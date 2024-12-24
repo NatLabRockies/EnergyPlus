@@ -14968,7 +14968,7 @@ void VRFCondenserEquipment::VRFOU_PipeLossC(
         Pipe_Coe_k1 = Pipe_Num_Nu * Pipe_viscosity_ref;
         Pipe_Coe_k3 = RefPipInsH * (this->RefPipDiaSuc + 2 * this->RefPipInsThi);
         if (this->RefPipInsThi >= 0.0) {
-            Pipe_Coe_k2 = 2 * this->RefPipInsCon / std::log(1.0 + 2 * this->RefPipInsThi / this->RefPipDiaSuc);
+            Pipe_Coe_k2 = 2 * this->RefPipInsCon / std::log1p(2 * this->RefPipInsThi / this->RefPipDiaSuc);
         } else {
             Pipe_Coe_k2 = 9999.9;
         }
