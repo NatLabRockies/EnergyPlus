@@ -3221,13 +3221,13 @@ namespace HeatRecovery {
                 }
             } break;
             case HXConfiguration::ParallelFlow: { // PARALLEL FLOW
-                NTU = -std::log(-Eps - Eps * Z + 1.0) / (Z + 1.0);
+                NTU = -std::log1p(-Eps - Eps * Z) / (Z + 1.0);
             } break;
             case HXConfiguration::CrossFlowBothUnmixed: { // CROSS FLOW BOTH UNMIXED
                 NTU = GetNTUforCrossFlowBothUnmixed(state, Eps, Z);
             } break;
             case HXConfiguration::CrossFlowOther: { // CROSS FLOW, Cmax MIXED, Cmin UNMIXED
-                NTU = -std::log(1.0 + std::log(1.0 - Eps * Z) / Z);
+                NTU = -std::log1p(std::log(1.0 - Eps * Z) / Z);
             } break;
             default: {
                 ShowFatalError(state, format("HeatRecovery: Illegal flow arrangement in CalculateNTUfromEpsAndZ, Value={}", FlowArr));
