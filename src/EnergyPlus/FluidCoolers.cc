@@ -1949,7 +1949,7 @@ void CalcFluidCoolerOutlet(
     Real64 NumTransferUnits = UAdesign / CapacityRatioMin;
     Real64 ETA = std::pow(NumTransferUnits, 0.22);
     Real64 A = CapacityRatio * NumTransferUnits / ETA;
-    Real64 effectiveness = 1.0 - std::exp((std::exp(-A) - 1.0) / (CapacityRatio / ETA));
+    Real64 effectiveness = 1.0 - std::exp(std::expm1(-A) / (CapacityRatio / ETA));
 
     // calculate water to air heat transfer
     _Qactual = effectiveness * CapacityRatioMin * (_InletWaterTemp - InletAirTemp);

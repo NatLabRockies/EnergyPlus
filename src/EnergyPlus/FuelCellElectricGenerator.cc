@@ -3068,7 +3068,7 @@ namespace FuelCellElectricGenerator {
                 this->ExhaustHX.THXexh =
                     ((1.0 - NdotCpAuxMix / NdotCpWater) / (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                         TauxMix +
-                    ((std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - 1.0) /
+                    (std::expm1(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) /
                      (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                         TwaterIn;
 
@@ -3113,7 +3113,7 @@ namespace FuelCellElectricGenerator {
                 this->ExhaustHX.THXexh =
                     ((1.0 - NdotCpAuxMix / NdotCpWater) / (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                         TauxMix +
-                    ((std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - 1.0) /
+                    (std::expm1(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) /
                      (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                         TwaterIn;
 
@@ -3174,7 +3174,7 @@ namespace FuelCellElectricGenerator {
                     this->ExhaustHX.THXexh = ((1.0 - NdotCpAuxMix / NdotCpWater) /
                                               (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                                                  TauxMix +
-                                             ((std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - 1.0) /
+                                             (std::expm1(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) /
                                               (std::exp(UAeff * (1.0 / NdotCpAuxMix - 1.0 / NdotCpWater)) - NdotCpAuxMix / NdotCpWater)) *
                                                  TwaterIn;
 
