@@ -7623,7 +7623,7 @@ Real64 WaterThermalTankData::CalcTempIntegral(Real64 const Ti, // Initial tank t
         b = -(UA / Cp + m1 + m2) / m;
 
         // Integral of T(t) = (a / b + Ti) * EXP(b * t) - a / b, evaluated from 0 to t
-        dTsum = (a / b + Ti) * (std::exp(b * t) - 1.0) / b - a * t / b;
+        dTsum = (a / b + Ti) * std::expm1(b * t) / b - a * t / b;
     }
 
     CalcTempIntegral = dTsum;
@@ -8084,8 +8084,8 @@ void WaterThermalTankData::CalcWaterThermalTankStratified(EnergyPlusData &state)
                             FinalFactorMixing = dt / NodeCapacitance;
                             AvgFactorMixing = FinalFactorMixing / 2.0;
                         } else {
-                            FinalFactorMixing = (exp(A[k] * dt) - 1.0) / A[k] / NodeCapacitance;
-                            AvgFactorMixing = ((exp(A[k] * dt) - 1.0) / A[k] / dt - 1.0) / A[k] / NodeCapacitance;
+                            FinalFactorMixing = expm1(A[k] * dt) / A[k] / NodeCapacitance;
+                            AvgFactorMixing = (expm1(A[k] * dt) / A[k] / dt - 1.0) / A[k] / NodeCapacitance;
                         }
                         const Real64 Q_AdiabaticMixing = (Tmixed - Tfinal[k]) / FinalFactorMixing;
                         Tfinal[k] = Tmixed;
