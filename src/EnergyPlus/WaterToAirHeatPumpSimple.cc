@@ -3768,7 +3768,7 @@ namespace WaterToAirHeatPumpSimple {
         To1 = aa + LatentCapacityTimeConstant;
         Error = 1.0;
         while (Error > 0.001) {
-            To2 = aa - LatentCapacityTimeConstant * (std::exp(-To1 / LatentCapacityTimeConstant) - 1.0);
+            To2 = aa - LatentCapacityTimeConstant * std::expm1(-To1 / LatentCapacityTimeConstant);
             Error = std::abs((To2 - To1) / To1);
             To1 = To2;
         }

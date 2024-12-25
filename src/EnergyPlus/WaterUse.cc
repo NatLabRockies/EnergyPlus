@@ -1497,7 +1497,7 @@ namespace WaterUse {
             case HeatRecovHX::CrossFlow: { // Unmixed
                 Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
                 Real64 NTU = this->HXUA / MinCapacityRate;
-                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
+                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * std::expm1(-CapacityRatio * std::pow(NTU, 0.78)));
             } break;
             default:
                 break;
