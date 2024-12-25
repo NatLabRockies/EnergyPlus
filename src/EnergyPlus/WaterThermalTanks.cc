@@ -8084,8 +8084,8 @@ void WaterThermalTankData::CalcWaterThermalTankStratified(EnergyPlusData &state)
                             FinalFactorMixing = dt / NodeCapacitance;
                             AvgFactorMixing = FinalFactorMixing / 2.0;
                         } else {
-                            FinalFactorMixing = expm1(A[k] * dt) / A[k] / NodeCapacitance;
-                            AvgFactorMixing = (expm1(A[k] * dt) / A[k] / dt - 1.0) / A[k] / NodeCapacitance;
+                            FinalFactorMixing = std::expm1(A[k] * dt) / A[k] / NodeCapacitance;
+                            AvgFactorMixing = (std::expm1(A[k] * dt) / A[k] / dt - 1.0) / A[k] / NodeCapacitance;
                         }
                         const Real64 Q_AdiabaticMixing = (Tmixed - Tfinal[k]) / FinalFactorMixing;
                         Tfinal[k] = Tmixed;

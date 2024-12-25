@@ -3133,7 +3133,7 @@ namespace HeatRecovery {
             } break;
             case HXConfiguration::CrossFlowBothUnmixed: { // CROSS FLOW BOTH UNMIXED
                 Temp = Z * std::pow(NTU, -0.22);
-                Eps = 1.0 - std::expm1(std::exp(-NTU * Temp) / Temp);
+                Eps = 1.0 - std::exp(std::expm1(-NTU * Temp) / Temp);
             } break;
             case HXConfiguration::CrossFlowOther: { // CROSS FLOW, Cmax MIXED, Cmin UNMIXED
                 Eps = (1.0 - std::exp(-Z * (1.0 - std::exp(-NTU)))) / Z;
@@ -3273,7 +3273,7 @@ namespace HeatRecovery {
         int SolFla;                  // Flag of solver
         Real64 constexpr NTU0(0.0);  // lower bound for NTU
         Real64 constexpr NTU1(50.0); // upper bound for NTU
-        auto f = [Eps, Z](Real64 const NTU) { return 1.0 - std::expm1(std::exp(-std::pow(NTU, 0.78) * Z) / Z * std::pow(NTU, 0.22)) - Eps; };
+        auto f = [Eps, Z](Real64 const NTU) { return 1.0 - std::exp(std::expm1(-std::pow(NTU, 0.78) * Z) / Z * std::pow(NTU, 0.22)) - Eps; };
         General::SolveRoot(state, Acc, MaxIte, SolFla, NTU, f, NTU0, NTU1);
 
         if (SolFla == -2) {
