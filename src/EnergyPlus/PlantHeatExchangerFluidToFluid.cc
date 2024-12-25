@@ -1538,7 +1538,7 @@ void HeatExchangerStruct::calculate(EnergyPlusData &state, Real64 const SupSideM
                     this->Effectiveness = 1.0;
                 }
             } else {
-                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapRatio) * (std::exp(-CapRatio * std::pow(NTU, 0.78)) - 1.0));
+                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapRatio) * std::expm1(-CapRatio * std::pow(NTU, 0.78)));
                 this->Effectiveness = min(1.0, this->Effectiveness);
             }
 
