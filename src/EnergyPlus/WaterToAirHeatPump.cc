@@ -2380,7 +2380,7 @@ namespace WaterToAirHeatPump {
         To1 = aa + heatPump.LatentCapacityTimeConstant;
         Error = 1.0;
         while (Error > 0.001) {
-            To2 = aa - heatPump.LatentCapacityTimeConstant * (std::exp(-To1 / heatPump.LatentCapacityTimeConstant) - 1.0);
+            To2 = aa - heatPump.LatentCapacityTimeConstant * std::expm1(-To1 / heatPump.LatentCapacityTimeConstant);
             Error = std::abs((To2 - To1) / To1);
             To1 = To2;
         }
