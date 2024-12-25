@@ -1645,7 +1645,7 @@ namespace Photovoltaics {
         Real64 FUN(0.0);
 
         if (((VV + II * RSER) / AA) < 700.0) {
-            FUN = II - IL + IO * (std::exp((VV + II * RSER) / AA) - 1.0) - ((VV + II * RSER) / state.dataPhotovoltaic->ShuntResistance);
+            FUN = II - IL + IO * std::expm1((VV + II * RSER) / AA) - ((VV + II * RSER) / state.dataPhotovoltaic->ShuntResistance);
         } else {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
