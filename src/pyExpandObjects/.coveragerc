@@ -1,0 +1,19 @@
+[run]
+source =
+        src
+
+omit =
+        /usr/*
+        /tmp/*
+        .tox/*
+        *.pyenv*
+        *venv*
+        setup.py
+
+[report]
+exclude_lines =
+        pragma: no cover
+        # This line is used where 'raise' was tested but not reported as covered.
+        pragma: loop bug
+        if __name__ == .__main__.:
+

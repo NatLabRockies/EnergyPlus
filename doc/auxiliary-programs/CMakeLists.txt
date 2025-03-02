@@ -61,11 +61,15 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/coeffconv-coeffcheck/coeffconv.tex
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/coeffconv-coeffcheck/coeffcheck.tex
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/coeffconv-coeffcheck/running-the-coeffconv-or-coeffcheck-programs.tex
-    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/expandobjects.tex
-    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/expandobjects/introduction-003.tex
-    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/expandobjects/hvac-template-objects-processed.tex
-    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/expandobjects/ground-heat-transfer-objects-processed.tex
-    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/expandobjects/building-surface-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/introduction-003.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/hvac-template-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/ground-heat-transfer-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/building-surface-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/pyexpandobjects-hvac-template-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/pyexpandobjects-hvac-template-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/pyexpandobjects-ground-heat-transfer-objects-processed.tex
+    ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/hvactemplateexpansion/pyexpandobjects-building-surface-objects-processed.tex
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/csvproc.tex
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/convertesomtr.tex
     ${PROJECT_SOURCE_DIR}/auxiliary-programs/src/calcsoilsurftemp-program.tex

@@ -1,0 +1,45 @@
+\section{pyExpandObjects}
+
+\subsection{Introduction}\label{pyExpandObjects}
+
+Much like the ExpandObjects program in Section~\ref{ExpandObjects}, the pyExpandObjects expands HVACTemplate objects from an input epJSON file into an expanded file that can be directly run in EnergyPlus.  However, pyExpandObjects does not process GroundHeatTransfer objects or provide support for the Slab or Basement executables.  Additionally, pyExpandObjects is a standalone application which means that it must be run manually to create an expanded file.  Details on how to run the program can be found in the Input Output Reference Manual (Chapter 2 - HVACTemplate Objects).
+
+The pyExpandObjects program works as a preprocessor that maps HVACTemplate objects to regular objects in EnergyPlus.  This processor reads an epJSON file and generates and expanded epJSON file.  No further pre-processing should be required after the conversion has been performed.  Unlike ExpandObjects (Section~\ref{ExpandObjects}), a schema validation does occur when the file is read into the program, and error messages will be shown in the usual EnergyPlus error file.  By default, an invalid epJSON file will stop the program, but this requirement can be removed via command line options.  Documentation aimed at developers is also available at \url{https://epjson-expandobjects.readthedocs.io/} or see the '--help' command line option for further details.  Additionally, the default settings produce two backup files ("<original-file-name>\_hvac\_templates.epJSON", "<original-file-name>\_base.epJSON") as well as an expanded file with an adjusted name ("<original-file-name>\_expanded.epJSON"). If the '--no-backup' option is used in the command line, then only the expanded file will be output.
+
+The command line interface for this tool provides optional arguments to enable various features of the simulation package.
+
+\begin{itemize}
+
+\item
+  -f, --file FILE\_NAME : Specify file to expand
+  
+  This argument may be omitted.  A value passed to the program with no argument will be assumed to be a file name.
+  
+\item
+  -h, --help : Display help information
+
+\item
+  -nb, --no\_backup : Do no create backup files
+  
+  It is not possible to comment sections of code in JSON formatted files.  Therefore, the output expanded files do not have the ability to retain the HVACTemplate objects used to create the current document.  If the original file were to be overwritten, then all template data would be lost.  In an attempt to provide and additional layer of backups, the -nb option is set to False by default which means two files will be created: one with HVACTemplate objects, and one with all other objects.  With these files, the original input file can be created, or specific objects can be copied and pasted.
+
+\item
+  -ns, --no\_schema : Skip schema validation checks for pyExpandObjects.  Note, this does not skip other schema validation operations within EnergyPlus itself.
+  
+  One benefit of the JSON file format is that files can be validated before simulation.  This means that erroneous inputs can be found before simulation, which saves time debugging output files and reading through logs, unsure of the error source.  This includes syntax errors, values that are out of range, and missing required inputs.  However, situations may occur when the user wishes to skip schema validation, in which case this flag should be used.  By default, schema validation is enabled.
+
+\item
+  -o, --output\_directory : Specify output directory.  If not provided, then input file directory is used.
+  
+\item
+  -l, --logger\_level LOGGER\_LEVEL: Set logging output level 
+  
+  Various levels of logging output are available for debugging, and other, purposes.  A valid level, consistent with Python logging naming structure (i.e. DEBUG, INFO, WARNING, ERROR, CRITICAL), must be provided.
+  
+\item
+  -v, --version : Display version information  
+
+\item
+  -wl, --write-logs : Write logs to file
+  
+  When this expansion tool is run from its source directory, the output can be written to a file, which is located in the logs directory (logs/base.log).

@@ -1,0 +1,236 @@
+{
+    "HVACTemplate:Plant:Boiler": {
+        "Main Boiler": {
+            "boiler_type": "HotWaterBoiler",
+            "capacity": "Autosize",
+            "efficiency": 0.8,
+            "fuel_type": "NaturalGas",
+            "priority": "1",
+            "water_outlet_upper_temperature_limit": 100.0
+        }
+    },
+    "HVACTemplate:Plant:ChilledWaterLoop": {
+        "Chilled Water Loop": {
+            "chilled_water_design_setpoint": 7.22,
+            "chilled_water_pump_configuration": "ConstantPrimaryNoSecondary",
+            "chilled_water_reset_outdoor_dry_bulb_high": 26.7,
+            "chilled_water_reset_outdoor_dry_bulb_low": 4.44,
+            "chilled_water_setpoint_at_outdoor_dry_bulb_high": 7.22,
+            "chilled_water_setpoint_at_outdoor_dry_bulb_low": 12.2,
+            "chilled_water_setpoint_reset_type": "None",
+            "chiller_plant_operation_scheme_type": "Default",
+            "condenser_plant_operation_scheme_type": "Default",
+            "condenser_water_design_setpoint": 29.4,
+            "condenser_water_pump_rated_head": 179352,
+            "minimum_outdoor_dry_bulb_temperature": 7.22,
+            "primary_chilled_water_pump_rated_head": 179352,
+            "pump_control_type": "Intermittent",
+            "secondary_chilled_water_pump_rated_head": 179352
+        }
+    },
+    "HVACTemplate:Plant:Chiller": {
+        "Main Chiller": {
+            "capacity": "Autosize",
+            "chiller_type": "ElectricReciprocatingChiller",
+            "condenser_type": "WaterCooled",
+            "nominal_cop": 3.2,
+            "priority": "1"
+        }
+    },
+    "HVACTemplate:Plant:CondenserWaterLoop": {
+        "Condenser Water Loop": {
+            "condenser_plant_operation_scheme_type": "Default",
+            "condenser_water_design_setpoint": 29.4,
+            "condenser_water_pump_rated_head": 179352,
+            "pump_control_type": "Intermittent",
+            "template_plant_loop_type": "CondenserWaterLoop"
+        }
+    },
+    "HVACTemplate:Plant:HotWaterLoop": {
+        "Hot Water Loop": {
+            "hot_water_design_setpoint": 82,
+            "hot_water_plant_operation_scheme_type": "Default",
+            "hot_water_pump_configuration": "ConstantFlow",
+            "hot_water_pump_rated_head": 179352,
+            "hot_water_reset_outdoor_dry_bulb_high": 10,
+            "hot_water_reset_outdoor_dry_bulb_low": -6.7,
+            "hot_water_setpoint_at_outdoor_dry_bulb_high": 65.6,
+            "hot_water_setpoint_at_outdoor_dry_bulb_low": 82.2,
+            "hot_water_setpoint_reset_type": "OutdoorAirTemperatureReset",
+            "pump_control_type": "Intermittent"
+        }
+    },
+    "HVACTemplate:Plant:Tower": {
+        "Main Tower": {
+            "free_convection_capacity": "Autosize",
+            "high_speed_fan_power": "Autosize",
+            "high_speed_nominal_capacity": "Autosize",
+            "low_speed_fan_power": "Autosize",
+            "low_speed_nominal_capacity": "Autosize",
+            "priority": "1",
+            "tower_type": "SingleSpeed"
+        }
+    },
+    "HVACTemplate:System:DualDuct": {
+        "SYS 1": {
+            "cold_duct_supply_fan_delta_pressure": 1000,
+            "cold_duct_supply_fan_maximum_flow_rate": "Autosize",
+            "cold_duct_supply_fan_minimum_flow_fraction": 0.2,
+            "cold_duct_supply_fan_motor_efficiency": 0.9,
+            "cold_duct_supply_fan_motor_in_air_stream_fraction": 1,
+            "cold_duct_supply_fan_part_load_power_coefficients": "InletVaneDampers",
+            "cold_duct_supply_fan_placement": "DrawThrough",
+            "cold_duct_supply_fan_total_efficiency": 0.7,
+            "cooling_coil_design_setpoint_temperature": 12.8,
+            "cooling_coil_reset_outdoor_dry_bulb_high": 23.3,
+            "cooling_coil_reset_outdoor_dry_bulb_low": 15.6,
+            "cooling_coil_setpoint_at_outdoor_dry_bulb_high": 12.8,
+            "cooling_coil_setpoint_at_outdoor_dry_bulb_low": 15.6,
+            "cooling_coil_setpoint_control_type": "OutdoorAirTemperatureReset",
+            "cooling_coil_type": "ChilledWater",
+            "dehumidification_control_type": "None",
+            "dehumidification_relative_humidity_setpoint": 60,
+            "economizer_lockout": "NoLockout",
+            "economizer_type": "DifferentialDryBulb",
+            "gas_heating_coil_efficiency": 0.8,
+            "gas_preheat_coil_efficiency": 0.8,
+            "heat_recovery_frost_control_type": "None",
+            "heat_recovery_heat_exchanger_type": "Plate",
+            "heat_recovery_type": "None",
+            "heating_coil_capacity": "Autosize",
+            "heating_coil_design_setpoint": 50,
+            "heating_coil_reset_outdoor_dry_bulb_high": 12.2,
+            "heating_coil_reset_outdoor_dry_bulb_low": 7.8,
+            "heating_coil_setpoint_at_outdoor_dry_bulb_high": 26,
+            "heating_coil_setpoint_at_outdoor_dry_bulb_low": 50,
+            "heating_coil_setpoint_control_type": "OutdoorAirTemperatureReset",
+            "heating_coil_type": "HotWater",
+            "hot_duct_supply_fan_delta_pressure": 1000,
+            "hot_duct_supply_fan_maximum_flow_rate": "Autosize",
+            "hot_duct_supply_fan_minimum_flow_fraction": 0.2,
+            "hot_duct_supply_fan_motor_efficiency": 0.9,
+            "hot_duct_supply_fan_motor_in_air_stream_fraction": 1,
+            "hot_duct_supply_fan_part_load_power_coefficients": "InletVaneDampers",
+            "hot_duct_supply_fan_placement": "BlowThrough",
+            "hot_duct_supply_fan_total_efficiency": 0.7,
+            "humidifier_control_zone_name": "SPACE5-1",
+            "humidifier_rated_capacity": 1e-06,
+            "humidifier_rated_electric_power": "Autosize",
+            "humidifier_relative_humidity_setpoint": 30,
+            "humidifier_type": "ElectricSteam",
+            "latent_heat_recovery_effectiveness": 0.65,
+            "main_supply_fan_delta_pressure": 1000,
+            "main_supply_fan_maximum_flow_rate": "Autosize",
+            "main_supply_fan_minimum_flow_fraction": 0.2,
+            "main_supply_fan_motor_efficiency": 0.9,
+            "main_supply_fan_motor_in_air_stream_fraction": 1,
+            "main_supply_fan_part_load_power_coefficients": "InletVaneDampers",
+            "main_supply_fan_total_efficiency": 0.7,
+            "maximum_outdoor_air_flow_rate": "Autosize",
+            "minimum_outdoor_air_control_type": "ProportionalMinimum",
+            "minimum_outdoor_air_flow_rate": "Autosize",
+            "night_cycle_control": "CycleOnAny",
+            "preheat_coil_design_setpoint": 7.2,
+            "preheat_coil_type": "None",
+            "return_fan": "Yes",
+            "return_fan_delta_pressure": 500,
+            "return_fan_motor_efficiency": 0.9,
+            "return_fan_motor_in_air_stream_fraction": 1,
+            "return_fan_part_load_power_coefficients": "InletVaneDampers",
+            "return_fan_total_efficiency": 0.7,
+            "return_plenum_name": "PLENUM-1",
+            "sensible_heat_recovery_effectiveness": 0.7,
+            "sizing_option": "NonCoincident",
+            "system_availability_schedule_name": "FanAvailSched",
+            "system_configuration_type": "DualFanConstantVolume"
+        }
+    },
+    "HVACTemplate:Thermostat": {
+        "All Zones": {
+            "cooling_setpoint_schedule_name": "Clg-SetP-Sch",
+            "heating_setpoint_schedule_name": "Htg-SetP-Sch"
+        }
+    },
+    "HVACTemplate:Zone:DualDuct": {
+        "HVACTemplate:Zone:DualDuct 1": {
+            "baseboard_heating_type": "None",
+            "outdoor_air_flow_rate_per_person": 0.00944,
+            "outdoor_air_method": "Flow/Person",
+            "supply_air_maximum_flow_rate": "Autosize",
+            "template_dual_duct_system_name": "SYS 1",
+            "template_thermostat_name": "All Zones",
+            "zone_cooling_design_supply_air_temperature": 12.8,
+            "zone_cooling_design_supply_air_temperature_difference": 11.11,
+            "zone_cooling_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_heating_design_supply_air_temperature": 50,
+            "zone_heating_design_supply_air_temperature_difference": 30,
+            "zone_heating_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_minimum_air_flow_fraction": 0.2,
+            "zone_name": "SPACE1-1"
+        },
+        "HVACTemplate:Zone:DualDuct 2": {
+            "baseboard_heating_type": "None",
+            "outdoor_air_flow_rate_per_person": 0.00944,
+            "outdoor_air_method": "Flow/Person",
+            "supply_air_maximum_flow_rate": "Autosize",
+            "template_dual_duct_system_name": "SYS 1",
+            "template_thermostat_name": "All Zones",
+            "zone_cooling_design_supply_air_temperature": 12.8,
+            "zone_cooling_design_supply_air_temperature_difference": 11.11,
+            "zone_cooling_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_heating_design_supply_air_temperature": 50,
+            "zone_heating_design_supply_air_temperature_difference": 30,
+            "zone_heating_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_minimum_air_flow_fraction": 0.2,
+            "zone_name": "SPACE2-1"
+        },
+        "HVACTemplate:Zone:DualDuct 3": {
+            "baseboard_heating_type": "None",
+            "outdoor_air_flow_rate_per_person": 0.00944,
+            "outdoor_air_method": "Flow/Person",
+            "supply_air_maximum_flow_rate": "Autosize",
+            "template_dual_duct_system_name": "SYS 1",
+            "template_thermostat_name": "All Zones",
+            "zone_cooling_design_supply_air_temperature": 12.8,
+            "zone_cooling_design_supply_air_temperature_difference": 11.11,
+            "zone_cooling_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_heating_design_supply_air_temperature": 50,
+            "zone_heating_design_supply_air_temperature_difference": 30,
+            "zone_heating_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_minimum_air_flow_fraction": 0.2,
+            "zone_name": "SPACE3-1"
+        },
+        "HVACTemplate:Zone:DualDuct 4": {
+            "baseboard_heating_type": "None",
+            "outdoor_air_flow_rate_per_person": 0.00944,
+            "outdoor_air_method": "Flow/Person",
+            "supply_air_maximum_flow_rate": "Autosize",
+            "template_dual_duct_system_name": "SYS 1",
+            "template_thermostat_name": "All Zones",
+            "zone_cooling_design_supply_air_temperature": 12.8,
+            "zone_cooling_design_supply_air_temperature_difference": 11.11,
+            "zone_cooling_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_heating_design_supply_air_temperature": 50,
+            "zone_heating_design_supply_air_temperature_difference": 30,
+            "zone_heating_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_minimum_air_flow_fraction": 0.2,
+            "zone_name": "SPACE4-1"
+        },
+        "HVACTemplate:Zone:DualDuct 5": {
+            "baseboard_heating_type": "None",
+            "outdoor_air_flow_rate_per_person": 0.00944,
+            "outdoor_air_method": "Flow/Person",
+            "supply_air_maximum_flow_rate": "Autosize",
+            "template_dual_duct_system_name": "SYS 1",
+            "template_thermostat_name": "All Zones",
+            "zone_cooling_design_supply_air_temperature": 12.8,
+            "zone_cooling_design_supply_air_temperature_difference": 11.11,
+            "zone_cooling_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_heating_design_supply_air_temperature": 50,
+            "zone_heating_design_supply_air_temperature_difference": 30,
+            "zone_heating_design_supply_air_temperature_input_method": "SystemSupplyAirTemperature",
+            "zone_minimum_air_flow_fraction": 0.2,
+            "zone_name": "SPACE5-1"
+        }
+    }
+}

@@ -1,0 +1,352 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <title>Unittest Results</title>
+        <a href="https://epjson-expandobjects.readthedocs.io/en/main/?badge=main">Main Page</a><h4> HVACTemplate</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create always value schedule</td>
+      <td>test_expand_objects.py</td>
+      <td>test_make_compact_schedule_always_val</td>
+      <td>2021-09-21 20:24:38</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify Bad templates caught</td>
+      <td>test_hvac_template.py</td>
+      <td>test_bad_template_name_returns_error</td>
+      <td>2021-09-21 20:24:49</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify bad templates are rejected</td>
+      <td>test_hvac_template.py</td>
+      <td>test_thermostat_bad_templates_raise_error</td>
+      <td>2021-09-21 20:25:06</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify plant equipment class templates created</td>
+      <td>test_hvac_template.py</td>
+      <td>test_plant_equipment_templates_have_good_objects</td>
+      <td>2021-09-21 20:24:59</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify plant loop class templates created</td>
+      <td>test_hvac_template.py</td>
+      <td>test_plant_loop_templates_have_good_objects</td>
+      <td>2021-09-21 20:25:00</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify system class templates created</td>
+      <td>test_hvac_template.py</td>
+      <td>test_system_templates_have_good_objects</td>
+      <td>2021-09-21 20:25:03</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify thermostat class templates created</td>
+      <td>test_hvac_template.py</td>
+      <td>test_thermostat_templates_have_good_objects</td>
+      <td>2021-09-21 20:25:09</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify zone class templates created</td>
+      <td>test_hvac_template.py</td>
+      <td>test_zone_templates_have_good_objects</td>
+      <td>2021-09-21 20:25:12</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : PlantEquipment</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Input Template Required</td>
+      <td>test_expand_plant_equipment.py</td>
+      <td>test_check_templates_are_required</td>
+      <td>2021-09-21 20:24:40</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify Plant Equipment template completes from parent class (HVACTemplate)</td>
+      <td>test_hvac_template.py</td>
+      <td>test_plant_equipment_processing</td>
+      <td>2021-09-21 20:24:58</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify valid template object</td>
+      <td>test_expand_plant_equipment.py</td>
+      <td>test_verify_good_template</td>
+      <td>2021-09-21 20:24:40</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : PlantLoop</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Input Template Required</td>
+      <td>test_expand_plant_loop.py</td>
+      <td>test_check_templates_are_required</td>
+      <td>2021-09-21 20:24:41</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify valid template object</td>
+      <td>test_expand_plant_loop.py</td>
+      <td>test_verify_good_template</td>
+      <td>2021-09-21 20:24:41</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : System</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Input Template Required</td>
+      <td>test_expand_system.py</td>
+      <td>test_check_templates_are_required</td>
+      <td>2021-09-21 20:24:41</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>VAV w zone connections</td>
+      <td>test_systems.py</td>
+      <td>test_simulation</td>
+      <td>2021-09-21 08:23:28</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify System template completes from parent class (HVACTemplate)</td>
+      <td>test_hvac_template.py</td>
+      <td>test_system_processing</td>
+      <td>2021-09-21 20:25:02</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify valid template object</td>
+      <td>test_expand_system.py</td>
+      <td>test_verify_good_template</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : Thermostat</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Assign schedule from constant setpoint</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_assign_thermostat_schedule_from_constant_setpoint</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Create schedule from constant setpoint</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_thermostat_schedule_from_constant_setpoint</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Input Template Required</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_check_templates_are_required</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Processing test</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_processing</td>
+      <td>2021-09-21 20:24:43</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Reject empty template</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_reject_no_inputs</td>
+      <td>2021-09-21 20:24:43</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Simulation test</td>
+      <td>test_thermostats.py</td>
+      <td>test_simulation</td>
+      <td>2021-09-21 08:23:41</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify Thermostat template completes from parent class (HVACTemplate)</td>
+      <td>test_hvac_template.py</td>
+      <td>test_thermostat_processing</td>
+      <td>2021-09-21 20:25:08</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify valid template object</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_verify_good_template</td>
+      <td>2021-09-21 20:24:43</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : Thermostat : Options</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DualSetpoint from schedules</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_dual_thermostat_from_schedules</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>DualSetpoint from setpoints</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_dual_thermostat_from_setpoints</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Object summary test</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_check_output_objects</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>SingleCooling from schedule</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_thermostat_single_cooling_from_schedule</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>SingleCooling from setpoint</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_thermostat_single_cooling_from_setpoint</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>SingleHeating from schedule</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_thermostat_single_heating_from_schedule</td>
+      <td>2021-09-21 20:24:42</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>SingleHeating from setpoint</td>
+      <td>test_expand_thermostats.py</td>
+      <td>test_create_thermostat_single_heating_from_setpoint</td>
+      <td>2021-09-21 20:24:43</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<h4> HVACTemplate : Zone</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Test</th>
+      <th>FileName</th>
+      <th>FunctionName</th>
+      <th>Last Check</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Input Template Required</td>
+      <td>test_expand_zone.py</td>
+      <td>test_check_templates_are_required</td>
+      <td>2021-09-21 20:24:44</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Test all components</td>
+      <td>test_expand_zone.py</td>
+      <td>test_processing</td>
+      <td>2021-09-21 20:24:45</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify Zone template completes from parent class (HVACTemplate)</td>
+      <td>test_hvac_template.py</td>
+      <td>test_zone_processing</td>
+      <td>2021-09-21 20:25:12</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Verify valid template object</td>
+      <td>test_expand_zone.py</td>
+      <td>test_verify_good_template</td>
+      <td>2021-09-21 20:24:46</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+
+            </head>
+            <body>
+        
