@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
 
 env:
   CMAKE_Fortran_COMPILER: "/c/msys64/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
@@ -54,7 +55,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-      uses: jmarrec/setup-python@v5
+      uses: jmarrec/setup-python@v5.4.0
       id: setup-python
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
@@ -63,7 +64,7 @@ jobs:
     - name: Setup QtIFW 4.x
       uses: jmarrec/setup-qtifw@v1
       with:
-        qtifw-version: '4.6.1'
+        qtifw-version: '4.8.1'
 
     - name: Install Python dependencies
       run: |

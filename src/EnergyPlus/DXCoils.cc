@@ -1238,13 +1238,18 @@ void GetDXCoils(EnergyPlusData &state)
         // A12, \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
         if (!lAlphaBlanks(12)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(12));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(12));                            // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(12), Alphas(12)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(12));                            // Field Name
+            }
         }
 
         // Get Water System tank connections
@@ -1438,13 +1443,18 @@ void GetDXCoils(EnergyPlusData &state)
         // A5; \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
         if (!lAlphaBlanks(5)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(5));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(5));                             // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(5));                             // Field Name
+            }
         }
 
         // Set crankcase heater capacity
@@ -2188,13 +2198,18 @@ void GetDXCoils(EnergyPlusData &state)
         // A11; \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
         if (!lAlphaBlanks(11)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(11));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(11));                            // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(11), Alphas(11)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(11));                            // Field Name
+            }
         }
 
         if (Util::SameString(Alphas(12), "ReverseCycle")) {
@@ -3179,13 +3194,18 @@ void GetDXCoils(EnergyPlusData &state)
 
         if (!lAlphaBlanks(9)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(9));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(9));                             // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(9), Alphas(9)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(9));                             // Field Name
+            }
         }
 
         thisDXCoil.InletAirTemperatureType = static_cast<HVAC::OATType>(getEnumValue(HVAC::oatTypeNamesUC, Alphas(10)));
@@ -3618,13 +3638,18 @@ void GetDXCoils(EnergyPlusData &state)
         // Coil:WaterHeating:AirToWaterHeatPump:Wrapped
         if (!lAlphaBlanks(5)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(5));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(5));                             // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(5));                             // Field Name
+            }
         }
 
         if (Util::SameString(Alphas(6), "DryBulbTemperature")) {
@@ -4036,13 +4061,18 @@ void GetDXCoils(EnergyPlusData &state)
 
         if (!lAlphaBlanks(11)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(11));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(11));                            // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(11), Alphas(11)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(11));                            // Field Name
+            }
         }
 
         if (!lAlphaBlanks(12)) {
@@ -4475,13 +4505,18 @@ void GetDXCoils(EnergyPlusData &state)
 
         if (!lAlphaBlanks(5)) {
             thisDXCoil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, Alphas(5));
-            ErrorsFound |= Curve::CheckCurveDims(state,
-                                                 thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                                 {1},                                          // Valid dimensions
-                                                 RoutineName,                                  // Routine name
-                                                 CurrentModuleObject,                          // Object Type
-                                                 thisDXCoil.Name,                              // Object Name
-                                                 cAlphaFields(5));                             // Field Name
+            if (thisDXCoil.CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                ShowSevereError(state, format("{} = {}:  {} not found = {}", CurrentModuleObject, thisDXCoil.Name, cAlphaFields(5), Alphas(5)));
+                ErrorsFound = true;
+            } else {
+                ErrorsFound |= Curve::CheckCurveDims(state,
+                                                     thisDXCoil.CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                                     {1},                                          // Valid dimensions
+                                                     RoutineName,                                  // Routine name
+                                                     CurrentModuleObject,                          // Object Type
+                                                     thisDXCoil.Name,                              // Object Name
+                                                     cAlphaFields(5));                             // Field Name
+            }
         }
 
         // Only required for reverse cycle heat pumps

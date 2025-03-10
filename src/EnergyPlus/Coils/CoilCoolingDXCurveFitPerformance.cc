@@ -124,14 +124,25 @@ void CoilCoolingDXCurveFitPerformance::instantiateFromInputSpec(EnergyPlus::Ener
     if (!input_data.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name.empty()) {
         this->crankcaseHeaterCapacityCurveIndex =
             Curve::GetCurveIndex(state, input_data.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name);
-        // Verify Curve Object, only legal type is Quadratic and Cubic
-        errorsFound |= Curve::CheckCurveDims(state,
-                                             this->crankcaseHeaterCapacityCurveIndex,                                        // Curve index
-                                             {1},                                                                            // Valid dimensions
-                                             routineName,                                                                    // Routine name
-                                             this->object_name,                                                              // Object Type
-                                             this->name,                                                                     // Object Name
-                                             input_data.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name); // Field Name
+        if (this->crankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+            ShowSevereError(state,
+                            format("{} = {}:  {} not found = {}",
+                                   this->object_name,
+                                   this->name,
+                                   "Crankcase Heater Capacity Function of Temperature Curve Name",
+                                   input_data.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name));
+
+            errorsFound = true;
+        } else {
+            // Verify Curve Object, only legal type is Quadratic and Cubic
+            errorsFound |= Curve::CheckCurveDims(state,
+                                                 this->crankcaseHeaterCapacityCurveIndex,                                        // Curve index
+                                                 {1},                                                                            // Valid dimensions
+                                                 routineName,                                                                    // Routine name
+                                                 this->object_name,                                                              // Object Type
+                                                 this->name,                                                                     // Object Name
+                                                 input_data.outdoor_temperature_dependent_crankcase_heater_capacity_curve_name); // Field Name
+        }
     }
     if (errorsFound) {
         ShowFatalError(

@@ -1015,14 +1015,24 @@ namespace VariableSpeedCoils {
             // A7; \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
             if (!lAlphaBlanks(7)) {
                 state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, AlphArray(7));
-                ErrorsFound |=
-                    Curve::CheckCurveDims(state,
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                          {1},                                                                                     // Valid dimensions
-                                          RoutineName,                                                                             // Routine name
-                                          CurrentModuleObject,                                                                     // Object Type
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,                              // Object Name
-                                          cAlphaFields(7));                                                                        // Field Name
+                if (state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                    ShowSevereError(state,
+                                    format("{} = {}:  {} not found = {}",
+                                           CurrentModuleObject,
+                                           state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,
+                                           cAlphaFields(7),
+                                           AlphArray(7)));
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |=
+                        Curve::CheckCurveDims(state,
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                              {1},                                                        // Valid dimensions
+                                              RoutineName,                                                // Routine name
+                                              CurrentModuleObject,                                        // Object Type
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name, // Object Name
+                                              cAlphaFields(7));                                           // Field Name
+                }
             }
 
             // Get Water System tank connections
@@ -2000,14 +2010,25 @@ namespace VariableSpeedCoils {
 
             if (!lAlphaBlanks(6)) {
                 state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, AlphArray(6));
-                ErrorsFound |=
-                    Curve::CheckCurveDims(state,
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                          {1},                                                                                     // Valid dimensions
-                                          RoutineName,                                                                             // Routine name
-                                          CurrentModuleObject,                                                                     // Object Type
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,                              // Object Name
-                                          cAlphaFields(6));                                                                        // Field Name
+
+                if (state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                    ShowSevereError(state,
+                                    format("{} = {}:  {} not found = {}",
+                                           CurrentModuleObject,
+                                           state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,
+                                           cAlphaFields(6),
+                                           AlphArray(6)));
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |=
+                        Curve::CheckCurveDims(state,
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                              {1},                                                        // Valid dimensions
+                                              RoutineName,                                                // Routine name
+                                              CurrentModuleObject,                                        // Object Type
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name, // Object Name
+                                              cAlphaFields(6));                                           // Field Name
+                }
             }
 
             if (Util::SameString(AlphArray(7), "ReverseCycle")) {
@@ -2590,14 +2611,24 @@ namespace VariableSpeedCoils {
 
             if (!lAlphaBlanks(9)) {
                 state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(state, AlphArray(9));
-                ErrorsFound |=
-                    Curve::CheckCurveDims(state,
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
-                                          {1},                                                                                     // Valid dimensions
-                                          RoutineName,                                                                             // Routine name
-                                          CurrentModuleObject,                                                                     // Object Type
-                                          state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,                              // Object Name
-                                          cAlphaFields(9));                                                                        // Field Name
+                if (state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex == 0) { // can't find the curve
+                    ShowSevereError(state,
+                                    format("{} = {}:  {} not found = {}",
+                                           CurrentModuleObject,
+                                           state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,
+                                           cAlphaFields(9),
+                                           AlphArray(9)));
+                    ErrorsFound = true;
+                } else {
+                    ErrorsFound |=
+                        Curve::CheckCurveDims(state,
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).CrankcaseHeaterCapacityCurveIndex, // Curve index
+                                              {1},                                                        // Valid dimensions
+                                              RoutineName,                                                // Routine name
+                                              CurrentModuleObject,                                        // Object Type
+                                              state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name, // Object Name
+                                              cAlphaFields(9));                                           // Field Name
+                }
             }
 
             if (Util::SameString(AlphArray(10), "DryBulbTemperature")) {

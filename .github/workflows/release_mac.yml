@@ -5,6 +5,12 @@ on:
     tags:
       - '*'
   workflow_dispatch:
+    inputs:
+      BUILD_DOCS:
+        description: 'Whether to build docs or not as it takes 15 minutes to install MacTex'
+        required: true
+        type: boolean
+        default: false
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -23,14 +29,14 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        macos_dev_target: [13.0]
+        macos_dev_target: [12.1, 13.0]
         include:
-#        - macos_dev_target: 12.1
-#          os: macos-12
-#          allow_failure: false
-#          arch: x86_64
-#          python-arch: x64
-#          pretty: "Mac x64"
+        - macos_dev_target: 12.1
+          os: macos-13
+          allow_failure: false
+          arch: x86_64
+          python-arch: x64
+          pretty: "Mac x64"
         - macos_dev_target: 13.0
           os: macos-14
           allow_failure: false
@@ -108,7 +114,7 @@ jobs:
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
-      uses: jmarrec/setup-python@v5
+      uses: jmarrec/setup-python@v5.4.0
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         # check-latest: true # Force pick up the python I built instead of the (potential) toolcache one. I could also do `rm -Rf $RUNNER_TOOL_CACHE/Python/3.12.2` before this action
@@ -123,6 +129,11 @@ jobs:
       run: |
         set -x
         brew update
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          BUILD_DOCS="${{ inputs.BUILD_DOCS }}"
+          echo "BUILD_DOCS=$BUILD_DOCS" >> $GITHUB_ENV
+        fi
+
         if [[ "$BUILD_DOCS" != "false" ]]; then
           echo "Using brew to install mactex and adding it to PATH"
           brew install --cask mactex-no-gui
@@ -268,13 +279,13 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        macos_dev_target: [ 13.0]
+        macos_dev_target: [12.1, 13.0]
         include:
-          #- macos_dev_target: 12.1
-          #  os: macos-12
-          #  arch: x86_64
-          #  python-arch: x64
-          #  test_key: mac12
+          - macos_dev_target: 12.1
+            os: macos-13
+            arch: x86_64
+            python-arch: x64
+            test_key: mac12
           - macos_dev_target: 13.0
             os: macos-14
             arch: arm64

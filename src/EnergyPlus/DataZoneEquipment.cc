@@ -315,38 +315,40 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                                                                  cAlphaFields,
                                                                  cNumericFields); // Get Equipment | data for one zone
 
-        int zoneOrSpaceNum = Util::FindItemInList(AlphArray(1), state.dataHeatBal->Zone);
+        int zoneNum = Util::FindItemInList(AlphArray(1), state.dataHeatBal->Zone);
         std::string_view zsString = "Zone";
 
-        if (zoneOrSpaceNum == 0) {
+        if (zoneNum == 0) {
             ShowSevereError(state, format("{}{}: {}=\"{}\"", RoutineName, CurrentModuleObject, cAlphaFields(1), AlphArray(1)));
             ShowContinueError(state,
                               format("..Requested Controlled {} not among {}s, remaining items for this object not processed.", zsString, zsString));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             continue;
         }
-        bool isControlledAlready = state.dataHeatBal->Zone(zoneOrSpaceNum).IsControlled;
-        if (isControlledAlready) {
+        auto &thisZone = state.dataHeatBal->Zone(zoneNum);
+        // Is this a duplicate for the same zone?
+        if (thisZone.IsControlled) {
             ShowSevereError(state, format("{}{}: {}=\"{}\"", RoutineName, CurrentModuleObject, cAlphaFields(1), AlphArray(1)));
             ShowContinueError(state,
                               format("..Duplicate Controlled {} entered, only one {} per {} is allowed.", zsString, CurrentModuleObject, zsString));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             continue;
         }
-        state.dataHeatBal->Zone(zoneOrSpaceNum).IsControlled = true;
+        thisZone.IsControlled = true;
         bool isSpace = false;
+        auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneNum);
         processZoneEquipmentInput(state,
                                   CurrentModuleObject,
-                                  zoneOrSpaceNum,
+                                  zoneNum,
                                   isSpace,
                                   locTermUnitSizingCounter,
                                   overallEquipCount,
-                                  state.dataZoneEquip->ZoneEquipConfig(zoneOrSpaceNum),
+                                  thisZoneEquipConfig,
                                   AlphArray,
                                   cAlphaFields,
                                   lAlphaBlanks,
                                   NodeNums);
-        state.dataHeatBal->Zone(zoneOrSpaceNum).SystemZoneNodeNumber = state.dataZoneEquip->ZoneEquipConfig(zoneOrSpaceNum).ZoneNode;
+        thisZone.SystemZoneNodeNumber = thisZoneEquipConfig.ZoneNode;
     } // end loop over controlled zones
     for (int controlledSpaceLoop = 1; controlledSpaceLoop <= numControlledSpaces; ++controlledSpaceLoop) {
         CurrentModuleObject = "SpaceHVAC:EquipmentConnections";
@@ -363,38 +365,49 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                                                                  cAlphaFields,
                                                                  cNumericFields); // Get Equipment | data for one zone
 
-        int zoneOrSpaceNum = Util::FindItemInList(AlphArray(1), state.dataHeatBal->space);
+        int spaceNum = Util::FindItemInList(AlphArray(1), state.dataHeatBal->space);
         std::string_view zsString = "Space";
 
-        if (zoneOrSpaceNum == 0) {
+        if (spaceNum == 0) {
             ShowSevereError(state, format("{}{}: {}=\"{}\"", RoutineName, CurrentModuleObject, cAlphaFields(1), AlphArray(1)));
             ShowContinueError(state,
                               format("..Requested Controlled {} not among {}s, remaining items for this object not processed.", zsString, zsString));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             continue;
         }
-        bool isControlledAlready = state.dataHeatBal->space(zoneOrSpaceNum).IsControlled;
-        if (isControlledAlready) {
+        auto &thisSpace = state.dataHeatBal->space(spaceNum);
+        int zoneNum = thisSpace.zoneNum;
+        if (!state.dataHeatBal->Zone(zoneNum).IsControlled) {
+            ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisSpace.Name));
+            ShowContinueError(state,
+                              format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.",
+                                     state.dataHeatBal->Zone(zoneNum).Name));
+            state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
+            continue;
+        }
+        // Is this a duplicate for the same space?
+        if (thisSpace.IsControlled) {
             ShowSevereError(state, format("{}{}: {}=\"{}\"", RoutineName, CurrentModuleObject, cAlphaFields(1), AlphArray(1)));
             ShowContinueError(state,
                               format("..Duplicate Controlled {} entered, only one {} per {} is allowed.", zsString, CurrentModuleObject, zsString));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             continue;
         }
-        state.dataHeatBal->space(zoneOrSpaceNum).IsControlled = true;
+        thisSpace.IsControlled = true;
         bool isSpace = true;
+        auto &thisSpaceEquipConfig = state.dataZoneEquip->spaceEquipConfig(spaceNum);
         processZoneEquipmentInput(state,
                                   CurrentModuleObject,
-                                  zoneOrSpaceNum,
+                                  spaceNum,
                                   isSpace,
                                   locTermUnitSizingCounter,
                                   overallEquipCount,
-                                  state.dataZoneEquip->spaceEquipConfig(zoneOrSpaceNum),
+                                  thisSpaceEquipConfig,
                                   AlphArray,
                                   cAlphaFields,
                                   lAlphaBlanks,
                                   NodeNums);
-        state.dataHeatBal->space(zoneOrSpaceNum).SystemZoneNodeNumber = state.dataZoneEquip->spaceEquipConfig(zoneOrSpaceNum).ZoneNode;
+        thisSpace.SystemZoneNodeNumber = thisSpaceEquipConfig.ZoneNode;
     } // end loop over controlled spaces
 
     if (state.dataHeatBal->doSpaceHeatBalanceSizing || state.dataHeatBal->doSpaceHeatBalanceSimulation) {
@@ -510,7 +523,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqSplitter.Name));
                 ShowContinueError(
                     state,
-                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConfiguration object is required for this zone.", zoneName));
+                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 continue;
             }
@@ -547,7 +560,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZeqMixer.Name));
                 ShowContinueError(
                     state,
-                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConfiguration object is required for this zone.", zoneName));
+                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 continue;
             }
@@ -584,7 +597,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, CurrentModuleObject, thisZretMixer.Name));
                 ShowContinueError(
                     state,
-                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConfiguration object is required for this zone.", zoneName));
+                    format("..Zone Name={} is not a controlled zone. A ZoneHVAC:EquipmentConnections object is required for this zone.", zoneName));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 continue;
             }

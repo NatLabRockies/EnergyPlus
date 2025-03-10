@@ -63,9 +63,9 @@ import os
 import stat
 
 
-def locate_tk_so(_python_dir: Path) -> Path:
-    print(f"Searching for _tkinter so in {_python_dir}")
-    sos = list(_python_dir.glob("lib-dynload/_tkinter*.so"))
+def locate_tk_so(python_dir: Path) -> Path:
+    print(f"Searching for _tkinter so in {python_dir}")
+    sos = list(python_dir.glob("lib-dynload/_tkinter*.so"))
     assert len(sos) == 1, "Unable to locate _tkinter so"
     return sos[0]
 
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             assert new_tcl_tk_so.is_file(), f"{new_tcl_tk_so} missing when the tkinter so is already adjusted. Wipe the dir"
             print("Already fixed up the libtcl and libtk, nothing to do here")
             continue
-        if not tcl_tk_so.exists():
+        elif not str(tcl_tk_so).startswith('@') and not tcl_tk_so.exists():
             print(f"Hmmm... could not find the dependency shared object at {tcl_tk_so}; script will continue but fail")
             any_missing = True
             continue
@@ -140,9 +140,6 @@ if __name__ == "__main__":
         )
         # Change the id that's the first line of the otool -L in this case and it's confusing
         subprocess.check_output(["install_name_tool", "-id", str(new_tcl_tk_so.name), str(new_tcl_tk_so)])
-
-    # as a very quick test, I wonder what happens if we just let it continue without this dep...I'll force fail the workflow as a reminder
-    sys.exit(0)
 
     if any_missing:
         sys.exit(1)

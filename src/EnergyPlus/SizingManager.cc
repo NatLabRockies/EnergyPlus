@@ -219,25 +219,6 @@ void ManageSizing(EnergyPlusData &state)
         state.dataGlobal->ZoneSizingCalc = true;
         Available = true;
 
-        if (state.dataSize->SizingFileColSep == CharComma) {
-            state.files.zsz.filePath = state.files.outputZszCsvFilePath;
-        } else if (state.dataSize->SizingFileColSep == CharTab) {
-            state.files.zsz.filePath = state.files.outputZszTabFilePath;
-        } else {
-            state.files.zsz.filePath = state.files.outputZszTxtFilePath;
-        }
-
-        if (state.dataSize->SizingFileColSep == CharComma) {
-            state.files.spsz.filePath = state.files.outputSpszCsvFilePath;
-        } else if (state.dataSize->SizingFileColSep == CharTab) {
-            state.files.spsz.filePath = state.files.outputSpszTabFilePath;
-        } else {
-            state.files.spsz.filePath = state.files.outputSpszTxtFilePath;
-        }
-
-        state.files.zsz.ensure_open(state, "ManageSizing", state.files.outputControl.zsz);
-        state.files.spsz.ensure_open(state, "ManageSizing", state.files.outputControl.spsz);
-
         ShowMessage(state, "Beginning Zone Sizing Calculations");
 
         Weather::ResetEnvironmentCounter(state);

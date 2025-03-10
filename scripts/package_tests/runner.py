@@ -89,6 +89,12 @@ CONFIGURATIONS = {
     'ubuntu2404': {
         'os': OS.Linux, 'bitness': 'x64', 'asset_pattern': 'Linux-Ubuntu24.04-x86_64.tar.gz', 'os_version': '24.04'
     },
+    'ubuntu2204-arm64': {
+        'os': OS.Linux, 'bitness': 'arm64', 'asset_pattern': 'Linux-Ubuntu22.04-arm64.tar.gz', 'os_version': '22.04'
+    },
+    'ubuntu2404-arm64': {
+        'os': OS.Linux, 'bitness': 'arm64', 'asset_pattern': 'Linux-Ubuntu24.04-arm64.tar.gz', 'os_version': '24.04'
+    },
     'mac11': {
         'os': OS.Mac, 'bitness': 'x64', 'asset_pattern': 'Darwin-macOS11.6-x86_64.tar.gz', 'os_version': '11.6'
     },

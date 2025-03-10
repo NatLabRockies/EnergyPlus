@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -20,10 +21,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
-            pretty: "Ubuntu 22.04"
-          - os: ubuntu-24.04
-            pretty: "Ubuntu 24.04"
+        - os: ubuntu-22.04
+          pretty: "Ubuntu 22.04"
+          arch: x86_64
+          python-arch: x64
+        - os: ubuntu-24.04
+          pretty: "Ubuntu 24.04"
+          arch: x86_64
+          python-arch: x64
+        - os: ubuntu-22.04-arm
+          pretty: "Ubuntu 22.04 arm64"
+          arch: arm64
+          python-arch: arm64
+        - os: ubuntu-24.04-arm
+          pretty: "Ubuntu 24.04 arm64"
+          arch: arm64
+          python-arch: arm64
 
     permissions:
       # Needed permission to upload the release asset
@@ -34,14 +47,14 @@ jobs:
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
-      uses: jmarrec/setup-python@v5
+      uses: jmarrec/setup-python@v5.4.0
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
 
     - name: Setup QtIFW 4.x
       uses: jmarrec/setup-qtifw@v1
       with:
-        qtifw-version: '4.6.1'
+        qtifw-version: '4.8.1'
 
     - name: Install Python dependencies
       run: |
@@ -72,7 +85,7 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE:STRING=$BUILD_TYPE \
               -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
-              -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/x64/ \
+              -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" -DENABLE_PCH:BOOL=OFF \
               ../
@@ -86,7 +99,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: energyplus-${{ matrix.os }}
-        path: build/EnergyPlus-*-x86_64.tar.gz
+        path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
         if-no-files-found: error
         retention-days: 7
         overwrite: false
@@ -95,7 +108,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/EnergyPlus-*-x86_64.tar.gz
+        file: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
@@ -104,7 +117,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/EnergyPlus-*-x86_64.run
+        file: build/EnergyPlus-*-${{ matrix.arch }}.run
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
@@ -113,7 +126,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/EnergyPlus-*-x86_64.sh
+        file: build/EnergyPlus-*-${{ matrix.arch }}.sh
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
@@ -133,6 +146,10 @@ jobs:
             test_key: ubuntu2204
           - os: ubuntu-24.04
             test_key: ubuntu2404
+          - os: ubuntu-22.04-arm
+            test_key: ubuntu2204-arm64
+          - os: ubuntu-24.04-arm
+            test_key: ubuntu2404-arm64
 
     steps:
       - uses: actions/checkout@v4  # Still need E+ checked out to get testing scripts
@@ -140,7 +157,7 @@ jobs:
           path: checkout
 
       - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-        uses: jmarrec/setup-python@v5
+        uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ env.Python_REQUIRED_VERSION }}
