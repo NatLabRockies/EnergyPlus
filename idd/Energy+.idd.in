@@ -85413,7 +85413,8 @@ ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \note Used during EnergyPlus sizing and warm-up.
+       \required-field
+       \note Used during the first call of EnergyPlus.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \memo Hardware portion of EMS used to set up actuators in the model
@@ -85439,8 +85440,8 @@ ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \note Used during EnergyPlus sizing and warm-up.
-       \note If no value is specified, then the actuated component will only be updated after sizing and warm-up.
+       \required-field
+       \note Used during the first call of EnergyPlus.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Variable,
        \memo Declares Erl variable as having global scope
@@ -85458,7 +85459,7 @@ ExternalInterface:FunctionalMockupUnitExport:To:Variable,
   N1 ; \field Initial Value
        \type real
        \required-field
-       \note Used during EnergyPlus sizing and warm-up.
+       \note Used during the first call of EnergyPlus.
 
 \group User Defined HVAC and Plant Component Models
 
