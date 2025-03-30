@@ -149,7 +149,14 @@ void SetComponentFlowRate(EnergyPlusData &state,
     Real64 const MdotOldRequest = state.dataLoopNodes->Node(InletNode).MassFlowRateRequest;
     auto &loop_side = state.dataPlnt->PlantLoop(plantLoc.loopNum).LoopSide(plantLoc.loopSideNum);
     auto const &comp = loop_side.Branch(plantLoc.branchNum).Comp(plantLoc.compNum);
-
+    if (DataPlant::CompData::getPlantComponent(state, plantLoc).FlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive &&
+        plantLoc.loopSideNum == DataPlant::LoopSideLocation::Supply) {
+        Real64 seriesFlowVal = state.dataLoopNodes->Node(DataPlant::CompData::getPlantComponent(state, plantLoc).NodeNumIn).MassFlowRate;
+        // we don't want to setup a zero MassFlowRateRequest if there is already flow in a series active branch.
+        if (CompFlow == 0.0 && seriesFlowVal > DataBranchAirLoopPlant::MassFlowTolerance) {
+            CompFlow = seriesFlowVal;
+        }
+    }
     if (comp.CurOpSchemeType == DataPlant::OpScheme::Demand) {
         // store flow request on inlet node
         state.dataLoopNodes->Node(InletNode).MassFlowRateRequest = CompFlow;
