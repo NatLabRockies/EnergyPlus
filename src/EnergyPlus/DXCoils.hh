@@ -939,6 +939,8 @@ namespace DXCoils {
 
     Real64 FanSpdResidualHeat(Real64 FanSpdRto, Real64 QCoilSenHeatingLoad, Real64 Ts_1, Real64 Tin, Real64 Garate, Real64 BF);
 
+    Real64 FanSpdResidualHeatUsingH(Real64 FanSpdRto, Real64 QCoilSenHeatingLoad, Real64 RatedAirMassFlowRate, Real64 Tout, Real64 Tin, Real64 Win);
+
     void SetMSHPDXCoilHeatRecoveryFlag(EnergyPlusData &state, int const DXCoilNum); // must match coil names for the coil type
 
     void SetDXCoilAirLoopNumber(EnergyPlusData &state, std::string const &CoilName, int const AirLoopNum); // must match coil names for the coil type

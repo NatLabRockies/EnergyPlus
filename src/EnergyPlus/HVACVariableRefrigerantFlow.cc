@@ -267,6 +267,45 @@ void SimulateVRF(EnergyPlusData &state,
         if (state.dataHVACVarRefFlow->VRF(VRFCondenser).VRFAlgorithmType == AlgorithmType::FluidTCtrl) {
             // Algorithm Type: VRF model based on physics, applicable for Fluid Temperature Control
             state.dataHVACVarRefFlow->VRF(VRFCondenser).CalcVRFCondenser_FluidTCtrl(state, FirstHVACIteration);
+
+            // update heating coil heating rate with the new OU output and piping correction factor
+            for (int VRFTUNum = 1; VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU; ++VRFTUNum) {
+                auto const &thisTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
+                if (state.dataHVACVarRefFlow->MaxHeatingCapacity(VRFCondenser) < Constant::MaxCap) {
+                    auto &heatingCoil = state.dataDXCoils->DXCoil(thisTU.HeatCoilIndex);
+                    Real64 FanSpdRatio;
+                    Real64 OutletAirHumRat;
+                    Real64 OutletAirTemp;
+                    Real64 OutletAirEnthalpy;
+                    Real64 ActualSH;
+                    Real64 ActualSC;
+                    Real64 AirMassFlowMin = state.dataHVACVarRefFlow->OACompOnMassFlow;
+                    if (heatingCoil.PartLoadRatio == 0.0) {
+                        AirMassFlowMin = state.dataHVACVarRefFlow->OACompOffMassFlow;
+                    }
+                    DXCoils::ControlVRFIUCoil(state,
+                                              thisTU.HeatCoilIndex,
+                                              state.dataHVACVarRefFlow->VRF(VRFCondenser).TotalHeatingCapacity *
+                                                  state.dataHVACVarRefFlow->VRF(VRFCondenser).PipingCorrectionHeating,
+                                              heatingCoil.InletAirTemp,
+                                              heatingCoil.InletAirHumRat,
+                                              heatingCoil.CondensingTemp,
+                                              AirMassFlowMin,
+                                              FanSpdRatio,
+                                              OutletAirHumRat,
+                                              OutletAirTemp,
+                                              OutletAirEnthalpy,
+                                              ActualSH,
+                                              ActualSC);
+                    Real64 AirMassFlow = FanSpdRatio * heatingCoil.RatedAirMassFlowRate(1); // heating mode
+                    // fixme: temporary remove multiply of coil PLR
+                    heatingCoil.TotalHeatingEnergyRate = AirMassFlow * (OutletAirEnthalpy - heatingCoil.InletAirEnthalpy);
+                    if (heatingCoil.PartLoadRatio > 0.0) {
+                        heatingCoil.TotalHeatingEnergyRate *= heatingCoil.PartLoadRatio;
+                    }
+                }
+            }
+
         } else {
             // Algorithm Type: VRF model based on system curve
             CalcVRFCondenser(state, VRFCondenser);

@@ -17488,12 +17488,20 @@ void ControlVRFIUCoil(EnergyPlusData &state,
         if (QCoilSenHeatingLoad > QinSenMin1) {
             // Modulate fan speed to meet room sensible load; SC is not updated
             FanSpdRatioMax = 1.0;
-            auto f = [QCoilSenHeatingLoad, Ts_1, Tin, Garate, BF](Real64 FanSpdRto) {
-                return FanSpdResidualHeat(FanSpdRto, QCoilSenHeatingLoad, Ts_1, Tin, Garate, BF);
+            Tout = Tin + (Ts_1 - Tin) * (1 - BF);
+            Real64 RatedAirMassFlowRate = state.dataDXCoils->DXCoil(CoilIndex).RatedAirMassFlowRate[0];
+            auto f = [QCoilSenHeatingLoad, RatedAirMassFlowRate, Tout, Tin, Win](Real64 FanSpdRto) {
+                return FanSpdResidualHeatUsingH(FanSpdRto, QCoilSenHeatingLoad, RatedAirMassFlowRate, Tout, Tin, Win);
             };
             General::SolveRoot(state, 1.0e-3, MaxIter, SolFla, Ratio1, f, FanSpdRatioMin, FanSpdRatioMax);
             // this will likely cause problems eventually, -1 and -2 mean different things
-            if (SolFla < 0) Ratio1 = FanSpdRatioMax; // over capacity
+            if (SolFla < 0) {
+                if (f(FanSpdRatioMin) <= 0) { // capacity <= demand
+                    Ratio1 = FanSpdRatioMax;  // over capacity
+                } else {                      // capacity > demand even for the minimum fan speed
+                    Ratio1 = FanSpdRatioMin;
+                }
+            }
             FanSpdRatio = Ratio1;
             CoilOnOffRatio = 1.0;
 
@@ -17771,6 +17779,28 @@ Real64 FanSpdResidualHeat(Real64 FanSpdRto, Real64 QCoilSenHeatingLoad, Real64 T
     if (std::abs(ZnSenLoad) < 100.0) ZnSenLoad = sign(100.0, ZnSenLoad);
     Real64 Tout = Tin + (Ts_1 - Tin) * (1 - BF);
     Real64 TotCap = FanSpdRto * Garate * 1005.0 * (Tout - Tin);
+    return (TotCap - ZnSenLoad) / ZnSenLoad;
+}
+
+Real64 FanSpdResidualHeatUsingH(Real64 FanSpdRto, Real64 QCoilSenHeatingLoad, Real64 RatedAirMassFlowRate, Real64 Tout, Real64 Tin, Real64 Win)
+{
+
+    // FUNCTION INFORMATION:
+    //       AUTHOR         Yujie Xu (yujiex)
+    //       DATE WRITTEN   Jul 2024
+    //
+    // PURPOSE OF THIS FUNCTION:
+    //       Calculates residual function (desired zone heating load - actual heating coil capacity)
+    //       This is used to modify the fan speed to adjust the coil heating capacity to match
+    //       the zone heating load. This one uses Hin and Hout difference rather than Tin and Tout difference
+    //       like in FanSpdResidualHeat
+    //
+    Real64 ZnSenLoad = QCoilSenHeatingLoad;
+    // +-100 W minimum zone load?
+    // not sure why this is needed, inherited from FanSpdResidualHeat
+    //    if (std::abs(ZnSenLoad) < 100.0) ZnSenLoad = sign(100.0, ZnSenLoad);
+    Real64 Wout = Win;
+    Real64 TotCap = FanSpdRto * RatedAirMassFlowRate * (PsyHFnTdbW(Tout, Wout) - PsyHFnTdbW(Tin, Win));
     return (TotCap - ZnSenLoad) / ZnSenLoad;
 }
 
