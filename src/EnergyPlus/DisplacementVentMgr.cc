@@ -681,7 +681,7 @@ namespace RoomAir {
                 auto const &surfParams = state.dataRoomAir->SurfParametersCrossDispVent(afnSurfNum);
                 auto const &afnLinkSimu = state.afn->AirflowNetworkLinkSimu(afnSurfNum);
                 auto const &afnMzSurfData = state.afn->MultizoneSurfaceData(afnSurfNum);
-                auto const &afnMzSurf = state.dataSurface->Surface(afnMzSurfData.SurfNum);
+                auto const &afnMzSurf = state.dataSurface->Surface(afnMzSurfData.surface_number);
                 if (afnMzSurf.Zone == ZoneNum) {
 
                     if ((surfParams.Zmax < 0.8 && afnLinkSimu.VolFLOW > 0)) {

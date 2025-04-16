@@ -6057,8 +6057,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestOtherSideCoefficients)
     state->dataSurface->Surface(1).Azimuth = 0.0;
     state->dataSurface->Surface(2).Azimuth = 180.0;
 
-    state->afn->MultizoneSurfaceData(1).SurfNum = 1;
-    state->afn->MultizoneSurfaceData(2).SurfNum = 2;
+    state->afn->MultizoneSurfaceData(1).surface_number = 1;
+    state->afn->MultizoneSurfaceData(2).surface_number = 2;
 
     state->afn->calculate_Cps();
     EXPECT_EQ(1, state->afn->MultizoneSurfaceData(1).NodeNums[1]);

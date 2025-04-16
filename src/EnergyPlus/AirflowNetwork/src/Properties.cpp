@@ -46,8 +46,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "AirflowNetwork/Properties.hpp"
-#include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/General.hh>
+#include "../../Data/EnergyPlusData.hh"
+#include "../../General.hh"
 
 namespace EnergyPlus {
 

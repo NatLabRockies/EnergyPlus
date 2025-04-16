@@ -6035,9 +6035,22 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
     EXPECT_NEAR(state->afn->AirflowNetworkReportData(1).MultiZoneInfiSenLossW, 95.89575, 0.001);
     EXPECT_NEAR(state->afn->AirflowNetworkReportData(1).MultiZoneInfiLatLossW, 0.969147, 0.001);
 
-    state->afn->AirflowNetworkCompData(state->afn->AirflowNetworkLinkageData(2).CompNum).CompTypeNum = AirflowNetwork::iComponentTypeNum::DOP;
-    state->afn->report();
+    for (int i = 1; i <= state->afn->AirflowNetworkLinkageData.isize(); ++i) {
+        std::cerr << i << ' ' << state->afn->AirflowNetworkCompData(state->afn->AirflowNetworkLinkageData(i).CompNum).CompTypeNum << std::endl;
+        EXPECT_EQ(state->afn->AirflowNetworkCompData(state->afn->AirflowNetworkLinkageData(i).CompNum).CompTypeNum,
+                  state->afn->AirflowNetworkLinkageData(i).element->type());
+    }
 
+    // The original test was changing the CompTypeNum, as that goes away it's necessaey to actually
+    // switch out the elements. This is probably an unwise approach.
+    auto const ye_olde_element = state->afn->AirflowNetworkLinkageData(2).element;
+    AirflowNetwork::DetailedOpening dop;
+    for (auto &link : state->afn->AirflowNetworkLinkageData) {
+        if (link.element == ye_olde_element) {
+            link.element = &dop;
+        }
+    }
+    state->afn->report();
     EXPECT_NEAR(state->afn->AirflowNetworkReportData(1).MultiZoneVentSenLossW, 95.89575, 0.001);
     EXPECT_NEAR(state->afn->AirflowNetworkReportData(1).MultiZoneVentLatLossW, 0.969147, 0.001);
     // #8475
@@ -6053,7 +6066,12 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
     EXPECT_NEAR(state->afn->AirflowNetworkZnRpt(1).VentilAirChangeRate, 0.2438, 0.001);
     EXPECT_NEAR(state->afn->AirflowNetworkZnRpt(1).VentilMass, 0.85114, 0.001);
     // Infiltration
-    state->afn->AirflowNetworkCompData(state->afn->AirflowNetworkLinkageData(2).CompNum).CompTypeNum = AirflowNetwork::iComponentTypeNum::SCR;
+    // Switch the element back
+    for (auto &link : state->afn->AirflowNetworkLinkageData) {
+        if (link.element == &dop) {
+            link.element = ye_olde_element;
+        }
+    }
     state->afn->update();
     state->afn->report();
     EXPECT_NEAR(state->afn->exchangeData(1).SumMCp, 2.38012, 0.001);
@@ -11068,7 +11086,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneVentingAirBoundary)
          "   ** Warning ** AirflowNetwork::Solver::get_input: AirflowNetwork:MultiZone:Surface=\"AIR WALL AULA 2\" is an air boundary surface.",
          "   **   ~~~   ** Ventilation Control Mode = TEMPERATURE is not valid. Resetting to Constant.",
          "   ** Warning ** AirflowNetwork::Solver::get_input: : AirflowNetwork:MultiZone:Surface = AIR WALL AULA 2",
-         "   **   ~~~   ** Venting Availbility Schedule is not empty.",
+         "   **   ~~~   ** Venting Availability Schedule is not empty.",
          "   **   ~~~   ** Venting is always available for air-boundary surfaces."});
     EXPECT_TRUE(compare_err_stream(expectedErrString, true));
 
@@ -11076,12 +11094,12 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneVentingAirBoundary)
     // venting schedule should be non-zero and venting method should be ZoneLevel
     auto *ventingSched = Sched::GetSchedule(*state, state->afn->MultizoneSurfaceData(1).VentAvailSchName);
     EXPECT_EQ(ventingSched, state->afn->MultizoneSurfaceData(1).ventAvailSched);
-    EXPECT_ENUM_EQ(state->afn->MultizoneSurfaceData(1).VentSurfCtrNum, AirflowNetwork::VentControlType::Temp);
+    EXPECT_ENUM_EQ(state->afn->MultizoneSurfaceData(1).ventilation_control_type, AirflowNetwork::VentControlType::Temp);
 
     // MultizoneSurfaceData(2) is connected to an air boundary surface
     // venting schedule should be zero and venting method should be Constant
     EXPECT_EQ(state->afn->MultizoneSurfaceData(2).ventAvailSched, Sched::GetScheduleAlwaysOn(*state));
-    EXPECT_ENUM_EQ(state->afn->MultizoneSurfaceData(2).VentSurfCtrNum, AirflowNetwork::VentControlType::Const);
+    EXPECT_ENUM_EQ(state->afn->MultizoneSurfaceData(2).ventilation_control_type, AirflowNetwork::VentControlType::Const);
 }
 
 TEST_F(EnergyPlusFixture, AirflowNetwork_TestNoZoneEqpSupportZoneERV)
@@ -16755,8 +16773,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
     state->afn->AirflowNetworkNodeData(19).EPlusNodeNum = 2;
     state->afn->AirflowNetworkNodeData(20).EPlusNodeNum = 11;
     state->afn->AirflowNetworkNodeData(21).EPlusNodeNum = 3;
-    state->afn->AirflowNetworkNodeData(11).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZIN;
-    state->afn->AirflowNetworkNodeData(12).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZOU;
+    state->afn->AirflowNetworkNodeData(11).EPlusTypeNum = AirflowNetwork::EPlusNodeType::ZIN;
+    state->afn->AirflowNetworkNodeData(12).EPlusTypeNum = AirflowNetwork::EPlusNodeType::ZOU;
     state->dataEnvrn->StdRhoAir = 1.2;
     state->afn->DisSysCompCVFData(1).FlowRate = 1.23;
     state->afn->SizeDucts();

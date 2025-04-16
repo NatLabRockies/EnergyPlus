@@ -1037,14 +1037,14 @@ namespace RoomAir {
                 auto const &mzSurfaceData = state.afn->MultizoneSurfaceData(iLink);
                 int nodeNum1 = mzSurfaceData.NodeNums[0];
                 int nodeNum2 = mzSurfaceData.NodeNums[1];
-                if (state.dataSurface->Surface(mzSurfaceData.SurfNum).Zone == zoneCV.ZonePtr ||
+                if (state.dataSurface->Surface(mzSurfaceData.surface_number).Zone == zoneCV.ZonePtr ||
                     (state.afn->AirflowNetworkNodeData(nodeNum2).EPlusZoneNum == zoneCV.ZonePtr &&
                      state.afn->AirflowNetworkNodeData(nodeNum1).EPlusZoneNum > 0) ||
                     (state.afn->AirflowNetworkNodeData(nodeNum2).EPlusZoneNum > 0 &&
                      state.afn->AirflowNetworkNodeData(nodeNum1).EPlusZoneNum == zoneCV.ZonePtr)) {
                     int compNum = state.afn->AirflowNetworkLinkageData(iLink).CompNum;
                     int typeNum = state.afn->AirflowNetworkCompData(compNum).TypeNum;
-                    if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::iComponentTypeNum::SCR) {
+                    if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::AirflowElementType::SCR) {
                         if (state.afn->MultizoneSurfaceCrackData(typeNum).exponent != 0.50) {
                             state.dataRoomAir->AirModel(zoneCV.ZonePtr).AirModel = RoomAirModel::Mixing;
                             ShowWarningError(state, format("Problem with {} = {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
@@ -1913,11 +1913,11 @@ namespace RoomAir {
 
             // calculate maximum number of airflow network surfaces in each zone
             for (int iMzLink = 1; iMzLink <= state.afn->NumOfLinksMultiZone; ++iMzLink) {
-                auto const &mzSurf = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(iMzLink).SurfNum);
+                auto const &mzSurf = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(iMzLink).surface_number);
                 ++AuxSurf(mzSurf.Zone);
                 ++state.dataRoomAir->CrossVentNumAFNSurfaces;
                 // Check if this is an interzone airflow network surface
-                if (mzSurf.ExtBoundCond > 0 && (state.afn->MultizoneSurfaceData(iMzLink).SurfNum != mzSurf.ExtBoundCond)) {
+                if (mzSurf.ExtBoundCond > 0 && (state.afn->MultizoneSurfaceData(iMzLink).surface_number != mzSurf.ExtBoundCond)) {
                     ++AuxSurf(state.dataSurface->Surface(mzSurf.ExtBoundCond).Zone);
                     ++state.dataRoomAir->CrossVentNumAFNSurfaces;
                 }
@@ -1951,7 +1951,7 @@ namespace RoomAir {
                 int SurfNum = 1;
 
                 for (int iMzLink = 1; iMzLink <= state.afn->NumOfLinksMultiZone; ++iMzLink) {
-                    auto const &mzSurf = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(iMzLink).SurfNum);
+                    auto const &mzSurf = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(iMzLink).surface_number);
                     auto &surfParams = state.dataRoomAir->SurfParametersCrossDispVent(iMzLink);
 
                     if (mzSurf.Zone == iZone) {
@@ -1960,7 +1960,7 @@ namespace RoomAir {
                         // calculate the surface width and height
                         int compNum = state.afn->AirflowNetworkLinkageData(iMzLink).CompNum;
                         int typeNum = state.afn->AirflowNetworkCompData(compNum).TypeNum;
-                        if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::iComponentTypeNum::DOP) {
+                        if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::AirflowElementType::DOP) {
                             Real64 WidthFactMax = 0.0;
                             Real64 HeightFactMax = 0.0;
 
@@ -1992,7 +1992,7 @@ namespace RoomAir {
                             surfParams.Height = HeightFactMax * mzSurf.Height;
 
                         } else if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum ==
-                                   AirflowNetwork::iComponentTypeNum::SCR) { // surface type = CRACK
+                                   AirflowNetwork::AirflowElementType::SCR) { // surface type = CRACK
                             surfParams.Width = mzSurf.Width / 2;
                             auto const &zoneHeatBal = state.dataZoneTempPredictorCorrector->zoneHeatBalance(iZone);
                             Real64 AinCV =
@@ -2003,9 +2003,9 @@ namespace RoomAir {
                         }
 
                         // calculate the surface Zmin and Zmax
-                        if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::iComponentTypeNum::DOP ||
+                        if (state.afn->AirflowNetworkCompData(compNum).CompTypeNum == AirflowNetwork::AirflowElementType::DOP ||
                             state.afn->AirflowNetworkCompData(compNum).CompTypeNum ==
-                                AirflowNetwork::iComponentTypeNum::SCR) { // surface type = CRACK
+                                AirflowNetwork::AirflowElementType::SCR) { // surface type = CRACK
                             Real64 z_min(std::numeric_limits<Real64>::max()), z_max(std::numeric_limits<Real64>::lowest());
                             for (int i = 1; i <= mzSurf.Sides; ++i) {
                                 Real64 const z_i = mzSurf.Vertex(i).z;
@@ -2509,14 +2509,14 @@ namespace RoomAir {
                                         zone.Name);
                     for (int i = 1; i <= state.dataRoomAir->AFNSurfaceCrossVent(0, ZoneNum); ++i) {
                         int N = state.afn->AirflowNetworkLinkageData(i).CompNum;
-                        if (state.afn->AirflowNetworkCompData(N).CompTypeNum == AirflowNetwork::iComponentTypeNum::DOP) {
+                        if (state.afn->AirflowNetworkCompData(N).CompTypeNum == AirflowNetwork::AirflowElementType::DOP) {
                             SetupOutputVariable(state,
                                                 "Room Air Window Jet Region Average Air Velocity",
                                                 Constant::Units::m_s,
                                                 state.dataRoomAir->CrossVentJetRecFlows(i, iZone).Ujet,
                                                 OutputProcessor::TimeStepType::Zone,
                                                 OutputProcessor::StoreType::Average,
-                                                state.afn->MultizoneSurfaceData(i).SurfName);
+                                                state.afn->MultizoneSurfaceData(i).surface_name);
                         }
                     }
                 } // for (iZone)

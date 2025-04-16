@@ -93,8 +93,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
     state->afn->AirflowNetworkCompData.allocate(j);
     state->afn->AirflowNetworkCompData(j).TypeNum = 1;
     state->afn->MultizoneSurfaceData.allocate(i);
-    state->afn->MultizoneSurfaceData(i).Width = 10.0;
-    state->afn->MultizoneSurfaceData(i).Height = 5.0;
+    state->afn->MultizoneSurfaceData(i).width = 10.0;
+    state->afn->MultizoneSurfaceData(i).height = 5.0;
     state->afn->MultizoneSurfaceData(i).OpenFactor = 1.0;
 
     state->afn->node_states.clear();
@@ -2457,32 +2457,32 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestPolygonalWindows)
     state->afn->get_input();
 
     // Choice: Height; Base Surface: Vertical Rectangular
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(1).Width, 0.0001);
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(1).Height, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(1).width, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(1).height, 0.0001);
     // Choice: Height; Base Surface: Vertical Polygon
-    EXPECT_NEAR(1.666667, state->afn->MultizoneSurfaceData(2).Width, 0.0001);
-    EXPECT_NEAR(1.5, state->afn->MultizoneSurfaceData(2).Height, 0.0001);
+    EXPECT_NEAR(1.666667, state->afn->MultizoneSurfaceData(2).width, 0.0001);
+    EXPECT_NEAR(1.5, state->afn->MultizoneSurfaceData(2).height, 0.0001);
     // Choice: Base aspect ratio; Base Surface: Vertical Rectangular
-    EXPECT_NEAR(1.454907, state->afn->MultizoneSurfaceData(3).Width, 0.0001);
-    EXPECT_NEAR(0.343664, state->afn->MultizoneSurfaceData(3).Height, 0.0001);
+    EXPECT_NEAR(1.454907, state->afn->MultizoneSurfaceData(3).width, 0.0001);
+    EXPECT_NEAR(0.343664, state->afn->MultizoneSurfaceData(3).height, 0.0001);
     // Choice: User aspect ratio; Base Surface: Vertical Rectangular
-    EXPECT_NEAR(0.70711, state->afn->MultizoneSurfaceData(4).Width, 0.0001);
-    EXPECT_NEAR(0.70711, state->afn->MultizoneSurfaceData(4).Height, 0.0001);
+    EXPECT_NEAR(0.70711, state->afn->MultizoneSurfaceData(4).width, 0.0001);
+    EXPECT_NEAR(0.70711, state->afn->MultizoneSurfaceData(4).height, 0.0001);
     // Choice: Base aspect ratio --> Height; Base Surface: Vertical Polygon
-    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(5).Width, 0.0001);
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(5).Height, 0.0001);
+    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(5).width, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(5).height, 0.0001);
     // Choice: Height --> Base aspect ratio; Base Surface: Horizontal Rectangular
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(6).Width, 0.0001);
-    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(6).Height, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(6).width, 0.0001);
+    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(6).height, 0.0001);
     // Choice: Base aspect ratio; Base Surface: Horizontal Rectangular
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(7).Width, 0.0001);
-    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(7).Height, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(7).width, 0.0001);
+    EXPECT_NEAR(0.5, state->afn->MultizoneSurfaceData(7).height, 0.0001);
     // Choice: Base aspect ratio --> User Aspect Ratio; Base Surface: Horizontal Polygon
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(8).Width, 0.0001);
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(8).Height, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(8).width, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(8).height, 0.0001);
     // Choice: Height --> User Aspect Ratio; Base Surface: Horizontal Polygon
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(9).Width, 0.0001);
-    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(9).Height, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(9).width, 0.0001);
+    EXPECT_NEAR(1.0, state->afn->MultizoneSurfaceData(9).height, 0.0001);
 
     state->dataHeatBal->Zone.deallocate();
     state->dataSurface->Surface.deallocate();

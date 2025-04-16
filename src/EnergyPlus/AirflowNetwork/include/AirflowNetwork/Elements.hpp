@@ -49,6 +49,7 @@
 #define AIRFLOWNETWORK_ELEMENTS_HPP
 
 #include "AirflowNetwork/Properties.hpp"
+#include "AirflowNetwork/Types.hpp"
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/ScheduleManager.hh>
@@ -60,167 +61,6 @@ struct EnergyPlusData;
 struct AirflowNetworkData;
 
 namespace AirflowNetwork {
-
-    enum VentControlType // TODO: make enum class
-    {
-        None = 0,  // Wrong input
-        Temp = 1,  // Temperature venting control
-        Enth = 2,  // Enthalpy venting control
-        Const = 3, // Constant venting control
-        ASH55 = 4,
-        CEN15251 = 5,
-        NoVent = 6,    // No venting
-        ZoneLevel = 7, // ZoneLevel control for a heat transfer subsurface
-        AdjTemp = 8,   // Temperature venting control based on adjacent zone conditions
-        AdjEnth = 9    // Enthalpy venting control based on adjacent zone conditions
-    };
-
-    enum OpenStatus // TODO: make enum class
-    {
-        FreeOperation = 0,     // Free operation
-        MinCheckForceOpen = 1, // Force open when opening elapsed time is less than minimum opening time
-        MinCheckForceClose = 2 // Force open when closing elapsed time is less than minimum closing time
-    };
-
-    enum ProbabilityCheck // TODO: make enum class
-    {
-        NoAction = 0,    // No action from probability check
-        ForceChange = 1, // Force open or close from probability check
-        KeepStatus = 2   // Keep status at the previous time step from probability check
-    };
-
-    enum class EquivRec
-    {
-        Height,          // Effective rectangle polygonal height selection
-        BaseAspectRatio, // Effective rectangle base surface aspect ratio selection
-        UserAspectRatio  // Effective rectangle user input aspect ratio selection
-    };
-
-    enum class DuctLineType
-    {
-        Invalid = -1,
-        SupplyTrunk,  // Supply trunk
-        SupplyBranch, // SupplyBrnach
-        ReturnTrunk,  // Return trunk
-        ReturnBranch, // ReturnBrnach
-    };
-
-    // Using/Aliasing
-
-    // Data
-    // module should be available to other modules and routines.  Thus,
-    // all variables in this module must be PUBLIC.
-
-    // MODULE PARAMETER DEFINITIONS:
-    enum class iComponentTypeNum : int
-    {
-        Invalid = 0,
-        DOP = 1,  // Detailed large opening component
-        SOP = 2,  // Simple opening component
-        SCR = 3,  // Surface crack component
-        SEL = 4,  // Surface effective leakage ratio component
-        PLR = 5,  // Distribution system crack component
-        DWC = 6,  // Distribution system duct component
-        CVF = 7,  // Distribution system constant volume fan component
-        FAN = 8,  // Distribution system detailed fan component
-        MRR = 9,  // Distribution system multiple curve fit power law resistant flow component
-        DMP = 10, // Distribution system damper component
-        ELR = 11, // Distribution system effective leakage ratio component
-        CPD = 12, // Distribution system constant pressure drop component
-        COI = 13, // Distribution system coil component
-        TMU = 14, // Distribution system terminal unit component
-        EXF = 15, // Zone exhaust fan
-        HEX = 16, // Distribution system heat exchanger
-        HOP = 17, // Horizontal opening component
-        RVD = 18, // Reheat VAV terminal damper
-        OAF = 19, // Distribution system OA
-        REL = 20, // Distribution system relief air
-        SMF = 21, // Specified mass flow component
-        SVF = 22, // Specified volume flow component
-        Num
-    };
-
-    enum class ComponentType
-    {
-        // TODO: enum check
-        Invalid = -1,
-        DOP = 1, // Detailed large opening component
-        SOP,     // Simple opening component
-        SCR,     // Surface crack component
-        SEL,     // Surface effective leakage ratio component
-        PLR,     // Distribution system crack component
-        DWC,     // Distribution system duct component
-        CVF,     // Distribution system constant volume fan component
-        FAN,     // Distribution system detailed fan component
-        MRR,     // Distribution system multiple curve fit power law resistant flow component
-        DMP,     // Distribution system damper component
-        ELR,     // Distribution system effective leakage ratio component
-        CPD,     // Distribution system constant pressure drop component
-        COI,     // Distribution system coil component
-        TMU,     // Distribution system terminal unit component
-        EXF,     // Zone exhaust fan
-        HEX,     // Distribution system heat exchanger
-        HOP,     // Horizontal opening component
-        RVD,     // Reheat VAV terminal damper
-        OAF,     // Distribution system OA
-        REL,     // Distribution system relief air
-        SMF,     // Specified mass flow component
-        SVF,     // Specified volume flow component
-        Num
-    };
-
-    // EPlus component Type
-    enum class iEPlusComponentType : int
-    {
-        Invalid = 0,
-        SCN = 1, // Supply connection
-        RCN = 2, // Return connection
-        RHT = 3, // Reheat terminal
-        FAN = 4, // Fan
-        COI = 5, // Heating or cooling coil
-        HEX = 6, // Heat exchanger
-        RVD = 7, // Reheat VAV terminal damper
-        Num
-    };
-
-    // EPlus node type
-    enum class iEPlusNodeType : int
-    {
-        Invalid = 0,
-        ZIN = 1,  // Zone inlet node
-        ZOU = 2,  // Zone outlet node
-        SPL = 3,  // Splitter node
-        MIX = 4,  // Mixer node
-        OAN = 5,  // Outside air system node
-        EXT = 6,  // OA system inlet node
-        FIN = 7,  // Fan Inlet node
-        FOU = 8,  // Fan Outlet Node
-        COU = 9,  // Coil Outlet Node
-        HXO = 10, // Heat exchanger Outlet Node
-        DIN = 11, // Damper Inlet node
-        DOU = 12, // Damper Outlet Node
-        SPI = 13, // Splitter inlet Node
-        SPO = 14, // Splitter Outlet Node
-        Num
-    };
-
-    enum class iWPCCntr : int
-    {
-        Invalid = 0,
-        Input = 1,
-        SurfAvg = 2,
-        Num
-    };
-
-    int constexpr PressureCtrlExhaust = 1;
-    int constexpr PressureCtrlRelief = 2;
-
-    // DERIVED TYPE DEFINITIONS:
-
-    // MODULE VARIABLE DECLARATIONS:
-    // Node simulation variable in air distribution system
-    // Link simulation variable in air distribution system
-    // Sensible and latent exchange variable in air distribution system
 
     void generic_crack(Real64 const coef,        // Flow coefficient
                        Real64 const expn,        // Flow exponent
@@ -242,7 +82,6 @@ namespace AirflowNetwork {
                     std::array<Real64, 2> &DF // Partial derivative:  DF/DP
     );
 
-    // Types
     struct MultizoneZoneProp // Zone information
     {
         // Members
@@ -278,75 +117,6 @@ namespace AirflowNetwork {
             : VentControl("NoVent"), Height(0.0), OpenFactor(1.0), LowValueTemp(0.0), UpValueTemp(100.0), LowValueEnth(0.0), UpValueEnth(300000.0),
               ZoneNum(0), VentCtrNum(VentControlType::None), SingleSidedCpType("STANDARD"), BuildWidth(10.0), ASH55PeopleInd(0), CEN15251PeopleInd(0),
               OccupantVentilationControlNum(0), RAFNNodeNum(0)
-        {
-        }
-    };
-
-    struct MultizoneSurfaceProp // Surface information
-    {
-        // Members
-        std::string SurfName;         // Name of Associated EnergyPlus surface
-        std::string OpeningName;      // Name of opening component, either simple or detailed large opening
-        std::string ExternalNodeName; // Name of external node, but not used at WPC="INPUT"
-        Real64 Factor;                // Crack Actual Value or Window Open Factor for Ventilation
-        int SurfNum;                  // Surface number
-        std::array<int, 2> NodeNums;  // Positive: Zone numbers; 0: External
-        Real64 OpenFactor;            // Surface factor
-        Real64 OpenFactorLast;        // Surface factor at previous time step
-        bool EMSOpenFactorActuated;   // True if EMS actuation is on
-        Real64 EMSOpenFactor;         // Surface factor value from EMS for override
-        Real64 Height;                // Surface Height
-        Real64 Width;                 // Surface width
-        Real64 CHeight;               // Surface central height in z direction
-        std::string VentControl;      // Ventilation Control Mode: TEMPERATURE, ENTHALPIC, CONSTANT, ZONELEVEL or NOVENT
-        Real64 ModulateFactor;        // Limit Value on Multiplier for Modulating Venting Open Factor
-        Real64 LowValueTemp;          // Lower Value on Inside/Outside Temperature Difference for
-        // Modulating the Venting Open Factor with temp control
-        Real64 UpValueTemp; // Upper Value on Inside/Outside Temperature Difference for
-        // Modulating the Venting Open Factor with temp control
-        Real64 LowValueEnth; // Lower Value on Inside/Outside Temperature Difference for
-        // Modulating the Venting Open Factor with Enthalpic control
-        Real64 UpValueEnth; // Upper Value on Inside/Outside Temperature Difference for
-        // Modulating the Venting Open Factor with Enthalpic control
-        std::string VentTempControlSchName;              // Name of ventilation temperature control schedule
-        Sched::Schedule *ventTempControlSched = nullptr; // Ventilation temperature control schedule
-        VentControlType VentSurfCtrNum;                  // Ventilation control mode number: 1 "Temperature", 2 "ENTHALPIC", 3 "CONSTANT", 4 "NOVENT"
-        std::string VentAvailSchName;                    // Ventilation availability schedule
-        Sched::Schedule *ventAvailSched = nullptr;       // Ventilation availability schedule
-        int ZonePtr;                                     // Pointer to inside face zone
-        bool IndVentControl;                             // Individual surface venting control
-        int ExtLargeOpeningErrCount;                     // Exterior large opening error count during HVAC system operation
-        int ExtLargeOpeningErrIndex;                     // Exterior large opening error index during HVAC system operation
-        int OpenFactorErrCount;                          // Large opening error count at Open factor > 1.0
-        int OpenFactorErrIndex;                          // Large opening error error index at Open factor > 1.0
-        Real64 Multiplier;                               // Window multiplier
-        bool HybridVentClose;                            // Hybrid ventilation window close control logical
-        bool HybridCtrlGlobal;                           // Hybrid ventilation global control logical
-        bool HybridCtrlMaster;                           // Hybrid ventilation global control master
-        Real64 WindModifier;                             // Wind modifier from hybrid ventilation control
-        std::string OccupantVentilationControlName;      // Occupant ventilation control name
-        int OccupantVentilationControlNum;               // Occupant ventilation control number
-        int OpeningStatus;                               // Open status at current time step
-        int PrevOpeningstatus;                           // Open status at previous time step
-        Real64 CloseElapsedTime;                         // Elapsed time during closing (min)
-        Real64 OpenElapsedTime;                          // Elapsed time during closing (min)
-        int ClosingProbStatus;                           // Closing probability status
-        int OpeningProbStatus;                           // Opening probability status
-        bool RAFNflag;                                   // True if this surface is used in AirflowNetwork:IntraZone:Linkage
-        bool NonRectangular;                             // True if this surface is not rectangular
-        EquivRec EquivRecMethod;        // Equivalent Rectangle Method input: 1 Height; 2 Base surface aspect ratio; 3 User input aspect ratio
-        Real64 EquivRecUserAspectRatio; // user input value when EquivRecMethod = 3
-
-        // Default Constructor
-        MultizoneSurfaceProp()
-            : Factor(0.0), SurfNum(0), NodeNums{{0, 0}}, OpenFactor(0.0), OpenFactorLast(0.0), EMSOpenFactorActuated(false), EMSOpenFactor(0.0),
-              Height(0.0), Width(0.0), CHeight(0.0), VentControl("ZONELEVEL"), ModulateFactor(0.0), LowValueTemp(0.0), UpValueTemp(100.0),
-              LowValueEnth(0.0), UpValueEnth(300000.0), VentSurfCtrNum(VentControlType::None), ZonePtr(0), IndVentControl(false),
-              ExtLargeOpeningErrCount(0), ExtLargeOpeningErrIndex(0), OpenFactorErrCount(0), OpenFactorErrIndex(0), Multiplier(1.0),
-              HybridVentClose(false), HybridCtrlGlobal(false), HybridCtrlMaster(false), WindModifier(1.0), OccupantVentilationControlNum(0),
-              OpeningStatus(OpenStatus::FreeOperation), PrevOpeningstatus(OpenStatus::FreeOperation), CloseElapsedTime(0.0), OpenElapsedTime(0.0),
-              ClosingProbStatus(ProbabilityCheck::NoAction), OpeningProbStatus(ProbabilityCheck::NoAction), RAFNflag(false), NonRectangular(false),
-              EquivRecMethod(EquivRec::Height), EquivRecUserAspectRatio(1.0)
         {
         }
     };
@@ -393,7 +163,7 @@ namespace AirflowNetwork {
             return 1;
         }
 
-        virtual ComponentType type() = 0;
+        virtual AirflowElementType type() = 0;
     };
 
     int constexpr NrInt = 20; // Number of intervals for a large opening
@@ -519,9 +289,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::DOP;
+            return AirflowElementType::DOP;
         }
     };
 
@@ -551,9 +321,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::SOP;
+            return AirflowElementType::SOP;
         }
     };
 
@@ -582,9 +352,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::HOP;
+            return AirflowElementType::HOP;
         }
     };
 
@@ -610,9 +380,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF               // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::SMF;
+            return AirflowElementType::SMF;
         }
     };
 
@@ -638,9 +408,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF            // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::SVF;
+            return AirflowElementType::SVF;
         }
     };
 
@@ -700,9 +470,9 @@ namespace AirflowNetwork {
                               std::array<Real64, 2> &DF // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::SCR;
+            return AirflowElementType::SCR;
         }
     };
 
@@ -743,9 +513,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::SEL;
+            return AirflowElementType::SEL;
         }
     };
 
@@ -793,9 +563,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::EXF;
+            return AirflowElementType::EXF;
         }
     };
 
@@ -842,40 +612,6 @@ namespace AirflowNetwork {
 
         // Default Constructor
         IntraZoneNodeProp() : Height(0.0), RAFNNodeNum(0), ZoneNum(0), AFNZoneNum(0)
-        {
-        }
-    };
-
-    struct AirflowNetworkLinkage // AirflowNetwork linkage data base class
-    {
-        // Members
-        std::string Name;                     // Provide a unique linkage name
-        std::array<std::string, 2> NodeNames; // Names of nodes (limited to 2)
-        std::array<Real64, 2> NodeHeights;    // Node heights
-        std::string CompName;                 // Name of element
-        int CompNum;                          // Element Number
-        std::array<int, 2> NodeNums;          // Node numbers
-        int LinkNum;                          // Linkage number
-        AirflowElement *element;              // Pointer to airflow element
-        Real64 control;                       // Control value
-
-        // Default Constructor
-        AirflowNetworkLinkage() : NodeHeights{{0.0, 0.0}}, CompNum(0), NodeNums{{0, 0}}, LinkNum(0), element(nullptr), control(1.0)
-        {
-        }
-
-        virtual ~AirflowNetworkLinkage()
-        {
-        }
-    };
-
-    struct IntraZoneLinkageProp : public AirflowNetworkLinkage // Intra zone linkage data
-    {
-        // Members
-        std::string SurfaceName; // Connection Surface Name
-
-        // Default Constructor
-        IntraZoneLinkageProp() : AirflowNetworkLinkage()
         {
         }
     };
@@ -929,9 +665,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::PLR;
+            return AirflowElementType::PLR;
         }
     };
 
@@ -970,9 +706,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::ELR;
+            return AirflowElementType::ELR;
         }
     };
 
@@ -1028,9 +764,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::DWC;
+            return AirflowElementType::DWC;
         }
     };
 
@@ -1075,9 +811,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::DMP;
+            return AirflowElementType::DMP;
         }
     };
 
@@ -1113,9 +849,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::CVF;
+            return AirflowElementType::CVF;
         }
     };
 
@@ -1159,9 +895,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::FAN;
+            return AirflowElementType::FAN;
         }
     };
 
@@ -1200,9 +936,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::COI;
+            return AirflowElementType::COI;
         }
     };
 
@@ -1241,9 +977,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::HEX;
+            return AirflowElementType::HEX;
         }
     };
 
@@ -1274,9 +1010,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::TMU;
+            return AirflowElementType::TMU;
         }
     };
 
@@ -1303,21 +1039,9 @@ namespace AirflowNetwork {
                       std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::CPD;
-        }
-    };
-
-    struct DisSysLinkageProp : public AirflowNetworkLinkage // Distribution system linkage data
-    {
-        // Members
-        std::string ZoneName; // Name of zone
-        int ZoneNum;          // Zone Number
-
-        // Default Constructor
-        DisSysLinkageProp() : AirflowNetworkLinkage(), ZoneNum(0)
-        {
+            return AirflowElementType::CPD;
         }
     };
 
@@ -1336,7 +1060,7 @@ namespace AirflowNetwork {
         int EPlusNodeNum;
         int ExtNodeNum;
         int OutAirNodeNum;
-        iEPlusNodeType EPlusTypeNum;
+        EPlusNodeType EPlusTypeNum;
         int RAFNNodeNum; // RoomAir model node number
         int NumOfLinks;  // Number of links for RoomAir model
         int AirLoopNum;  // AirLoop number
@@ -1344,7 +1068,7 @@ namespace AirflowNetwork {
         // Default Constructor
         AirflowNetworkNodeProp()
             : NodeHeight(0.0), NodeNum(0), NodeTypeNum(0), EPlusZoneNum(0), EPlusNodeNum(0), ExtNodeNum(0), OutAirNodeNum(0),
-              EPlusTypeNum(iEPlusNodeType::Invalid), RAFNNodeNum(0), NumOfLinks(0), AirLoopNum(0)
+              EPlusTypeNum(EPlusNodeType::Invalid), RAFNNodeNum(0), NumOfLinks(0), AirLoopNum(0)
         {
         }
     };
@@ -1353,36 +1077,16 @@ namespace AirflowNetwork {
     {
         // Members
         std::string Name;                 // Provide a unique element name
-        iComponentTypeNum CompTypeNum;    // Provide numeric equivalent for AirflowNetworkCompType
+        AirflowElementType CompTypeNum;    // Provide numeric equivalent for AirflowNetworkCompType
         int TypeNum;                      // Component number under same component type
         int CompNum;                      // General component number
         std::string EPlusName;            // Provide a unique element name
         std::string EPlusCompName;        // Provide EPlus component name or Other
         std::string EPlusType;            // Provide EPlus type, such as terminal reheat, coil, etc. 9/30/03 or Other
-        iEPlusComponentType EPlusTypeNum; // Provide EPlus component type
+        EPlusComponentType EPlusTypeNum; // Provide EPlus component type
 
         // Default Constructor
-        AirflowNetworkCompProp() : CompTypeNum(iComponentTypeNum::Invalid), TypeNum(0), CompNum(0), EPlusTypeNum(iEPlusComponentType::Invalid)
-        {
-        }
-    };
-
-    struct AirflowNetworkLinkageProp : public AirflowNetworkLinkage // AirflowNetwork linkage data
-    {
-        // Members
-        std::string ZoneName;               // Name of zone
-        int ZoneNum;                        // Zone Number
-        int DetOpenNum;                     // Large Opening number
-        iEPlusComponentType ConnectionFlag; // Return and supply connection flag
-        bool VAVTermDamper;                 // True if this component is a damper for a VAV terminal
-        int LinkageViewFactorObjectNum;
-        int AirLoopNum; // Airloop number
-        DuctLineType ductLineType;
-
-        // Default Constructor
-        AirflowNetworkLinkageProp()
-            : AirflowNetworkLinkage(), ZoneNum(0), DetOpenNum(0), ConnectionFlag(iEPlusComponentType::Invalid), VAVTermDamper(false),
-              LinkageViewFactorObjectNum(0), AirLoopNum(0), ductLineType(DuctLineType::Invalid)
+        AirflowNetworkCompProp() : CompTypeNum(AirflowElementType::Invalid), TypeNum(0), CompNum(0), EPlusTypeNum(EPlusComponentType::Invalid)
         {
         }
     };
@@ -1447,9 +1151,9 @@ namespace AirflowNetwork {
                               std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::OAF;
+            return AirflowElementType::OAF;
         }
     };
 
@@ -1473,9 +1177,9 @@ namespace AirflowNetwork {
                               std::array<Real64, 2> &DF                 // Partial derivative:  DF/DP
         );
 
-        virtual ComponentType type()
+        virtual AirflowElementType type()
         {
-            return ComponentType::REL;
+            return AirflowElementType::REL;
         }
     };
 
@@ -1494,45 +1198,6 @@ namespace AirflowNetwork {
 
         // Default Constructor
         AirflowNetworkNodeSimuData() : TZ(0.0), WZ(0.0), PZ(0.0), CO2Z(0.0), GCZ(0.0), TZlast(0.0), WZlast(0.0), CO2Zlast(0.0), GCZlast(0.0)
-        {
-        }
-    };
-
-    struct AirflowNetworkLinkSimuData
-    {
-        // Members
-        Real64 FLOW;     // Mass flow rate [kg/s]
-        Real64 FLOW2;    // Mass flow rate [kg/s] for two way flow
-        Real64 DP;       // Pressure difference across a component
-        Real64 VolFLOW;  // Mass flow rate [m3/s]
-        Real64 VolFLOW2; // Mass flow rate [m3/s] for two way flow
-        Real64 DP1;
-
-        // Default Constructor
-        AirflowNetworkLinkSimuData() : FLOW(0.0), FLOW2(0.0), DP(0.0), VolFLOW(0.0), VolFLOW2(0.0), DP1(0.0)
-        {
-        }
-    };
-
-    struct AirflowNetworkLinkReportData
-    {
-        // Members
-        Real64 FLOW;        // Mass flow rate [kg/s]
-        Real64 FLOW2;       // Mass flow rate [kg/s] for two way flow
-        Real64 VolFLOW;     // Mass flow rate [m^3/s]
-        Real64 VolFLOW2;    // Mass flow rate [m^3/s] for two way flow
-        Real64 FLOWOFF;     // Mass flow rate during OFF cycle [kg/s]
-        Real64 FLOW2OFF;    // Mass flow rate during OFF cycle [kg/s] for two way flow
-        Real64 VolFLOWOFF;  // Mass flow rate during OFF cycle [m^3/s]
-        Real64 VolFLOW2OFF; // Mass flow rate during OFF cycle [m^3/s] for two way flow
-        Real64 DP;          // Average Pressure difference across a component
-        Real64 DPON;        // Pressure difference across a component with fan on
-        Real64 DPOFF;       // Pressure difference across a component with fan off
-
-        // Default Constructor
-        AirflowNetworkLinkReportData()
-            : FLOW(0.0), FLOW2(0.0), VolFLOW(0.0), VolFLOW2(0.0), FLOWOFF(0.0), FLOW2OFF(0.0), VolFLOWOFF(0.0), VolFLOW2OFF(0.0), DP(0.0), DPON(0.0),
-              DPOFF(0.0)
         {
         }
     };
@@ -1657,37 +1322,6 @@ namespace AirflowNetwork {
               CondSenGainJ(0.0), CondSenLossW(0.0), CondSenLossJ(0.0), DiffLatGainW(0.0), DiffLatGainJ(0.0), DiffLatLossW(0.0), DiffLatLossJ(0.0),
               RadGainW(0.0), RadGainJ(0.0), RadLossW(0.0), RadLossJ(0.0), TotalSenGainW(0.0), TotalSenGainJ(0.0), TotalSenLossW(0.0),
               TotalSenLossJ(0.0), TotalLatGainW(0.0), TotalLatGainJ(0.0), TotalLatLossW(0.0), TotalLatLossJ(0.0), OnOffFlag(false)
-        {
-        }
-    };
-
-    struct LinkageSurfaceProp
-    {
-        // Members
-        std::string SurfaceName;
-        int SurfaceNum;                 // Name of surface referenced by view factor
-        Real64 ViewFactor;              // View factor
-        Real64 SurfaceResistanceFactor; // Total radiation heat transfer resistance factor
-        Real64 SurfaceRadLoad;          // Duct radiation load from surface [W]
-
-        // Default constructor
-        LinkageSurfaceProp() : SurfaceNum(0), ViewFactor(0.0), SurfaceResistanceFactor(0.0), SurfaceRadLoad(0.0)
-        {
-        }
-    };
-
-    struct AirflowNetworkLinkageViewFactorProp
-    {
-        // Members
-        std::string LinkageName;
-        Real64 DuctExposureFraction;
-        Real64 DuctEmittance;
-        Array1D<LinkageSurfaceProp> LinkageSurfaceData;
-        int ObjectNum;
-        Real64 QRad;
-        Real64 QConv;
-
-        AirflowNetworkLinkageViewFactorProp() : DuctExposureFraction(0.0), DuctEmittance(0.0), ObjectNum(0), QRad(0.0), QConv(0.0)
         {
         }
     };

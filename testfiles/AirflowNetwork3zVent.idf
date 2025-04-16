@@ -853,6 +853,17 @@
     0,                       !- Lower Limit Value
     4,                       !- Upper Limit Value
     DISCRETE;                !- Numeric Type
+ 
+ Schedule:Compact,
+    Window2Control,          !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: WeekDays,           !- Field 2
+    Until: 10:00,0.0,        !- Field 3
+    Until: 14:00,0.5,        !- Field 5
+    Until: 24:00,0.0,        !- Field 7
+    For: AllOtherDays,       !- Field 9
+    Until: 24:00,0.0;        !- Field 10
 
   Schedule:Compact,
     Activity Sch,            !- Name
@@ -1106,7 +1117,7 @@
 
   AirflowNetwork:MultiZone:Zone,
     NORTH_ZONE,              !- Zone Name
-    Temperature,             !- Ventilation Control Mode
+    NoVent,                  !- Ventilation Control Mode
     WindowVentSched,         !- Ventilation Control Zone Temperature Setpoint Schedule Name
     1.0,                     !- Minimum Venting Open Factor {dimensionless}
     0.0,                     !- Indoor and Outdoor Temperature Difference Lower Limit For Maximum Venting Open Factor {deltaC}
@@ -1190,7 +1201,19 @@
     Window2,                 !- Surface Name
     WiOpen1,                 !- Leakage Component Name
     NFacade,                 !- External Node Name
-    0.5;                     !- Window/Door Opening Factor, or Crack Factor {dimensionless}
+    0.5,                     !- Window/Door Opening Factor, or Crack Factor {dimensionless}
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    Window2Control;
 
   AirflowNetwork:MultiZone:Surface,
     Surface_16,              !- Surface Name

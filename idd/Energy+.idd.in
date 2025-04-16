@@ -25597,13 +25597,18 @@ AirflowNetwork:MultiZone:Surface,
       \default PolygonHeight
       \note This field is applied to a non-rectangular window or door. The equivalent shape has
       \note the same area as a polygonal window or door.
-  N7; \field Equivalent Rectangle Aspect Ratio
+  N7, \field Equivalent Rectangle Aspect Ratio
       \note This field is used when UserDefinedAspectRatio is entered in the Equivalent
       \note Rectangle Method field.
       \units dimensionless
       \type real
       \minimum> 0.0
       \default 1.0
+  A9; \field Control Schedule Name
+      \type object-list
+      \object-list ScheduleNames
+      \note If specified, this schedule will be applied to the control parameter of the specified leakage component.
+      \note Not used if Ventilation Control Mode != NoVent or Occupant Ventilation Control Name is specified.
 
 AirflowNetwork:MultiZone:ReferenceCrackConditions,
       \min-fields 4

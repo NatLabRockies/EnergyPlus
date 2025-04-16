@@ -341,7 +341,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.Name = AlphaName(1);
 
         contam.SurfName = AlphaName(2);
-        contam.SurfNum = Util::FindItemInList(AlphaName(2), state.afn->MultizoneSurfaceData, &AirflowNetwork::MultizoneSurfaceProp::SurfName);
+        contam.SurfNum = Util::FindItemInList(AlphaName(2), state.afn->MultizoneSurfaceData, &AirflowNetwork::MultizoneSurfaceProp::surface_name);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
                             format("{}{}=\"{}\", invalid {} entered={}",
@@ -355,7 +355,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         }
         // Ensure external surface
         if (contam.SurfNum > 0 &&
-            state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).SurfNum).ExtBoundCond != DataSurfaces::ExternalEnvironment) {
+            state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).surface_number).ExtBoundCond != DataSurfaces::ExternalEnvironment) {
             ShowSevereError(
                 state,
                 format(
@@ -418,7 +418,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
                             contam.Name);
 
         if (contam.SurfNum > 0) {
-            ZonePtr = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).SurfNum).Zone;
+            ZonePtr = state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).surface_number).Zone;
         } else {
             ZonePtr = 0;
         }

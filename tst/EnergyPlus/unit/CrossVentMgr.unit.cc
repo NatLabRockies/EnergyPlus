@@ -84,9 +84,9 @@ TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
     state->dataRoomAir->AFNSurfaceCrossVent(0, 2) = 2;
 
     state->afn->MultizoneSurfaceData.allocate(MaxSurf);
-    state->afn->MultizoneSurfaceData(1).SurfNum = 6;
+    state->afn->MultizoneSurfaceData(1).surface_number = 6;
     state->afn->MultizoneSurfaceData(1).OpenFactor = 1.;
-    state->afn->MultizoneSurfaceData(2).SurfNum = 9;
+    state->afn->MultizoneSurfaceData(2).surface_number = 9;
     state->afn->MultizoneSurfaceData(2).OpenFactor = 1.;
 
     state->dataSurface->Surface.allocate(10);
@@ -131,11 +131,11 @@ TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
 
     state->afn->AirflowNetworkCompData.allocate(3);
     state->afn->AirflowNetworkCompData(1).TypeNum = 1;
-    state->afn->AirflowNetworkCompData(1).CompTypeNum = AirflowNetwork::iComponentTypeNum::DOP;
+    state->afn->AirflowNetworkCompData(1).CompTypeNum = AirflowNetwork::AirflowElementType::DOP;
     state->afn->AirflowNetworkCompData(2).TypeNum = 1;
-    state->afn->AirflowNetworkCompData(2).CompTypeNum = AirflowNetwork::iComponentTypeNum::SCR;
+    state->afn->AirflowNetworkCompData(2).CompTypeNum = AirflowNetwork::AirflowElementType::SCR;
     state->afn->AirflowNetworkCompData(3).TypeNum = 2;
-    state->afn->AirflowNetworkCompData(3).CompTypeNum = AirflowNetwork::iComponentTypeNum::SOP;
+    state->afn->AirflowNetworkCompData(3).CompTypeNum = AirflowNetwork::AirflowElementType::SOP;
 
     state->dataRoomAir->SurfParametersCrossDispVent.allocate(2);
     state->dataRoomAir->SurfParametersCrossDispVent(1).Width = 22.715219999999999;
