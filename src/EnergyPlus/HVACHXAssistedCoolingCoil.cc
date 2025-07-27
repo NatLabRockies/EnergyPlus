@@ -658,7 +658,8 @@ namespace HXAssistCoil {
                     hxCoil.CoolCoilInNodeNum = WaterCoils::GetCoilAirInletNode(state, hxCoil.CoolCoilNum);
                     hxCoil.CoolCoilWaterInNodeNum = WaterCoils::GetCoilWaterInletNode(state, hxCoil.CoolCoilNum);
                     hxCoil.CoolCoilWaterOutNodeNum = WaterCoils::GetCoilWaterOutletNode(state, hxCoil.CoolCoilNum);
-                
+
+                    CoolingCoilErrFlag = false;
                     HVACControllers::GetControllerNameAndIndex(
                         state, hxCoil.CoolCoilWaterInNodeNum, hxCoil.ControllerName, hxCoil.ControllerIndex, CoolingCoilErrFlag);
                     if (CoolingCoilErrFlag) ShowContinueError(state, format("...occurs in {} \"{}\"", CurrentModuleObject, hxCoil.Name));
