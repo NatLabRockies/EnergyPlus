@@ -1,6 +1,0 @@
-compilers:
-  - name: Visual Studio
-    version: 16
-    architecture: Win64
-    cmake_extra_flags: -DBUILD_FORTRAN:BOOL=ON -DBUILD_TESTING:BOOL=ON -DCOMMIT_SHA=%COMMIT_SHA% -DENABLE_GTEST_DEBUG_MODE:BOOL=OFF -DLINK_WITH_PYTHON=ON -DPYTHON_CLI:BOOL=OFF -DPython_EXECUTABLE:PATH=C:/Users/elee/AppData/Local/Programs/Python/Python312/python.exe
-    skip_regression: true

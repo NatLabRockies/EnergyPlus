@@ -17,6 +17,15 @@ inputs:
   enable-pch:
     description: "Turn on ENABLE_PCH to have pre-compiled headers. Pass ON or OFF"
     default: "OFF"
+  build-type:
+    description: "The CMake build type to use, which will default to release"
+    default: "Release"
+  enable-coverage:
+    description: "Turn this on to set the ENABLE_COVERAGE CMake variable to ON. Pass ON or OFF."
+    default: "OFF"
+  build-python-cli:
+    description: "Turn on the PYTHON_CLI build configuration. Pass ON or OFF."
+    default: "ON"
 
 runs:
   using: "composite"
@@ -50,9 +59,10 @@ runs:
       cmake `
         -G Ninja `
         -DENABLE_PCH:BOOL=${{ inputs.enable-pch }} `
-        -DCMAKE_BUILD_TYPE:STRING=Release `
+        -DCMAKE_BUILD_TYPE:STRING=${{ inputs.build-type }} `
         -DLINK_WITH_PYTHON:BOOL=ON `
-        -DPYTHON_CLI:BOOL=ON `
+        -DPYTHON_CLI:BOOL=${{ inputs.build-python-cli }} `
+        -DENABLE_COVERAGE:BOOL=${{ inputs.enable-coverage }} `
         -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} `
         -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} `
         -DBUILD_TESTING:BOOL=ON `
@@ -91,9 +101,10 @@ runs:
       cmake \
         -G Ninja \
         -DENABLE_PCH:BOOL=${{ inputs.enable-pch }} \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
+        -DCMAKE_BUILD_TYPE:STRING=${{ inputs.build-type }} \
         -DLINK_WITH_PYTHON:BOOL=ON \
-        -DPYTHON_CLI:BOOL=ON \
+        -DPYTHON_CLI:BOOL=${{ inputs.build-python-cli }} \
+        -DENABLE_COVERAGE:BOOL=${{ inputs.enable-coverage }} \
         -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} \
         -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} \
         -DBUILD_TESTING:BOOL=ON \

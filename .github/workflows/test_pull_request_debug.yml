@@ -1,0 +1,121 @@
+name: Debug Build and Test
+
+# run this on all commits to the develop branch
+# once a large runner, or a self-hosted runner, is available, re-enable for all pull requests
+on:
+  #  pull_request:
+  #    branches: [ develop ]
+  push:
+    branches: [ develop, AddRWDBuildToGHA ]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  FC: gfortran-13
+  Python_REQUIRED_VERSION: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+  python-arch: x64
+  os: ubuntu-24.04
+
+jobs:
+  build_and_test:
+    name: Debug Testing
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+
+    steps:
+
+    - uses: actions/checkout@v5
+
+    - name: Setup System
+      id: setup-runner
+      uses: ./.github/actions/setup-runner
+      with:
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        python-arch: ${{ env.python-arch }}
+
+    - name: Install coverage tools
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install lcov gcovr
+
+    - name: Create Build Directory
+      shell: bash
+      run: cmake -E make_directory ./build/
+
+    - name: Install problem matcher
+      shell: bash
+      run: echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
+
+    - name: Configure and Build
+      id: branch_build
+      uses: ./.github/actions/configure-and-build
+      with:
+        enable-pch: ${{ env.ENABLE_PCH }}
+        minimal-targets: false
+        build-directory: ./build
+        nproc: ${{ steps.setup-runner.outputs.nproc }}
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        build-type: "RelWithDebInfo"
+        enable-coverage: "ON"
+        build-python-cli: "OFF"
+
+    - name: Remove problem matcher
+      shell: bash
+      run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Run Tests
+      working-directory: ./build
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -j ${{ env.NPROC }} -E "integration\.HospitalLowEnergy|integration\.DirectIndirectEvapCoolersVSAS|integration\.HospitalBaselineReheatReportEMS|integration\.HospitalBaseline|integration\.ASHRAE901_ApartmentHighRise_STD2019_Denver|integration\.RefBldgOutPatientNew2004_Chicago|integration\.UnitarySystem_MultiSpeedDX_EconoStaging|integration\.ASHRAE901_OutPatientHealthCare_STD2019_Denver|integration\.UnitaryHybridAC_DedicatedOutsideAir|integration\.RefrigeratedWarehouse|integration\.RefBldgSecondarySchoolNew2004_Chicago|integration\.LgOffVAVusingBasement|integration\.EcoroofOrlando|integration\._5ZoneAirCooled_LeapYear_annual|integration\.EcoroofOrlando_NoSitePrec|integration\._5ZoneAirCooled_annual"; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely..."
+          ctest --rerun-failed -VV
+          echo "::endgroup::"
+        fi;
+
+    # I fully acknowledge that there is a better way to get coverage results
+    # I tried running some of the tips from Julien, but could not get them to work fully
+    # The series of steps here are hacky, but pretty much works, so I'm leaving it.
+    # When the next person gets here to clean this up, don't forget to add a message to the GITHUB_STEP_SUMMARY
+    # And even better would be to post a message as a PR comment like we do for regressions.
+
+    - name: Prepare Initial Coverage Results
+      shell: bash
+      working-directory: ./build
+      run: lcov -c -d . -o lcov.raw.info --base-directory ../src/EnergyPlus --ignore-errors source,mismatch
+
+    - name: Why does it have src/src/?  I don't know, but remove it!
+      shell: bash
+      working-directory: ./build
+      run: sed -i 's#/src/src/#/src/#g' lcov.raw.info
+
+    - name: Clean up Coverage Results
+      shell: bash
+      working-directory: ./build
+      run: lcov -e lcov.raw.info "*/EnergyPlus/src/EnergyPlus/*" -o lcov.filtered.info
+      # could also run lcov -r to remove some of the generated files, like the embedded schema cc file
+
+    - name: Generate HTML Coverage Package
+      shell: bash
+      working-directory: ./build
+      run: genhtml lcov.filtered.info -o lcov-html --title "EnergyPlus Coverage" --synthesize-missing --ignore-errors source
+
+    - name: Upload folder as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-results
+        path: ./build/lcov-html
