@@ -534,11 +534,17 @@ namespace SteamBaseboardRadiator {
             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType =
                 DataPlant::PlantEquipmentType::Baseboard_Rad_Conv_Steam; //'ZoneHVAC:Baseboard:RadiantConvective:Steam'
 
-            state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName =
-                state.dataIPShortCut->cAlphaArgs(2); // Name of the design object for this baseboard
-            state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).DesignObjectPtr =
-                Util::FindItemInList(state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName,
-                                     state.dataSteamBaseboardRadiator->SteamBaseboardDesignNames);
+            Util::setDesignObjectNameAndPointer(state,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).DesignObjectPtr,
+                                                state.dataIPShortCut->cAlphaArgs(2),
+                                                state.dataSteamBaseboardRadiator->SteamBaseboardDesignNames,
+                                                state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                ErrorsFound);
+            if (ErrorsFound) {
+                break;
+            }
             SteamBaseboardDesignData SteamBaseboardDesignDataObject{
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum)
                                                                            .DesignObjectPtr)}; // Contains the design data for steam baseboard object

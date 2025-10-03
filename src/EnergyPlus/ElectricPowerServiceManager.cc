@@ -538,7 +538,7 @@ void ElectricPowerServiceManager::reportPVandWindCapacity(EnergyPlusData &state)
     for (auto const &lc : elecLoadCenterObjs) {
         if (lc->numGenerators > 0) {
             for (auto const &g : lc->elecGenCntrlObj) {
-                if (g->generatorType == GeneratorType::PV) {
+                if ((g->generatorType == GeneratorType::PV) || (g->generatorType == GeneratorType::PVWatts)) {
                     pvTotalCapacity_ += g->maxPowerOut;
                 }
                 if (g->generatorType == GeneratorType::WindTurbine) {

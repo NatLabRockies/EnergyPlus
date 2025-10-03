@@ -132,22 +132,6 @@ This numeric input field specifies carbon dioxide generation rate per person wit
 
 Number of People * People Schedule * People Activity * Carbon Dioxide Generation Rate. The default value is 3.82E-8 m3/s-W (obtained from ASHRAE Standard 62.1-2007 value at 0.0084 cfm/met/person over the general adult population). The maximum value can be 10 times the default value.
 
-\paragraph{Field: Cold Stress Temperature Threshold}\label{cold-stress-temperature-threshold}
-
-This field is used in the calculation of hours of safety for cold events, which
-is defined as the longest duration (number of hours), starting from the
-beginning time of the risk period (e.g., the start time of a power outage), to
-not below a certain temperature threshold (specified in this field). If not
-specified, 60F (or 15.56C) will be used as the default temperature threshold.
-
-\paragraph{Field: Heat Stress Temperature Threshold}\label{heat-stress-temperature-threshold}
-
-This field is used in the calculation of hours of safety for hot events, which
-is defined as the longest duration (number of hours), starting from the
-beginning time of the risk period (e.g., the start time of a power outage), to
-not above a certain temperature threshold (specified in this field). If not
-specified, 86F (or 30C) will be used as the default temperature threshold.
-
 \paragraph{Field: Enable ASHRAE 55 comfort warnings}\label{field-enable-ashrae-55-comfort-warnings}
 
 This field accepts either ``Yes'' or ``No'' as values. When ``Yes'' is specified, warnings are generated when the space conditions are outside of the ASHRAE 55 comfort range as discussed in the sections that follow titled ``Simplified ASHRAE 55-2004 Graph Related Outputs'' and ``Simplified ASHRAE 55 Warnings.'' The default is not to provide these warnings so if you want to know if your space is outside this comfort range you must set this field to Yes.
@@ -277,10 +261,10 @@ The final one to five fields are optional and are intended to trigger various th
   The KSU Two-Node Model is applied to calculate related thermal comfort metrics. KSU Model Thermal Sensation Vote is calculated and reported as each time step. Note that the KSU model is computationally intensive and may noticeably increase the execution time of the simulation. Apart from existing required fields in People object, extra fields required for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
 
   \item[AdaptiveASH55]
-  Adaptive Comfort Model Based on ASHRAE Standard 55-2010 is applied to calculate related thermal comfort metrics. ASHRAE 55 Adaptive Model 90\% Acceptability Status, 80\% Acceptability Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported as each time step. AdaptiveASH55 is only applicable when the running average outdoor air temperature for the past 7 days is between 10.0 and 33.5C.
+  Adaptive Comfort Model Based on ASHRAE Standard 55-2010 is applied to calculate related thermal comfort metrics. ASHRAE 55 Adaptive Model 90\% Acceptability Status, 80\% Acceptability Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported as each time step. AdaptiveASH55 is only applicable when the running average outdoor air temperature for the past 7 days is between 10.0 and 33.5$^\circ$C.
 
   \item[AdaptiveCEN15251]
-  Adaptive Comfort Model Based on European Standard EN15251-2007 is applied to calculate related thermal comfort metrics. CEN 15251 Adaptive Model Category I/II/II Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported as each time step. AdaptiveCEN15251 is only applicable when the running average outdoor air temperature for the past 30 days is between 10.0 and 30.0C.
+  Adaptive Comfort Model Based on European Standard EN15251-2007 is applied to calculate related thermal comfort metrics. CEN 15251 Adaptive Model Category I/II/II Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported as each time step. AdaptiveCEN15251 is only applicable when the running average outdoor air temperature for the past 30 days is between 10.0 and 30.0$^\circ$C.
 
   \item[CoolingEffectASH55]
   ASHRAE 55-2017 Elevated Air Speed Cooling Effect Model is applied to calculate related thermal comfort metrics. Elevated Air Speed Cooling Effect, Cooling Effect Adjusted PMV, and Cooling Effect Adjusted PPD are calculated and reported as each time step. Apart from existing required fields in People object, extra fields required for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
@@ -298,6 +282,22 @@ The final one to five fields are optional and are intended to trigger various th
 \paragraph{Field: Ankle Level Air Velocity Schedule Name}\label{field-ankle-level-air-velocity-schedule-name}
 
 This field is the name of the schedule that approximates the amount of air movement at the occupants' ankle level (0.1 m above floor level) as a function of time throughout the simulation period. The user has control over this parameter through the schedule that requires the individual numbers in the schedule to be positive real numbers having units of meters per second. This field is required to run the AnkleDraftASH55 thermal comfort model. If a schedule is listed here but no thermal comfort model is selected, then a warning message will be produced and this schedule will be listed as unused in the error file.
+
+\paragraph{Field: Cold Stress Temperature Threshold}\label{cold-stress-temperature-threshold}
+
+This field is used in the calculation of hours of safety for cold events, which
+is defined as the longest duration (number of hours), starting from the
+beginning time of the risk period (e.g., the start time of a power outage) to
+not below a certain temperature threshold (specified in this field). If not
+specified, 60$^\circ$F (or 15.56$^\circ$C) will be used as the default temperature threshold.
+
+\paragraph{Field: Heat Stress Temperature Threshold}\label{heat-stress-temperature-threshold}
+
+This field is used in the calculation of hours of safety for hot events, which
+is defined as the longest duration (number of hours), starting from the
+beginning time of the risk period (e.g., the start time of a power outage) to
+not above a certain temperature threshold (specified in this field). If not
+specified, 86$^\circ$F (or 30$^\circ$C) will be used as the default temperature threshold.
 
 The following IDF example allows for a maximum of 31 people with scheduled occupancy of ``Office Occupancy'', 60\% radiant using an Activity Schedule of ``Activity Sch''. The example allows for thermal comfort reporting.
 
@@ -473,6 +473,8 @@ People specific outputs include:
   Zone,Average,Zone Thermal Comfort Fanger Model PPD {[}\%{]}
 \item
   Zone,Average,Zone Thermal Comfort Clothing Surface Temperature {[}C{]}
+\item
+  Zone,Average,Zone Thermal Comfort Clothing Value {[}clo{]}
 \item
   Zone,Average,Zone Thermal Comfort Pierce Model Effective Temperature PMV {[]}
 \item
@@ -699,13 +701,13 @@ The following output variables are all based on whether the humidity ratio and t
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Winter Clothes (1.0 Clo) \label{table:winter-clothes-1.0-clo}} \tabularnewline
 \toprule
-Operative Temperature (C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
+Operative Temperature ($^\circ$C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Winter Clothes (1.0 Clo)} \tabularnewline
 \toprule
-Operative Temperature (C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
+Operative Temperature ($^\circ$C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
 \midrule
 \endhead
 
@@ -726,13 +728,13 @@ Operative Temperature (C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Summer Clothes (0.5 Clo) \label{table:summer-clothes-0.5-clo}} \tabularnewline
 \toprule
-Operative Temperature (C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
+Operative Temperature ($^\circ$C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Summer Clothes (0.5 Clo)} \tabularnewline
 \toprule
-Operative Temperature (C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
+Operative Temperature ($^\circ$C) & Humidity Ratio (kgWater/kgDryAir) \tabularnewline
 \midrule
 \endhead
 

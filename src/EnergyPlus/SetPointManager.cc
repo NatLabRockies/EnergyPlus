@@ -74,6 +74,8 @@
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
+#include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -242,6 +244,7 @@ constexpr std::array<std::string_view, (int)DataEnvironment::GroundTempType::Num
     "SITE:GROUNDTEMPERATURE:DEEP",
     "SITE:GROUNDTEMPERATURE:FCFACTORMETHOD"};
 
+constexpr std::array<std::string_view, (int)ReturnTempType::Num> returnTempTypeNames = {"Scheduled", "Constant", "ReturnTemperatureSetpoint"};
 constexpr std::array<std::string_view, (int)ReturnTempType::Num> returnTempTypeNamesUC = {"SCHEDULED", "CONSTANT", "RETURNTEMPERATURESETPOINT"};
 
 void ManageSetPoints(EnergyPlusData &state)
@@ -353,6 +356,7 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
     using NodeInputManager::GetNodeNums;
     using NodeInputManager::GetOnlySingleNode;
+
     // Locals
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view routineName = "GetSetPointManagerInputs";
@@ -1455,11 +1459,79 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
             default:
                 break;
             } // switch (spm->type)
-
         } // for (instance)
     } // for (iSPM)
 
 } // GetSetPointManagerInputData()
+
+void FillPredefinedTablesForSetPointManagers(EnergyPlusData &state)
+{
+    static constexpr std::string_view routineName = "FillPredefinedTablesForSetPointManagers";
+    auto &orp = state.dataOutRptPredefined;
+    for (auto *spm : state.dataSetPointManager->spms) {
+        switch (spm->type) {
+            // SetpointManager:OutdoorAirReset
+        case SPMType::OutsideAir: {
+            auto *spmOA = dynamic_cast<SPMOutsideAir *>(spm);
+            assert(spmOA != nullptr);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArType, spmOA->Name, ctrlVarTypeNames[(int)spm->ctrlVar]);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArStLo1, spmOA->Name, spmOA->lowSetPt1);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArStHi1, spmOA->Name, spmOA->highSetPt1);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArOutLo1, spmOA->Name, spmOA->low1);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArOutHi1, spmOA->Name, spmOA->high1);
+            if (spmOA->sched != nullptr) {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArSchNm, spmOA->Name, spmOA->sched->Name);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArStLo2, spmOA->Name, spmOA->lowSetPt2);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArStHi2, spmOA->Name, spmOA->highSetPt2);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArOutLo2, spmOA->Name, spmOA->low2);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArOutHi2, spmOA->Name, spmOA->high2);
+            }
+            std::vector<std::string> namesOfNodes;
+            std::vector<std::string> namesOfLoops;
+            PlantLocation plantLoc;
+            for (std::size_t i = 0; i < spm->ctrlNodeNums.size(); ++i) {
+                namesOfNodes.push_back(state.dataLoopNodes->NodeID(spm->ctrlNodeNums[i]));
+                int dummy = 0;
+                PlantUtilities::ScanPlantLoopsForNodeNum(state, routineName, spm->ctrlNodeNums[i], plantLoc, dummy, false);
+                if (plantLoc.loopNum > 0) {
+                    namesOfLoops.push_back(plantLoc.loop->Name);
+                }
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchSPMOArStPtNd, spmOA->Name, OutputReportTabular::stringJoinDelimiter(namesOfNodes, "; "));
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchSPMOArStPtLp, spmOA->Name, OutputReportTabular::stringJoinDelimiter(namesOfLoops, "; "));
+            }
+        } break;
+        // SetpointManager:ReturnTemperature:ChilledWater
+        // SetpointManager:ReturnTemperature:HotWater
+        case SPMType::ChilledWaterReturnTemp:
+        case SPMType::HotWaterReturnTemp: {
+            auto *spmRWT = dynamic_cast<SPMReturnWaterTemp *>(spm);
+            assert(spmRWT != nullptr);
+            if (spm->type == SPMType::ChilledWaterReturnTemp) {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetType, spmRWT->Name, "Chilled Water");
+            } else {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetType, spmRWT->Name, "Hot Water");
+            }
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetMinT, spmRWT->Name, spmRWT->minSetTemp);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetMaxT, spmRWT->Name, spmRWT->maxSetTemp);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetRetT, spmRWT->Name, spmRWT->returnTempConstantTarget);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetRetType, spmRWT->Name, returnTempTypeNames[(int)spmRWT->returnTempType]);
+            if (spmRWT->returnTempSched != nullptr) {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMOArSchNm, spmRWT->Name, spmRWT->returnTempSched->Name);
+            }
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetOutNd, spmRWT->Name, state.dataLoopNodes->NodeID(spmRWT->supplyNodeNum));
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchSPMRetInNd, spmRWT->Name, state.dataLoopNodes->NodeID(spmRWT->returnNodeNum));
+            if (spmRWT->plantLoopNum != 0) {
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchSPMRetPltLp, spmRWT->Name, state.dataPlnt->PlantLoop(spmRWT->plantLoopNum).Name);
+            }
+        } break;
+        default:
+            break;
+        }
+    }
+}
 
 void VerifySetPointManagers(EnergyPlusData &state, [[maybe_unused]] bool &ErrorsFound) // flag to denote node conflicts in input. !unused1208
 {

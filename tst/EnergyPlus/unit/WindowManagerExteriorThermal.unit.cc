@@ -92,7 +92,6 @@ TEST_F(EnergyPlusFixture, test_overallUfactorFromFilmsAndCond)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
 
     s_mat->materials.push_back(new Material::MaterialGlass);
     s_mat->materials.push_back(new Material::MaterialGlass);
@@ -147,7 +146,6 @@ TEST_F(EnergyPlusFixture, test_getOutdoorNfrc)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
 
     auto *matOutside = new Material::MaterialGlass;
     s_mat->materials.push_back(matOutside);
@@ -215,7 +213,6 @@ TEST_F(EnergyPlusFixture, test_getShadeType)
     state->dataConstruction->Construct(simpleCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(simpleCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(simpleCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside + 1;
     s_mat->materials.push_back(new Material::MaterialGlass);
     s_mat->materials.push_back(new Material::MaterialGlass);
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, simpleCons);
@@ -298,7 +295,6 @@ TEST_F(EnergyPlusFixture, test_getActiveConstructionNumber)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
 
     s_mat->materials.push_back(new Material::MaterialGlass);
     s_mat->materials.push_back(new Material::MaterialGlass);
@@ -336,7 +332,6 @@ TEST_F(EnergyPlusFixture, test_getIGU)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
 
     s_mat->materials.push_back(new Material::MaterialGlass);
     s_mat->materials.push_back(new Material::MaterialGlass);

@@ -1,2 +1,6 @@
 25.1.0,25.2.0,Transition notes - some of these are EMS variable names
-0,0,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+4,4,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,
+Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,
+Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy,Zone Opaque Surface Inside Faces Conduction Heat Gain Energy,
+Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy,Zone Opaque Surface Inside Faces Conduction Heat Loss Energy,

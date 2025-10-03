@@ -4512,7 +4512,7 @@ included in the example file called “EMSCustomOutputVariable.idf.”
 
 
       EnergyManagementSystem:OutputVariable,
-        Weighted Average Building Zone Air Temperature [C], ! Name
+        Weighted Average Building Zone Air Temperature, ! Name
         AverageBuildingTemp, ! EMS Variable Name
         Averaged, ! Type of Data in Variable
         ZoneTimeStep ; ! Update Frequency

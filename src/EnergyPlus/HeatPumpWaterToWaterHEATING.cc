@@ -735,13 +735,13 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
                 ShowContinueError(state, format("Heatpump Name = {}", this->Name));
                 ShowContinueError(
                     state,
-                    format("Heat Inbalance (%)             = {:S}", std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
-                ShowContinueError(state, format("Load-side heat transfer rate   = {:S}", this->QLoad));
-                ShowContinueError(state, format("Source-side heat transfer rate = {:S}", this->QSource));
-                ShowContinueError(state, format("Source-side mass flow rate     = {:S}", this->SourceSideWaterMassFlowRate));
-                ShowContinueError(state, format("Load-side mass flow rate       = {:S}", this->LoadSideWaterMassFlowRate));
-                ShowContinueError(state, format("Source-side inlet temperature  = {:S}", this->SourceSideWaterInletTemp));
-                ShowContinueError(state, format("Load-side inlet temperature    = {:S}", this->LoadSideWaterInletTemp));
+                    format("Heat Inbalance (%)             = {:G}", std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
+                ShowContinueError(state, format("Load-side heat transfer rate   = {:G}", this->QLoad));
+                ShowContinueError(state, format("Source-side heat transfer rate = {:G}", this->QSource));
+                ShowContinueError(state, format("Source-side mass flow rate     = {:G}", this->SourceSideWaterMassFlowRate));
+                ShowContinueError(state, format("Load-side mass flow rate       = {:G}", this->LoadSideWaterMassFlowRate));
+                ShowContinueError(state, format("Source-side inlet temperature  = {:G}", this->SourceSideWaterInletTemp));
+                ShowContinueError(state, format("Load-side inlet temperature    = {:G}", this->LoadSideWaterInletTemp));
             }
             goto LOOPLoadEnth_exit;
 

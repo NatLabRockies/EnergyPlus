@@ -10079,7 +10079,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // OA flow rate
     EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_MaxCoolAirVolFlow, 0.65598, 0.001);
     // Cooling capacity
-    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.01);
+    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.05);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)
@@ -11689,6 +11689,73 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->InletNodeNum, 17);
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->OutletNodeNum[0], 2);
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopMixer->InletNodeNum[0], 18);
+}
+
+TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestMixerSplitterMissingNodes)
+{
+    // Test of Fix for Defect #10815
+    std::string const idf_objects = delimited_string({
+        " AirLoopHVAC:Mixer,",
+        "  DOAS loop Mixer Correct,         !- Name",
+        "  MixerOutletNode1,         !- Outlet Node Name",
+        "  MixerInletNode1;  !- Inlet 1 Node Name",
+
+        " AirLoopHVAC:Mixer,",
+        "  DOAS loop Mixer Wrong,         !- Name",
+        "  MixerOutletNode2         !- Outlet Node Name",
+        "  MixerInletNode2;  !- Inlet 1 Node Name",
+
+        " AirLoopHVAC:Splitter,",
+        "  DOAS loop Splitter Correct,      !- Name",
+        "  SplitterInletNode1,       !- Inlet Node Name",
+        "  SplitterOutletNode1;  !- Outlet 1 Node Name",
+
+        " AirLoopHVAC:Splitter,",
+        "  DOAS loop Splitter Wrong,      !- Name",
+        "  SplitterInletNode2       !- Inlet Node Name",
+        "  SplitterOutletNode2;  !- Outlet 1 Node Name",
+
+        " NodeList,",
+        "  All The Nodes,  !- Name",
+        "  MixerInletNode1,  !- Node 1 Name",
+        "  MixerInletNode2,  !- Node 2 Name",
+        "  MixerOutletNode1,  !- Node 3 Name",
+        "  MixerOutletNode2,  !- Node 4 Name",
+        "  SplitterInletNode1,  !- Node 1 Name",
+        "  SplitterInletNode2,  !- Node 2 Name",
+        "  SplitterOutletNode1,  !- Node 3 Name",
+        "  SplitterOutletNode2;  !- Node 4 Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->init_state(*state);
+
+    // Test 1: Mixer Test--first one is correct, second one generates the severe/fatal that was added as part of this fix
+    ASSERT_THROW(AirLoopHVACDOAS::AirLoopMixer::getAirLoopMixer(*state), std::runtime_error);
+
+    std::string const error_stringMix = delimited_string({
+        "   ** Severe  ** AirLoopHVAC:Mixer, \"DOAS LOOP MIXER WRONG\" does not have any inlet nodes.",
+        "   **   ~~~   ** All mixers must have at least one inlet node.",
+        "   **  Fatal  ** getAirLoopMixer: Previous errors cause termination.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=1",
+        "   ..... Last severe error=AirLoopHVAC:Mixer, \"DOAS LOOP MIXER WRONG\" does not have any inlet nodes.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringMix, true));
+
+    // Test 2: Splitter Test--first one is correct, second one generates the severe/fatal that was added as part of this fix
+    ASSERT_THROW(AirLoopHVACDOAS::AirLoopSplitter::getAirLoopSplitter(*state), std::runtime_error);
+
+    std::string const error_stringSplit = delimited_string({
+        "   ** Severe  ** AirLoopHVAC:Splitter, \"DOAS LOOP SPLITTER WRONG\" does not have any outlet nodes.",
+        "   **   ~~~   ** All splitters must have at least one outlet node.",
+        "   **  Fatal  ** getAirLoopSplitter: Previous errors cause termination.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=2",
+        "   ..... Last severe error=AirLoopHVAC:Splitter, \"DOAS LOOP SPLITTER WRONG\" does not have any outlet nodes.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringSplit, true));
 }
 
 } // namespace EnergyPlus

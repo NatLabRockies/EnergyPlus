@@ -98,8 +98,10 @@ EnergyPlusData::EnergyPlusData()
     this->dataDesiccantDehumidifiers = std::make_unique<DesiccantDehumidifiersData>();
     this->dataDispVentMgr = std::make_unique<DisplacementVentMgrData>();
     this->dataDualDuct = std::make_unique<DualDuctData>();
+    this->dataDuctLoss = std::make_unique<DuctLossData>();
     this->dataEIRFuelFiredHeatPump = std::make_unique<EIRFuelFiredHeatPumpsData>();
     this->dataEIRPlantLoopHeatPump = std::make_unique<EIRPlantLoopHeatPumpsData>();
+    this->dataHeatPumpAirToWater = std::make_unique<HeatPumpAirToWatersData>();
     this->dataEMSMgr = std::make_unique<EMSManagerData>();
     this->dataEarthTube = std::make_unique<EarthTubeData>();
     this->dataEcoRoofMgr = std::make_unique<EcoRoofManagerData>();
@@ -355,8 +357,10 @@ void EnergyPlusData::clear_state()
     this->dataDesiccantDehumidifiers->clear_state();
     this->dataDispVentMgr->clear_state();
     this->dataDualDuct->clear_state();
+    this->dataDuctLoss->clear_state();
     this->dataEIRFuelFiredHeatPump->clear_state();
     this->dataEIRPlantLoopHeatPump->clear_state();
+    this->dataHeatPumpAirToWater->clear_state();
     this->dataEMSMgr->clear_state();
     this->dataEarthTube->clear_state();
     this->dataEcoRoofMgr->clear_state();
@@ -632,6 +636,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataDualDuct->init_constant_state(state);
     this->dataEIRFuelFiredHeatPump->init_constant_state(state);
     this->dataEIRPlantLoopHeatPump->init_constant_state(state);
+    this->dataHeatPumpAirToWater->init_constant_state(state);
     this->dataEarthTube->init_constant_state(state);
     this->dataEcoRoofMgr->init_constant_state(state);
     this->dataEconLifeCycleCost->init_constant_state(state);
@@ -895,6 +900,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataDualDuct->init_state(state);
     this->dataEIRFuelFiredHeatPump->init_state(state);
     this->dataEIRPlantLoopHeatPump->init_state(state);
+    this->dataHeatPumpAirToWater->init_state(state);
     this->dataEarthTube->init_state(state);
     this->dataEcoRoofMgr->init_state(state);
     this->dataEconLifeCycleCost->init_state(state);

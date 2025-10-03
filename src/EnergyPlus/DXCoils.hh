@@ -54,14 +54,11 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/StandardRatings.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 

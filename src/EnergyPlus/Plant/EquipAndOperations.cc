@@ -937,7 +937,7 @@ namespace DataPlant {
         } else if ((this->Report.BuildingPolledCoolingLoad < DataPrecisionGlobals::constant_minusone * HVAC::SmallLoad) &&
                    (this->Report.BuildingPolledHeatingLoad > HVAC::SmallLoad)) {
             this->PlantOps.AirSourcePlantSimultaneousHeatingAndCooling = true;
-            if (this->Report.BuildingPolledHeatingLoad > abs(this->Report.BuildingPolledCoolingLoad)) {
+            if (this->Report.BuildingPolledHeatingLoad > std::abs(this->Report.BuildingPolledCoolingLoad)) {
                 this->PlantOps.SimultaneousHeatingCoolingWithHeatingDominant = true;
                 if (this->PlantOps.SimultHeatCoolOpAvailable) {
                     this->PlantOps.AirSourcePlantSimultaneousHeatingAndCooling = true;
@@ -945,7 +945,7 @@ namespace DataPlant {
                     this->PlantOps.AirSourcePlantHeatingOnly = true;
                     this->PlantOps.AirSourcePlantSimultaneousHeatingAndCooling = false;
                 }
-            } else if (abs(this->Report.BuildingPolledCoolingLoad) > this->Report.BuildingPolledHeatingLoad) {
+            } else if (std::abs(this->Report.BuildingPolledCoolingLoad) > this->Report.BuildingPolledHeatingLoad) {
                 this->PlantOps.SimultaneousHeatingCoolingWithCoolingDominant = true;
                 if (this->PlantOps.SimultHeatCoolOpAvailable) {
                     this->PlantOps.AirSourcePlantSimultaneousHeatingAndCooling = true;

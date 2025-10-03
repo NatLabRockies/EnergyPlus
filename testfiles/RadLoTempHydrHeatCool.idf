@@ -2232,6 +2232,8 @@
 
   Output:Variable,*,Zone Thermal Comfort Fanger Model PMV,timestep;
 
+  Output:Variable,*,Zone Thermal Comfort Clothing Value,timestep,On;
+
   Output:Variable,*,Zone Radiant HVAC Heating Energy,timestep;
 
   Output:Variable,*,Zone Radiant HVAC Cooling Energy,timestep;

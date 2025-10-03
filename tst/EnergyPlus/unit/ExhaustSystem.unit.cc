@@ -899,4 +899,23 @@ TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_Test_CalcZoneHVACExhaustControl_Call)
     EXPECT_NEAR(thisExhOutlet.MassFlowRate, 0.0, 1e-5);
     EXPECT_NEAR(thisExhCtrl1.BalancedFlow, 0.0, 1e-5);
     EXPECT_NEAR(thisExhCtrl1.UnbalancedFlow, 0.0, 1e-5);
+
+    thisExhInlet.MassFlowRate = 0.25;
+    auto *schedAvail = Sched::GetSchedule(*state, "HVACOPERATIONSCHD1");
+    auto *schedFlow = Sched::GetSchedule(*state, "ZONE1EXH EXHAUST FLOW FRAC SCHED");
+    schedAvail->currentVal = 1.0;
+    schedFlow->currentVal = 1.0;
+    ExhaustAirSystemManager::CalcZoneHVACExhaustControl(*state, ExhaustControlNum);
+
+    EXPECT_NEAR(thisExhInlet.MassFlowRate, 0.1, 1e-5); // matches design flow rate for fan 1
+    EXPECT_NEAR(thisExhOutlet.MassFlowRate, 0.1, 1e-5);
+    EXPECT_NEAR(thisExhCtrl1.BalancedFlow, 0.0, 1e-5);
+    EXPECT_NEAR(thisExhCtrl1.UnbalancedFlow, 0.1, 1e-5);
+
+    state->dataZoneEquip->ZoneExhaustControlSystem(1).exhaustFlowFractionSched = NULL; // delete exhaust flow schedule
+    ExhaustAirSystemManager::CalcZoneHVACExhaustControl(*state, ExhaustControlNum);
+    EXPECT_NEAR(thisExhInlet.MassFlowRate, 0.1, 1e-5); // matches design flow rate for fan 1
+    EXPECT_NEAR(thisExhOutlet.MassFlowRate, 0.1, 1e-5);
+    EXPECT_NEAR(thisExhCtrl1.BalancedFlow, 0.0, 1e-5);
+    EXPECT_NEAR(thisExhCtrl1.UnbalancedFlow, 0.1, 1e-5);
 }

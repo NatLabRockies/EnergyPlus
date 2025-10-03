@@ -3086,7 +3086,7 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     SetPredefinedTables(*state);
 
     auto *schA = Sched::AddScheduleConstant(*state, "schA");
-    auto *schB = Sched::AddScheduleConstant(*state, "schB");
+    [[maybe_unused]] auto *schB = Sched::AddScheduleConstant(*state, "schB");
 
     auto &adu = state->dataDefineEquipment->AirDistUnit;
     adu.allocate(2);

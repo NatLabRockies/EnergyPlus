@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
 
 # Use ccache if available, has to be before "project()"
 find_program(CCACHE_PROGRAM NAMES ccache sccache)
@@ -11,10 +11,6 @@ if(CCACHE_PROGRAM)
   set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} CACHE FILEPATH "C compiler cache used")
 endif()
 
-cmake_policy(SET CMP0048 NEW) # handling project_version_* variables
-
-cmake_policy(SET CMP0087 NEW) # install(CODE) and install(SCRIPT) support generator expressions.
-
 project(EnergyPlus)
 
 # Raise an error if attempting to compile on macOS older than 10.15 - it does not work
@@ -25,12 +21,6 @@ if (APPLE)
     message(FATAL_ERROR "The minimum required version for macOS is 10.15, however CMAKE_OSX_DEPLOYMENT_TARGET is set to ${CMAKE_OSX_DEPLOYMENT_TARGET}.")
   endif()
 endif()
-
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.0")
-  cmake_policy(SET CMP0054 NEW) # CMake 3.1 added this policy
-endif()
-
-cmake_policy(SET CMP0012 NEW) # if() recognizes boolean constants
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -328,9 +318,6 @@ target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third
 target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
 target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.61.0/")
 
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP/include)
-
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING
       OFF
@@ -457,7 +444,6 @@ mark_as_advanced(ENABLE_GTEST_DEBUG_MODE)
 mark_as_advanced(ENABLE_GTEST_SHUFFLE)
 mark_as_advanced(ENABLE_MEMORY_SANITIZER)
 mark_as_advanced(ENABLE_OPENMP)
-mark_as_advanced(USE_OpenMP)
 mark_as_advanced(KIVA_3D)
 mark_as_advanced(KIVA_COVERAGE)
 mark_as_advanced(KIVA_EXE_BUILD)

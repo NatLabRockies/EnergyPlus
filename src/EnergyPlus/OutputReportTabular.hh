@@ -1050,6 +1050,8 @@ namespace OutputReportTabular {
 
     int digitsAferDecimal(std::string const &s);
 
+    std::string stringJoinDelimiter(const std::vector<std::string> &in_strings, const std::string &delimiter);
+
     void AddTOCEntry(EnergyPlusData &state, std::string const &nameSection, std::string const &nameReport);
 
     void SetupUnitConversions(EnergyPlusData &state);

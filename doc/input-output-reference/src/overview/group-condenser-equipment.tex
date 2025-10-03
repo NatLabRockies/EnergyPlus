@@ -2185,15 +2185,15 @@ This numeric input field contains the heat rejection capacity of the fluid coole
 
 \paragraph{Field:Design Entering Water Temperature}\label{fielddesign-entering-water-temperature}
 
-This numeric field contains entering water temperature at nominal conditions in degrees Celsius. The design entering water temperature must be greater than the design entering air temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering water temperature at nominal conditions in degrees Celsius. The design entering water temperature must be greater than the design entering air temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored. This field is autosizable and defaults to autosize (which means it will take the value from the corresponding Sizing:Plant object).
 
 \paragraph{Field:Design Entering Air Temperature}\label{fielddesign-entering-air-temperature}
 
-This numeric field contains entering air dry-bulb temperature at nominal conditions in degrees Celsius. The design entering air temperature must be greater than the design entering air wet-bulb temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering air dry-bulb temperature at nominal conditions in degrees Celsius. The design entering air temperature must be greater than the design entering air wet-bulb temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.  This field defaults to 35.0C.
 
 \paragraph{Field:Design Entering Air Wet-bulb Temperature}\label{fielddesign-entering-air-wet-bulb-temperature}
 
-This numeric field contains entering air wetbulb temperature at nominal conditions in degrees Celsius. The design entering air wet-bulb temperature must be less than the design entering air (dry-bulb) temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering air wetbulb temperature at nominal conditions in degrees Celsius. The design entering air wet-bulb temperature must be less than the design entering air (dry-bulb) temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored. This field defaults to 25.6C.
 
 \paragraph{Field: Capacity Control}\label{field-capacity-control}
 
@@ -2484,15 +2484,15 @@ This field contains the sizing factor to use when calculating the Low-Speed User
 
 \paragraph{Field:Design Entering Water Temperature}\label{fielddesign-entering-water-temperature-1}
 
-This numeric field contains entering water temperature at nominal conditions in degrees Celsius. The design entering water temperature must be greater than the design entering air temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering water temperature at nominal conditions in degrees Celsius. The design entering water temperature must be greater than the design entering air temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored. This field is autosizable and defaults to autosize (which means it will take the value from the corresponding Sizing:Plant object).
 
 \paragraph{Field:Design Entering Air Temperature}\label{fielddesign-entering-air-temperature-1}
 
-This numeric field contains entering air dry-bulb temperature at nominal conditions in degrees Celsius. The design entering air temperature must be greater than the design entering air wet-bulb temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering air dry-bulb temperature at nominal conditions in degrees Celsius. The design entering air temperature must be greater than the design entering air wet-bulb temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored. This field defaults to 35.0C.
 
 \paragraph{Field:Design Entering Air Wet-bulb Temperature}\label{fielddesign-entering-air-wet-bulb-temperature-1}
 
-This numeric field contains entering air wetbulb temperature at nominal conditions in degrees Celsius. The design entering air wet-bulb temperature must be less than the design entering air (dry-bulb) temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored.
+This numeric field contains entering air wetbulb temperature at nominal conditions in degrees Celsius. The design entering air wet-bulb temperature must be less than the design entering air (dry-bulb) temperature. Only used for Performance Input Method = UserSpecifiedDesignCapacity; for other performance input methods this field is ignored. This field defaults to 25.6C.
 
 \paragraph{Field: High Speed Sizing Factor}\label{field-high-speed-sizing-factor}
 
@@ -2981,8 +2981,8 @@ The heat exchanger response is defined by a g-function which is a non-dimensiona
 The g-function is different for each borehole field configuration (i.e.~a 4 $\times$ 4 field has a different response than a 80 $\times$ 80 field). It is also dependent on the ratio of borehole spacing to depth. g-function values, for accurate simulation, have to be computed for each specific heat exchanger design. The GroundHeatExchanger:System object will accept three different types of input in order to define the g-functions necessary for the ground heat exchanger calculations.
 
 \begin{enumerate}
-    \item Use the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object to define a rectangular borehole field. EnergyPlus will compute and cache the g-functions for reuse again in future simulations.
-    \item Use one or more \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} objects to define a vertical borehole field with the boreholes located arbitrarily. EnergyPlus will compute and cache the g-functions for reuse again in future simulations.
+    \item Use the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object to define a rectangular borehole field.
+    \item Use one or more \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} objects to define a vertical borehole field with the boreholes located arbitrarily.
     \item Use a third-party tool, such as GLHEPro, to compute the g-functions and pass them to EnergyPlus using the \hyperref[groundheatexchangerresponsefactors]{GroundHeatExchanger:ResponseFactors} object.
 \end{enumerate}
 
@@ -3046,7 +3046,7 @@ The unique name of the \hyperref[groundheatexchangerverticalarray]{GroundHeatExc
 
 The unique names of all single, vertical GLHE objects which are used to define and arbitrarily shaped GHE array. This field is extensible.
 
-The following is are example inputs corresponding to the input variations allowed which were described previously. The first example uses the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object. The g-functions will be generated automatically by EnergyPlus and cached for later use.
+The following is are example inputs corresponding to the input variations allowed which were described previously. The first example uses the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object. The g-functions will be generated automatically by EnergyPlus.
 
 \begin{lstlisting}
   GroundHeatExchanger:System,
@@ -3083,7 +3083,7 @@ The following is are example inputs corresponding to the input variations allowe
     5;                  !- Borehole Spacing {m}
 \end{lstlisting}
 
-The second example uses the \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} object. The g-functions will be generated automatically by EnergyPlus and cached for later use.
+The second example uses the \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} object. The g-functions will be generated automatically by EnergyPlus.
 
 \begin{lstlisting}
   GroundHeatExchanger:System,

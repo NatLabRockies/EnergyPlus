@@ -3,6 +3,9 @@
 
 project(miniziplib C)
 
+include(../../cmake/TargetArch.cmake)
+target_architecture(TARGET_ARCH)
+
 include(CheckTypeSize)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
@@ -145,7 +148,11 @@ add_library(miniziplib STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HD
 
 if( MSVC )
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set_target_properties(miniziplib PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
+    if(TARGET_ARCH MATCHES "arm64")
+      set_target_properties(miniziplib PROPERTIES STATIC_LIBRARY_FLAGS "/machine:arm64")
+    else()
+      set_target_properties(miniziplib PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x64")
+    endif()
   else()
     set_target_properties(miniziplib PROPERTIES STATIC_LIBRARY_FLAGS "/machine:x86")
   endif()

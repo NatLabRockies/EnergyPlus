@@ -90,10 +90,11 @@ constexpr std::array<std::string_view, (int)EconConv::Num> econConvNamesUC = {
 
 constexpr std::array<std::string_view, (int)DemandWindow::Num> demandWindowStrings = {"/Hr", "/Hr", "/Hr", "/Day", "/Wk"};
 
-constexpr std::array<std::string_view, (int)BuySell::Num> buySellNames = {"BuyFromUtility", "SellToUtility", "NetMetering"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)BuySell::Num> buySellNames = {"BuyFromUtility", "SellToUtility", "NetMetering"};
 constexpr std::array<std::string_view, (int)BuySell::Num> buySellNamesUC = {"BUYFROMUTILITY", "SELLTOUTILITY", "NETMETERING"};
 
-constexpr std::array<std::string_view, (int)Season::Num> seasonNames = {"Unused", "Winter", "Spring", "Summer", "Fall", "Annual", "Monthly"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)Season::Num> seasonNames = {
+    "Unused", "Winter", "Spring", "Summer", "Fall", "Annual", "Monthly"};
 constexpr std::array<std::string_view, (int)Season::Num> seasonNamesUC = {"Unused", "WINTER", "SPRING", "SUMMER", "FALL", "ANNUAL", "MONTHLY"};
 
 constexpr std::array<std::string_view, (int)Op::Num> opNamesUC = {"SUM",
@@ -212,7 +213,7 @@ constexpr std::array<std::string_view, (int)Native::Num> nativeNamesUC = {"TOTAL
                                                                           "ABOVECUSTOMERBASEENERGY",
                                                                           "BELOWCUSTOMERBASEENERGY"};
 
-constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNames = {"Energy", "Demand", "Dimensionless", "Currency"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNames = {"Energy", "Demand", "Dimensionless", "Currency"};
 constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNamesUC = {"ENERGY", "DEMAND", "DIMENSIONLESS", "CURRENCY"};
 
 void UpdateUtilityBills(EnergyPlusData &state)
@@ -1429,7 +1430,7 @@ void parseComputeLine(EnergyPlusData &state, std::string const &lineOfCompute, i
         // first see if word is an operator
         Op op = static_cast<Op>(getEnumValue(opNamesUC, word));
         if (op == Op::Invalid) {
-            static_cast<Op>(getEnumValue(opNames2UC, word));
+            op = static_cast<Op>(getEnumValue(opNames2UC, word));
         }
 
         // if not an operator then look for

@@ -20287,7 +20287,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_ZoneOrderTest)
     state->afn->AirflowNetworkNodeData(3).EPlusNodeNum = 0;
 
     // Check that the validation fails if the AFN exhaust fan is not well setup
-    int exhaustFanInletNodeIndex = state->afn->MultizoneCompExhaustFanData(1).InletNode;
     state->afn->MultizoneCompExhaustFanData(1).InletNode = 6;
     state->afn->ValidateExhaustFanInputOneTimeFlag = true;
     EXPECT_THROW(state->afn->validate_exhaust_fan_input(), std::runtime_error);
@@ -20380,7 +20379,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZoneWindowAC)
 
     // Create Fans
     Real64 supplyFlowRate = 0.005;
-    Real64 exhaustFlowRate = 0.005;
 
     auto *fan1 = new Fans::FanComponent;
     fan1->Name = "SupplyFan";
@@ -20516,7 +20514,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZoneVRF)
 
     // Create Fans
     Real64 supplyFlowRate = 0.005;
-    Real64 exhaustFlowRate = 0.005;
 
     auto *fan1 = new Fans::FanComponent;
     fan1->Name = "SupplyFan";
@@ -20667,7 +20664,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZonePTHP)
 
     // Create Fans
     Real64 supplyFlowRate = 0.005;
-    Real64 exhaustFlowRate = 0.005;
 
     auto *fan1 = new Fans::FanComponent;
     fan1->Name = "SupplyFan";
@@ -20709,9 +20705,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZonePTHP)
     thisSys.m_sysType = UnitarySystems::UnitarySys::SysType::PackagedWSHP;
     state->dataUnitarySystems->unitarySys.push_back(thisSys);
     state->dataUnitarySystems->unitarySys[0].Name = "ZonalWAHP";
-    state->dataUnitarySystems->unitarySys[0].m_CoolOutAirVolFlow == 0;
-    state->dataUnitarySystems->unitarySys[0].m_HeatOutAirVolFlow == 0;
-    state->dataUnitarySystems->unitarySys[0].m_NoCoolHeatOutAirVolFlow == 0;
+    state->dataUnitarySystems->unitarySys[0].m_CoolOutAirVolFlow = 0;
+    state->dataUnitarySystems->unitarySys[0].m_HeatOutAirVolFlow = 0;
+    state->dataUnitarySystems->unitarySys[0].m_NoCoolHeatOutAirVolFlow = 0;
     state->dataUnitarySystems->unitarySys[0].m_FanIndex = 1;
     state->dataUnitarySystems->unitarySys[0].AirInNode = 3;
     state->dataUnitarySystems->unitarySys[0].m_OAMixerNodes[0] = 4;

@@ -678,7 +678,7 @@ namespace WindowAC {
             SetupOutputVariable(state,
                                 "Zone Window Air Conditioner Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)state.dataWindowAC->WindAC(WindACNum).availStatus,
+                                state.dataWindowAC->WindAC(WindACNum).availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 state.dataWindowAC->WindAC(WindACNum).Name);
@@ -882,15 +882,9 @@ namespace WindowAC {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         auto &windowAC = state.dataWindowAC->WindAC(WindACNum);
 
-        Real64 MaxAirVolFlowDes = 0.0;                                // Autosized maximum air flow for reporting
-        Real64 MaxAirVolFlowUser = 0.0;                               // Hardsized maximum air flow for reporting
-        Real64 OutAirVolFlowDes = 0.0;                                // Autosized outdoor air flow for reporting
-        Real64 OutAirVolFlowUser = 0.0;                               // Hardsized outdoor ari flow for reporting
-        bool IsAutoSize = false;                                      // Indicator to autosize
         std::string const CompType = "ZoneHVAC:WindowAirConditioner"; // component name
         std::string const CompName = windowAC.Name;                   // component type
         Real64 TempSize = AutoSize;                                   // autosized value of coil input field
-        int FieldNum = 2;                                             // IDD numeric field number where input field description is found
         bool PrintFlag = false;                                       // TRUE when sizing information is reported in the eio file
 
         state.dataSize->DataFracOfAutosizedCoolingAirflow = 1.0;
@@ -1077,8 +1071,7 @@ namespace WindowAC {
         int OutletNode = state.dataWindowAC->WindAC(WindACNum).AirOutNode;
         int InletNode = state.dataWindowAC->WindAC(WindACNum).AirInNode;
         Real64 AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate;
-        Real64 Test = AirMassFlow;
-        Real64 CpAir = PsyCpAirFnW(state.dataLoopNodes->Node(InletNode).HumRat); // inlet air specific heat [J/kg-C]
+        // Real64 CpAir = PsyCpAirFnW(state.dataLoopNodes->Node(InletNode).HumRat); // inlet air specific heat [J/kg-C]
         HVAC::FanOp fanOp = state.dataWindowAC->WindAC(WindACNum).fanOp;
 
         // set the on/off flags

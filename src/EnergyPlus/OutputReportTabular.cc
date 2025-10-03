@@ -101,6 +101,7 @@
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/EvaporativeCoolers.hh>
 #include <EnergyPlus/EvaporativeFluidCoolers.hh>
+#include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/FluidCoolers.hh>
 #include <EnergyPlus/General.hh>
@@ -116,6 +117,7 @@
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReportTabularAnnual.hh>
 #include <EnergyPlus/PackagedThermalStorageCoil.hh>
+#include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantChillers.hh>
 #include <EnergyPlus/PollutionModule.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -124,11 +126,13 @@
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/SQLiteProcedures.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SetPointManager.hh>
 #include <EnergyPlus/ThermalComfort.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/VentilatedSlab.hh>
 #include <EnergyPlus/WaterManager.hh>
 #include <EnergyPlus/WaterThermalTanks.hh>
+#include <EnergyPlus/WaterUse.hh>
 #include <EnergyPlus/WeatherManager.hh>
 #include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
@@ -6608,6 +6612,16 @@ void FillRemainingPredefinedEntries(EnergyPlusData &state)
             PreDefTableEntry(
                 state, state.dataOutRptPredefined->pdchOaAvFctEMS, thisPrimaryAirSys.Name, avgFlowRate(iSys, MixedAir::OALimitFactor::EMS), 4);
         }
+
+        // System Summary Fan Operation
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpOccHrs, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeOccupiedTotal);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpOccCont, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanContTotalOcc);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpOccCyc, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanCycTotalOcc);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpOccOff, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanOffTotalOcc);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpUnoccHrs, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeUnoccupiedTotal);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpUnoccCont, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanContTotalUnocc);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpUnoccCyc, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanCycTotalUnocc);
+        PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanOpUnoccOff, thisPrimaryAirSys.Name, thisSysPreDefRep.TimeFanOffTotalUnocc);
     }
     // add total rows for outdoor air details
     OutputReportPredefined::PreDefTableEntry(
@@ -6930,6 +6944,60 @@ void FillRemainingPredefinedEntries(EnergyPlusData &state)
     // fill the LEED setpoint table
     ZoneTempPredictorCorrector::FillPredefinedTableOnThermostatSetpoints(state);
     ZoneTempPredictorCorrector::FillPredefinedTableOnThermostatSchedules(state);
+
+    // Fan Operating Points
+    constexpr std::array<Real64, 10> flowFrac = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+    bool const saveNightVentOn = state.dataHVACGlobal->NightVentOn;
+    bool const saveTurnFansOn = state.dataHVACGlobal->TurnFansOn;
+    state.dataHVACGlobal->NightVentOn = false;
+    state.dataHVACGlobal->TurnFansOn = true;
+
+    for (auto *fan : state.dataFans->fans) {
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanPowerType, fan->Name, HVAC::fanTypeNames[(int)fan->type]);
+        // Save node data to restore later
+        auto &outletNode = state.dataLoopNodes->Node(fan->outletNodeNum);
+        auto &inletNode = state.dataLoopNodes->Node(fan->inletNodeNum);
+        auto const saveOutletNode = outletNode;
+        auto const saveInletNode = inletNode;
+        // Set some node values so the fan init function works as expected
+        outletNode.MassFlowRateMax = inletNode.MassFlowRateMaxAvail = fan->maxAirMassFlowRate;
+        outletNode.MassFlowRateMin = inletNode.MassFlowRateMinAvail = 0.0;
+        inletNode.MassFlowRate = fan->maxAirMassFlowRate;
+        fan->simulate(state, false);
+        Real64 const fullLoadPower = fan->totalPower;
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFanPower10, fan->Name, 1.0);
+
+        int columnIndex = state.dataOutRptPredefined->pdchFanPower00;
+        for (Real64 frac : flowFrac) {
+            Real64 fanPowerFrac = 0.0;
+            if (fullLoadPower > 0.0) {
+                inletNode.MassFlowRate = frac * fan->maxAirMassFlowRate;
+                fan->simulate(state, false);
+                fanPowerFrac = fan->totalPower / fullLoadPower;
+            }
+            PreDefTableEntry(state, columnIndex, fan->Name, fanPowerFrac);
+            ++columnIndex;
+        }
+        // Restore Nodes
+        outletNode = saveOutletNode;
+        inletNode = saveInletNode;
+    }
+    // Restore flags
+    state.dataHVACGlobal->NightVentOn = saveNightVentOn;
+    state.dataHVACGlobal->TurnFansOn = saveTurnFansOn;
+
+    // fill water use equipment table
+    for (auto &we : state.dataWaterUse->WaterEquipment) {
+        we.FillPredefinedTable(state);
+    }
+    // fill the setpoint manager tables
+    SetPointManager::FillPredefinedTablesForSetPointManagers(state);
+
+    // fill the available manager tables
+    Avail::FillPredefinedTablesForAvailManager(state);
+
+    // fill the plant equipment operation load based
+    PlantManager::FillPlantEquipmentOperationLoad(state);
 }
 
 void WriteMonthlyTables(EnergyPlusData &state)
@@ -13961,7 +14029,6 @@ void WriteComponentSizing(EnergyPlusData &state)
     //       DATE WRITTEN   July 2007
     //       MODIFIED       January 2010, Kyle Benne
     //                      Added SQLite output
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     //   Write out tables based on component sizing data originally
@@ -14144,26 +14211,30 @@ void WriteComponentSizing(EnergyPlusData &state)
                         }
                     }
                     if ((foundDesc >= 1) && (foundObj >= 1)) {
-                        state.dataOutRptTab->curValueSIWCS = state.dataOutRptPredefined->CompSizeTableEntry(iTableEntry).valField;
-                        if (unitsStyle_cur == UnitsStyle::InchPound) {
-                            if (colUnitConv(foundDesc) != 0) {
-                                state.dataOutRptTab->curValueWCS = ConvertIP(state, colUnitConv(foundDesc), state.dataOutRptTab->curValueSIWCS);
+                        if (!state.dataOutRptPredefined->CompSizeTableEntry(iTableEntry).strField.empty()) {
+                            tableBody(foundDesc, foundObj) = state.dataOutRptPredefined->CompSizeTableEntry(iTableEntry).strField;
+                        } else {
+                            state.dataOutRptTab->curValueSIWCS = state.dataOutRptPredefined->CompSizeTableEntry(iTableEntry).valField;
+                            if (unitsStyle_cur == UnitsStyle::InchPound) {
+                                if (colUnitConv(foundDesc) != 0) {
+                                    state.dataOutRptTab->curValueWCS = ConvertIP(state, colUnitConv(foundDesc), state.dataOutRptTab->curValueSIWCS);
+                                } else {
+                                    state.dataOutRptTab->curValueWCS = state.dataOutRptTab->curValueSIWCS;
+                                }
+                            } else if (unitsStyle_cur == UnitsStyle::InchPoundExceptElectricity) {
+                                if (colUnitConv(foundDesc) != 0) {
+                                    state.dataOutRptTab->curValueWCS = ConvertIP(state, colUnitConv(foundDesc), state.dataOutRptTab->curValueSIWCS);
+                                } else {
+                                    state.dataOutRptTab->curValueWCS = state.dataOutRptTab->curValueSIWCS;
+                                }
                             } else {
                                 state.dataOutRptTab->curValueWCS = state.dataOutRptTab->curValueSIWCS;
                             }
-                        } else if (unitsStyle_cur == UnitsStyle::InchPoundExceptElectricity) {
-                            if (colUnitConv(foundDesc) != 0) {
-                                state.dataOutRptTab->curValueWCS = ConvertIP(state, colUnitConv(foundDesc), state.dataOutRptTab->curValueSIWCS);
+                            if (std::abs(state.dataOutRptTab->curValueWCS) >= 1.0) {
+                                tableBody(foundDesc, foundObj) = RealToStr(state.dataOutRptTab->curValueWCS, 2);
                             } else {
-                                state.dataOutRptTab->curValueWCS = state.dataOutRptTab->curValueSIWCS;
+                                tableBody(foundDesc, foundObj) = RealToStr(state.dataOutRptTab->curValueWCS, 6);
                             }
-                        } else {
-                            state.dataOutRptTab->curValueWCS = state.dataOutRptTab->curValueSIWCS;
-                        }
-                        if (std::abs(state.dataOutRptTab->curValueWCS) >= 1.0) {
-                            tableBody(foundDesc, foundObj) = RealToStr(state.dataOutRptTab->curValueWCS, 2);
-                        } else {
-                            tableBody(foundDesc, foundObj) = RealToStr(state.dataOutRptTab->curValueWCS, 6);
                         }
                         state.dataOutRptPredefined->CompSizeTableEntry(iTableEntry).written = true;
                     }
@@ -14719,7 +14790,6 @@ void ComputeLoadComponentDecayCurve(EnergyPlusData &state)
         if (!state.dataZoneEquip->ZoneEquipConfig(zoneNum).IsControlled) {
             continue;
         }
-        int const spaceNum = state.dataSurface->Surface(surfNum).spaceNum;
         int coolDesSelected = state.dataSize->CalcFinalZoneSizing(zoneNum).CoolDDNum;
         // loop over timesteps after pulse occurred
         if (coolDesSelected != 0) {
@@ -15836,7 +15906,7 @@ void GetDelaySequences(EnergyPlusData &state,
 
                     for (int mStepBack = 1; mStepBack <= kTimeStep; ++mStepBack) {
                         int sourceStep = kTimeStep - mStepBack + 1;
-                        auto &compLoadTS = szCLDay.ts[sourceStep - 1].spacezone[szNumMinus1];
+                        // auto &compLoadTS = szCLDay.ts[sourceStep - 1].spacezone[szNumMinus1];
                         auto const &surfCLDayTS = surfCLDay.ts[sourceStep - 1].surf[jSurf - 1];
                         auto const &enclCLDayTS = enclCLDay.ts[sourceStep - 1].encl[radEnclosureNum - 1];
                         Real64 thisQRadThermInAbsMult =
@@ -16422,6 +16492,7 @@ void addSurfaceArea(DataSurfaces::SurfaceData const &surf, Array1D<ZompComponent
     bool isTouchingGround = surf.ExtBoundCond == DataSurfaces::Ground || surf.ExtBoundCond == DataSurfaces::GroundFCfactorMethod ||
                             surf.ExtBoundCond == DataSurfaces::KivaFoundation;
     int curIndex = (isZone) ? surf.Zone : surf.spaceNum;
+
     switch (surf.Class) {
     case DataSurfaces::SurfaceClass::Wall: {
         if (isExterior) {
@@ -16456,6 +16527,8 @@ void addSurfaceArea(DataSurfaces::SurfaceData const &surf, Array1D<ZompComponent
     case DataSurfaces::SurfaceClass::GlassDoor: {
         areas(curIndex).door += surf.GrossArea;
     } break;
+    default:
+        break;
     }
 }
 
@@ -16669,7 +16742,7 @@ void LoadSummaryUnitConversion(EnergyPlusData &state, CompLoadTablesType &compLo
 
     compLoadTotal.airflowPerFlrArea *= airFlowPerAreaConversion;
     if (powerConversion != 0.) {
-        compLoadTotal.airflowPerTotCap = compLoadTotal.airflowPerTotCap * airFlowPerAreaConversion / powerConversion;
+        compLoadTotal.airflowPerTotCap = compLoadTotal.airflowPerTotCap * airFlowConversion / powerConversion;
         compLoadTotal.areaPerTotCap = compLoadTotal.areaPerTotCap * areaConversion / powerConversion;
     }
     if (areaConversion != 0.) {
@@ -16726,7 +16799,7 @@ void LoadSummaryUnitConversion(EnergyPlusData &state, CompLoadTablesType &compLo
 
         compLoadTotal.airflowPerFlrArea *= airFlowPerAreaConversion;
         if (powerConversion != 0.) {
-            compLoadTotal.airflowPerTotCap = compLoadTotal.airflowPerTotCap * airFlowPerAreaConversion / powerConversion;
+            compLoadTotal.airflowPerTotCap = compLoadTotal.airflowPerTotCap * airFlowConversion / powerConversion;
             compLoadTotal.areaPerTotCap = compLoadTotal.areaPerTotCap * areaConversion / powerConversion;
         }
         if (areaConversion != 0.) {
@@ -18394,7 +18467,7 @@ std::string RealToStr(Real64 const RealIn, int const numDigits)
     }
 
     if (std::abs(RealIn) > maxvalDigitsA.at(nDigits)) {
-        return format("{:12.6Z}", RealIn);
+        return format("{:12.6E}", RealIn);
     } else {
         return format<FormatSyntax::FMT>(formDigitsA.at(nDigits), RealIn);
     }
@@ -18497,6 +18570,18 @@ int digitsAferDecimal(std::string const &s)
         }
     }
     return int(numDigits);
+}
+
+std::string stringJoinDelimiter(const std::vector<std::string> &in_strings, const std::string &delimiter)
+{
+    if (in_strings.empty()) {
+        return "";
+    }
+    std::string result = in_strings[0];
+    for (size_t i = 1; i < in_strings.size(); ++i) {
+        result += delimiter + in_strings[i];
+    }
+    return result;
 }
 
 void AddTOCEntry(EnergyPlusData &state, std::string const &nameSection, std::string const &nameReport)

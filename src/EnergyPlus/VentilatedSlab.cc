@@ -1387,7 +1387,7 @@ namespace VentilatedSlab {
             SetupOutputVariable(state,
                                 "Zone Ventilated Slab Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)ventSlab.availStatus,
+                                ventSlab.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 ventSlab.Name);
@@ -2170,7 +2170,6 @@ namespace VentilatedSlab {
                                 EnthSteamOutWet = steam->getSatEnthalpy(state, TempSteamIn, 0.0, RoutineName);
                                 LatentHeatSteam = EnthSteamInDry - EnthSteamOutWet;
                                 SteamDensity = steam->getSatDensity(state, TempSteamIn, 1.0, RoutineName);
-                                int DummyWaterIndex = 1;
 
                                 auto *water = Fluid::GetWater(state);
                                 Cp = water->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);

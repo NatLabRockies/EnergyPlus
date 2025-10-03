@@ -79,13 +79,13 @@ The Envelope Summary report (key: EnvelopeSummary) produces a report that includ
 \item
   Exterior Fenestration which includes all non-opaque exterior surfaces and includes the name of the construction, frame and divider name, areas (glass, frame, divider, single opening, multiplied openings), glass U-Factor, glass SHGC (the solar heat gain coefficient based on summer conditions), glass visible transmittance, NFRC Product Type, assembly U-Factor, assembly SHGC, assembly visible transmittance, conductance (frame, divider), indication of shade control, the name of the parent surface, azimuth, tilt, cardinal direction. 
 \item
-  Exterior Fenestration Shaded State has values shown for exterior fenestration that have a shaded state by using \hyperref[windowpropertyshadingcontrol]{WindowShadingControl} the values of the u-factor, SHGC, and visible transmittance are shown for both the glass only and the full assembly when in the shaded state.
+  Exterior Fenestration Shaded State has values shown for exterior fenestration that have a shaded state by using \hyperref[windowpropertyshadingcontrol]{WindowShadingControl}.  Note that for windows without frames/dividers defined only the values of the U-Factor, SHGC, and visible transmittance for the glass only when in the shaded state are shown. For windows with frames/dividers defined, the U-Factor, SHGC, and visible transmittance are shown for both the glass only and the full assembly when in the shaded state.
 \item
-  Interior Fenestration which includes the construction, areas, glass u-factor, SHGC, and visible transmittance, and the parent surface name.
+  Interior Fenestration which includes the construction, areas, glass U-Factor, SHGC, and visible transmittance, and the parent surface name.
 \item
-  Exterior Door which includes the construction, u-factors, area, and the parent surface name.
+  Exterior Door which includes the construction, U-Factors, area, and the parent surface name.
 \item
-  Interior Door which includes the construction, u-factors, area, and the parent surface name.
+  Interior Door which includes the construction, U-Factors, area, and the parent surface name.
 \item
   Opaque Construction Layers includes the material layers for each construction in order.
   
@@ -93,7 +93,7 @@ The Envelope Summary report (key: EnvelopeSummary) produces a report that includ
 
 The assembly results include the effect of the frame and divider and are only produced when \hyperref[windowpropertyframeanddivider]{WindowProperty:FrameAndDivider} input object is used. In addition, the assembly columns are shown for most configurations but are not shown when using \hyperref[constructionwindowequivalentlayer]{Construction:WindowEquivalentLayer} or when using \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} with a Window5DataFile.dat file. 
 
-Differences should still be expected between the results from EnergyPlus and the WINDOW program for the u-factor, SHGC, and visible transmittance, both glass and assembly. These differences are based on algorithmic differences between the two programs even though they do share some code in the Windows Calculation Engine, other portions of the algorithms differ. In addition, the reported values may not match the NFRC rated values seen on a label because of differences between the calculations in EnergyPlus and the exact NFRC rating procedures including grouping of products.
+Differences should still be expected between the results from EnergyPlus and the WINDOW program for the U-Factor, SHGC, and visible transmittance, both glass and assembly. These differences are based on algorithmic differences between the two programs even though they do share some code in the Windows Calculation Engine, other portions of the algorithms differ. In addition, the reported values may not match the NFRC rated values seen on a label because of differences between the calculations in EnergyPlus and the exact NFRC rating procedures including grouping of products.
 
 \paragraph{Surface Shadowing Summary}\label{surface-shadowing-summary}
 
@@ -142,7 +142,7 @@ The Equipment Summary report (key: EquipmentSummary) produces a report that incl
 \item
   DX Cooling Coils summarizes the Standard Rating (Net) Cooling Capacity, SEER, EER and IEER values at AHRI standard test. Currently, these values are only reported for coil type = \hyperref[coilcoolingdxsinglespeed]{Coil:Cooling:DX:SingleSpeed} and \hyperref[coilcoolingdxmultispeed]{Coil:Cooling:DX:MultiSpeeed} with condenser type = AirCooled. However, the EER value is not reported for the multi-speed DX cooling coil. There are two SEER values reported: \textit{SEER} and \textit{SEER Default}. The \textit{SEER} value is calculated using user specified Part Load Factor (PLF) curve used for energy performance calculation and the \textit{SEER Default} value is calculated using the AHRI Standard 210/240-2008 default PLF curve and cooling coefficient of degradation value of 0.25. 
 \item
-  DX Heating Coils summarizes the High Temperature Heating Standard (Net) Rating Capacity, Low Temperature Heating Standard (Net) Rating Capacity and Heating Seasonal Performance Factor (HSPF) values at AHRI standard test. Currently, these values are only reported for coil type = \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}. Also included is the supplemental heat high shutoff temperature.
+  DX Heating Coils summarizes the High Temperature Heating Standard (Net) Rating Capacity, Low Temperature Heating Standard (Net) Rating Capacity and Heating Seasonal Performance Factor (HSPF) values at AHRI standard test. Currently, these values are only reported for coil type = \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}. Also included are the heat pump heating to cooling capacity sizing ratio and supplemental heat high shutoff temperature.
 \item
   Water-to-Air Heat Pumps at Rated Temperatures Report includes the type of coil, capacities, power, COP, rated temperatures, and design day used for sizing.
 \item

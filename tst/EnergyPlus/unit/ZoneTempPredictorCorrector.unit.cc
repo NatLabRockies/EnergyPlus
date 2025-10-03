@@ -1214,7 +1214,6 @@ TEST_F(EnergyPlusFixture, temperatureAndCountInSch_test)
     Real64 valueAtTime;
     int numDays;
     std::string monthAssumed;
-    constexpr int wednesday = 4;
 
     state->dataEnvrn->Latitude = 30.; // northern hemisphere
     auto *sched1 = Sched::GetSchedule(*state, "SCHED1");
@@ -1947,6 +1946,121 @@ TEST_F(EnergyPlusFixture, FillPredefinedTableOnThermostatSchedules_Test)
     EXPECT_EQ("control D", RetrievePreDefTableEntry(*state, orp.pdchStatSchdTypeName1, "zoneD"));
     EXPECT_EQ("DUALHEATCOOLHEATSCH", RetrievePreDefTableEntry(*state, orp.pdchStatSchdHeatName, "zoneD"));
     EXPECT_EQ("DUALHEATCOOLCOOLSCH", RetrievePreDefTableEntry(*state, orp.pdchStatSchdCoolName, "zoneD"));
+}
+
+TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_Test)
+{
+    // Test for Fix of Defect #11122: User file crashes with ZoneControl:Thermostat but no ThermostatSetpoint:* objects
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Any Number;              !- Name",
+        " ",
+        "ScheduleTypeLimits,",
+        " Control Type,            !- Name",
+        " 0,                       !- Lower Limit Value",
+        " 4,                       !- Upper Limit Value",
+        " DISCRETE;                !- Numeric Type",
+        " ",
+        "Schedule:Compact,",
+        " ZONE CONTROL TYPE SCHED, !- Name",
+        " Control Type,            !- Schedule Type Limits Name",
+        " Through: 12/31,          !- Field 1",
+        " For: AllDays,            !- Field 2",
+        " Until: 10:00, 0.0,",
+        " Until: 12:00, 2.0,"
+        " Until: 14:00, 3.0,"
+        " Until: 18:00, 1.0,"
+        " Until: 24:00, 4.0;",
+        " ",
+        "Schedule:Compact,",
+        " HeatingSetpoints,                  !- Name",
+        " Any Number,               !- Schedule Type Limits Name",
+        " Through: 12/31,           !- Field 1",
+        " For: AllDays,             !- Field 2",
+        " Until: 24:00, 20.0;       !- Field 26",
+        " ",
+        "Schedule:Compact,",
+        " CoolingSetpoints,                  !- Name",
+        " Any Number,               !- Schedule Type Limits Name",
+        " Through: 12/31,           !- Field 1",
+        " For: AllDays,             !- Field 2",
+        " Until: 24:00, 24.0;       !- Field 26",
+        " ",
+        "Schedule:Compact,",
+        " HeatCoolSetpoints,                  !- Name",
+        " Any Number,               !- Schedule Type Limits Name",
+        " Through: 12/31,           !- Field 1",
+        " For: AllDays,             !- Field 2",
+        " Until: 24:00, 22.0;       !- Field 26",
+        " ",
+        "ThermostatSetpoint:SingleHeating,",
+        " SingleHeatingSetpoints,",
+        " HeatingSetpoints;",
+        " ",
+        "ThermostatSetpoint:SingleCooling,",
+        " SingleCoolingSetpoints,",
+        " CoolingSetpoints;",
+        " ",
+        "ThermostatSetpoint:SingleHeatingOrCooling,",
+        " HeatCoolSetpoints,",
+        " HeatCoolSetpoints;",
+        " ",
+        "ThermostatSetpoint:DualSetpoint,",
+        " DualSetpoints,",
+        " HeatingSetpoints,",
+        " CoolingSetpoints;",
+        " ",
+        "ZoneControl:Thermostat,",
+        " TheZone Thermostat,",
+        " TheZone,",
+        " ZONE CONTROL TYPE SCHED,"
+        " ThermostatSetpoint:SingleHeating,",
+        " SingleHeatingSetpoints,",
+        " ThermostatSetpoint:SingleCooling,",
+        " SingleCoolingSetpoints,",
+        " ThermostatSetpoint:SingleHeatingOrCooling,",
+        " HeatCoolSetpoints,",
+        " ThermostatSetpoint:DualSetpoint,",
+        " DualSetpoints;",
+        " ",
+        "ZoneControl:Thermostat,",
+        " AnotherZone Thermostat,",
+        " AnotherZone,",
+        " ZONE CONTROL TYPE SCHED,",
+        " ThermostatSetpoint:SingleHeating,",
+        " ThisIsInvalid;" // This is an error because this ThermostatSetpoint:SingleHeating object does NOT exist (cause of defect)
+        " ",
+        "Zone,",
+        "  TheZone,  !- Name",
+        "  0,        !- Direction of Relative North {deg}",
+        "  0,        !- X Origin {m}",
+        "  0,        !- Y Origin {m}",
+        "  0,        !- Z Origin {m}",
+        "  1,        !- Type",
+        "  1;        !- Multiplier",
+        " ",
+        "Zone,",
+        "  AnotherZone,  !- Name",
+        "  0,        !- Direction of Relative North {deg}",
+        "  0,        !- X Origin {m}",
+        "  0,        !- Y Origin {m}",
+        "  0,        !- Z Origin {m}",
+        "  1,        !- Type",
+        "  1;        !- Multiplier",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->init_state(*state); // read schedules (this calls ProcessScheduleInput via ScheduleManagerData::init_state)
+
+    bool errFlag;
+    GetZoneData(*state, errFlag);
+
+    ASSERT_THROW(GetZoneAirSetPoints(*state), std::runtime_error);
+
+    EXPECT_TRUE(compare_err_stream_substring("ZoneControl:Thermostat = ANOTHERZONE THERMOSTAT, control name = THISISINVALID was not found in "
+                                             "ThermostatSetpoint object type = ThermostatSetpoint:SingleHeating.",
+                                             true));
 }
 
 #ifdef GET_OUT

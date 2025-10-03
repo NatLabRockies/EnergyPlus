@@ -5619,7 +5619,7 @@ void GetDXCoils(EnergyPlusData &state)
                 SetupOutputVariable(state,
                                     "Cooling Coil Dehumidification Mode",
                                     Constant::Units::None,
-                                    (int &)thisDXCoil.DehumidificationMode,
+                                    thisDXCoil.DehumidificationMode,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     thisDXCoil.Name);
@@ -5841,6 +5841,26 @@ void GetDXCoils(EnergyPlusData &state)
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     thisDXCoil.Name);
+            }
+
+            if (thisDXCoil.CondensateCollectMode == CondensateCollectAction::ToTank) {
+                SetupOutputVariable(state,
+                                    "Cooling Coil Condensate Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    thisDXCoil.CondensateVdot,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
+                                    thisDXCoil.Name);
+                SetupOutputVariable(state,
+                                    "Cooling Coil Condensate Volume",
+                                    Constant::Units::m3,
+                                    thisDXCoil.CondensateVol,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Sum,
+                                    thisDXCoil.Name,
+                                    Constant::eResource::OnSiteWater,
+                                    OutputProcessor::Group::HVAC,
+                                    OutputProcessor::EndUseCat::Condensate);
             }
 
             if (thisDXCoil.ReportEvapCondVars) {
@@ -7675,7 +7695,6 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataCapacityUsedForSizing = thisDXCoil.RatedTotCap(Mode);
                 state.dataSize->DataEMSOverrideON = thisDXCoil.RatedSHREMSOverrideOn(Mode);
                 state.dataSize->DataEMSOverride = thisDXCoil.RatedSHREMSOverrideValue(Mode);
-                bool ErrorsFound = false;
                 sizerCoolingSHR.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.RatedSHR(Mode) = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
                 state.dataSize->DataDXSpeedNum = 0;
@@ -7926,7 +7945,6 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataConstantUsedForSizing = thisDXCoil.RatedSHR(Mode);
                 state.dataSize->DataFractionUsedForSizing = 1.0;
                 state.dataSize->DataDXSpeedNum = 2; // refers to low speed in sizer
-                bool ErrorsFound = false;
                 TempSize = thisDXCoil.RatedSHR2;
                 sizerCoolingSHR.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.RatedSHR2 = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
@@ -8146,7 +8164,6 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 state.dataSize->DataCapacityUsedForSizing = MSRatedTotCapDesAtMaxSpeed;
                 state.dataSize->DataEMSOverrideON = thisDXCoil.RatedSHREMSOverrideOn(Mode);
                 state.dataSize->DataEMSOverride = thisDXCoil.RatedSHREMSOverrideValue(Mode);
-                bool ErrorsFound = false;
                 state.dataSize->DataDXSpeedNum = Mode;
                 sizerCoolingSHR.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 thisDXCoil.MSRatedSHR(Mode) = sizerCoolingSHR.size(state, TempSize, ErrorsFound);
@@ -8158,7 +8175,6 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 MSRatedSHRDes = thisDXCoil.MSRatedSHR(Mode);
             } else {
                 TempSize = thisDXCoil.MSRatedSHR(Mode);
-                bool ErrorsFound = false;
                 state.dataSize->DataDXSpeedNum = Mode;
                 state.dataSize->DataFractionUsedForSizing = MSRatedSHRDes;
                 state.dataSize->DataConstantUsedForSizing = 1.0;
@@ -9508,12 +9524,12 @@ void CalcDoe2DXCoil(EnergyPlusData &state,
         RatedCBF = thisDXCoil.RatedCBF(Mode);
         if (RatedCBF > 0.0) {
             A0 = -std::log(RatedCBF) * thisDXCoil.RatedAirMassFlowRate(Mode);
-        } else {
-            A0 = 0.0;
-        }
-        ADiff = -A0 / AirMassFlow;
-        if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
-            CBF = std::exp(ADiff);
+            ADiff = -A0 / AirMassFlow;
+            if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
+                CBF = std::exp(ADiff);
+            } else {
+                CBF = 0.0;
+            }
         } else {
             CBF = 0.0;
         }
@@ -10488,12 +10504,12 @@ void CalcVRFCoolingCoil(EnergyPlusData &state,
         RatedCBF = thisDXCoil.RatedCBF(Mode);
         if (RatedCBF > 0.0) {
             A0 = -std::log(RatedCBF) * thisDXCoil.RatedAirMassFlowRate(Mode);
-        } else {
-            A0 = 0.0;
-        }
-        ADiff = -A0 / AirMassFlow;
-        if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
-            CBF = std::exp(ADiff);
+            ADiff = -A0 / AirMassFlow;
+            if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
+                CBF = std::exp(ADiff);
+            } else {
+                CBF = 0.0;
+            }
         } else {
             CBF = 0.0;
         }
@@ -11947,12 +11963,12 @@ Real64 AdjustCBF(Real64 const CBFNom,             // nominal coil bypass factor
 
     if (CBFNom > 0.0) {
         A0 = -std::log(CBFNom) * AirMassFlowRateNom;
-    } else {
-        A0 = 0.0;
-    }
-    ADiff = -A0 / AirMassFlowRate;
-    if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
-        CBFAdj = std::exp(ADiff);
+        ADiff = -A0 / AirMassFlowRate;
+        if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
+            CBFAdj = std::exp(ADiff);
+        } else {
+            CBFAdj = 1.0e-6;
+        }
     } else {
         CBFAdj = 1.0e-6;
     }
@@ -12004,6 +12020,7 @@ Real64 CalcCBF(EnergyPlusData &state,
     Real64 DeltaHumRat(0.0);                // Humidity ratio drop across evaporator at given conditions [kg/kg]
     Real64 OutletAirTemp(InletAirTemp);     // Outlet dry-bulb temperature from evaporator at given conditions [C]
     Real64 OutletAirTempSat(InletAirTemp);  // Saturation dry-bulb temperature from evaporator at outlet air enthalpy [C]
+    Real64 OutletAirDPTemp(InletAirTemp);   // Dew point temperature from evaporator at outlet air enthalpy [C]
     Real64 OutletAirEnthalpy;               // Enthalpy of outlet air at given conditions [J/kg]
     Real64 OutletAirHumRat(InletAirHumRat); // Outlet humidity ratio from evaporator at given conditions [kg/kg]
     Real64 OutletAirRH;                     // relative humidity of the outlet air
@@ -12035,6 +12052,25 @@ Real64 CalcCBF(EnergyPlusData &state,
     DeltaHumRat = InletAirHumRat - OutletAirHumRat;
     OutletAirEnthalpy = InletAirEnthalpy - DeltaH;
     OutletAirTemp = PsyTdbFnHW(OutletAirEnthalpy, OutletAirHumRat);
+    OutletAirDPTemp = PsyTdpFnWPb(state, OutletAirHumRat, DataEnvironment::StdPressureSeaLevel);
+    if (OutletAirTemp < OutletAirDPTemp) {
+        ShowSevereError(state, format("For object = {}, name = \"{}\"", UnitType, UnitName));
+        ShowContinueError(state, "Calculated outlet air temperature is lower than the dew point temperature at the same humidity ratio.");
+        ShowContinueError(state, format("...Inlet Air Temperature                      = {:.2R} C", InletAirTemp));
+        ShowContinueError(state, format("...Outlet Air Temperature                     = {:.2R} C", OutletAirTemp));
+        ShowContinueError(state, format("...Dew Point Temperature                      = {:.2R} C", OutletAirDPTemp));
+        ShowContinueError(state, format("...Inlet Air Humidity Ratio                   = {:.6R} kgWater/kgDryAir", InletAirHumRat));
+        ShowContinueError(state, format("...Outlet Air Humidity Ratio                  = {:.6R} kgWater/kgDryAir", OutletAirHumRat));
+        ShowContinueError(state, format("...Dew Point Humidity Ratio                   = {:.6R} kgWater/kgDryAir", OutletAirHumRat));
+        ShowContinueError(state, format("...Inlet Air Enthalpy                         = {:.2R} J/kg", InletAirEnthalpy));
+        ShowContinueError(state, format("...Outlet Air Enthalpy                        = {:.2R} J/kg", OutletAirEnthalpy));
+        ShowContinueError(state, format("...Total Cooling Capacity used in calculation = {:.2R} W", TotCap));
+        ShowContinueError(state, format("...Air Mass Flow Rate used in calculation     = {:.6R} kg/s", AirMassFlowRate));
+        ShowContinueError(state, format("...Air Volume Flow Rate used in calculation   = {:.6R} m3/s", AirVolFlowRate));
+        ShowContinueError(state, format("...Sensible Heat Ratio                        = {:.2R}", SHR));
+        ShowContinueError(state, "Check coil design sensible heat ratio, total gross rated capacity, and air flow inputs.");
+    }
+
     //  Eventually inlet air conditions will be used in DX Coil, these lines are commented out and marked with this comment line
     //  Pressure will have to be pass into this subroutine to fix this one
     OutletAirRH = PsyRhFnTdbWPb(state, OutletAirTemp, OutletAirHumRat, DataEnvironment::StdPressureSeaLevel, RoutineName);
@@ -12157,8 +12193,12 @@ Real64 CalcCBF(EnergyPlusData &state,
             Slope = (InletAirHumRat - ADPHumRat) / max(0.001, (InletAirTemp - ADPTemp));
 
             //     check for convergence (slopes are equal to within error tolerance)
+            if (SlopeAtConds > 0) {
+                Error = (Slope - SlopeAtConds) / SlopeAtConds;
+            } else {
+                Error = 0; // SHR = 1
+            }
 
-            Error = (Slope - SlopeAtConds) / SlopeAtConds;
             if ((Error > 0.0) && (ErrorLast < 0.0)) {
                 DeltaADPTemp = -DeltaADPTemp / 2.0;
             } else if ((Error < 0.0) && (ErrorLast > 0.0)) {
@@ -12260,10 +12300,31 @@ Real64 ValidateADP(EnergyPlusData &state,
     SHR = InitialSHR;
     AirMassFlow =
         AirVolFlowRate * PsyRhoAirFnPbTdbW(state, DataEnvironment::StdPressureSeaLevel, RatedInletAirTemp, RatedInletAirHumRat, CallingRoutine);
+    DeltaH = TotCap / AirMassFlow;
+    InletAirEnthalpy = PsyHFnTdbW(RatedInletAirTemp, RatedInletAirHumRat);
+    Real64 enthalpyMaxADP = InletAirEnthalpy - DeltaH;
+    Real64 tempADPMax = PsyTsatFnHPb(state, enthalpyMaxADP, DataEnvironment::StdPressureSeaLevel, CallingRoutine);
+    Real64 humRatADP = PsyWFnTdbH(state, tempADPMax, enthalpyMaxADP, CallingRoutine);
+    Real64 enthalpyTempinHumRatADP = PsyHFnTdbW(RatedInletAirTemp, humRatADP);
+    Real64 shrADPMax = (enthalpyTempinHumRatADP - enthalpyMaxADP) / (InletAirEnthalpy - enthalpyMaxADP);
+    if (shrADPMax > 1.0) {
+        ShowWarningError(state, format("ValidateADP: Sensible heat ratio (SHR) calculation error for {} \"{} ", UnitType, UnitName));
+        ShowContinueError(state, "The maxium design SHR calculated based on the design total cooling capacity and flow rate is greater than 1.0.");
+        ShowContinueError(state, format("...Total Cooling Capacity                  = {:.2R} W", TotCap));
+        ShowContinueError(state, format("...Mass Flow Rate                          = {:.6R} kg/s", AirMassFlow));
+        ShowContinueError(state, format("...Volumetric Flow Rate                    = {:.6R} m3/s", AirVolFlowRate));
+        ShowContinueError(state, format("...Coil Inlet Temperature                  = {:.2R} C", RatedInletAirTemp));
+        ShowContinueError(state, format("...Coil Inlet Humidity Ratio               = {:.6R} kgWater/kgDryAir", RatedInletAirHumRat));
+        ShowContinueError(state, format("...Coil Inlet Enthalpy                     = {:.6R} J/kg", InletAirEnthalpy));
+        ShowContinueError(state, format("...Coil Aparatus Dew Point Temperature     = {:.2R} C", tempADPMax));
+        ShowContinueError(state, format("...Coil Aparatus Dew Point Humidity Ratio  = {:.6R} kgWater/kgDryAir", humRatADP));
+        ShowContinueError(state,
+                          format("...Coil Enthalpy at Inlet Temperature and Aparatus Dew Point Humidity Ratio  = {:.2R} C", enthalpyTempinHumRatADP));
+        ShowContinueError(state, "The maximum design SHR is assumed to be 1.0.");
+    }
+    shrADPMax = min(1.0, shrADPMax);
     while (bStillValidating) {
         CBF_calculated = max(0.0, CalcCBF(state, UnitType, UnitName, RatedInletAirTemp, RatedInletAirHumRat, TotCap, AirMassFlow, SHR, bNoReporting));
-        DeltaH = TotCap / AirMassFlow;
-        InletAirEnthalpy = PsyHFnTdbW(RatedInletAirTemp, RatedInletAirHumRat);
         HTinHumRatOut = InletAirEnthalpy - (1.0 - SHR) * DeltaH;
         OutletAirHumRat = PsyWFnTdbH(state, RatedInletAirTemp, HTinHumRatOut, CallingRoutine);
         DeltaHumRat = RatedInletAirHumRat - OutletAirHumRat;
@@ -12294,8 +12355,9 @@ Real64 ValidateADP(EnergyPlusData &state,
                     SHR += 0.001; // increase SHR slowly until ADP temps are resolved
                 }
             }
-            if (SHR > 0.8) {
-                bStillValidating = false; // have to stop somewhere, this is the upper limit of SHR empirical model (see Autosizing/CoolingSHRSizing)
+            if (SHR > shrADPMax) {
+                SHR = shrADPMax;
+                bStillValidating = false;
             }
         } else {
             bStillValidating = false; // ADP temps are close enough. Normal input files hit this on first pass
@@ -16937,12 +16999,12 @@ void CalcVRFCoolingCoil_FluidTCtrl(EnergyPlusData &state,
         RatedCBF = thisDXCoil.RatedCBF(Mode);
         if (RatedCBF > 0.0) {
             A0 = -std::log(RatedCBF) * thisDXCoil.RatedAirMassFlowRate(Mode);
-        } else {
-            A0 = 0.0;
-        }
-        ADiff = -A0 / AirMassFlow;
-        if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
-            CBF = std::exp(ADiff);
+            ADiff = -A0 / AirMassFlow;
+            if (ADiff >= DataPrecisionGlobals::EXP_LowerLimit) {
+                CBF = std::exp(ADiff);
+            } else {
+                CBF = 0.0;
+            }
         } else {
             CBF = 0.0;
         }

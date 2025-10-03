@@ -105,6 +105,11 @@ A unique user-assigned name for an instance of a cooling coil performance specif
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. AirLoopHVAC:UnitaryHeatPump:AirToAir or PackageTerminal: HeatPump:AirToAir), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Minimum Outdoor Dry-Bulb Temperature for Compressor Operation}
 
 This numeric field defines the minimum outdoor air dry-bulb temperature where the cooling coil compressor turns off. If this input field is left blank, the default value is -25 °C (-13 °F).
@@ -153,15 +158,6 @@ The name corresponding to a Coil:Cooling:DX:CurveFit:OperatingMode object. Opera
 The name corresponding to a Coil:Cooling:DX:CurveFit:OperatingMode object. Operating Mode is used as to represent a reheat mode as a subcool reheat coil. If field is blank, the base operating mode will be used. This field is optional.
 
 If there are 3 operating modes, it represents a subcool-reheat mode coil. The Operating Mode 1 represents a base operating mode coil. The Operating Mode 2 represents a subcool mode coil with lower SHR than the Operating Mode 1. The Operating Mode 3 represents a reheat mode coil with lower SHR than the Operating Mode 2. All 3 operation modes work together to represent a subcool reheat coil model. The operation procedure is described in \ref{coilcoolingdx}  
-
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-0}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
 
 \subsection{Coil:Cooling:DX:CurveFit:OperatingMode}\label{coilcoolingdxcurvefitoperatingmode}
 

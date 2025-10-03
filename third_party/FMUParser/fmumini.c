@@ -88,9 +88,7 @@
     filename : the filename of the file where date/time must be modified
     dosdate : the new date at the MSDos format (4 bytes)
     tmu_date : the SAME new date at the tm_unz format */
-void change_file_date(filename, dosdate, tmu_date) const char *filename;
-uLong dosdate;
-tm_unz tmu_date;
+void change_file_date(const char* filename, uLong dosdate, tm_unz tmu_date)
 {
 #ifdef _WIN32
     HANDLE hFile;
@@ -126,7 +124,7 @@ tm_unz tmu_date;
 /* mymkdir and change_file_date are not 100 % portable
    As I don't know well Unix, I wait feedback for the unix portion */
 
-int mymkdir(dirname) const char *dirname;
+int mymkdir(const char *dirname)
 {
     int ret = 0;
 #ifdef _WIN32
@@ -139,7 +137,7 @@ int mymkdir(dirname) const char *dirname;
     return ret;
 }
 
-int makedir(newdir) const char *newdir;
+int makedir(const char *newdir)
 {
     char *buffer;
     char *p;
@@ -225,7 +223,7 @@ void Display64BitsSize(ZPOS64_T n, int size_char)
     printf("%s", &number[pos_string]);
 }
 
-int do_list(uf) unzFile uf;
+int do_list(unzFile uf)
 {
     uLong i;
     unz_global_info64 gi;
@@ -290,10 +288,7 @@ int do_list(uf) unzFile uf;
     return 0;
 }
 
-int do_extract_currentfile(uf, popt_extract_without_path, popt_overwrite, password) unzFile uf;
-const int *popt_extract_without_path;
-int *popt_overwrite;
-const char *password;
+int do_extract_currentfile(unzFile uf, const int *popt_extract_without_path, int *popt_overwrite, const char *password)
 {
     char filename_inzip[256];
     char *filename_withoutpath;
@@ -419,10 +414,7 @@ const char *password;
     return err;
 }
 
-int do_extract(uf, opt_extract_without_path, opt_overwrite, password) unzFile uf;
-int opt_extract_without_path;
-int opt_overwrite;
-const char *password;
+int do_extract(unzFile uf, int opt_extract_without_path, int opt_overwrite, const char *password)
 {
     uLong i;
     unz_global_info64 gi;
@@ -446,11 +438,7 @@ const char *password;
     return 0;
 }
 
-int do_extract_onefile(uf, filename, opt_extract_without_path, opt_overwrite, password) unzFile uf;
-const char *filename;
-int opt_extract_without_path;
-int opt_overwrite;
-const char *password;
+int do_extract_onefile(unzFile uf, const char *filename, int opt_extract_without_path, int opt_overwrite, const char *password)
 {
     if (unzLocateFile(uf, filename, CASESENSITIVITY) != UNZ_OK) {
         printf("file %s not found in the zipfile\n", filename);

@@ -784,9 +784,12 @@ void GatherForPredefinedReport(EnergyPlusData &state)
 
     // set up for EIO <FenestrationShadedState> output
     bool fenestrationShadedStateHeaderShown(false);
+    bool fenestrationShadedStateHeaderShownNoFrameDivider(false);
     static constexpr std::string_view FenestrationShadedStateFormat("FenestrationShadedState,{},{:.3R},{:.3R},{:.3R},{},{},{:.3R},{:.3R},{:.3R}\n");
+    static constexpr std::string_view FenestrationShadedStateFormatNoFrameDivider("FenestrationShadedState,{},{:.3R},{:.3R},{:.3R}\n");
     std::vector<std::pair<int, int>> uniqShdConsFrame;
     std::pair<int, int> shdConsAndFrame;
+    std::vector<int> shdConsReported;
 
     for (int iSurf : state.dataSurface->AllSurfaceListReportOrder) {
         auto &surface = state.dataSurface->Surface(iSurf);
@@ -957,48 +960,55 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                         const Real64 stateSHGC = Window::GetSHGCValueForNFRCReporting(state, iSurf, stateConstrNum, windowWidth, windowHeight);
                         std::string const &constructionName = state.dataConstruction->Construct(stateConstrNum).Name;
 
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdFrameDiv, constructionName, frameDivider.Name);
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdUfact, constructionName, stateUValue, 3);
-                        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFenShdSHGC, constructionName, stateSHGC, 3);
-                        OutputReportPredefined::PreDefTableEntry(state,
-                                                                 state.dataOutRptPredefined->pdchFenShdVisTr,
-                                                                 constructionName,
-                                                                 state.dataConstruction->Construct(stateConstrNum).VisTransNorm,
-                                                                 3);
+                        shdConsAndFrame = std::make_pair(stateConstrNum, frameDivNum);
+                        if (std::find(uniqShdConsFrame.begin(), uniqShdConsFrame.end(), shdConsAndFrame) == uniqShdConsFrame.end()) {
+                            uniqShdConsFrame.push_back(shdConsAndFrame);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdFrameDiv, constructionName, frameDivider.Name);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdUfact, constructionName, stateUValue, 3);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdSHGC, constructionName, stateSHGC, 3);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     state.dataOutRptPredefined->pdchFenShdVisTr,
+                                                                     constructionName,
+                                                                     state.dataConstruction->Construct(stateConstrNum).VisTransNorm,
+                                                                     3);
 
-                        Real64 stateAssemblyUValue{0.0};
-                        Real64 stateAssemblySHGC{0.0};
-                        Real64 stateAssemblyVT{0.0};
+                            Real64 stateAssemblyUValue{0.0};
+                            Real64 stateAssemblySHGC{0.0};
+                            Real64 stateAssemblyVT{0.0};
 
-                        Window::GetWindowAssemblyNfrcForReport(
-                            state, iSurf, stateConstrNum, windowWidth, windowHeight, vision, stateAssemblyUValue, stateAssemblySHGC, stateAssemblyVT);
+                            Window::GetWindowAssemblyNfrcForReport(state,
+                                                                   iSurf,
+                                                                   stateConstrNum,
+                                                                   windowWidth,
+                                                                   windowHeight,
+                                                                   vision,
+                                                                   stateAssemblyUValue,
+                                                                   stateAssemblySHGC,
+                                                                   stateAssemblyVT);
 
-                        std::string_view NFRCname = NfrcProductNames[static_cast<int>(frameDivider.NfrcProductType)];
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdAssemNfrcType, constructionName, NFRCname);
+                            std::string_view NFRCname = NfrcProductNames[static_cast<int>(frameDivider.NfrcProductType)];
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdAssemNfrcType, constructionName, NFRCname);
 
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdAssemUfact, constructionName, stateAssemblyUValue, 3);
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdAssemSHGC, constructionName, stateAssemblySHGC, 3);
-                        OutputReportPredefined::PreDefTableEntry(
-                            state, state.dataOutRptPredefined->pdchFenShdAssemVisTr, constructionName, stateAssemblyVT, 3);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdAssemUfact, constructionName, stateAssemblyUValue, 3);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdAssemSHGC, constructionName, stateAssemblySHGC, 3);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdAssemVisTr, constructionName, stateAssemblyVT, 3);
 
-                        if (state.dataGeneral->Constructions) {
-                            if (!fenestrationShadedStateHeaderShown) {
-                                print(state.files.eio,
-                                      "{}\n",
-                                      "! <FenestrationShadedState>,Construction Name,Glass U-Factor {W/m2-K},"
-                                      "Glass SHGC, Glass Visible Transmittance, Frame and Divider Name,NFRC Product Type,"
-                                      "Assembly U-Factor {W/m2-K},Assembly SHGC,Assembly Visible Transmittance");
-                                fenestrationShadedStateHeaderShown = true;
-                            }
-
-                            shdConsAndFrame = std::make_pair(stateConstrNum, frameDivNum);
-                            if (std::find(uniqShdConsFrame.begin(), uniqShdConsFrame.end(), shdConsAndFrame) == uniqShdConsFrame.end()) {
-                                uniqShdConsFrame.push_back(shdConsAndFrame);
+                            if (state.dataGeneral->Constructions) {
+                                if (!fenestrationShadedStateHeaderShown) {
+                                    print(state.files.eio,
+                                          "{}\n",
+                                          "! <FenestrationShadedState>,Construction Name,Glass U-Factor {W/m2-K},"
+                                          "Glass SHGC, Glass Visible Transmittance, Frame and Divider Name,NFRC Product Type,"
+                                          "Assembly U-Factor {W/m2-K},Assembly SHGC,Assembly Visible Transmittance");
+                                    fenestrationShadedStateHeaderShown = true;
+                                }
                                 print(state.files.eio,
                                       FenestrationShadedStateFormat,
                                       constructionName,
@@ -1010,6 +1020,43 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                                       stateAssemblyUValue,
                                       stateAssemblySHGC,
                                       stateAssemblyVT);
+                            }
+                        }
+                    }
+                } else { // frameDivNum = 0 (no frame or divider)
+                    for (unsigned int i = 0; i < totalStates; ++i) {
+                        const int stateConstrNum = surface.shadedConstructionList[i];
+                        if (std::find(shdConsReported.begin(), shdConsReported.end(), stateConstrNum) == shdConsReported.end()) {
+                            shdConsReported.push_back(stateConstrNum);
+                            std::string const &constructionName = state.dataConstruction->Construct(stateConstrNum).Name;
+                            const Real64 windowWidth = NfrcWidth[0];
+                            const Real64 windowHeight = NfrcHeight[0];
+                            const Real64 stateUValue = Window::GetIGUUValueForNFRCReport(state, iSurf, stateConstrNum, windowWidth, windowHeight);
+                            const Real64 stateSHGC = Window::GetSHGCValueForNFRCReporting(state, iSurf, stateConstrNum, windowWidth, windowHeight);
+
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdUfact, constructionName, stateUValue, 3);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, state.dataOutRptPredefined->pdchFenShdSHGC, constructionName, stateSHGC, 3);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     state.dataOutRptPredefined->pdchFenShdVisTr,
+                                                                     constructionName,
+                                                                     state.dataConstruction->Construct(stateConstrNum).VisTransNorm,
+                                                                     3);
+                            if (state.dataGeneral->Constructions) {
+                                if (!fenestrationShadedStateHeaderShownNoFrameDivider) {
+                                    print(state.files.eio,
+                                          "{}\n",
+                                          "! <FenestrationShadedState>,Construction Name,Glass U-Factor {W/m2-K},"
+                                          "Glass SHGC, Glass Visible Transmittance");
+                                    fenestrationShadedStateHeaderShownNoFrameDivider = true;
+                                }
+                                print(state.files.eio,
+                                      FenestrationShadedStateFormatNoFrameDivider,
+                                      constructionName,
+                                      stateUValue,
+                                      stateSHGC,
+                                      state.dataConstruction->Construct(stateConstrNum).VisTransNorm);
                             }
                         }
                     }
@@ -1544,6 +1591,7 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
     state.dataMstBal->HSkyFD.dimension(state.dataSurface->TotSurfaces, 0.0);
     state.dataMstBal->HGrndFD.dimension(state.dataSurface->TotSurfaces, 0.0);
     state.dataMstBal->HAirFD.dimension(state.dataSurface->TotSurfaces, 0.0);
+    state.dataMstBal->HSurrFD.dimension(state.dataSurface->TotSurfaces, 0.0);
 
     state.dataSurface->SurfSkySolarInc.dimension(state.dataSurface->TotSurfaces, 0);
     state.dataSurface->SurfGndSolarInc.dimension(state.dataSurface->TotSurfaces, 0);
@@ -2213,6 +2261,7 @@ void InitThermalAndFluxHistories(EnergyPlusData &state)
                 state.dataHeatBalSurf->SurfHAirExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfHSkyExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfHGrdExt(SurfNum) = 0.0;
+                state.dataHeatBalSurf->SurfHSrdSurfExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfTempOut(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfTempInMovInsRep(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfQConvInRep(SurfNum) = 0.0;
@@ -6990,11 +7039,13 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                 Real64 HSky = 0.0;      // "Convection" coefficient from sky to surface
                 Real64 HGround = 0.0;   // "Convection" coefficient from ground to surface
                 Real64 HAir = 0.0;      // "Convection" coefficient from air to surface (radiation)
+                // Real64 HSurrr = 0.0;    // "Linearized radiation" coefficient from surrounding surfaces to surface
                 state.dataHeatBalSurf->SurfHConvExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfHAirExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfHSkyExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfHGrdExt(SurfNum) = 0.0;
                 state.dataHeatBalSurf->SurfQRadLWOutSrdSurfs(SurfNum) = 0.0;
+                state.dataHeatBalSurf->SurfHSrdSurfExt(SurfNum) = 0.0;
 
                 // Calculate the current outside surface temperature TH(SurfNum,1,1) for the
                 // various different boundary conditions
@@ -7435,6 +7486,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                                 state.dataMstBal->HSkyFD(SurfNum) = state.dataHeatBalSurf->SurfHSkyExt(SurfNum);
                                 state.dataMstBal->HGrndFD(SurfNum) = state.dataHeatBalSurf->SurfHGrdExt(SurfNum);
                                 state.dataMstBal->HAirFD(SurfNum) = state.dataHeatBalSurf->SurfHAirExt(SurfNum);
+                                state.dataMstBal->HSurrFD(SurfNum) = state.dataHeatBalSurf->SurfHSrdSurfExt(SurfNum);
                             }
 
                         } else { // Surface is dry, use the normal correlation
@@ -7470,6 +7522,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                                 state.dataMstBal->HSkyFD(SurfNum) = state.dataHeatBalSurf->SurfHSkyExt(SurfNum);
                                 state.dataMstBal->HGrndFD(SurfNum) = state.dataHeatBalSurf->SurfHGrdExt(SurfNum);
                                 state.dataMstBal->HAirFD(SurfNum) = state.dataHeatBalSurf->SurfHAirExt(SurfNum);
+                                state.dataMstBal->HSurrFD(SurfNum) = state.dataHeatBalSurf->SurfHSrdSurfExt(SurfNum);
                             }
                         }
 
@@ -7512,6 +7565,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                             state.dataMstBal->HSkyFD(SurfNum) = state.dataHeatBalSurf->SurfHSkyExt(SurfNum);
                             state.dataMstBal->HGrndFD(SurfNum) = state.dataHeatBalSurf->SurfHGrdExt(SurfNum);
                             state.dataMstBal->HAirFD(SurfNum) = state.dataHeatBalSurf->SurfHAirExt(SurfNum);
+                            state.dataMstBal->HSurrFD(SurfNum) = state.dataHeatBalSurf->SurfHSrdSurfExt(SurfNum);
                         }
                     }
                     // Calculate LWR from surrounding surfaces if defined for an exterior surface
@@ -7588,6 +7642,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                             state.dataMstBal->HSkyFD(SurfNum) = 0.0;
                             state.dataMstBal->HGrndFD(SurfNum) = 0.0;
                             state.dataMstBal->HAirFD(SurfNum) = 0.0;
+                            state.dataMstBal->HSurrFD(SurfNum) = 0.0;
                         }
 
                     } else { // Interzone partition
@@ -7618,6 +7673,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                             state.dataMstBal->HSkyFD(SurfNum) = 0.0;
                             state.dataMstBal->HGrndFD(SurfNum) = 0.0;
                             state.dataMstBal->HAirFD(SurfNum) = 0.0;
+                            state.dataMstBal->HSurrFD(SurfNum) = 0.0;
                         }
                     }
                     // This ends the calculations for this surface and goes on to the next SurfNum

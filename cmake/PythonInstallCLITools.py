@@ -53,12 +53,62 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import argparse
+import platform
 from pathlib import Path
 from subprocess import run
 from sys import argv, executable
 
-# expecting one command line argument - the path to the python_lib folder to place the pip package
-pkgs = {'energyplus_launch': '3.7.4', 'energyplus_transition_tools': '2.1.4'}
-if to_install := [f"{n}=={v}" for n, v in pkgs.items() if not (Path(argv[1]) / f"{n}-{v}.dist-info").exists()]:
+PKGS = {
+    "energyplus_launch": "3.7.4",
+    "energyplus_transition_tools": "2.1.4",
+    "ghedesigner": "2.0",
+}
+
+
+def install_packages(python_lib_dir: Path):
+    # expecting one command line argument - the path to the python_lib folder to place the pip package
+    pkgs_to_install = {k: v for k, v in PKGS.items() if not (python_lib_dir / f"{k}-{v}.dist-info").exists()}
+
+    if not pkgs_to_install:
+        print("PYTHON: All CLI packages found and up to date, no pip install needed")
+        return
+
+    to_install = [f"{n}=={v}" for n, v in pkgs_to_install.items()]
+    
+    is_windows = platform.system() == "Windows"
+    is_arm = platform.machine().lower() in ("arm64", "aarch64")
+    if "ghedesigner" in pkgs_to_install and is_windows and is_arm:
+        # there are no arm64 Windows wheels for scipy on PyPi (as of 2025-09-05, Scipy 1.16.1)
+        # I got a wheel built on https://github.com/scipy/scipy/actions/runs/17428824000 (weel builder)
+        scipy_wheel_url = (
+            "https://github.com/jmarrec/EnergyPlus/releases/download/"
+            "v25.2.0-pre-IOFreeze-1/scipy-1.17.0.dev0-cp312-cp312-win_arm64.whl"
+        )
+        print(
+            f"PYTHON: Installing scipy from {scipy_wheel_url} since this is Windows ARM64 "
+            "and no official wheel exists as of 1.16.1"
+        )
+        to_install.append(scipy_wheel_url)
+
     print(f"PYTHON: CLI packages not found or out of date, pip installing these now: {to_install}")
-    run([executable, '-m', 'pip', 'install', f'--target={argv[1]}', '--upgrade', *to_install], check=True)
+    run([executable, "-m", "pip", "install", f"--target={python_lib_dir}", "--upgrade", *to_install], check=True)
+
+
+def existing_dir(path_str):
+    dir_path = Path(path_str).resolve()
+    if not dir_path.is_dir():
+        raise argparse.ArgumentTypeError(f"'{dir_path}' is not a valid directory")
+    return dir_path
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Install required EnergyPlus Python packages into a target directory.")
+    parser.add_argument(
+        "python_lib_dir",
+        type=existing_dir,
+        help="Path to the python_lib folder where packages will be installed. Must be a valid existing directory.",
+    )
+    args = parser.parse_args()
+
+    install_packages(python_lib_dir=args.python_lib_dir)

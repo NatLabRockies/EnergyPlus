@@ -307,6 +307,9 @@ public:
                                   ObjexxFCL::Optional_string_const UsrDesc = _,
                                   ObjexxFCL::Optional<Real64 const> UsrValue = _);
 
+    static void reportSizerStrOutput(
+        EnergyPlusData &state, std::string_view CompType, std::string_view CompName, std::string_view VarDesc, std::string_view VarValue);
+
     static Real64 setOAFracForZoneEqSizing(const EnergyPlusData &state, Real64 desMassFlow, DataSizing::ZoneEqSizingData const &zoneEqSizing);
     static Real64 setHeatCoilInletTempForZoneEqSizing(Real64 outAirFrac,
                                                       DataSizing::ZoneEqSizingData const &zoneEqSizing,

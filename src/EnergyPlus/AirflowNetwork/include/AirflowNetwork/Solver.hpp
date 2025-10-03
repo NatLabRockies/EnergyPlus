@@ -219,6 +219,7 @@ namespace AirflowNetwork {
         bool allow_unsupported_zone_equipment = false; // Allow unsupported zone equipment
         bool autosize_ducts = false;                   // True: perform duct autosize, otherwise no duct autosize
         DuctSizing ductSizing;
+        bool DuctLoss = false; // Duct loss calculation without AFN flag
     };
 
     struct Solver : BaseGlobalStruct
@@ -310,6 +311,7 @@ namespace AirflowNetwork {
         void validate_distribution();
         void validate_fan_flowrate(); // Catch a fan flow rate from EPlus input file and add a flag for VAV terminal damper
         void validate_exhaust_fan_input();
+        int get_people_index(int const zoneNum, int ventCtrlNum, bool &errorFound);
         void hybrid_ventilation_control();
         void single_sided_Cps(std::vector<std::vector<Real64>> &valsByFacade, int numWindDirs = 36);
         Real64 zone_OA_change_rate(int ZoneNum); // hybrid ventilation system controlled zone number

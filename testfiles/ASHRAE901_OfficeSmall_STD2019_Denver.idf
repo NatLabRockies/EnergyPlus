@@ -5257,7 +5257,11 @@
     1.205980747,             !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
     ,                        !- On Cycle Loss Fraction to Zone
     4.048e-06,               !- Peak Use Flow Rate {m3/s}
-    BLDG_SWH_SCH;            !- Use Flow Rate Fraction Schedule Name
+    BLDG_SWH_SCH,            !- Use Flow Rate Fraction Schedule Name
+    ,                        !- Cold Water Supply Temperature Schedule Name
+    SHWSys1 Pump-SHWSys1 Water HeaterNode, !- Use Side Inlet Node Name
+    SHWSys1 Supply Equipment Outlet Node;  !- Use Side Outlet Node Name
+
 
 !-   ===========  ALL OBJECTS IN CLASS: PLANTLOOP ===========
 

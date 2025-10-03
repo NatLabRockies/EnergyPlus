@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
-
-if(POLICY CMP0087)
-  cmake_policy(SET CMP0087 NEW) # install(CODE) and install(SCRIPT) support generator expressions.
-endif()
+cmake_minimum_required(VERSION 3.5.1...4.0.3)
 
 project(ConvertInputFormat)
 
@@ -14,7 +10,7 @@ endif()
 
 # Detect OpenMP support in a compiler. If the compiler supports OpenMP, the
 # flags to compile with OpenMP are returned and added.
-if (${USE_OpenMP} OR ${ENABLE_OPENMP})
+if (${ENABLE_OPENMP})
   find_package(OpenMP COMPONENTS CXX)
   if(OpenMP_CXX_FOUND)
     set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE PARENT_SCOPE)

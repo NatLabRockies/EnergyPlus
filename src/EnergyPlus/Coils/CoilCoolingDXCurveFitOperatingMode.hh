@@ -131,6 +131,7 @@ struct CoilCoolingDXCurveFitOperatingMode
     Real64 ratedAirVolFlowEMSOverrideValue = 0.0;
     bool ratedTotCapFlowEMSOverrideON = false;
     Real64 ratedTotCapFlowEMSOverrideValue = 0.0;
+    Real64 minOutdoorDrybulb = -25.0;
 
     enum class CondenserType
     {

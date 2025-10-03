@@ -947,7 +947,7 @@ namespace UnitVentilator {
             SetupOutputVariable(state,
                                 "Zone Unit Ventilator Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)unitVent.availStatus,
+                                unitVent.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 unitVent.Name);

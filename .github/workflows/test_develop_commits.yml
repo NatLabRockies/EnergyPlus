@@ -44,13 +44,6 @@ jobs:
 #          nproc: 4
 #          pretty: "Standard Build on Ubuntu 24.04"
 #          alternate: false
-#        - os: windows-2019
-#          arch: x86_64
-#          python-arch: x64
-#          generator: "Visual Studio 16 2019"
-#          nproc: 4
-#          pretty: "Windows VS 2019"
-#          alternate: false
 #        - os: windows-2022
 #          arch: x86_64
 #          python-arch: x64
@@ -70,7 +63,7 @@ jobs:
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
 
@@ -92,7 +85,7 @@ jobs:
           echo "FC=gfortran-13" >> $GITHUB_ENV
         fi
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Create Build Directory
       run: cmake -E make_directory ./build/
@@ -114,7 +107,6 @@ jobs:
         -DBUILD_PACKAGE:BOOL=OFF
         -DDOCUMENTATION_BUILD:STRING=DoNotBuild
         -DENABLE_OPENMP:BOOL=OFF
-        -DUSE_OpenMP:BOOL=OFF
         ../
 
     - name: Configure CMake with Alternative Flags

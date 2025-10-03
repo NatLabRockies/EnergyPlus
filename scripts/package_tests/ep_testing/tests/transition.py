@@ -55,7 +55,7 @@
 
 
 import os
-from subprocess import check_call, CalledProcessError, STDOUT
+from subprocess import STDOUT, CalledProcessError, check_call
 from urllib import request
 
 from ep_testing.tests.base import BaseTest
@@ -64,47 +64,45 @@ from ep_testing.tests.base import BaseTest
 class TransitionOldFile(BaseTest):
 
     def name(self):
-        return 'Test running 1ZoneUncontrolled.idf and make sure it exits OK'
+        return "Test running 1ZoneUncontrolled.idf and make sure it exits OK"
 
     def run(self, install_root: str, verbose: bool, kwargs: dict):
-        if 'last_version' not in kwargs:
-            raise Exception('Bad call to %s -- must pass last_version in kwargs' % self.__class__.__name__)
-        last_version = kwargs['last_version']
-        test_file = kwargs.get('test_file', '1ZoneUncontrolled.idf')
-        print('* Running test class "%s" on file "%s"... ' % (self.__class__.__name__, test_file), end='')
-        transition_dir = os.path.join(install_root, 'PreProcess', 'IDFVersionUpdater')
+        if "last_version" not in kwargs:
+            raise Exception("Bad call to %s -- must pass last_version in kwargs" % self.__class__.__name__)
+        last_version = kwargs["last_version"]
+        test_file = kwargs.get("test_file", "1ZoneUncontrolled.idf")
+        print('* Running test class "%s" on file "%s"... ' % (self.__class__.__name__, test_file), end="")
+        transition_dir = os.path.join(install_root, "PreProcess", "IDFVersionUpdater")
         all_transition_binaries = [
-            f.path for f in os.scandir(transition_dir) if f.is_file() and f.name.startswith('Transition-')
+            f.path for f in os.scandir(transition_dir) if f.is_file() and f.name.startswith("Transition-")
         ]
         if len(all_transition_binaries) < 1:
-            raise Exception('Could not find any transition binaries...weird')
+            raise Exception("Could not find any transition binaries...weird")
         all_transition_binaries.sort()
         most_recent_binary = all_transition_binaries[-1]
-        idf_url = 'https://raw.githubusercontent.com/NREL/EnergyPlus/%s/testfiles/%s' % (last_version, test_file)
+        idf_url = "https://raw.githubusercontent.com/NREL/EnergyPlus/%s/testfiles/%s" % (last_version, test_file)
         saved_dir = os.getcwd()
         os.chdir(transition_dir)
         idf_path = os.path.join(transition_dir, test_file)
-        dev_null = open(os.devnull, 'w')
+        dev_null = open(os.devnull, "w")
         try:
             r = request.Request(idf_url)
             response = request.urlopen(r)
             data = response.read()
-            with open(idf_path, 'wb') as f:
+            with open(idf_path, "wb") as f:
                 f.write(data)
         except Exception as e:
-            raise Exception(
-                'Could not download file from prior release at %s; error: %s' % (idf_url, str(e))
-            ) from None
+            raise Exception("Could not download file from prior release at %s; error: %s" % (idf_url, str(e))) from None
         try:
             check_call([most_recent_binary, os.path.basename(idf_path)], stdout=dev_null, stderr=STDOUT)
-            print(' [TRANSITIONED] ', end='')
+            print(" [TRANSITIONED] ", end="")
         except CalledProcessError:
-            raise Exception('Transition failed!') from None
+            raise Exception("Transition failed!") from None
         os.chdir(install_root)
-        eplus_binary = os.path.join(install_root, 'energyplus')
+        eplus_binary = os.path.join(install_root, "energyplus")
         try:
-            check_call([eplus_binary, '-D', idf_path], stdout=dev_null, stderr=STDOUT)
-            print(' [DONE]!')
+            check_call([eplus_binary, "-D", idf_path], stdout=dev_null, stderr=STDOUT)
+            print(" [DONE]!")
         except CalledProcessError:
-            raise Exception('EnergyPlus failed!') from None
+            raise Exception("EnergyPlus failed!") from None
         os.chdir(saved_dir)

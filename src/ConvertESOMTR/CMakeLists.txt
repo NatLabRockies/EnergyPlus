@@ -1,12 +1,6 @@
 project(ConvertESOMTR Fortran)
 
-cmake_minimum_required(VERSION 3.5.1)
-
-cmake_policy(SET CMP0012 NEW) # if() recognizes boolean constants
-
-if(POLICY CMP0087)
-  cmake_policy(SET CMP0087 NEW) # install(CODE) and install(SCRIPT) support generator expressions.
-endif()
+cmake_minimum_required(VERSION 3.5.1...4.0.3)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")

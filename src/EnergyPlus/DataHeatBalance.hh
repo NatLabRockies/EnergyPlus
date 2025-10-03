@@ -1327,7 +1327,7 @@ namespace DataHeatBalance {
         Real64 CarbonDioxideGainRate = 0.0;           // current timestep value of carbon dioxide gain rate for device
         Real64 *PtrGenericContamGainRate = nullptr;   // POINTER to value of generic contaminant gain rate for device
         Real64 GenericContamGainRate = 0.0;           // current timestep value of generic contaminant gain rate for device
-        int ReturnAirNodeNum = 0;                     // return air node number for retrun air convection heat gain
+        int ReturnAirNodeNum = 0;                     // return air node number for return air convection heat gain
     };
 
     struct SpaceZoneSimData // Calculated data by Space or Zone during each time step/hour
@@ -1923,8 +1923,8 @@ struct HeatBalanceData : BaseGlobalStruct
     Array1D<Real64> ZoneDifSolFrIntWinsRepEnergy;   // Energy of ZoneDifSolFrIntWinsRep [J]
     Array1D<Real64> ZnOpqSurfInsFaceCondGnRepEnrg;  // Energy of ZoneOpaqSurfInsFaceCondGainRep [J]
     Array1D<Real64> ZnOpqSurfInsFaceCondLsRepEnrg;  // Energy of ZoneOpaqSurfInsFaceCondLossRep [J]
-    Array1D<Real64> ZnOpqSurfExtFaceCondGnRepEnrg;  // Energy of ZoneOpaqSurfInsFaceCondGainRep [J]
-    Array1D<Real64> ZnOpqSurfExtFaceCondLsRepEnrg;  // Energy of ZoneOpaqSurfInsFaceCondLossRep [J]
+    Array1D<Real64> ZnOpqSurfExtFaceCondGnRepEnrg;  // Energy of ZoneOpaqSurfExtFaceCondGainRep [J]
+    Array1D<Real64> ZnOpqSurfExtFaceCondLsRepEnrg;  // Energy of ZoneOpaqSurfExtFaceCondLossRep [J]
 
     Array1D<Real64> SurfQdotRadIntGainsInPerArea;       // Thermal radiation absorbed on inside surfaces
     Array1D<Real64> SurfQRadSWOutIncident;              // Exterior beam plus diffuse solar incident on surface (W/m2)

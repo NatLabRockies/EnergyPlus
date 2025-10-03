@@ -948,7 +948,7 @@ namespace FanCoilUnits {
             SetupOutputVariable(state,
                                 "Fan Coil Availability Status",
                                 Constant::Units::None,
-                                (int &)fanCoil.availStatus,
+                                fanCoil.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 fanCoil.Name);

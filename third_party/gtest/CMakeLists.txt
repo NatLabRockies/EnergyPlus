@@ -1,7 +1,7 @@
 # Note: CMake support is community-based. The maintainers do not use CMake
 # internally.
 
-cmake_minimum_required(VERSION 2.8.12...3.5)  # bumped max support to 3.5 to hush a cmake deprecation warning
+cmake_minimum_required(VERSION 2.8.12...4.0.3)  # bumped max support to hush a cmake deprecation warning
 
 if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)

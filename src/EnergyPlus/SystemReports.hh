@@ -217,6 +217,13 @@ namespace SystemReports {
         Real64 TimeAboveVozDynTotalOcc = 0.0; // time [hrs] that mechanical+natural ventilation is > VozTarget + 1% during occupied
         Real64 TimeVentUnoccTotal = 0.0;      // time [hrs] that mechanical+natural ventilation is > zero during unoccupied
         Real64 TimeOccupiedTotal = 0.0;       // time [hrs] that any zone is occupied
+        Real64 TimeFanContTotalOcc = 0.0;     // time [hrs] that fan is continuous when occupied
+        Real64 TimeFanCycTotalOcc = 0.0;      // time [hrs] that fan is cycling when occupied
+        Real64 TimeFanOffTotalOcc = 0.0;      // time [hrs] that fan is off when occupied
+        Real64 TimeUnoccupiedTotal = 0.0;     // time [hrs] that all zones are unoccupied
+        Real64 TimeFanContTotalUnocc = 0.0;   // time [hrs] that fan is continuous when unoccupied
+        Real64 TimeFanCycTotalUnocc = 0.0;    // time [hrs] that fan is cycling when unoccupied
+        Real64 TimeFanOffTotalUnocc = 0.0;    // time [hrs] that fan is off when unoccupied
 
         std::vector<Real64> TimeAtOALimit = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};    // time [hrs] at limit [n]
         std::vector<Real64> TimeAtOALimitOcc = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // time [hrs] at limit [n] during occupied

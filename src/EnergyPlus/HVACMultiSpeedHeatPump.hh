@@ -64,15 +64,6 @@ struct EnergyPlusData;
 
 namespace HVACMultiSpeedHeatPump {
 
-    // Heating coil types
-    int constexpr MultiSpeedHeatingCoil(1); // COIL:DX:MultiSpeed:Heating
-    // Cooling coil types
-    int constexpr MultiSpeedCoolingCoil(2); // COIL:DX:MultiSpeed:Cooling
-    // Supplymental heating coil types
-    int constexpr SuppHeatingCoilGas(1);  // Supplymental heating coil type: COIL:GAS:HEATING
-    int constexpr SuppHeatingCoilElec(2); // Supplymental heating coil type: COIL:ELECTRIC:HEATING
-    int constexpr SuppHeatingCoilRec(3);  // Supplymental heating coil type: COIL:ENGINEHEATRECOVERY:HEATING
-
     // Mode of operation
     enum class ModeOfOperation
     {
@@ -218,6 +209,9 @@ namespace HVACMultiSpeedHeatPump {
         bool EMSOverrideCoilSpeedNumOn;
         Real64 EMSOverrideCoilSpeedNumValue;
         int CoilSpeedErrIndex;
+        Real64 HeatingSizingRatio = 1.0;
+        bool isHeatPump = false;
+        bool reportACCAManualS = true;
 
         // Default Constructor
         MSHeatPumpData()

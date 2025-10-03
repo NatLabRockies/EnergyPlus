@@ -1,0 +1,120 @@
+name: "CMake Configure and Build"
+description: "Run CMake Configure and Build the targets"
+
+inputs:
+  build-directory:
+    description: "the E+ working directory, top level of the repo"
+  nproc:
+    required: true
+  minimal-targets:
+    description: "If true will build only energyplus and a couple of fortran ones, just enough to run reg tests"
+    type: boolean
+    default: false
+  python-version:
+    required: true
+  python-root-dir:
+    required: true
+  enable-pch:
+    description: "Turn on ENABLE_PCH to have pre-compiled headers. Pass ON or OFF"
+    default: "OFF"
+
+runs:
+  using: "composite"
+  steps:
+
+  - name: Configure CMake And Build on Windows
+    if: runner.os == 'Windows'
+    working-directory: ${{ inputs.build-directory }}
+    shell: pwsh
+    run: |
+      $ErrorActionPreference = 'stop'
+      $PSNativeCommandUseErrorActionPreference = $true
+
+      function Begin-Group {
+          param([string]$Title)
+          Write-Output "::group::`e[93m$Title`e[0m"
+      }
+
+      switch ($env:PROCESSOR_ARCHITECTURE) {
+        "AMD64" { $target_arch = "x64" }
+        "ARM64" { $target_arch = "arm64" }
+        default { throw "Unknown architecture: $env:PROCESSOR_ARCHITECTURE" }
+      }
+
+      Begin-Group "Entering a VS Dev Shell"
+      Import-Module "$env:MSVC_DIR\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+      Enter-VsDevShell -VsInstallPath "$env:MSVC_DIR" -SkipAutomaticLocation -devCmdArguments "-arch=$target_arch"
+      Write-Output "::endgroup::"
+
+      Begin-Group "CMake configure"
+      cmake `
+        -G Ninja `
+        -DENABLE_PCH:BOOL=${{ inputs.enable-pch }} `
+        -DCMAKE_BUILD_TYPE:STRING=Release `
+        -DLINK_WITH_PYTHON:BOOL=ON `
+        -DPYTHON_CLI:BOOL=ON `
+        -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} `
+        -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} `
+        -DBUILD_TESTING:BOOL=ON `
+        -DBUILD_FORTRAN:BOOL=ON `
+        -DBUILD_PACKAGE:BOOL=OFF `
+        -DDOCUMENTATION_BUILD:STRING=DoNotBuild `
+        -DENABLE_OPENMP:BOOL=OFF `
+        ../
+      Write-Output "::endgroup::"
+
+      if ("${{ inputs.minimal-targets }}" -eq "true") {
+          Begin-Group "Building only energyplus and fortran targets"
+          ninja energyplus ExpandObjects_build ReadVars_build Slab_build Basement_build AppGPostProcess_build ParametricPreprocessor_build
+          Write-Output "::endgroup::"
+      }
+      else {
+          Begin-Group "Building full energyplus"
+          ninja
+          Write-Output "::endgroup::"
+      }
+
+      Begin-Group "Showing CCache Stats"
+      try { ccache --show-stats -vv } catch { ccache --show-stats }
+      ccache --zero-stats
+      ccache -p
+      Write-Output "::endgroup::"
+
+  - name: Configure CMake And Build on Unix
+    if: runner.os != 'Windows'
+    working-directory: ${{ inputs.build-directory }}
+    shell: bash
+    run: |
+      begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+      begin_group "CMake configure"
+      cmake \
+        -G Ninja \
+        -DENABLE_PCH:BOOL=${{ inputs.enable-pch }} \
+        -DCMAKE_BUILD_TYPE:STRING=Release \
+        -DLINK_WITH_PYTHON:BOOL=ON \
+        -DPYTHON_CLI:BOOL=ON \
+        -DPython_REQUIRED_VERSION:STRING=${{ inputs.python-version }} \
+        -DPython_ROOT_DIR:PATH=${{ inputs.python-root-dir }} \
+        -DBUILD_TESTING:BOOL=ON \
+        -DBUILD_FORTRAN:BOOL=ON \
+        -DBUILD_PACKAGE:BOOL=OFF \
+        -DDOCUMENTATION_BUILD:STRING=DoNotBuild \
+        -DENABLE_OPENMP:BOOL=OFF \
+        ../
+
+      if [ "${{ inputs.minimal-targets }}" == "true" ]; then
+        begin_group "Builing only energyplus and fortran targets"
+        ninja energyplus ExpandObjects ReadVarsESO Slab Basement AppGPostProcess ParametricPreprocessor
+        echo "::endgroup::"
+      else
+        begin_group "Builing full energyplus"
+        ninja
+        echo "::endgroup::"
+      fi;
+
+      begin_group "Showing CCache Stats"
+      ccache --show-stats -vv || ccache --show-stats || true
+      ccache --zero-stats
+      ccache -p
+      echo "::endgroup::"

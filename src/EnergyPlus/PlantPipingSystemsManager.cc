@@ -380,7 +380,7 @@ namespace PlantPipingSystemsManager {
 
             // Write eio data
             for (auto &thisDomain : state.dataPlantPipingSysMgr->domains) {
-                static constexpr std::string_view DomainCellsToEIO("{},{:5},{:5},{:5}\n");
+                static constexpr std::string_view DomainCellsToEIO("Domain Name,{},{:5},{:5},{:5}\n");
                 print(state.files.eio,
                       DomainCellsToEIO,
                       thisDomain.Name,

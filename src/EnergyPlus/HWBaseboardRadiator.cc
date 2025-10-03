@@ -453,8 +453,17 @@ namespace HWBaseboardRadiator {
             thisHWBaseboard.Name = state.dataIPShortCut->cAlphaArgs(1);                          // Name of this baseboard
             thisHWBaseboard.EquipType = DataPlant::PlantEquipmentType::Baseboard_Rad_Conv_Water; //'ZoneHVAC:Baseboard:RadiantConvective:Water'
 
-            thisHWBaseboard.designObjectName = state.dataIPShortCut->cAlphaArgs(2); // Name of the design object for this baseboard
-            thisHWBaseboard.DesignObjectPtr = Util::FindItemInList(thisHWBaseboard.designObjectName, HWBaseboardDesignNames);
+            Util::setDesignObjectNameAndPointer(state,
+                                                thisHWBaseboard.designObjectName,
+                                                thisHWBaseboard.DesignObjectPtr,
+                                                state.dataIPShortCut->cAlphaArgs(2),
+                                                HWBaseboardDesignNames,
+                                                cCMO_BBRadiator_Water,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                ErrorsFound);
+            if (ErrorsFound) {
+                break;
+            }
             HWBaseboardDesignData &HWBaseboardDesignDataObject =
                 state.dataHWBaseboardRad->HWBaseboardDesignObject(thisHWBaseboard.DesignObjectPtr); // Contains the data for the design object
 

@@ -2203,12 +2203,21 @@ void GetOARequirements(EnergyPlusData &state)
     lAlphaBlanks.dimension(NumAlphas, true);
     lNumericBlanks.dimension(NumNumbers, true);
 
-    if (state.dataSize->NumOARequirements > 0) {
+    // Create default OASpec for use by Controller:MechanicalVentilation if needed, put at the end of OARequirements
+    state.dataSize->NumOARequirements += 1;
+    state.dataSize->OARequirements.allocate(state.dataSize->NumOARequirements);
+    state.dataSize->OARequirements_Default = state.dataSize->NumOARequirements;
+    auto &defaultOAReq = state.dataSize->OARequirements(state.dataSize->OARequirements_Default);
+    defaultOAReq.Name = "Default-0.00944[m3/s-person]";
+    defaultOAReq.OAFlowMethod = OAFlowCalcMethod::PerPerson;
+    defaultOAReq.OAFlowPerPerson = 0.00944;
+    defaultOAReq.oaFlowFracSched = Sched::GetScheduleAlwaysOn(state);
+
+    if (numOARequirements > 0) {
         int IOStatus;            // Used in GetObjectItem
         bool ErrorsFound(false); // If errors detected in input
-        state.dataSize->OARequirements.allocate(state.dataSize->NumOARequirements);
 
-        // Start Loading the System Input
+        // Start Loading the System Input, first element is the default
         for (int OAIndex = 1; OAIndex <= numOARequirements; ++OAIndex) {
 
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
@@ -3276,6 +3285,9 @@ void GetZoneSizingInput(EnergyPlusData &state)
                                                  state.dataIPShortCut->cAlphaArgs(13)));
                     }
                 }
+                zoneSizingIndex.heatCoilSizingMethod = static_cast<DataSizing::HeatCoilSizMethod>(
+                    getEnumValue(DataSizing::HeatCoilSizMethodNamesUC, state.dataIPShortCut->cAlphaArgs(16)));
+                zoneSizingIndex.maxHeatCoilToCoolingLoadSizingRatio = state.dataIPShortCut->rNumericArgs(23);
             }
         }
     }
@@ -3311,8 +3323,12 @@ void ReportTemperatureInputError(
     }
 }
 
-void GetZoneAndZoneListNames(
-    EnergyPlusData &state, bool &ErrorsFound, int &NumZones, Array1D_string &ZoneNames, int &NumZoneLists, Array1D<ZoneListData> &ZoneListNames)
+void GetZoneAndZoneListNames(EnergyPlusData &state,
+                             [[maybe_unused]] bool &ErrorsFound,
+                             int &NumZones,
+                             Array1D_string &ZoneNames,
+                             int &NumZoneLists,
+                             Array1D<ZoneListData> &ZoneListNames)
 {
 
     // SUBROUTINE INFORMATION:
@@ -3442,7 +3458,9 @@ void GetSystemSizingInput(EnergyPlusData &state)
     constexpr int iHeatDesignCapacityNumericNum(24);          // N24, \field Heating Design Capacity {W}
     constexpr int iHeatCapacityPerFloorAreaNumericNum(25);    // N25, \field Heating Design Capacity Per Floor Area {W/m2}
     constexpr int iHeatFracOfAutosizedCapacityNumericNum(26); // N26, \field Fraction of Autosized Cooling Design Capacity {-}
-    constexpr int iOccupantDiversity = 27;                    // N26, \field Occupant Diversity
+    constexpr int iOccupantDiversity = 27;                    // N27, \field Occupant Diversity
+    constexpr int iHeatCoilSizingMethodAlphaNum = 12;         // A12, \field Heating Coil Sizing Method
+    constexpr int iHeatToCoolSizingRatioNumericNum = 28;      // N28, \field Maximum Heating Capacity To Cooling Load Sizing Ratio
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int SysSizIndex;         // loop index
@@ -3505,22 +3523,8 @@ void GetSystemSizingInput(EnergyPlusData &state)
         SysSizInput(SysSizIndex).CoolCapControl = static_cast<CapacityControl>(
             getEnumValue(CapacityControlNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(iCoolCapControlAlphaNum))));
 
-        {
-            std::string const &sizingOption = state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum);
-            if (sizingOption == "COINCIDENT") {
-                SysSizInput(SysSizIndex).SizingOption = DataSizing::SizingConcurrence::Coincident;
-            } else if (sizingOption == "NONCOINCIDENT") {
-                SysSizInput(SysSizIndex).SizingOption = DataSizing::SizingConcurrence::NonCoincident;
-            } else {
-                ShowSevereError(state, format("{}=\"{}\", invalid data.", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(iNameAlphaNum)));
-                ShowContinueError(state,
-                                  format("... incorrect {}=\"{}\".",
-                                         state.dataIPShortCut->cAlphaFieldNames(iSizingOptionAlphaNum),
-                                         state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum)));
-                ShowContinueError(state, "... valid values are Coincident or NonCoincident.");
-                ErrorsFound = true;
-            }
-        }
+        SysSizInput(SysSizIndex).SizingOption = static_cast<SizingConcurrence>(
+            getEnumValue(SizingConcurrenceNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum))));
 
         BooleanSwitch is100PctOACooling = getYesNoValue(state.dataIPShortCut->cAlphaArgs(i100PercentOACoolingAlphaNum));
         SysSizInput(SysSizIndex).CoolOAOption = (is100PctOACooling == BooleanSwitch::Yes) ? OAControl::AllOA : OAControl::MinOA;
@@ -3963,6 +3967,10 @@ void GetSystemSizingInput(EnergyPlusData &state)
         } else {
             SysSizInput(SysSizIndex).OccupantDiversity = state.dataIPShortCut->rNumericArgs(iOccupantDiversity);
         }
+
+        SysSizInput(SysSizIndex).heatCoilSizingMethod = static_cast<DataSizing::HeatCoilSizMethod>(
+            getEnumValue(DataSizing::HeatCoilSizMethodNamesUC, state.dataIPShortCut->cAlphaArgs(iHeatCoilSizingMethodAlphaNum)));
+        SysSizInput(SysSizIndex).maxHeatCoilToCoolingLoadSizingRatio = state.dataIPShortCut->rNumericArgs(iHeatToCoolSizingRatioNumericNum);
     }
 
     if (ErrorsFound) {
@@ -4010,10 +4018,6 @@ void GetPlantSizingInput(EnergyPlusData &state)
             e.LoopType = DataSizing::TypeOfPlantLoop::Invalid;
             e.DesVolFlowRate = 0.0;
         }
-        for (int i = 1; i <= state.dataSize->NumPltSizInput; ++i) {
-            state.dataSize->PlantSizData(i).ConcurrenceOption = NonCoincident;
-            state.dataSize->PlantSizData(i).NumTimeStepsInAvg = 1;
-        }
     }
 
     for (PltSizIndex = 1; PltSizIndex <= state.dataSize->NumPltSizInput; ++PltSizIndex) {
@@ -4047,20 +4051,8 @@ void GetPlantSizingInput(EnergyPlusData &state)
         assert(state.dataSize->PlantSizData(PltSizIndex).LoopType != TypeOfPlantLoop::Invalid);
 
         if (NumAlphas > 2) {
-            {
-                std::string const &concurrenceOption = state.dataIPShortCut->cAlphaArgs(3);
-                if (concurrenceOption == "NONCOINCIDENT") {
-                    state.dataSize->PlantSizData(PltSizIndex).ConcurrenceOption = NonCoincident;
-                } else if (concurrenceOption == "COINCIDENT") {
-                    state.dataSize->PlantSizData(PltSizIndex).ConcurrenceOption = Coincident;
-                } else {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(
-                        state, format("...incorrect {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-                    ShowContinueError(state, R"(...Valid values are "NonCoincident" or "Coincident".)");
-                    ErrorsFound = true;
-                }
-            }
+            state.dataSize->PlantSizData(PltSizIndex).ConcurrenceOption =
+                static_cast<SizingConcurrence>(getEnumValue(SizingConcurrenceNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3))));
         }
         if (NumAlphas > 3) {
             {

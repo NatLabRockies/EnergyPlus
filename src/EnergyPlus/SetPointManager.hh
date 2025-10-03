@@ -505,6 +505,8 @@ namespace SetPointManager {
     int GetMixedAirNumWithCoilFreezingCheck(EnergyPlusData &state, int MixedAirNode);
 
     Real64 interpSetPoint(Real64 LowVal, Real64 HighVal, Real64 RefVal, Real64 SetptAtLowVal, Real64 SetptAtHighVal);
+
+    void FillPredefinedTablesForSetPointManagers(EnergyPlusData &state);
 } // namespace SetPointManager
 
 struct SetPointManagerData : BaseGlobalStruct

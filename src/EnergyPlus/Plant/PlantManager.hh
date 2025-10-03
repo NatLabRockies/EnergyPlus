@@ -113,6 +113,8 @@ namespace PlantManager {
                                        const std::string_view &compName,
                                        int &rowCounter);
 
+    void FillPlantEquipmentOperationLoad(EnergyPlusData &state);
+
     void InitializeLoops(EnergyPlusData &state,
                          bool FirstHVACIteration); // true if first iteration of the simulation
 

@@ -191,6 +191,8 @@ endif()
 
 
 if (RUN_CALLGRIND)
+  message("Running Simulation with Callgrind:")
+  message(STATUS "${VALGRIND_COMMAND} ${ENERGYPLUS_EXE} -w ${EPW_PATH} -d ${OUTPUT_DIR_PATH} ${ENERGYPLUS_FLAGS} ${IDF_PATH}")
   execute_process(
     COMMAND ${ECHO_CMD}
     COMMAND ${VALGRIND_COMMAND} "${ENERGYPLUS_EXE}" -w "${EPW_PATH}" -d "${OUTPUT_DIR_PATH}" ${ENERGYPLUS_FLAGS_LIST} "${IDF_PATH}"
@@ -204,6 +206,8 @@ if (RUN_CALLGRIND)
 endif()
 
 if (RUN_PERF_STAT)
+  message("Running Simulation with Perf Stat:")
+  message(STATUS "${PERF_STAT_COMMAND} ${ENERGYPLUS_EXE} -w ${EPW_PATH} -d ${OUTPUT_DIR_PATH} ${ENERGYPLUS_FLAGS} ${IDF_PATH}")
   execute_process(
     COMMAND ${ECHO_CMD}
     COMMAND ${PERF_STAT_COMMAND} "${ENERGYPLUS_EXE}" -w "${EPW_PATH}" -d "${OUTPUT_DIR_PATH}" ${ENERGYPLUS_FLAGS_LIST} "${IDF_PATH}"
@@ -219,6 +223,8 @@ endif()
 
 # Run without perf stat or callgrind, if neither is requested
 if (NOT RUN_PERF_STAT AND NOT RUN_CALLGRIND)
+  message("Running Simulation:")
+  message(STATUS "${ENERGYPLUS_EXE} -w ${EPW_PATH} -d ${OUTPUT_DIR_PATH} ${ENERGYPLUS_FLAGS} ${IDF_PATH}")
   execute_process(
     COMMAND ${ECHO_CMD}
     COMMAND "${ENERGYPLUS_EXE}" -w "${EPW_PATH}" -d "${OUTPUT_DIR_PATH}" ${ENERGYPLUS_FLAGS_LIST} "${IDF_PATH}"
@@ -231,6 +237,22 @@ if (NOT RUN_PERF_STAT AND NOT RUN_CALLGRIND)
   endif()
 endif()
 
+set(HTML_PATH "${OUTPUT_DIR_PATH}/eplustbl.htm")
+if(EXISTS "${HTML_PATH}")
+  message("Checking uniqueness of HTML Table FullNames:")
+  message(STATUS "${Python_EXECUTABLE} ${SOURCE_DIR}/scripts/dev/ensure_unique_html_tables.py ${OUTPUT_DIR_PATH}")
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} "${SOURCE_DIR}/scripts/dev/ensure_unique_html_tables.py" "${OUTPUT_DIR_PATH}"
+    RESULT_VARIABLE RESULT
+    ECHO_OUTPUT_VARIABLE
+    ECHO_ERROR_VARIABLE
+  )
+
+  if(NOT RESULT EQUAL 0)
+    message("Test Failed: HTML output tables are NOT unique")
+    return()
+  endif()
+endif()
+
 # if we get here, then none of the required tests failed
 message("Test Passed")
-

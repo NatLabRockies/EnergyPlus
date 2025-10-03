@@ -4807,7 +4807,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         SetupOutputVariable(state,
                             "Zone VRF Air Terminal Fan Availability Status",
                             Constant::Units::None,
-                            (int &)thisVrfTU.availStatus,
+                            thisVrfTU.availStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             thisVrfTU.Name);

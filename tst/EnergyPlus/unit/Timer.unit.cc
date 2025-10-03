@@ -89,7 +89,6 @@ TEST_F(EnergyPlusFixture, Timer_ticktock)
     t.tick();
     std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time_ms));
     t.tock();
-    auto count = t.duration().count();
     EXPECT_GE(t.duration().count(), sleep_time_ms * 2);
     EXPECT_LT(t.duration().count(), sleep_time_ms * 3);
     EXPECT_GE(t.elapsedSeconds(), sleep_time_s * 2);

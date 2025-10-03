@@ -1023,11 +1023,11 @@ void SQLite::initializeSystemSizingTable()
 void SQLite::initializeComponentSizingTable()
 {
     constexpr std::string_view componentSizesTableSQL = "CREATE TABLE ComponentSizes (ComponentSizesIndex INTEGER PRIMARY KEY, "
-                                                        "CompType TEXT, CompName TEXT, Description TEXT, Value REAL, Units TEXT);";
+                                                        "CompType TEXT, CompName TEXT, Description TEXT, Value REAL, Units TEXT, StrValue TEXT);";
 
     sqliteExecuteCommand(componentSizesTableSQL);
 
-    constexpr std::string_view componentSizingInsertSQL = "INSERT INTO ComponentSizes VALUES (?,?,?,?,?,?);";
+    constexpr std::string_view componentSizingInsertSQL = "INSERT INTO ComponentSizes VALUES (?,?,?,?,?,?,?);";
 
     sqlitePrepareStatement(m_componentSizingInsertStmt, componentSizingInsertSQL);
 }
@@ -1836,6 +1836,25 @@ void SQLite::addSQLiteComponentSizingRecord(std::string_view compType, // the ty
         sqliteBindText(m_componentSizingInsertStmt, 4, description);
         sqliteBindDouble(m_componentSizingInsertStmt, 5, varValue);
         sqliteBindText(m_componentSizingInsertStmt, 6, units);
+
+        sqliteStepCommand(m_componentSizingInsertStmt);
+        sqliteResetCommand(m_componentSizingInsertStmt);
+    }
+}
+
+void SQLite::addSQLiteComponentSizingStrRecord(std::string_view compType, // the type of the component
+                                               std::string_view compName, // the name of the component
+                                               std::string_view varDesc,  // the description of the input variable
+                                               std::string_view varValue  // the value from the sizing calculation
+)
+{
+    if (m_writeOutputToSQLite) {
+        ++m_componentSizingIndex;
+        sqliteBindInteger(m_componentSizingInsertStmt, 1, m_componentSizingIndex);
+        sqliteBindText(m_componentSizingInsertStmt, 2, compType);
+        sqliteBindText(m_componentSizingInsertStmt, 3, compName);
+        sqliteBindText(m_componentSizingInsertStmt, 4, varDesc);
+        sqliteBindText(m_componentSizingInsertStmt, 7, varValue);
 
         sqliteStepCommand(m_componentSizingInsertStmt);
         sqliteResetCommand(m_componentSizingInsertStmt);

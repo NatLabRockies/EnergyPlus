@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.12...3.5 )  # bumped max support to 3.5 to hush a cmake deprecation warning
+CMAKE_MINIMUM_REQUIRED( VERSION 2.8.12...4.0.3 )  # bumped max support to hush a cmake deprecation warning
 
 PROJECT(DElight)
 

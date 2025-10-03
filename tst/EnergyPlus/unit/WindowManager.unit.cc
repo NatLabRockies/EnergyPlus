@@ -2541,7 +2541,6 @@ TEST_F(EnergyPlusFixture, SpectralAngularPropertyTest)
     Window::InitGlassOpticalCalculations(*state);
 
     int NumAngles = 10; // Number of incident angles
-    Real64 sum;
     // total transmittance
     Array1D<Real64> correctT(
         NumAngles, {0.529017128, 0.472866571, 0.414862350, 0.355230972, 0.294204731, 0.232087506, 0.169331950, 0.10672958, 0.04626078, 0.0});

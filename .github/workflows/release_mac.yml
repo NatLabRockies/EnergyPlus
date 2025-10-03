@@ -49,7 +49,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
 #    - name: Setup QtIFW 4.x
 #      uses: jmarrec/setup-qtifw@v1
@@ -166,7 +166,7 @@ jobs:
               -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DDOCUMENTATION_BUILD:STRING=$DOCUMENTATION_BUILD -DTEX_INTERACTION:STRING="batchmode" \
-              -DENABLE_OPENMP:BOOL=OFF -DUSE_OpenMP:BOOL=OFF \
+              -DENABLE_OPENMP:BOOL=OFF \
               -DCPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION:STRING="Developer ID Application: National Renewable Energy Laboratory (K7JYVQJL7R)" \
               -DCPACK_CODESIGNING_NOTARY_PROFILE_NAME:STRING=EnergyPlus \
               ../
@@ -293,19 +293,19 @@ jobs:
             test_key: mac13-arm64
 
     steps:
-    - uses: actions/checkout@v4  # Still need E+ checked out to get testing scripts
+    - uses: actions/checkout@v5  # Still need E+ checked out to get testing scripts
       with:
         path: checkout
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       id: setup-python
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         architecture: ${{ matrix.python-arch }}
 
     - name: Gather Test Package from Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.tar.gz
         path: package
@@ -323,7 +323,7 @@ jobs:
       run: python checkout/scripts/package_tests/runner.py --verbose ${{ matrix.test_key }} package/
 
     - name: Gather Dmg Package from Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.dmg
         path: dmg

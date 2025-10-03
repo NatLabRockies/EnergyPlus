@@ -456,6 +456,8 @@ namespace Avail {
                                       bool &ErrorsFound        // true if certain errors are detected here
     );
 
+    void FillPredefinedTablesForAvailManager(EnergyPlusData &state);
+
     void InitSysAvailManagers(EnergyPlusData &state);
 
     Status SimSysAvailManager(EnergyPlusData &state,

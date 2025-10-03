@@ -6,6 +6,10 @@ if(USE_PSYCH_ERRORS)
   add_compile_definitions(EP_psych_errors)
 endif()
 
+if(PYTHON_CLI)
+  add_compile_definitions(EP_PYTHON_CLI)
+endif()
+
 set(test_src
     TestHelpers/IdfParser.cc
     TestHelpers/IdfParser.hh
@@ -98,6 +102,7 @@ set(test_src
     DesiccantDehumidifiers.unit.cc
     DisplacementVentMgr.unit.cc
     DualDuct.unit.cc
+    DuctLoss.unit.cc
     EPVector.unit.cc
     EMSManager.unit.cc
     EarthTube.unit.cc
@@ -123,7 +128,13 @@ set(test_src
     Furnaces.unit.cc
     General.unit.cc
     GeneralRoutines.unit.cc
-    GroundHeatExchangers.unit.cc
+    GroundHeatExchangers/Base.unit.cc
+    GroundHeatExchangers/BoreholeArray.unit.cc
+    GroundHeatExchangers/BoreholeSingle.unit.cc
+    GroundHeatExchangers/Properties.unit.cc
+    GroundHeatExchangers/ResponseFactors.unit.cc
+    GroundHeatExchangers/Slinky.unit.cc
+    GroundHeatExchangers/Vertical.unit.cc
     HVACControllers.unit.cc
     HVACCooledBeam.unit.cc
     HVACDXSystem.unit.cc

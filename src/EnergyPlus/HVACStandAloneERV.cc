@@ -75,6 +75,7 @@
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -260,7 +261,8 @@ void GetStandAloneERV(EnergyPlusData &state)
             state, Alphas(3), CurrentModuleObject, cAlphaFields(3), state.dataHVACStandAloneERV->HeatExchangerUniqueNames, ErrorsFound);
         standAloneERV.HeatExchangerName = Alphas(3);
         bool errFlag = false;
-        standAloneERV.hxType = HeatRecovery::GetHeatExchangerObjectTypeNum(state, standAloneERV.HeatExchangerName, errFlag);
+        standAloneERV.hxType =
+            HeatRecovery::GetHeatExchangerObjectTypeNum(state, standAloneERV.HeatExchangerName, standAloneERV.HeatExchangerIndex, errFlag);
         if (errFlag) {
             ShowContinueError(state, format("... occurs in {} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ErrorsFound = true;
@@ -432,6 +434,10 @@ void GetStandAloneERV(EnergyPlusData &state)
                     state, format("{} controller type ZoneHVAC:EnergyRecoveryVentilator:Controller not found = {}", CurrentModuleObject, Alphas(6)));
                 ErrorsFound = true;
                 standAloneERV.ControllerNameDefined = false;
+            } else {
+                state.dataHeatRecovery->ExchCond(standAloneERV.HeatExchangerIndex).hasZoneERVController = true;
+                OutputReportPredefined::PreDefTableEntry(
+                    state, state.dataOutRptPredefined->pdchAirHROAControllerName, standAloneERV.HeatExchangerName, standAloneERV.ControllerName);
             }
         }
 
@@ -575,6 +581,8 @@ void GetStandAloneERV(EnergyPlusData &state)
         // Add HX to component sets array
         BranchNodeConnections::SetUpCompSets(
             state, standAloneERV.UnitType, standAloneERV.Name, "UNDEFINED", standAloneERV.HeatExchangerName, "UNDEFINED", "UNDEFINED");
+        OutputReportPredefined::PreDefTableEntry(
+            state, state.dataOutRptPredefined->pdchAirHRZoneHVACName, standAloneERV.HeatExchangerName, standAloneERV.Name);
 
         // Add supply fan to component sets array
         BranchNodeConnections::SetUpCompSets(state,
@@ -1026,7 +1034,7 @@ void GetStandAloneERV(EnergyPlusData &state)
         SetupOutputVariable(state,
                             "Zone Ventilator Supply Fan Availability Status",
                             Constant::Units::None,
-                            (int &)standAloneERV.availStatus,
+                            standAloneERV.availStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             standAloneERV.Name);

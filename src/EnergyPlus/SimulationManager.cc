@@ -1131,6 +1131,32 @@ namespace SimulationManager {
             if (NumAlpha > 5) {
                 if (Alphas(6) == "YES") {
                     state.dataGlobal->DoHVACSizingSimulation = true;
+                    if (!state.dataGlobal->DoPlantSizing) { // if not doing plant sizing, cannot do HVAC sizing simulation
+                        state.dataGlobal->DoHVACSizingSimulation = false;
+
+                        ShowWarningError(
+                            state, "GetProjectData: Mismatch in the Sizing Flags Do HVAC Sizing and Do Plant Sizing in SimulationControl object");
+                        ShowContinueError(state, "...The Do HVAC Sizing Simulation for Sizing Periods flag is YES, but the Do Plant Sizing");
+                        ShowContinueError(state, "...Calculation flag is NO.  This is not allowed.  Either set the Do HVAC Sizing Simulation");
+                        ShowContinueError(state, "...for Sizing Periods flag to NO or set the Do Plant Sizing Calculation to YES and add the");
+                        ShowContinueError(state, "...appropriate Sizing:Plant object(s) to the input file.  The simulation continues with");
+                        ShowContinueError(state, "...the Do HVAC Sizing flag reset to NO.");
+                    } else {
+                        std::string spObject = "Sizing:Plant";
+                        int NumPltSizInput = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, spObject);
+                        if (NumPltSizInput == 0 && state.dataGlobal->DoHVACSizingSimulation && state.dataGlobal->DoPlantSizing) {
+                            ShowSevereError(
+                                state,
+                                format(
+                                    "GetProjectData: No {} object entered when the Do HVAC Sizing Simulation and Do Plant Sizing are both YES in the "
+                                    "SimulationControl object.",
+                                    spObject));
+                            ShowContinueError(state, format("...When these input flags are both yes, a {} object is required.", spObject));
+                            ShowContinueError(state, format("...Either add one or more appropriate {} objects to the input file", spObject));
+                            ShowContinueError(state, "...or change both the Do HVAC Sizing Simulation and Do Plant Sizing are both YES. ");
+                            ErrorsFound = true;
+                        }
+                    }
                 }
             }
         }
@@ -1838,7 +1864,7 @@ namespace SimulationManager {
             "Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number "
             "Parallel Sims");
         print(state.files.eio, "{}\n", ThreadingHeader);
-        static constexpr std::string_view ThreadReport("Program Control:Threads/Parallel Sims, {},{}, {}, {}, {}, {}, {}, {}\n");
+        static constexpr std::string_view ThreadReport("Program Control Information:Threads/Parallel Sims, {},{}, {}, {}, {}, {}, {}, {}\n");
         if (state.dataSysVars->Threading) {
             if (state.dataSysVars->iEnvSetThreads == 0) {
                 cEnvSetThreads = "Not Set";
@@ -2192,6 +2218,7 @@ namespace SimulationManager {
         static constexpr std::string_view Format_723 =
             "! <Zone Equipment Component>,<Component Count>,<Component Type>,<Component Name>,<Zone Name>,<Heating "
             "Priority>,<Cooling Priority>";
+        bool nodeConnectionErrorFlag = false;
 
         // Report outside air node names on the Branch-Node Details file
         print(state.files.bnd, "{}\n", "! ===============================================================");
@@ -2256,12 +2283,13 @@ namespace SimulationManager {
                                      "been retrieved.");
                     state.dataSimulationManager->WarningOut = false;
                 }
-                ShowWarningError(
+                ShowSevereError(
                     state,
                     format("Potential Node Connection Error for object {}, name={}", CType, state.dataBranchNodeConnections->CompSets(Count).CName));
                 ShowContinueError(state, "  Node Types are still UNDEFINED -- See Branch/Node Details file for further information");
                 ShowContinueError(state, format("  Inlet Node : {}", state.dataBranchNodeConnections->CompSets(Count).InletNodeName));
                 ShowContinueError(state, format("  Outlet Node: {}", state.dataBranchNodeConnections->CompSets(Count).OutletNodeName));
+                nodeConnectionErrorFlag = true;
                 ++state.dataBranchNodeConnections->NumNodeConnectionErrors;
             }
         }
@@ -2723,6 +2751,10 @@ namespace SimulationManager {
         }
 
         state.dataErrTracking->AskForConnectionsReport = false;
+
+        if (nodeConnectionErrorFlag) {
+            ShowFatalError(state, "Please see severe error(s) and correct either the branch nodes or the component nodes so that they match.");
+        }
     }
 
     void PostIPProcessing(EnergyPlusData &state)

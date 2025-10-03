@@ -75,7 +75,7 @@ Begin VB.Form frmAbout
       Width           =   3855
    End
    Begin VB.Label lblTitle 
-      Caption         =   "EP-Launch  -  Version 2.16"
+      Caption         =   "EP-Launch  -  Version 2.17"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   12

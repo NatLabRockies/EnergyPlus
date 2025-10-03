@@ -6,7 +6,7 @@ The AirflowNetwork model can also be used to model infiltration and mixing (zone
 
 \subsection{ZoneInfiltration:DesignFlowRate}\label{zoneinfiltrationdesignflowrate}
 
-Infiltration is the unintended flow of air from the outdoor environment directly into a thermal zone. Infiltration is generally caused by the opening and closing of exterior doors, cracks around windows, and even in very small amounts through building elements. The basic equation used to calculate infiltration with this object is:
+Infiltration is the unintended flow of air from the outdoor environment directly into a thermal zone. Infiltration is generally caused by the opening and closing of exterior doors, cracks around windows and exterior doors, and even in very small amounts through building elements. The basic equation used to calculate infiltration with this object is:
 
 \begin{equation}
   \rm{Infiltration} = \left( {{I_{design}}} \right)\left( {{F_{schedule}}} \right)\left[ {A + B\left| {\left( {{T_{zone}} - {T_{odb}}} \right)} \right| + C\left( {WindSpeed} \right) + D\left( {Windspee{d^2}} \right)} \right]
@@ -14,9 +14,9 @@ Infiltration is the unintended flow of air from the outdoor environment directly
 
 More advanced infiltration calculations are possible using the EnergyPlus AirflowNetwork model for natural infiltration driven by wind and/or by forced air. Infiltration described by the equation shown above is entered into EnergyPlus using the following syntax. Exfiltration (the leakage of zone air to the outside) is generally handled better as zone exhaust air in the zone equipment description. The equation must always yield a non-negative results; negative values are set to 0.0.
 
-The question of typical values for these coefficients is subject to debate. Ideally, one should do a detailed analysis of the infiltration situation and then determine a custom set of coefficients using methods such as those laid out in Chapter 26 of the ASHRAE Handbook of Fundamentals. The EnergyPlus defaults are 1,0,0,0 which give a constant volume flow of infiltration under all conditions.
+The question of typical values for these coefficients is subject to debate. Ideally, one should do a detailed analysis of the infiltration situation and then determine a custom set of coefficients using methods such as those laid out in Chapter 26 of the ASHRAE Handbook of Fundamentals. The EnergyPlus defaults are 1,0,0,0 which give a constant volumetric flow of infiltration under all conditions.
 
-BLAST (one of the EnergyPlus predecessors) used the following values as defaults: 0.606, 0.03636, 0.1177, 0. These coefficients produce a value of 1.0 at 0$^\circ$C deltaT and 3.35 m/s (7.5 mph) windspeed, which corresponds to a typical summer condition. At a winter condition of 40$^\circ$C deltaT and 6 m/s (13.4 mph) windspeed, these coefficients would increase the infiltration rate by a factor of 2.75.
+BLAST (one of the EnergyPlus predecessors) used the following values as defaults: 0.606, 0.03636, 0.1177, 0. These coefficients produce a value of 1.0 at 0$^\circ$C temperature difference between the inside and outside air temperatures and 3.35 m/s (7.5 mph) windspeed, which corresponds to a typical summer condition. At a winter condition of 40$^\circ$C temperature difference between the inside and outside air temperatures and 6 m/s (13.4 mph) windspeed, these coefficients would increase the infiltration rate by a factor of 2.75.
 
 In DOE-2 (the other EnergyPlus predecessor), the air change method defaults are (adjusted to SI units) 0, 0, 0.224 (windspeed), 0. With these coefficients, the summer conditions above would give a factor of 0.75, and the winter conditions would give 1.34. A windspeed of 4.47 m/s (10 mph) gives a factor of 1.0.
 
@@ -30,10 +30,10 @@ The EnergyPlus example files use all of the above, the BLAST defaults in some (e
 
 The local outdoor dry-bulb temperature used in the above basic equation (T\(_{odb}\)) is typically a function of the height of the zone centroid above ground. The corresponding zone name is given in the second field. The local outdoor dry-bulb temperature calculation procedure is given in the section of ``Local Outdoor Air Temperature Calculation'' in the Engineering Reference.
 
-The local outdoor wind speed used in the above basic equation (WindSpeed) is also a function of the height of the zone centroid above ground. The corresponding zone name is given in the second filed. The local outdoor wind speed calculation procedure is given in the section of ``Local Wind Speed Calculation'' in the Engineering Reference.
+The local outdoor wind speed used in the above basic equation (WindSpeed) is also a function of the height of the zone centroid above ground. The corresponding zone name is given in the second field. The local outdoor wind speed calculation procedure is given in the section of ``Local Wind Speed Calculation'' in the Engineering Reference.
 
 \begin{callout}
-  Note: When the value of the Wind Speed Profile Exponent field in the \hyperref[siteheightvariation]{Site:HeightVariation} is equal to 0.0. The local wind speed is always equal to the wind speed given in the weather data and will not be dependent on zone centroid height. Similarly, if the value of the Air Temperature Gradient Coefficient is set equal to 0 the local air dry-bulb temperature is also always equal to the air dry-bulb temperature given in the weather data and will not be dependent on zone centroid height.
+  Note: When the value of the Wind Speed Profile Exponent field in the \hyperref[siteheightvariation]{Site:HeightVariation} is equal to 0.0, the local wind speed is always equal to the wind speed given in the weather data and will not be dependent on zone centroid height. Similarly, if the value of the Air Temperature Gradient Coefficient is set equal to 0, the local air dry-bulb temperature is also always equal to the air dry-bulb temperature given in the weather data and will not be dependent on zone centroid height.
 \end{callout}
 
 One or more infiltration objects can be defined for each zone, and the resulting infiltration rate for the zone will simply be the summation of the flow rates specified by the infiltration objects.

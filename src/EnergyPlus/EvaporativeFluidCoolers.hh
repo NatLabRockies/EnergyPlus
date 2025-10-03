@@ -134,6 +134,7 @@ namespace EvaporativeFluidCoolers {
         bool LowSpeedEvapFluidCoolerUAWasAutoSized = false;  // true if low speed UA set to autosize on input
         Real64 LowSpeedEvapFluidCoolerUASizingFactor = 0.0;  // sizing factor for low speed UA []
         Real64 DesignEnteringWaterTemp = 0.0;                // Entering water temperature at design conditions
+        Real64 DesignExitWaterTemp = -999;                   // Leaving water temperature at design conditions [C]
         Real64 DesignEnteringAirTemp = 0.0;                  // Design inlet air dry-bulb temperature (C)
         Real64 DesignEnteringAirWetBulbTemp = 0.0;           // Design inlet air wet-bulb temperature (C)
         Real64 EvapFluidCoolerMassFlowRateMultiplier = 0.0;  // Maximum evaporative fluid cooler flow rate is

@@ -742,7 +742,9 @@ void ValidateComponent(EnergyPlusData &state,
     // convention of the Name of the item/object being the first Alpha Argument.
 
     IsNotOK = false;
-
+    if (CompType == "HEATPUMP:AIRTOWATER:COOLING" || CompType == "HEATPUMP:AIRTOWATER:HEATING") {
+        CompType = "HEATPUMP:AIRTOWATER";
+    }
     int ItemNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, std::string{CompType}, CompName);
 
     if (ItemNum < 0) {

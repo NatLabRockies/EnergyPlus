@@ -112,23 +112,23 @@ namespace FileSystem {
         Num
     };
 
-    inline constexpr bool is_all_json_type(FileTypes t)
+    constexpr bool is_all_json_type(FileTypes t)
     {
         return t > FileTypes::Invalid && t <= FileTypes::last_binary_json_type;
     }
-    inline constexpr bool is_json_type(FileTypes t)
+    constexpr bool is_json_type(FileTypes t)
     {
         return t > FileTypes::Invalid && t <= FileTypes::last_json_type;
     }
-    inline constexpr bool is_binary_json_type(FileTypes t)
+    constexpr bool is_binary_json_type(FileTypes t)
     {
         return t > FileTypes::last_json_type && t <= FileTypes::last_binary_json_type;
     }
-    inline constexpr bool is_idf_type(FileTypes t)
+    constexpr bool is_idf_type(FileTypes t)
     {
         return t == FileTypes::IDF || t == FileTypes::IMF;
     }
-    inline constexpr bool is_flat_file_type(FileTypes t)
+    constexpr bool is_flat_file_type(FileTypes t)
     {
         return t > FileTypes::last_binary_json_type && t <= FileTypes::last_flat_file_type;
     }

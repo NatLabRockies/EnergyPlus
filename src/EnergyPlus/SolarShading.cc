@@ -1180,31 +1180,73 @@ void AllocateModuleArrays(EnergyPlusData &state)
         if (state.dataGlobal->DisplayAdvancedReportVariables) {
             // CurrentModuleObject='Zone(Advanced)'
             SetupOutputVariable(state,
-                                "Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate",
+                                "Zone Opaque Surface Inside Faces Conduction Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneOpaqSurfInsFaceCond(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Inside Faces Conduction Heat Gain Rate",
                                 Constant::Units::W,
                                 state.dataHeatBal->ZoneOpaqSurfInsFaceCondGainRep(ZoneLoop),
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 state.dataHeatBal->Zone(ZoneLoop).Name);
             SetupOutputVariable(state,
-                                "Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate",
+                                "Zone Opaque Surface Inside Faces Conduction Heat Loss Rate",
                                 Constant::Units::W,
                                 state.dataHeatBal->ZoneOpaqSurfInsFaceCondLossRep(ZoneLoop),
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Outside Faces Conduction Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneOpaqSurfExtFaceCond(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Outside Faces Conduction Heat Gain Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneOpaqSurfExtFaceCondGainRep(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Outside Faces Conduction Heat Loss Rate",
+                                Constant::Units::W,
+                                state.dataHeatBal->ZoneOpaqSurfExtFaceCondLossRep(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
             // Energy variables
             SetupOutputVariable(state,
-                                "Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy",
+                                "Zone Opaque Surface Inside Faces Conduction Heat Gain Energy",
                                 Constant::Units::J,
                                 state.dataHeatBal->ZnOpqSurfInsFaceCondGnRepEnrg(ZoneLoop),
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Sum,
                                 state.dataHeatBal->Zone(ZoneLoop).Name);
             SetupOutputVariable(state,
-                                "Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy",
+                                "Zone Opaque Surface Inside Faces Conduction Heat Loss Energy",
                                 Constant::Units::J,
                                 state.dataHeatBal->ZnOpqSurfInsFaceCondLsRepEnrg(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Outside Faces Conduction Heat Gain Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZnOpqSurfExtFaceCondGnRepEnrg(ZoneLoop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->Zone(ZoneLoop).Name);
+            SetupOutputVariable(state,
+                                "Zone Opaque Surface Outside Faces Conduction Heat Loss Energy",
+                                Constant::Units::J,
+                                state.dataHeatBal->ZnOpqSurfExtFaceCondLsRepEnrg(ZoneLoop),
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Sum,
                                 state.dataHeatBal->Zone(ZoneLoop).Name);
@@ -1223,6 +1265,7 @@ void AllocateModuleArrays(EnergyPlusData &state)
                             OutputProcessor::StoreType::Average,
                             surf.Name);
         if (surf.ExtSolar) {
+
             SetupOutputVariable(state,
                                 "Surface Outside Face Sunlit Area",
                                 Constant::Units::m2,
@@ -4875,78 +4918,73 @@ void CalcPerSolarBeam(EnergyPlusData &state,
 
     // Initialize some values for the appropriate period
     if (!state.dataSysVars->DetailedSolarTimestepIntegration) {
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            for (int spaceNum : state.dataHeatBal->Zone(zoneNum).spaceIndexes) {
-                auto &thisSpace = state.dataHeatBal->space(spaceNum);
-                int firstSurf = thisSpace.OpaqOrIntMassSurfaceFirst;
-                int lastSurf = thisSpace.OpaqOrIntMassSurfaceLast;
-                for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                    s_surf->SurfOpaqAO(surfNum) = 0.0;
-                }
-                firstSurf = thisSpace.HTSurfaceFirst;
-                lastSurf = thisSpace.HTSurfaceLast;
-                for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                    state.dataSolarShading->SurfSunCosTheta(surfNum) = 0.0;
-                }
-                for (int hour = 1; hour <= 24; ++hour) {
-                    for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                        state.dataHeatBal->SurfSunlitFracHR(hour, surfNum) = 0.0;
-                        state.dataHeatBal->SurfCosIncAngHR(hour, surfNum) = 0.0;
-                    }
-                }
-                for (int hour = 1; hour <= 24; ++hour) {
-                    for (int timestep = 1; timestep <= state.dataGlobal->TimeStepsInHour; ++timestep) {
-                        for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                            state.dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum) = 0.0;
-                            state.dataHeatBal->SurfCosIncAng(hour, timestep, surfNum) = 0.0;
-                            state.dataHeatBal->SurfSunlitFracWithoutReveal(hour, timestep, surfNum) = 0.0;
-                        }
-                    }
-                }
-                for (int hour = 1; hour <= 24; ++hour) {
-                    for (int timestep = 1; timestep <= state.dataGlobal->TimeStepsInHour; ++timestep) {
-                        for (int backSurfNum = 1; backSurfNum <= state.dataBSDFWindow->MaxBkSurf; ++backSurfNum) {
-                            for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                                state.dataHeatBal->SurfWinBackSurfaces(hour, timestep, backSurfNum, surfNum) = 0.0;
-                                state.dataHeatBal->SurfWinOverlapAreas(hour, timestep, backSurfNum, surfNum) = 0.0;
-                            }
-                        }
-                    } // for (timestep)
-                } // for (hour)
-            } // for (spaceNum)
-        } // for (zoneNum)
 
-        for (auto &e : s_surf->SurfaceWindow) {
-            std::fill(e.OutProjSLFracMult.begin(), e.OutProjSLFracMult.end(), 1.0);
-            std::fill(e.InOutProjSLFracMult.begin(), e.InOutProjSLFracMult.end(), 1.0);
+        // Array1D and 1D-ish
+        for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+            s_surf->SurfOpaqAO(surfNum) = 0.0;
+            state.dataSolarShading->SurfSunCosTheta(surfNum) = 0.0;
+
+            for (int hour = 1; hour <= 24; ++hour) {
+                s_surf->SurfaceWindow(surfNum).OutProjSLFracMult[hour] = 1.0;
+                s_surf->SurfaceWindow(surfNum).InOutProjSLFracMult[hour] = 1.0;
+            }
         }
-    } else {
-        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
-            for (int spaceNum : state.dataHeatBal->Zone(zoneNum).spaceIndexes) {
-                auto &thisSpace = state.dataHeatBal->space(spaceNum);
-                int const firstSurf = thisSpace.HTSurfaceFirst;
-                int const lastSurf = thisSpace.HTSurfaceLast;
-                for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                    state.dataSolarShading->SurfSunCosTheta(surfNum) = 0.0;
-                    s_surf->SurfOpaqAO(surfNum) = 0.0;
-                    state.dataHeatBal->SurfSunlitFrac(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
-                    state.dataHeatBal->SurfSunlitFracWithoutReveal(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
-                    state.dataHeatBal->SurfSunlitFracHR(state.dataGlobal->HourOfDay, surfNum) = 0.0;
-                    state.dataHeatBal->SurfCosIncAngHR(state.dataGlobal->HourOfDay, surfNum) = 0.0;
-                    state.dataHeatBal->SurfCosIncAng(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
+
+        // Array2D
+        for (int hour = 1; hour <= 24; ++hour) {
+            for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+                state.dataHeatBal->SurfSunlitFracHR(hour, surfNum) = 0.0;
+                state.dataHeatBal->SurfCosIncAngHR(hour, surfNum) = 0.0;
+            }
+        }
+
+        // Array3D
+        for (int hour = 1; hour <= 24; ++hour) {
+            for (int timestep = 1; timestep <= state.dataGlobal->TimeStepsInHour; ++timestep) {
+                for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+                    state.dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum) = 0.0;
+                    state.dataHeatBal->SurfCosIncAng(hour, timestep, surfNum) = 0.0;
+                    state.dataHeatBal->SurfSunlitFracWithoutReveal(hour, timestep, surfNum) = 0.0;
                 }
+            }
+        }
+
+        // Array4D
+        for (int hour = 1; hour <= 24; ++hour) {
+            for (int timestep = 1; timestep <= state.dataGlobal->TimeStepsInHour; ++timestep) {
                 for (int backSurfNum = 1; backSurfNum <= state.dataBSDFWindow->MaxBkSurf; ++backSurfNum) {
-                    for (int surfNum = firstSurf; surfNum <= lastSurf; ++surfNum) {
-                        state.dataHeatBal->SurfWinBackSurfaces(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, backSurfNum, surfNum) = 0;
-                        state.dataHeatBal->SurfWinOverlapAreas(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, backSurfNum, surfNum) = 0.0;
+                    for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+                        state.dataHeatBal->SurfWinBackSurfaces(hour, timestep, backSurfNum, surfNum) = 0.0;
+                        state.dataHeatBal->SurfWinOverlapAreas(hour, timestep, backSurfNum, surfNum) = 0.0;
                     }
                 }
             }
         }
 
-        for (int SurfNum = 1; SurfNum <= s_surf->TotSurfaces; ++SurfNum) {
-            s_surf->SurfaceWindow(SurfNum).OutProjSLFracMult[state.dataGlobal->HourOfDay] = 1.0;
-            s_surf->SurfaceWindow(SurfNum).InOutProjSLFracMult[state.dataGlobal->HourOfDay] = 1.0;
+    } else {
+        for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+            state.dataSolarShading->SurfSunCosTheta(surfNum) = 0.0;
+            s_surf->SurfOpaqAO(surfNum) = 0.0;
+
+            s_surf->SurfaceWindow(surfNum).OutProjSLFracMult[state.dataGlobal->HourOfDay] = 1.0;
+            s_surf->SurfaceWindow(surfNum).InOutProjSLFracMult[state.dataGlobal->HourOfDay] = 1.0;
+
+            // Array2D
+            state.dataHeatBal->SurfSunlitFracHR(state.dataGlobal->HourOfDay, surfNum) = 0.0;
+            state.dataHeatBal->SurfCosIncAngHR(state.dataGlobal->HourOfDay, surfNum) = 0.0;
+
+            // Array3D
+            state.dataHeatBal->SurfSunlitFrac(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
+            state.dataHeatBal->SurfSunlitFracWithoutReveal(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
+            state.dataHeatBal->SurfCosIncAng(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, surfNum) = 0.0;
+        }
+
+        // Array4D
+        for (int backSurfNum = 1; backSurfNum <= state.dataBSDFWindow->MaxBkSurf; ++backSurfNum) {
+            for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
+                state.dataHeatBal->SurfWinBackSurfaces(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, backSurfNum, surfNum) = 0;
+                state.dataHeatBal->SurfWinOverlapAreas(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, backSurfNum, surfNum) = 0.0;
+            }
         }
     }
 
@@ -6641,7 +6679,7 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
 
             if (s_surf->SurfWinWindowModelType(SurfNum) != WindowModel::EQL && ANY_BLIND(ShadeFlag)) {
                 auto const &surfShade = s_surf->surfShades(SurfNum);
-                auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(surfShade.blind.matNum));
+                [[maybe_unused]] auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(surfShade.blind.matNum));
                 assert(matBlind != nullptr);
 
                 int profIdxLo = surfShade.blind.profAngIdxLo;

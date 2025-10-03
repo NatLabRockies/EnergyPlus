@@ -147,10 +147,6 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     Real64 TransmittivityVis; // Glass transmittivity, visible
     Real64 DenomRGas;         // Denominator for WindowGas calculations of NominalR
     Real64 Openness;          // insect screen openness fraction = (1-d/s)^2
-    Real64 minAngValue;       // minimum value of angle
-    Real64 maxAngValue;       // maximum value of angle
-    Real64 minLamValue;       // minimum value of wavelength
-    Real64 maxLamValue;       // maximum value of wavelength
 
     // Added TH 1/9/2009 to read the thermochromic glazings
 

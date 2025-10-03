@@ -2932,14 +2932,16 @@ Zone,Average,Surface Heat Storage Gain Rate [W]
 Zone,Average,Surface Heat Storage Loss Rate [W]
 Zone,Average,Surface Heat Storage Rate per Area [W/m2]
 Zone,Sum,Surface Heat Storage Energy [J]
-Zone,Average,Zone Opaque Surface Inside Face Conduction [W]
-Zone,Average,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate [W]
-Zone,Average,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate [W]
-Zone,Sum,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy [J]
-Zone,Sum,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy [J]
-Zone,Average,Zone Opaque Surface Outside Face Conduction [W]
-Zone,Average,Zone Opaque Surface Outside Face Conduction Gain[W]
-Zone,Average,Zone Opaque Surface Outside Face Conduction Loss[W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Rate [W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate [W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate [W]
+Zone,Sum,Zone Opaque Surface Inside Faces Conduction Heat Gain Energy [J]
+Zone,Sum,Zone Opaque Surface Inside Faces Conduction Heat Loss Energy [J]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Rate [W]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Heat Gain Rate [W]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Heat Loss Rate [W]
+Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Gain Energy [J]
+Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Loss Energy [J]
 Zone,Average, Surface Inside Face Beam Solar Radiation Heat Gain Rate [W]
 \end{lstlisting}
 
@@ -3430,37 +3432,37 @@ These ``heat storage'' output variables combine the inside face conduction and o
 
 Different versions of the reports are available. The basic heat storage rate (W) and a per unit area flux (W/m\(^{2}\)) can have positive or negative values with the sign convention that positive indicates heat being added to the surface's mass. There are also directed ``gain'' and ``loss'' versions that have only positive values or zero when the heat storage direction opposes (W). Finally there is a version for total energy stored (J).
 
-\subsubsection{Zone Opaque Surface Inside Face Conduction {[}W{]}}\label{zone-opaque-surface-inside-face-conduction-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Rate {[}W{]}}\label{zone-opaque-surface-inside-face-conduction-w}
 
-The sum of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Face Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Face Conduction = 550 -- 650 = -100 W.
+The sum of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Faces Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Faces Conduction = 550 -- 650 = -100 W.
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-gain-rate-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-gain-rate-w}
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-gain-energy-j}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-gain-energy-j}
 
 These are the power and energy sums for the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate = 700 - 500 = 200 W.
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-loss-rate-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-loss-rate-w}
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-loss-energy-j}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-loss-energy-j}
 
 These are the power and energy absolute value for the sums of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-w}
 
-The sum of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Face Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Outside Face Conduction = 550 -- 650 = -100 W.
+The sum of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Faces Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Outside Faces Conduction = 550 -- 650 = -100 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Gain {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-gain-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-gain-w}
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Gain Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-gain-energy-j}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-gain-energy-j}
 
-These are the power and energy sums for the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Face Conduction Gain = 700 - 500 = 200 W.
+These are the power and energy sums for the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Faces Conduction Gain = 700 - 500 = 200 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Loss {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-loss-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-loss-w}
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Loss Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-loss-energy-j}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-loss-energy-j}
 
-These are the power and energy absolute value for the sums of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and -300W. Then Zone Opaque Surface Outside Face Conduction Loss = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
+These are the power and energy absolute value for the sums of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and -300W. Then Zone Opaque Surface Outside Faces Conduction Loss = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
 
 \subsubsection{Surface Inside Face Beam Solar Radiation Heat Gain Rate {[}W{]}}\label{surface-inside-face-beam-solar-radiation-heat-gain-rate-w}
 

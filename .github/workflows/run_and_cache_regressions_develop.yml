@@ -1,0 +1,179 @@
+name: Build, Run and Cache Develop Regressions
+
+on:
+  push:
+    branches: [ develop, FixDevelopArmBuilds ]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  FC: gfortran-13
+
+jobs:
+  build_and_test:
+    name: Testing on ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      pull-requests: write
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: macos-14
+          macos_dev_target: 13.0
+          arch: arm64
+          python-arch: arm64
+          pretty: "Mac arm64"
+          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          allow_failure: false
+        - os: ubuntu-24.04
+          arch: x86_64
+          python-arch: x64
+          pretty: "Ubuntu 24.04"
+          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          allow_failure: false
+        - os: windows-2022
+          arch: x86_64
+          python-arch: x64
+          pretty: "Windows x64"
+          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          allow_failure: false
+        - os: ubuntu-24.04-arm
+          arch: arm64
+          python-arch: arm64
+          pretty: "Ubuntu 24.04 arm64"
+          python-version: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+          allow_failure: true
+        - os: windows-11-arm
+          arch: arm64
+          python-arch: arm64
+          pretty: "Windows arm64"
+          python-version: 3.12.10
+          allow_failure: true
+
+    steps:
+
+    - uses: actions/checkout@v5
+
+    - name: Setup System
+      id: setup-runner
+      uses: ./.github/actions/setup-runner
+      with:
+        python-version: ${{ matrix.python-version }}
+        python-arch: ${{ matrix.python-arch }}
+
+    - name: Get Current SHA
+      shell: bash
+      run: |
+        echo "Figuring out the develop GIT SHA"
+        CURRENT_SHA=$(git rev-parse --short=10 HEAD)
+        echo "Develop GIT SHA is '${CURRENT_SHA}'"
+        echo "CURRENT_SHA=$CURRENT_SHA" >> $GITHUB_ENV
+
+    - name: Restore Cache CCACHE
+      uses: actions/cache/restore@v4
+      id: cacheccache-restore
+      with:
+        path: |
+          ${{ steps.setup-runner.outputs.ccache-dir }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.CURRENT_SHA }}
+        restore-keys: |
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
+          ccache-${{ matrix.os }}-
+
+    - name: Did restoring the CCache-cache work?
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+        BrightYellow='\033[93m'
+
+        if [ "${{ steps.cacheccache-restore.outputs.cache-hit }}" == "true" ]; then
+          echo -e "✅ ${Green}CCache primary key was hit${Color_Off}"
+        else
+          FILES_IN_CACHE=$(ccache --print-stats | grep "^files_in_cache" | awk '{print $2}')
+          if [ "$FILES_IN_CACHE" -gt 0 ]; then
+            echo -e "⚠️  ${BrightYellow}Secondary cache hit${Color_Off}"
+          else
+            echo -e "❌ ${Red}No cache hit${Color_Off}"
+          fi;
+        fi;
+
+        begin_group "Showing existing ccache stats"
+        ccache --show-stats -vv || ccache --show-stats
+        echo "::endgroup::"
+
+        ccache --zero-stats
+        begin_group "Showing CCache config"
+        ccache -p
+        echo "::endgroup::"
+
+    - name: Create Build Directory
+      shell: bash
+      run: |
+        cmake -E make_directory ./build/
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          # The MACOSX_DEPLOYMENT_TARGET environment variable sets the default value for the CMAKE_OSX_DEPLOYMENT_TARGET variable.
+          echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
+        fi;
+
+    - name: Install problem matcher
+      shell: bash
+      run: echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
+
+    - name: Configure and Build
+      uses: ./.github/actions/configure-and-build
+      with:
+        enable-pch: OFF
+        minimal-targets: false
+        build-directory: ./build
+        nproc: ${{ steps.setup-runner.outputs.nproc }}
+        python-version: ${{ matrix.python-version }}
+        python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+
+    - name: Remove problem matcher
+      shell: bash
+      run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Save CCache cache
+      if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ steps.setup-runner.outputs.ccache-dir }}
+        key: ${{ steps.cacheccache-restore.outputs.cache-primary-key }}
+
+    - name: Run Tests
+      working-directory: ./build
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -j ${{ env.NPROC }}; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely..."
+          ctest --rerun-failed -VV
+          echo "::endgroup::"
+        fi;
+        mv testfiles testfiles-develop
+
+    - uses: actions/cache/save@v4
+      with:
+        path: |
+          ./build/testfiles-develop
+        key: baselineregression-${{ matrix.os }}-${{ env.CURRENT_SHA }}

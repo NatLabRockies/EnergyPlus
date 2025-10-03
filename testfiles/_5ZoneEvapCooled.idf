@@ -3568,6 +3568,6 @@
   Output:Table:SummaryReports,
     AllSummary;              !- Report 1 Name
 
-!  Output:Diagnostics,
-!    ReportDetailedWarmupConvergence;  !- Key 1
+  Output:Diagnostics,
+    ReportDetailedWarmupConvergence;  !- Key 1
 

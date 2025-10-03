@@ -722,8 +722,8 @@ namespace Curve {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "AirflowNetwork:MultiZone:WindPressureCoefficientValues");
 
         // state.dataCurveManager->NumCurves = NumBiQuad + NumCubic + NumQuad + NumQuadLinear + NumCubicLinear + NumLinear + NumBicubic + NumTriQuad +
-        NumExponent + NumQuartic + NumTableLookup + NumFanPressRise + NumExpSkewNorm + NumSigmoid + NumRectHyper1 + NumRectHyper2 + NumExpDecay +
-            NumDoubleExpDecay + NumQLinear + NumQuintLinear + NumChillerPartLoadWithLift + NumWPCValTab;
+        //     NumExponent + NumQuartic + NumTableLookup + NumFanPressRise + NumExpSkewNorm + NumSigmoid + NumRectHyper1 + NumRectHyper2 + NumExpDecay
+        //     + NumDoubleExpDecay + NumQLinear + NumQuintLinear + NumChillerPartLoadWithLift + NumWPCValTab;
 
         // Loop over biquadratic curves and load data
         CurrentModuleObject = "Curve:Biquadratic";
@@ -2488,8 +2488,7 @@ namespace Curve {
             }
         }
 
-        int numTblLookups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Table:Lookup");
-        if (numTblLookups > 0) {
+        if (NumTableLookup > 0) {
             auto const &lookupInstances = state.dataInputProcessing->inputProcessor->getObjectInstances("Table:Lookup");
             for (auto &instance : lookupInstances.items()) {
 
@@ -3332,7 +3331,7 @@ namespace Curve {
         // Given the curve index, sets the minimum and maximum possible value for this curve.
         // Certain curve types have set limits (e.g., PLF curve should not be greater than 1 or less than 0.7).
 
-        if (CurveIndex > 0 && CurveIndex <= state.dataCurveManager->curves.size()) {
+        if (CurveIndex > 0 && CurveIndex <= static_cast<int>(state.dataCurveManager->curves.size())) {
             Curve *thisCurve = state.dataCurveManager->curves(CurveIndex);
             thisCurve->outputLimits.min = CurveMin;
             thisCurve->outputLimits.minPresent = true;
@@ -3361,7 +3360,7 @@ namespace Curve {
         // Given the curve index, sets the minimum and maximum possible value for this curve.
         // Certain curve types have set limits (e.g., PLF curve should not be greater than 1 or less than 0.7).
 
-        if (CurveIndex > 0 && CurveIndex <= state.dataCurveManager->curves.size()) {
+        if (CurveIndex > 0 && CurveIndex <= static_cast<int>(state.dataCurveManager->curves.size())) {
             Curve *thisCurve = state.dataCurveManager->curves(CurveIndex);
             thisCurve->outputLimits.max = CurveMax;
             thisCurve->outputLimits.maxPresent = true;

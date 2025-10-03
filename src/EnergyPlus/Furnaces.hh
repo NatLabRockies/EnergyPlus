@@ -127,6 +127,7 @@ namespace Furnaces {
         int ReheatingCoilIndex;                                    // Index to reheat coil
         std::string HeatingCoilName;                               // name of heating coil
         std::string HeatingCoilType;                               // type of heating coil
+        Real64 HeatingSizingRatio = 1.0;                           // Ratio of heat pump heating to cooling capacity
         int CoilControlNode;                                       // control node for hot water and steam heating coils
         int HWCoilAirInletNode;                                    // air inlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly
         int HWCoilAirOutletNode;                                   // air outlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly

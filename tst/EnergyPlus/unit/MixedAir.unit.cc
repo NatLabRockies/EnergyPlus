@@ -860,9 +860,13 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest)
     auto &ventMechanical = state->dataMixedAir->VentilationMechanical(1);
     EXPECT_EQ(SysOAMethod::ProportionalControlDesOcc, ventMechanical.SystemOAMethod);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, oaController.OANode));
-    EXPECT_NEAR(0.00314899, ventMechanical.VentMechZone(1).ZoneOAPeopleRate, 0.00001);
-    EXPECT_NEAR(0.000407, ventMechanical.VentMechZone(1).ZoneOAAreaRate, 0.00001);
 
+    auto &oaReq1 = state->dataSize->OARequirements(ventMechanical.VentMechZone(1).ZoneDesignSpecOAObjIndex);
+    int zoneNum1 = ventMechanical.VentMechZone(1).zoneNum;
+    Real64 expectedOAPerPerson1 = oaReq1.desFlowPerZonePerson(*state, zoneNum1);
+    Real64 expectedOAPerArea1 = oaReq1.desFlowPerZoneArea(*state, zoneNum1);
+    EXPECT_NEAR(0.00314899, expectedOAPerPerson1, 0.00001);
+    EXPECT_NEAR(0.000407, expectedOAPerArea1, 0.00001);
     ventMechanical.availSched = Sched::GetSchedule(*state, "OCCUPY-1");
     ventMechanical.availSched->currentVal = 1.0;
 
@@ -890,7 +894,6 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
 
     oaRequirements.OAFlowMethod = OAFlowCalcMethod::PCDesOcc;
-    ventMechanical.VentMechZone(1).ZoneOAFlowMethod = oaRequirements.OAFlowMethod;
     state->dataAirLoop->NumOASystems = 1;
 
     state->dataAirLoop->OutsideAirSys.allocate(1);
@@ -924,8 +927,7 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest)
     state->dataAirLoop->AirLoopZoneInfo(1).ActualZoneNumber(1) = 1;
 
     InitOAController(*state, 1, true, 1);
-    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy",
-              DataSizing::OAFlowCalcMethodNames[static_cast<int>(ventMechanical.VentMechZone(1).ZoneOAFlowMethod)]);
+    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy", DataSizing::OAFlowCalcMethodNames[static_cast<int>(oaReq1.OAFlowMethod)]);
 
     oaController.MixMassFlow = 1.7 * state->dataEnvrn->StdRhoAir;
     oaController.MaxOAMassFlowRate = 1.7 * state->dataEnvrn->StdRhoAir;
@@ -1152,12 +1154,27 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest3Zone)
     auto &ventMechanical = state->dataMixedAir->VentilationMechanical(1);
     EXPECT_EQ(SysOAMethod::ProportionalControlDesOcc, ventMechanical.SystemOAMethod);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, oaController.OANode));
-    EXPECT_NEAR(0.00314899, ventMechanical.VentMechZone(1).ZoneOAPeopleRate, 0.00001);
-    EXPECT_NEAR(0.000407, ventMechanical.VentMechZone(1).ZoneOAAreaRate, 0.00001);
-    EXPECT_NEAR(0.00314899, ventMechanical.VentMechZone(2).ZoneOAPeopleRate, 0.00001);
-    EXPECT_NEAR(0.000407, ventMechanical.VentMechZone(2).ZoneOAAreaRate, 0.00001);
-    EXPECT_NEAR(0.00314899, ventMechanical.VentMechZone(3).ZoneOAPeopleRate, 0.00001);
-    EXPECT_NEAR(0.000407, ventMechanical.VentMechZone(3).ZoneOAAreaRate, 0.00001);
+
+    auto &oaReq1 = state->dataSize->OARequirements(ventMechanical.VentMechZone(1).ZoneDesignSpecOAObjIndex);
+    int zoneNum1 = ventMechanical.VentMechZone(1).zoneNum;
+    Real64 expectedOAPerPerson1 = oaReq1.desFlowPerZonePerson(*state, zoneNum1);
+    Real64 expectedOAPerArea1 = oaReq1.desFlowPerZoneArea(*state, zoneNum1);
+    EXPECT_NEAR(0.00314899, expectedOAPerPerson1, 0.00001);
+    EXPECT_NEAR(0.000407, expectedOAPerArea1, 0.00001);
+
+    auto &oaReq2 = state->dataSize->OARequirements(ventMechanical.VentMechZone(2).ZoneDesignSpecOAObjIndex);
+    int zoneNum2 = ventMechanical.VentMechZone(2).zoneNum;
+    Real64 expectedOAPerPerson2 = oaReq2.desFlowPerZonePerson(*state, zoneNum2);
+    Real64 expectedOAPerArea2 = oaReq2.desFlowPerZoneArea(*state, zoneNum2);
+    EXPECT_NEAR(0.00314899, expectedOAPerPerson2, 0.00001);
+    EXPECT_NEAR(0.000407, expectedOAPerArea2, 0.00001);
+
+    auto &oaReq3 = state->dataSize->OARequirements(ventMechanical.VentMechZone(3).ZoneDesignSpecOAObjIndex);
+    int zoneNum3 = ventMechanical.VentMechZone(3).zoneNum;
+    Real64 expectedOAPerPerson3 = oaReq3.desFlowPerZonePerson(*state, zoneNum3);
+    Real64 expectedOAPerArea3 = oaReq3.desFlowPerZoneArea(*state, zoneNum3);
+    EXPECT_NEAR(0.00314899, expectedOAPerPerson3, 0.00001);
+    EXPECT_NEAR(0.000407, expectedOAPerArea3, 0.00001);
 
     ventMechanical.availSched = Sched::GetSchedule(*state, "OCCUPY-1");
     ventMechanical.availSched->currentVal = 1.0;
@@ -1205,9 +1222,6 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest3Zone)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(3);
 
     oaRequirements.OAFlowMethod = OAFlowCalcMethod::PCDesOcc;
-    ventMechanical.VentMechZone(1).ZoneOAFlowMethod = oaRequirements.OAFlowMethod;
-    ventMechanical.VentMechZone(2).ZoneOAFlowMethod = oaRequirements.OAFlowMethod;
-    ventMechanical.VentMechZone(3).ZoneOAFlowMethod = oaRequirements.OAFlowMethod;
     state->dataAirLoop->NumOASystems = 1;
 
     state->dataAirLoop->OutsideAirSys.allocate(1);
@@ -1243,12 +1257,9 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest3Zone)
     state->dataAirLoop->AirLoopZoneInfo(1).ActualZoneNumber(3) = 3;
 
     InitOAController(*state, 1, true, 1);
-    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy",
-              DataSizing::OAFlowCalcMethodNames[static_cast<int>(ventMechanical.VentMechZone(1).ZoneOAFlowMethod)]);
-    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy",
-              DataSizing::OAFlowCalcMethodNames[static_cast<int>(ventMechanical.VentMechZone(2).ZoneOAFlowMethod)]);
-    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy",
-              DataSizing::OAFlowCalcMethodNames[static_cast<int>(ventMechanical.VentMechZone(3).ZoneOAFlowMethod)]);
+    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy", DataSizing::OAFlowCalcMethodNames[static_cast<int>(oaReq1.OAFlowMethod)]);
+    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy", DataSizing::OAFlowCalcMethodNames[static_cast<int>(oaReq2.OAFlowMethod)]);
+    EXPECT_EQ("ProportionalControlBasedOnDesignOccupancy", DataSizing::OAFlowCalcMethodNames[static_cast<int>(oaReq3.OAFlowMethod)]);
 
     oaController.MixMassFlow = 1.7 * state->dataEnvrn->StdRhoAir;
     oaController.MaxOAMassFlowRate = 1.7 * state->dataEnvrn->StdRhoAir;
@@ -1421,10 +1432,16 @@ TEST_F(EnergyPlusFixture, MissingDesignOccupancyTest)
     state->dataGlobal->DoZoneSizing = true;
     GetOAControllerInputs(*state);
 
-    EXPECT_EQ(0.00944, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAPeopleRate);
-    EXPECT_EQ(0.00, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAAreaRate);
-    EXPECT_EQ(0.00, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAFlowRate);
-    EXPECT_EQ(0.00, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAACHRate);
+    auto &oaReq1 = state->dataSize->OARequirements(state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneDesignSpecOAObjIndex);
+    int zoneNum1 = state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).zoneNum;
+    Real64 expectedOAPerPerson1 = oaReq1.desFlowPerZonePerson(*state, zoneNum1);
+    Real64 expectedOAPerArea1 = oaReq1.desFlowPerZoneArea(*state, zoneNum1);
+    Real64 expectedOAPerZone1 = oaReq1.desFlowPerZone(*state);
+    Real64 expectedOAPerACH1 = oaReq1.desFlowPerACH(*state);
+    EXPECT_EQ(0.00944, expectedOAPerPerson1);
+    EXPECT_EQ(0.00, expectedOAPerArea1);
+    EXPECT_EQ(0.00, expectedOAPerZone1);
+    EXPECT_EQ(0.00, expectedOAPerACH1);
 }
 
 TEST_F(EnergyPlusFixture, MixedAir_TestHXinOASystem)
@@ -5882,6 +5899,7 @@ TEST_F(EnergyPlusFixture, MechVentController_VRPCap)
     EXPECT_EQ(SysOAMethod::VRPL, state->dataMixedAir->VentilationMechanical(1).SystemOAMethod);
 
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(2);                // Necessary for CalcMechVentController
+    state->dataHeatBal->ZoneIntGain.allocate(2);                                 // Necessary for CalcMechVentController
     state->dataSize->SysSizingRunDone = true;                                    // Indicate that a system sizing run has been performed
     state->dataHeatBal->Zone(1).TotOccupants = 15;                               // Zone 1 total number of people
     state->dataHeatBal->Zone(2).TotOccupants = 12;                               // Zone 2 total number of people
@@ -5992,6 +6010,7 @@ TEST_F(EnergyPlusFixture, MechVentController_VRPNoCap)
     EXPECT_EQ(SysOAMethod::VRP, state->dataMixedAir->VentilationMechanical(1).SystemOAMethod);
 
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(2); // Necessary for CalcMechVentController
+    state->dataHeatBal->ZoneIntGain.allocate(2);                  // Necessary for CalcMechVentController
     state->dataSize->SysSizingRunDone = true;                     // Indicate that a system sizing run has been performed
     state->dataHeatBal->Zone(1).TotOccupants = 15;                // Zone 1 total number of people
     state->dataHeatBal->Zone(2).TotOccupants = 12;                // Zone 2 total number of people
@@ -6154,6 +6173,7 @@ TEST_F(EnergyPlusFixture, MechVentController_ACHflow)
     EXPECT_EQ(SysOAMethod::VRP, state->dataMixedAir->VentilationMechanical(1).SystemOAMethod);
 
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(2);                // Necessary for CalcMechVentController
+    state->dataHeatBal->ZoneIntGain.allocate(2);                                 // Necessary for CalcMechVentController
     state->dataSize->SysSizingRunDone = true;                                    // Indicate that a system sizing run has been performed
     state->dataHeatBal->Zone(1).Volume = 100.0;                                  // Zone 1 total floor area
     state->dataHeatBal->Zone(2).Volume = 50.0;                                   // Zone 2 total floor area
@@ -6446,6 +6466,208 @@ TEST_F(EnergyPlusFixture, MechVentController_ZoneSumTests)
     state->dataHeatBal->ZoneIntGain.deallocate();
 }
 
+TEST_F(EnergyPlusFixture, MechVentController_ZoneSumTests_DSOASpaceList)
+{
+    std::string const idf_objects = delimited_string({"  Controller:MechanicalVentilation,",
+                                                      "    DCVObject, !- Name",
+                                                      "    , !- Availability Schedule Name",
+                                                      "    Yes, !- Demand Controlled Ventilation",
+                                                      "    ZoneSum, !- System Outdoor Air Method",
+                                                      "     , !- Zone Maximum Outdoor Air Fraction{ dimensionless }",
+                                                      "    Zone 1, !- Zone 1 Name",
+                                                      "    Zone 1 DSOA SpaceList, !- Design Specification Outdoor Air Object Name 1",
+                                                      "    ; !- Design Specification Zone Air Distribution Object Name 1",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 1 DSOA,             !- Name",
+                                                      "    flow/person,             !- Outdoor Air Method",
+                                                      "    0.1,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    0.0,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 1 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 2 DSOA,             !- Name",
+                                                      "    flow/area,               !- Outdoor Air Method",
+                                                      "    0.0,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    1.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    0.0,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 2 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 3 DSOA,             !- Name",
+                                                      "    flow/zone,               !- Outdoor Air Method",
+                                                      "    0.0,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    3.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    0.0,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 3 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 4 DSOA,             !- Name",
+                                                      "    AirChanges/Hour,         !- Outdoor Air Method",
+                                                      "    0.0,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    0.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    5.0,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 4 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 5 DSOA,             !- Name",
+                                                      "    Sum,                     !- Outdoor Air Method",
+                                                      "    0.2,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    2.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    5.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    4.0,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 5 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir,",
+                                                      "    Space 6 DSOA,             !- Name",
+                                                      "    Maximum,                 !- Outdoor Air Method",
+                                                      "    0.3,                     !- Outdoor Air Flow per Person {m3/s-person}",
+                                                      "    1.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}",
+                                                      "    1.0,                     !- Outdoor Air Flow per Zone {m3/s}",
+                                                      "    0.1,                     !- Outdoor Air Flow Air Changes per Hour {1/hr}",
+                                                      "    Space 6 OA Schedule;      !- Outdoor Air Schedule Name",
+                                                      "DesignSpecification:OutdoorAir:SpaceList,",
+                                                      "    Zone 1 DSOA SpaceList,   !- Name",
+                                                      "    Space 1,                 !- Space 1 Name",
+                                                      "    Space 1 DSOA,            !- Space 1 Design Specification Outdoor Air Object Name",
+                                                      "    Space 2,                 !- Space 2 Name",
+                                                      "    Space 2 DSOA,            !- Space 2 Design Specification Outdoor Air Object Name",
+                                                      "    Space 3,                 !- Space 3 Name",
+                                                      "    Space 3 DSOA,            !- Space 3 Design Specification Outdoor Air Object Name",
+                                                      "    Space 4,                 !- Space 4 Name",
+                                                      "    Space 4 DSOA,            !- Space 4 Design Specification Outdoor Air Object Name",
+                                                      "    Space 5,                 !- Space 5 Name",
+                                                      "    Space 5 DSOA,            !- Space 5 Design Specification Outdoor Air Object Name",
+                                                      "    Space 6,                 !- Space 6 Name",
+                                                      "    Space 6 DSOA;            !- Space 6 Design Specification Outdoor Air Object Name",
+                                                      "Schedule:Constant, Space 1 OA Schedule, , 0.1;",
+                                                      "Schedule:Constant, Space 2 OA Schedule, , 0.2;",
+                                                      "Schedule:Constant, Space 3 OA Schedule, , 0.3;",
+                                                      "Schedule:Constant, Space 4 OA Schedule, , 0.4;",
+                                                      "Schedule:Constant, Space 5 OA Schedule, , 0.5;",
+                                                      "Schedule:Constant, Space 6 OA Schedule, , 0.6;",
+                                                      "Zone,",
+                                                      "    Zone 1;                  !- Name",
+                                                      "Space,",
+                                                      "    Space 1,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    ,                        !- Volume {m3}",
+                                                      "    100;                     !- Floor Area {m2}",
+                                                      "Space,",
+                                                      "    Space 2,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    ,                        !- Volume {m3}",
+                                                      "    200;                     !- Floor Area {m2}",
+                                                      "Space,",
+                                                      "    Space 3,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    ,                        !- Volume {m3}",
+                                                      "    300;                     !- Floor Area {m2}",
+                                                      "Space,",
+                                                      "    Space 4,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    3600,                    !- Volume {m3}",
+                                                      "    400;                     !- Floor Area {m2}",
+                                                      "Space,",
+                                                      "    Space 5,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    7200,                    !- Volume {m3}",
+                                                      "    100;                     !- Floor Area {m2}",
+                                                      "Space,",
+                                                      "    Space 6,                  !- Name",
+                                                      "    Zone 1,                  !- Zone Name",
+                                                      "    ,                        !- Ceiling Height {m}",
+                                                      "    3600,                    !- Volume {m3}",
+                                                      "    600;                     !- Floor Area {m2}"});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    state->dataContaminantBalance->Contaminant.CO2Simulation = true;
+    state->dataContaminantBalance->Contaminant.CO2OutdoorSched = Sched::GetSchedule(*state, "SPACE 1 OA SCHEDULE");
+
+    bool ErrorsFound(false);
+    GetZoneData(*state, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    // Initialize schedule values
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60 / state->dataGlobal->TimeStepsInHour;
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataEnvrn->DayOfWeek = 1;
+    state->dataEnvrn->DayOfYear_Schedule = 100;
+    Sched::UpdateScheduleVals(*state);
+
+    // Initialize zone areas and volumes - too many other things need to be set up to do these in the normal routines
+    int NumZones(1);
+    int NumSpaces(6);
+    for (int index = 1; index <= NumSpaces; ++index) {
+        state->dataHeatBal->space(index).FloorArea = state->dataHeatBal->space(index).userEnteredFloorArea;
+    }
+
+    Real64 SysMassFlow(0.0);           // System supply mass flow rate [kg/s]
+    Real64 OAMassFlow(0.0);            // OA mass flow rate [kg/s]
+    state->dataEnvrn->StdRhoAir = 1.0; // For convenience so mass flow returned will equal volume flows input
+
+    state->dataHeatBal->ZoneIntGain.allocate(NumZones);
+    state->dataHeatBal->spaceIntGain.allocate(NumSpaces);
+    state->dataHeatBal->spaceIntGain(1).NOFOCC = 10;
+    state->dataHeatBal->spaceIntGain(2).NOFOCC = 2;
+    state->dataHeatBal->spaceIntGain(3).NOFOCC = 3;
+    state->dataHeatBal->spaceIntGain(4).NOFOCC = 4;
+    state->dataHeatBal->spaceIntGain(5).NOFOCC = 20;
+    state->dataHeatBal->spaceIntGain(6).NOFOCC = 6;
+
+    SizingManager::GetOARequirements(*state);
+    state->dataZoneEquip->ZoneEquipConfig.allocate(NumZones);
+    SetUpZoneSizingArrays(*state); // Call this to fill in space indexes in DSOA:Spacelist
+    GetOAControllerInputs(*state);
+    EXPECT_EQ(SysOAMethod::ZoneSum, state->dataMixedAir->VentilationMechanical(1).SystemOAMethod);
+
+    // Summary of inputs and expected OA flow rate for each zone, StdRho = 1, so mass flow = volume flow for these tests
+    // Zone 1 - flow/person, 0.1 m3/s/person, 10 persons, OA=1 m3/s
+    // Zone 2 - flow/area, 1.0 m3/s-m2, area 200 m2, OA=200 m3/s
+    // Zone 3 - flow/zone, 3.0 m3/s-zone, OA=3.0 m3/s
+    // Zone 4 - AirChanges/Hour, 5.0 ACH, volume 3600 m3, OA=5 m3/s (ACH/3600=air change/sec)
+    // Zone 5 - Sum, 0.2 m3/s/person, 20 persons [4], 2 m3/s-m2, area 100 [200], 5 m3/s-zone [5], 4 ACH, volume 7200 m3 [8], OA=4+200+5+8=217 m3/s
+    // Zone 6 - Maximum, 0.3 m3/s/person, 6 persons [1.8], 1 m3/s-m2, area 600 [600], 1 m3/s-zone [1], 0.1 ACH, volume 3600 m3 [0.1],
+    // OA=max(1.8+600+1+0.1=600 m3/s
+
+    // Apply schedules
+    // Zone 1 - schedule = 0.1, multiplier = 1.0, OA=1*0.1*1  =   0.1 m3/s
+    // Zone 2 - schedule = 0.2, multiplier = 1.0, OA=200*0.2*1=  40.0 m3/s
+    // Zone 3 - schedule = 0.3, multiplier = 1.0, OA=3*0.3*1  =   0.9 m3/s
+    // Zone 4 - schedule = 0.4, multiplier = 1.0, OA=5*0.4*1  =   2.0 m3/s
+    // Zone 5 - schedule = 0.5, multiplier = 1.0, OA=217*0.5*1= 108.5 m3/s
+    // Zone 6 - schedule = 0.6, multiplier = 1.0, OA=600*0.6*1= 360.0 m3/s
+    // Total for all zones = 1951.5 m3/s
+
+    // Case 1 - All zones as initially set up
+    OAMassFlow = state->dataMixedAir->VentilationMechanical(1).CalcMechVentController(*state, SysMassFlow);
+    EXPECT_NEAR(511.5, OAMassFlow, 0.00001);
+
+    // Case 2 - Turn off Zone 4-6
+    Sched::GetSchedule(*state, "SPACE 4 OA SCHEDULE")->currentVal = 0.0;
+    Sched::GetSchedule(*state, "SPACE 5 OA SCHEDULE")->currentVal = 0.0;
+    Sched::GetSchedule(*state, "SPACE 6 OA SCHEDULE")->currentVal = 0.0;
+    OAMassFlow = state->dataMixedAir->VentilationMechanical(1).CalcMechVentController(*state, SysMassFlow);
+    EXPECT_NEAR(41.0, OAMassFlow, 0.00001);
+
+    // Case 3 - Turn off remaining SPACEs
+    Sched::GetSchedule(*state, "SPACE 1 OA SCHEDULE")->currentVal = 0.0;
+    Sched::GetSchedule(*state, "SPACE 2 OA SCHEDULE")->currentVal = 0.0;
+    Sched::GetSchedule(*state, "SPACE 3 OA SCHEDULE")->currentVal = 0.0;
+    OAMassFlow = state->dataMixedAir->VentilationMechanical(1).CalcMechVentController(*state, SysMassFlow);
+    EXPECT_EQ(0.0, OAMassFlow);
+
+    state->dataHeatBal->ZoneIntGain.deallocate();
+}
+
 TEST_F(EnergyPlusFixture, CO2ControlDesignOARateTest)
 {
     std::string const idf_objects = delimited_string({
@@ -6556,8 +6778,13 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOARateTest)
 
     EXPECT_EQ(SysOAMethod::ProportionalControlDesOARate, state->dataMixedAir->VentilationMechanical(1).SystemOAMethod);
     EXPECT_TRUE(OutAirNodeManager::CheckOutAirNodeNumber(*state, state->dataMixedAir->OAController(1).OANode));
-    EXPECT_NEAR(0.00314899, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAPeopleRate, 0.00001);
-    EXPECT_NEAR(0.000407, state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneOAAreaRate, 0.00001);
+
+    auto &oaReq1 = state->dataSize->OARequirements(state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).ZoneDesignSpecOAObjIndex);
+    int zoneNum1 = state->dataMixedAir->VentilationMechanical(1).VentMechZone(1).zoneNum;
+    Real64 expectedOAPerPerson1 = oaReq1.desFlowPerZonePerson(*state, zoneNum1);
+    Real64 expectedOAPerArea1 = oaReq1.desFlowPerZoneArea(*state, zoneNum1);
+    EXPECT_NEAR(0.00314899, expectedOAPerPerson1, 0.00001);
+    EXPECT_NEAR(0.000407, expectedOAPerArea1, 0.00001);
 
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataMixedAir->OAController(1).MixMassFlow = 1.7 * state->dataEnvrn->StdRhoAir;
@@ -6619,7 +6846,7 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOARateTest)
         "   **   ~~~   ** This may be overriding desired ventilation controls. Check inputs for Minimum Outdoor Air Flow Rate, Minimum Outdoor Air "
         "Schedule Name and Controller:MechanicalVentilation",
         "   **   ~~~   ** Minimum OA fraction = 2.9412E-003, Mech Vent OA fraction = 1.5603E-003",
-        "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+        "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:15",
     });
 
     EXPECT_TRUE(compare_err_stream_substring(error_string, true));

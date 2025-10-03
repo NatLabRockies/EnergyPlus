@@ -38,7 +38,7 @@ A unique user assigned name for an instance of a hot water baseboard heater unit
 
 \paragraph{Field: Design Object}\label{HW_Baseboard_DesignObjectName}
 
-The name of the object that holds design data for this instance of hot water baseboard heater unit. Multiple input data values are taken from this object.
+The name of the object that holds design data for this instance of hot water baseboard heater unit. Multiple input data values are taken from this object.  For details about the design object input parameters, please refer to the \hyperref[zonehvac-baseboard-radiantconvective-water-design] {ZoneHVAC:Baseboard:RadiantConvective:Water:Design} section.
 
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-013}
 
@@ -116,58 +116,6 @@ ZoneHVAC:Baseboard:RadiantConvective:Water,
       0.1;                          !- fraction of radiant energy from heater distributed to surface 6
 \end{lstlisting}
 
-\subsubsection{ZoneHVAC:Baseboard:RadiantConvective:Water:Design}\label{ZoneHVAC:Baseboard:RadiantConvective:Water:Design}
-
-This object contains the design fields for ZoneHVAC:Baseboard:RadiantConvective:Water. The information from one ZoneHVAC:Baseboard:RadiantConvective:Water:Design object can be shared with several ZoneHVAC:Baseboard:RadiantConvective:Water objects.
-
-\paragraph{Field: Design Object Name}\label{HW_BB_DesignObjectName}
-
-A unique user assigned name for an instance of a hot water baseboard heater unit design object. Any reference to this unit by another object will use this name.
-
-\paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method-000}
-
-Enter the method used to determine the heating design capacity or the method for scalable sizing. Input allowed is either \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. If this input field is left blank or zero, then autosizing is assumed. \emph{HeatingDesignCapacity} means user specifies the magnitude of heating capacity or the program calculates the design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the radiant baseboard unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
-
-\paragraph{Field: Heating Design Capacity Per Floor Area \{W/m2\}}\label{field-heating-design-capacity-per-floor-area-wm2-000}
-
-Enter the rated heating capacity per unit floor area of radiant-convective water baseboard unit in m3/s-m2. This field is required field when the Heating Design Capacity Method is \emph{CapacityPerFloorArea}. The program calculates the heating capacity from floor area of the zone served by the radiant baseboard unit and the heating capacity per unit floor area value specified by the user. This field may be left blank.
-
-\paragraph{Field: Fraction of Autosized Heating Design Capacity}\label{field-fraction-of-autosized-heating-design-capacity-000}
-
-Enter the heating capacity as a fraction of the autosized heating capacity of radiant-convective water baseboard. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized heating capacity and user specified fraction. Design day sizing run must be specified. This field may be left blank. Default value is 1.0.
-
-\paragraph{Field: Convergence Tolerance}\label{field-convergence-tolerance-000}
-
-This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For hot water baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
-
-\begin{equation}
-\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
-\end{equation}
-
-The default is 0.001.
-
-\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-000}
-
-This field specifies what fraction of the power input to the baseboard heater is actually transferred to the space as radiant heat. The fraction should be between 0 and 1. This is the portion of the total power that is modeled as radiation. The portion that is radiant heat transfer from the baseboard heater is distributed to people and specific surfaces using the remaining fields. Note that the sum of the fractions in the remaining fields (people and surfaces) must equal 1.0 so that all the radiant power is distributed properly. For more information on the specification of this parameter, please see the Engineering Reference for EnergyPlus.
-
-\paragraph{Field: Fraction of Radiant Energy Incident on People}\label{field-fraction-of-radiant-energy-incident-on-people}
-
-This field specifies the fraction of radiant portion of heat transfer to the zone from the baseboard heater that is incident directly on people within the space. This has an impact on the predicted thermal comfort of the zone occupants. Note that although this energy is ``radiant'' it is actually modeled in the zone heat balance as convective energy (like an internal gain). The basic assumption here is that most radiant energy falling on people will most likely be re-released to the zone air by convection. This is a simplification of reality, but it maintains the overall energy balance.
-
-An example IDF for the water baseboard design object is shown below.
-
-\begin{lstlisting}
-
-ZoneHVAC:Baseboard:RadiantConvective:Water:Design,
-      SPACE2-1 Baseboard Design,    !- Design Object Name
-      HeatingDesignCapacity,        !- Heating Design Capacity Method
-      ,                             !- Heating Design Capacity Per Floor Area
-      ,                             !- Fraction of Autosized Heating Design Capacity
-      0.001,                        !- Convergence Tolerance
-      0.3,                          !- Fraction Radiant
-      0.3;                          !- Fraction of Radiant Energy Incident on People
-
-\end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-027}
 
@@ -238,6 +186,59 @@ This field reports the air temperatures at the inlet node of a baseboard unit.
 
 This field reports the air temperatures at the outlet node of a baseboard unit.
 
+\subsection{ZoneHVAC:Baseboard:RadiantConvective:Water:Design}\label{zonehvac-baseboard-radiantconvective-water-design}
+
+This object contains the design fields for \hyperref[zonehvacbaseboardradiantconvectivewater] {ZoneHVAC:Baseboard:RadiantConvective:Water}. The information from one ZoneHVAC:Baseboard:RadiantConvective:Water:Design object can be shared with several ZoneHVAC:Baseboard:RadiantConvective:Water objects.
+
+\paragraph{Field: Design Object Name}\label{HW_BB_DesignObjectName}
+
+A unique user assigned name for an instance of a hot water baseboard heater unit design object. Any reference to this unit by another object will use this name.
+
+\paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method-000}
+
+Enter the method used to determine the heating design capacity or the method for scalable sizing. Input allowed is either \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. If this input field is left blank or zero, then autosizing is assumed. \emph{HeatingDesignCapacity} means user specifies the magnitude of heating capacity or the program calculates the design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the radiant baseboard unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
+
+\paragraph{Field: Heating Design Capacity Per Floor Area \{W/m2\}}\label{field-heating-design-capacity-per-floor-area-wm2-000}
+
+Enter the rated heating capacity per unit floor area of radiant-convective water baseboard unit in m3/s-m2. This field is required field when the Heating Design Capacity Method is \emph{CapacityPerFloorArea}. The program calculates the heating capacity from floor area of the zone served by the radiant baseboard unit and the heating capacity per unit floor area value specified by the user. This field may be left blank.
+
+\paragraph{Field: Fraction of Autosized Heating Design Capacity}\label{field-fraction-of-autosized-heating-design-capacity-000}
+
+Enter the heating capacity as a fraction of the autosized heating capacity of radiant-convective water baseboard. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized heating capacity and user specified fraction. Design day sizing run must be specified. This field may be left blank. Default value is 1.0.
+
+\paragraph{Field: Convergence Tolerance}\label{field-convergence-tolerance-000}
+
+This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For hot water baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
+
+\begin{equation}
+\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
+\end{equation}
+
+The default is 0.001.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-000}
+
+This field specifies what fraction of the power input to the baseboard heater is actually transferred to the space as radiant heat. The fraction should be between 0 and 1. This is the portion of the total power that is modeled as radiation. The portion that is radiant heat transfer from the baseboard heater is distributed to people and specific surfaces using the remaining fields. Note that the sum of the fractions in the remaining fields (people and surfaces) must equal 1.0 so that all the radiant power is distributed properly. For more information on the specification of this parameter, please see the Engineering Reference for EnergyPlus.
+
+\paragraph{Field: Fraction of Radiant Energy Incident on People}\label{field-fraction-of-radiant-energy-incident-on-people}
+
+This field specifies the fraction of radiant portion of heat transfer to the zone from the baseboard heater that is incident directly on people within the space. This has an impact on the predicted thermal comfort of the zone occupants. Note that although this energy is ``radiant'' it is actually modeled in the zone heat balance as convective energy (like an internal gain). The basic assumption here is that most radiant energy falling on people will most likely be re-released to the zone air by convection. This is a simplification of reality, but it maintains the overall energy balance.
+
+An example IDF for the water baseboard design object is shown below.
+
+\begin{lstlisting}
+
+ZoneHVAC:Baseboard:RadiantConvective:Water:Design,
+      SPACE2-1 Baseboard Design,    !- Design Object Name
+      HeatingDesignCapacity,        !- Heating Design Capacity Method
+      ,                             !- Heating Design Capacity Per Floor Area
+      ,                             !- Fraction of Autosized Heating Design Capacity
+      0.001,                        !- Convergence Tolerance
+      0.3,                          !- Fraction Radiant
+      0.3;                          !- Fraction of Radiant Energy Incident on People
+
+\end{lstlisting}
+
 \subsection{ZoneHVAC:Baseboard:RadiantConvective:Steam}\label{zonehvacbaseboardradiantconvectivesteam}
 
 The objective of this model is to calculate the convective and radiant heat transfer from steam baseboard heaters to the people and the surfaces within a zone so that surface heat balances can take into account the radiant heat transfer to the surfaces and thus enhance the accuracy of thermal comfort predictions within the space. The radiant heat gains are distributed to the surfaces by fractions defined by the user. Users are requested to provide degree of sub cooling to estimate the outlet conditions of the condensate.
@@ -250,7 +251,7 @@ A unique user assigned name for an instance of a steam baseboard heater unit. An
 
 \paragraph{Field: Design Object Name}\label{SteamBB_DesignObjectName}
 
-The name of the object that holds design data for this instance of steam baseboard heater unit. Multiple input data values is taken from this object.
+The name of the object that holds design data for this instance of steam baseboard heater unit. Multiple input data values is taken from this object. For details about the design object input parameters, please refer to the \hyperref[zonehvac-baseboard-radiantconvective-steam-design] {ZoneHVAC:Baseboard:RadiantConvective:Steam:Design} section.
 
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-1-010}
 
@@ -319,59 +320,6 @@ ZoneHVAC:Baseboard:RadiantConvective:Steam,
   0.1;                                  !- Fraction of radiant energy from heater distributed to surface 4
 \end{lstlisting}
 
-\subsubsection{ZoneHVAC:Baseboard:RadiantConvective:Steam:Design}\label{ZoneHVAC:Baseboard:RadiantConvective:Steam:Design}
-
-
-This object contains the design fields for ZoneHVAC:Baseboard:RadiantConvective:Steam. The information from one ZoneHVAC:Baseboard:RadiantConvective:Steam:Design object can be shared with several ZoneHVAC:Baseboard:RadiantConvective:Steam objects.
-
-\paragraph{Field: Name}\label{steam-baseboard-design-name}
-
-A unique user assigned name for an instance of a steam baseboard heater unit design object. Any reference to this unit by another object will use this name.
-
-\paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method-1-000}
-
-Enter the method used to determine the heating design capacity for scalable sizing. Input allowed is either \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. If this input field is left blank or zero, then autosizing is assumed. \emph{HeatingDesignCapacity} means user specifies the magnitude of maximum heating capacity or the program calculates the maximum design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the radiant baseboard unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
-
-\paragraph{Field: Heating Design Capacity Per Floor Area \{W/m2\}}\label{field-heating-design-capacity-per-floor-area-wm2-1-000}
-
-Enter the heating capacity per unit floor area in m3/s-m2 of radiant/convective steam baseboard. This field is required field when the Heating Design Capacity Method is \emph{CapacityPerFloorArea}. The program calculates the heating capacity from floor area of the zone served by the steam baseboard unit and the heating capacity per unit floor area value specified by the user. This field may be left blank.
-
-\paragraph{Field: Fraction of Autosized Heating Design Capacity}\label{field-fraction-of-autosized-heating-design-capacity-1-000}
-
-Enter the heating capacity as a fraction of the autosized heating capacity of a radiant/convective steam baseboard unit. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized heat capacity and user specified fraction. Design day sizing run must be specified. This field may be left blank. Default value is 1.0.
-
-\paragraph{Field: Convergence Tolerance}\label{field-convergence-tolerance-1-000}
-
-This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For steam baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
-
-\begin{equation}
-\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
-\end{equation}
-
-The default is 0.001.
-
-\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-1-000}
-
-This field specifies what fraction of the power input to the baseboard heater is actually transferred to the space as radiant heat. The fraction should be between 0 and 1. This is the portion of the total power that is modeled as radiation. The portion that is radiant heat transfer from the baseboard heater is distributed to people and specific surfaces using the remaining fields. Note that the sum of the fractions in the remaining fields (people and surfaces) must equal 1.0 so that all the radiant power is distributed properly.
-
-\paragraph{Field: Fraction of Radiant Energy Incident on People}\label{field-fraction-of-radiant-energy-incident-on-people-1}
-
-This field specifies the fraction of radiant portion of heat transfer to the zone from the baseboard heater that is incident directly on people within the space. This has an impact on the predicted thermal comfort of the zone occupants. Note that although this energy is ``radiant'' it is actually modeled in the zone heat balance as convective energy (like an internal gain). The basic assumption here is that most radiant energy falling on people will most likely be re-released to the zone air by convection. This is a simplification of reality, but it maintains the overall energy balance.
-
-An example IDF for the steam baseboard design object is shown below.
-
-\begin{lstlisting}
-
-ZoneHVAC:Baseboard:RadiantConvective:Steam:Design,
-  SPACE1-1 Baseboard Design,    !- Design Object Name
-  HeatingDesignCapacity,        !- Heating Design Capacity Method
-  ,                             !- Heating Design Capacity Per Floor Area
-  ,                             !- Fraction of Autosized Heating Design Capacity
-  0.001,                        !- Convergence Tolerance
-  0.3,                          !- Fraction Radiant
-  0.3;                          !- Fraction of Radiant Energy Incident on People
-\end{lstlisting}
-
 \subsubsection{Outputs}\label{outputs-1-021}
 
 \begin{itemize}
@@ -438,6 +386,58 @@ This field reports the steam temperatures at the inlet node of a baseboard unit.
 \paragraph{Baseboard Steam Outlet Temperature {[}C{]}}\label{baseboard-steam-outlet-temperature-c}
 
 This field reports the steam temperatures at the outlet node of a baseboard unit.
+
+\subsection{ZoneHVAC:Baseboard:RadiantConvective:Steam:Design}\label{zonehvac-baseboard-radiantconvective-steam-design}
+
+This object contains the design fields for \hyperref[zonehvacbaseboardradiantconvectivesteam] {ZoneHVAC:Baseboard:RadiantConvective:Steam}. The information from one ZoneHVAC:Baseboard:RadiantConvective:Steam:Design object can be shared with several ZoneHVAC:Baseboard:RadiantConvective:Steam objects.
+
+\paragraph{Field: Name}\label{steam-baseboard-design-name}
+
+A unique user assigned name for an instance of a steam baseboard heater unit design object. Any reference to this unit by another object will use this name.
+
+\paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method-1-000}
+
+Enter the method used to determine the heating design capacity for scalable sizing. Input allowed is either \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. If this input field is left blank or zero, then autosizing is assumed. \emph{HeatingDesignCapacity} means user specifies the magnitude of maximum heating capacity or the program calculates the maximum design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the radiant baseboard unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
+
+\paragraph{Field: Heating Design Capacity Per Floor Area \{W/m2\}}\label{field-heating-design-capacity-per-floor-area-wm2-1-000}
+
+Enter the heating capacity per unit floor area in m3/s-m2 of radiant/convective steam baseboard. This field is required field when the Heating Design Capacity Method is \emph{CapacityPerFloorArea}. The program calculates the heating capacity from floor area of the zone served by the steam baseboard unit and the heating capacity per unit floor area value specified by the user. This field may be left blank.
+
+\paragraph{Field: Fraction of Autosized Heating Design Capacity}\label{field-fraction-of-autosized-heating-design-capacity-1-000}
+
+Enter the heating capacity as a fraction of the autosized heating capacity of a radiant/convective steam baseboard unit. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized heat capacity and user specified fraction. Design day sizing run must be specified. This field may be left blank. Default value is 1.0.
+
+\paragraph{Field: Convergence Tolerance}\label{field-convergence-tolerance-1-000}
+
+This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For steam baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
+
+\begin{equation}
+\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
+\end{equation}
+
+The default is 0.001.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-1-000}
+
+This field specifies what fraction of the power input to the baseboard heater is actually transferred to the space as radiant heat. The fraction should be between 0 and 1. This is the portion of the total power that is modeled as radiation. The portion that is radiant heat transfer from the baseboard heater is distributed to people and specific surfaces using the remaining fields. Note that the sum of the fractions in the remaining fields (people and surfaces) must equal 1.0 so that all the radiant power is distributed properly.
+
+\paragraph{Field: Fraction of Radiant Energy Incident on People}\label{field-fraction-of-radiant-energy-incident-on-people-1}
+
+This field specifies the fraction of radiant portion of heat transfer to the zone from the baseboard heater that is incident directly on people within the space. This has an impact on the predicted thermal comfort of the zone occupants. Note that although this energy is ``radiant'' it is actually modeled in the zone heat balance as convective energy (like an internal gain). The basic assumption here is that most radiant energy falling on people will most likely be re-released to the zone air by convection. This is a simplification of reality, but it maintains the overall energy balance.
+
+An example IDF for the steam baseboard design object is shown below.
+
+\begin{lstlisting}
+
+ZoneHVAC:Baseboard:RadiantConvective:Steam:Design,
+  SPACE1-1 Baseboard Design,    !- Design Object Name
+  HeatingDesignCapacity,        !- Heating Design Capacity Method
+  ,                             !- Heating Design Capacity Per Floor Area
+  ,                             !- Fraction of Autosized Heating Design Capacity
+  0.001,                        !- Convergence Tolerance
+  0.3,                          !- Fraction Radiant
+  0.3;                          !- Fraction of Radiant Energy Incident on People
+\end{lstlisting}
 
 \subsection{ZoneHVAC:Baseboard:RadiantConvective:Electric}\label{zonehvacbaseboardradiantconvectiveelectric}
 

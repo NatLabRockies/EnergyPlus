@@ -278,128 +278,7 @@ public:
             checker.end_precision();
         }
 
-        // matches Fortran's 'E' format
-        if (specs_.type == 'Z') {
-            // The Fortran 'G' format insists on a leading 0, even though
-            // that actually means losing data
-            specs_.type = 'E';
-
-            // 0 pad the end
-            specs_.alt = true;
-
-            bool initialPrecisionWas1 = false;
-            if (specs_.precision > 1) {
-                // reduce the precision to get rounding behavior
-                --specs_.precision;
-            } else {
-                // We need AT LEAST one in precision so we capture a '.' below
-                initialPrecisionWas1 = true;
-                specs_.precision = 1;
-                ++specs_.width;
-            }
-
-            // multiply by 10 to get the exponent we want
-            auto str = fmt::format(spec_builder(), val * 10);
-            //      auto str = write_to_string(value * 10);
-
-            // we need "space" to insert our leading 0
-            if (str.front() != ' ') {
-                str.insert(str.begin(), ' ');
-            }
-
-            auto begin = std::find(std::begin(str), std::end(str), '.');
-            if (initialPrecisionWas1) {
-                // 123.45 => 1.2E+03, except we asked for precision = 1. So we delete the thing after the dot
-                // and this is why we manually increased the specs_.width by one above
-                str.erase(std::next(begin));
-            }
-            // if (begin != std::end(str)) {
-            // ' -1.2345E15'
-            //     ^
-            std::swap(*begin, *std::prev(begin));
-            // ' -.12345E15'
-            //     ^
-            std::advance(begin, -2);
-            // ' -.12345E15'
-            //   ^
-            if (*begin != ' ') {
-                // found a sign
-                std::swap(*begin, *std::prev(begin));
-                // '- .12345E15'
-                //   ^
-            }
-            // '-0.12345E15'
-            //   ^
-            *begin = '0';
-            return fmt::format_to(ctx.out(), "{}", str);
-        } else if (specs_.type == 'S') {
-            // matches Fortran's 'G', but stripped of whitespace
-            specs_.type = 'N';
-            // Need to rerun with double wrapper since 'N' is one of our custom ones
-            auto str = fmt::format(spec_builder(), doubleWrapper);
-
-            auto strip_whitespace = [](std::string_view const s) -> std::string {
-                if (s.empty()) {
-                    return std::string{};
-                }
-                auto const first = s.find_first_not_of(' ');
-                auto const last = s.find_last_not_of(' ');
-                if ((first == std::string::npos) || (last == std::string::npos)) {
-                    return std::string{};
-                } else {
-                    return std::string{s.substr(first, last - first + 1)};
-                }
-            };
-
-            return fmt::format_to(ctx.out(), "{}", strip_whitespace(str));
-        } else if (specs_.type == 'N') {
-            // matches Fortran's 'G' format
-
-            if (specs_.width == 0 && specs_.precision == -1) {
-                // Need to rerun with double wrapper since 'N' is one of our custom ones
-                return fmt::format_to(ctx.out(), "{:20N}", doubleWrapper);
-            } else if (should_be_fixed_output(val) && fixed_will_fit(val, specs_.width - 5)) {
-                specs_.type = 'F';
-
-                // account for alignment with E formatted
-                specs_.width -= 4;
-                if (val == 0.0) {
-                    --specs_.precision;
-                } else if (val < 1.0 && val > -1.0) {
-                    // No adjustment necessary
-                } else if (specs_.precision == -1) {
-                    const auto order_of_magnitude = static_cast<int>(std::log10(std::abs(val)));
-                    specs_.precision = specs_.width - (order_of_magnitude + 2);
-                } else {
-                    const auto order_of_magnitude = static_cast<int>(std::log10(std::abs(val)));
-                    specs_.precision -= (order_of_magnitude + 1);
-                }
-
-                // if precision adjustment would result in negative, make it 0 to get rounding
-                // and adjust spacing
-                if (specs_.precision <= 0) {
-                    specs_.width -= 1;
-                    specs_.precision = 0;
-                }
-
-                auto str = fmt::format(spec_builder(), val);
-
-                // When precision hit 0, add . to match Fortran formatting
-                if (specs_.precision == 0) {
-                    // write the last 4 chars
-                    return fmt::format_to(ctx.out(), "{}.    ", str);
-                } else {
-                    // write the last 4 chars
-                    return fmt::format_to(ctx.out(), "{}    ", str);
-                }
-            } else {
-                // The Fortran 'G' format insists on a leading 0, even though
-                // that actually means losing data
-                specs_.type = 'Z';
-                // Need to rerun with double wrapper since 'Z' is one of our custom ones
-                return fmt::format_to(ctx.out(), spec_builder(), doubleWrapper);
-            }
-        } else if (specs_.type == 'R') { // matches RoundSigDigits() behavior
+        if (specs_.type == 'R') { // matches RoundSigDigits() behavior
             // push the value up a tad to get the same rounding behavior as Objexx
             const auto fixed_output = should_be_fixed_output(val);
 
@@ -490,9 +369,6 @@ inline constexpr bool is_fortran_syntax(const std::string_view format_str)
             within_fmt_str = false;
             break;
         case 'R':
-        case 'S':
-        case 'N':
-        case 'Z':
         case 'T':
             if (within_fmt_str) {
                 return true;
@@ -707,7 +583,6 @@ public:
         bool end = true;
         bool shd = true;
         bool dfs = true;
-        bool glhe = true;
         bool delightin = true;
         bool delighteldmp = true;
         bool delightdfdmp = true;
@@ -856,15 +731,6 @@ template <typename... Args> std::string vprint(std::string_view format_str, cons
 // Defines a custom formatting type 'R' (round_ which chooses between `E` and `G` depending
 // on the value being printed.
 // This is necessary for parity with the old "RoundSigDigits" utility function
-//
-// Defines a custom formatting type 'S' that behaves like Fortran's G type, but stripped of whitespace
-// 'S' was chosen for "Stripped". It is implemented in terms of 'N'
-//
-// Defines a custom formatting type 'N' that behaves like Fortran's G type.
-// 'N' was chosen for "Number"
-//
-// Defines a custom formatting type 'Z' that behaves like Fortran's E type.
-// 'Z' was chosen because Fortran's 'E' format always starts with a Zero
 //
 // Defines a custom formatting type 'T' that that truncates the value
 // to match the behavior of TrimSigDigits utility function

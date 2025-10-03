@@ -1366,7 +1366,7 @@
     FanModeSchedule,         !- Supply Air Fan Operating Mode Schedule Name
     Coil:Heating:DX:MultiSpeed,  !- Heating Coil Object Type
     Heat Pump DX Heating Coil 1,  !- Heating Coil Name
-    -8.0,                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- DX Heating Coil Sizing Ratio
     Coil:Cooling:DX:MultiSpeed,  !- Cooling Coil Object Type
     Heat Pump ACDXCoil 1,    !- Cooling Coil Name
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type

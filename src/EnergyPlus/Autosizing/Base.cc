@@ -341,6 +341,31 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
     }
 }
 
+void BaseSizer::reportSizerStrOutput(
+    EnergyPlusData &state, std::string_view CompType, std::string_view CompName, std::string_view VarDesc, std::string_view VarValue)
+{
+
+    static constexpr std::string_view Format_990(
+        "! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n");
+    static constexpr std::string_view Format_991(" Component Sizing Information, {}, {}, {}, {}\n");
+
+    // to do, make this a parameter. Unfortunately this function is used in MANY
+    // places so it involves touching most of E+
+    if (state.dataEnvrn->oneTimeCompRptHeaderFlag) {
+        print(state.files.eio, Format_990);
+        state.dataEnvrn->oneTimeCompRptHeaderFlag = false;
+    }
+
+    print(state.files.eio, Format_991, CompType, CompName, VarDesc, VarValue);
+    // add to tabular output reports
+    OutputReportPredefined::AddCompSizeTableStrEntry(state, CompType, CompName, VarDesc, VarValue);
+
+    // add to SQL output
+    if (state.dataSQLiteProcedures->sqlite) {
+        state.dataSQLiteProcedures->sqlite->addSQLiteComponentSizingStrRecord(CompType, CompName, VarDesc, VarValue);
+    }
+}
+
 void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
 {
     if (this->printWarningFlag) {

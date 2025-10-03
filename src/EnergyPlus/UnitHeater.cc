@@ -550,7 +550,7 @@ namespace UnitHeater {
             SetupOutputVariable(state,
                                 "Zone Unit Heater Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)unitHeat.availStatus,
+                                unitHeat.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 unitHeat.Name);
@@ -821,8 +821,6 @@ namespace UnitHeater {
         int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
 
         bool ErrorsFound = false;
-        Real64 MaxAirVolFlowDes = 0.0;
-        Real64 MaxAirVolFlowUser = 0.0;
         Real64 MaxVolHotWaterFlowDes = 0.0;
         Real64 MaxVolHotWaterFlowUser = 0.0;
         Real64 MaxVolHotSteamFlowDes = 0.0;

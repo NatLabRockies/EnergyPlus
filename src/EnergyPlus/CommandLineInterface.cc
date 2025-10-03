@@ -273,6 +273,28 @@ main_gui(True)
             engine.exec(cmd);
             exit(0);
         });
+
+        auto *gheDesignerSubCommand = auxiliaryToolsSubcommand->add_subcommand("ghedesigner", "GHEDesigner Operation");
+        gheDesignerSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to GHEDesigner")->option_text("ARG ...");
+        gheDesignerSubCommand->positionals_at_end(true);
+        gheDesignerSubCommand->footer(
+            "You can pass extra arguments after the ghedesigner keyword, they should be the input file and output directory.");
+
+        gheDesignerSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from ghedesigner.main import run_manager_from_cli
+run_manager_from_cli()
+)python";
+            try {
+                engine.exec(cmd);
+                exit(0);
+            } catch (std::runtime_error &) {
+                exit(1);
+            }
+        });
 #    endif
 #endif
 

@@ -97,12 +97,11 @@ struct SystemVarsData : BaseGlobalStruct
 
     DataSystemVariables::ShadingMethod shadingMethod = DataSystemVariables::ShadingMethod::PolygonClipping; // defines the shading method used
 
-    bool DDOnly = false;             // TRUE if design days (sizingperiod:*) only are to be run.
-    bool ReverseDD = false;          // TRUE if reverse design days (reordering sizingperiod:*) are to be run.
-    bool DisableGLHECaching = false; // TRUE if caching is to be disabled, for example, during unit tests.
-    bool FullAnnualRun = false;      // TRUE if full annual simulation is to be run.
-    bool DeveloperFlag = false;      // TRUE if developer flag is turned on. (turns on more displays to console)
-    bool TimingFlag = false;         // TRUE if timing flag is turned on. (turns on more timing displays to console)
+    bool DDOnly = false;        // TRUE if design days (sizingperiod:*) only are to be run.
+    bool ReverseDD = false;     // TRUE if reverse design days (reordering sizingperiod:*) are to be run.
+    bool FullAnnualRun = false; // TRUE if full annual simulation is to be run.
+    bool DeveloperFlag = false; // TRUE if developer flag is turned on. (turns on more displays to console)
+    bool TimingFlag = false;    // TRUE if timing flag is turned on. (turns on more timing displays to console)
 
     bool SutherlandHodgman = true;                 // TRUE if SutherlandHodgman algorithm for polygon clipping is to be used.
     bool SlaterBarsky = false;                     // TRUE if SlaterBarsky algorithm for polygon clipping is to be used for vertical polygons.
@@ -165,7 +164,6 @@ struct SystemVarsData : BaseGlobalStruct
         shadingMethod = DataSystemVariables::ShadingMethod::PolygonClipping;
         DDOnly = false;
         ReverseDD = false;
-        DisableGLHECaching = false;
         FullAnnualRun = false;
         DeveloperFlag = false;
         TimingFlag = false;

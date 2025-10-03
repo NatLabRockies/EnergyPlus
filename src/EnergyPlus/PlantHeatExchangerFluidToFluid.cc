@@ -91,13 +91,13 @@ namespace EnergyPlus::PlantHeatExchangerFluidToFluid {
 
 std::string const ComponentClassName("HeatExchanger:FluidToFluid");
 
-constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNames = {"CrossFlowBothUnMixed",
-                                                                                  "CrossFlowBothMixed",
-                                                                                  "CrossFlowSupplyMixedDemandUnMixed",
-                                                                                  "CrossFlowSupplyUnMixedDemandMixed",
-                                                                                  "CounterFlow",
-                                                                                  "ParallelFlow",
-                                                                                  "Ideal"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNames = {"CrossFlowBothUnMixed",
+                                                                                                   "CrossFlowBothMixed",
+                                                                                                   "CrossFlowSupplyMixedDemandUnMixed",
+                                                                                                   "CrossFlowSupplyUnMixedDemandMixed",
+                                                                                                   "CounterFlow",
+                                                                                                   "ParallelFlow",
+                                                                                                   "Ideal"};
 constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNamesUC = {"CROSSFLOWBOTHUNMIXED",
                                                                                     "CROSSFLOWBOTHMIXED",
                                                                                     "CROSSFLOWSUPPLYMIXEDDEMANDUNMIXED",
@@ -106,18 +106,18 @@ constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNamesUC
                                                                                     "PARALLELFLOW",
                                                                                     "IDEAL"};
 
-constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNames = {"UncontrolledOn",
-                                                                                  "OperationSchemeModulated",
-                                                                                  "OperationSchemeOnOff",
-                                                                                  "HeatingSetpointModulated",
-                                                                                  "HeatingSetpointOnOff",
-                                                                                  "CoolingSetpointModulated",
-                                                                                  "CoolingSetpointOnOff",
-                                                                                  "DualDeadbandSetpointModulated",
-                                                                                  "DualDeadbandSetpointOnOff",
-                                                                                  "CoolingDifferentialOnOff",
-                                                                                  "CoolingSetpointOnOffWithComponentOverride",
-                                                                                  "TrackComponentOnOff"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNames = {"UncontrolledOn",
+                                                                                                   "OperationSchemeModulated",
+                                                                                                   "OperationSchemeOnOff",
+                                                                                                   "HeatingSetpointModulated",
+                                                                                                   "HeatingSetpointOnOff",
+                                                                                                   "CoolingSetpointModulated",
+                                                                                                   "CoolingSetpointOnOff",
+                                                                                                   "DualDeadbandSetpointModulated",
+                                                                                                   "DualDeadbandSetpointOnOff",
+                                                                                                   "CoolingDifferentialOnOff",
+                                                                                                   "CoolingSetpointOnOffWithComponentOverride",
+                                                                                                   "TrackComponentOnOff"};
 constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNamesUC = {"UNCONTROLLEDON",
                                                                                     "OPERATIONSCHEMEMODULATED",
                                                                                     "OPERATIONSCHEMEONOFF",
@@ -131,7 +131,8 @@ constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNamesUC
                                                                                     "COOLINGSETPOINTONOFFWITHCOMPONENTOVERRIDE",
                                                                                     "TRACKCOMPONENTONOFF"};
 
-constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNames = {"WetBulbTemperature", "DryBulbTemperature", "Loop"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNames = {
+    "WetBulbTemperature", "DryBulbTemperature", "Loop"};
 constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNamesUC = {"WETBULBTEMPERATURE", "DRYBULBTEMPERATURE", "LOOP"};
 
 PlantComponent *HeatExchangerStruct::factory(EnergyPlusData &state, std::string const &objectName)

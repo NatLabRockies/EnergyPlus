@@ -791,7 +791,7 @@ void CalcDayltgCoeffsRefPoints(EnergyPlusData &state, int const daylightCtrlNum)
     Real64 TVISIntWinDisk; // Visible transmittance of int win at COSBIntWin for sun
 
     Vector3<Real64> W2;
-    Vector3<Real64> W3;
+    Vector3<Real64> W3 = {0.0, 0.0, 0.0};
     Vector3<Real64> W21;
     Vector3<Real64> W23;
     Vector3<Real64> RREF2;
@@ -1723,7 +1723,7 @@ void FigureDayltgCoeffsAtPointsSetupForWindow(EnergyPlusData &state,
 
         Vector3<Real64> U3 = surf2.Vertex(2);
         U2 = surf2.Vertex(3);
-        Vector3<Real64> U1;
+        Vector3<Real64> U1 = {0.0, 0.0, 0.0};
 
         if (surf2.Sides == 4) {
             // Vertices of window (numbered counter-clockwise starting
@@ -4124,7 +4124,6 @@ void GetInputIlluminanceMap(EnergyPlusData &state, bool &ErrorsFound)
 
     CheckForGeometricTransform(state, doTransform, OldAspectRatio, NewAspectRatio);
 
-    auto &ip = state.dataInputProcessing->inputProcessor;
     auto const &s_ipsc = state.dataIPShortCut;
     s_ipsc->cCurrentModuleObject = "Output:IlluminanceMap";
     int TotIllumMaps = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
@@ -8011,7 +8010,7 @@ void DayltgInterReflectedIllum(EnergyPlusData &state,
 
                     auto const &surfShade = s_surf->surfShades(IWin);
                     auto const &btar = surfShade.blind.TAR;
-                    auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(surfShade.blind.matNum));
+                    [[maybe_unused]] auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(surfShade.blind.matNum));
 
                     assert(matBlind != nullptr);
 

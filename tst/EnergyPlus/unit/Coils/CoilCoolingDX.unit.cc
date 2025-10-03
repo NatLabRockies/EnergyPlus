@@ -173,7 +173,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
     // set some values to run at rated conditions and call to run normal mode speed 1
     evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMinSpeed(*state);
     HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
-    Real64 PLR = 1.0;
     int speedNum = 1;
     Real64 speedRatio = 1.0;
     HVAC::FanOp fanOp = HVAC::FanOp::Cycling;
@@ -312,7 +311,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
     // set some values to run at rated conditions and call to run normal mode speed 1
     evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMinSpeed(*state);
     HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
-    Real64 PLR = 1.0;
     int speedNum = 1;
     Real64 speedRatio = 1.0;
     HVAC::FanOp fanOp = HVAC::FanOp::Cycling;

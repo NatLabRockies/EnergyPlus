@@ -3022,12 +3022,13 @@ namespace HeatBalanceManager {
                 if (state.dataSysVars->ReportDetailedWarmupConvergence) { // only do this detailed thing when requested by user is on
                     // Write Warmup Convergence Information to the initialization output file
                     if (state.dataHeatBalMgr->FirstWarmupWrite) {
-                        constexpr const char *Format_732{"! <Warmup Convergence Information>,Zone Name,Time Step,Hour of Day,Warmup Temperature "
-                                                         "Difference {{deltaC}},Warmup Load Difference {{W}}\n"};
+                        constexpr const char *Format_732{
+                            "! <Warmup Convergence Information - Detailed>,Zone Name,Time Step,Hour of Day,Warmup Temperature "
+                            "Difference {{deltaC}},Warmup Load Difference {{W}}\n"};
                         print(state.files.eio, Format_732);
                         state.dataHeatBalMgr->FirstWarmupWrite = false;
                     }
-                    constexpr const char *Format_731{" Warmup Convergence Information, {},{},{},{:.10R},{:.10R}\n"};
+                    constexpr const char *Format_731{" Warmup Convergence Information - Detailed, {},{},{},{:.10R},{:.10R}\n"};
                     print(state.files.eio,
                           Format_731,
                           state.dataHeatBal->Zone(ZoneNum).Name,
@@ -3756,18 +3757,28 @@ namespace HeatBalanceManager {
         }
 
     Label10:;
-        for (LineNum = 2; LineNum <= 5; ++LineNum) {
+        NextLine = W5DataFile.readLine();
+        if (NextLine.eof) {
+            goto Label1000;
+        }
+        ++FileLineCount;
+        if (!has_prefixi(NextLine.data, "WINDOW NAME")) {
+            // Berkeley Lab WINDOW 7 has been found to include extra blank lines after the "WINDOW5" line
+            // so find the line that begins with "WINDOW NAME"
+            goto Label10;
+        } else {
+            // Get window name
+            W5Name = std::string{NextLine.data.substr(19)};
+            WindowNameInW5DataFile = Util::makeUPPER(W5Name);
+
+            // Get description (currently not used)
             NextLine = W5DataFile.readLine();
             if (NextLine.eof) {
                 goto Label1000;
             }
-            DataLine(LineNum) = NextLine.data;
             ++FileLineCount;
         }
-
-        // Get window name and check for match
-        W5Name = std::string{DataLine(4).substr(19)};
-        WindowNameInW5DataFile = Util::makeUPPER(W5Name);
+        // Check for window name match
         if (DesiredConstructionName != WindowNameInW5DataFile) {
             // Doesn't match; read through file until next window entry is found
         Label20:;
@@ -6100,7 +6111,7 @@ namespace HeatBalanceManager {
             print(state.files.eio,
                   "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{w/m-K}},Density {{kg/m3}},Specific Heat "
                   "{{J/kg-K}},ThermalResistance {{m2-K/w}}\n");
-            print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/w}}\n");
+            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/w}}\n");
             print(state.files.eio, "! <CTF>,Time,Outside,Cross,Inside,Flux (except final one)\n");
 
             int cCounter = 0; // just used to keep construction index in output report

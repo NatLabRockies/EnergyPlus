@@ -6175,67 +6175,6 @@
 !   3,                       !- Zone Equipment 2 Heating or No-Load Sequence
 !   ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
 !   ,                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
-   !-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:ENERGYRECOVERYVENTILATOR ===========
-
-  ZoneHVAC:EnergyRecoveryVentilator,
-    ERV_unit1,               !- Name
-    always_avail,            !- Availability Schedule Name
-    OA_Heat_Recovery_Unit1,  !- Heat Exchanger Name
-    0.0283168464628752,      !- Supply Air Flow Rate {m3/s}
-    0.0283168464628752,      !- Exhaust Air Flow Rate {m3/s}
-    OASupplyFan_unit1,       !- Supply Air Fan Name
-    OAExhaustFan_unit1;      !- Exhaust Air Fan Name
-
-  Fan:OnOff,
-    OASupplyFan_unit1,       !- Name
-    always_off,              !- Availability Schedule Name
-    0.6,                     !- Fan Total Efficiency
-    454.045717061016,        !- Pressure Rise {Pa}
-    0.0283168464628752,      !- Maximum Flow Rate {m3/s}
-    1,                       !- Motor Efficiency
-    0,                       !- Motor In Airstream Fraction
-    OA fan inlet node_unit1, !- Air Inlet Node Name
-    OA inlet node_unit1,     !- Air Outlet Node Name
-    ,                        !- Fan Power Ratio Function of Speed Ratio Curve Name
-    ,                        !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
-    Ventilation;             !- End-Use Subcategory
-
-  Fan:OnOff,
-    OAExhaustFan_unit1,      !- Name
-    always_off,              !- Availability Schedule Name
-    0.6,                     !- Fan Total Efficiency
-    454.045717061016,        !- Pressure Rise {Pa}
-    0.0283168464628752,      !- Maximum Flow Rate {m3/s}
-    1,                       !- Motor Efficiency
-    0,                       !- Motor In Airstream Fraction
-    ERVexhaustnode_unit1,    !- Air Inlet Node Name
-    exhaust outlet node_unit1,  !- Air Outlet Node Name
-    ,                        !- Fan Power Ratio Function of Speed Ratio Curve Name
-    ,                        !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
-    Ventilation;             !- End-Use Subcategory
-
-   !-   ===========  ALL OBJECTS IN CLASS: HEATEXCHANGER:AIRTOAIR:SENSIBLEANDLATENT ===========
-
-  HeatExchanger:AirToAir:SensibleAndLatent,
-    OA_Heat_Recovery_Unit1,  !- Name
-    always_off,              !- Availability Schedule Name
-    0.0283168464628752,      !- Nominal Supply Air Flow Rate {m3/s}
-    0.65,                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
-    0,                       !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-    0.65,                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
-    0,                       !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-    outdoor air node_unit1,  !- Supply Air Inlet Node Name
-    OA fan inlet node_unit1, !- Supply Air Outlet Node Name
-    Zone Exhaust Node_unit1, !- Exhaust Air Inlet Node Name
-    ERVexhaustnode_unit1,    !- Exhaust Air Outlet Node Name
-    0,                       !- Nominal Electric Power {W}
-    No,                      !- Supply Air Outlet Temperature Control
-    Plate,                   !- Heat Exchanger Type
-    None,                    !- Frost Control Type
-    -16.8333337792644,       !- Threshold Temperature {C}
-    0.083,                   !- Initial Defrost Time Fraction {dimensionless}
-    2.15999989700318E-02,    !- Rate of Defrost Time Fraction Increase {1/K}
-    No;                      !- Economizer Lockout
 
 !- DHW pipe network...
 

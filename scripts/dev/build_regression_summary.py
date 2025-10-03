@@ -57,12 +57,16 @@
 from os import path
 from sys import argv, exit
 
-summary_input_md_file = argv[1]
-summary_output_js_file = argv[2]
-matrix_os = argv[3]
-github_sha = argv[4]
-github_run_id = argv[5]
-artifact_url = argv[6]
+from pathlib import Path
+
+workspace = argv[1]
+matrix_os = argv[2]
+github_sha = argv[3]
+github_run_id = argv[4]
+artifact_url = argv[5]
+
+summary_input_md_file = Path(workspace) / "regressions" / "summary.md"
+summary_output_js_file = Path(workspace) / "regressions" / "summary.js"
 
 if not path.exists(summary_input_md_file):
     print("Regression script shows failure exit code, but could not find summary file.")
@@ -84,7 +88,7 @@ fixed_up_contents = f"""
 
 with open(summary_output_js_file, 'w') as js:
     js_contents = f"""
-module.exports = ({{github, context}}) => {{    
+module.exports = ({{github, context}}) => {{
     github.rest.issues.createComment({{
         issue_number: context.issue.number,
         owner: context.repo.owner,

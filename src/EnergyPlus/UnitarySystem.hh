@@ -525,6 +525,7 @@ namespace UnitarySystems {
         HVAC::EconomizerStagingType OAControllerEconomizerStagingType =
             HVAC::EconomizerStagingType::InterlockedWithMechanicalCooling; // economizer staging operation type
         bool OAMixerExists = false;                                        // true if OA mixer is connected to inlet of UnitarySystem
+        bool reportACCAManualS = false;
 
         //    private:
         // private members not initialized in constructor

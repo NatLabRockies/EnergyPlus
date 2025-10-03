@@ -1022,7 +1022,6 @@ namespace SurfaceGeometry {
         using namespace Vectors;
         using namespace DataErrorTracking;
 
-        int ConstrNumFound;    // Construction number of matching interzone surface
         bool NonMatch(false);  // Error for non-matching interzone surfaces
         int MovedSurfs;        // Number of Moved Surfaces (when sorting into hierarchical structure)
         bool SurfError(false); // General Surface Error, causes fatal error at end of routine
@@ -2493,7 +2492,7 @@ namespace SurfaceGeometry {
                         continue;
                     }
 
-                    auto *matBlind = dynamic_cast<Material::MaterialBlind *>(mat);
+                    [[maybe_unused]] auto *matBlind = dynamic_cast<Material::MaterialBlind *>(mat);
                     assert(matBlind != nullptr);
 
                     surfShade.blind.matNum = mat->Num;
@@ -2918,7 +2917,7 @@ namespace SurfaceGeometry {
                 if (anySurfacesWithSpace(zoneNum)) {
                     // Add new space
                     ++state.dataGlobal->numSpaces;
-                    assert(state.dataHeatBal->space.size() >= state.dataGlobal->numSpaces);
+                    assert(static_cast<int>(state.dataHeatBal->space.size()) >= state.dataGlobal->numSpaces);
                     state.dataHeatBal->space(state.dataGlobal->numSpaces).zoneNum = zoneNum;
                     // Add to zone's list of spaces
                     thisZone.spaceIndexes.emplace_back(state.dataGlobal->numSpaces);
@@ -14281,7 +14280,6 @@ namespace SurfaceGeometry {
         // begin execution
         // get user input...
 
-        auto &s_ipsc = state.dataIPShortCut;
         auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
 
         if (state.dataSurfaceGeometry->firstTime) {

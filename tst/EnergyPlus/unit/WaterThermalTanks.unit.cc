@@ -368,7 +368,7 @@ TEST_F(EnergyPlusFixture, HPWHZoneEquipSeqenceNumberWarning)
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     ZoneEquipmentManager::GetZoneEquipment(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    EXPECT_NO_THROW(WaterThermalTanks::GetWaterThermalTankInput(*state));
 }
 
 TEST_F(EnergyPlusFixture, HPWHWrappedDummyNodeConfig)
@@ -732,7 +732,7 @@ TEST_F(EnergyPlusFixture, HPWHEnergyBalance)
     state->init_state(*state);
     state->dataEnvrn->StdRhoAir = 1.0;
 
-    ASSERT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
     WaterThermalTanks::HeatPumpWaterHeaterData &HPWH = state->dataWaterThermalTanks->HPWaterHeater(Tank.HeatPumpNum);
@@ -1048,6 +1048,8 @@ TEST_F(EnergyPlusFixture, HPWHSizing)
     Real64 LatLoadMet = 0;
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
+    DataZoneEquipment::GetZoneEquipmentData(*state);
+
     state->dataHVACGlobal->TimeStepSys = 1;
     state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     state->dataEnvrn->OutBaroPress = 101325;
@@ -1244,20 +1246,23 @@ TEST_F(EnergyPlusFixture, HPWHOutdoorAirMissingNodeNameWarning)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    bool ErrorsFound = WaterThermalTanks::GetWaterThermalTankInput(*state);
-    EXPECT_TRUE(ErrorsFound);
-    ASSERT_TRUE(ErrorsFound);
+    EXPECT_THROW(WaterThermalTanks::GetWaterThermalTankInput(*state), EnergyPlus::FatalError);
 
-    std::string const error_string =
-        delimited_string({"   ** Warning ** ProcessScheduleInput: Schedule:Constant = DUMMYSCH",
-                          "   **   ~~~   ** Schedule Type Limits Name is empty.",
-                          "   **   ~~~   ** Schedule will not be validated.",
-                          "   ** Severe  ** WaterHeater:HeatPump:PumpedCondenser=\"ZONE4HEATPUMPWATERHEATER\":",
-                          "   **   ~~~   ** When Inlet Air Configuration=\"OUTDOORAIRONLY\".",
-                          "   **   ~~~   ** Outdoor Air Node Name and Exhaust Air Node Name must be specified.",
-                          "   ** Severe  ** WaterHeater:HeatPump:PumpedCondenser=\"ZONE4HEATPUMPWATERHEATER\":",
-                          "   **   ~~~   ** Heat pump water heater fan outlet node name does not match next connected component.",
-                          "   **   ~~~   ** Fan outlet node name = ZONE4AIRINLETNODE"});
+    std::string const error_string = delimited_string({
+        "   ** Warning ** ProcessScheduleInput: Schedule:Constant = DUMMYSCH",
+        "   **   ~~~   ** Schedule Type Limits Name is empty.",
+        "   **   ~~~   ** Schedule will not be validated.",
+        "   ** Severe  ** WaterHeater:HeatPump:PumpedCondenser=\"ZONE4HEATPUMPWATERHEATER\":",
+        "   **   ~~~   ** When Inlet Air Configuration=\"OUTDOORAIRONLY\".",
+        "   **   ~~~   ** Outdoor Air Node Name and Exhaust Air Node Name must be specified.",
+        "   ** Severe  ** WaterHeater:HeatPump:PumpedCondenser=\"ZONE4HEATPUMPWATERHEATER\":",
+        "   **   ~~~   ** Heat pump water heater fan outlet node name does not match next connected component.",
+        "   **   ~~~   ** Fan outlet node name = ZONE4AIRINLETNODE",
+        "   **  Fatal  ** GetWaterThermalTankInput: Errors found in processing Water Thermal Tank input.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=2",
+        "   ..... Last severe error=WaterHeater:HeatPump:PumpedCondenser=\"ZONE4HEATPUMPWATERHEATER\":",
+    });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
@@ -1428,7 +1433,7 @@ TEST_F(EnergyPlusFixture, HPWHTestSPControl)
     SetPredefinedTables(*state);
     Sched::UpdateScheduleVals(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
     WaterThermalTanks::HeatPumpWaterHeaterData &HeatPump = state->dataWaterThermalTanks->HPWaterHeater(1);
@@ -1619,7 +1624,7 @@ TEST_F(EnergyPlusFixture, StratifiedTankUseEnergy)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
 
@@ -1737,7 +1742,7 @@ TEST_F(EnergyPlusFixture, StratifiedTankSourceTemperatures)
     Sched::UpdateScheduleVals(*state);
 
     int TankNum(1);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
 
@@ -1836,7 +1841,7 @@ TEST_F(EnergyPlusFixture, MixedTankTimeNeededCalc)
     EXPECT_FALSE(ErrorsFound);
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     int TankNum(1);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
@@ -1949,7 +1954,7 @@ TEST_F(EnergyPlusFixture, StratifiedTankCalc)
     EXPECT_FALSE(ErrorsFound);
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     state->dataGlobal->HourOfDay = 0;
     state->dataGlobal->TimeStep = 1;
@@ -2029,7 +2034,6 @@ TEST_F(EnergyPlusFixture, StratifiedTankCalc)
         EXPECT_GE(NodeTemps[i], NodeTemps[i + 1]);
     }
 
-    int DummyIndex = 1;
     Real64 TankNodeEnergy = 0;
     for (int i = 0; i < Tank.Nodes; ++i) {
         auto &node = Tank.Node[i];
@@ -2146,7 +2150,7 @@ TEST_F(EnergyPlusFixture, StratifiedTankSourceFlowRateCalc)
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
     constexpr int TankNum = 1;
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
     Tank.SourceInletNode = 1;
@@ -2174,7 +2178,6 @@ TEST_F(EnergyPlusFixture, StratifiedTankSourceFlowRateCalc)
     Tank.SourceInletTemp = 70.0;
     Tank.SourceMassFlowRate = 6.30901964e-5 * 997; // 1 gal/min
 
-    int DummyIndex = 1;
     Real64 Cp = Fluid::GetWater(*state)->getSpecificHeat(*state, 60.0, "StratifiedTankCalcNoDraw");
 
     Tank.CalcWaterThermalTankStratified(*state);
@@ -2398,7 +2401,7 @@ TEST_F(EnergyPlusFixture, DesuperheaterTimeAdvanceCheck)
     int DXNum = 1;
     bool FirstHVAC = true;
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
     WaterThermalTanks::WaterHeaterDesuperheaterData &Desuperheater = state->dataWaterThermalTanks->WaterHeaterDesuperheater(Tank.DesuperheaterNum);
@@ -2679,7 +2682,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_GSHP_DesuperheaterSourceHeat)
     int CompNum(1);
     Real64 PLR(0.5);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
     // Test if the new data Structure for water to air heat pump coils successfully initialized
     EXPECT_EQ(state->dataHeatBal->HeatReclaimSimple_WAHPCoil(1).Name, "GSHP_COIL1");
     EXPECT_EQ(state->dataHeatBal->HeatReclaimSimple_WAHPCoil(1).SourceType, "Coil:Cooling:WaterToAirHeatPump:EquationFit");
@@ -3064,7 +3067,7 @@ TEST_F(EnergyPlusFixture, Desuperheater_Multispeed_Coil_Test)
     int TankNum(1);
     int DXNum(1);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
     // Source name and type successfully passed to DataHeatBalance::HeatReclaimDXCoil data struct
     EXPECT_EQ(state->dataHeatBal->HeatReclaimDXCoil(1).Name, "MULTISPEED_COIL");
     EXPECT_EQ(state->dataHeatBal->HeatReclaimDXCoil(1).SourceType, "Coil:Cooling:DX:MultiSpeed");
@@ -3474,12 +3477,12 @@ TEST_F(EnergyPlusFixture, Desuperheater_WAHP_VSEQ_Coil_Test)
     int DXNum(1);
     int PlantLoopNum(1);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
     // Source name and type successfully passed to DataHeatBalance::HeatReclaimVS_Coil data struct
 
     DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state->dataHeatBal->HeatReclaimVS_Coil(DXNum);
-    EXPECT_EQ(state->dataHeatBal->HeatReclaimVS_Coil(DXNum).Name, "VARSPEED_WAHP_COIL");
-    EXPECT_EQ(state->dataHeatBal->HeatReclaimVS_Coil(DXNum).SourceType, "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit");
+    EXPECT_EQ(HeatReclaim.Name, "VARSPEED_WAHP_COIL");
+    EXPECT_EQ(HeatReclaim.SourceType, "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit");
 
     // Initiate conditions for multispeed coil calculation
     state->dataEnvrn->OutDryBulbTemp = 32.0;
@@ -3663,11 +3666,10 @@ TEST_F(EnergyPlusFixture, MixedTankAlternateSchedule)
     state->dataEnvrn->DayOfYear_Schedule = General::OrdinalDay(state->dataEnvrn->Month, state->dataEnvrn->DayOfMonth, 1);
     Sched::UpdateScheduleVals(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     int TankNum(1);
     Real64 rho;
-    int WaterIndex(1);
     bool NeedsHeatOrCool;
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
 
@@ -3753,7 +3755,7 @@ TEST_F(EnergyPlusFixture, MixedTank_WarnPotentialFreeze)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     int TankNum(1);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
@@ -3775,6 +3777,12 @@ TEST_F(EnergyPlusFixture, MixedTank_WarnPotentialFreeze)
     // zero source mass flow rate
     Tank.SourceMassFlowRate = 0.0;
 
+    // set time in simulation for time stamp in error message
+    state->dataHVACGlobal->SysTimeElapsed = 0.5;
+    state->dataHVACGlobal->TimeStepSys = 0.5;
+    state->dataGlobal->CurrentTime = 24.0;
+    state->dataGlobal->TimeStepZone = 0.5;
+
     // Calls CalcWaterThermalTankMixed
     Tank.CalcWaterThermalTank(*state);
 
@@ -3791,7 +3799,7 @@ TEST_F(EnergyPlusFixture, MixedTank_WarnPotentialFreeze)
                                                        "   **   ~~~   ** Schedule will not be validated.",
                                                        "   ** Warning ** CalcWaterThermalTankMixed: WaterHeater:Mixed = 'CHILLEDWATERTANK':  "
                                                        "Temperature of tank < 2C indicates of possibility of freeze. Tank Temperature = 1.95 C.",
-                                                       "   **   ~~~   **  Environment=, at Simulation time= 00:-1 - 00:00"});
+                                                       "   **   ~~~   **  Environment=, at Simulation time= 23:30 - 24:00"});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
@@ -3859,7 +3867,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarnPotentialFreeze)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     int TankNum(1);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(TankNum);
@@ -3886,6 +3894,12 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarnPotentialFreeze)
     // zero source mass flow rate
     Tank.SourceMassFlowRate = 0.0;
 
+    // set time in simulation for time stamp in error message
+    state->dataHVACGlobal->SysTimeElapsed = 0.1;
+    state->dataHVACGlobal->TimeStepSys = 0.1;
+    state->dataGlobal->CurrentTime = 0.1;
+    state->dataGlobal->TimeStepZone = 0.1;
+
     // Calls CalcWaterThermalTankStratified
     Tank.CalcWaterThermalTank(*state);
 
@@ -3907,7 +3921,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarnPotentialFreeze)
                           "   **   ~~~   ** Schedule will not be validated.",
                           "   ** Warning ** CalcWaterThermalTankStratified: WaterHeater:Stratified = 'STRATIFIED CHILLEDWATERTANK':  Temperature of "
                           "tank < 2C indicates of possibility of freeze. Tank Temperature = 1.75 C.",
-                          "   **   ~~~   **  Environment=, at Simulation time= 00:-1 - 00:00"});
+                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:06"});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
@@ -4176,7 +4190,7 @@ TEST_F(EnergyPlusFixture, MultipleDesuperheaterSingleSource)
     int DXNum = 1;
     bool FirstHVAC = true;
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     // first tank
     WaterThermalTanks::WaterThermalTankData &Tank1 = state->dataWaterThermalTanks->WaterThermalTank(1);
@@ -4245,14 +4259,14 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  HPWHPumped Condenser Outlet - Tank Inlet,  !- Condenser Water Outlet Node Name",
         "  Autosize,                !- Condenser Water Flow Rate {m3/s}",
         "  Autosize,                !- Evaporator Air Flow Rate {m3/s}",
-        "  ZoneAirOnly,             !- Inlet Air Configuration",
-        "  HPWHPumped Air Inlet Node,  !- Air Inlet Node Name",
-        "  HPWHPumped Air Outlet Node,  !- Air Outlet Node Name",
-        "  ,                        !- Outdoor Air Node Name",
-        "  ,                        !- Exhaust Air Node Name",
+        "  OutdoorAirOnly,          !- Inlet Air Configuration",
+        "  ,                        !- Air Inlet Node Name",
+        "  ,                        !- Air Outlet Node Name",
+        "  HPWHPumped Air Inlet Node, !- Outdoor Air Node Name",
+        "  HPWHPumped Air Outlet Node,!- Exhaust Air Node Name",
         "  ,                        !- Inlet Air Temperature Schedule Name",
         "  ,                        !- Inlet Air Humidity Schedule Name",
-        "  Zone1,                   !- Inlet Air Zone Name",
+        "  ,                        !- Inlet Air Zone Name",
         "  WaterHeater:Mixed,       !- Tank Object Type",
         "  HPWHPumped Mixed Tank,   !- Tank Name",
         "  HPWHPumped Water Inlet Node,  !- Tank Use Side Inlet Node Name",
@@ -4261,7 +4275,7 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  HPWHPumped DXCoil,       !- DX Coil Name",
         "  10,                      !- Minimum Inlet Air Temperature for Compressor Operation {C}",
         "  94,                      !- Maximum Inlet Air Temperature for Compressor Operation {C}",
-        "  Zone,                    !- Compressor Location",
+        "  Outdoors,                !- Compressor Location",
         "  ,                        !- Compressor Ambient Temperature Schedule Name",
         "  Fan:SystemModel,         !- Fan Object Type",
         "  HPWHPumped FanSystemModel,  !- Fan Name",
@@ -4297,10 +4311,10 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  0,                       !- On Cycle Parasitic Fuel Consumption Rate {W}",
         "  DistrictHeatingSteam,              !- On Cycle Parasitic Fuel Type",
         "  0,                       !- On Cycle Parasitic Heat Fraction to Tank",
-        "  Zone,                    !- Ambient Temperature Indicator",
+        "  Outdoors,                !- Ambient Temperature Indicator",
         "  ,                        !- Ambient Temperature Schedule Name",
-        "  Zone1,                   !- Ambient Temperature Zone Name",
-        "  ,                        !- Ambient Temperature Outdoor Air Node Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  HPWHPumped OA Node,      !- Ambient Temperature Outdoor Air Node Name",
         "  6,                       !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}",
         "  1,                       !- Off Cycle Loss Fraction to Zone",
         "  6,                       !- On Cycle Loss Coefficient to Ambient Temperature {W/K}",
@@ -4462,14 +4476,14 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  0.0664166667,            !- Condenser Bottom Location {m}",
         "  0.8634166667,            !- Condenser Top Location {m}",
         "  0.2279,                  !- Evaporator Air Flow Rate {m3/s}",
-        "  ZoneAirOnly,             !- Inlet Air Configuration",
-        "  HPWHWrapped Air Inlet Node,  !- Air Inlet Node Name",
-        "  HPWHWrapped Air Outlet Node,  !- Air Outlet Node Name",
-        "  ,                        !- Outdoor Air Node Name",
-        "  ,                        !- Exhaust Air Node Name",
+        "  OutdoorAirOnly,          !- Inlet Air Configuration",
+        "  ,                        !- Air Inlet Node Name",
+        "  ,                        !- Air Outlet Node Name",
+        "  HPWHWrapped Air Inlet Node,  !- Outdoor Air Node Name",
+        "  HPWHWrapped Air Outlet Node,  !- Exhaust Air Node Name",
         "  HPWHWrapped Inlet Air Temp Sch,  !- Inlet Air Temperature Schedule Name",
         "  HPWHWrapped Inlet Air Hum Sch,  !- Inlet Air Humidity Schedule Name",
-        "  Zone1,                   !- Inlet Air Zone Name",
+        "  ,                        !- Inlet Air Zone Name",
         "  WaterHeater:Stratified,  !- Tank Object Type",
         "  HPWHWrapped Stratified Tank,  !- Tank Name",
         "  HPWHWrapped Water Inlet Node,  !- Tank Use Side Inlet Node Name",
@@ -4478,7 +4492,7 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  HPWHWrapped DXCoil,      !- DX Coil Name",
         "  7.2,                     !- Minimum Inlet Air Temperature for Compressor Operation {C}",
         "  48.89,                   !- Maximum Inlet Air Temperature for Compressor Operation {C}",
-        "  Zone,                    !- Compressor Location",
+        "  Outdoors,                !- Compressor Location",
         "  ,                        !- Compressor Ambient Temperature Schedule Name",
         "  Fan:SystemModel,         !- Fan Object Type",
         "  HPWHWrapped FanSystemModel,  !- Fan Name",
@@ -4525,10 +4539,10 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  Electricity,             !- On Cycle Parasitic Fuel Type",
         "  0,                       !- On Cycle Parasitic Heat Fraction to Tank",
         "  0,                       !- On Cycle Parasitic Height {m}",
-        "  Zone,                    !- Ambient Temperature Indicator",
-        "  HPWHWrapped Stratified Tank Ambient Temp Sch,  !- Ambient Temperature Schedule Name",
-        "  Zone1,                   !- Ambient Temperature Zone Name",
-        "  ,                        !- Ambient Temperature Outdoor Air Node Name",
+        "  Outdoors,                !- Ambient Temperature Indicator",
+        "  ,                        !- Ambient Temperature Schedule Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  HPWHWrapped OA Node,     !- Ambient Temperature Outdoor Air Node Name",
         "  0.846,                   !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}",
         "  1,                       !- Skin Loss Fraction to Zone",
         "  0,                       !- Off Cycle Flue Loss Coefficient to Ambient Temperature {W/K}",
@@ -4670,12 +4684,16 @@ TEST_F(EnergyPlusFixture, HPWH_Both_Pumped_and_Wrapped_InputProcessing)
         "  General,                 !- End-Use Subcategory",
         "  1;                       !- Number of Speeds",
 
+        "OutdoorAir:NodeList,",
+        "  HPWHPumped Air Inlet Node,  !- Node or NodeList Name",
+        "  HPWHPumped OA Node,         !- Node or NodeList Name",
+        "  HPWHWrapped Air Inlet Node, !- Node or NodeList Name",
+        "  HPWHWrapped OA Node;        !- Node or NodeList Name",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    EXPECT_TRUE(WaterThermalTanks::GetWaterThermalTankInput(*state));
-
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
     EXPECT_EQ(state->dataWaterThermalTanks->HPWaterHeater.size(), 2u);
     EXPECT_EQ(state->dataWaterThermalTanks->numHeatPumpWaterHeater, 2);
 
@@ -4914,7 +4932,7 @@ TEST_F(EnergyPlusFixture, CrashCalcStandardRatings_HPWH_and_Standalone)
     SetPredefinedTables(*state);
     Sched::UpdateScheduleVals(*state);
 
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     {
         auto &HPWH = state->dataWaterThermalTanks->HPWaterHeater(1);
@@ -5197,8 +5215,8 @@ TEST_F(EnergyPlusFixture, HPWH_Wrapped_Stratified_Simultaneous)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // This returns true if ErrorsFound
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    // This throws a FatalError if ErrorsFound
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     // Previous warning before fix
     std::string const error_string =
@@ -5492,8 +5510,8 @@ TEST_F(EnergyPlusFixture, HPWH_Pumped_Stratified_Simultaneous)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    // This returns true if ErrorsFound
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    // This throws a FatalError if ErrorsFound
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     // Previous warning before fix
     // std::string const error_string = delimited_string({
@@ -5609,7 +5627,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarningNumberOfNodes_FalsePositiveBlank
     EXPECT_FALSE(ErrorsFound);
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     EXPECT_EQ(1, state->dataWaterThermalTanks->numWaterHeaterStratified);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
@@ -5720,7 +5738,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarningNumberOfNodes_FalsePositiveZeroe
     EXPECT_FALSE(ErrorsFound);
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     EXPECT_EQ(1, state->dataWaterThermalTanks->numWaterHeaterStratified);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
@@ -5830,7 +5848,7 @@ TEST_F(EnergyPlusFixture, StratifiedTank_WarningNumberOfNodes_ExpectedWarning)
     EXPECT_FALSE(ErrorsFound);
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state));
+    WaterThermalTanks::GetWaterThermalTankInput(*state);
 
     EXPECT_EQ(1, state->dataWaterThermalTanks->numWaterHeaterStratified);
     WaterThermalTanks::WaterThermalTankData &Tank = state->dataWaterThermalTanks->WaterThermalTank(1);
@@ -6157,7 +6175,7 @@ TEST_F(EnergyPlusFixture, MixedTank_PVT_Per_VolumeSizing_PerSolarCollectorArea)
     EXPECT_EQ(10.0 * 0.5, pvt.AreaCol);
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     has_err_output(true);
-    EXPECT_FALSE(WaterThermalTanks::GetWaterThermalTankInput(*state)); // This returns true if ErrorsFound
+    WaterThermalTanks::GetWaterThermalTankInput(*state); // This throws a FatalError if ErrorsFound
     EXPECT_TRUE(compare_err_stream(""));
 
     EXPECT_EQ(4, state->dataLoopNodes->NumOfNodes);

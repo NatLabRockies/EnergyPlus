@@ -2812,13 +2812,13 @@ namespace DesiccantDehumidifiers {
                 if (desicDehum.ErrCount < 2) {
                     ShowWarningError(state,
                                      format("{} \"{}\" - Air volume flow rate per watt of total condenser waste heat is below the minimum "
-                                            "recommended at {:N} m3/s/W.",
+                                            "recommended at {:G} m3/s/W.",
                                             desicDehum.DehumType,
                                             desicDehum.Name,
                                             VolFlowPerRatedTotQ));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowContinueError(state,
-                                      format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:N}]", MinVolFlowPerRatedTotQ));
+                                      format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:G}]", MinVolFlowPerRatedTotQ));
                     ShowContinueError(state, "Possible causes include inconsistent air flow rates in system components ");
                     ShowContinueError(state, "on the regeneration side of the desiccant dehumidifier.");
                 } else {

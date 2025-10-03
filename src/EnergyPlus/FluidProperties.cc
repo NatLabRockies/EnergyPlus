@@ -508,8 +508,6 @@ namespace Fluid {
 
     void InitConstantFluidPropertiesData(EnergyPlusData &state)
     {
-        constexpr std::string_view routineName = "InitConstantFluidPropertiesData";
-
         auto &df = state.dataFluid;
         bool ErrorsFound = false;
 
@@ -2261,7 +2259,6 @@ namespace Fluid {
 
         for (auto *glycol : df->glycols) {
 
-            int GlycolIndex = 0; // used in routine calls -- value is returned when first 0
             // Lay out the basic values:
             if (!glycol->GlycolName.empty()) {
                 print(state.files.debug, "Glycol={}, Mixture fluid={}\n", glycol->Name, glycol->GlycolName);
@@ -5009,13 +5006,13 @@ namespace Fluid {
         }
     }
 
-    void GlycolProps::getDensityTemperatureLimits(EnergyPlusData &state, Real64 &MinTempLimit, Real64 &MaxTempLimit)
+    void GlycolProps::getDensityTemperatureLimits([[maybe_unused]] EnergyPlusData &state, Real64 &MinTempLimit, Real64 &MaxTempLimit)
     {
         MinTempLimit = this->RhoLowTempValue;
         MaxTempLimit = this->RhoHighTempValue;
     }
 
-    void GlycolProps::getSpecificHeatTemperatureLimits(EnergyPlusData &state, Real64 &MinTempLimit, Real64 &MaxTempLimit)
+    void GlycolProps::getSpecificHeatTemperatureLimits([[maybe_unused]] EnergyPlusData &state, Real64 &MinTempLimit, Real64 &MaxTempLimit)
     {
         MinTempLimit = this->CpLowTempValue;
         MaxTempLimit = this->CpHighTempValue;

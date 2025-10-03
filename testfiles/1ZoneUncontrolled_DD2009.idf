@@ -829,7 +829,7 @@
 
   Output:Constructions,Constructions;
 
-  ! Output:Schedules,Timestep;
+  Output:Schedules,Timestep;
 
   Output:Schedules,Hourly;
 

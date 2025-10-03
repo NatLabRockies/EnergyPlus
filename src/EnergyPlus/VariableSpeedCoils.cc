@@ -4756,6 +4756,10 @@ namespace VariableSpeedCoils {
                         } else {
                             CoolCapAtPeak = (rhoair * VolFlowRate * (48000.0 - SupEnth)) + FanCoolLoad;
                         }
+                        if (state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum).CoolingCapacity &&
+                            finalSysSizing.heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None) {
+                            CoolCapAtPeak = state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum).DesCoolingLoad;
+                        }
                         CoolCapAtPeak = max(0.0, CoolCapAtPeak);
                         if (TotCapTempModFac > 0.0) {
                             RatedCapCoolTotalDes = CoolCapAtPeak / TotCapTempModFac;
@@ -4833,6 +4837,10 @@ namespace VariableSpeedCoils {
                         CoolCapAtPeak = (rhoair * VolFlowRate * (MixEnth - SupEnth)) + FanCoolLoad;
                     } else {
                         CoolCapAtPeak = (rhoair * VolFlowRate * (48000.0 - SupEnth)) + FanCoolLoad;
+                    }
+                    if (state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).CoolingCapacity &&
+                        finalZoneSizing.heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None) {
+                        CoolCapAtPeak = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).DesCoolingLoad;
                     }
                     CoolCapAtPeak = max(0.0, CoolCapAtPeak);
                     if (TotCapTempModFac > 0.0) {
@@ -4948,6 +4956,17 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.RatedCapCoolTotal = RatedCapHeatDes; // AVOID BEING ZERO
             } else {
                 RatedCapHeatDes = state.dataSize->DXCoolCap; // previous code, can be risky
+            }
+            if (state.dataSize->CurSysNum > 0) { // override coil sizing if heat pump sizing inputs are present
+                if (state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum).HeatingCapacity && !state.dataSize->FinalSysSizing.empty() &&
+                    state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None) {
+                    RatedCapHeatDes = state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum).DesHeatingLoad;
+                }
+            } else if (state.dataSize->CurZoneEqNum > 0) {
+                if (state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).HeatingCapacity && !state.dataSize->FinalZoneSizing.empty() &&
+                    state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None) {
+                    RatedCapHeatDes = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum).DesHeatingLoad;
+                }
             }
             // END IF
             if (RatedCapHeatAutoSized) {

@@ -1,0 +1,119 @@
+name: "Setup Runner"
+description: "Setup Python, System Dependencies and configure CCache"
+
+inputs:
+  python-version:
+    required: true
+  python-arch:
+    required: true
+
+outputs:
+  nproc:
+    description: "The number of processors"
+    value: ${{ steps.install-deps.outputs.nproc }}
+  python-root-dir:
+    description: "The Python_ROOT_DIR"
+    value: ${{ steps.install-deps.outputs.python-root-dir }}
+  ccache-dir:
+    description: "The ccache directory"
+    value: ${{ steps.install-deps.outputs.ccache-dir }}
+  compiler-id:
+    description: "The computer compiler id to use as a caching key"
+    value: ${{ steps.install-deps.outputs.compiler-id }}
+
+runs:
+  using: "composite"
+  steps:
+
+  - name: Set up Python ${{ inputs.python-version }}
+    id: setup-python
+    uses: actions/setup-python@v5
+    with:
+      python-version: ${{ inputs.python-version }}
+      architecture: ${{ inputs.python-arch }}
+
+  - name: Install Dependencies
+    id: install-deps
+    shell: bash
+    run: |
+      echo "Configuring"
+      begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+      begin_group "Figure out NPROC"
+      NPROC=$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
+      echo "There are $NPROC threads available"
+      echo "NPROC=$NPROC" >> $GITHUB_ENV
+      echo "nproc=$NPROC" >> $GITHUB_OUTPUT
+      echo "::endgroup::"
+
+      if [ "$RUNNER_OS" == "Windows" ]; then
+        DIR_SEP="\\"
+      else
+        DIR_SEP="/"
+      fi
+      echo "DIR_SEP=$DIR_SEP" >> $GITHUB_ENV
+
+      begin_group "Install system dependencies such as ninja and ccache"
+      export CCACHE_DIR="${{ github.workspace }}${DIR_SEP}.ccache"
+      echo "CCACHE_DIR=$CCACHE_DIR"
+      echo "CCACHE_DIR=$CCACHE_DIR" >> $GITHUB_ENV
+      echo "ccache-dir=$CCACHE_DIR" >> $GITHUB_OUTPUT
+
+      if [ "$RUNNER_OS" == "Linux" ]; then
+        echo "FC=gfortran-13" >> $GITHUB_ENV
+        sudo apt-get -qq update
+        sudo apt-get -qq install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev ccache
+
+        COMPILER="gcc-$(gcc -dumpversion)"
+      elif [ "$RUNNER_OS" == "Windows" ]; then
+        choco install ninja ccache
+
+        # C:\Program Files\Microsoft Visual Studio\2022\Enterprise
+        MSVC_DIR=$(vswhere -products '*' -requires Microsoft.Component.MSBuild -latest -property installationPath)
+        echo "Latest MSVC_DIR is: $MSVC_DIR"
+        echo "MSVC_DIR=$MSVC_DIR" >> $GITHUB_ENV
+        # add folder containing vcvarsall.bat
+        echo "$MSVC_DIR\VC\Auxiliary\Build" >> $GITHUB_PATH
+        # msvc-17.14
+        # COMPILER="msvc-$(vswhere -products '*' -requires Microsoft.Component.MSBuild -latest -property installationVersion | cut -d'.' -f 1,2)"
+        # msvc-2022
+        COMPILER="msvc-$(vswhere -products '*' -requires Microsoft.Component.MSBuild -latest -property catalog_productLineVersion)"
+      elif [ "$RUNNER_OS" == "macOS" ]; then
+        brew update
+        brew install tcl-tk
+        brew reinstall gcc@13
+        echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
+        echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }}" >> $GITHUB_ENV
+
+        brew install ccache
+        ccache --set-config=compiler_check=content # darwin only
+        # clang-19
+        COMPILER="clang-$(clang -dumpversion | cut -d'.' -f 1)"
+      fi;
+      echo "::endgroup::"
+
+      begin_group "compiler ID"
+      echo "compiler-id=$COMPILER"
+      echo "COMPILER=$COMPILER" >> $GITHUB_ENV
+      echo "compiler-id=$COMPILER" >> $GITHUB_OUTPUT
+      echo "::endgroup::"
+
+      # Setup ccache, common
+      begin_group "Configure CCache"
+      ccache --set-config=cache_dir=$CCACHE_DIR
+      ccache --set-config=max_size=500M
+      ccache --set-config=compression=true
+      ccache --set-config=sloppiness=pch_defines,time_macros
+      ccache --set-config=base_dir="${{ github.workspace }}"
+      ccache -p
+      echo "::endgroup::"
+
+      begin_group "App Python_ROOT_DIR env variable"
+      Python_ROOT_DIR="$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ inputs.python-arch }}"
+      echo "Python_ROOT_DIR=$Python_ROOT_DIR" >> $GITHUB_ENV
+      echo "python-root-dir=$Python_ROOT_DIR" >> $GITHUB_OUTPUT
+      echo "::endgroup::"
+
+      begin_group "Install python dependencies"
+      pip install pytest lxml tzdata
+      echo "::endgroup::"

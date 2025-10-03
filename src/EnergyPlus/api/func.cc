@@ -92,7 +92,7 @@ Glycol glycolNew(EnergyPlusState state, const char *glycolName)
     auto *glycol = EnergyPlus::Fluid::GetGlycol(*thisState, EnergyPlus::Util::makeUPPER(glycolName));
     return reinterpret_cast<Glycol>(glycol);
 }
-void glycolDelete(EnergyPlusState, Glycol glycol)
+void glycolDelete(EnergyPlusState, Glycol)
 {
 }
 
@@ -123,7 +123,7 @@ Refrigerant refrigerantNew(EnergyPlusState state, const char *refrigerantName)
     auto *refrigerant = EnergyPlus::Fluid::GetRefrig(*thisState, EnergyPlus::Util::makeUPPER(refrigerantName));
     return reinterpret_cast<Refrigerant>(refrigerant);
 }
-void refrigerantDelete(EnergyPlusState, Refrigerant refrigerant)
+void refrigerantDelete(EnergyPlusState, Refrigerant)
 {
 }
 

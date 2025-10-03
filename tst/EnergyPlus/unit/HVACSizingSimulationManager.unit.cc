@@ -95,7 +95,7 @@ protected:
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).SizingFactorOption = NoSizingFactorMode;
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).DesVolFlowRate = 0.002;
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).DeltaT = 10;
-        state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).ConcurrenceOption = Coincident;
+        state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).ConcurrenceOption = DataSizing::SizingConcurrence::Coincident;
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).NumTimeStepsInAvg = 1;
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).PlantLoopName = "Test Plant Loop 1";
         state->dataSize->PlantSizData(state->dataSize->NumPltSizInput).LoopType = DataSizing::TypeOfPlantLoop::Heating;

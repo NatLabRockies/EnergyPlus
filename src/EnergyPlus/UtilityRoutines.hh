@@ -165,7 +165,8 @@ void emitWarningMessages(EnergyPlusData &state,
                          std::initializer_list<std::string> const &msgs,
                          bool countAsError = false);
 
-void ShowFatalError(EnergyPlusData &state, std::string const &ErrorMessage, OptionalOutputFileRef OutUnit1 = {}, OptionalOutputFileRef OutUnit2 = {});
+[[noreturn]] void
+ShowFatalError(EnergyPlusData &state, std::string const &ErrorMessage, OptionalOutputFileRef OutUnit1 = {}, OptionalOutputFileRef OutUnit2 = {});
 
 void ShowSevereError(EnergyPlusData &state,
                      std::string const &ErrorMessage,
@@ -790,6 +791,15 @@ namespace Util {
     }
 
     bool IsNameEmpty(EnergyPlusData &state, std::string &NameToVerify, std::string_view StringToDisplay, bool &ErrorFound);
+
+    void setDesignObjectNameAndPointer(EnergyPlusData &state,
+                                       std::string &nameToBeSet,         // field that is being set once a match is found
+                                       int &ptrToBeSet,                  // pointer that is being set once a match is found
+                                       std::string const userName,       // name to be found searching through the list
+                                       Array1S_string const listOfNames, // list of names in which the userName must be found
+                                       std::string const itemType,       // string containing type of base object
+                                       std::string const itemName,       // string containing name of base object
+                                       bool &errorFound);                // set to true if an error is found
 
     // Two structs for case insensitive containers.
     // Eg: for unordered_map, we need to have a case insenstive hasher and a case insensitive comparator

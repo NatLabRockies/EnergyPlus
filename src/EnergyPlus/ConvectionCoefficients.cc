@@ -3083,7 +3083,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
             static constexpr std::string_view Format_8800(
                 "! <Building Convection Parameters:Roof>, Area [m2], Perimeter [m], Height [m], Tilt [deg], Azimuth [deg]\n");
             print(state.files.eio, Format_8800); // header for roof
-            static constexpr std::string_view Format_8801("Building Convection Parameters:Roof,{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}");
+            static constexpr std::string_view Format_8801("Building Convection Parameters:Roof,{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}\n");
             print(state.files.eio,
                   Format_8801,
                   geoSummaryRoof.Area,

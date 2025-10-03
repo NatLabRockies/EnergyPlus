@@ -173,6 +173,218 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTest)
     state->dataHeatBal->SurfWinOverlapAreas.deallocate();
 }
 
+TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
+{
+    // Test for #11181 - Test inits for integrated and non-integrated shading calcs, including for DETACHED shading surfaces
+    // We are going to mimic the case where we have two surfaces:
+    // 1) A surface part a zone
+    // 2) A detached or building shading surface, not part of any zone
+    //
+    // We also assume we are in a case where we're starting a new environment, and the SurfSunlitFrac is already filled with numbers
+    // The issue with #11181 was that the arrays were NOT being cleared for the detached shading surfaces, so the previous values were retained when
+    // the Sun was down, because FigureSolarBeamAtTimestep returns early in that case
+
+    state->dataGlobal->TimeStepsInHour = 4;
+    state->dataGlobal->TimeStepZone = 1.0 / state->dataGlobal->TimeStepsInHour;
+
+    // Mimic December 1 in Chicago
+    state->dataEnvrn->DayOfYear = 335;
+    state->dataEnvrn->Month = 12;
+    state->dataEnvrn->DayOfMonth = 1;
+    state->dataGlobal->TimeStep = 1;
+
+    Real64 AvgSinSolarDeclin = 0.0;
+    Real64 AvgEqOfTime = 0.0;                                                        // Average value of Equation of Time for period
+    SolarShading::SUN3(state->dataEnvrn->DayOfYear, AvgSinSolarDeclin, AvgEqOfTime); // Average value of Sine of Solar Declination for period
+    Real64 const AvgCosSolarDeclin = std::sqrt(1.0 - pow_2(AvgSinSolarDeclin));      // Average value of Cosine of Solar Declination for period
+
+    EXPECT_NEAR(0.18712816682814074, AvgEqOfTime, 0.0000000000000001);
+    EXPECT_NEAR(-0.36958738195178753, AvgSinSolarDeclin, 0.0000000000000001);
+    EXPECT_NEAR(0.92919597884516458, AvgCosSolarDeclin, 0.0000000000000001);
+
+    state->dataEnvrn->Latitude = 41.98;
+    state->dataEnvrn->Longitude = -87.92;
+    state->dataEnvrn->SinLatitude = std::sin(Constant::DegToRad * state->dataEnvrn->Latitude);
+    state->dataEnvrn->CosLatitude = std::cos(Constant::DegToRad * state->dataEnvrn->Latitude);
+    state->dataEnvrn->TimeZoneNumber = -6.0;
+    state->dataEnvrn->TimeZoneMeridian = state->dataEnvrn->TimeZoneNumber * 15.0; // -90.0
+
+    state->dataSurface->TotSurfaces = 2;
+    state->dataBSDFWindow->MaxBkSurf = 2;
+    int constexpr zoneSurfaceIndex = 1;
+    int constexpr shadingSurfaceIndex = 2;
+
+    state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
+    state->dataSurface->SurfaceWindow.allocate(state->dataSurface->TotSurfaces);
+    EnergyPlus::SurfaceGeometry::AllocateSurfaceWindows(*state, state->dataSurface->TotSurfaces);
+
+    state->dataGlobal->NumOfZones = 1;
+    state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
+    auto &thisZone = state->dataHeatBal->Zone(1);
+    thisZone.Name = "ZONE 1";
+    thisZone.spaceIndexes.emplace_back(1);
+    state->dataHeatBal->space.allocate(1);
+    auto &thisSpace = state->dataHeatBal->space(1);
+    thisSpace.HTSurfaceFirst = zoneSurfaceIndex;
+    thisSpace.HTSurfaceLast = zoneSurfaceIndex;
+
+    auto &zoneSurface = state->dataSurface->Surface(zoneSurfaceIndex);
+    zoneSurface.Name = "ROOF";
+    zoneSurface.Class = DataSurfaces::SurfaceClass::Wall;
+    zoneSurface.Zone = 1;
+    zoneSurface.spaceNum = 1;
+    zoneSurface.BaseSurf = zoneSurfaceIndex;
+    zoneSurface.HeatTransSurf = true;
+    zoneSurface.ExtSolar = true;
+    zoneSurface.OutNormVec = {0.0, 0.0, 1.0};
+    zoneSurface.Sides = 4;
+    zoneSurface.Vertex.allocate(zoneSurface.Sides);
+    zoneSurface.Vertex(1) = {10.0, 0.0, 4.0};
+    zoneSurface.Vertex(2) = {10.0, 10.0, 4.0};
+    zoneSurface.Vertex(3) = {0.0, 10.0, 4.0};
+    zoneSurface.Vertex(4) = {0.0, 0.0, 4.0};
+    zoneSurface.Area = 100.0;
+    zoneSurface.NetAreaShadowCalc = 100.0;
+
+    auto &shadingSurface = state->dataSurface->Surface(shadingSurfaceIndex);
+    shadingSurface.Name = "SHADING";
+    shadingSurface.Class = DataSurfaces::SurfaceClass::Detached_B;
+    shadingSurface.HeatTransSurf = false;
+    shadingSurface.ExtSolar = true;
+    shadingSurface.IsShadowing = true;
+    shadingSurface.OutNormVec = {0.0, 0.0, 1.0};
+    shadingSurface.Sides = 4;
+    shadingSurface.Vertex.allocate(shadingSurface.Sides);
+    shadingSurface.Vertex(1) = {110.0, 0.0, 4.0};
+    shadingSurface.Vertex(2) = {110.0, 10.0, 4.0};
+    shadingSurface.Vertex(3) = {100.0, 10.0, 4.0};
+    shadingSurface.Vertex(4) = {100.0, 0.0, 4.0};
+    shadingSurface.Area = 100.0;
+    shadingSurface.NetAreaShadowCalc = 100.0;
+
+    Window::initWindowModel(*state);
+    SolarShading::AllocateModuleArrays(*state);
+
+    // Prefill with some values
+    state->dataHeatBal->SurfSunlitFrac = 0.5;
+    state->dataHeatBal->SurfSunlitFracHR = 0.5;
+    // Test non-integrated option first, CalcPerSolarBeam should set OutProjSLFracMult and InOutProjSLFracMult to 1.0 for all hours
+    for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
+        for (int Hour = 1; Hour <= Constant::iHoursInDay; ++Hour) {
+            state->dataSurface->SurfaceWindow(SurfNum).OutProjSLFracMult[Hour] = 999.0;
+            state->dataSurface->SurfaceWindow(SurfNum).InOutProjSLFracMult[Hour] = 888.0;
+        }
+    }
+
+    SolarShading::DetermineShadowingCombinations(*state);
+
+    state->dataSysVars->DetailedSolarTimestepIntegration = false;
+    CalcPerSolarBeam(*state, AvgEqOfTime, AvgSinSolarDeclin, AvgCosSolarDeclin);
+
+    int constexpr sunRiseHour = 8;
+    int constexpr sunRiseTimeStep = 1;
+    int constexpr sunSetHour = 17;
+    int constexpr sunSetTimeStep = 1;
+
+    auto isSunUp = [=](int hour, int timestep) {
+        if ((hour < sunRiseHour || (hour == sunRiseHour && timestep < sunRiseTimeStep))) {
+            return false;
+        }
+        if (hour > sunSetHour || (hour == sunSetHour && timestep > sunSetTimeStep)) {
+            return false;
+        }
+
+        return true;
+    };
+
+    // Ensure we have sun is Up working properly
+    for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
+        for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
+            if (isSunUp(hour, timestep)) {
+                EXPECT_GT(state->dataBSDFWindow->SUNCOSTS(timestep, hour).z, 0.0);
+            } else {
+                EXPECT_LT(state->dataBSDFWindow->SUNCOSTS(timestep, hour).z, 0.0);
+            }
+        }
+    }
+
+    // Check that the fraction Sunlit is properly set to 1.0 when the sun is Up and ZERO otherwis: it does NOT remember previously set values
+    for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
+        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
+            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            if (isSunUp(hour, state->dataGlobal->TimeStepsInHour)) {
+                EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Up";
+            } else {
+                EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Down";
+            }
+            for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
+                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                if (isSunUp(hour, timestep)) {
+                    EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum)) << "Failed when Sun is Up";
+                } else {
+                    EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum)) << "Failed when Sun is Down";
+                }
+            }
+
+            EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour]);
+            EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour]);
+        }
+    }
+
+    // Test integrated option, CalcPerSolarBeam should set OutProjSLFracMult and InOutProjSLFracMult to 1.0 only for the specified hour
+    // Re-initialize to new values
+    for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
+        for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
+            state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour] = 555.0;
+            state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour] = 444.0;
+        }
+    }
+    state->dataHeatBal->SurfSunlitFrac = 0.5;
+    state->dataHeatBal->SurfSunlitFracHR = 0.5;
+
+    state->dataSysVars->DetailedSolarTimestepIntegration = true;
+    state->dataGlobal->HourOfDay = 23;
+    state->dataGlobal->TimeStep = 3;
+    CalcPerSolarBeam(*state, AvgEqOfTime, AvgSinSolarDeclin, AvgCosSolarDeclin);
+
+    for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
+        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
+            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            if (hour == state->dataGlobal->HourOfDay) {
+                EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour]);
+                EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour]);
+                EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum));
+            } else {
+                EXPECT_EQ(555.0, state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour]);
+                EXPECT_EQ(444.0, state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour]);
+                EXPECT_DOUBLE_EQ(0.5, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum));
+            }
+            for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
+                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                if (hour == state->dataGlobal->HourOfDay && timestep == state->dataGlobal->TimeStep) {
+                    EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum));
+                } else {
+                    EXPECT_DOUBLE_EQ(0.5, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum));
+                }
+            }
+        }
+    }
+
+    // Clean up (Why is this needed?!)
+    state->dataSurface->SurfaceWindow.deallocate();
+    state->dataHeatBal->SurfSunlitFracHR.deallocate();
+    state->dataHeatBal->SurfSunlitFrac.deallocate();
+    state->dataHeatBal->SurfSunlitFracWithoutReveal.deallocate();
+    state->dataSolarShading->SurfSunCosTheta.deallocate();
+    state->dataHeatBal->SurfCosIncAngHR.deallocate();
+    state->dataHeatBal->SurfCosIncAng.deallocate();
+    state->dataSurface->SurfOpaqAO.deallocate();
+    state->dataHeatBal->SurfWinBackSurfaces.deallocate();
+    state->dataHeatBal->SurfWinOverlapAreas.deallocate();
+}
+
 TEST_F(EnergyPlusFixture, SolarShadingTest_SurfaceScheduledSolarInc)
 {
     int SurfSolIncPtr;
@@ -3932,6 +4144,8 @@ TEST_F(EnergyPlusFixture, ShadowCalculation_CSV)
     state->dataSurface->Surface(2).Class = DataSurfaces::SurfaceClass::Wall;
     state->dataSurface->Surface(2).Construction = 1;
 
+    state->dataSurface->SurfaceWindow.allocate(state->dataSurface->TotSurfaces);
+
     state->files.shade.open_as_stringstream();
 
     HeatBalanceManager::OpenShadingFile(*state);
@@ -6250,7 +6464,8 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
         Line line_new{}; // Only defined if visible
     };
 
-    auto testclipline = [&maxX, &minX, &maxY, &minY](const TestCase &t) {
+    // No need to capture the constexpr variables (but MSVC will complain)
+    auto testclipline = [&](const TestCase &t) {
         Real64 x0 = t.line_ori.p0.x;
         Real64 y0 = t.line_ori.p0.y;
 

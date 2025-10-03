@@ -3178,7 +3178,6 @@ TEST_F(LowTempRadiantSystemTest, setOffTemperatureLowTemperatureRadiantSystemTes
     Real64 actualResult;
     Real64 acceptibleError = 0.001;
     Real64 throttlingRange;
-    int scheduleIndex;
 
     state->dataLowTempRadSys->HydrRadSys.allocate(1);
 

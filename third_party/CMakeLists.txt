@@ -143,7 +143,7 @@ set_target_properties(epexpat PROPERTIES FOLDER ThirdParty/Expat)
 
 add_subdirectory(FMI)
 set_target_properties(epfmiimport PROPERTIES FOLDER ThirdParty/FMI)
-target_link_libraries(epfmiimport turn_off_warnings)
+target_link_libraries(epfmiimport PRIVATE turn_off_warnings)
 
 add_subdirectory(zlib)
 set_target_properties(miniziplib PROPERTIES FOLDER ThirdParty/zlib)
@@ -160,9 +160,6 @@ add_subdirectory(fmt-8.0.1)
 target_compile_definitions(fmt PRIVATE FMT_USE_FULL_CACHE_DRAGONBOX=1)
 set_target_properties(fmt PROPERTIES FOLDER ThirdParty/fmt)
 mark_as_advanced(FORCE FMT_SYSTEM_HEADERS)
-
-add_subdirectory(cpgfunctionEP)
-set_target_properties(cpgfunctionEP PROPERTIES FOLDER ThirdParty/cpgfunctionEP)
 
 # Kiva
 option(BUILD_GROUND_PLOT "Build ground plotting library (for Kiva debugging only)" OFF)

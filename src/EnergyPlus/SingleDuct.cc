@@ -1112,7 +1112,7 @@ void GetSysInput(EnergyPlusData &state)
 
         // Setup the Average damper Position output variable
         // BG removed 9-10-2009 during work on CR 7770, constant volume has no damper
-        //  CALL SetupOutputVariable(state, 'Damper Position', Sys(SysNum)%DamperPosition, &
+        //  CALL Setup Output Variable(state, 'Damper Position', Sys(SysNum)%DamperPosition, &
         //                        'System','Average',Sys(SysNum)%SysName)
 
     } // End Number of Sys Loop

@@ -3182,7 +3182,7 @@ ZoneAirHeatBalanceAlgorithm,
     VAV Sys 1 Inlet Node,    !- Return Air Node Name
     Mixed Air Node 1,        !- Mixed Air Node Name
     Outside Air Inlet Node 1,!- Actuator Node Name
-    autosize,                !- Minimum Outdoor Air Flow Rate {m3/s}
+    0.0,                     !- Minimum Outdoor Air Flow Rate {m3/s}
     autosize,                !- Maximum Outdoor Air Flow Rate {m3/s}
     NoEconomizer,            !- Economizer Control Type
     ModulateFlow,            !- Economizer Control Action Type
@@ -3193,7 +3193,32 @@ ZoneAirHeatBalanceAlgorithm,
     4.6,                     !- Economizer Minimum Limit Dry-Bulb Temperature {C}
     NoLockout,               !- Lockout Type
     FixedMinimum,            !- Minimum Limit Type
-    Min OA Sched;            !- Minimum Outdoor Air Schedule Name
+    ,                        !- Minimum Outdoor Air Schedule Name
+    ,                        !- Minimum Fraction of Outdoor Air Schedule Name
+    ,                        !- Maximum Fraction of Outdoor Air Schedule Name
+    Controller Mechanical Ventilation 1;  !- Mechanical Ventilation Controller Name
+
+  Controller:MechanicalVentilation,
+    Controller Mechanical Ventilation 1,  !- Name
+    Min OA Sched,            !- Availability Schedule Name
+    Yes,                     !- Demand Controlled Ventilation
+    ZoneSum,                 !- System Outdoor Air Method
+    ,                        !- Zone Maximum Outdoor Air Fraction {dimensionless}
+    Zone 1,                  !- Zone or ZoneList 1 Name
+    SZ DSOA Zone 1,          !- Design Specification Outdoor Air Object Name 1
+    ,                        !- Design Specification Zone Air Distribution Object Name 1
+    Zone 2,                  !- Zone or ZoneList 2 Name
+    SZ DSOA Zone 2,          !- Design Specification Outdoor Air Object Name 2
+    ,                        !- Design Specification Zone Air Distribution Object Name 2
+    Zone 3,                  !- Zone or ZoneList 3 Name
+    SZ DSOA Zone 3,          !- Design Specification Outdoor Air Object Name 3
+    ,                        !- Design Specification Zone Air Distribution Object Name 3
+    Zone 4,                  !- Zone or ZoneList 4 Name
+    SZ DSOA Zone 4,          !- Design Specification Outdoor Air Object Name 4
+    ,                        !- Design Specification Zone Air Distribution Object Name 4
+    Zone 5,                  !- Zone or ZoneList 5 Name
+    SZ DSOA Zone 5 List,     !- Design Specification Outdoor Air Object Name 5
+    ;                        !- Design Specification Zone Air Distribution Object Name 5
 
   Controller:WaterCoil,
     Central Heating Coil Controller 1,  !- Name

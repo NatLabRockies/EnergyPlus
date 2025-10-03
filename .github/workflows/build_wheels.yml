@@ -21,18 +21,18 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9"]
-        os: [ubuntu-22.04]  # , macos-13, windows-2019]
+        os: [ubuntu-22.04]  # , macos-13, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - name: Checkout EnergyPlus
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         ref: ${{ github.event.inputs.ref }}
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -47,7 +47,7 @@ jobs:
         path: ./dist
 
     - name: Deploy on Test PyPi
-      uses: pypa/gh-action-pypi-publish@v1.12.4
+      uses: pypa/gh-action-pypi-publish@v1.13.0
       with:
         repository-url: https://test.pypi.org/legacy/
         user: __token__

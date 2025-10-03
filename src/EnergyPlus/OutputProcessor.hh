@@ -52,6 +52,7 @@
 #include <array>
 #include <iosfwd>
 #include <map>
+#include <type_traits>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -810,6 +811,29 @@ void SetupOutputVariable(EnergyPlusData &state,
                          int const indexGroupKey = -999,                                      // Group identifier for SQL output
                          OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this freqency
 );
+
+// A helper to be able to cast an enum to an int& for use in the above function
+template <typename EnumType, typename = std::enable_if_t<std::is_enum_v<EnumType>>>
+void SetupOutputVariable(EnergyPlusData &state,
+                         std::string_view const VariableName,                                 // String Name of variable
+                         Constant::Units VariableUnit,                                        // Actual units corresponding to the actual variable
+                         EnumType &ActualVariable,                                            // Actual Variable, used to set up pointer
+                         OutputProcessor::TimeStepType TimeStepType,                          // Zone, HeatBalance=1, HVAC, System, Plant=2
+                         OutputProcessor::StoreType VariableType,                             // State, Average=1, NonState, Sum=2
+                         std::string const &KeyedValue,                                       // Associated Key for this variable
+                         int const indexGroupKey = -999,                                      // Group identifier for SQL output
+                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this freqency
+)
+{
+#if defined(__GNUC__) || defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+    SetupOutputVariable(state, VariableName, VariableUnit, (int &)ActualVariable, TimeStepType, VariableType, KeyedValue, indexGroupKey, freq);
+#if defined(__GNUC__) || defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
+};
 
 void UpdateDataandReport(EnergyPlusData &state, OutputProcessor::TimeStepType TimeStepTypeKey); // What kind of data to update (Zone, HVAC)
 

@@ -6831,7 +6831,7 @@ namespace Window {
                       "! <WindowMaterial:Glazing:EquivalentLayer>, Material Name, Optical Data Type, Spectral Data "
                       "Set Name, Front Side Beam-Beam Solar Transmittance, Back Side Beam-Beam Solar Transmittance, "
                       "Front Side Beam-Beam Solar Reflectance, Back Side Beam-Beam Solar Reflectance, Front Side "
-                      "Beam-Diffuse Solar Transmittance, Back Side Beam-Diffuse Solar Transmittance, , Front Side "
+                      "Beam-Diffuse Solar Transmittance, Back Side Beam-Diffuse Solar Transmittance, Front Side "
                       "Beam-Diffuse Solar Reflectance, Back Side Beam-Diffuse Solar Reflectance, Diffuse-Diffuse "
                       "Solar Transmittance, Front Side Diffuse-Diffuse Solar Reflectance, Back Side Diffuse-Diffuse "
                       "Solar Reflectance, Infrared Transmittance, Front Side Infrared Emissivity, Back Side Infrared "

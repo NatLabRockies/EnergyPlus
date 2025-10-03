@@ -767,7 +767,7 @@ TEST_F(EnergyPlusFixture, HeaderedVariableSpeedPumpEMSPressureTest)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    int thisLoopNum = 1, thisBranchNum = 1, thisCompNum = 1;
+    int thisBranchNum = 1;
     DataPlant::LoopSideLocation thisLoopSideNum = DataPlant::LoopSideLocation::Supply;
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";

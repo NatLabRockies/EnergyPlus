@@ -1358,6 +1358,11 @@ This alpha input field contains the type of dehumidification control. The follow
 
 The default is \textbf{None}. For the other dehumidification control modes, the maximum humidity setpoint is required. This must be set using a \textbf{\hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat}} object. When extra dehumidification is required, the system may not be able to meet the humidity setpoint if its full capacity is not adequate. Supplemental heating coil (supplemental heating coil type and name) is a required input in AirToAir HeatPumps. The supplemental heating coil capacity must be adequate enough to meet the heating coil load and offset the excess cooling load due to extra dehumidification required to meet the high relative humidity setpoint.
 
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0103}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
+
+
 Note: the air-to-air heat pump's fan, cooling coil, heating coil and supplementary heating coil must be connected in the air loop according to the configuration shown above (Figure 118) for the blow-through fan configuration. The only other valid configuration is with a draw-through fan placement, where the fan is located between the DX heating coil and the supplementary heating coil.
 
 \paragraph{AirLoopHVAC:UnitaryHeatPump:AirToAir Example Specification}\label{airloophvacunitaryheatpumpairtoair-example-specification}
@@ -1556,9 +1561,9 @@ This alpha field contains the identifying type of heating coil specified in the 
 
 This alpha field contains the identifying name given to the DX heating coil, and should match the name specified in the corresponding DX heating coil object.
 
-\paragraph{Field: Minimum Outdoor Dry-Bulb Temperature for Compressor Operation}\label{field-minimum-outdoor-dry-bulb-temperature-for-compressor-operation-000}
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0303}
 
-\textbf{Deprecated field}. The Minimum Outdoor Dry-Bulb Temperature for Compressor Operation is now controlled by the \hyperref[coilcoolingdxmultispeed]{Coil:Cooling:DX:MultiSpeed} and \hyperref[coilheatingdxmultispeed]{Coil:Heating:DX:MultiSpeed} (if used) coil objects.
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
 
 \paragraph{Field: Cooling Coil Object Type}\label{field-cooling-coil-object-type-4}
 
@@ -1682,7 +1687,7 @@ AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,
   BlowThrough,             !- Supply air fan placement
   FanModeSchedule,         !- Supply air fan operating mode schedule name
   Coil:Heating:DX:MultiSpeed, Heat Pump DX Heating Coil 1,  !- Heating coil type & name
-  -8.0,                    !- Minimum outdoor dry-bulb temperature for compressor operation
+  ,                        !- DX Heating Coil Sizing Ratio
   Coil:Cooling:DX:MultiSpeed, Heat Pump ACDXCoil 1,    !- Cooling coil type & name
   Coil:Heating:Fuel,        !- Supplemental heating coil type
   Supp Gas Heating Coil 1, !- Supplemental heating coil name
@@ -2577,6 +2582,11 @@ This field specifies the way in which water flow through the heat pump coils wil
 \textbf{Constant} provides a constant water flow regardless of heat pump operation.~ Remember that EnergyPlus has two coils (a heating coil and a cooling coil) to approximate the operation of one coil that can operate in either heating mode or cooling mode.~ Therefore, when the water flow mode is constant, there will be full flow through either the heating coil or the cooling coil, but not both at the same time.
 
 \textbf{ConstantOnDemand} provides full flow through the coil whenever there is a load.~ When there is no load, there is zero flow through the coil.~ This control strategy represents the way EnergyPlus modeled heat pump water flow prior to Version 8.
+
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0104}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
+
 
 Following is an example of IDF usage:
 

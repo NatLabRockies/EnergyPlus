@@ -361,6 +361,20 @@ namespace Python {
         }
     }
 
+    std::string PythonEngine::getBasicPreamble()
+    {
+        std::string cmd = R"python(import sys
+sys.argv.clear()
+sys.argv.append("energyplus")
+)python";
+        fs::path programDir = FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(FileSystem::getProgramPath()));
+        fs::path const pathToPythonPackages = programDir / "python_lib";
+        std::string sPathToPythonPackages = std::string(pathToPythonPackages.string());
+        std::replace(sPathToPythonPackages.begin(), sPathToPythonPackages.end(), '\\', '/');
+        cmd += fmt::format("sys.path.insert(0, \"{}\")\n", sPathToPythonPackages);
+        return cmd;
+    }
+
     std::string PythonEngine::getTclPreppedPreamble(std::vector<std::string> const &python_fwd_args)
     {
         std::string cmd = R"python(import sys
@@ -407,7 +421,7 @@ sys.argv.append("energyplus")
     {
     }
 
-    void PythonEngine::exec(std::string_view sv)
+    void PythonEngine::exec(std::string_view)
     {
     }
 

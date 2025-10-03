@@ -1778,7 +1778,8 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
                               std::string_view const CallerName, // really used for error messages
                               int const NodeNum,                 // index in Node structure of node to be scanned
                               PlantLocation &plantLoc,           // return value for location
-                              ObjexxFCL::Optional_int CompNum)
+                              int &CompNum,                      // return value for component number
+                              bool reportError)                  // optional parameter for reporting
 {
 
     // SUBROUTINE INFORMATION:
@@ -1803,9 +1804,7 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
 
     inFoundCount = 0;
     outFoundCount = 0;
-    if (present(CompNum)) {
-        CompNum = 0;
-    }
+    CompNum = 0;
     FoundNode = false;
 
     for (LoopCtr = 1; LoopCtr <= state.dataPlnt->TotNumLoops; ++LoopCtr) {
@@ -1822,10 +1821,7 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
                         plantLoc.loopNum = LoopCtr;
                         plantLoc.loopSideNum = LoopSideCtr;
                         plantLoc.branchNum = BranchCtr;
-
-                        if (present(CompNum)) {
-                            CompNum = CompCtr; // What is this? This is an input
-                        }
+                        CompNum = CompCtr;
                         plantLoc.loop = &this_loop;
                         plantLoc.side = &this_loop_side;
                         plantLoc.branch = &this_branch;
@@ -1848,7 +1844,7 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
         }
     }
 
-    if (!FoundNode) {
+    if (!FoundNode && reportError) {
         ShowSevereError(state, "ScanPlantLoopsForNodeNum: Plant Node was not found as inlet node (for component) on any plant loops");
         ShowContinueError(state, format("Node Name=\"{}\"", state.dataLoopNodes->NodeID(NodeNum)));
         if (!state.dataGlobal->DoingSizing) {
@@ -1862,6 +1858,16 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
         ShowContinueError(state, "Possible error in Branch inputs.  For more information, look for other error messages related to this node name.");
         // fatal?
     }
+}
+
+void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
+                              std::string_view const CallerName, // really used for error messages
+                              int const NodeNum,                 // index in Node structure of node to be scanned
+                              PlantLocation &plantLoc,           // return value for location
+                              bool reportError)                  // optional parameter for reporting
+{
+    int dummy = 0;
+    ScanPlantLoopsForNodeNum(state, CallerName, NodeNum, plantLoc, dummy, reportError);
 }
 
 // Utility function, mostly for unit tests.

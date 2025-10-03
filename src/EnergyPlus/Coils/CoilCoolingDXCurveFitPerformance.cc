@@ -403,6 +403,7 @@ void CoilCoolingDXCurveFitPerformance::size(EnergyPlus::EnergyPlusData &state)
         }
         this->mySizeFlag = false;
     }
+    this->oneTimeMinOATSetup();
 }
 
 void CoilCoolingDXCurveFitPerformance::calculate(EnergyPlus::EnergyPlusData &state,
@@ -674,5 +675,15 @@ void CoilCoolingDXCurveFitPerformance::setOperMode(EnergyPlus::EnergyPlusData &s
         ShowFatalError(state,
                        format("CoilCoolingDXCurveFitPerformance: Errors found in getting {} input. Preceding condition(s) causes termination.",
                               this->object_name));
+    }
+}
+void CoilCoolingDXCurveFitPerformance::oneTimeMinOATSetup()
+{
+    if (this->myOneTimeMinOATFlag) {
+        // set the minimum OA temperature for compressor operation for each mode
+        this->normalMode.minOutdoorDrybulb = static_cast<EnergyPlus::CoilCoolingDXPerformanceBase *>(this)->minOutdoorDrybulb;
+        this->alternateMode.minOutdoorDrybulb = this->normalMode.minOutdoorDrybulb;
+        this->alternateMode2.minOutdoorDrybulb = this->normalMode.minOutdoorDrybulb;
+        this->myOneTimeMinOATFlag = false;
     }
 }

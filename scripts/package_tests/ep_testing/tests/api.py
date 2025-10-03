@@ -55,34 +55,35 @@
 
 
 import os
-import sys
 import platform
 import subprocess
+import sys
 from tempfile import mkdtemp, mkstemp
-from typing import List
+from typing import List, Optional
 
+from ep_testing.constants import MSVC, OS, Bitness
 from ep_testing.tests.base import BaseTest
 
 
 def api_resource_dir() -> str:
     this_file_path = os.path.realpath(__file__)
     this_directory = os.path.dirname(this_file_path)
-    templates_dir = os.path.join(this_directory, 'api_templates')
+    templates_dir = os.path.join(this_directory, "api_templates")
     return templates_dir
 
 
 def my_check_call(verbose: bool, command_line: List[str], **kwargs) -> None:
 
-    r = subprocess.run(command_line,
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+    r = subprocess.run(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
     if r.returncode != 0:
         raise Exception(
-            f'Command {command_line} failed with exit status {r.returncode}!\n'
-            'stderr:\n'
-            f'{r.stderr.decode().strip()}'
-            '\n\n'
-            'stdout:\n'
-            f'{r.stdout.decode().strip()}')
+            f"Command {command_line} failed with exit status {r.returncode}!\n"
+            "stderr:\n"
+            f"{r.stderr.decode().strip()}"
+            "\n\n"
+            "stdout:\n"
+            f"{r.stdout.decode().strip()}"
+        )
     elif verbose:
         if len(r.stderr) > 0:
             print(r.stderr.decode().strip())
@@ -95,28 +96,28 @@ class TestPythonAPIAccess(BaseTest):
         self.os = None
 
     def name(self):
-        return 'Test running an API script against pyenergyplus'
+        return "Test running an API script against pyenergyplus"
 
     @staticmethod
     def _api_script_content(install_root: str) -> str:
-        if platform.system() in ['Linux', 'Darwin']:
+        if platform.system() in ["Linux", "Darwin"]:
             pass
         else:  # windows
-            install_root = install_root.replace('\\', '\\\\')
-        template_file = os.path.join(api_resource_dir(), 'python_link.py')
+            install_root = install_root.replace("\\", "\\\\")
+        template_file = os.path.join(api_resource_dir(), "python_link.py")
         template = open(template_file).read()
         return template % install_root
 
     def run(self, install_root: str, verbose: bool, kwargs: dict):
         self.verbose = verbose
-        print('* Running test class "%s"... ' % self.__class__.__name__, end='')
-        if 'os' not in kwargs:
-            raise Exception('Bad call to %s -- must pass os in kwargs' % self.__class__.__name__)
-        self.os = kwargs['os']
-        handle, python_file_path = mkstemp(suffix='.py')
-        with os.fdopen(handle, 'w') as f:
+        print('* Running test class "%s"... ' % self.__class__.__name__, end="")
+        if "os" not in kwargs:
+            raise Exception("Bad call to %s -- must pass os in kwargs" % self.__class__.__name__)
+        self.os = kwargs["os"]
+        handle, python_file_path = mkstemp(suffix=".py")
+        with os.fdopen(handle, "w") as f:
             f.write(self._api_script_content(install_root))
-        print(' [FILE WRITTEN] ', end='')
+        print(" [FILE WRITTEN] ", end="")
         try:
             # TODO: why do we have to pass the full path to python on darwin/Windows but not linux?
             # Anyhoo, let's just use sys.executable everywhere
@@ -128,211 +129,197 @@ class TestPythonAPIAccess(BaseTest):
             #    py = 'C:\\Python36\\Python.exe'
             py = sys.executable
             my_env = os.environ.copy()
-            if platform.system() == 'Windows':  # my local comp didn't have cmake in path except in interact shells
+            if platform.system() == "Windows":  # my local comp didn't have cmake in path except in interact shells
                 my_env["PATH"] = install_root + ";" + my_env["PATH"]
-            if platform.system() == 'Darwin':
+            if platform.system() == "Darwin":
                 # while it runs OK locally, for some reason on GHA, running a Plugin file from the Python API seg-faults
-                idf_to_run = os.path.join(install_root, 'ExampleFiles', '1ZoneUncontrolled.idf')
+                idf_to_run = os.path.join(install_root, "ExampleFiles", "1ZoneUncontrolled.idf")
             else:
-                idf_to_run = os.path.join(install_root, 'ExampleFiles', '1ZoneUncontrolled.idf')  # PythonPluginCustomOutputVariable
-            my_check_call(self.verbose, [py, python_file_path, '-D', idf_to_run], env=my_env)
-            print(' [DONE]!')
+                idf_to_run = os.path.join(
+                    install_root, "ExampleFiles", "1ZoneUncontrolled.idf"
+                )  # PythonPluginCustomOutputVariable
+            my_check_call(self.verbose, [py, python_file_path, "-D", idf_to_run], env=my_env)
+            print(" [DONE]!")
         except Exception as e:
-            print('Python API Wrapper Script failed!')
+            print("Python API Wrapper Script failed!")
             raise e
 
 
-def make_build_dir_and_build(cmake_build_dir: str, verbose: bool, bitness: str, msvc_version: int):
+def make_build_dir_and_build(cmake_build_dir: str, verbose: bool, bitness: Bitness, msvc_version: MSVC):
+
+    os.makedirs(cmake_build_dir)
+    my_env = os.environ.copy()
+    if platform.system() == "Darwin":  # my local comp didn't have cmake in path except in interact shells
+        my_env["PATH"] = "/usr/local/bin:" + my_env["PATH"]
+    command_line = ["cmake", ".."]
+    is_windows = platform.system() == "Windows"
+    if is_windows:
+        command_line.extend(["-G", msvc_version.generator_name(), "-A", bitness.value])
+
     try:
-        os.makedirs(cmake_build_dir)
-        my_env = os.environ.copy()
-        if platform.system() == 'Darwin':  # my local comp didn't have cmake in path except in interact shells
-            my_env["PATH"] = "/usr/local/bin:" + my_env["PATH"]
-        command_line = ['cmake', '..']
-        if platform.system() == 'Windows':
-            if bitness not in ['x32', 'x64']:
-                raise Exception('Bad bitness sent to make_build_dir_and_build, should be x32 or x64')
-            if msvc_version == 15:
-                if bitness == 'x64':
-                    command_line.extend(['-G', 'Visual Studio 15 Win64'])
-                elif bitness == 'x32':
-                    command_line.extend(['-G', 'Visual Studio 15'])  # defaults to 32
-            elif msvc_version == 16:
-                if bitness == 'x64':
-                    command_line.extend(['-G', 'Visual Studio 16 2019', '-A', 'x64'])  # default to 64, but be explicit
-                elif bitness == 'x32':
-                    command_line.extend(['-G', 'Visual Studio 16 2019', '-A', 'x86'])
-
-            elif msvc_version == 17:
-                if bitness == 'x64':
-                    command_line.extend(['-G', 'Visual Studio 17 2022', '-A', 'x64'])  # default to 64, but be explicit
-                elif bitness == 'x32':
-                    command_line.extend(['-G', 'Visual Studio 17 2022', '-A', 'x86'])
-            else:
-                raise Exception("Unknown msvc_version passed to make_build_dir_and_build")
-
         my_check_call(verbose, command_line, cwd=cmake_build_dir, env=my_env)
-        command_line = ['cmake', '--build', '.']
-        if platform.system() == 'Windows':
-            command_line.extend(['--config', 'Release'])
+    except Exception as e:
+        print("C API Wrapper Configuration Failed!")
+        raise e
+
+    command_line = ["cmake", "--build", "."]
+    if platform.system() == "Windows":
+        command_line.extend(["--config", "Release"])
+    try:
         my_check_call(verbose, command_line, env=my_env, cwd=cmake_build_dir)
-        print(' [COMPILED] ', end='')
     except Exception as e:
         print("C API Wrapper Compilation Failed!")
         raise e
+    print(" [COMPILED] ", end="")
 
 
 class TestCAPIAccess(BaseTest):
 
-    def __init__(self):
+    def __init__(self, os: OS, bitness: Bitness, msvc_version: Optional[MSVC] = None):
         super().__init__()
-        self.os = None
-        self.bitness = None
-        self.source_file_name = 'func.c'
-        self.target_name = 'TestCAPIAccess'
-        self.msvc_version = None
+        self.os = os
+        self.bitness = bitness
+        self.msvc_version = msvc_version
+        self.source_file_name = "func.c"
+        self.target_name = "TestCAPIAccess"
+        if self.os == OS.Windows and self.msvc_version is None:
+            raise Exception("Must pass msvc_version if os is Windows")
 
     def name(self):
-        return 'Test running an API script against energyplus in C'
+        return "Test running an API script against energyplus in C"
 
     @staticmethod
     def _api_fixup_content() -> str:
-        template_file = os.path.join(api_resource_dir(), 'eager_cpp_fixup.txt')
+        template_file = os.path.join(api_resource_dir(), "eager_cpp_fixup.txt")
         template = open(template_file).read()
         return template
 
     def _api_cmakelists_content(self, install_path: str) -> str:
-        if platform.system() == 'Linux':
-            lib_file_name = 'libenergyplusapi.so'
-        elif platform.system() == 'Darwin':
-            lib_file_name = 'libenergyplusapi.dylib'
+        if platform.system() == "Linux":
+            lib_file_name = "libenergyplusapi.so"
+        elif platform.system() == "Darwin":
+            lib_file_name = "libenergyplusapi.dylib"
         else:  # windows
-            lib_file_name = 'energyplusapi.lib'
-            install_path = install_path.replace('\\', '\\\\')
-        template_file = os.path.join(api_resource_dir(), 'eager_cpp_cmakelists.txt')
+            lib_file_name = "energyplusapi.lib"
+            install_path = install_path.replace("\\", "\\\\")
+        template_file = os.path.join(api_resource_dir(), "eager_cpp_cmakelists.txt")
         template = open(template_file).read()
         return template.format(
-            EPLUS_INSTALL_NO_SLASH=install_path, LIB_FILE_NAME=lib_file_name,
-            TARGET_NAME=self.target_name, SOURCE_FILE=self.source_file_name
+            EPLUS_INSTALL_NO_SLASH=install_path,
+            LIB_FILE_NAME=lib_file_name,
+            TARGET_NAME=self.target_name,
+            SOURCE_FILE=self.source_file_name,
         )
 
     @staticmethod
     def _api_script_content() -> str:
-        template_file = os.path.join(api_resource_dir(), 'eager_cpp_source.cpp')
+        template_file = os.path.join(api_resource_dir(), "eager_cpp_source.cpp")
         template = open(template_file).read()
         return template
 
-    def run(self, install_root: str, verbose: bool, kwargs: dict):
+    def run(self, install_root: str, verbose: bool):
         self.verbose = verbose
-        print('* Running test class "%s"... ' % self.__class__.__name__, end='')
-        if 'os' not in kwargs:
-            raise Exception('Bad call to %s -- must pass os in kwargs' % self.__class__.__name__)
-        if 'bitness' not in kwargs:
-            raise Exception('Bad call to %s -- must pass bitness in kwargs' % self.__class__.__name__)
-        self.os = kwargs['os']
-        self.bitness = kwargs['bitness']
-        self.msvc_version = kwargs['msvc_version']
+        print('* Running test class "%s"... ' % self.__class__.__name__, end="")
         build_dir = mkdtemp()
         c_file_name = self.source_file_name
         c_file_path = os.path.join(build_dir, c_file_name)
-        with open(c_file_path, 'w') as f:
+        with open(c_file_path, "w") as f:
             f.write(self._api_script_content())
-        print(' [SRC FILE WRITTEN] ', end='')
-        cmake_lists_path = os.path.join(build_dir, 'CMakeLists.txt')
-        with open(cmake_lists_path, 'w') as f:
+        print(" [SRC FILE WRITTEN] ", end="")
+        cmake_lists_path = os.path.join(build_dir, "CMakeLists.txt")
+        with open(cmake_lists_path, "w") as f:
             f.write(self._api_cmakelists_content(install_root))
-        print(' [CMAKE FILE WRITTEN] ', end='')
-        fixup_cmake_path = os.path.join(build_dir, 'fixup.cmake')
-        with open(fixup_cmake_path, 'w') as f:
+        print(" [CMAKE FILE WRITTEN] ", end="")
+        fixup_cmake_path = os.path.join(build_dir, "fixup.cmake")
+        with open(fixup_cmake_path, "w") as f:
             f.write(self._api_fixup_content())
-        print(' [FIXUP CMAKE WRITTEN] ', end='')
-        cmake_build_dir = os.path.join(build_dir, 'build')
-        make_build_dir_and_build(cmake_build_dir, self.verbose, self.bitness, self.msvc_version)
+        print(" [FIXUP CMAKE WRITTEN] ", end="")
+        cmake_build_dir = os.path.join(build_dir, "build")
+        make_build_dir_and_build(
+            cmake_build_dir=cmake_build_dir, verbose=self.verbose, bitness=self.bitness, msvc_version=self.msvc_version
+        )
         try:
             new_binary_path = os.path.join(cmake_build_dir, self.target_name)
-            if platform.system() == 'Windows':  # override the path/name for Windows
-                new_binary_path = os.path.join(cmake_build_dir, 'Release', self.target_name + '.exe')
+            if platform.system() == "Windows":  # override the path/name for Windows
+                new_binary_path = os.path.join(cmake_build_dir, "Release", self.target_name + ".exe")
             command_line = [new_binary_path]
             my_check_call(self.verbose, command_line, cwd=install_root)
         except Exception as e:
-            print('C API Wrapper Execution failed!')
+            print("C API Wrapper Execution failed!")
             raise e
-        print(' [DONE]!')
+        print(" [DONE]!")
 
 
 class TestCppAPIDelayedAccess(BaseTest):
 
-    def __init__(self):
+    def __init__(self, os: OS, bitness: Bitness, msvc_version: Optional[MSVC] = None):
         super().__init__()
-        self.os = None
-        self.bitness = None
-        self.source_file_name = 'func.cpp'
-        self.target_name = 'TestCAPIAccess'
-        self.msvc_version = None
+        self.os = os
+        self.bitness = bitness
+        self.msvc_version = msvc_version
+        self.source_file_name = "func.cpp"
+        self.target_name = "TestCAPIAccess"
+        if self.os == OS.Windows and self.msvc_version is None:
+            raise Exception("Must pass msvc_version if os is Windows")
 
     def name(self):
-        return 'Test running an API script against energyplus in C++ but with delayed DLL loading'
+        return "Test running an API script against energyplus in C++ but with delayed DLL loading"
 
     def _api_cmakelists_content(self) -> str:
-        template_file = os.path.join(api_resource_dir(), 'delayed_cpp_cmakelists.txt')
+        template_file = os.path.join(api_resource_dir(), "delayed_cpp_cmakelists.txt")
         template = open(template_file).read()
         return template.format(TARGET_NAME=self.target_name, SOURCE_FILE=self.source_file_name)
 
     @staticmethod
     def _api_script_content(install_path: str) -> str:
-        if platform.system() == 'Linux':
-            lib_file_name = '/libenergyplusapi.so'
-        elif platform.system() == 'Darwin':
-            lib_file_name = '/libenergyplusapi.dylib'
+        if platform.system() == "Linux":
+            lib_file_name = "/libenergyplusapi.so"
+        elif platform.system() == "Darwin":
+            lib_file_name = "/libenergyplusapi.dylib"
         else:  # windows
-            raise Exception('Dont call TestCAPIDelayedAccess._api_script_content for Windows')
-        template_file = os.path.join(api_resource_dir(), 'delayed_cpp_source_linux_mac.cpp')
+            raise Exception("Dont call TestCAPIDelayedAccess._api_script_content for Windows")
+        template_file = os.path.join(api_resource_dir(), "delayed_cpp_source_linux_mac.cpp")
         template = open(template_file).read()
-        return template.replace('{EPLUS_INSTALL_NO_SLASH}', install_path).replace('{LIB_FILE_NAME}', lib_file_name)
+        return template.replace("{EPLUS_INSTALL_NO_SLASH}", install_path).replace("{LIB_FILE_NAME}", lib_file_name)
 
     @staticmethod
     def _api_script_content_windows(install_path: str) -> str:
-        lib_file_name = '\\\\energyplusapi.dll'
-        install_path = install_path.replace('\\', '\\\\')
-        template_file = os.path.join(api_resource_dir(), 'delayed_cpp_source_windows.cpp')
+        lib_file_name = "\\\\energyplusapi.dll"
+        install_path = install_path.replace("\\", "\\\\")
+        template_file = os.path.join(api_resource_dir(), "delayed_cpp_source_windows.cpp")
         template = open(template_file).read()
-        return template.replace('{EPLUS_INSTALL_NO_SLASH}', install_path).replace('{LIB_FILE_NAME}', lib_file_name)
+        return template.replace("{EPLUS_INSTALL_NO_SLASH}", install_path).replace("{LIB_FILE_NAME}", lib_file_name)
 
-    def run(self, install_root: str, verbose: bool, kwargs: dict):
+    def run(self, install_root: str, verbose: bool):
         self.verbose = verbose
-        print('* Running test class "%s"... ' % self.__class__.__name__, end='')
-        if 'os' not in kwargs:
-            raise Exception('Bad call to %s -- must pass os in kwargs' % self.__class__.__name__)
-        if 'bitness' not in kwargs:
-            raise Exception('Bad call to %s -- must pass bitness in kwargs' % self.__class__.__name__)
-        self.os = kwargs['os']
-        self.bitness = kwargs['bitness']
-        self.msvc_version = kwargs['msvc_version']
+        print('* Running test class "%s"... ' % self.__class__.__name__, end="")
         build_dir = mkdtemp()
-        c_file_name = 'func.cpp'
+        c_file_name = "func.cpp"
         c_file_path = os.path.join(build_dir, c_file_name)
-        with open(c_file_path, 'w') as f:
-            if platform.system() == 'Linux' or platform.system() == 'Darwin':
+        with open(c_file_path, "w") as f:
+            if platform.system() == "Linux" or platform.system() == "Darwin":
                 f.write(self._api_script_content(install_root))
             else:
                 f.write(self._api_script_content_windows(install_root))
-        print(' [SRC FILE WRITTEN] ', end='')
-        cmake_lists_path = os.path.join(build_dir, 'CMakeLists.txt')
-        with open(cmake_lists_path, 'w') as f:
+        print(" [SRC FILE WRITTEN] ", end="")
+        cmake_lists_path = os.path.join(build_dir, "CMakeLists.txt")
+        with open(cmake_lists_path, "w") as f:
             f.write(self._api_cmakelists_content())
-        print(' [CMAKE FILE WRITTEN] ', end='')
-        cmake_build_dir = os.path.join(build_dir, 'build')
-        make_build_dir_and_build(cmake_build_dir, self.verbose, self.bitness, self.msvc_version)
-        if platform.system() == 'Windows':
-            built_binary_path = os.path.join(cmake_build_dir, 'Release', 'TestCAPIAccess')
+        print(" [CMAKE FILE WRITTEN] ", end="")
+        cmake_build_dir = os.path.join(build_dir, "build")
+        make_build_dir_and_build(
+            cmake_build_dir=cmake_build_dir, verbose=self.verbose, bitness=self.bitness, msvc_version=self.msvc_version
+        )
+        if platform.system() == "Windows":
+            built_binary_path = os.path.join(cmake_build_dir, "Release", "TestCAPIAccess")
         else:
-            built_binary_path = os.path.join(cmake_build_dir, 'TestCAPIAccess')
+            built_binary_path = os.path.join(cmake_build_dir, "TestCAPIAccess")
         my_env = os.environ.copy()
-        if platform.system() == 'Windows':  # my local comp didn't have cmake in path except in interact shells
+        if platform.system() == "Windows":  # my local comp didn't have cmake in path except in interact shells
             my_env["PATH"] = install_root + ";" + my_env["PATH"]
         try:
             my_check_call(self.verbose, [built_binary_path], env=my_env)
         except Exception as e:
             print("Delayed C API Wrapper execution failed")
             raise e
-        print(' [DONE]!')
+        print(" [DONE]!")

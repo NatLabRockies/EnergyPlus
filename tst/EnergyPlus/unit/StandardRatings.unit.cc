@@ -125,9 +125,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest)
     Coil.OATempCompressorOn = -5.0;
     Coil.OATempCompressorOnOffBlank = "true";
 
-    Curve::Curve *pCurve;
-
-    int constexpr nCapfT = 1;
     auto *curve1 = Curve::AddCurve(*state, "PTHPHeatingCAPFT");
     curve1->curveType = CurveType::Cubic;
     curve1->numDims = 1;
@@ -140,7 +137,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest)
 
     Coil.CCapFTemp(1) = curve1->Num;
 
-    int constexpr nCapfFF = 2;
     auto *curve2 = Curve::AddCurve(*state, "HPHeatCapfFF");
     curve2->curveType = CurveType::Quadratic;
     curve2->numDims = 1;
@@ -153,7 +149,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest)
     curve2->outputLimits.max = 2;
     Coil.CCapFFlow(1) = curve2->Num;
 
-    int constexpr nEIRfT = 3;
     auto *curve3 = Curve::AddCurve(*state, "PTHPHeatingEIRFT");
     curve3->curveType = CurveType::Cubic;
     curve3->numDims = 1;
@@ -165,7 +160,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest)
     curve3->inputLimits[0].max = 25;
     Coil.EIRFTemp(1) = curve3->Num;
 
-    int constexpr nEIRfFF = 4;
     auto *curve4 = Curve::AddCurve(*state, "HPHeatEIRfFF");
     curve4->curveType = CurveType::Quadratic;
     curve4->numDims = 1;
@@ -312,7 +306,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
     Coil.OATempCompressorOn = -5.0;
     Coil.OATempCompressorOnOffBlank = "true";
 
-    int constexpr nCapfT = 1;
     auto *curve1 = Curve::AddCurve(*state, "PTHPHeatingCAPFT");
     curve1->curveType = CurveType::Cubic;
     curve1->numDims = 1;
@@ -325,7 +318,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
 
     Coil.CCapFTemp(1) = curve1->Num;
 
-    int constexpr nCapfFF = 2;
     auto *curve2 = Curve::AddCurve(*state, "HPHeatCapfFF");
     curve2->curveType = CurveType::Quadratic;
     curve2->numDims = 1;
@@ -338,7 +330,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
     curve2->outputLimits.max = 2;
     Coil.CCapFFlow(1) = curve2->Num;
 
-    int constexpr nEIRfT = 3;
     auto *curve3 = Curve::AddCurve(*state, "PTHPHeatingEIRFT");
     curve3->curveType = CurveType::Cubic;
     curve3->numDims = 1;
@@ -350,7 +341,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
     curve3->inputLimits[0].max = 25;
     Coil.EIRFTemp(1) = curve3->Num;
 
-    int constexpr nEIRfFF = 4;
     auto *curve4 = Curve::AddCurve(*state, "HPHeatEIRfFF");
     curve4->curveType = CurveType::Quadratic;
     curve4->numDims = 1;
@@ -363,7 +353,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
     curve4->outputLimits.max = 2;
     Coil.EIRFFlow(1) = curve4->Num;
 
-    int constexpr nPLFfPLR = 5;
     auto *curve5 = Curve::AddCurve(*state, "HPHeatPLFfPLR");
     curve5->curveType = CurveType::Quadratic;
     curve5->numDims = 1;
@@ -488,7 +477,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
     Coil.OATempCompressorOn = -5.0;
     Coil.OATempCompressorOnOffBlank = "true";
 
-    int constexpr nCapfT = 1;
     auto *curve1 = AddCurve(*state, "PTHPHeatingCAPFT"); // Simpl_HPACHeatCapFT_Cubic
     curve1->curveType = CurveType::Cubic;
     curve1->numDims = 1;
@@ -501,7 +489,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
 
     Coil.CCapFTemp(1) = curve1->Num;
 
-    int constexpr nCapfFF = 2;
     auto *curve2 = AddCurve(*state, "HPHeatCapfFF"); // Simpl_HPACHeatCapFFF_Cubic
     curve2->curveType = CurveType::Cubic;
     curve2->numDims = 1;
@@ -513,7 +500,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
     curve2->inputLimits[0].max = 1.5;
     Coil.CCapFFlow(1) = curve2->Num;
 
-    int constexpr nEIRfT = 3;
     auto *curve3 = AddCurve(*state, "PTHPHeatingEIRFT"); // Simpl_HPACEIRFT_Biquadratic
     curve3->curveType = CurveType::BiQuadratic;
     curve3->numDims = 1;
@@ -529,7 +515,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
     curve3->inputLimits[1].max = 46.111;
     Coil.EIRFTemp(1) = curve3->Num;
 
-    int constexpr nEIRfFF = 4;
     auto *curve4 = AddCurve(*state, "HPHeatEIRfFF"); // Simpl_HPACHeatEIRFT_Cubic
     curve4->curveType = CurveType::Cubic;
     curve4->numDims = 1;
@@ -543,7 +528,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
     curve4->outputLimits.max = 20;
     Coil.EIRFFlow(1) = curve4->Num;
 
-    int constexpr nPLFfPLR = 5;
     auto *curve5 = AddCurve(*state, "HPHeatPLFfPLR"); // Simpl_HPACCOOLPLFFPLR_Quadratic
     curve5->curveType = CurveType::Quadratic;
     curve5->numDims = 1;
@@ -2346,14 +2330,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoilEvap_32000W_IEER_2022_ValueTest)
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
     std::map<std::string, Real64> StandardRatingsResult;
-    Real64 NetCoolingCapRated(0.0);
-    Real64 IEER_2022(0.0);
-    Real64 NetCoolingCapRated2022(0.0);
-    Real64 EER_2022(0.0);
 
-    Real64 constexpr AirMassFlowRatioRated(1.0);
-    Real64 CapFFlowCurveIndex = thisCoil.CCapFFlow(1);
-    Real64 EIRFFlowCurveIndex = thisCoil.EIRFFlow(1);
     thisCoil.RatedTotCap(1) = 32000.00;
     thisCoil.RatedAirVolFlowRate(1) = 1.70;
     std::map<std::string, Real64> StandarRatingResults;
@@ -2491,14 +2468,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoilAir_AHRIExample_IEER_2022_ValueT
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
     std::map<std::string, Real64> StandardRatingsResult;
-    Real64 NetCoolingCapRated(0.0);
-    Real64 IEER_2022(0.0);
-    Real64 NetCoolingCapRated2022(0.0);
-    Real64 EER_2022(0.0);
-
-    Real64 constexpr AirMassFlowRatioRated(1.0); // AHRI test is at the design flow rate and hence AirMassFlowRatio is 1.0
-    Real64 CapFFlowCurveIndex = thisCoil.CCapFFlow(1);
-    Real64 EIRFFlowCurveIndex = thisCoil.EIRFFlow(1);
 
     EXPECT_EQ(26669.5, thisCoil.RatedTotCap(1));
     EXPECT_NEAR(1.227, thisCoil.RatedAirVolFlowRate(1), 0.01);
@@ -10347,11 +10316,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_18000W_SEER2_2023_ValueTest)
     Real64 EER2(0.0); // Energy Efficiency Ratio using AHRI 210/240 - 2023
     Real64 NetCoolingCapRated2023(0.0);
 
-    Real64 NetCoolingCapRated(0.0);
-    Real64 IEER_2022(0.0);
-    Real64 EER_2022(0.0);
-    Real64 NetCoolingCapRated2022(0.0);
-
     Array1D_int TSCCapFTemp;
     TSCCapFTemp.push_back(thisCoil.CCapFTemp(1)); // High Speed
     TSCCapFTemp.push_back(thisCoil.CCapFTemp2);   // Low Speed
@@ -10858,7 +10822,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_39000W_IEER_2022_ValueTest)
     EXPECT_EQ(0.0, minEIRfLowPLRXInput);
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
-    auto ratedTotcap = thisCoil.RatedTotCap(1);
     // Rated Total Capacity
     EXPECT_NEAR(39000, thisCoil.RatedTotCap(1), 0.01);
     EXPECT_NEAR(12000, thisCoil.RatedTotCap2, 0.01);
@@ -10913,16 +10876,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_39000W_IEER_2022_ValueTest)
     // Note -- No EIRFlow for Low Speed
 
     std::map<std::string, Real64> StandardRatingsResult;
-    Real64 NetCoolingCapRatedMaxSpeed(0.0);
-    Real64 SEER2_User(0.0);
-    Real64 SEER2_Standard(0.0);
-    Real64 NetCoolingCapRated2023(0.0);
-    Real64 EER2(0.0); // Energy Efficiency Ratio using AHRI 210/240 - 2023
-
-    Real64 NetCoolingCapRated(0.0);
-    Real64 IEER_2022(0.0);
-    Real64 EER_2022(0.0);
-    Real64 NetCoolingCapRated2022(0.0);
 
     StandardRatingsResult = TwoSpeedDXCoilStandardRatings(*state,
                                                           thisCoil.Name,
@@ -11148,7 +11101,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_54000W_IEER_2022_ValueTest)
     EXPECT_EQ(0.0, minEIRfLowPLRXInput);
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
-    auto ratedTotcap = thisCoil.RatedTotCap(1);
     // Rated Total Capacity
     EXPECT_NEAR(54883.780765317439, thisCoil.RatedTotCap(1), 0.01);
     EXPECT_NEAR(18292.764129080300, thisCoil.RatedTotCap2, 0.01);
@@ -11203,16 +11155,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_54000W_IEER_2022_ValueTest)
     // Note -- No EIRFlow for Low Speed
 
     std::map<std::string, Real64> StandardRatingsResult;
-    Real64 NetCoolingCapRatedMaxSpeed(0.0);
-    Real64 SEER2_User(0.0);
-    Real64 SEER2_Standard(0.0);
-    Real64 NetCoolingCapRated2023(0.0);
-    Real64 EER2(0.0); // Energy Efficiency Ratio using AHRI 210/240 - 2023
-
-    Real64 NetCoolingCapRated(0.0);
-    Real64 IEER_2022(0.0);
-    Real64 EER_2022(0.0);
-    Real64 NetCoolingCapRated2022(0.0);
 
     StandardRatingsResult = TwoSpeedDXCoilStandardRatings(*state,
                                                           thisCoil.Name,

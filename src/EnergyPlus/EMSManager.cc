@@ -938,14 +938,11 @@ namespace EMSManager {
         //  so here we do a final pass and throw the errors that would usually occur during get input.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        OutputProcessor::VariableType VarType;
+        OutputProcessor::VariableType VarType = OutputProcessor::VariableType::Invalid;
         bool ErrorsFound(false);
-        bool FoundObjectType;
-        bool FoundObjectName;
-        bool FoundActuatorName;
-        int ActuatorVariableNum;
-        int InternVarNum;        // local do loop index
-        int InternalVarAvailNum; // local do loop index
+        bool FoundObjectType = false;
+        bool FoundObjectName = false;
+        int InternalVarAvailNum = 0; // local do loop index
         std::string cCurrentModuleObject;
 
         cCurrentModuleObject = "EnergyManagementSystem:Sensor";
@@ -1093,7 +1090,7 @@ namespace EMSManager {
         } // ActuatorNum
 
         cCurrentModuleObject = "EnergyManagementSystem:InternalVariable";
-        for (InternVarNum = 1; InternVarNum <= state.dataRuntimeLang->NumInternalVariablesUsed; ++InternVarNum) {
+        for (int InternVarNum = 1; InternVarNum <= state.dataRuntimeLang->NumInternalVariablesUsed; ++InternVarNum) {
             if (state.dataRuntimeLang->EMSInternalVarsUsed(InternVarNum).CheckedOkay) {
                 continue;
             }
@@ -1633,6 +1630,8 @@ namespace EMSManager {
         if (allocated(state.dataAirLoop->PriAirSysAvailMgr)) {
             int numAirLoops = isize(state.dataAirLoop->PriAirSysAvailMgr);
             for (int Loop = 1; Loop <= numAirLoops; ++Loop) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
                 SetupEMSActuator(state,
                                  "AirLoopHVAC",
                                  state.dataAirSystemsData->PrimaryAirSystems(Loop).Name,
@@ -1640,6 +1639,7 @@ namespace EMSManager {
                                  "[ ]",
                                  state.dataEMSMgr->lDummy2,
                                  (int &)state.dataAirLoop->PriAirSysAvailMgr(Loop).availStatus);
+#pragma GCC diagnostic pop
             }
         }
     }
@@ -2019,7 +2019,7 @@ void SetupEMSActuator(EnergyPlusData &state,
 
     auto &s_lang = state.dataRuntimeLang;
 
-    auto tup = std::make_tuple(std::move(Util::makeUPPER(objType)), std::move(Util::makeUPPER(objName)), std::move(Util::makeUPPER(controlTypeName)));
+    auto tup = std::make_tuple(Util::makeUPPER(objType), Util::makeUPPER(objName), Util::makeUPPER(controlTypeName));
 
     // DataRuntimeLanguage::EMSActuatorKey const key(UpperCaseObjectType, UpperCaseObjectName, UpperCaseActuatorName);
     if (s_lang->EMSActuatorAvailableMap.find(tup) != s_lang->EMSActuatorAvailableMap.end()) {

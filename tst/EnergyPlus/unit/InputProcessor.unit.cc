@@ -2655,20 +2655,21 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
                                                              "ZONESUM",
                                                              "COOLINGDESIGNCAPACITY",
                                                              "HEATINGDESIGNCAPACITY",
-                                                             "ONOFF"}),
+                                                             "ONOFF",
+                                                             "NONE"}),
                                    Alphas));
     // The commented out compare containers is what the original input processor said that alpha blanks should be, even though the last 3 alpha fields
     // are filled in with defaults. We think the last three fields really should be considered blank, i.e. true
     //        EXPECT_TRUE( compare_containers( std::vector< bool >( { false, false, false, false, false, false, false, true, false, false, false } ),
     //        lAlphaBlanks ) );
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(26, NumNumbers);
-    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0,     0,
-                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, -99999}),
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0,      0,
+                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, -99999, 1}),
                                    Numbers));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true}),
+                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true, true}),
                                    lNumericBlanks));
     EXPECT_EQ(1, IOStatus);
 }

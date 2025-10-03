@@ -1500,7 +1500,6 @@ void GasAbsorberSpecs::calculateChiller(EnergyPlusData &state, Real64 &MyLoad)
     Real64 revisedEstimateAvailCap; // final estimate of available capacity if using leaving
     // condenser water temperature
     Real64 errorAvailCap; // error fraction on final estimate of AvailableCoolingCapacity
-    DataPlant::LoopSideLocation LoopSideNum;
 
     // set node values to data structure values for nodes
 

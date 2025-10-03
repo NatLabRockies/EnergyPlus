@@ -6963,7 +6963,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
                                               OnOffAirFlowRatio);
 
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 908.10992432432420, 1e-3);
-    Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
+    // Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
     EXPECT_LT(state->dataVariableSpeedCoils->HeatingCapacityMultiplier, 1.0);
     EXPECT_LT(state->dataVariableSpeedCoils->InputPowerMultiplier, 1.0);
 
@@ -7359,7 +7359,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     thisInletNode.GenContam = 12.345;
     thisOutletNode.GenContam = 0.0;
     thisVarSpeedCoil.reportCoilFinalSizes = false;
-    thisVarSpeedCoil.VSCoilType == HVAC::Coil_CoolingAirToAirVariableSpeed;
+    thisVarSpeedCoil.VSCoilType = HVAC::Coil_CoolingAirToAirVariableSpeed;
 
     // Run the test
     VariableSpeedCoils::UpdateVarSpeedCoil(*state, coilNum);

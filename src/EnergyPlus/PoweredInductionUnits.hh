@@ -186,12 +186,12 @@ namespace PoweredInductionUnits {
         Real64 PriAirMassFlow;
         Real64 SecAirMassFlow;
 
-        FanCntrlType fanControlType = FanCntrlType::Invalid; // fan speed control, Constant or VS
-        Real64 MinFanTurnDownRatio = 0.0;                    // VS fan minimum speed as fraction of maximum, to facilitate autosizing
-        Real64 MinTotAirVolFlow = 0.0;                       // m3/s  VS fan on minimum speed
-        Real64 MinTotAirMassFlow = 0.0;                      // kg/s  VS fan on minimum speed
-        Real64 MinSecAirVolFlow = 0.0;                       // m3/s  VS fan on minimum speed
-        Real64 MinSecAirMassFlow = 0.0;                      // kg/s  VS fan on minimum speed
+        FanCntrlType fanControlType = FanCntrlType::ConstantSpeedFan; // fan speed control, Constant or VS
+        Real64 MinFanTurnDownRatio = 0.0;                             // VS fan minimum speed as fraction of maximum, to facilitate autosizing
+        Real64 MinTotAirVolFlow = 0.0;                                // m3/s  VS fan on minimum speed
+        Real64 MinTotAirMassFlow = 0.0;                               // kg/s  VS fan on minimum speed
+        Real64 MinSecAirVolFlow = 0.0;                                // m3/s  VS fan on minimum speed
+        Real64 MinSecAirMassFlow = 0.0;                               // kg/s  VS fan on minimum speed
         HeatCntrlBehaviorType heatingControlType =
             HeatCntrlBehaviorType::Invalid; // heating control scheme, staged or modulated (physical devices) have different control behavior
         Real64 designHeatingDAT = 0.0;      // C, target heating discharge air temperature during second stage modulated heating behavior

@@ -223,7 +223,8 @@ namespace Sched {
         bool checkValsForLimitViolations(EnergyPlusData &state) const;
         bool checkValsForBadIntegers(EnergyPlusData &state) const;
         void populateFromMinuteVals(EnergyPlusData &state, std::array<Real64, Constant::iMinutesInDay> const &minuteVals);
-        std::vector<Real64> const &getDayVals([[maybe_unused]] EnergyPlusData &state, int jDay = -1, int dayOfWeek = -1)
+        std::vector<Real64> const &
+        getDayVals([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int jDay = -1, [[maybe_unused]] int dayOfWeek = -1)
         {
             return tsVals;
         }
@@ -368,6 +369,9 @@ namespace Sched {
     void ProcessScheduleInput(EnergyPlusData &state);
 
     void InitConstantScheduleData(EnergyPlusData &state);
+
+    // If any Output:Schedules object is found, report to EIO
+    void ReportScheduleTypeLimits(EnergyPlusData &state);
 
     void ReportScheduleDetails(EnergyPlusData &state, ReportLevel const LevelOfDetail);
 

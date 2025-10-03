@@ -1,7 +1,7 @@
 VERSION 5.00
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{48E59290-9880-11CF-9754-00AA00C00908}#1.0#0"; "MSINET.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Begin VB.Form eplUI 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "EP-Launch"
@@ -15,6 +15,168 @@ Begin VB.Form eplUI
    ScaleHeight     =   7455
    ScaleWidth      =   8835
    StartUpPosition =   1  'CenterOwner
+   Begin VB.Frame frameUtility 
+      BorderStyle     =   0  'None
+      Caption         =   "Frame1"
+      Height          =   6255
+      Left            =   240
+      TabIndex        =   28
+      Top             =   480
+      Width           =   8295
+      Begin VB.CommandButton cmdUtilityOutput6 
+         Caption         =   "Open 6"
+         Height          =   375
+         Left            =   3960
+         TabIndex        =   104
+         Top             =   4680
+         Width           =   1785
+      End
+      Begin VB.CommandButton cmdUtilityOutput5 
+         Caption         =   "Open 5"
+         Height          =   375
+         Left            =   2040
+         TabIndex        =   103
+         Top             =   4680
+         Width           =   1785
+      End
+      Begin VB.CommandButton cmdUtilityOutput4 
+         Caption         =   "Open 4"
+         Height          =   375
+         Left            =   120
+         TabIndex        =   102
+         Top             =   4680
+         Width           =   1785
+      End
+      Begin VB.CommandButton cmdUtilityOutput3 
+         Caption         =   "Open 3"
+         Height          =   375
+         Left            =   3960
+         TabIndex        =   44
+         Top             =   4200
+         Width           =   1785
+      End
+      Begin VB.CommandButton cmdUtilityOutput2 
+         Caption         =   "Open 2"
+         Height          =   375
+         Left            =   2040
+         TabIndex        =   43
+         Top             =   4200
+         Width           =   1785
+      End
+      Begin VB.ComboBox cmbUtility 
+         Height          =   315
+         Left            =   600
+         Style           =   2  'Dropdown List
+         TabIndex        =   42
+         Top             =   120
+         Width           =   1815
+      End
+      Begin VB.Frame frameUtilityWeather 
+         Caption         =   "Weather File"
+         Height          =   1215
+         Left            =   120
+         TabIndex        =   36
+         Top             =   2880
+         Width           =   8175
+         Begin VB.CommandButton cmdUtilityWeatherBrowse 
+            Caption         =   "Browse.."
+            Height          =   375
+            Left            =   240
+            TabIndex        =   37
+            Top             =   720
+            Width           =   1215
+         End
+         Begin VB.Label lblUtilityWeatherFile 
+            Caption         =   "<file path>\<file name>"
+            Height          =   495
+            Left            =   120
+            TabIndex        =   38
+            Top             =   240
+            Width           =   7935
+         End
+      End
+      Begin VB.Frame frameUtilityInput 
+         Caption         =   "Input File"
+         Height          =   1215
+         Left            =   120
+         TabIndex        =   33
+         Top             =   1560
+         Width           =   8175
+         Begin VB.CommandButton cmdUtilityIDFEdit 
+            Caption         =   "Edit - IDF Editor"
+            Height          =   375
+            Left            =   6720
+            TabIndex        =   41
+            Top             =   720
+            Width           =   1335
+         End
+         Begin VB.CommandButton cmdUtilityTextEdit 
+            Caption         =   "Edit - Text Editor"
+            Height          =   375
+            Left            =   5280
+            TabIndex        =   40
+            Top             =   720
+            Width           =   1335
+         End
+         Begin VB.CommandButton cmdUtilityInputBrowse 
+            Caption         =   "Browse.."
+            Height          =   375
+            Left            =   240
+            TabIndex        =   34
+            Top             =   720
+            Width           =   1215
+         End
+         Begin VB.Label lblUtilityInputFile 
+            Caption         =   "<file path>\<file name>"
+            Height          =   495
+            Left            =   120
+            TabIndex        =   35
+            Top             =   240
+            Width           =   7935
+         End
+      End
+      Begin VB.Frame frameUtilityAbout 
+         Caption         =   "About"
+         Height          =   975
+         Left            =   120
+         TabIndex        =   32
+         Top             =   480
+         Width           =   8175
+         Begin VB.Label lblUtilityAbout 
+            Caption         =   "lt"
+            Height          =   615
+            Left            =   120
+            TabIndex        =   39
+            Top             =   240
+            Width           =   7935
+            WordWrap        =   -1  'True
+         End
+      End
+      Begin VB.CommandButton cmdUtilityOutput1 
+         Caption         =   "Open 1"
+         Height          =   375
+         Left            =   120
+         TabIndex        =   31
+         Top             =   4200
+         Width           =   1785
+      End
+      Begin VB.CommandButton cmdUtilityRun 
+         Caption         =   "Run Utility"
+         Height          =   375
+         Left            =   6000
+         TabIndex        =   30
+         Top             =   4200
+         Width           =   2175
+      End
+      Begin VB.Label Label2 
+         Caption         =   "Utility"
+         Height          =   255
+         Left            =   120
+         TabIndex        =   45
+         Top             =   160
+         Width           =   495
+      End
+   End
    Begin VB.Frame frameSingle 
       BorderStyle     =   0  'None
       Caption         =   "frameSingle"
@@ -850,168 +1012,6 @@ Begin VB.Form eplUI
          EndProperty
       EndProperty
    End
-   Begin VB.Frame frameUtility 
-      BorderStyle     =   0  'None
-      Caption         =   "Frame1"
-      Height          =   6255
-      Left            =   240
-      TabIndex        =   28
-      Top             =   480
-      Width           =   8295
-      Begin VB.CommandButton cmdUtilityOutput6 
-         Caption         =   "Open 6"
-         Height          =   375
-         Left            =   3960
-         TabIndex        =   104
-         Top             =   4680
-         Width           =   1785
-      End
-      Begin VB.CommandButton cmdUtilityOutput5 
-         Caption         =   "Open 5"
-         Height          =   375
-         Left            =   2040
-         TabIndex        =   103
-         Top             =   4680
-         Width           =   1785
-      End
-      Begin VB.CommandButton cmdUtilityOutput4 
-         Caption         =   "Open 4"
-         Height          =   375
-         Left            =   120
-         TabIndex        =   102
-         Top             =   4680
-         Width           =   1785
-      End
-      Begin VB.CommandButton cmdUtilityOutput3 
-         Caption         =   "Open 3"
-         Height          =   375
-         Left            =   3960
-         TabIndex        =   44
-         Top             =   4200
-         Width           =   1785
-      End
-      Begin VB.CommandButton cmdUtilityOutput2 
-         Caption         =   "Open 2"
-         Height          =   375
-         Left            =   2040
-         TabIndex        =   43
-         Top             =   4200
-         Width           =   1785
-      End
-      Begin VB.ComboBox cmbUtility 
-         Height          =   315
-         Left            =   600
-         Style           =   2  'Dropdown List
-         TabIndex        =   42
-         Top             =   120
-         Width           =   1815
-      End
-      Begin VB.Frame frameUtilityWeather 
-         Caption         =   "Weather File"
-         Height          =   1215
-         Left            =   120
-         TabIndex        =   36
-         Top             =   2880
-         Width           =   8175
-         Begin VB.CommandButton cmdUtilityWeatherBrowse 
-            Caption         =   "Browse.."
-            Height          =   375
-            Left            =   240
-            TabIndex        =   37
-            Top             =   720
-            Width           =   1215
-         End
-         Begin VB.Label lblUtilityWeatherFile 
-            Caption         =   "<file path>\<file name>"
-            Height          =   495
-            Left            =   120
-            TabIndex        =   38
-            Top             =   240
-            Width           =   7935
-         End
-      End
-      Begin VB.Frame frameUtilityInput 
-         Caption         =   "Input File"
-         Height          =   1215
-         Left            =   120
-         TabIndex        =   33
-         Top             =   1560
-         Width           =   8175
-         Begin VB.CommandButton cmdUtilityIDFEdit 
-            Caption         =   "Edit - IDF Editor"
-            Height          =   375
-            Left            =   6720
-            TabIndex        =   41
-            Top             =   720
-            Width           =   1335
-         End
-         Begin VB.CommandButton cmdUtilityTextEdit 
-            Caption         =   "Edit - Text Editor"
-            Height          =   375
-            Left            =   5280
-            TabIndex        =   40
-            Top             =   720
-            Width           =   1335
-         End
-         Begin VB.CommandButton cmdUtilityInputBrowse 
-            Caption         =   "Browse.."
-            Height          =   375
-            Left            =   240
-            TabIndex        =   34
-            Top             =   720
-            Width           =   1215
-         End
-         Begin VB.Label lblUtilityInputFile 
-            Caption         =   "<file path>\<file name>"
-            Height          =   495
-            Left            =   120
-            TabIndex        =   35
-            Top             =   240
-            Width           =   7935
-         End
-      End
-      Begin VB.Frame frameUtilityAbout 
-         Caption         =   "About"
-         Height          =   975
-         Left            =   120
-         TabIndex        =   32
-         Top             =   480
-         Width           =   8175
-         Begin VB.Label lblUtilityAbout 
-            Caption         =   "lt"
-            Height          =   615
-            Left            =   120
-            TabIndex        =   39
-            Top             =   240
-            Width           =   7935
-            WordWrap        =   -1  'True
-         End
-      End
-      Begin VB.CommandButton cmdUtilityOutput1 
-         Caption         =   "Open 1"
-         Height          =   375
-         Left            =   120
-         TabIndex        =   31
-         Top             =   4200
-         Width           =   1785
-      End
-      Begin VB.CommandButton cmdUtilityRun 
-         Caption         =   "Run Utility"
-         Height          =   375
-         Left            =   6000
-         TabIndex        =   30
-         Top             =   4200
-         Width           =   2175
-      End
-      Begin VB.Label Label2 
-         Caption         =   "Utility"
-         Height          =   255
-         Left            =   120
-         TabIndex        =   45
-         Top             =   160
-         Width           =   495
-      End
-   End
    Begin VB.Label lblCheckingUpdates 
       Caption         =   "Checking for Updates"
       ForeColor       =   &H80000011&
@@ -1485,7 +1485,7 @@ Private Type utilProgType
     includeExtensionInCall As Boolean 'if the extension should be included when the file is passed to the application
     waitUntilUtilityExits As Boolean 'true if EP-Launch should wait until the called program is done
 End Type
-Const numUtilProg = 10
+Const numUtilProg = 9
 Dim utilProg(numUtilProg) As utilProgType
 
 Private Type SimQueueType
@@ -6098,7 +6098,7 @@ utilProg(7).outExt3Alt = "-GAVGTable.htm"
 utilProg(7).outExt4 = "-AppGErr.txt"
 utilProg(7).outExt5 = ""
 utilProg(7).outExt6 = ""
-utilProg(7).applicationFile = "PostProcess\AppGPostProcess\appgpostprocess.exe"
+utilProg(7).applicationFile = "PostProcess\AppGPostProcess.exe"
 utilProg(7).appIsSpreadsheet = False
 utilProg(7).batchFile = ""
 utilProg(7).useInputAsExeArgument = True
@@ -6149,32 +6149,31 @@ utilProg(9).useInputAsExeArgument = False
 utilProg(9).fileSuffix = ""
 utilProg(9).includeExtensionInCall = False
 utilProg(9).waitUntilUtilityExits = False
-'
-utilProg(10).name = "EP-Compare"
-utilProg(10).about = "Graphs the values from the tabular report for multiple simulations side by side."
-utilProg(10).enableInput = False
-utilProg(10).enableWthr = False
-utilProg(10).enableInTextEdit = True
-utilProg(10).IDFEdOpt = ""
-utilProg(10).inExt = ""
-utilProg(10).outExt1 = ""
-utilProg(10).outExt2 = ""
-utilProg(10).outExt3 = ""
-utilProg(10).outExt4 = ""
-utilProg(10).outExt5 = ""
-utilProg(10).outExt6 = ""
-utilProg(10).applicationFile = "PostProcess\EP-Compare\EP-Compare.exe"
-utilProg(10).appIsSpreadsheet = False
-utilProg(10).batchFile = ""
-utilProg(10).useInputAsExeArgument = False
-utilProg(10).fileSuffix = ""
-utilProg(10).includeExtensionInCall = False
-utilProg(10).waitUntilUtilityExits = False
-
-
 
 '
 ' NOT SUPPORTED
+'
+'utilProg(10).name = "EP-Compare"
+'utilProg(10).about = "Graphs the values from the tabular report for multiple simulations side by side."
+'utilProg(10).enableInput = False
+'utilProg(10).enableWthr = False
+'utilProg(10).enableInTextEdit = True
+'utilProg(10).IDFEdOpt = ""
+'utilProg(10).inExt = ""
+'utilProg(10).outExt1 = ""
+'utilProg(10).outExt2 = ""
+'utilProg(10).outExt3 = ""
+'utilProg(10).outExt4 = ""
+'utilProg(10).outExt5 = ""
+'utilProg(10).outExt6 = ""
+'utilProg(10).applicationFile = "PostProcess\EP-Compare\EP-Compare.exe"
+'utilProg(10).appIsSpreadsheet = False
+'utilProg(10).batchFile = ""
+'utilProg(10).useInputAsExeArgument = False
+'utilProg(10).fileSuffix = ""
+'utilProg(10).includeExtensionInCall = False
+'utilProg(10).waitUntilUtilityExits = False
+'
 'utilProg(8).name = "View3D"
 'utilProg(8).about = "EnergyPlus has the capability of accepting user defined view factors for special research " & _
 '"situations. This option is not recommended for general use. However, when a user desires to supply view " & _

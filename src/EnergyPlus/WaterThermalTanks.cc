@@ -2569,6 +2569,7 @@ bool getWaterHeaterMixedInputs(EnergyPlusData &state)
         Tank.OnCycLossFracToZone = state.dataIPShortCut->rNumericArgs(16);
         Real64 rho = Tank.water->getDensity(state, Constant::InitConvTemp, routineName);
 
+        Tank.VolFlowRateMax = state.dataIPShortCut->rNumericArgs(17);
         Tank.MassFlowRateMax = state.dataIPShortCut->rNumericArgs(17) * rho;
 
         if ((state.dataIPShortCut->cAlphaArgs(14).empty()) && (state.dataIPShortCut->cAlphaArgs(15).empty())) {
@@ -4041,7 +4042,7 @@ bool getWaterTankStratifiedInput(EnergyPlusData &state)
     return ErrorsFound;
 }
 
-bool GetWaterThermalTankInput(EnergyPlusData &state)
+void GetWaterThermalTankInput(EnergyPlusData &state)
 {
 
     // SUBROUTINE INFORMATION:
@@ -4105,7 +4106,7 @@ bool GetWaterThermalTankInput(EnergyPlusData &state)
             if (state.dataWaterThermalTanks->numWaterHeaterStratified > 0) {
                 print(state.files.eio, Format_722);
             }
-            if (state.dataWaterThermalTanks->numChilledWaterMixed > 0) {
+            if ((state.dataWaterThermalTanks->numChilledWaterMixed > 0) || (state.dataWaterThermalTanks->numChilledWaterStratified > 0)) {
                 print(state.files.eio, Format_725);
             }
             if (state.dataWaterThermalTanks->numChilledWaterStratified > 0) {
@@ -4902,7 +4903,9 @@ bool GetWaterThermalTankInput(EnergyPlusData &state)
         }
     } // get input flag
 
-    return ErrorsFound;
+    if (ErrorsFound) {
+        ShowFatalError(state, "GetWaterThermalTankInput: Errors found in processing Water Thermal Tank input.");
+    }
 }
 
 void WaterThermalTankData::setupOutputVars(EnergyPlusData &state)
@@ -10720,6 +10723,7 @@ void WaterThermalTankData::SizeSupplySidePlantConnections(EnergyPlusData &state,
                         this->PlantUseMassFlowRateMax = this->UseDesignVolFlowRate * rho;
                     } else {
                         this->PlantUseMassFlowRateMax = tmpUseDesignVolFlowRate * rho;
+                        this->VolFlowRateMax = tmpUseDesignVolFlowRate;
                     }
                 }
             } else {
@@ -11482,6 +11486,7 @@ void WaterThermalTankData::SizeDemandSidePlantConnections(EnergyPlusData &state)
                         this->PlantUseMassFlowRateMax = this->UseDesignVolFlowRate * rho;
                     } else {
                         this->PlantUseMassFlowRateMax = tmpUseDesignVolFlowRate * rho;
+                        this->VolFlowRateMax = tmpUseDesignVolFlowRate;
                     }
                 } // Demand side
             } else {
@@ -12458,6 +12463,40 @@ void WaterThermalTankData::CalcStandardRatings(EnergyPlusData &state)
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHThEff, equipName, this->Efficiency);
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHRecEff, equipName, RecoveryEfficiency);
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHEnFac, equipName, EnergyFactor);
+    }
+
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSWHFuelType, equipName, Constant::eResourceNames[static_cast<int>(this->FuelType)]);
+    // if use nodes are used then the flow rate field and the schedule field are not used
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHPkUseFlwRt, equipName, this->VolFlowRateMax);
+    if (this->flowRateSched != nullptr) {
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHUseSch, equipName, this->flowRateSched->Name);
+    } else {
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHUseSch, equipName, "N/A");
+    }
+    if (this->setptTempSched != nullptr) {
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt1StptName, equipName, this->setptTempSched->Name);
+        Real64 setPointAt11;
+        int numDays;
+        std::string monthAssumed;
+        std::tie(setPointAt11, numDays, monthAssumed) = this->setptTempSched->getValAndCountOnDay(state, false, Sched::DayType::Wednesday, 11);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt1Stpt11amWedVal, equipName, setPointAt11);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt1Stpt11amWedCnt, equipName, numDays);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt1StptMonthUsed, equipName, monthAssumed);
+    }
+    if (this->setptTemp2Sched != nullptr) {
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt2StptName, equipName, this->setptTemp2Sched->Name);
+        Real64 setPointAt11;
+        int numDays;
+        std::string monthAssumed;
+        std::tie(setPointAt11, numDays, monthAssumed) = this->setptTemp2Sched->getValAndCountOnDay(state, false, Sched::DayType::Wednesday, 11);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt2Stpt11amWedVal, equipName, setPointAt11);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt2Stpt11amWedCnt, equipName, numDays);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchSWHSchHt2StptMonthUsed, equipName, monthAssumed);
+    }
+    if (this->AmbientTempZone > 0) {
+        OutputReportPredefined::PreDefTableEntry(
+            state, state.dataOutRptPredefined->pdchSWHAmbZoneNm, equipName, state.dataHeatBal->Zone(this->AmbientTempZone).Name);
     }
 
     // Write test results

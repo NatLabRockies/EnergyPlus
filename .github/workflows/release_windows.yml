@@ -15,7 +15,7 @@ env:
 jobs:
   build_installer_artifact:
     name: Build Packages for ${{ matrix.pretty }}
-    runs-on: windows-2019
+    runs-on: windows-2022
     # to move to windows-2022, just make sure to set the Visual Studio generator build to "17 2022"
     continue-on-error: ${{ matrix.allow_failure }}
     strategy:
@@ -52,7 +52,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       uses: jmarrec/setup-python@v5.4.0
@@ -134,7 +134,7 @@ jobs:
       shell: bash
       run: |
         set -x
-        cmake -G "Visual Studio 16 2019" -A ${{ matrix.vs-generator }} \
+        cmake -G "Visual Studio 17 2022" -A ${{ matrix.vs-generator }} \
               -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
               -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.arch }}/ \
@@ -178,22 +178,22 @@ jobs:
   test_package:
     name: Test Built Package
     needs: build_installer_artifact
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v4  # Still need E+ checked out to get testing scripts
+      - uses: actions/checkout@v5  # Still need E+ checked out to get testing scripts
         with:
           path: checkout
 
       - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         id: setup-python
         with:
           python-version: ${{ env.Python_REQUIRED_VERSION }}
           architecture: ${{ matrix.arch }}
 
       - name: Gather Test Package from Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: energyplus-x86_64
           path: package

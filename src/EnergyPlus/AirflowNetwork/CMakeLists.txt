@@ -1,10 +1,6 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.17...4.0.3)
 
 project(AirflowNetwork)
-
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.0")
-  cmake_policy(SET CMP0054 NEW) # CMake 3.1 added this policy
-endif()
 
 set(HDRS include/AirflowNetwork/Solver.hpp include/AirflowNetwork/Elements.hpp include/AirflowNetwork/Properties.hpp)
 

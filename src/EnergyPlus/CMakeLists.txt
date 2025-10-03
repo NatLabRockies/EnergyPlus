@@ -244,6 +244,8 @@ set(SRC
     DisplayRoutines.hh
     DualDuct.cc
     DualDuct.hh
+    DuctLoss.cc
+    DuctLoss.hh
     EMSManager.cc
     EMSManager.hh
     EPVector.hh
@@ -301,8 +303,21 @@ set(SRC
     GeneratorFuelSupply.hh
     GlobalNames.cc
     GlobalNames.hh
-    GroundHeatExchangers.cc
-    GroundHeatExchangers.hh
+    GroundHeatExchangers/Base.cc
+    GroundHeatExchangers/Base.hh
+    GroundHeatExchangers/BoreholeArray.cc
+    GroundHeatExchangers/BoreholeArray.hh
+    GroundHeatExchangers/BoreholeSingle.cc
+    GroundHeatExchangers/BoreholeSingle.hh
+    GroundHeatExchangers/Properties.cc
+    GroundHeatExchangers/Properties.hh
+    GroundHeatExchangers/ResponseFactors.cc
+    GroundHeatExchangers/ResponseFactors.hh
+    GroundHeatExchangers/Slinky.cc
+    GroundHeatExchangers/Slinky.hh
+    GroundHeatExchangers/State.hh
+    GroundHeatExchangers/Vertical.cc
+    GroundHeatExchangers/Vertical.hh
     GroundTemperatureModeling/BaseGroundTemperatureModel.hh
     GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.cc
     GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.hh
@@ -779,7 +794,6 @@ target_link_libraries(
          Windows-CalcEngine
          airflownetworklib
          ssc
-         cpgfunctionEP
          libtk205)
 
 target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings cpp_pch_files)
@@ -862,20 +876,29 @@ set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 
 # bring in the Python API layer right next to the executable
+# We call the PythonSetupAPIinBuild.cmake whenever the api/*.py change
+file(GLOB PYAPI_SOURCES "api/*.py")
+set(PYAPI_STAMP "${CMAKE_CURRENT_BINARY_DIR}/setup_pyapi_done.stamp")
 add_custom_command(
-  TARGET energyplusapi
-  POST_BUILD
+  OUTPUT "${PYAPI_STAMP}"
   DEPENDS
-  "${PROJECT_SOURCE_DIR}/src/EnergyPlus/api"
-  # TODO: temporary "hack" to depend on a specific file that doesn't exist to
-  # force this to run
-  DEPENDS
-  __ALWAYSRUNME
+    ${PYAPI_SOURCES}
   COMMAND
-    ${CMAKE_COMMAND} -DREPO_ROOT=${PROJECT_SOURCE_DIR} -DEXECUTABLE_PATH=$<TARGET_FILE:energyplusapi> -DCMAKE_VERSION_MAJOR="${CMAKE_VERSION_MAJOR}"
+    ${CMAKE_COMMAND} -DREPO_ROOT=${PROJECT_SOURCE_DIR} -DEPLUS_EXE_DIR=$<TARGET_FILE_DIR:energyplusapi> -DCMAKE_VERSION_MAJOR="${CMAKE_VERSION_MAJOR}"
     -DCMAKE_VERSION_MINOR="${CMAKE_VERSION_MINOR}" -DCMAKE_VERSION_PATCH="${CMAKE_VERSION_PATCH}" -DCMAKE_VERSION_BUILD="${CMAKE_VERSION_BUILD}"
     -DPYTHON_API_VERSION_MAJOR="${PYTHON_API_VERSION_MAJOR}" -DPYTHON_API_VERSION_MINOR="${PYTHON_API_VERSION_MINOR}" -P
-    "${PROJECT_SOURCE_DIR}/cmake/PythonSetupAPIinBuild.cmake")
+    "${PROJECT_SOURCE_DIR}/cmake/PythonSetupAPIinBuild.cmake"
+  COMMAND ${CMAKE_COMMAND} -E touch "${PYAPI_STAMP}"
+  COMMENT "Generating Python API files next to energyplusapi"
+)
+
+# And a target that calls the above command. It is NOT called by default
+add_custom_target(setup_pyapi
+  DEPENDS "${PYAPI_STAMP}"
+)
+# When you build CLI, we want the api configuration to run, so add it as a dependency
+# which will ensure it's run (beforehand, at **build** not configure time)
+add_dependencies(energyplus setup_pyapi)
 
 if(NOT BUILD_STATIC_ENERGYPLUS_API)
   install(

@@ -281,9 +281,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     int ZoneNumB;
 
     // Formats
-    static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{:.2R},{:.1R},");
+    static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{},{:.2R},{:.1R},");
     static constexpr std::string_view Format_721(
-        "! <{} Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {{m2}}, # Zone Occupants,{}\n");
+        "! <{} Airflow Stats Nominal>,Name,Input Object, Schedule Name,Zone Name, Zone Floor Area {{m2}}, # Zone Occupants,{}\n");
     static constexpr std::string_view Format_722(" {}, {}\n");
 
     RepVarSet.dimension(state.dataGlobal->NumOfZones, true);
@@ -578,14 +578,14 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                 Constant::Units::m3_s,
                                 state.dataHeatBal->ZnAirRpt(thisZoneAirBalance.ZonePtr).OABalanceVdotCurDensity,
                                 OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
+                                OutputProcessor::StoreType::Average,
                                 state.dataHeatBal->Zone(thisZoneAirBalance.ZonePtr).Name);
             SetupOutputVariable(state,
                                 "Zone Combined Outdoor Air Standard Density Volume Flow Rate",
                                 Constant::Units::m3_s,
                                 state.dataHeatBal->ZnAirRpt(thisZoneAirBalance.ZonePtr).OABalanceVdotStdDensity,
                                 OutputProcessor::TimeStepType::System,
-                                OutputProcessor::StoreType::Sum,
+                                OutputProcessor::StoreType::Average,
                                 state.dataHeatBal->Zone(thisZoneAirBalance.ZonePtr).Name);
             SetupOutputVariable(state,
                                 "Zone Combined Outdoor Air Current Density Volume",
@@ -1781,7 +1781,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                         ShowWarningCustom(
                             state,
                             eoh,
-                            format("Both {} and {} provided, {} will be used.", cAlphaFieldNames(10), cNumericFieldNames(15), cAlphaFieldNames(15)));
+                            format("Both {} and {} provided, {} will be used.", cAlphaFieldNames(10), cNumericFieldNames(15), cAlphaFieldNames(10)));
                     }
                 }
 
@@ -3865,10 +3865,27 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             continue;
         }
         TotInfilVentFlow(ZoneNum) += state.dataHeatBal->Infiltration(Loop).DesignLevel;
+
+        std::string infilInputObjectType = "";
+        switch (state.dataHeatBal->Infiltration(Loop).ModelType) {
+        case DataHeatBalance::InfiltrationModelType::DesignFlowRate:
+            infilInputObjectType = "ZoneInfiltration:DesignFlowRate";
+            break;
+        case DataHeatBalance::InfiltrationModelType::ShermanGrimsrud:
+            infilInputObjectType = "ZoneInfiltration:EffectiveLeakageArea";
+            break;
+        case DataHeatBalance::InfiltrationModelType::AIM2:
+            infilInputObjectType = "ZoneInfiltration:FlowCoefficient";
+            break;
+        default:
+            infilInputObjectType = "unknown";
+        };
+
         print(state.files.eio,
               Format_720,
               "ZoneInfiltration",
               state.dataHeatBal->Infiltration(Loop).Name,
+              infilInputObjectType,
               state.dataHeatBal->Infiltration(Loop).sched->Name,
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
@@ -3913,10 +3930,24 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             continue;
         }
         TotInfilVentFlow(ZoneNum) += state.dataHeatBal->Ventilation(Loop).DesignLevel;
+
+        std::string ventInputObjectType = "";
+        switch (state.dataHeatBal->Ventilation(Loop).ModelType) {
+        case DataHeatBalance::VentilationModelType::DesignFlowRate:
+            ventInputObjectType = "ZoneVentilation:DesignFlowRate";
+            break;
+        case DataHeatBalance::VentilationModelType::WindAndStack:
+            ventInputObjectType = "ZoneVentilation:WindandStackOpenArea";
+            break;
+        default:
+            ventInputObjectType = "unknown";
+        };
+
         print(state.files.eio,
               Format_720,
               "ZoneVentilation",
               state.dataHeatBal->Ventilation(Loop).Name,
+              ventInputObjectType,
               state.dataHeatBal->Ventilation(Loop).availSched->Name,
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
@@ -3990,6 +4021,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               Format_720,
               "Mixing",
               state.dataHeatBal->Mixing(Loop).Name,
+              "ZoneMixing",
               state.dataHeatBal->Mixing(Loop).sched->Name,
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
@@ -4023,6 +4055,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
               Format_720,
               "CrossMixing",
               state.dataHeatBal->CrossMixing(Loop).Name,
+              "ZoneCrossMixing",
               state.dataHeatBal->CrossMixing(Loop).sched->Name,
               state.dataHeatBal->Zone(ZoneNum).Name,
               state.dataHeatBal->Zone(ZoneNum).FloorArea,
@@ -4043,7 +4076,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         static constexpr std::string_view Format_724("! <{} Airflow Stats Nominal>, {}\n");
         print(state.files.eio,
               Format_724,
-              "RefrigerationDoorMixing ",
+              "RefrigerationDoorMixing",
               "Name, Zone 1 Name,Zone 2 Name,Door Opening Schedule Name,Door Height {m},Door Area {m2},Door Protection Type");
         for (ZoneNumA = 1; ZoneNumA <= (state.dataGlobal->NumOfZones - 1); ++ZoneNumA) {
             if (!state.dataHeatBal->RefDoorMixing(ZoneNumA).RefDoorMixFlag) {

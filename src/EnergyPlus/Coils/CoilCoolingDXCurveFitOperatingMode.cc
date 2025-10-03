@@ -297,8 +297,8 @@ void CoilCoolingDXCurveFitOperatingMode::CalcOperatingMode(EnergyPlus::EnergyPlu
     static constexpr std::string_view RoutineName = "CoilCoolingDXCurveFitOperatingMode::calcOperatingMode";
     // Currently speedNum is 1-based, while this->speeds are zero-based
     auto &thisspeed(this->speeds[max(speedNum - 1, 0)]);
-
-    if ((speedNum == 0) || ((speedNum == 1) && (speedRatio == 0.0)) || (inletNode.MassFlowRate == 0.0)) {
+    if ((speedNum == 0) || ((speedNum == 1) && (speedRatio == 0.0)) || (inletNode.MassFlowRate == 0.0) ||
+        (state.dataEnvrn->OutDryBulbTemp < this->minOutdoorDrybulb)) {
         outletNode.Temp = inletNode.Temp;
         outletNode.HumRat = inletNode.HumRat;
         outletNode.Enthalpy = inletNode.Enthalpy;

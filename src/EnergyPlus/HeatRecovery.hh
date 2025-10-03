@@ -73,7 +73,7 @@ namespace HeatRecovery {
         Num
     };
 
-    enum class HXConfigurationType
+    enum class HXExchConfigType
     {
         Invalid = -1,
         Plate,
@@ -154,7 +154,7 @@ namespace HeatRecovery {
         int CoolEffectSensibleCurveIndex = 0; // cooling sensible effectiveness multiplier curve to CoolEffectSensible100
         int CoolEffectLatentCurveIndex = 0;   // cooling latent effectiveness multiplier curve to CoolEffectLatent100
         // 1 = None, 2 = Bypass, 3 = Stop Rotary HX Rotation
-        HXConfigurationType ExchConfig = HXConfigurationType::Invalid; // parameter equivalent of HX configuration, plate or rotary
+        HXExchConfigType ExchConfig = HXExchConfigType::Invalid; // parameter equivalent of HX configuration, plate or rotary
         // frost control parameters
         FrostControlOption FrostControlType = FrostControlOption::Invalid; // type of frost control used if any
         Real64 ThresholdTemperature = 0.0;                                 // threshold temperature for frost control
@@ -200,6 +200,7 @@ namespace HeatRecovery {
         Array1D_string NumericFieldNames;
         bool MySetPointTest = true;
         bool MySizeFlag = true;
+        bool hasZoneERVController = false; // If this HX is controlled by a ZoneHVAC:EnergyRecoveryVentilator:Controller
 
         void initialize(EnergyPlusData &state, int CompanionCoilIndex, int CompanionCoilType_Num);
 
@@ -454,7 +455,8 @@ namespace HeatRecovery {
 
     HVAC::HXType GetHeatExchangerObjectTypeNum(EnergyPlusData &state,
                                                std::string const &HXName, // must match HX names for the ExchCond type
-                                               bool &ErrorsFound          // set to true if problem
+                                               int &WhichHX,
+                                               bool &ErrorsFound // set to true if problem
     );
 
 } // namespace HeatRecovery

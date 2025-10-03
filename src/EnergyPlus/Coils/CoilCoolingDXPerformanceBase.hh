@@ -157,24 +157,24 @@ struct CoilCoolingDXPerformanceBase
         return "";
     }
 
-    virtual Real64 ratedAirMassFlowRateMaxSpeed(EnergyPlusData &state, HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
+    virtual Real64 ratedAirMassFlowRateMaxSpeed(EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
     {
         ShowFatalError(state, "Rated Air Mass Flow Rate is not an available parameter for this coil type.");
         return 0.0;
     }
 
-    virtual Real64 ratedAirMassFlowRateMinSpeed(EnergyPlusData &state, HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
+    virtual Real64 ratedAirMassFlowRateMinSpeed(EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
     {
         ShowFatalError(state, "Rated Air Mass Flow Rate is not an available parameter for this coil type.");
         return 0.0;
     }
 
-    virtual Real64 ratedCondAirMassFlowRateNomSpeed(EnergyPlusData &state, HVAC::CoilMode const mode)
+    virtual Real64 ratedCondAirMassFlowRateNomSpeed([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode)
     {
         return 0.0;
     }
 
-    virtual int indexCapFT(HVAC::CoilMode const mode)
+    virtual int indexCapFT([[maybe_unused]] HVAC::CoilMode const mode)
     {
         return 0;
     }

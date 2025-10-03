@@ -71,6 +71,22 @@ namespace DataPlant {
 
     constexpr std::array<std::string_view, (int)LoopType::Num> loopTypeNames = {"PlantLoop", "CondenserLoop", "Both"};
 
+    enum class WaterLoopType
+    {
+        Invalid = -1,
+        HotWater,
+        ChilledWater,
+        None,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)LoopType::Num> waterLoopTypeNames = {"HotWater", "ChilledWater", "None"};
+
+    static constexpr std::array<std::string_view, static_cast<int>(PressSimType::Num)> waterLoopTypeNamesUC{
+        "HOTWATER",
+        "CHILLEDWATER",
+        "NONE",
+    };
     // This needs to go, it's not helping
 
     struct HalfLoopContainer : std::array<HalfLoopData, static_cast<int>(DataPlant::LoopSideLocation::Num)>
@@ -135,6 +151,7 @@ namespace DataPlant {
         Real64 EconControlTempDiff;
         bool LoopHasConnectionComp;
         LoopType TypeOfLoop;
+        WaterLoopType TypeOfWaterLoop;
         DataPlant::PressSimType PressureSimType;
         bool HasPressureComponents;
         Real64 PressureDrop;

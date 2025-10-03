@@ -699,7 +699,7 @@ void GetOperationSchemeInput(EnergyPlusData &state)
                     FindRangeBasedOrUncontrolledInput(state, CurrentModuleObject, DPRBO, LoopNum, SchemeNum, ErrorsFound);
 
                 } else if (plantLoopOperation == "PLANTEQUIPMENTOPERATION:OUTDOORRELATIVEHUMIDITY") {
-                    CurrentModuleObject = "PlantEquipmentOperation:OutdoorrelativeHumidity";
+                    CurrentModuleObject = "PlantEquipmentOperation:OutdoorRelativeHumidity";
                     FindRangeBasedOrUncontrolledInput(state, CurrentModuleObject, RHRBO, LoopNum, SchemeNum, ErrorsFound);
 
                 } else if (plantLoopOperation == "PLANTEQUIPMENTOPERATION:OUTDOORDRYBULBDIFFERENCE") {
@@ -870,47 +870,12 @@ void FindRangeBasedOrUncontrolledInput(EnergyPlusData &state,
                         state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeLowerLimit = NumArray(ListNum * 2 - 1);
                         state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeUpperLimit = NumArray(ListNum * 2);
                         state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Name = AlphArray(ListNum + 1);
-                        if (state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeUpperLimit < 0.0) {
-                            ShowSevereError(state,
-                                            format("{} = \"{}\", found a negative value for an upper limit in {} = \"{}\".",
-                                                   LoopOpSchemeObj,
-                                                   state.dataPlnt->PlantLoop(LoopNum).OperationScheme,
-                                                   CurrentModuleObject,
-                                                   state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).Name));
-                            ErrorsFound = true;
-                        }
 
-                        {
-                            std::string const &plantLoopOperation =
-                                CurrentModuleObject; // different op schemes have different lower limit check values
-
-                            if (plantLoopOperation == "PlantEquipmentOperation:CoolingLoad" ||
-                                plantLoopOperation == "PlantEquipmentOperation:HeatingLoad" ||
-                                plantLoopOperation == "PlantEquipmentOperation:OutdoorrelativeHumidity") {
-                                // these should not be less than zero
-                                if (state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeLowerLimit < 0.0) {
-                                    ShowSevereError(state,
-                                                    format("{} = \"{}\", found a negative value for a lower limit in {} = \"{}\".",
-                                                           LoopOpSchemeObj,
-                                                           state.dataPlnt->PlantLoop(LoopNum).OperationScheme,
-                                                           CurrentModuleObject,
-                                                           state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).Name));
-                                    ErrorsFound = true;
-                                }
-                            } else {
-                                // others should not be less than -70
-                                if (state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeLowerLimit < -70.0) {
-                                    ShowSevereError(state,
-                                                    format("{} = \"{}\", found too low of a value for a lower limit in {} = \"{}\".",
-                                                           LoopOpSchemeObj,
-                                                           state.dataPlnt->PlantLoop(LoopNum).OperationScheme,
-                                                           CurrentModuleObject,
-                                                           state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).Name));
-                                    ErrorsFound = true;
-                                }
-                            }
-                        }
-
+                        // Previously, code existed to check various operation schemes against reasonable limits.  Loads and humidity values were
+                        // checked to make sure everything was positive.  Other strategies should have checked to make sure values were greater
+                        // than -70.0.  However: (1) those limits for non-load and non-humidity operation schemes were not implemented properly and
+                        // (2) those limit checks were unnecessary because the IDD already checks for these values.  So, the only thing that really
+                        // needs to get checked is the upper and lower limits--simplifying the code greatly.
                         if (state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeLowerLimit >
                             state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).RangeUpperLimit) {
                             ShowSevereError(state,
@@ -1328,8 +1293,19 @@ void LoadEquipList(EnergyPlusData &state,
                 state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp.allocate(
                     state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).NumComps);
                 for (MachineNum = 1; MachineNum <= state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).NumComps; ++MachineNum) {
-                    state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp(MachineNum).TypeOf =
-                        state.dataIPShortCut->cAlphaArgs(MachineNum * 2);
+                    auto const type_str = state.dataIPShortCut->cAlphaArgs(MachineNum * 2);
+                    if (type_str == "HEATPUMP:AIRTOWATER") {
+                        if (state.dataPlnt->PlantLoop(LoopNum).TypeOfWaterLoop == DataPlant::WaterLoopType::HotWater) {
+                            state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp(MachineNum).TypeOf =
+                                "HEATPUMP:AIRTOWATER:HEATING";
+                        } else if (state.dataPlnt->PlantLoop(LoopNum).TypeOfWaterLoop == DataPlant::WaterLoopType::ChilledWater) {
+                            state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp(MachineNum).TypeOf =
+                                "HEATPUMP:AIRTOWATER:COOLING";
+                        }
+                    } else {
+                        state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp(MachineNum).TypeOf =
+                            state.dataIPShortCut->cAlphaArgs(MachineNum * 2);
+                    }
                     state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(ListNum).Comp(MachineNum).Name =
                         state.dataIPShortCut->cAlphaArgs(MachineNum * 2 + 1);
                 } // MachineList

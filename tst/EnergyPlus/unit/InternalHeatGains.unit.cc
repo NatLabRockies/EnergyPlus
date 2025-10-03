@@ -72,6 +72,7 @@
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
@@ -3483,4 +3484,160 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     EXPECT_EQ(thisZnRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
     EXPECT_NE(thisspaceRpt.ITEqTimeBelowRH, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisspaceRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
+}
+TEST_F(EnergyPlusFixture, InternalHeatGains_SpaceAllocation)
+{
+
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  Zone 1,                  !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  20.0;           !- Area {m2}",
+
+        "Space,",
+        "Space 1A,            !- Name",
+        "Zone 1,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "5.0;                !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1B,            !- Name",
+        "Zone 1,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "15.0;                !- Floor Area {m2}",
+
+        " Zone,",
+        "  Zone 2,                  !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  0.0;           !- Area {m2}",
+
+        "Space,",
+        "Space 2A,            !- Name",
+        "Zone 2,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "0.0;                !- Floor Area {m2}",
+
+        "SpaceList, All Spaces, Space 1A, Space 1B, Space 2A;",
+
+        "ZoneList, All Zones, Zone 1, Zone 2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,,1.0;",
+
+        "  Lights,",
+        "    Zone 1 Lights,        !- Name",
+        "    Zone 1,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    Zone 2 Lights,        !- Name",
+        "    Zone 2,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    Space 1A Lights,        !- Name",
+        "    Space 1A,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    All Space Lights,        !- Name",
+        "    All Spaces,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    All Zone Lights,        !- Name",
+        "    All Zones,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    // Zone 1 Lights: 2 spaces
+    // Zone 2 Lights: 1 space
+    // Space 1A lights: 1 space
+    // All Space Lights: 3 spaces
+    // All Zone Lights: 3 spaces
+    // 2+1+1+3+3 = 10
+    EXPECT_EQ(state->dataHeatBal->TotLights, 10);
 }
