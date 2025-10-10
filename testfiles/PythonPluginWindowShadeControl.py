@@ -54,6 +54,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import math
+
 from pyenergyplus.plugin import EnergyPlusPlugin
 
 

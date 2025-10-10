@@ -55,10 +55,9 @@
 
 import os
 import sys
+import unittest
 from pathlib import Path
 from typing import List
-import unittest
-
 
 verbose = True
 
@@ -75,14 +74,14 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
         while True:
             line += lines[line_no_counter]
             # get rid of escaped parentheses
-            line = line.replace("\\\"", "")
+            line = line.replace('\\"', "")
             if line[-1] != ";":
                 line_no_counter += 1
             else:
                 break
 
         # replace parens '""' next to each other in case of wrapped lines
-        line = line.replace("\"\"", "")
+        line = line.replace('""', "")
 
         # throw away front
         tokens = line.split("format", 1)
@@ -99,7 +98,7 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
         for idx_fmt, c in enumerate(line):
 
             # get fmt string
-            if c == "\"":
+            if c == '"':
                 num_quote += 1
                 if num_quote == 1:
                     start_fmt = idx_fmt + 1
@@ -121,7 +120,7 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
 
             # found full args string
             if (num_open_paren - num_close_paren) == 0:
-                args_str = line[end_fmt + 2:idx_fmt]
+                args_str = line[end_fmt + 2 : idx_fmt]
                 args_str = args_str.strip()
                 num_quote = 0
                 args = []
@@ -129,10 +128,10 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
 
                 # partial process args
                 for a in args_str:
-                    if (a == "\"") and (num_quote > 0):
+                    if (a == '"') and (num_quote > 0):
                         num_quote -= 1
                         continue
-                    elif (a == "\"") and (num_quote == 0):
+                    elif (a == '"') and (num_quote == 0):
                         num_quote += 1
 
                     if (a == ",") and (num_quote == 0):
@@ -155,8 +154,7 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
             args_copy = args
             for idx_args, a in enumerate(args):
                 if a.count("(") != a.count(")"):
-                    args_copy[idx_args:idx_args +
-                              2] = [','.join(args[idx_args:idx_args + 2])]
+                    args_copy[idx_args : idx_args + 2] = [",".join(args[idx_args : idx_args + 2])]
                     break
             args = args_copy
             if all([y == 0 for y in [x.count("(") - x.count(")") for x in args]]):
@@ -213,7 +211,7 @@ def get_format_line_numbers_from_lines(lines: List[str]) -> List[int]:
             tokens = line.split("//")
             line = tokens[0].strip()
         # find 'format' line numbers first
-        if "format(\"" in line:
+        if 'format("' in line:
             format_line_nos.append(idx)
     return format_line_nos
 
@@ -235,37 +233,25 @@ class TestFormatCheck(unittest.TestCase):
         self.assertEqual(
             0,  # number of errors encountered
             process_all_format_lines(
-                Path('/dummy/path'),
-                [  # actual file content lines
-                    'line 1',
-                    'line 2',
-                    'format(\"hi{}\", varName);'
-                ],
-                [  # lines containing actual format statements
-                    2
-                ]
-            )
+                Path("/dummy/path"),
+                ["line 1", "line 2", 'format("hi{}", varName);'],  # actual file content lines
+                [2],  # lines containing actual format statements
+            ),
         )
 
     def test_invalid_format_chunk(self):
         self.assertEqual(
             1,  # number of errors encountered
             process_all_format_lines(
-                Path('/dummy/path'),
-                [  # actual file content lines
-                    'line 1',
-                    'line 2',
-                    'format(\"hi{\", varName);'
-                ],
-                [  # lines containing actual format statements
-                    2
-                ]
-            )
+                Path("/dummy/path"),
+                ["line 1", "line 2", 'format("hi{", varName);'],  # actual file content lines
+                [2],  # lines containing actual format statements
+            ),
         )
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
         unittest.main(exit=False, verbosity=0)
 

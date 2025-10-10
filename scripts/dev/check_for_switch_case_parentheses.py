@@ -57,23 +57,30 @@ from json import dumps
 from pathlib import Path
 from sys import exit
 
-d = Path(__file__).resolve().parent.parent.parent / 'src' / 'EnergyPlus'
+d = Path(__file__).resolve().parent.parent.parent / "src" / "EnergyPlus"
 total_case_parentheses = 0
 for p in d.glob("**/*"):
-    if p.is_file() and str(p.name).endswith('.cc') or str(p.name).endswith('.hh'):
-        file_lines = p.open(encoding='utf-8', errors='ignore').readlines()
+    if p.is_file() and str(p.name).endswith(".cc") or str(p.name).endswith(".hh"):
+        file_lines = p.open(encoding="utf-8", errors="ignore").readlines()
         for line_number, li in enumerate(file_lines, start=1):
             remaining_line = li.strip()
-            if '//' in li:
-                index = li.index('//')
+            if "//" in li:
+                index = li.index("//")
                 remaining_line = li[:index]
-            if 'case (' in remaining_line and '):' in remaining_line:
+            if "case (" in remaining_line and "):" in remaining_line:
                 total_case_parentheses += 1
-                print(dumps({
-                    "tool": "check_for_switch_case_parentheses",
-                    "filename": str(p.relative_to(d)), "file": str(p.relative_to(d)),
-                    "line": line_number, "messagetype": "error", "message": "Found Parenthesized Switch Case Label"
-                }))
+                print(
+                    dumps(
+                        {
+                            "tool": "check_for_switch_case_parentheses",
+                            "filename": str(p.relative_to(d)),
+                            "file": str(p.relative_to(d)),
+                            "line": line_number,
+                            "messagetype": "error",
+                            "message": "Found Parenthesized Switch Case Label",
+                        }
+                    )
+                )
 
 if total_case_parentheses > 0:
     exit(1)

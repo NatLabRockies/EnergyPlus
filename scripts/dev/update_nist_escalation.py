@@ -144,14 +144,10 @@ def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
         if years is None:
             years = [int(x) for x in line.split()]
             if len(years) != NUMBER_YEARS:
-                print(
-                    f"Warning: expected {NUMBER_YEARS} years, "
-                    f"got {len(years)}: {years}"
-                )
+                print(f"Warning: expected {NUMBER_YEARS} years, " f"got {len(years)}: {years}")
             if years[0] != year:
                 raise ValueError(
-                    f"Given the name of the file {fpath.name=}, we assumed "
-                    f"we would find {year=} but got {years[0]}"
+                    f"Given the name of the file {fpath.name=}, we assumed " f"we would find {year=} but got {years[0]}"
                 )
             if escalation_start_year is not None:
                 if escalation_start_year != years[1]:
@@ -168,10 +164,7 @@ def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
         if prices is None:
             prices = [float(x) for x in line.split()]
             if len(prices) != NUMBER_YEARS:
-                print(
-                    f"Warning: expected {NUMBER_YEARS} years, "
-                    f"got {len(prices)} prices: {prices}"
-                )
+                print(f"Warning: expected {NUMBER_YEARS} years, " f"got {len(prices)} prices: {prices}")
 
             escalations = [x / prices[0] for x in prices[1:]]
             this_dict = {
@@ -186,13 +179,11 @@ def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
     return results, escalation_start_year
 
 
-def plot_escalations(
-    results: List[dict], escalation_start_year: Optional[int] = None
-):
+def plot_escalations(results: List[dict], escalation_start_year: Optional[int] = None):
     # Lazy import, these are stdlib deps, so only for local use
-    import pandas as pd
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
 
     pandas_results = []
     for lcc in results:
@@ -210,11 +201,9 @@ def plot_escalations(
     ncols = 2
     nrows = int(np.ceil(grouped.ngroups / ncols))
 
-    fig, axes = plt.subplots(
-        nrows=nrows, ncols=ncols, figsize=(16, 24), sharey=True
-    )
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(16, 24), sharey=True)
 
-    for (key, ax) in zip(grouped.groups.keys(), axes.flatten()):
+    for key, ax in zip(grouped.groups.keys(), axes.flatten()):
         grouped.get_group(key)[key].plot(ax=ax)
         ax.set_title(f"Region: {key}")
 
@@ -225,9 +214,7 @@ def plot_escalations(
     plt.show()
 
 
-def format_field(
-    field_str: str, field_name: str, last_field: Optional[bool] = False
-) -> str:
+def format_field(field_str: str, field_name: str, last_field: Optional[bool] = False) -> str:
     """
     Helper to format the IDF
     """
@@ -259,15 +246,11 @@ def produce_idf(results: List[dict], escalation_start_year: int):
 
         content.append(format_field(lcc_name, "Name"))
         content.append(format_field(fuel, "Resource"))
-        content.append(
-            format_field(escalation_start_year, "Escalation Start Year")
-        )
+        content.append(format_field(escalation_start_year, "Escalation Start Year"))
         content.append(format_field("January", "Escalation Start Month"))
 
         escalations = lcc["escalations"]
-        for i, (year, value) in enumerate(
-            sorted(escalations.items(), reverse=False)
-        ):
+        for i, (year, value) in enumerate(sorted(escalations.items(), reverse=False)):
             content.append(
                 format_field(
                     f"{value:.4f}",
@@ -277,10 +260,7 @@ def produce_idf(results: List[dict], escalation_start_year: int):
             )
         content.append("")
 
-    fpath = (
-        DATASETS_DIR
-        / f"LCCusePriceEscalationDataSet{escalation_start_year - 1}.idf"
-    )
+    fpath = DATASETS_DIR / f"LCCusePriceEscalationDataSet{escalation_start_year - 1}.idf"
     with open(fpath, "w") as f:
         f.write("\n".join(content) + "\n")
     print(f"Saved as {fpath=}")
@@ -292,6 +272,4 @@ if __name__ == "__main__":
         results, escalation_start_year = parse_encost(fpath=fpath)
         # plot_escalations(results,
         #                  escalation_start_year=escalation_start_year)
-        produce_idf(
-            results=results, escalation_start_year=escalation_start_year
-        )
+        produce_idf(results=results, escalation_start_year=escalation_start_year)

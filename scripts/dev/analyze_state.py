@@ -54,8 +54,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
-from typing import List, Set
 from re import compile
+from typing import List, Set
 
 
 class StateClass:
@@ -94,9 +94,9 @@ class StateChecker:
         self.member_variables: Set[StateClass] = set()
 
         # read the state file contents -- if we ever split the data into files this will require modification
-        header_file_path = self.repo_root / 'src' / 'EnergyPlus' / 'Data' / 'EnergyPlusData.hh'
+        header_file_path = self.repo_root / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.hh"
         self.header_file_lines: List[str] = header_file_path.open().readlines()
-        source_file_path = self.repo_root / 'src' / 'EnergyPlus' / 'Data' / 'EnergyPlusData.cc'
+        source_file_path = self.repo_root / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.cc"
         self.source_file_lines: List[str] = source_file_path.open().readlines()
 
     def determine_member_variables(self) -> None:
@@ -106,7 +106,7 @@ class StateChecker:
         Currently it looks for lines of the form:
              std::unique_ptr<AirflowNetworkBalanceManagerData> dataAirflowNetworkBalanceManager;
         """
-        pattern = compile(r'\s*std::unique_ptr<(\w+)> (\w+);')
+        pattern = compile(r"\s*std::unique_ptr<(\w+)> (\w+);")
         for li in self.header_file_lines:
             m = pattern.match(li)
             if m:
@@ -118,9 +118,9 @@ class StateChecker:
         """
         Validates that the state member variables are constructed using a clue of the `make_unique` function.
         """
-        pattern = compile(r'\s*this->(\w+) = std::make_unique<(\w+)>\(\);')
+        pattern = compile(r"\s*this->(\w+) = std::make_unique<(\w+)>\(\);")
         for li in self.source_file_lines:
-            if li.strip().startswith('#'):
+            if li.strip().startswith("#"):
                 continue
             m = pattern.match(li)
             if m:
@@ -136,9 +136,9 @@ class StateChecker:
         """
         Validates the member's clear_state call is made in an uncommented line
         """
-        pattern = compile(r'\s*this->(\w+)->clear_state\(\);')
+        pattern = compile(r"\s*this->(\w+)->clear_state\(\);")
         for li in self.source_file_lines:
-            if li.strip().startswith('#'):
+            if li.strip().startswith("#"):
                 continue
             m = pattern.match(li)
             if m:
@@ -148,7 +148,7 @@ class StateChecker:
                         v.clear_state_executed = True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     this_file_path = Path(__file__).resolve()  # should be in scripts/dev
     repo_root = this_file_path.parent.parent.parent  # dev, scripts, repo_root
     sc = StateChecker(repo_root)

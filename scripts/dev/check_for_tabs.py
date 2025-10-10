@@ -65,45 +65,53 @@ def usage():
 
 
 current_script_dir = os.path.dirname(os.path.realpath(__file__))
-dirs_to_search = ['datasets', 'testfiles']
+dirs_to_search = ["datasets", "testfiles"]
 
 num_issues_found = 0
 for dir_name in dirs_to_search:
-    test_files_dir = os.path.join(current_script_dir, '..', '..', dir_name)
+    test_files_dir = os.path.join(current_script_dir, "..", "..", dir_name)
     for root, dirs, files in os.walk(test_files_dir):
         for sfile in files:
-            if sfile.endswith('.idf') or sfile.endswith('.imf'):
+            if sfile.endswith(".idf") or sfile.endswith(".imf"):
                 if root == test_files_dir:
                     relative_path = sfile
                 else:
                     folder = os.path.basename(os.path.normpath(root))
                     relative_path = os.path.join(folder, sfile)
                 abs_path = os.path.join(test_files_dir, relative_path)
-                with io.open(abs_path, 'r', encoding='utf-8', errors='strict') as fd:
+                with io.open(abs_path, "r", encoding="utf-8", errors="strict") as fd:
                     for i, line in enumerate(fd):
-                        if '\t' in line:
-                            print(json.dumps({
-                                'tool': 'check_for_tabs',
-                                'filename': os.path.join(dir_name, relative_path),
-                                'file': os.path.join(dir_name, relative_path),
-                                'line': i + 1,
-                                'messagetype': 'error',
-                                'message': 'Tab character found; use spaces for indentation'
-                            }))
+                        if "\t" in line:
+                            print(
+                                json.dumps(
+                                    {
+                                        "tool": "check_for_tabs",
+                                        "filename": os.path.join(dir_name, relative_path),
+                                        "file": os.path.join(dir_name, relative_path),
+                                        "line": i + 1,
+                                        "messagetype": "error",
+                                        "message": "Tab character found; use spaces for indentation",
+                                    }
+                                )
+                            )
                             num_issues_found += 1
 
-idd_path = os.path.join(current_script_dir, '..', '..', 'idd', 'Energy+.idd.in')
-with io.open(idd_path, 'r', encoding='utf-8', errors='strict') as fd:
+idd_path = os.path.join(current_script_dir, "..", "..", "idd", "Energy+.idd.in")
+with io.open(idd_path, "r", encoding="utf-8", errors="strict") as fd:
     for i, line in enumerate(fd):
-        if '\t' in line:
-            print(json.dumps({
-                'tool': 'check_for_tabs',
-                'filename': 'Energy+.idd.in',
-                'file': os.path.join('idd', 'Energy+.idd.in'),
-                'line': i + 1,
-                'messagetype': 'error',
-                'message': 'Tab character found in IDD, use spaces for indentation'
-            }))
+        if "\t" in line:
+            print(
+                json.dumps(
+                    {
+                        "tool": "check_for_tabs",
+                        "filename": "Energy+.idd.in",
+                        "file": os.path.join("idd", "Energy+.idd.in"),
+                        "line": i + 1,
+                        "messagetype": "error",
+                        "message": "Tab character found in IDD, use spaces for indentation",
+                    }
+                )
+            )
             num_issues_found += 1
 
 if num_issues_found > 0:

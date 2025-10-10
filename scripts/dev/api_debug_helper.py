@@ -80,17 +80,17 @@ from tempfile import mkdtemp
 DO_BUILD = False
 
 repo_root = Path(__file__).resolve().parent.parent.parent
-file_to_run = repo_root / 'testfiles' / 'PythonPluginCustomOutputVariable.idf'
+file_to_run = repo_root / "testfiles" / "PythonPluginCustomOutputVariable.idf"
 
 if DO_BUILD:
-    build_dir = repo_root / 'cmake-build-debug'
-    products_dir = build_dir / 'Products'
-    make_tool = '/snap/clion/current/bin/ninja/linux/x64/ninja'  # 'make'
+    build_dir = repo_root / "cmake-build-debug"
+    products_dir = build_dir / "Products"
+    make_tool = "/snap/clion/current/bin/ninja/linux/x64/ninja"  # 'make'
 
     # this will automatically build E+ each run, so you can quickly make changes and re-execute inside the debugger
-    check_call([make_tool, '-j', str(cpu_count() - 2), 'energyplus'], cwd=str(build_dir))
+    check_call([make_tool, "-j", str(cpu_count() - 2), "energyplus"], cwd=str(build_dir))
 else:
-    products_dir = '/tmp/EnergyPlus-24.1.0-241fc81186-Linux-Ubuntu22.04-x86_64'
+    products_dir = "/tmp/EnergyPlus-24.1.0-241fc81186-Linux-Ubuntu22.04-x86_64"
 
 
 path.insert(0, str(products_dir))
@@ -100,13 +100,6 @@ api = EnergyPlusAPI()
 state = api.state_manager.new_state()
 run_dir = mkdtemp()
 print(f"EnergyPlus starting with outputs in directory: {run_dir}")
-return_value = api.runtime.run_energyplus(
-    state, [
-        '-d',
-        run_dir,
-        '-D',
-        str(file_to_run)
-    ]
-)
+return_value = api.runtime.run_energyplus(state, ["-d", run_dir, "-D", str(file_to_run)])
 print(f"EnergyPlus finished with outputs in directory: {run_dir}")
 exit(return_value)

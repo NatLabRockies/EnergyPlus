@@ -55,21 +55,21 @@
 
 import json
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from typing import Tuple
 
 from eplaunch.workflows.base import BaseEPLaunchWorkflow1, EPLaunchWorkflowResponse1
 
 
 class ColumnNames(object):
-    Errors = 'Errors'
-    Warnings = 'Warnings'
-    Runtime = 'Runtime [s]'
-    Version = 'Version'
+    Errors = "Errors"
+    Warnings = "Warnings"
+    Runtime = "Runtime [s]"
+    Version = "Version"
 
 
 class Version:
@@ -78,12 +78,12 @@ class Version:
     def check_energyplus_version(file_path: str) -> Tuple[bool, str, int]:
         """Gets the version number information for a given EnergyPlus input file"""
         extension = os.path.splitext(file_path)[1].upper()
-        if extension == '.IDF' or extension == '.IMF':
+        if extension == ".IDF" or extension == ".IMF":
             return Version.check_idf_imf_energyplus_version(file_path)
-        elif extension == '.EPJSON':
+        elif extension == ".EPJSON":
             return Version.check_json_energyplus_version(file_path)
         else:
-            return False, '', 0
+            return False, "", 0
 
     @staticmethod
     def check_idf_imf_energyplus_version(file_path: str) -> Tuple[bool, str, int]:
@@ -92,7 +92,7 @@ class Version:
         # noinspection PyBroadException
         try:
             file_contents = file_path_object.read_text()
-            file_lines = [x.strip() for x in file_contents.split('\n')]
+            file_lines = [x.strip() for x in file_contents.split("\n")]
             for index, cur_line in enumerate(file_lines):
                 if len(cur_line) > 0 and cur_line[0] != "!" and "VERSION" in cur_line.upper():
                     trimmed_line = Version.line_with_no_comment(cur_line)
@@ -100,33 +100,33 @@ class Version:
                         poss_obj = trimmed_line
                     else:  # hoping for a two-liner version object ("Version,\n  8.4;")
                         if index + 1 <= len(file_lines):
-                            next_line_trimmed = Version.line_with_no_comment(file_lines[index+1])
+                            next_line_trimmed = Version.line_with_no_comment(file_lines[index + 1])
                             poss_obj = trimmed_line + next_line_trimmed
                         else:
-                            return False, '<invalid>', 0  # hit the end of the file in the middle of the version object
+                            return False, "<invalid>", 0  # hit the end of the file in the middle of the version object
                     hopeful_object = poss_obj[:-1] if poss_obj[-1] == ";" else poss_obj
-                    fields = hopeful_object.split(',')
+                    fields = hopeful_object.split(",")
                     return True, fields[1], Version.numeric_version_from_string(fields[1])
             else:
-                return False, '<missing>', 0
+                return False, "<missing>", 0
         except:
-            return False, '<error>', 0
+            return False, "<error>", 0
 
     @staticmethod
     def line_with_no_comment(in_string: str) -> str:
         """Returns an IDF line with any comments removed"""
-        return in_string[0:in_string.find("!")].strip() if in_string.find("!") >= 0 else in_string.strip()
+        return in_string[0 : in_string.find("!")].strip() if in_string.find("!") >= 0 else in_string.strip()
 
     @staticmethod
     def numeric_version_from_string(string_version: str) -> int:
         """Gets the coded version string from a version string like 5.0.0-abcdef"""
-        parts = [int(x) for x in string_version.split("-")[0].split('.')]
+        parts = [int(x) for x in string_version.split("-")[0].split(".")]
         return 10000 * parts[0] + 100 * parts[1]
 
     @staticmethod
     def numeric_version_from_dash_string(string_version: str) -> int:
         """Gets the coded version string from a version string like V5-0-0"""
-        string_version = string_version[1:] if string_version[0] == 'V' else string_version
+        string_version = string_version[1:] if string_version[0] == "V" else string_version
         # the rest of the version number should just be separated by periods
         parts = [int(x) for x in string_version.split("-")]
         return 10000 * parts[0] + 100 * parts[1]
@@ -134,7 +134,7 @@ class Version:
     @staticmethod
     def string_version_from_number(version_number: int) -> str:
         """Converts a coded number like 50200 (fictional version 5.2) to string with leading zeros 'V050200'"""
-        return 'V' + str(version_number).zfill(6)
+        return "V" + str(version_number).zfill(6)
 
     @staticmethod
     def check_json_energyplus_version(file_path: str) -> Tuple[bool, str, int]:
@@ -143,25 +143,24 @@ class Version:
         try:
             with open(file_path, "r") as readfile:
                 data = json.load(readfile)
-            current_version = data['Version']['Version 1']['version_identifier']
+            current_version = data["Version"]["Version 1"]["version_identifier"]
             return True, current_version, Version.numeric_version_from_string(current_version)
         except:  # could be a file-not-found, a permission issue, a key error, a JSON exception.....
-            return False, '', 0
-
+            return False, "", 0
 
 
 class EPlusRunManager(object):
 
     @staticmethod
     def get_end_summary_from_err(err_file_path):
-        contents = open(err_file_path, 'r').readlines()
+        contents = open(err_file_path, "r").readlines()
         last_line = contents[-1]
-        if 'EnergyPlus' not in last_line and 'Elapsed Time' not in last_line:
+        if "EnergyPlus" not in last_line and "Elapsed Time" not in last_line:
             return False, None, None, None
-        last_line_tokens = last_line.split(' ')
+        last_line_tokens = last_line.split(" ")
         num_warnings = int(last_line_tokens[7])
         num_errors = int(last_line_tokens[9])
-        time_position_marker = last_line.index('Time=')
+        time_position_marker = last_line.index("Time=")
         time_string = last_line[time_position_marker:]
         num_hours = int(time_string[5:7])
         num_minutes = int(time_string[10:12])
@@ -250,18 +249,16 @@ class EPlusRunManager(object):
             if os.path.exists(file_path):
                 os.remove(file_path)
 
-        energyplus_root_folder, _ = os.path.split(args['workflow location'])
+        energyplus_root_folder, _ = os.path.split(args["workflow location"])
 
         # Run EnergyPlus binary
-        if platform.system() == 'Windows':
-            energyplus_binary = os.path.join(energyplus_root_folder, 'energyplus.exe')
+        if platform.system() == "Windows":
+            energyplus_binary = os.path.join(energyplus_root_folder, "energyplus.exe")
         else:
-            energyplus_binary = os.path.join(energyplus_root_folder, 'energyplus')
+            energyplus_binary = os.path.join(energyplus_root_folder, "energyplus")
         if not os.path.exists(energyplus_binary):
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="EnergyPlus binary not found: {}!".format(energyplus_binary),
-                column_data=[]
+                success=False, message="EnergyPlus binary not found: {}!".format(energyplus_binary), column_data=[]
             )
 
         v = Version()
@@ -275,28 +272,26 @@ class EPlusRunManager(object):
         else:
             command_line_args = [energyplus_binary]
 
-        if extension == '.imf':
-            command_line_args += ['--epmacro']
+        if extension == ".imf":
+            command_line_args += ["--epmacro"]
 
         # So...ExpandObjects is weird in E+.  It doesn't like running things in directories and accidentally symlinks
         # things into the current working directory even if you specify an output directory
         # We're just going to run it ourselves.  (Side note it could be a similar problem for EPMacro)
-        if extension != '.epJSON':
-            if platform.system() == 'Windows':
-                expand_objects = os.path.join(energyplus_root_folder, 'ExpandObjects.exe')
+        if extension != ".epJSON":
+            if platform.system() == "Windows":
+                expand_objects = os.path.join(energyplus_root_folder, "ExpandObjects.exe")
             else:
-                expand_objects = os.path.join(energyplus_root_folder, 'ExpandObjects')
+                expand_objects = os.path.join(energyplus_root_folder, "ExpandObjects")
             if not os.path.exists(expand_objects):
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="ExpandObjects binary not found: {}!".format(expand_objects),
-                    column_data=[]
+                    success=False, message="ExpandObjects binary not found: {}!".format(expand_objects), column_data=[]
                 )
             # go ahead and copy the target IDF and original IDD into the output_dir/in.idf for running ExpandObjects
-            idf_path_in_output_dir = os.path.join(output_directory, 'in.idf')
+            idf_path_in_output_dir = os.path.join(output_directory, "in.idf")
             shutil.copy(full_file_path, idf_path_in_output_dir)
-            idd_path = os.path.join(energyplus_root_folder, 'Energy+.idd')  # yes for now we still need it
-            idd_path_in_output_dir = os.path.join(output_directory, 'Energy+.idd')
+            idd_path = os.path.join(energyplus_root_folder, "Energy+.idd")  # yes for now we still need it
+            idd_path_in_output_dir = os.path.join(output_directory, "Energy+.idd")
             shutil.copy(idd_path, idd_path_in_output_dir)
             # run ExpandObjects
             try:
@@ -305,9 +300,7 @@ class EPlusRunManager(object):
             except subprocess.CalledProcessError:
                 workflow_instance.callback("E+ FAILED")
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="EnergyPlus failed for file: %s!" % full_file_path,
-                    column_data={}
+                    success=False, message="EnergyPlus failed for file: %s!" % full_file_path, column_data={}
                 )
             # regardless of what happened, clean up the temp files
             delete_if_exists(idf_path_in_output_dir)
@@ -316,32 +309,32 @@ class EPlusRunManager(object):
             # but if it does exist, then this needs to be the IDF that we run, *however* we can't just leave it here
             # as it may reference some other files back in the original directory.  I'm going to go with a new file name
             # in the original directory of "FileName_Expanded.idf"
-            expanded_path_in_output_dir = os.path.join(output_directory, 'expanded.idf')
+            expanded_path_in_output_dir = os.path.join(output_directory, "expanded.idf")
             if os.path.exists(expanded_path_in_output_dir):
                 target_expanded_file_name = os.path.join(run_directory, f"{file_name_no_ext}_Expanded.idf")
                 shutil.copy(expanded_path_in_output_dir, target_expanded_file_name)
                 full_file_path = target_expanded_file_name
 
         # Run EnergyPlus in a subdirectory
-        command_line_args += ['-d', output_directory]
+        command_line_args += ["-d", output_directory]
 
         # if not isIP:  # if using SI output units just use readvars CLI option
         #     command_line_args += ['--readvars']
 
         # add some config parameters
-        command_line_args += ['--output-prefix', file_name_no_ext, '--output-suffix', 'C']
+        command_line_args += ["--output-prefix", file_name_no_ext, "--output-suffix", "C"]
 
         # add in simulation control args
-        if 'weather' in args and args['weather']:
-            command_line_args += ['--weather', args['weather']]
+        if "weather" in args and args["weather"]:
+            command_line_args += ["--weather", args["weather"]]
         else:
-            command_line_args += ['--design-day']
+            command_line_args += ["--design-day"]
 
         # and at the very end, add the file to run
         command_line_args += [full_file_path]
 
         # make sure we clean up any existing csv file to detect whether E+ created it natively
-        vari_csv_path = os.path.join(output_directory, file_name_no_ext + '.csv')  # TODO: What is this?
+        vari_csv_path = os.path.join(output_directory, file_name_no_ext + ".csv")  # TODO: What is this?
         delete_if_exists(vari_csv_path)
 
         # run E+
@@ -350,7 +343,8 @@ class EPlusRunManager(object):
             eplus_dir = Path(__file__).parent.parent.absolute()
             sys.path.insert(0, str(eplus_dir))
             from pyenergyplus.api import EnergyPlusAPI
-            x = lambda msg: workflow_instance.callback("(E+API) " + msg.decode('utf-8', errors='ignore'))
+
+            x = lambda msg: workflow_instance.callback("(E+API) " + msg.decode("utf-8", errors="ignore"))
             # x = lambda msg: print("(E+ API) : " + str(msg))
             api = EnergyPlusAPI()
             state = api.state_manager.new_state()
@@ -363,9 +357,7 @@ class EPlusRunManager(object):
             if eplus_return != 0:
                 workflow_instance.callback("E+ FAILED")
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="EnergyPlus failed for file: %s!" % full_file_path,
-                    column_data={}
+                    success=False, message="EnergyPlus failed for file: %s!" % full_file_path, column_data={}
                 )
         else:
             # if by CLI then just execute the full command line
@@ -375,9 +367,7 @@ class EPlusRunManager(object):
             except subprocess.CalledProcessError:
                 workflow_instance.callback("E+ FAILED")
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="EnergyPlus failed for file: %s!" % full_file_path,
-                    column_data={}
+                    success=False, message="EnergyPlus failed for file: %s!" % full_file_path, column_data={}
                 )
 
         if os.path.exists(vari_csv_path):
@@ -387,25 +377,29 @@ class EPlusRunManager(object):
             # if isIP:
             # set up the ESO and MTR output files for either unit conversion or just ReadVarsESO
             # *.eso back to eplusout.eso
-            eso_path = os.path.join(output_directory, file_name_no_ext + '.eso')
-            eplusouteso_path = os.path.join(output_directory, 'eplusout.eso')
+            eso_path = os.path.join(output_directory, file_name_no_ext + ".eso")
+            eplusouteso_path = os.path.join(output_directory, "eplusout.eso")
             if os.path.exists(eso_path):
                 shutil.copy(eso_path, eplusouteso_path)
             # *.mtr back to eplusout.mtr
-            mtr_path = os.path.join(output_directory, file_name_no_ext + '.mtr')
-            eplusoutmtr_path = os.path.join(output_directory, 'eplusout.mtr')
+            mtr_path = os.path.join(output_directory, file_name_no_ext + ".mtr")
+            eplusoutmtr_path = os.path.join(output_directory, "eplusout.mtr")
             if os.path.exists(mtr_path):
                 shutil.copy(mtr_path, eplusoutmtr_path)
 
             if is_ip:
                 # run the ConvertESOMTR program to create IP versions of the timestep based output files
-                if platform.system() == 'Windows':
-                    converter = os.path.join(energyplus_root_folder, 'PostProcess', 'convertESOMTRpgm', 'convertESOMTR.exe')
+                if platform.system() == "Windows":
+                    converter = os.path.join(
+                        energyplus_root_folder, "PostProcess", "convertESOMTRpgm", "convertESOMTR.exe"
+                    )
                 else:
-                    converter = os.path.join(energyplus_root_folder, 'PostProcess', 'convertESOMTRpgm', 'convertESOMTR')
+                    converter = os.path.join(energyplus_root_folder, "PostProcess", "convertESOMTRpgm", "convertESOMTR")
                 if os.path.exists(converter):
-                    txt_orig_path = os.path.join(energyplus_root_folder, 'PostProcess', 'convertESOMTRpgm', 'convert.txt')
-                    txt_run_path = os.path.join(output_directory, 'convert.txt')
+                    txt_orig_path = os.path.join(
+                        energyplus_root_folder, "PostProcess", "convertESOMTRpgm", "convert.txt"
+                    )
+                    txt_run_path = os.path.join(output_directory, "convert.txt")
                     shutil.copy(txt_orig_path, txt_run_path)
 
                     command_line_args = [converter]
@@ -415,42 +409,40 @@ class EPlusRunManager(object):
                     except subprocess.CalledProcessError:
                         workflow_instance.callback("ConvertESOMTR FAILED")
                         return EPLaunchWorkflowResponse1(
-                            success=False,
-                            message="ConvertESOMTR failed for file: %s!" % full_file_path,
-                            column_data={}
+                            success=False, message="ConvertESOMTR failed for file: %s!" % full_file_path, column_data={}
                         )
                     # copy converted IP version of ESO file to users *.eso file
-                    ipeso_path = os.path.join(output_directory, 'ip.eso')
+                    ipeso_path = os.path.join(output_directory, "ip.eso")
                     if os.path.exists(ipeso_path):
                         shutil.copy(ipeso_path, eso_path)
                         os.replace(ipeso_path, eplusouteso_path)
                     # copy converted IP version of MTR file to users *.mtr file
-                    ipmtr_path = os.path.join(output_directory, 'ip.mtr')
+                    ipmtr_path = os.path.join(output_directory, "ip.mtr")
                     if os.path.exists(ipmtr_path):
                         shutil.copy(ipmtr_path, mtr_path)
                         os.replace(ipmtr_path, eplusoutmtr_path)
                     os.remove(txt_run_path)
 
             # run ReadVarsESO to convert the timestep based output files to CSV files
-            if platform.system() == 'Windows':
-                readvarseso_binary = os.path.join(energyplus_root_folder, 'PostProcess', 'ReadVarsESO.exe')
+            if platform.system() == "Windows":
+                readvarseso_binary = os.path.join(energyplus_root_folder, "PostProcess", "ReadVarsESO.exe")
             else:
-                readvarseso_binary = os.path.join(energyplus_root_folder, 'PostProcess', 'ReadVarsESO')
+                readvarseso_binary = os.path.join(energyplus_root_folder, "PostProcess", "ReadVarsESO")
             if os.path.exists(readvarseso_binary):
 
                 command_line_args = [readvarseso_binary]
-                rvi_path = os.path.join(run_directory, file_name_no_ext + '.rvi')
-                temp_rvi_path = os.path.join(output_directory, 'temp.rvi')
-                eplusout_rvi_path = os.path.join(output_directory, 'eplusout.rvi')
+                rvi_path = os.path.join(run_directory, file_name_no_ext + ".rvi")
+                temp_rvi_path = os.path.join(output_directory, "temp.rvi")
+                eplusout_rvi_path = os.path.join(output_directory, "eplusout.rvi")
                 if os.path.exists(rvi_path):
                     shutil.copy(rvi_path, eplusout_rvi_path)
-                    command_line_args.append('eplusout.rvi')
+                    command_line_args.append("eplusout.rvi")
                 else:
                     with open(temp_rvi_path, "w") as f:
-                        f.write('eplusout.eso \n')
-                        f.write('eplusout.csv \n')
-                    command_line_args.append('temp.rvi')
-                command_line_args.append('unlimited')  # no number of column limit
+                        f.write("eplusout.eso \n")
+                        f.write("eplusout.csv \n")
+                    command_line_args.append("temp.rvi")
+                command_line_args.append("unlimited")  # no number of column limit
 
                 try:
                     for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
@@ -458,27 +450,25 @@ class EPlusRunManager(object):
                 except subprocess.CalledProcessError:
                     workflow_instance.callback("ReadVarsESO FAILED on ESO file")
                     return EPLaunchWorkflowResponse1(
-                        success=False,
-                        message="ReadVarsESO failed for ESO file: %s!" % full_file_path,
-                        column_data={}
+                        success=False, message="ReadVarsESO failed for ESO file: %s!" % full_file_path, column_data={}
                     )
-                eplusout_csv_path = os.path.join(output_directory, 'eplusout.csv')
+                eplusout_csv_path = os.path.join(output_directory, "eplusout.csv")
                 if os.path.exists(eplusout_csv_path):
                     os.replace(eplusout_csv_path, vari_csv_path)
 
                 command_line_args = [readvarseso_binary]
-                mvi_path = os.path.join(run_directory, file_name_no_ext + '.mvi')
-                temp_mvi_path = os.path.join(output_directory, 'temp.mvi')
-                eplusout_mvi_path = os.path.join(output_directory, 'eplusout.mvi')
+                mvi_path = os.path.join(run_directory, file_name_no_ext + ".mvi")
+                temp_mvi_path = os.path.join(output_directory, "temp.mvi")
+                eplusout_mvi_path = os.path.join(output_directory, "eplusout.mvi")
                 if os.path.exists(mvi_path):
                     shutil.copy(mvi_path, eplusout_mvi_path)
-                    command_line_args.append('eplusout.mvi')
+                    command_line_args.append("eplusout.mvi")
                 else:
                     with open(temp_mvi_path, "w+") as f:
-                        f.write('eplusout.mtr \n')
-                        f.write('eplusmtr.csv \n')
-                    command_line_args.append('temp.mvi')
-                command_line_args.append('unlimited')  # no number of column limit
+                        f.write("eplusout.mtr \n")
+                        f.write("eplusmtr.csv \n")
+                    command_line_args.append("temp.mvi")
+                command_line_args.append("unlimited")  # no number of column limit
 
                 try:
                     for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
@@ -486,17 +476,15 @@ class EPlusRunManager(object):
                 except subprocess.CalledProcessError:
                     workflow_instance.callback("ReadVarsESO FAILED on MTR file")
                     return EPLaunchWorkflowResponse1(
-                        success=False,
-                        message="ReadVarsESO failed for MTR file: %s!" % full_file_path,
-                        column_data={}
+                        success=False, message="ReadVarsESO failed for MTR file: %s!" % full_file_path, column_data={}
                     )
-                mtr_csv_path = os.path.join(output_directory, file_name_no_ext + 'Meter.csv')
-                eplusmtr_csv_path = os.path.join(output_directory, 'eplusmtr.csv')
+                mtr_csv_path = os.path.join(output_directory, file_name_no_ext + "Meter.csv")
+                eplusmtr_csv_path = os.path.join(output_directory, "eplusmtr.csv")
                 if os.path.exists(eplusmtr_csv_path):
                     os.replace(eplusmtr_csv_path, mtr_csv_path)
 
-                readvars_audit_path = os.path.join(output_directory, 'readvars.audit')
-                rv_audit_path = os.path.join(output_directory, file_name_no_ext + '.rvaudit')
+                readvars_audit_path = os.path.join(output_directory, "readvars.audit")
+                rv_audit_path = os.path.join(output_directory, file_name_no_ext + ".rvaudit")
                 if os.path.exists(readvars_audit_path):
                     os.replace(readvars_audit_path, rv_audit_path)
 
@@ -510,21 +498,21 @@ class EPlusRunManager(object):
             delete_if_exists(eplusouteso_path)
             delete_if_exists(eplusoutmtr_path)
 
-        audit_out_path = os.path.join(output_directory, 'audit.out')
+        audit_out_path = os.path.join(output_directory, "audit.out")
         delete_if_exists(audit_out_path)
-        expanded_idf_path = os.path.join(output_directory, 'expanded.idf')
+        expanded_idf_path = os.path.join(output_directory, "expanded.idf")
         delete_if_exists(expanded_idf_path)
-        out_idf_path = os.path.join(output_directory, 'out.idf')
+        out_idf_path = os.path.join(output_directory, "out.idf")
         delete_if_exists(out_idf_path)
 
         # run HVAC-Diagram
-        if platform.system() == 'Windows':
-            hvac_diagram_binary = os.path.join(energyplus_root_folder, 'PostProcess', 'HVAC-Diagram.exe')
+        if platform.system() == "Windows":
+            hvac_diagram_binary = os.path.join(energyplus_root_folder, "PostProcess", "HVAC-Diagram.exe")
         else:
-            hvac_diagram_binary = os.path.join(energyplus_root_folder, 'PostProcess', 'HVAC-Diagram')
+            hvac_diagram_binary = os.path.join(energyplus_root_folder, "PostProcess", "HVAC-Diagram")
         if os.path.exists(hvac_diagram_binary):
-            bnd_path = os.path.join(output_directory, file_name_no_ext + '.bnd')
-            eplusout_bnd_path = os.path.join(output_directory, 'eplusout.bnd')
+            bnd_path = os.path.join(output_directory, file_name_no_ext + ".bnd")
+            eplusout_bnd_path = os.path.join(output_directory, "eplusout.bnd")
             if os.path.exists(bnd_path):
                 shutil.copy(bnd_path, eplusout_bnd_path)
                 command_line_args = [hvac_diagram_binary]
@@ -534,12 +522,10 @@ class EPlusRunManager(object):
             except subprocess.CalledProcessError:
                 workflow_instance.callback("HVAC-Diagram FAILED on BND file")
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="HVAC-Diagram failed for BND file: %s!" % full_file_path,
-                    column_data={}
+                    success=False, message="HVAC-Diagram failed for BND file: %s!" % full_file_path, column_data={}
                 )
-            svg_path = os.path.join(output_directory, file_name_no_ext + '.svg')
-            eplusout_svg_path = os.path.join(output_directory, 'eplusout.svg')
+            svg_path = os.path.join(output_directory, file_name_no_ext + ".svg")
+            eplusout_svg_path = os.path.join(output_directory, "eplusout.svg")
             if os.path.exists(eplusout_svg_path):
                 os.replace(eplusout_svg_path, svg_path)
             if os.path.exists(eplusout_bnd_path):
@@ -560,14 +546,12 @@ class EPlusRunManager(object):
             ColumnNames.Errors: errors,
             ColumnNames.Warnings: warnings,
             ColumnNames.Runtime: runtime,
-            ColumnNames.Version: current_version
+            ColumnNames.Version: current_version,
         }
 
         # now leave
         return EPLaunchWorkflowResponse1(
-            success=True,
-            message="Ran EnergyPlus OK for file: %s!" % file_name,
-            column_data=column_data
+            success=True, message="Ran EnergyPlus OK for file: %s!" % file_name, column_data=column_data
         )
 
 
@@ -602,8 +586,8 @@ class EnergyPlusWorkflowSI(BaseEPLaunchWorkflow1):
         if type(response) is not EPLaunchWorkflowResponse1:
             response = EPLaunchWorkflowResponse1(
                 success=False,
-                message='Current workflow run_energyplus function did not respond properly',
-                column_data=None
+                message="Current workflow run_energyplus function did not respond properly",
+                column_data=None,
             )
         return response
 
@@ -639,8 +623,8 @@ class EnergyPlusWorkflowIP(BaseEPLaunchWorkflow1):
         if type(response) is not EPLaunchWorkflowResponse1:
             response = EPLaunchWorkflowResponse1(
                 success=False,
-                message='Current workflow run_energyplus function did not respond properly',
-                column_data=None
+                message="Current workflow run_energyplus function did not respond properly",
+                column_data=None,
             )
         return response
 
@@ -676,7 +660,7 @@ class EnergyPlusWorkflowSIByAPI(BaseEPLaunchWorkflow1):
         if type(response) is not EPLaunchWorkflowResponse1:
             response = EPLaunchWorkflowResponse1(
                 success=False,
-                message='Current workflow run_energyplus function did not respond properly',
-                column_data=None
+                message="Current workflow run_energyplus function did not respond properly",
+                column_data=None,
             )
         return response

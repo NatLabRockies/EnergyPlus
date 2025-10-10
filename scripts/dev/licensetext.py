@@ -54,16 +54,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import datetime
-import textwrap
-import json
 import glob
+import json
 import re
 import sys
+import textwrap
 
 #
 # The previous year that is in the license. It should be a string
 #
-_previous_year = '2024'
+_previous_year = "2024"
 #
 # From file "EnergyPlus License DRAFT 112015 100 fixed.txt"
 #
@@ -131,156 +131,161 @@ _original = """// EnergyPlus, Copyright (c) 1996-2015, The Board of Trustees of 
 # This is probably not awesome, but it gets it done for now
 error_output = sys.stdout
 
+
 def error_json(dictionary):
-    '''Function for output of JSON-style messages for decent_ci.'''
-    error_output.write(json.dumps(dictionary) + '\n')
+    """Function for output of JSON-style messages for decent_ci."""
+    error_output.write(json.dumps(dictionary) + "\n")
+
 
 def error_for_humans(dictionary):
-    '''Function for output of more human friendly messages.'''
-    tool = dictionary.get('tool', 'UNKNOWN')
-    mesg = dictionary.get('message', 'An unknown error has occurred')
-    if 'file' in dictionary and 'line' in dictionary:
-        error_output.write('%s(%s, line %d): %s\n' % (tool, dictionary['file'],
-                                                      dictionary['line'], mesg))
+    """Function for output of more human friendly messages."""
+    tool = dictionary.get("tool", "UNKNOWN")
+    mesg = dictionary.get("message", "An unknown error has occurred")
+    if "file" in dictionary and "line" in dictionary:
+        error_output.write("%s(%s, line %d): %s\n" % (tool, dictionary["file"], dictionary["line"], mesg))
     else:
-        error_output.write('%s(%s, line %d): %s\n' % (tool, mesg))
+        error_output.write("%s(%s, line %d): %s\n" % (tool, mesg))
+
 
 # This is also probably not awesome, but same deal
 report_error = error_json
 
+
 def merge_paragraphs(text):
-    '''Merge license text lines into a single line per paragraph.'''
+    """Merge license text lines into a single line per paragraph."""
     lines = []
-    current = ''
+    current = ""
     for line in text.splitlines():
         line = line.rstrip()
-        if line == '//':
-            lines.extend([current.lstrip(), ''])
-            current = ''
+        if line == "//":
+            lines.extend([current.lstrip(), ""])
+            current = ""
         else:
-            current += ' ' + line[2:].lstrip()
+            current += " " + line[2:].lstrip()
     lines.append(current.lstrip())
-    return '\n'.join(lines) + '\n'
+    return "\n".join(lines) + "\n"
 
 
-def pythonize(text, line_limit=79, toolname='unspecified',
-              message=report_error):
-    '''Convert the C++ comment text into Python comments'''
-    paragraphs = [el for el in merge_paragraphs(text).splitlines() if el != '']
+def pythonize(text, line_limit=79, toolname="unspecified", message=report_error):
+    """Convert the C++ comment text into Python comments"""
+    paragraphs = [el for el in merge_paragraphs(text).splitlines() if el != ""]
     if len(paragraphs) != 8 or line_limit < 7:
-        message({'tool': toolname,
-                 'filename': 'unknown',
-                 'file': 'unknown',
-                 'line': 1,
-                 'messagetype': 'error',
-                 'message': 'License text cannot processed'})
-        return ''
+        message(
+            {
+                "tool": toolname,
+                "filename": "unknown",
+                "file": "unknown",
+                "line": 1,
+                "messagetype": "error",
+                "message": "License text cannot processed",
+            }
+        )
+        return ""
     lines = []
     # Work the first three paragraphs
     limit = line_limit - 2
     for pg in paragraphs[0:3]:
-        lines.extend([' ' + el for el in textwrap.wrap(pg, width=limit)])
-        lines.append('')
+        lines.extend([" " + el for el in textwrap.wrap(pg, width=limit)])
+        lines.append("")
     # Work the next four paragraphs
     limit = line_limit - 6
     for i, pg in enumerate(paragraphs[3:7]):
         sublines = textwrap.wrap(pg[4:], width=limit)
-        lines.append((' (%d) ' % (i + 1)) + sublines[0])
+        lines.append((" (%d) " % (i + 1)) + sublines[0])
         for el in sublines[1:]:
-            lines.append('     ' + el)
-        lines.append('')
+            lines.append("     " + el)
+        lines.append("")
     # Work the last paragraph
     limit = line_limit - 2
-    lines.extend([' ' + el for el in textwrap.wrap(paragraphs[7],
-                                                   width=limit)])
-    return '#' + '\n#'.join(lines) + '\n'
+    lines.extend([" " + el for el in textwrap.wrap(paragraphs[7], width=limit)])
+    return "#" + "\n#".join(lines) + "\n"
 
 
 def previous():
-    '''Return the previous Python license text (last year).'''
+    """Return the previous Python license text (last year)."""
     # Modify the year in the text
-    originalYear = '2015'
+    originalYear = "2015"
     currentYear = _previous_year
     txt = _original.replace(originalYear, currentYear)
     # Modify and delete some lines with LBNL IP permission
     # Keep in mind that the line numbering here starts with 0
     lines = txt.splitlines()
     # On line 37, replace LBNL with USDOE
-    lines[37] = lines[37].replace('Lawrence Berkeley National Laboratory',
-                                  'the U.S. Department of Energy')
+    lines[37] = lines[37].replace("Lawrence Berkeley National Laboratory", "the U.S. Department of Energy")
     # Delete the last 9 lines
     lines = lines[:-9]
     # Delete lines 4-6
     lines = lines[:4] + lines[7:]
     # Modify the notice
-    lines[0] = lines[0].replace(' and', ',')
-    lines[2] = '// (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge'
-    lines.insert(3, '// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other')
-    lines[4] = '// contributors. All rights reserved.'
-    txt = '\n'.join(lines) + '\n'
+    lines[0] = lines[0].replace(" and", ",")
+    lines[2] = "// (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge"
+    lines.insert(3, "// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other")
+    lines[4] = "// contributors. All rights reserved."
+    txt = "\n".join(lines) + "\n"
     return txt
 
 
 def previous_python():
-    '''Return the previous Python license text (last year).'''
+    """Return the previous Python license text (last year)."""
     cpp_license = previous()
     text = pythonize(cpp_license)
     return text
 
 
 def current():
-    '''Return the current license text, as of today.'''
+    """Return the current license text, as of today."""
     # Modify the year in the text
-    originalYear = '2015'
-    currentYear = '%d' % datetime.date.today().year
+    originalYear = "2015"
+    currentYear = "%d" % datetime.date.today().year
     txt = _original.replace(originalYear, currentYear)
     # Modify and delete some lines with LBNL IP permission
     # Keep in mind that the line numbering here starts with 0
     lines = txt.splitlines()
     # On line 37, replace LBNL with USDOE
-    lines[37] = lines[37].replace('Lawrence Berkeley National Laboratory',
-                                  'the U.S. Department of Energy')
+    lines[37] = lines[37].replace("Lawrence Berkeley National Laboratory", "the U.S. Department of Energy")
     # Delete the last 9 lines
     lines = lines[:-9]
     # Delete lines 4-6
     lines = lines[:4] + lines[7:]
     # Modify the notice
-    lines[0] = lines[0].replace(' and', ',')
-    lines[2] = '// (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge'
-    lines.insert(3, '// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other')
-    lines[4] = '// contributors. All rights reserved.'
-    txt = '\n'.join(lines) + '\n'
+    lines[0] = lines[0].replace(" and", ",")
+    lines[2] = "// (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge"
+    lines.insert(3, "// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other")
+    lines[4] = "// contributors. All rights reserved."
+    txt = "\n".join(lines) + "\n"
     return txt
 
 
 def current_python():
-    '''Return the current Python license text, as of today.'''
+    """Return the current Python license text, as of today."""
     cpp_license = current()
     text = pythonize(cpp_license)
     return text
 
 
 def original():
-    '''Return the original BSD3+ license text from 2015.'''
+    """Return the original BSD3+ license text from 2015."""
     return _original
 
 
-def check_license(filename, possible, correct, offset=0,
-                  toolname='unspecified', message=report_error):
-    '''Check for a few of the usual issues with the license'''
+def check_license(filename, possible, correct, offset=0, toolname="unspecified", message=report_error):
+    """Check for a few of the usual issues with the license"""
     if possible == correct:
         return True
     try:
-        possibleYear = possible[offset + 31:offset + 35]
-        correctYear = correct[offset + 31:offset + 35]
+        possibleYear = possible[offset + 31 : offset + 35]
+        correctYear = correct[offset + 31 : offset + 35]
     except IndexError:
-        message({'tool': toolname,
-                 'filename': filename,
-                 'file': filename,
-                 'line': 1,
-                 'messagetype': 'error',
-                 'message':
-                     'License text cannot be matched, check entire license'})
+        message(
+            {
+                "tool": toolname,
+                "filename": filename,
+                "file": filename,
+                "line": 1,
+                "messagetype": "error",
+                "message": "License text cannot be matched, check entire license",
+            }
+        )
         return False
     try:
         # The original behavior was to report year differences and then possibly
@@ -288,31 +293,42 @@ def check_license(filename, possible, correct, offset=0,
         # double reports. Now report incorrect license year only if that is all
         # that is wrong.
         int(possibleYear)
-        corrected = possible[:offset + 31] + correctYear + possible[offset + 35:]
+        corrected = possible[: offset + 31] + correctYear + possible[offset + 35 :]
         if corrected == correct:
-            message({'tool': toolname,
-                     'filename': filename,
-                     'file': filename,
-                     'line': 1,
-                     'messagetype': 'error',
-                     'message': 'License year is incorrect'})
-            corrected = possible[:offset + 31] + correctYear + possible[offset + 35:]
+            message(
+                {
+                    "tool": toolname,
+                    "filename": filename,
+                    "file": filename,
+                    "line": 1,
+                    "messagetype": "error",
+                    "message": "License year is incorrect",
+                }
+            )
+            corrected = possible[: offset + 31] + correctYear + possible[offset + 35 :]
             return False
     except:
-        message({'tool': toolname,
-                 'filename': filename,
-                 'file': filename,
-                 'line': 1,
-                 'messagetype': 'error',
-                 'message':
-                     'License text cannot be matched, check entire license'})
+        message(
+            {
+                "tool": toolname,
+                "filename": filename,
+                "file": filename,
+                "line": 1,
+                "messagetype": "error",
+                "message": "License text cannot be matched, check entire license",
+            }
+        )
         return False
-    message({'tool': toolname,
-             'filename': filename,
-             'file': filename,
-             'line': 1,
-             'messagetype': 'error',
-             'message': 'Differences in license text, check entire license'})
+    message(
+        {
+            "tool": toolname,
+            "filename": filename,
+            "file": filename,
+            "line": 1,
+            "messagetype": "error",
+            "message": "Differences in license text, check entire license",
+        }
+    )
     return False
 
 
@@ -320,14 +336,14 @@ class FileVisitor:
     def __init__(self, extensions=None):
         self.visited_files = []
         if extensions is None:
-            self.extensions = ['cc', 'cpp', 'c', 'hh', 'hpp', 'h']
+            self.extensions = ["cc", "cpp", "c", "hh", "hpp", "h"]
         else:
             self.extensions = extensions
 
     def files(self, path, exclude_patterns=None):
         results = []
         for ext in self.extensions:
-            results.extend(glob.glob(path + '**/*.' + ext, recursive=True))
+            results.extend(glob.glob(path + "**/*." + ext, recursive=True))
         if exclude_patterns is not None:
             for pattern in exclude_patterns:
                 matcher = re.compile(pattern)
@@ -350,22 +366,23 @@ class FileVisitor:
         return overall_success
 
     def readtext(self, filepath):
-        fp = open(filepath, 'r', encoding='utf-8')
+        fp = open(filepath, "r", encoding="utf-8")
         try:
             txt = fp.read()
         except UnicodeDecodeError as exc:
-            self.error(filepath, 0, 'UnicodeDecodeError: ' + str(exc))
+            self.error(filepath, 0, "UnicodeDecodeError: " + str(exc))
             txt = None
         except Exception as exc:
-            self.error(filepath, 0, 'Exception: ' + str(exc))
+            self.error(filepath, 0, "Exception: " + str(exc))
             txt = None
         fp.close()
         return txt
 
 
 class Checker(FileVisitor):
-    def __init__(self, boilerplate, offset=3, toolname='unspecified',
-                 extensions=None, shebang=False, empty_passes=False):
+    def __init__(
+        self, boilerplate, offset=3, toolname="unspecified", extensions=None, shebang=False, empty_passes=False
+    ):
         super().__init__(extensions=extensions)
         lines = boilerplate.splitlines()
         self.n = len(lines)
@@ -376,33 +393,33 @@ class Checker(FileVisitor):
         self.empty_passes = empty_passes
 
     def error(self, file, line_number, mesg):
-        dictionary = {'tool': self.toolname,
-                      'filename': file,
-                      'file': file,
-                      'line': line_number,
-                      'messagetype': 'error',
-                      'message': mesg}
+        dictionary = {
+            "tool": self.toolname,
+            "filename": file,
+            "file": file,
+            "line": line_number,
+            "messagetype": "error",
+            "message": mesg,
+        }
         report_error(dictionary)
 
     def visit_file(self, filepath):
         txt = self.readtext(filepath)
         if self.empty_passes:
-            if txt.strip() == '':
+            if txt.strip() == "":
                 return True
         if txt is not None:
             n = txt.count(self.text)
             if n == 0:
-                lines = txt.splitlines()[:self.n]
-                shortened = '\n'.join(lines) + '\n'
-                success = check_license(filepath, shortened, self.text,
-                                        offset=self.offset,
-                                        toolname=self.toolname,
-                                        message=report_error)
+                lines = txt.splitlines()[: self.n]
+                shortened = "\n".join(lines) + "\n"
+                success = check_license(
+                    filepath, shortened, self.text, offset=self.offset, toolname=self.toolname, message=report_error
+                )
                 return success
             else:
                 if n > 1:
-                    self.error(filepath, 1,
-                               'Multiple instances of license text')
+                    self.error(filepath, 1, "Multiple instances of license text")
                     return False
                 if not txt.startswith(self.text):
                     if self.shebang:
@@ -411,15 +428,12 @@ class Checker(FileVisitor):
                         if lines[0].startswith("#!"):
                             count = 1
                             if len(lines) > 1:
-                                if re.match("^[ \t\f]*#.*?coding[:=][ \t]*"
-                                            "([-_.a-zA-Z0-9]+)",
-                                            lines[1]):
+                                if re.match("^[ \t\f]*#.*?coding[:=][ \t]*" "([-_.a-zA-Z0-9]+)", lines[1]):
                                     count += 1
-                            txt = '\n'.join(lines[count:])
+                            txt = "\n".join(lines[count:])
                             if txt.startswith(self.text):
                                 return True
-                    self.error(filepath, 1,
-                               'License text is not at top of file')
+                    self.error(filepath, 1, "License text is not at top of file")
                     return False
         return True
 
@@ -434,10 +448,10 @@ class Replacer(FileVisitor):
         self.failures = []
 
     def error(self, file, line, mesg):
-        self.failures.append(file + ', ' + mesg)
+        self.failures.append(file + ", " + mesg)
 
     def writetext(self, filepath, txt):
-        fp = open(filepath, 'w', encoding='utf-8')
+        fp = open(filepath, "w", encoding="utf-8")
         fp.write(txt)
         fp.close()
 
@@ -454,36 +468,35 @@ class Replacer(FileVisitor):
                     self.replaced.append(filepath)
 
     def summary(self, full_report=False):
-        txt = ['Checked %d files' % len(self.visited_files)]
+        txt = ["Checked %d files" % len(self.visited_files)]
         difference = list(set(self.visited_files) - set(self.replaced))
         if self.dryrun:
-            txt.append('Would have replaced text in %d file(s)'
-                       % len(self.replaced))
+            txt.append("Would have replaced text in %d file(s)" % len(self.replaced))
             if full_report:
                 for file in self.replaced:
-                    txt.append('\t' + file)
-            txt.append('Would have done nothing in %d file(s)'
-                       % len(difference))
+                    txt.append("\t" + file)
+            txt.append("Would have done nothing in %d file(s)" % len(difference))
             if full_report:
                 for file in difference:
-                    txt.append('\t' + file)
+                    txt.append("\t" + file)
         else:
-            txt.append('Replaced text in %d file(s)' % len(self.replaced))
+            txt.append("Replaced text in %d file(s)" % len(self.replaced))
             if full_report:
                 for file in self.replaced:
-                    txt.append('\t' + file)
-            txt.append('Did nothing in %d file(s)' % len(difference))
+                    txt.append("\t" + file)
+            txt.append("Did nothing in %d file(s)" % len(difference))
             if full_report:
                 for file in difference:
-                    txt.append('\t' + file)
+                    txt.append("\t" + file)
         if len(self.failures):
-            txt.append('Failures in %d file(s)' % len(self.failures))
+            txt.append("Failures in %d file(s)" % len(self.failures))
             for message in self.failures:
-                txt.append('\t' + message)
-        return '\n'.join(txt)
+                txt.append("\t" + message)
+        return "\n".join(txt)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     text = current()
     print(text)
     for number, line in enumerate(text.splitlines()):
-        print('%2d' % number, line)
+        print("%2d" % number, line)

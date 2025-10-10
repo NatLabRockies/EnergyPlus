@@ -80,6 +80,6 @@ class HistoryTracker(EnergyPlusPlugin):
         datetime = (self.api.exchange.day_of_year(state) - 1) * 24 + self.api.exchange.current_time(state)
         temp = self.api.exchange.get_variable_value(state, self.handle)
         self.history.append((datetime, temp))
-        print(f'{datetime:0.2f}, {temp:0.2f}, {len(self.history)}', flush=True)
+        print(f"{datetime:0.2f}, {temp:0.2f}, {len(self.history)}", flush=True)
 
         return 0

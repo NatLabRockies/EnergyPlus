@@ -58,13 +58,12 @@
 # and only used in a single source file.  This indicates enums that should be declared at the top of the source
 # file rather than exported through the header
 
+import unittest
 from os import walk
+from pathlib import Path
 from re import finditer
 from sys import argv, exit
-from pathlib import Path
 from typing import List, Set
-import unittest
-
 
 verbose = False
 
@@ -112,25 +111,25 @@ class SingleHeaderFile:
                 continue
 
             # find enum class, if it doesn't exist, just ignore
-            enum_index = line.find('enum class')
+            enum_index = line.find("enum class")
             if enum_index == -1:
                 continue
 
             # ok, so now we have an enum class, but we can get rid of the enum class portion
-            enum_name = line[enum_index + 11:].strip()
+            enum_name = line[enum_index + 11 :].strip()
 
             # find open brace, if it doesn't exist, assume it's on the next line
-            open_brace_index = enum_name.find('{')
+            open_brace_index = enum_name.find("{")
             if open_brace_index != -1:
                 enum_name = enum_name[:open_brace_index]
 
             # find enum subtype specifier, if it doesn't exist, assume it's on the next line
-            type_delimiter_index = enum_name.find(':')
+            type_delimiter_index = enum_name.find(":")
             if type_delimiter_index != -1:
                 enum_name = enum_name[:type_delimiter_index].strip()
 
             # finally, if this is an enum class forward declaration, we should skip it
-            if enum_name.endswith(';'):
+            if enum_name.endswith(";"):
                 continue
 
             self.enum_declarations.append(EnumDeclaration(self.full_path, idx, enum_name))
@@ -178,7 +177,7 @@ class EnumScopeEvaluator:
                 if "//" in line:
                     tokens = line.split("//")
                     line = tokens[0].strip()
-                if "::" not in line and ' ' not in line:
+                if "::" not in line and " " not in line:
                     line = ""  # ignore lines without namespace qualifier to save space for later searching
                 new_lines.append(line.strip())
             self.all_source_file_contents[file] = new_lines
@@ -203,7 +202,9 @@ class EnumScopeEvaluator:
                 for u in e.usages:
                     unique_files_in_usages.add(u.file_path.name)
                 if len(unique_files_in_usages) == 1:
-                    apparent_enums_in_only_one_source_file.append(f"{e.describe()} in {next(iter(unique_files_in_usages))}")
+                    apparent_enums_in_only_one_source_file.append(
+                        f"{e.describe()} in {next(iter(unique_files_in_usages))}"
+                    )
 
         if verbose:
             print("Reporting results")
@@ -220,20 +221,20 @@ class EnumScopeEvaluator:
 
     def check_single_line_for_usage(self, file_path: Path, line_num: int, line: str):
         # search for usages of Enum:: first
-        for match in finditer(r'(\w*::)', line):
+        for match in finditer(r"(\w*::)", line):
             g = match.group(1)
-            if g != 'std::':
+            if g != "std::":
                 scope = g[:-2]
                 for e in self.all_enum_declarations:
                     if e.enum_name == scope:
                         e.usages.append(PotentialUsage(file_path, line_num, line))
         # also search for declarations of the enum type as in EnumType e;
-        if ' ' in line:
+        if " " in line:
             for e in self.all_enum_declarations:
                 if f"{e.enum_name} " in line:
                     e.usages.append(PotentialUsage(file_path, line_num, line))
         # finally it might also be used as a template type:
-        if '>' in line:
+        if ">" in line:
             for e in self.all_enum_declarations:
                 if f"{e.enum_name}>" in line:
                     e.usages.append(PotentialUsage(file_path, line_num, line))
@@ -246,7 +247,7 @@ class TestEnumStuff(unittest.TestCase):
         e.check_single_line_for_usage(
             Path(),
             0,
-            "state.dataSurface->SurfOutConvClassification(SurfNum) = ConvectionConstants::OutConvClass::RoofStable;"
+            "state.dataSurface->SurfOutConvClassification(SurfNum) = ConvectionConstants::OutConvClass::RoofStable;",
         )
         self.assertEqual(1, len(e.all_enum_declarations))
         self.assertEqual(1, len(e.all_enum_declarations[0].usages))
@@ -268,7 +269,7 @@ class TestEnumStuff(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    if len(argv) > 1 and argv[1] == 'test':
+    if len(argv) > 1 and argv[1] == "test":
         del argv[1:]
         unittest.main(exit=False, verbosity=0)
     root_path = Path(__file__).parent.parent.parent

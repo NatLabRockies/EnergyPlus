@@ -54,14 +54,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import io  # For Python 2 compat
 import json
 import os
-import io  # For Python 2 compat
 import sys
 
 DIRS_TO_SKIP = [
-    '.git', 'build', 'builds', 'cmake-build-debug',
-    'cmake-build-release', 'design', 'release',
+    ".git",
+    "build",
+    "builds",
+    "cmake-build-debug",
+    "cmake-build-release",
+    "design",
+    "release",
 ]
 
 # these CC files purposefully have bad characters
@@ -73,12 +78,10 @@ FILE_NAMES_TO_SKIP = [
 
 # tex files are included here, but the docs folder is ignored,
 # so it has no effect right now
-FILE_PATTERNS = [
-    '.cc', '.hh', '.tex', '.cpp', '.hpp', '.idd'
-]
+FILE_PATTERNS = [".cc", ".hh", ".tex", ".cpp", ".hpp", ".idd"]
 
 current_script_dir = os.path.dirname(os.path.realpath(__file__))
-repo_root = os.path.abspath(os.path.join(current_script_dir, '..', '..'))
+repo_root = os.path.abspath(os.path.join(current_script_dir, "..", ".."))
 full_path_dirs_to_skip = [os.path.join(repo_root, d) for d in DIRS_TO_SKIP]
 
 num_warnings = 0
@@ -97,44 +100,46 @@ for root, dirs, filenames in os.walk(repo_root):
 
         # High level check: try to open the file as utf-8 in full
         try:
-            with io.open(file_path, encoding='utf-8',
-                         errors='strict') as f_idf:
+            with io.open(file_path, encoding="utf-8", errors="strict") as f_idf:
                 idf_text = f_idf.read()
         except UnicodeDecodeError:
-            ci_msg = {'tool': 'verify_file_encodings',
-                      'filename': filename,
-                      'file': relative_file_path,
-                      'messagetype': 'error',
-                      'message': ("{} isn't UTF-8 encoded"
-                                  "".format(relative_file_path))
-                      }
+            ci_msg = {
+                "tool": "verify_file_encodings",
+                "filename": filename,
+                "file": relative_file_path,
+                "messagetype": "error",
+                "message": ("{} isn't UTF-8 encoded" "".format(relative_file_path)),
+            }
             print(json.dumps(ci_msg))
             num_errors += 1
 
             # Now you try to give a better error message by pointing at the
             # lines that are guilty. To do so, you open as binary, and try to
             # decode each line as utf-8
-            with io.open(file_path, 'rb') as f_idf:
+            with io.open(file_path, "rb") as f_idf:
                 binary_lines = f_idf.readlines()
 
             for line_num, line in enumerate(binary_lines):
                 try:
-                    line.decode(encoding='utf-8', errors='strict')
+                    line.decode(encoding="utf-8", errors="strict")
                     # codecs.decode(line, encoding='utf-8', errors='strict')
                 except (UnicodeDecodeError, UnicodeEncodeError):
-                    _l = line.decode(encoding='utf-8', errors='replace')
+                    _l = line.decode(encoding="utf-8", errors="replace")
 
                     # line contains non-utf8 character
-                    print(json.dumps({
-                        'tool': 'check_non_utf8',
-                        'filename': relative_file_path,
-                        'file': relative_file_path,
-                        'line': line_num,
-                        'messagetype': 'warning',
-                        # " {}".format(_l)) # only works python3
-                        'message': ("Line has invalid characters/encoding: " +
-                                    _l)
-                    }))
+                    print(
+                        json.dumps(
+                            {
+                                "tool": "check_non_utf8",
+                                "filename": relative_file_path,
+                                "file": relative_file_path,
+                                "line": line_num,
+                                "messagetype": "warning",
+                                # " {}".format(_l)) # only works python3
+                                "message": ("Line has invalid characters/encoding: " + _l),
+                            }
+                        )
+                    )
                     num_warnings += 1
 
 if num_errors + num_warnings > 0:

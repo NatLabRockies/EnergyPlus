@@ -75,22 +75,24 @@ class SuppCoilSpeedControl(EnergyPlusPlugin):
 
             # get variable handles if needed
             if self.need_to_get_handles:
-                self.zone_air_temp_handle = self.api.exchange.get_variable_handle(state,
-                                                                                  "Zone Air Temperature",
-                                                                                  "LIVING ZONE")
+                self.zone_air_temp_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Air Temperature", "LIVING ZONE"
+                )
 
-                self.heating_setpoint_handle = self.api.exchange.get_variable_handle(state,
-                                                                                     "Zone Thermostat Heating Setpoint Temperature",
-                                                                                     "LIVING ZONE")
+                self.heating_setpoint_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Thermostat Heating Setpoint Temperature", "LIVING ZONE"
+                )
 
-                self.coil_speed_level_handle = self.api.exchange.get_actuator_handle(state,
-                                                                                     "Coil Speed Control",
-                                                                                     "Unitary System Supplemental Coil Stage Level",
-                                                                                     "TWOSPEED HEAT PUMP 1")
+                self.coil_speed_level_handle = self.api.exchange.get_actuator_handle(
+                    state, "Coil Speed Control", "Unitary System Supplemental Coil Stage Level", "TWOSPEED HEAT PUMP 1"
+                )
 
-
-                self.coil_speed_override_report_handle = self.api.exchange.get_global_handle(state, "CoilSpeedLevelOverrideReport")
-                self.coil_speed_override_value_handle = self.api.exchange.get_global_handle(state, "CoilSpeedLevelOverrideValue")
+                self.coil_speed_override_report_handle = self.api.exchange.get_global_handle(
+                    state, "CoilSpeedLevelOverrideReport"
+                )
+                self.coil_speed_override_value_handle = self.api.exchange.get_global_handle(
+                    state, "CoilSpeedLevelOverrideValue"
+                )
 
                 self.need_to_get_handles = False
 

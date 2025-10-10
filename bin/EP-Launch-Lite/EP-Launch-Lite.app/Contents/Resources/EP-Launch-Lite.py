@@ -1,7 +1,6 @@
 import os
 
 import gtk
-
 from EPLaunchLite.EPLaunchLiteWindow import Window
 from EPLaunchLite.Settings import load_settings, save_settings
 

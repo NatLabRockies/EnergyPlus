@@ -55,9 +55,9 @@
 
 import os
 import sys
-from typing import TextIO, Set, Tuple
 import unittest
-from math import log10, floor
+from math import floor, log10
+from typing import Set, TextIO, Tuple
 
 """Processes a diff between DD and ReverseDD runs, returning 0 for match and 1 for differences or error"""
 
@@ -72,14 +72,14 @@ def process_command_arguments() -> str:
 
 def configure_root_dirs(test_dir: str) -> Tuple[str, str]:
     """Set up the test directories based on prescribed names"""
-    return os.path.join(test_dir, 'Regular'), os.path.join(test_dir, 'Reversed')
+    return os.path.join(test_dir, "Regular"), os.path.join(test_dir, "Reversed")
 
 
 def configure_paths(b_dir: str, r_dir: str, filename: str) -> Tuple[str, str]:
     """Set all the relative file paths for the base, reversed, and reverse-backup files"""
     return (
-        os.path.join(b_dir, f'{filename}.csv'),
-        os.path.join(r_dir, f'{filename}.csv'),
+        os.path.join(b_dir, f"{filename}.csv"),
+        os.path.join(r_dir, f"{filename}.csv"),
     )
 
 
@@ -105,7 +105,7 @@ def get_processed_rows(file_object: TextIO) -> Set[str]:
             rows.add(li)
             continue
         tokens = []
-        for i, v in enumerate(li.split(',')):
+        for i, v in enumerate(li.split(",")):
             if i == 0:
                 tokens.append(v)
             try:
@@ -114,7 +114,7 @@ def get_processed_rows(file_object: TextIO) -> Set[str]:
                 tokens.append(rounded)
             except ValueError:
                 continue
-        rows.add(','.join([str(x) for x in tokens]))
+        rows.add(",".join([str(x) for x in tokens]))
     return rows
 
 
@@ -153,8 +153,8 @@ def main():
     base_dir, reversed_dir = configure_root_dirs(reverse_dd_test_dir)
 
     # configure paths for both csv and mtr outputs
-    base_csv, reversed_csv = configure_paths(base_dir, reversed_dir, 'eplusout')
-    base_mtr, rev_mtr = configure_paths(base_dir, reversed_dir, 'eplusmtr')
+    base_csv, reversed_csv = configure_paths(base_dir, reversed_dir, "eplusout")
+    base_mtr, rev_mtr = configure_paths(base_dir, reversed_dir, "eplusmtr")
 
     if both_csv_files_missing(base_csv, reversed_csv):
         return 0  # assume everything is fine if the CSV is missing in *both* builds
@@ -175,6 +175,6 @@ if __name__ == "__main__":
 
 class Test1(unittest.TestCase):
     def test_function(self):
-        f1 = '/eplus/repos/8eplus/builds/r/testfiles_ReverseDD/1ZoneUncontrolled/Regular/eplusout.csv'
-        f2 = '/eplus/repos/8eplus/builds/r/testfiles_ReverseDD/1ZoneUncontrolled/Reversed/eplusout.csv'
+        f1 = "/eplus/repos/8eplus/builds/r/testfiles_ReverseDD/1ZoneUncontrolled/Regular/eplusout.csv"
+        f2 = "/eplus/repos/8eplus/builds/r/testfiles_ReverseDD/1ZoneUncontrolled/Reversed/eplusout.csv"
         self.assertTrue(files_match(f1, f2))

@@ -108,26 +108,25 @@
 # These are both pretty awful and need to be improved, and it would help if the
 # exclusions were uniform.
 
-import licensetext
 import argparse
 
-parser = argparse.ArgumentParser(description='Update the E+ license year.')
-parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                    default=False, help='operate verbosely')
+import licensetext
+
+parser = argparse.ArgumentParser(description="Update the E+ license year.")
+parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="operate verbosely")
 # Maybe next year
-#parser.add_argument('--update', dest='dryrun', action='store_false',
+# parser.add_argument('--update', dest='dryrun', action='store_false',
 #                    default=True, help='update the license year')
 
 args = parser.parse_args()
 
-TOOL_NAME = 'license-update'
+TOOL_NAME = "license-update"
 dryrun = True
 
 #
 # Directories to check
 #
-cpp_dirs = ["./src/",
-            "./tst/EnergyPlus/"]
+cpp_dirs = ["./src/", "./tst/EnergyPlus/"]
 python_dirs = ["./"]
 
 # Get the C++ current text
@@ -140,15 +139,14 @@ licensetxt = licensetext.merge_paragraphs(current)
 full_count = 0
 
 if not dryrun:
-    print('Writing out LICENSE.txt')
+    print("Writing out LICENSE.txt")
     filename = "LICENSE.txt"
-    fp = open(filename, 'w')
+    fp = open(filename, "w")
     fp.write(licensetxt)
     fp.close()
     full_count += 1
 else:
-    print('Skipping writing out LICENSE.txt')
-
+    print("Skipping writing out LICENSE.txt")
 
 
 # Create C++ Replacer object
@@ -158,7 +156,7 @@ replacer = licensetext.Replacer(previous, current, dryrun=dryrun)
 for base in cpp_dirs:
     replacer.visit(base)
 
-print('\nC++ Summary')
+print("\nC++ Summary")
 print(replacer.summary())
 full_count += len(replacer.replaced)
 
@@ -167,17 +165,21 @@ current = licensetext.current_python()
 previous = licensetext.previous_python()
 
 # Create Python Replacer object
-replacer = licensetext.Replacer(previous, current, extensions=['py'],
-                                dryrun=dryrun)
+replacer = licensetext.Replacer(previous, current, extensions=["py"], dryrun=dryrun)
 
 # Check Python files
-patterns = [r'.*third_party.*', r'^\.(\\|/)build.*',
-            r'^\.(\\|/)bin.*', r'.*readthedocs.*',
-            r'.*venv.*', r'.*cmake-build-.*']
+patterns = [
+    r".*third_party.*",
+    r"^\.(\\|/)build.*",
+    r"^\.(\\|/)bin.*",
+    r".*readthedocs.*",
+    r".*venv.*",
+    r".*cmake-build-.*",
+]
 for base in python_dirs:
     replacer.visit(base, exclude_patterns=patterns)
 
-print('\nPython Summary')
+print("\nPython Summary")
 print(replacer.summary(full_report=args.verbose))
 full_count += len(replacer.replaced)
-print('\nFull count of files: %d' % full_count)
+print("\nFull count of files: %d" % full_count)

@@ -82,7 +82,7 @@ if not os.path.exists(build_dir):
 gcda_files_to_delete = []
 all_gcda_files = []
 for root, _, filenames in os.walk(build_dir):
-    for filename in fnmatch.filter(filenames, '*.gcda'):
+    for filename in fnmatch.filter(filenames, "*.gcda"):
         all_gcda_files.append(os.path.join(root, filename))
         if excluded_pattern and excluded_pattern.lower() in filename.lower():
             continue

@@ -114,7 +114,7 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
             "HVACInterfaceManager.cc:UpdateType",
             "DataHeatBalance.hh:PERptVars",
             "EconomicTariff.hh:StepType",
-            "LowTempRadiantSystem.hh:OpMode"
+            "LowTempRadiantSystem.hh:OpMode",
         ]
         if f"{file_name}:{name}" not in exceptions:
             error_str += "\tMissing 'Invalid' at position 0\n"
@@ -122,9 +122,7 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
     # check for null value = -1 at 0-th position
     if keys_uc[0] in valid_null_enum_value_names and values[0] != -1:
         # exceptions listed by <FILE>:<ENUM NAME>
-        exceptions = [
-            "HVACInterfaceManager.cc:UpdateType"
-        ]
+        exceptions = ["HVACInterfaceManager.cc:UpdateType"]
         if f"{file_name}:{name}" not in exceptions:
             error_str += f"\t{keys_uc[0]} must = -1\n"
 
@@ -135,7 +133,7 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
             "HVACInterfaceManager.cc:UpdateType",
             "IdfParser.hh:Token",
             "EconomicTariff.hh:StepType",
-            "LowTempRadiantSystem.hh:OpMode"
+            "LowTempRadiantSystem.hh:OpMode",
         ]
         if f"{file_name}:{name}" not in exceptions:
             error_str += "\tMissing 'Num' at position N\n"
@@ -155,8 +153,10 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
     if str(name[0]).islower():
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = [
-            "DataGlobalConstants.hh:eResource", "DataGlobalConstants.hh:eFuel",
-            "DataGlobalConstants.hh:ePollutant", "OutputProcessor.hh:eResourceSOV"
+            "DataGlobalConstants.hh:eResource",
+            "DataGlobalConstants.hh:eFuel",
+            "DataGlobalConstants.hh:ePollutant",
+            "OutputProcessor.hh:eResourceSOV",
         ]
         if f"{file_name}:{name}" not in exceptions:
             error_str += "\tenum name must begin with upper case letter\n"
@@ -171,7 +171,11 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
             error_str += "\tenum keys must begin with upper case letter\n"
 
     if difflib.get_close_matches(name, keys, cutoff=0.7):
-        exceptions = ["DataGlobalConstants.hh:HeatOrCool", "DataHVACGlobals.hh:UnitarySysType", "DataGenerators.hh:WaterTempMode"]
+        exceptions = [
+            "DataGlobalConstants.hh:HeatOrCool",
+            "DataHVACGlobals.hh:UnitarySysType",
+            "DataGenerators.hh:WaterTempMode",
+        ]
         if f"{file_name}:{name}" not in exceptions:
             error_str += "\tenum keys are too similar to enum name\n"
 
@@ -212,7 +216,7 @@ def find_enums(search_path: Path) -> int:
             with open(file, "r") as f:
                 lines = f.readlines()
         except UnicodeDecodeError:
-            with open(file, "r", encoding='utf-8') as f:
+            with open(file, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
         lines = [x.strip() for x in lines]
@@ -276,7 +280,7 @@ class TestProcessEnums(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
         unittest.main(exit=False, verbosity=0)
     root_path = Path(__file__).parent.parent.parent

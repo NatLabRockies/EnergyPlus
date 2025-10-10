@@ -54,16 +54,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import json
+import multiprocessing
 import os
 import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy, rmtree
 from traceback import print_exc
 from zoneinfo import ZoneInfo
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from energyplus_regressions.builds.base import BuildTree
 from energyplus_regressions.runtests import SuiteRunner

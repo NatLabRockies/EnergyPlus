@@ -76,7 +76,9 @@ class CalculateAverageTrend(EnergyPlusPlugin):
                 handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", zone_name)
                 zone_volume = self.api.exchange.get_internal_variable_value(state, handle)
                 self.zone_volumes.append(zone_volume)
-                self.t_handles.append(self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", zone_name))
+                self.t_handles.append(
+                    self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", zone_name)
+                )
             self.avg_temp_variable_handle = self.api.exchange.get_global_handle(state, "AverageBuildingTemp")
             self.trend_avg_var_handle = self.api.exchange.get_global_handle(state, "TrendAverageTemp")
             self.one_time = False

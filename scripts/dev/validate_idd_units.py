@@ -62,7 +62,6 @@ import json
 import os
 import sys
 
-
 # There are some missing units in a large number of fields.
 # I don't really want to add an ignore list, but I don't want to fix them all at the moment, either.
 # Thus, here is an ignore list.  To fix these up, you could add these to the 'not-translated units' section.
@@ -90,8 +89,8 @@ class Problem:
 
 
 current_script_dir = os.path.dirname(os.path.realpath(__file__))
-idd_file = os.path.join(current_script_dir, '..', '..', 'idd', 'Energy+.idd.in')
-idd_lines = codecs.open(idd_file, encoding='utf-8', errors='ignore').readlines()
+idd_file = os.path.join(current_script_dir, "..", "..", "idd", "Energy+.idd.in")
+idd_lines = codecs.open(idd_file, encoding="utf-8", errors="ignore").readlines()
 
 original_units = []
 reading_mode = ReadingMode.FindTranslatedUnits
@@ -115,28 +114,36 @@ for line in idd_lines:
         else:
             reading_mode = ReadingMode.ScanFieldUnits
     elif reading_mode == ReadingMode.ScanFieldUnits:
-        if '\\units ' in line:
+        if "\\units " in line:
             tokens = line.split(" ")
             real_tokens = [t for t in tokens if t]
             if not len(real_tokens) == 2 and warn_for_bad_unit_tokens:
-                print(json.dumps({
-                    'tool': 'validate_idd_units.py',
-                    'filename': '/idd/Energy+.idd.in',
-                    'file': '/idd/Energy+.idd.in',
-                    'line': line_num,
-                    'messagetype': 'warning',
-                    'message': "Unexpected number of unit specifications"
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "tool": "validate_idd_units.py",
+                            "filename": "/idd/Energy+.idd.in",
+                            "file": "/idd/Energy+.idd.in",
+                            "line": line_num,
+                            "messagetype": "warning",
+                            "message": "Unexpected number of unit specifications",
+                        }
+                    )
+                )
                 num_issues_found += 1
             elif real_tokens[1] not in original_units and real_tokens[1] not in ignore_list:
-                print(json.dumps({
-                    'tool': 'validate_idd_units.py',
-                    'filename': '/idd/Energy+.idd.in',
-                    'file': '/idd/Energy+.idd.in',
-                    'line': line_num,
-                    'messagetype': 'warning',
-                    'message': "Unexpected unit type found: " + real_tokens[1]
-                }))
+                print(
+                    json.dumps(
+                        {
+                            "tool": "validate_idd_units.py",
+                            "filename": "/idd/Energy+.idd.in",
+                            "file": "/idd/Energy+.idd.in",
+                            "line": line_num,
+                            "messagetype": "warning",
+                            "message": "Unexpected unit type found: " + real_tokens[1],
+                        }
+                    )
+                )
                 num_issues_found += 1
 
 if num_issues_found > 0:

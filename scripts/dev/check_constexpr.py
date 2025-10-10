@@ -57,8 +57,8 @@
 import os
 import re
 import sys
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 sci_notation_str = r"[+-]?\d+\.?(\d+)?e[+-]?\d+"
 sci_notation_pattern = re.compile(sci_notation_str)
@@ -66,7 +66,9 @@ sci_notation_pattern = re.compile(sci_notation_str)
 int_real_str = r"[+-]?\d+\.?(\d+)?"
 int_real_pattern = re.compile(int_real_str)
 
-const_type_str = r"(const int|int const|const bool|bool const|const Real64|Real64 const|const double|double const)(?!(expr))"
+const_type_str = (
+    r"(const int|int const|const bool|bool const|const Real64|Real64 const|const double|double const)(?!(expr))"
+)
 const_type_pattern = re.compile(const_type_str)
 
 var_name_str = r"[_a-zA-Z][_a-zA-Z0-9]*"
@@ -133,7 +135,7 @@ class TestMatching(unittest.TestCase):
             "static Array2D_bool const A(",
             "static Array2D_bool const Abc(",
             "static Array2D_double const A(",
-            "static Array2D_double const Abc("
+            "static Array2D_double const Abc(",
         ]
         for y in yes_match:
             self.assertTrue(re.match(array_us_const_pattern, y))
@@ -150,7 +152,7 @@ class TestMatching(unittest.TestCase):
             "static Array2D_bool A(",
             "static Array2D_bool Abc(",
             "static Array2D_double A(",
-            "static Array2D_double Abc("
+            "static Array2D_double Abc(",
         ]
         for n in no_match:
             self.assertFalse(re.match(array_us_const_pattern, n))
@@ -181,7 +183,7 @@ class TestMatching(unittest.TestCase):
             "static Array2D<bool> const A(",
             "static Array2D<bool> const Abc(",
             "static Array2D<double> const A(",
-            "static Array2D<double> const Abc("
+            "static Array2D<double> const Abc(",
         ]
         for y in yes_match:
             self.assertTrue(re.match(array_const_pattern, y))
@@ -198,7 +200,7 @@ class TestMatching(unittest.TestCase):
             "static Array2D<bool> A(",
             "static Array2D<bool> Abc(",
             "static Array2D<double> A(",
-            "static Array2D<double> Abc("
+            "static Array2D<double> Abc(",
         ]
         for n in no_match:
             self.assertFalse(re.match(array_const_pattern, n))
@@ -215,11 +217,7 @@ class TestMatching(unittest.TestCase):
 
     def test_const_num(self):
         # match these
-        yes_match = [
-            "const int VarName = 1;",
-            "const int VarName(1);",
-            "const int A(1);"
-        ]
+        yes_match = ["const int VarName = 1;", "const int VarName(1);", "const int A(1);"]
         for y in yes_match:
             self.assertTrue(re.match(const_num_pattern, y))
         # don't match these
@@ -227,7 +225,7 @@ class TestMatching(unittest.TestCase):
             "Real64 constexpr VarName = 1.e1;",
             "constexpr int VarName = 1;",
             "Real64 constexpr VarName(1.e1);",
-            "constexpr int VarName(1);"
+            "constexpr int VarName(1);",
         ]
         for n in no_match:
             self.assertFalse(re.match(const_num_pattern, n))
@@ -266,15 +264,12 @@ class TestMatching(unittest.TestCase):
             "Real64 const VarName = 1;",
             "Real64 const VarName = 1.0;",
             "Real64 const VarName = 1.0e1;",
-            "Real64 const VarName = 1.e1;"
+            "Real64 const VarName = 1.e1;",
         ]
         for y in yes_match:
             self.assertTrue(re.match(const_num_equal_pattern, y))
         # don't match these
-        no_match = [
-            "Real64 constexpr VarName = 1.e1;",
-            "constexpr int VarName = 1;"
-        ]
+        no_match = ["Real64 constexpr VarName = 1.e1;", "constexpr int VarName = 1;"]
         for n in no_match:
             self.assertFalse(re.match(const_num_equal_pattern, n))
 
@@ -312,15 +307,12 @@ class TestMatching(unittest.TestCase):
             "Real64 const VarName(1);",
             "Real64 const VarName(1.0);",
             "Real64 const VarName(1.0e1);",
-            "Real64 const VarName(1.e1);"
+            "Real64 const VarName(1.e1);",
         ]
         for y in yes_match:
             self.assertTrue(re.match(const_num_paren_pattern, y))
         # don't match these
-        no_match = [
-            "Real64 constexpr VarName(1.e1);",
-            "constexpr int VarName(1);"
-        ]
+        no_match = ["Real64 constexpr VarName(1.e1);", "constexpr int VarName(1);"]
         for n in no_match:
             self.assertFalse(re.match(const_num_paren_pattern, n))
 
@@ -334,16 +326,12 @@ class TestMatching(unittest.TestCase):
             "_VarName123",
             "VarName123",
             "VarName123_",
-            "_VarName123_"
+            "_VarName123_",
         ]
         for y in yes_match:
             self.assertTrue(re.match(var_name_pattern, y))
         # don't match these
-        no_match = [
-            "123",
-            "9.81",
-            "9.81e0"
-        ]
+        no_match = ["123", "9.81", "9.81e0"]
         for n in no_match:
             self.assertFalse(re.match(var_name_pattern, n))
 
@@ -357,7 +345,7 @@ class TestMatching(unittest.TestCase):
             "int const",
             "bool const",
             "double const",
-            "Real64 const"
+            "Real64 const",
         ]
         for y in yes_match:
             self.assertTrue(re.match(const_type_pattern, y))
@@ -370,28 +358,18 @@ class TestMatching(unittest.TestCase):
             "int constexpr",
             "bool constexpr",
             "double constexpr",
-            "Real64 constexpr"
+            "Real64 constexpr",
         ]
         for n in no_match:
             self.assertFalse(re.match(const_type_pattern, n))
 
     def test_int_real(self):
         # match these
-        yes_match = [
-            "1",
-            "+1",
-            "-1",
-            "1.0",
-            "+1.0",
-            "-1.0"
-        ]
+        yes_match = ["1", "+1", "-1", "1.0", "+1.0", "-1.0"]
         for y in yes_match:
             self.assertTrue(re.match(int_real_pattern, y))
             # don't match these
-        no_match = [
-            "Var",
-            "Var123"
-        ]
+        no_match = ["Var", "Var123"]
         for n in no_match:
             self.assertFalse(re.match(int_real_pattern, n))
 
@@ -415,14 +393,12 @@ class TestMatching(unittest.TestCase):
             "+9.e+0",
             "-9.e0",
             "-9.e-0",
-            "-9.e+0"
+            "-9.e+0",
         ]
         for y in yes_match:
             self.assertTrue(re.match(sci_notation_pattern, y))
             # don't match these
-        no_match = [
-            "VarName"
-        ]
+        no_match = ["VarName"]
         for n in no_match:
             self.assertFalse(re.match(sci_notation_pattern, n))
 
@@ -484,7 +460,7 @@ def constexpr_check(search_path: Path) -> int:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
         unittest.main(exit=False, verbosity=0)
     root_path = Path(__file__).parent.parent.parent

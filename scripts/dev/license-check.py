@@ -54,19 +54,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import licensetext
-import sys
 import os
+import sys
 
-TOOL_NAME = 'license-check'
+import licensetext
+
+TOOL_NAME = "license-check"
 # Switch to more human-friendly output
 licensetext.report_error = licensetext.error_for_humans
 
 #
 # Directories to check
 #
-cpp_dirs = ["./src/",
-            "./tst/EnergyPlus/"]
+cpp_dirs = ["./src/", "./tst/EnergyPlus/"]
 
 python_dirs = ["./"]
 
@@ -81,9 +81,7 @@ fp = open(filename)
 filetxt = fp.read()
 fp.close()
 # Compare the two strings
-base_license_text_success = licensetext.check_license('LICENSE.txt', filetxt,
-                                                      licensetxt,
-                                                      toolname=TOOL_NAME)
+base_license_text_success = licensetext.check_license("LICENSE.txt", filetxt, licensetxt, toolname=TOOL_NAME)
 
 # Create C++ Checker object
 checker = licensetext.Checker(current, toolname=TOOL_NAME)
@@ -96,23 +94,27 @@ for base in cpp_dirs:
         cpp_file_license_success = False
 
 # Create Python Checker object
-checker = licensetext.Checker(licensetext.current_python(), offset=2,
-                              extensions=['py'], toolname=TOOL_NAME,
-                              shebang=True, empty_passes=True)
+checker = licensetext.Checker(
+    licensetext.current_python(), offset=2, extensions=["py"], toolname=TOOL_NAME, shebang=True, empty_passes=True
+)
 
 # Check files
 python_file_license_success = True
-patterns = [r'.*third_party.*', r'^\.(\\|/)build.*',
-            r'^\.(\\|/)bin.*', r'.*readthedocs.*',
-            r'.*venv.*', r'.*cmake-build-.*',
-            r'.*colorize_cppcheck_results.py.*']
+patterns = [
+    r".*third_party.*",
+    r"^\.(\\|/)build.*",
+    r"^\.(\\|/)bin.*",
+    r".*readthedocs.*",
+    r".*venv.*",
+    r".*cmake-build-.*",
+    r".*colorize_cppcheck_results.py.*",
+]
 for base in python_dirs:
     file_success = checker.visit(base, exclude_patterns=patterns)
     if not file_success:
         python_file_license_success = False
 
-if (base_license_text_success and cpp_file_license_success
-   and python_file_license_success):
+if base_license_text_success and cpp_file_license_success and python_file_license_success:
     sys.exit(0)
 else:
     sys.exit(1)

@@ -59,32 +59,31 @@ import os
 import re
 import sys
 
-
 current_script_dir = os.path.dirname(os.path.realpath(__file__))
-test_files_dir = os.path.join(current_script_dir, '..', '..', 'testfiles')
+test_files_dir = os.path.join(current_script_dir, "..", "..", "testfiles")
 
 cmake_lists_file = os.path.join(test_files_dir, "CMakeLists.txt")
 cmake_list_idf_files = set()
 with open(cmake_lists_file) as f:
     contents = f.read()
-    matches = re.findall(r'\(([^)]+)\)', contents, re.MULTILINE)
+    matches = re.findall(r"\(([^)]+)\)", contents, re.MULTILINE)
     for match in matches:
-        if 'IDF_FILE' in match:
-            cleaned_match = match.replace('\n', '')
+        if "IDF_FILE" in match:
+            cleaned_match = match.replace("\n", "")
             tokens = cleaned_match.split()  # special case that allows multiple whitespace delimiters
             filename = tokens[1]
             cmake_list_idf_files.add(filename)
-        elif 'PYTHON_FILE' in match:  # API-based IDF runs
-            cleaned_match = match.replace('\n', '')
+        elif "PYTHON_FILE" in match:  # API-based IDF runs
+            cleaned_match = match.replace("\n", "")
             tokens = cleaned_match.split()  # special case that allows multiple whitespace delimiters
             filename = tokens[1]
-            filename = 'API/' + filename.replace('.py', '.idf')  # assuming the file is named the same as the py file
+            filename = "API/" + filename.replace(".py", ".idf")  # assuming the file is named the same as the py file
             cmake_list_idf_files.add(filename)
 
 found_idf_files = set()
 for root, dirs, files in os.walk(test_files_dir):
     for s_file in files:
-        if s_file.endswith('.idf') or s_file.endswith('.imf'):
+        if s_file.endswith(".idf") or s_file.endswith(".imf"):
             if root == test_files_dir:
                 found_idf_files.add(s_file)
             else:
@@ -92,9 +91,17 @@ for root, dirs, files in os.walk(test_files_dir):
                 found_idf_files.add(os.path.join(folder, s_file))
 
 # there are a few files we purposely skip
-files_to_skip = {"_1a-Long0.0.idf", "_ExternalInterface-actuator.idf", "_ExternalInterface-schedule.idf",
-                 "_ExternalInterface-variable.idf", "HVAC3Zone-IntGains-Def.imf", "HVAC3ZoneChillerSpec.imf",
-                 "HVAC3ZoneGeometry.imf", "HVAC3ZoneMat-Const.imf", "_1ZoneUncontrolled_ForAPITesting.idf"}
+files_to_skip = {
+    "_1a-Long0.0.idf",
+    "_ExternalInterface-actuator.idf",
+    "_ExternalInterface-schedule.idf",
+    "_ExternalInterface-variable.idf",
+    "HVAC3Zone-IntGains-Def.imf",
+    "HVAC3ZoneChillerSpec.imf",
+    "HVAC3ZoneGeometry.imf",
+    "HVAC3ZoneMat-Const.imf",
+    "_1ZoneUncontrolled_ForAPITesting.idf",
+}
 found_idf_files_trimmed = found_idf_files - files_to_skip
 
 # the CMakeLists file will always have "forward" slashes
@@ -109,12 +116,16 @@ for fil in found_idf_files_trimmed:
 need_to_add_to_cmake = found_idf_files_refined.difference(cmake_list_idf_files)
 if len(need_to_add_to_cmake) > 0:
     for this_file in sorted(need_to_add_to_cmake):
-        print(json.dumps({
-            'tool': 'verify_idfs_in_cmake',
-            'filename': this_file,
-            'file': this_file,
-            'line': 0,
-            'messagetype': 'error',
-            'message': 'File missing from testfiles/CMakeLists.txt'
-        }))
+        print(
+            json.dumps(
+                {
+                    "tool": "verify_idfs_in_cmake",
+                    "filename": this_file,
+                    "file": this_file,
+                    "line": 0,
+                    "messagetype": "error",
+                    "message": "File missing from testfiles/CMakeLists.txt",
+                }
+            )
+        )
     sys.exit(1)

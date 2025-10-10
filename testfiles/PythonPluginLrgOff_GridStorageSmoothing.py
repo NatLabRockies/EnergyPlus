@@ -59,7 +59,7 @@ from pyenergyplus.plugin import EnergyPlusPlugin
 class BatteryControlDemandDemo(EnergyPlusPlugin):
 
     def get_handles(self, state):
-        self.data['current_demand'] = self.api.exchange.get_variable_handle(
+        self.data["current_demand"] = self.api.exchange.get_variable_handle(
             state, "Facility Total Electricity Demand Rate", "Whole Building"
         )
         self.data["trend"] = self.api.exchange.get_trend_handle(state, "CurntFacilityElectDemandTrend")
@@ -73,9 +73,11 @@ class BatteryControlDemandDemo(EnergyPlusPlugin):
 
     def handles_are_valid(self):
         handles = [
-            self.data['current_demand'], self.data["trend"],
-            self.data["discharge_rate"], self.data["charge_rate"],
-            self.data["var"]
+            self.data["current_demand"],
+            self.data["trend"],
+            self.data["discharge_rate"],
+            self.data["charge_rate"],
+            self.data["var"],
         ]
         return all([x > -1 for x in handles])
 
@@ -91,10 +93,10 @@ class BatteryControlDemandDemo(EnergyPlusPlugin):
         elif current_facility_elect_demand < (avg_facility_demand * 0.95):
             charge_rate = (avg_facility_demand - current_facility_elect_demand) * dampen_factor
             self.api.exchange.set_actuator_value(state, self.data["charge_rate"], charge_rate)
-        self.api.exchange.set_global_value(state, self.data['var'], current_facility_elect_demand)
+        self.api.exchange.set_global_value(state, self.data["var"], current_facility_elect_demand)
 
     def on_begin_zone_timestep_before_init_heat_balance(self, state) -> int:
-        if 'current_demand' not in self.data or self.data['current_demand'] == -1:
+        if "current_demand" not in self.data or self.data["current_demand"] == -1:
             if not self.api.exchange.api_data_fully_ready(state):
                 return 0
             self.get_handles(state)
