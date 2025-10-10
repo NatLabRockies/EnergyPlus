@@ -225,5 +225,3 @@ DataZoneEquipment.hh
 Instead of CompIndex being used on the call to the Sim function, the compPointer accesses that data and Sim function directly (as long as all model Sim functions are unified with the same arguments). Eventually, CompIndex will no longer be needed.
 
 Now that the VRF terminal unit is allowed in the air loop, it should simply be a matter of inheriting the new class and storing the pointer in the same array previously used only for UnitarySystems. Similar changes to other HVAC equipment can now be made during ongoing refactoring efforts. The good news is that since the UnitarySystem can be used anywhere in the air simulation (i.e., air loops, OA systems, zone equipment, and zone OA units) this new OO method (with the help of reviewers updates) can be used with any HVAC equipment type.
-
-

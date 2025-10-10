@@ -419,4 +419,3 @@ N/A
 Lee, Sang Hoon, and Tianzhen Hong. 2015. Validation Report for the Hybrid Modeling Approach Part 1: Internal Thermal Mass.
 
 Lee, Sang Hoon, and Tianzhen Hong. 2016. Validation of the Hybrid Modeling Using Measured Data from the FLEXLAB Experiment.
-

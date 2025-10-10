@@ -101,6 +101,3 @@ No transition changes are needed since there is no change to the input.  A chang
 ## References ##
 
 Current code in PlantCentralGSHP.cc
-
-
-

@@ -633,4 +633,3 @@ Add component type for 'CoilSystem:Cooling:Water' in Mixed Air
 
     Add component type here
     constexpr int CoilWaterSystems(25);
-

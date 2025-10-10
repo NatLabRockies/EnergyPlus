@@ -158,4 +158,3 @@ DistrictHeatingSteam,
 - Engineering Reference, EnergyPlus™ Version 22.1.0 Documentation
 - Çengel, Yunus A., Robert H. Turner, and John M. Cimbala. 2008. Fundamentals of thermal-fluid sciences. Boston: McGraw-Hill.
 - Rahul J. Chillar. 2005. Development and implementation of a steam loop in the building energy simulation program EnergyPlus. University of Illinois at Urbana-Champaign, Master Thesis
-

@@ -55,4 +55,3 @@ Shift all later fields down by two.
 Field A27 (Tank Element Control Logic) had a typo in previous versions.
 There was a key `MutuallyExlcusive` that should be `MutuallyExclusive`.
 This is field F35.  So the transition is simply to check if the typo version was there and replace it.
-

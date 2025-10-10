@@ -37,4 +37,3 @@ A new example file built upon the existing file, `UnitarySystem_MultiSpeedDX.idf
 ## Email Discussion
 
 The feature and implementation details were based on previous PR comments and discussions during EnergyPlus Technicality calls.
-

@@ -1079,5 +1079,3 @@ Heating
 #### CalcVRF ####
 
 When multiple speed fan is applied, a for loop will be used to test which speed is used for the terminal unit. The procedure mimics one from HVACAirToAirHeatPump:MUltispeed.
-
-

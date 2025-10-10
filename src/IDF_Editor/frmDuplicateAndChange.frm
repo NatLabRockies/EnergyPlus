@@ -82,6 +82,3 @@ Private Sub cmdCancel_Click()
 replaceTerm = "" ' return a blank if canceled by user
 Unload Me
 End Sub
-
-
-

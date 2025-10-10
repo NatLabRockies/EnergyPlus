@@ -263,6 +263,3 @@ While the object is changing name from WindowProperty:ShadingControl to WindowSh
 The DayltgInteriorIllum() function is in DaylightingManager.cc is the main function to be updated to support the new ordered window shading controls. The function will be modified to traverse the list of SurfaceWindows in an order established by the revised objects. A sort of the WindowShadingControl objects will be made once based on the Shading Control Sequence Number during GetInput and not repeated during timestep simulation.
 
 Testing will be done by comparing the results on a timestep basis with develop for buildings with multiple window shades.
-
-
-

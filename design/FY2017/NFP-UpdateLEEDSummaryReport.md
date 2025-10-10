@@ -1384,6 +1384,3 @@ The end use subcategory fields will be updated.
 ## References ##
 
 v4_Minimum Energy Performance Calculator_v04.xlsm
-
-
-

@@ -12,4 +12,3 @@ Task List:
 * Move EnergyPlusBuildSupport / release / Report Variables X1.Y1.Z1 to X2.Y2.Z2.csv to EnergyPlusBuildSupport / bin / IDFVersionUpdater / ReportVars, where the version represents the major releases.
 * Create a new ReportVariables...csv files named according to the upcoming major release and prevous major release.  Place new file in EnergyPlusBuildSupport / release.
 * Update install commands for previous major version IDD as well as ReportVariables...csv located in EnergyPlusTeam / CPack.cmake, so that new upcoming major version is reflected.
-

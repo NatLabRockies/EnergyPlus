@@ -589,4 +589,3 @@ Add 3 members with default values to handle new fields
 		bool NonRectangular( false ); // True if this surface is not rectangular
 		int EquivRecMethod( 1 ); // Equivalent Rectangle Method input: 1 Height; 2 Base surface aspect ratio; 3 User input aspect ratio
 		Real64 EquivRecUserAspectRatio( 1.0 ); // user input value when EquivRecMethod = 3
-

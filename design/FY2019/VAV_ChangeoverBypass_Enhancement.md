@@ -115,8 +115,3 @@ Transition will not be required.
 
 
 ## References ##
-
-
-
-
-

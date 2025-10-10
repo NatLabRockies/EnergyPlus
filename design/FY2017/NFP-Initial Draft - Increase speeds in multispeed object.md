@@ -318,4 +318,3 @@ Same as draft NFP
     3) Test that number of speeds < 10 works with modified IDD
     4) Test input file without UnitarySystemPerformance:Multispeed object (should already work).
     5) Test use of UnitarySystemPerformance:Multispeed object with 10-spd DX coil object
-

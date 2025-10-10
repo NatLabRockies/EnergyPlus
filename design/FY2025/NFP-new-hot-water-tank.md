@@ -402,4 +402,3 @@ The feature will be tested and demonstrated with a test file derived from the Pl
 
 [1] Gill, B. (2021). Solving the Large Building All-Electric Heating Problem. ASHRAE Journal, 63(10).
 [2] Lawrence Berkeley National Laboratory. (n.d.). Buildings.Fluid.Storage.UsersGuide. Simulation Research Group. Retrieved [2025-04-11], from https://simulationresearch.lbl.gov/modelica/releases/v10.0.0/help/Buildings_Fluid_Storage_UsersGuide.html#Buildings.Fluid.Storage.UsersGuide
-

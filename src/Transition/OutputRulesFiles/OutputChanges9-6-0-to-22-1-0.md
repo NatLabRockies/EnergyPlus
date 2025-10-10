@@ -178,4 +178,3 @@ One line is added to the EIO sizing report regarding the central exhaust fan "De
 - FanName, FanType, "Design Fan Airflow [m3/s]", Design Flow Rate Value
 
 See pull request [#9209](https://github.com/NREL/EnergyPlus/pull/9209) for more details.
-

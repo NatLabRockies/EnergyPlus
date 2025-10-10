@@ -225,4 +225,3 @@ This will follow the pattern set out by objects such as the ```ZoneHVAC:Baseboar
 Since the new duct view factor object described here and in the NFP are intended as a *first* step at evaluating the effects of duct radiation, no major refactorization will occur during this phase of the project. If in subsequent phases duct radiation view factors are to be calculated automatically by EnergyPlus, refactorization of the surface heat balance and airflow network will be further evaluated. Converting some of the affected list of component types, as shown [here](https://github.com/NREL/EnergyPlus/blob/ea65c6e0c28a9e40c4846062fadfbf198ede5681/src/EnergyPlus/DataAirflowNetwork.cc#L87) to ```enum``` types could be tasked given team support, though little effort for code refactorization is expected.
 
 Lots of spelling errors and end-of-line whitespace--correct those at a minimum.
-

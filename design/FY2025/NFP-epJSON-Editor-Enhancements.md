@@ -130,6 +130,3 @@ N/A
 ## References ##
 
 None.
-
-
-

@@ -344,4 +344,3 @@ There are two types of AirflowNetwork:Distribution:Node. The first type is the n
 The CheckAirLoopIntegrity function will check each linkage first. If the second type node is connected to the first type node in a linkage, the same AirLoopNum will be assigned to the second type node. If both nods are the second type in a link, an AirLoopNum from one of the nodes will be assigned to the other. If both nodes are the second type and no AirLoopNum is assigned in either one, a severe warning will be issued. Then each linkage will be assigned AirLoopNum based node assignments. If both nodes have different AirLoopNums, a severe warning will be issued.
 
 The check will ensure integrity of AirLoopNum assignment, so that each air distribution system will be under the same AirLoopNum .
-

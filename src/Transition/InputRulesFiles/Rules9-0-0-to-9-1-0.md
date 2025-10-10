@@ -17,4 +17,3 @@ Shift all later fields down by 11. The old input fields F6-F9 (N1-N4) become the
 Fields F1-F2 remain the same.
 Each extensible block has 2 numeric fields added to the end of it, making the extensible block 6 items long instead of 4.
 The additional fields can be left empty.
-

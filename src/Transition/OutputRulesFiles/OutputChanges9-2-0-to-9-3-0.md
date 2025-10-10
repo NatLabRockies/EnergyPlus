@@ -251,7 +251,3 @@ that contains the following:
 
 See [7761](https://github.com/NREL/EnergyPlus/pull/7761)
 and the [NFP](https://github.com/energy-plus/EnergyPlus/blob/PerfOverrideAndReporting/design/FY2020/NFP-PerformanceOverRidesAndReporting.md)
-
-
-
-

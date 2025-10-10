@@ -143,4 +143,3 @@ We will using the new airspeed value in E+ implementation. We'll modify the curr
 ## Acknowledgments ##
 
 N/A
-

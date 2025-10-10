@@ -98,8 +98,3 @@ Woods, J., Winkler, J, and Christensen, D. [*Evaluation of the Effective Moistur
 Woods, J., J. Winkler, D. Christensen, E. Hancock, [*Using Whole-House Field Tests to Empirically Derive Moisture Buffering Model Inputs*](http://www.nrel.gov/docs/fy14osti/62456.pdf). NREL/TP-5500-62456, 2014.
 
 Janssen, H. and S. Roels, [*Qualitative and quantitative assessment of interior moisture buffering by enclosures*](http://www.sciencedirect.com/science/article/pii/S0378778808002387), Energ. Buildings. 41 (2009) 382-94.
-
-
-
-
-

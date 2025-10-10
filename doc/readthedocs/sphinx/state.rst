@@ -35,4 +35,3 @@ State really is just a small payload that needs to be properly passed around thr
     :members:
     :undoc-members:
     :show-inheritance:
-

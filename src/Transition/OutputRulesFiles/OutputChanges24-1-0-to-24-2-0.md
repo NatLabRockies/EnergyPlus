@@ -124,4 +124,3 @@ The HVAC Topology report provides information about the arrangement of HVAC comp
 When space sizing is active (ZoneAirHeatBalanceAlgorithm, "Do Space Heat Balance for Sizing=Yes") a new space sizing (spsz) output file is created, similar to the existing zone sizing (zsz) output. A new field "Output Space Sizing" has been added to OutputControl:Files to control this file.
 
 See pull request [#10566](https://github.com/NREL/EnergyPlus/pull/10566) for more details.
-

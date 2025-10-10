@@ -62,6 +62,3 @@ All existing input files that use either the variable or constant flow radiant s
 
 Communications between the CBE and the author of this NFP are available upon request as is the summary of the features requested by the CBE and the status within EnergyPlus (wishlist).
 ISO Standard 11855-2.
-
-
-

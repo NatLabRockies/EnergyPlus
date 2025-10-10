@@ -120,5 +120,3 @@ N/A
 ASHRAE Standard 55-2010. Thermal environment conditions for human occupancy. ASHRAE, Atlanta.
 
 EN 15251 (2007) Indoor environmental input parameters for design and assessment of energy performance of buildings- addressing indoor air quality, thermal environment, lighting and acoustics. CEN, Brussels.
-
-

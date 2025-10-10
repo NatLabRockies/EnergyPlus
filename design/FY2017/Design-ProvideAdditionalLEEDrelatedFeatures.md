@@ -41,6 +41,3 @@ The schedule will be examined by a new routine that returns the value at a speci
 ## Modifying the EAp2-4/5 Performance Rating Method Compliance Table
 
 This table is similar to the ABUPS End-Use report but includes energy and demand on the same table and only has electricity, natural gas and other as columns. It is currently created primarily in the WriteBEPSTable() routine. It includes algorithms that explicitly remove some end use subcategories for certain end-uses to try to match USGBC forms. Instead a more generic approach will be taken and each end-use subcategory will be shown individually. The sum of the end-use subcategories will be subtracted from the end-use and that will be reported as all other energy used for that end-use. In addition, all code related to keeping these special end use subcategories separated for the LEED report will be removed in favor of this more generic solution.
-
-
-

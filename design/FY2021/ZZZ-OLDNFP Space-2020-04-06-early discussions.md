@@ -481,4 +481,3 @@ Jason G. - I think you are heading in the right direction but I do wonder if the
 GUI developers. What if these changes are incorporated into new objects and the existing ones continue to work (for a few releases?) and mapping
 from the old to new is done internally? Don't underestimate the hassle this will cause to many users and GUI developers so the value that is being
  gained from the user perspective should be spelled out explicitly.
-

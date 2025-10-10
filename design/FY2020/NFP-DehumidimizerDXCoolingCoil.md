@@ -1102,5 +1102,3 @@ NotEmpty(base_operating_mode_name && alternate_operating_mode_name && alternate_
 The loadSHR is provided from the parent object, such as unitary system, because the coil model does not know the required loadSHR, whihc is used to determine the coil operation mode.
 
 	LoadSHR = ZoneLoad / (ZoneLoad + MoistureLoad * hg)
-
-

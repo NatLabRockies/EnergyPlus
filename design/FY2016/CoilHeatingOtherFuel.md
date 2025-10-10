@@ -44,6 +44,3 @@ Transition will include renaming the `Coil:Heating:Gas` object and adding the fu
 ## References ##
 
 n/a
-
-
-

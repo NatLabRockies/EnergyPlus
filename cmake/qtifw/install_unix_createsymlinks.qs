@@ -72,12 +72,3 @@ function Component()
     }
   }
 }
-
-
-
-
-
-
-
-
-

@@ -405,6 +405,3 @@ One potential improvememt that could be considered in the future for the model i
 Existing EnergyPlus Earth Tube Model, EnergyPlus Engineering Reference, EnergyPlus Input-Output Reference.
 
 Liu, X., M. Xu, J. Guo, and R. Zhu.  2019.  “Conceptual Development of the Earth Tube Cooling System For a Tall Building,” Journal of Green Building (2019) 14 (2): 1–28.
-
-
-

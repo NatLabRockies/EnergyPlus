@@ -59,7 +59,3 @@ N/A
 * California Univ., Berkeley. Lawrence Berkeley Lab., Washington, DC. Department of Energy, and NM. Los Alamos National Lab. 1981. "DOE-2 Engineers Manual (Version 2.1A)." Technical Report.
 * Drury B. Crawley, Curtis O. Pedersen, Linda K. Lawrie, Frederick C. Winkelmann. 2000. EnergyPlus: Energy Simulation Program.
 * Lerond, Jeremy. 2019. "Algorithmically Generated Chiller Performance Curves for Building Energy Simulation." ASHRAE Transaction. Atlanta: ASHRAE. 93-95.
-
-
-
-

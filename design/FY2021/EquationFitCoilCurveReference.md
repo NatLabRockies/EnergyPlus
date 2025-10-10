@@ -107,5 +107,3 @@ There's potentially many doc changes required.
 And transition will be required.
 
  - For all of the test files that use above coil/heatpump objects.
-
-

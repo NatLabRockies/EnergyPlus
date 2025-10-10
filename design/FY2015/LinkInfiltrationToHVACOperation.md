@@ -235,5 +235,3 @@ This is within the IterAir loop in SimSelectedEquipment and it fires every time 
 https://github.com/NREL/EnergyPlusArchive/commit/c8c4ecb752714b44b8b15de074fad81d9139d685
 
 [ResetTerminalUnitFlowLimits](https://github.com/NREL/EnergyPlus/blame/develop/src/EnergyPlus/HVACManager.cc#L1613) resets all the terminal unit inlet node MassFlowRateMaxAvail (and Min) to the hard design flow rates without any regard to schedules or other things that may be varying.  This is find during FirstHVACIteration, but looks suspicious here.  This probably explains why I couldn't get the VAV terminal unit schedule to stick.  Note that IterAir is repeated up to six times (hardwired iteration limit) and then goes back up to the main HVAC iteration loop (HVACManagerIteration whcih is the one that has a user-controlled max that defaults to 20).
-
-

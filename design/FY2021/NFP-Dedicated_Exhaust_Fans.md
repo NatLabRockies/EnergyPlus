@@ -415,4 +415,3 @@ This struct definition and declaration will create a new data struct for the Zon
 ### ReportAirLoopExhaustSystem() ###
 
 The function is for reporting the variables related to the exhaust systems, such as the exhaust fans' flow rates, energy usages, and pressure drops.
-

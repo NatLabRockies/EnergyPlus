@@ -365,6 +365,3 @@ void CalcZoneSums(EnergyPlusData &state,
 
 `PushSystemTimestepHistories`
 * Refactor to handle zone or space
-
-
-

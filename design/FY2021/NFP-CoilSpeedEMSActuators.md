@@ -46,4 +46,3 @@ The feature and implementation details were discussed at one of the EnergyPlus T
 ## References
 
 Another branch `HVACFlexMeasures`, owned by ORNL, is working on developing HVAC flexibility measures in EnergyPlus to assess impact of grid-responsive building equipment technologies and energy storage. The coil side focuses on variable-speed coils.
-

@@ -1131,7 +1131,3 @@ The optional argument of SingleModeFlag will be passed into the following two fu
 PNNL ENergyPlus input file: ASHRAE90.1_RetailStandalone_STD2013_Chicago.idf
 
 Reid Hart, PE; Rahul Athalye; Weimin Wang, Ph.D, 2013. "Improving Simulation of Outside Air Economizer and Fan Control for Unitary Air Conditioners," DE-13-C058, ASHRAE Transactions
-
-
-
-

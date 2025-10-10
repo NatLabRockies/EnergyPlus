@@ -367,7 +367,3 @@ No transition required unless fields are inserted within existing object fields.
 ## References ##
 
 NA
-
-
-
-

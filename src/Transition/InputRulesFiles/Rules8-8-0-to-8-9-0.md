@@ -275,4 +275,3 @@ New F4 = old F17
 New F5:end = old F19:end
 
 *End of new Site:GroundHeatExchanger:ResponseFactors object.*
-

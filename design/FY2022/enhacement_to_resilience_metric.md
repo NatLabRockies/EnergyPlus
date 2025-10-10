@@ -241,4 +241,3 @@ The following variables will be added to the "advanced report variable" set: Hea
 [4]	S. Salimi, E. Estrella Guillén, and H. Samuelson, “Exceedance Degree-Hours: A new method for assessing long-term thermal conditions,” Indoor Air, vol. 31, no. 6, pp. 2296–2311, 2021, doi: 10.1111/ina.12855.<br>
 [5]	R. Levinson et al., “Key performance indicators for cool envelope materials, windows and shading, natural ventilation, and personal comfort systems,” Nov. 10, 2020.<br>
 [6]	F. Tartarini, S. Schiavon, T. Cheung, and T. Hoyt, “CBE Thermal Comfort Tool: Online tool for thermal comfort calculations and visualizations,” SoftwareX, vol. 12, p. 100563, Jul. 2020, doi: 10.1016/j.softx.2020.100563.<br>
-

@@ -154,4 +154,3 @@ The inputs and outputs that would be required to incorporate the Li-ion battery 
 - [3] DiOrio, Nicholas, et al. Technoeconomic modeling of battery energy storage in SAM. No. NREL/TP-6A20-64641. National Renewable Energy Lab.(NREL), Golden, CO (United States), 2015.
 - [4] Smith, Kandler, et al. "Life prediction model for grid-connected Li-ion battery energy storage system." 2017 American Control Conference (ACC). IEEE, 2017
 - [5] Santhanagopalan, Shriram, et al. Design and analysis of large lithium-ion battery systems. Artech House, 2014.
-

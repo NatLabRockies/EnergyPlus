@@ -61,4 +61,3 @@ In addition:
 
 See [5928](https://github.com/NREL/EnergyPlus/pull/5928).
 See also [6002](https://github.com/NREL/EnergyPlus/pull/6002).
-

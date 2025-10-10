@@ -727,7 +727,3 @@ Based on trunk and branch definitions, a loop for every linkage, with duct compo
 Note:
 
 If we assume all Surface Roughness values are the same in the same trunk or branch, a simple iteration will be performed to find a solution for all ducts in the same trunk or branch.
-
-
-
-

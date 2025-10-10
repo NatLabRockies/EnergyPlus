@@ -392,8 +392,3 @@ Hanby, V.I., Wright, J.A., Fletcher, D.W and Jones, D.N.T. 2002. Modeling the Dy
 of Conduits. International Journal of HVACR&R, Vol.8, No.1. pp. 1-12.
 
 D. Parker, P. Fairey, L. Gu, Simulation of the effects of duct leakage and heat transfer on residential space-cooling energy use, Published 1993 Engineering Energy and Buildings
-
-
-
-
-

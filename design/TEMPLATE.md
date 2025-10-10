@@ -50,6 +50,3 @@ insert text
 ## References ##
 
 insert text
-
-
-

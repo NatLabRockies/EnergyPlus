@@ -102,6 +102,3 @@ Transition will be required for `ZoneHVAC:EquipmentList`.
 ## References ##
 
 - Mike Witte - [Improve Control of Multiple HVAC in One Zone](https://github.com/NREL/EnergyPlus/blob/8d7fcb46b41e083a30a872f2b9fc23ca65912c2e/design/FY2017/MultiplePartialHVACInOneZone.md) NFP.
-
-
-

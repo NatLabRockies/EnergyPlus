@@ -231,6 +231,3 @@ EIO report and initialization report will impact the output files.
 ## References ##
 
 None
-
-
-

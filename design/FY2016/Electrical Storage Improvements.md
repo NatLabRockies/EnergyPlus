@@ -178,6 +178,3 @@ EMS Application Guide will be updated for new actuators.
 ## References ##
 
 <insert text>
-
-
-

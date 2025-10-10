@@ -158,6 +158,3 @@ A transition rule will be written to insert the ```Condenser Type``` field into 
 ## Engineering Reference
 
 No changes expected, aside from any minor changes requried to explain the water- vs. air-source operation.
-
-
-

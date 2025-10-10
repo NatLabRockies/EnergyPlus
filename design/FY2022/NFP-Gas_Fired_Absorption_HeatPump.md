@@ -627,4 +627,3 @@ Any other functions that inovles a special treatment for the new fuel-fired heat
 ## Reference ##
 
 [1] Fridlyand, Alex; Glanville, Paul; and Garrabrant, Michael, 2021. "Pathways to Decarbonization of Residential Heating," International High Performance Buildings Conference. Paper 354. https://docs.lib.purdue.edu/ihpbc/354).
-

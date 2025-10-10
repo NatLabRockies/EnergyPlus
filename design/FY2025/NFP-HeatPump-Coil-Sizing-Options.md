@@ -202,4 +202,3 @@ These are the existing objects that will require code changes and whether those 
     AirLoopHVAC:UnitaryHeatPump:WaterToAir,
     AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass,
     AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,
-

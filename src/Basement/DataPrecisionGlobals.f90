@@ -77,4 +77,3 @@ PUBLIC ! This data only module is public.
 !     TRADEMARKS: EnergyPlus is a trademark of the US Department of Energy.
 !
 END MODULE DataPrecisionGlobals
-

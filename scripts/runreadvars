@@ -165,4 +165,3 @@ case $EXT in
     ;;*)
     Usage; ExitWithError;
 esac
-

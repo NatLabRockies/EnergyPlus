@@ -148,6 +148,3 @@ No transition change is required.
 [11]  F. Carmona, R. Rivas, and V. Caselles, “Estimation of daytime downward longwave radiation under clear and cloudy skies conditions over a sub-humid region,” Theor. Appl. Climatol., vol. 115, no. 1–2, pp. 281–295, 2014.
 
 [12] M. G. G. Iziomon, H. Mayer, and A. Matzarakis, “Downward atmospheric longwave irradiance under clear and cloudy skies: Measurement and parameterization,” J. Atmos. Solar-Terrestrial Phys., vol. 65, no. 10, pp. 1107–1116, Jul. 2003.
-
-
-

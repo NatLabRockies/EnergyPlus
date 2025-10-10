@@ -287,6 +287,3 @@ The following describes the design:
 ## References ##
 
 https://github.com/open229/ruleset-model-description-schema
-
-
-

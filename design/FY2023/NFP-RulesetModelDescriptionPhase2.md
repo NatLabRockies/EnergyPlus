@@ -675,5 +675,3 @@ https://github.com/JasonGlazer/createRulesetModelDescription/blob/main/docs/less
 The schema is described here:
 
 https://github.com/open229/ruleset-model-description-schema/blob/main/schema-source/ASHRAE229_extra.schema.yaml
-
-

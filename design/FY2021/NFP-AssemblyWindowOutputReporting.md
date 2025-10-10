@@ -787,6 +787,3 @@ input object.
 Additional unit tests in OutputReportTabular.unit.cc and HeatBalanceSurfaceManager.unit.cc
 
 Additional changes may also be required to implement the feature.
-
-
-

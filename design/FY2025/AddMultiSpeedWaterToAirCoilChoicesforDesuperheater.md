@@ -91,6 +91,3 @@ Engineering reference would be checked to make sure it documents all the options
 New enumarations would be enabled in object **Coil:WaterHeating:Desuperheater**
 
 ## References ##
-
-
-

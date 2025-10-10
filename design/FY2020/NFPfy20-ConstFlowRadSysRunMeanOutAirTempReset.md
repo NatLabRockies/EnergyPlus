@@ -137,6 +137,3 @@ Various example files will have to be updated to reflect that there is a new inp
 ## References ##
 
 insert text
-
-
-

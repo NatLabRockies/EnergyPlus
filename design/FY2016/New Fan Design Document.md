@@ -504,4 +504,3 @@ No transition is planned for this project however feasibility of transition rule
 ## References ##
 
 Hart, R., Athalye, R., Wang, W.; 2013. Improving Simulation of Outside Air Economizer and Fan Control for Unitary Air Conditioners. ASHRAE Transactions. Vol 119 Issue 2, p1-8.
-

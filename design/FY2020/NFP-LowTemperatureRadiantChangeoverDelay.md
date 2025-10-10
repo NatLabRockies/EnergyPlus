@@ -70,6 +70,3 @@ A new example file that shows the use of the new parameter as well as verifies t
 ## References ##
 
 Communications from CBE and the summary written by the author of this NFP are available upon request.
-
-
-

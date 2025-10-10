@@ -322,4 +322,3 @@ Adds module parameter for the new object added
 	- Adds AirDistUnit( AirDistUnitNum ).EquipType_Num( AirDistCompUnitNum ) = SingleDuctConstVolNoReheat; case statement in get input function GetZoneAirLoopEquipment().
 
 	- Adds calling point for SimulateSingleDuct for SingleDuctConstVolNoReheat case in SimZoneAirLoopEquipment() function
-

@@ -814,5 +814,3 @@ Both functions of InitAirZoneReturnPlenum and CalcAirZoneReturnPlenum may be mod
 2. Calculate zone plenumn outlet conditions using existing procedure
 3. Set air properties for all induced air nodes and return plenum node
 4. Split mass flow rate of plenum outlets for retur plenum node and induced nodes.
-
-

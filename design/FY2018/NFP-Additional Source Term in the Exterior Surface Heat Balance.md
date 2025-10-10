@@ -68,4 +68,3 @@ No transition changes are envisioned as a result of the new feature. A new examp
 S.E.G. Jayamaha, N.E. Wijeysundera, S.K. Chou. Effect of rain on the heat gain through building walls in tropical climates, Building and Environment, 32(5): 465-477, 1997.
 
 L. Zhang, R. Zhang, Y. Zhang, T. Hong, Q. Meng, Y. Feng, The impact of evaporation from porous tile on roof thermal performance: A case study of Guangzhou's climatic conditions. Energy and Buildings, 2016.
-

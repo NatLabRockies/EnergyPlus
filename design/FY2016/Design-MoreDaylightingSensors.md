@@ -83,6 +83,3 @@ The DaylightingManager.cc file is over 10,000 lines of code that is not object o
 ## Old Short Variable Names ##
 
 The daylighting code includes many old variable names that are 4 to 6 characters long, all uppercase, and are difficult to read and understand. If time is available we will replace these variables names with ones that are easier to read and understand.
-
-
-

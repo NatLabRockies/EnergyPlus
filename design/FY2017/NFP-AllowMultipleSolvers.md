@@ -487,4 +487,3 @@ Three modules are revised: DataHVACGlobals, HeatBalanceManager, and General.
 		Optional_double & XX_1, // Hign bound obtained with maximum number of allowed iterations
 
 	);
-

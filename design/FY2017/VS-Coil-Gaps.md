@@ -103,6 +103,3 @@ WindowACAirToAir.idf
 ## References ##
 
 none.
-
-
-

@@ -214,5 +214,3 @@ Four possible new functions will be created to provide enough information for th
 		GetSpeedNumber
 
 The first 3 new functions will be called from GetAirflowNetworkInput. The last function will be called during runtime from ConstantVolumeFan::calculate to determine fan operation mode.
-
-

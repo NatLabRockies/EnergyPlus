@@ -43,4 +43,3 @@ The DataAirLoop.hh defines a struct for the AirLoopZoneInfo array that associate
 ## Computing Other Check values
 
 The new results fields in the Peak Conditions and Engineering Checks tables are either directly available from the sizing routine results or are derivable by combining those values with appropriate areas or flowrates.
-

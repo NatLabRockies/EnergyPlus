@@ -182,5 +182,3 @@ Transition will insert the Fuel Use Type field and leave it blank, which will ca
 ## References ##
 
 n/a
-
-

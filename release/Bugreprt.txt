@@ -67,5 +67,3 @@ If 'yes', please describe the workaround.
 ---------------------------------------------------------------------------
 
 Additional Comments:
-
-

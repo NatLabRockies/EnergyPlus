@@ -94,6 +94,3 @@ New and modified example files will be created to test the new controls that are
 Google document authored by CBE (their own internal document)
 Current EnergyPlus code and documentation
 RadiantControlsWorkWishlistWithEvaluation.docx (author’s internal document, submitted to CBE and NREL and available upon request)
-
-
-

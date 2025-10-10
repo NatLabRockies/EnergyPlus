@@ -107,6 +107,3 @@ New enumarations would be enabled in object **Coil:WaterHeating:Desuperheater**
 
 Unmet hour unsolved question link:
 https://unmethours.com/question/19819/modeling-water-to-air-heat-pump-with-desuperheater-for-dhw/
-
-
-

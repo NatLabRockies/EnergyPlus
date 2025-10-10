@@ -456,7 +456,3 @@ Is the three step implementation process reasonable?
 Should we provide an option to provide IP converted values directly from EnergyPlus to the  ESO and MTR (and thus the normal CSV files)?
 
 - We probably won't have enough time to take this on and we did it would need some discussion and an NFP.
-
-
-
-

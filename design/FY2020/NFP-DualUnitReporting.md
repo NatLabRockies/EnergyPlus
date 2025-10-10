@@ -197,5 +197,3 @@ Also, the SQLProcedures::CreateSQLiteDatabase() function will be modified to add
 "Unit Conversion."
 
 In addition, appropriate unit tests will be added.
-
-
