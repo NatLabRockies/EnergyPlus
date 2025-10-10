@@ -3,7 +3,7 @@ import json
 import os
 from concurrent.futures import Executor, ProcessPoolExecutor, as_completed
 from enum import StrEnum
-from functools import partial, total_ordering
+from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Iterator, Sequence, TypedDict
 
@@ -14,13 +14,16 @@ SRC_DIR = ROOT_DIR / "src/EnergyPlus"
 TST_DIR = ROOT_DIR / "tst/EnergyPlus"
 
 
-@total_ordering
 class LogLevel(StrEnum):
     """Enum for error types."""
 
     ERROR = "Error"
     WARNING = "Warning"
     INFO = "Info"
+
+    def to_int(self):
+        order = {LogLevel.ERROR: 3, LogLevel.WARNING: 2, LogLevel.INFO: 1}
+        return order[self]
 
     def to_gha(self):
         """Convert to GitHub Actions annotation level."""
@@ -35,14 +38,31 @@ class LogLevel(StrEnum):
         """Define less-than for ordering."""
         if not isinstance(other, LogLevel):
             return NotImplemented
-        order = {LogLevel.ERROR: 3, LogLevel.WARNING: 2, LogLevel.INFO: 1}
-        return order[self] < order[other]
+        return self.to_int() < other.to_int()
+
+    def __le__(self, other):
+        """Define less-than for ordering."""
+        if not isinstance(other, LogLevel):
+            return NotImplemented
+        return self.to_int() <= other.to_int()
+
+    def __gt__(self, other):
+        """Define less-than for ordering."""
+        if not isinstance(other, LogLevel):
+            return NotImplemented
+        return self.to_int() > other.to_int()
+
+    def __ge__(self, other):
+        """Define less-than for ordering."""
+        if not isinstance(other, LogLevel):
+            return NotImplemented
+        return self.to_int() >= other.to_int()
 
     def __eq__(self, other):
         """Define equality for ordering."""
         if not isinstance(other, LogLevel):
             return NotImplemented
-        return self.value == other.value
+        return self.to_int() == other.to_int()
 
     def __hash__(self):
         """Define hash for using as dict key."""
@@ -246,20 +266,29 @@ def report_log_messages(
             print("No issues found.")
         return result
 
+    # Minimum log level to print
+    minimum_log_level = LogLevel.INFO if verbose else LogLevel.WARNING
+
     # This already sorts and removes None
     error_dict = groupby_log_level(log_messages=log_messages)
 
     for logLevel, msgs in error_dict.items():
         if logLevel >= fail_threshold:
             result = False
+        if logLevel < minimum_log_level:
+            continue
         for msg in msgs:
             print(msg.to_json())
             if is_github_actions():
                 print(msg.to_github_annotation())
 
     summary_parts = [f"{len(msgs)} {lvl.value}(s)" for lvl, msgs in error_dict.items()]
-    summary = f"We found {', '.join(summary_parts)}."
+    summary = f"{'Success' if result else 'Fail'}: We found {', '.join(summary_parts)}."
     print(summary)
+    if result:
+        if verbose:
+            print("No issues found.")
+        return result
 
     if is_github_actions():
         add_github_step_summary_str(error_dict=error_dict)
@@ -349,18 +378,20 @@ def argparse_type_valid_absolute_file(path_str: str) -> Path:
     return path
 
 
-def get_base_parser(description: str, include_files_arg: bool = True) -> argparse.ArgumentParser:
+def get_base_parser(description: str, include_files_arg: bool = True, files_arg_help: str | None = None) -> argparse.ArgumentParser:
     """Get the base parser for all scripts.
 
     This parser includes common arguments like `verbose` and `filenames` (nargs)
     """
     parser = argparse.ArgumentParser(description=description)
+    if files_arg_help is None:
+        files_arg_help = "Files to check (if omitted, checks whole repo)"
     if include_files_arg:
         parser.add_argument(
             "files",
             nargs="*",
             type=argparse_type_valid_absolute_file,
-            help="Files to check (if omitted, checks whole repo)",
+            help=files_arg_help,
         )
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="operate verbosely")
     return parser
