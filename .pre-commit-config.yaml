@@ -1,0 +1,26 @@
+exclude: |
+  (?x)(
+      ^bin/.*            # bin/ at repo root
+    | ^third_party/.*    # third_party/ at repo root
+    | .*\.bat$           # .bat (lowercase)
+    | .*\.BAT$           # .BAT (uppercase)
+  )
+fail_fast: false
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-merge-conflict
+  - id: check-yaml
+
+- repo: https://github.com/psf/black
+  rev: 25.9.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/pycqa/isort
+  rev: 6.1.0
+  hooks:
+  - id: isort
