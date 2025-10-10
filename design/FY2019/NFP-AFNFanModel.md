@@ -1,4 +1,4 @@
-﻿﻿Support System Fan Object in Airflow Networks
+Support System Fan Object in Airflow Networks
 ================
 
 **Lixing Gu**

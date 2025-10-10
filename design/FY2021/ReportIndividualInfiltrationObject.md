@@ -1,4 +1,4 @@
-﻿# Add ZoneInfiltration Output Variables for Individual objects(Issue #8209)
+# Add ZoneInfiltration Output Variables for Individual objects(Issue #8209)
 ================
 
 **Yueyue Zhou, NREL**

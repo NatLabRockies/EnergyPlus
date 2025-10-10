@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Connecting Split DX AHU Components to VRF Refrigeration Loops
+Connecting Split DX AHU Components to VRF Refrigeration Loops
 ================
 
 **Richard Raustad, Florida Solar Energy Center**

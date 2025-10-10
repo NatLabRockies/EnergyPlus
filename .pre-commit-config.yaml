@@ -16,6 +16,7 @@ repos:
     exclude: '.*\.(idf|imf|rvi|mvi|epw|ddy)$'
   - id: check-merge-conflict
   - id: check-yaml
+  - id: fix-byte-order-marker
 
 - repo: https://github.com/psf/black
   rev: 25.9.0

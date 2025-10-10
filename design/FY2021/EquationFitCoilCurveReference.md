@@ -1,4 +1,4 @@
-﻿
+
 
 Change EquationFit coils to reference curve objects (Issue #8352)
 ================
