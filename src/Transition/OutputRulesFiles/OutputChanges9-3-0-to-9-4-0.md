@@ -85,7 +85,7 @@ Hour,Reference Point,Daylight Factor for Clear Sky,Daylight Factor for Clear Tur
 ```
 ### Surface Order in Output Reports
 
-The internal ordering of surfaces has changed. Previously subsurfaces (doors and windows) immdediately followed their respective base surface. 
+The internal ordering of surfaces has changed. Previously subsurfaces (doors and windows) immdediately followed their respective base surface.
 Now subsurfaces are at the end of each group of zone surfaces.Many reports preserve the old order, but some outputs do not.
 Changed outputs include the rdd, edd, eso (and resulting csv), shd, and sci output files.
 
@@ -98,7 +98,7 @@ When Zone Sensible Cooling = 0 or Zone Sensible Heating = 0, empty values are sh
 Zone Sensible Cooling
 
 	Calculated Design Load [W] 	User Design Load [W] 	User Design Load per Area [W/m2] 	Calculated Design Air Flow [m3/s] 	User Design Air Flow [m3/s] 	Design Day Name 	Date/Time Of Peak {TIMESTAMP} 	Thermostat Setpoint Temperature at Peak Load [C] 	Indoor Temperature at Peak Load [C] 	Indoor Humidity Ratio at Peak Load [kgWater/kgDryAir] 	Outdoor Temperature at Peak Load [C] 	Outdoor Humidity Ratio at Peak Load [kgWater/kgDryAir] 	Minimum Outdoor Air Flow Rate [m3/s] 	Heat Gain Rate from DOAS [W]
-None 	  	  	  	  	  	  	  	  	  	  	  	  	  	 
+None
 
 This causes difficulty for SQLite to retrieve data.
 
@@ -115,7 +115,7 @@ See [PR#8145](https://github.com/NREL/EnergyPlus/pull/8145)
 
 ### New reporting items added to the _perflog.csv log file for PerformancePrecisionTradeoffs
 
-Two new reporting variables (two columns) related to the new PerformancePrecisionTradeoffs modes are added to the _perflog.csv log file to help with performance tuning of newly added and expanded PerformancePrecisionTradeoffs modes. 
+Two new reporting variables (two columns) related to the new PerformancePrecisionTradeoffs modes are added to the _perflog.csv log file to help with performance tuning of newly added and expanded PerformancePrecisionTradeoffs modes.
 In the log file with _perflog.csv suffix, each simulation will add a line that contains the following the reporting variables (items) below. The two newly added reporting items (Minimum System Timestep, and MaxAllowedDelTemp) are denoted with (*) marks in the following table:
 
 - Program
@@ -145,7 +145,7 @@ See [8121](https://github.com/NREL/EnergyPlus/pull/8121)
 
 ### EIO reporting items added for PerformancePrecisionTradeoffs
 
-Two new reporting variables (two columns) related to the new PerformancePrecisionTradeoffs modes are added to the .eio file to help with tracing the and tuning of newly added and expanded PerformancePrecisionTradeoffs modes. 
+Two new reporting variables (two columns) related to the new PerformancePrecisionTradeoffs modes are added to the .eio file to help with tracing the and tuning of newly added and expanded PerformancePrecisionTradeoffs modes.
 In the PerformancePrecisionTradeoffs section of .eio file, a line of header of parameter names and a line of corresponding parameter values are reported. Two newly added reporting items (Minimum System Timestep, and MaxAllowedDelTemp) are now added to reporting lines: the parameter names are added to the headline (first line); and the parameter values are added to the data line (secon line). Now the new reporting lines look like the following:
 
 ! <Performance Precision Tradeoffs>, Use Coil Direct Simulation, Zone Radiant Exchange Algorithm, Override Mode, Number of Timestep In Hour, Force Euler Method, Minimum Number of Warmup Days, Force Suppress All Begin Environment Resets, Minimum System Timestep, MaxZoneTempDiff, MaxAllowedDelTemp
@@ -165,5 +165,5 @@ See [8121](https://github.com/NREL/EnergyPlus/pull/8121)
 ### table output headings moving from:
  (a) "Fuel Oil #1" in 9.3 to "Fuel Oil No 1" in 9.4
  (b) "Fuel Oil #2" in 9.3 to "Fuel Oil No 2" in 9.4
- 
+
 See [8301](https://github.com/NREL/EnergyPlus/pull/8304)

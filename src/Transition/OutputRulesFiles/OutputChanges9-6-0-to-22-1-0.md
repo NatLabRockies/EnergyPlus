@@ -16,7 +16,7 @@ See pull request [#9117](https://github.com/NREL/EnergyPlus/pull/9117/files) for
 
 ### EIO and Initialization Summary Report Changes for Daylighting
 
-Daylighting outputs in the EIO and Initialization Summary Report which were by Zone are now by Enclosure or Daylighting Control. 
+Daylighting outputs in the EIO and Initialization Summary Report which were by Zone are now by Enclosure or Daylighting Control.
 This changes the headers and tags. It may also change the number, naming, and order of entries for each section.
 
 Also, for Sky Daylight Factors, "Sky Type" was missing from the header.
@@ -134,7 +134,7 @@ Climatic Data Summary section. It summarizes the following quantities
 
 Three rows are added to the Weather Statistics File reporting table:
 - Annual Total Precipitation [mm]
-- Max Hourly Precipitation [mm]	
+- Max Hourly Precipitation [mm]
 - The month in which max hourly precipitation occurs
 
 See pull request [#9177](https://github.com/NREL/EnergyPlus/pull/9177) for more details.
@@ -174,7 +174,7 @@ Five new output variables related to the AirLoopHVAC:Exhaust System have been ad
 See pull request [#9209](https://github.com/NREL/EnergyPlus/pull/9209) for more details.
 
 ### EIO Sizing information for Central Exhaust Fan
-One line is added to the EIO sizing report regarding the central exhaust fan "Design Fan Airflow [m3/s]" sizing containing the following information: 
+One line is added to the EIO sizing report regarding the central exhaust fan "Design Fan Airflow [m3/s]" sizing containing the following information:
 - FanName, FanType, "Design Fan Airflow [m3/s]", Design Flow Rate Value
 
 See pull request [#9209](https://github.com/NREL/EnergyPlus/pull/9209) for more details.

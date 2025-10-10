@@ -6,7 +6,7 @@ Airflow Network Default Behavior Enhancements
  - 1/21/21, Add Design Document
  - 01/04/21, Original Date
  - Revision Date
- 
+
 
 ## Justification for New Feature ##
 
@@ -30,7 +30,7 @@ Although the issue provides two possible options, I would like to propose the lo
 
 If (NoExist AirflowNetwork:SimulationControl) && (Exist AirflowNetwork:MultiZone:Zone & AirflowNetwork:MultiZone:Surface) Then
 
-	Default all fields of AirflowNetwork::SimulationControl and issue a warning to make the default 
+	Default all fields of AirflowNetwork::SimulationControl and issue a warning to make the default
 	Let the program catches other possible errors
 
 Else
@@ -43,7 +43,7 @@ The justification is that the objects of AirflowNetwork:MultiZone:Zone and Airfl
 
 	! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
 	AirflowNetwork Model:Control,NoMultizoneOrDistribution
-  
+
 
 ## Approach ##
 
@@ -93,7 +93,7 @@ insert text
 
 ## Design Document ##
 
-The new feature will revise a single module: AirflowNetworkBalanceManager. 
+The new feature will revise a single module: AirflowNetworkBalanceManager.
 
 
 ### AirflowNetworkBalanceManager ###
@@ -104,7 +104,7 @@ The module revision includes the GetAirflowNetworkInput fuction and a new variab
 
 The new variable at the module level is added to indicate if the default control is assigned or not. The defaul value of the flag is false. If this is true, the section to read input values is bypassed.
 
-This variable will be reset in the clear_state function. 
+This variable will be reset in the clear_state function.
 
 ####GetAirflowNetworkInput####
 

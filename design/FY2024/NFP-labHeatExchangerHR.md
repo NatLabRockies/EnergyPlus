@@ -263,7 +263,7 @@ N/A
 ## Proposed Report Variables:
 
 N/A
- 
+
 ## References
 
 [1]	W. J. Turner, "Investigation and Development of Hybrid Ventilation Wall Convector," The University of Reading, 2009. [Online]. Available: https://www.researchgate.net/publication/263209666_Investigation_and_Development_of_Hybrid_Ventilation_Wall_Convector/figures?lo=1

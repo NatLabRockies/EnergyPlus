@@ -434,7 +434,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 IF (MakeUPPERCase(OutArgs(4)) == "VENTILATIONRATEPROCEDURE") THEN
                   OutArgs(4) = "Standard62.1VentilationRateProcedure"
                 ENDIF
-              
+
               ! If your original object starts with D, insert the rules here
 
               ! If your original object starts with E, insert the rules here
@@ -519,7 +519,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                   CurArgs = CurArgs + 1
 
               ! If your original object starts with S, insert the rules here
-              
+
               CASE('SIZING:SYSTEM')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.

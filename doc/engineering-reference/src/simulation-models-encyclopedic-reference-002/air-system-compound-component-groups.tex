@@ -220,7 +220,7 @@ If the sensible cooling energy rate delivered by the unitary system at Speed 1 i
 
 \begin{equation}
   \begin{array}{rl}
-    CyclingRatio &= \frac{ \left| \PB{CoolingCoilSensibleLoad} \right| } {FullCoolingCoilCapacity} \\ 
+    CyclingRatio &= \frac{ \left| \PB{CoolingCoilSensibleLoad} \right| } {FullCoolingCoilCapacity} \\
                  &= \max \PB{0.0,\frac{UnitarySystemCoolingLoad - AddedFanHeat}{FullCoolOutput_{Speed1} - AddedFanHeat_{Speed1}}}
   \end{array}
 \end{equation}
@@ -551,7 +551,7 @@ where \emph{UnitarySystemOutput\(_{SpeedRatio}\)} is the unitary system delivere
 \begin{equation}
   \begin{array}{rl}
     UnitarySystemOutput_{SpeedRatio} &= \PB{SpeedRatio} FullHeatOutput_{Speedn} \\
-                                     &+ \PB{1 - SpeedRatio} FullHeatOutput_{Speedn-1} \\ 
+                                     &+ \PB{1 - SpeedRatio} FullHeatOutput_{Speedn-1} \\
                                      &- AddedFanHeat_{SpeedRatio}
   \end{array}
 \end{equation}
@@ -566,7 +566,7 @@ The air mass flow rate calculations during heating operation are the same as tho
 
 \subsubsection{Single Zone VAV load based control:}\label{ashrae-901-load-based-control}
 
-The unitary system can also be used to simulate a system capable of maintaining a low fan speed through a range of low to moderate loads. This control scheme is similar to single zone variable-air-volume (VAV) control where the fan speed is maintained at a minimum level and the coil is modulated to a point where the system outlet air temperature reaches a user specified limit. As the outlet air temperature limit is reached and loads increase, the fan speed increases to maintain thermostat control. When the fan speed reaches the maximum flow limit, the system outlet air temperature may exceed the user specified limit, if the coil is capable of providing more capacity, to meet increased load. This model is applicable to AirloopHVAC and ZoneHVAC equipment and is active only for constant fan operating mode. Cycling fan operating may be used, however, during time of cycling fan operating mode, the model reverts to control specified above for Load Based control. Additionally, only specific coil types are allowed for the Single Zone VAV load based control method. 
+The unitary system can also be used to simulate a system capable of maintaining a low fan speed through a range of low to moderate loads. This control scheme is similar to single zone variable-air-volume (VAV) control where the fan speed is maintained at a minimum level and the coil is modulated to a point where the system outlet air temperature reaches a user specified limit. As the outlet air temperature limit is reached and loads increase, the fan speed increases to maintain thermostat control. When the fan speed reaches the maximum flow limit, the system outlet air temperature may exceed the user specified limit, if the coil is capable of providing more capacity, to meet increased load. This model is applicable to AirloopHVAC and ZoneHVAC equipment and is active only for constant fan operating mode. Cycling fan operating may be used, however, during time of cycling fan operating mode, the model reverts to control specified above for Load Based control. Additionally, only specific coil types are allowed for the Single Zone VAV load based control method.
 
 Allowed coil types are:
 
@@ -700,7 +700,7 @@ When the supply fan is cycling between consecutive speeds, then the speed ratio 
 \begin{equation}
   {SR_{n}} = Abs({SystemLoad} - {FullLoadOutput_{n-1}}) / Abs({FullLoadOutput_{n}} - {FullLoadOutput_{n-1}})
 \end{equation}
-  
+
 \begin{equation}
   {\dot m} = {\dot m_{on, n}} {SR_{n}} + {\dot m_{on, n-1}} (1 - {SR_{n}})
 \end{equation}
@@ -728,7 +728,7 @@ The average supply air flow rate calculation when the fan is running at the lowe
 \begin{equation}
   {\dot m} = {\dot m_{on, 1}} {PLR}
 \end{equation}
-  
+
 \begin{equation}
   {\dot m{w}} = {\dot m_{w, max}} * {PLR}
 \end{equation}
@@ -1264,7 +1264,7 @@ If $\dot{Q}_{total}<0$, then:
 
 Else:
 
-\begin{equation} 
+\begin{equation}
   \begin{array}{rl}
     \dot{Q}_{total,cooling} &= 0.0 \\
     \dot{Q}_{total,heating} &= \dot{Q}_{total}
@@ -1656,7 +1656,7 @@ Frac is the control zone air fraction with respect to the system mass flow rate
 
 \begin{equation}
 \begin{split}
-{\Delta_{sen,coil~off}} = \frac{{{{\dot m}_{Zone~Inlet}}}}{{Frac}}{\left( {{h_{Out,coil~off}} - {h_{Zone~Inlet}}} \right)_{HRmin}} \\ 
+{\Delta_{sen,coil~off}} = \frac{{{{\dot m}_{Zone~Inlet}}}}{{Frac}}{\left( {{h_{Out,coil~off}} - {h_{Zone~Inlet}}} \right)_{HRmin}} \\
 + \left( {{{\dot m}_{coil~off}} - \frac{{{{\dot m}_{Zone~Inlet}}}}{{Frac}}} \right){\left( {{h_{Out,coil~off}} - {h_{Control~Zone}}} \right)_{HRmin}}
 \end{split}
 \end{equation}
@@ -1732,7 +1732,7 @@ For this case where speed 1 operation was able to meet the required cooling load
 Finally, if the heat pump's cooling output at full load for Speed 1 is insufficient to meet the entire cooling load, the Cycling ratio is set equal to 1.0 (compressor and fan are not cycling). Then the cooling speed is increased and the delivered sensible capacity is calculated. If the full load sensible capacity at Speed n is greater than or equal to the sensible load, the speed ratio for the heat pump is estimated:
 
 \begin{equation}
-Speed~Ratio = \frac{{ABS(Heat~Pump~Cooling~Load - AddedFanHeat - Full~Cool~ Outpu{t_{Speedn-1}})}}{{ABS(Full~Cool~Outpu{t_{Speedn}} - Full~Cool~Outpu{t_{Speedn-1}})}} 
+Speed~Ratio = \frac{{ABS(Heat~Pump~Cooling~Load - AddedFanHeat - Full~Cool~ Outpu{t_{Speedn-1}})}}{{ABS(Full~Cool~Outpu{t_{Speedn}} - Full~Cool~Outpu{t_{Speedn-1}})}}
 \end{equation}
 
 Although a linear relationship is assumed by applying the speed ratio to obtain the effective capacity and mass flow rate between speed n and n-1, the outlet air node conditions are dependent on the combined outputs and may not be linear. In addition, the supply air fan heat varies with the speed ratio due to different supply mass flow rates between speed n and n-1 . Therefore, the final speed ratio for the cooling coil compressor and fan are determined through iterative calculations (successive modeling of the cooling coil and fan) until the heat pump's cooling output matches the cooling load to be met within the convergence tolerance. The convergence tolerance is fixed at 0.001 and is calculated based on the difference between the load to be met and the heat pump's cooling output divided by the load to be met.
@@ -2575,7 +2575,7 @@ Once load and source water flow rates have been established for the component, u
 
 \begin{enumerate}
       \item Determine the operating water flow rate of the heat pump. Constant water flow heat pumps will operating at the design water flow rate and variable speed water flow heat pumps will operate at a water flow rate proportional to operating part-load ratio. In addition, if a heat pump is configured as a heat recovery unit (see figure) then the water flow rate is set as pass-through when the unit is off.
-	\item If set point controlled, retrieve the load side temperature setpoint to determine the load on the heat pump. If load controlled, directly use the load passed to the model. 
+	\item If set point controlled, retrieve the load side temperature setpoint to determine the load on the heat pump. If load controlled, directly use the load passed to the model.
 	\item Evaluate the capacity modifier function using the load side setpoint temperature as the projected outlet temperature and the source inlet temperature ($CAPFT = f(T_{out,load,set}, T_{in,source}) $)
      \item Evaluate source outlet temperature limits and defrost operation, if selected, to determine the impact on operating capacity
 	\item Calculate available load side capacity using the reference value and the modifier ($\dot{Q}_{avail} = \dot{Q}_{ref} \times CAPFT$)
@@ -2845,7 +2845,7 @@ Heat_{load,\; defrost} = f(T_{ambient})
 \begin{equation}
 Heat_{load,\; defrost} = f(T_{ambient,\;wetbulb})
 \end{equation}
-The heat load per cycle of defrost is applied to the available capacity and is proportional to the defrost cycle per hour as: 
+The heat load per cycle of defrost is applied to the available capacity and is proportional to the defrost cycle per hour as:
 \begin{equation}
 \dot{Q}_{defrost} = \dot{Q}_{avail} \times Heat_{load,\; defrost} \times Cycles_{defrost}
 \end{equation}
@@ -2938,7 +2938,7 @@ The heat recovery fluid reference volume flow rates are determined from the heat
 \end{equation}
 
 \subsubsection{Heat Recovery Rate}
-The hot water or chilled water heat recovery rate is determined from the load side heat transfer rate and the electric power usage rate based on energy conservation as follows: 
+The hot water or chilled water heat recovery rate is determined from the load side heat transfer rate and the electric power usage rate based on energy conservation as follows:
 
 \begin{equation}
 \mathrm{Q}_\mathrm{HW} = \dot{Q}_\mathrm{load,\; cool} + \mathrm{Power}
@@ -2952,7 +2952,7 @@ The heat recovery does not occur when the heat recovery hot water outlet tempera
 
 \subsubsection{Heat Recovery Outlet Temperature}
 The heat recovery fluid outlet temperature is determiend from the heat recovery rate, specific heat of the fluid, and the heat recovery inlet temperature.
- 
+
 \begin{equation}
 \mathrm{T}_\mathrm{HW,\; Out} = \mathrm{T}_\mathrm{HW,\; In} + \frac{\mathrm{Q}_\mathrm{HW}}{\mathrm{Cp}_\mathrm{HW} \times \dot{m}_\mathrm{heatrecovery,\; HW}}
 \end{equation}
@@ -2971,7 +2971,7 @@ When the heat recovery outlet temperature exceeds the user-specified maximum or 
 \dot{Q}_\mathrm{CHW,\; limit} = \dot{m}_\mathrm{CHW} \times \mathrm{Cp}_\mathrm{CHW} \times {(\mathrm{T}_\mathrm{CHW,\; In} - \mathrm{T}_\mathrm{CHW,\; limit})}
 \end{equation}
 
-The net difference between the potential heat recovery rate and delivered heat recovery rate is reported as source side heat transfer rate and is calculated as follows: 
+The net difference between the potential heat recovery rate and delivered heat recovery rate is reported as source side heat transfer rate and is calculated as follows:
 
 \begin{equation}
 \dot{Q}_\mathrm{source,\; cool} = \dot{Q}_\mathrm{HW} - \dot{Q}_\mathrm{HW,\; limit}
@@ -2986,10 +2986,10 @@ The net difference between the potential heat recovery rate and delivered heat r
 
 This section describes the EIR formulated model for fuel-fired plant loop absorption air-to-water heat pumps. The object is similar to a conventional air-to-water heat pump, except that it uses an absorption cycle driven by fuel combustion. The object names are HeatPump:AirToWater:FuelFired:Heating and HeatPump:AirToWater:FuelFired:Cooling. In general, these heat pump objects are treated in the same way as the other plant loop heat pump models. When dealing with the heating and cooling modules of the equipment, it uses a similar paradigm as the electric-driven \hyperref[eir-plant-loop-heat-pump-model]{EIR Formulated Plant Loop Heat Pump}: even though a heat pump is generally a single load coil and a single source coil with a reversing valve, in EnergyPlus, the paradigm is to split the operation into two separate units, one for heating a hot water loop and one for cooling a chilled water loop. It is certainly possible to connect the load side of both of these to a single plant loop if the controls are established properly. This equipment only supports air-source operation with an outdoor air node used as the source-side inlet node.
 
-The underlying fuel-fired absorption heat pump model uses equation-fit models based on manufacturer data. The implemented model is as follows: 
+The underlying fuel-fired absorption heat pump model uses equation-fit models based on manufacturer data. The implemented model is as follows:
 
 \subsubsection{Equipment Capacity}
-The heating and cooling capacities are derived from the nominal (rated) capacity and a capacity function of temperatures. 
+The heating and cooling capacities are derived from the nominal (rated) capacity and a capacity function of temperatures.
 \begin{equation}
 \mathrm{GAHP Heating/Cooling Capacity} = \mathrm{Rated Capacity} \times \mathrm{CAPFT}
 \end{equation}
@@ -3000,7 +3000,7 @@ The temperatures used for the equation model are the returning (or entering) wat
 \end{equation}
 
 \subsubsection{Part Load Ratio}
-Part Load Ratio is the ratio for the actual heating/cooling load over the current full capacity load. In real absorption machines, the PLR is usually between 0.2 and 1.0. 
+Part Load Ratio is the ratio for the actual heating/cooling load over the current full capacity load. In real absorption machines, the PLR is usually between 0.2 and 1.0.
 \begin{equation}
 \mathrm{PLR} = \frac{\mathrm{Load}}{\mathrm{Capacity}}, 0.2 \leq \mathrm{PLR} \leq 1
 \end{equation}
@@ -3013,36 +3013,36 @@ The fuel usage is calculated using the following formula, taking consideration o
 \end{equation}
 
 \subsubsection{EIR Temperature Adjustment}
-A typical EIR temperature correction function will involve two independent temperature variables---the ambient air temperature ($T_{mathrm{amb}}$) and the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side. 
+A typical EIR temperature correction function will involve two independent temperature variables---the ambient air temperature ($T_{mathrm{amb}}$) and the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side.
 \begin{equation}
 \mathrm{EIRFT} = a + b \times T_{\mathrm{ret}} + c \times T_{\mathrm{ret}}^{2} + d \times T_{\mathrm{amb}} + e \times T_{\mathrm{amb}}^{2} + f \times T_{\mathrm{amb}} \times T_{\mathrm{ret}}
 \end{equation}
 
 \subsubsection{EIR PLR Adjustment}
-The EIR PLR correction function is a cubic function that takes the PLR as the sole independent variable. For example, a potential curve can be used is like the following:  
+The EIR PLR correction function is a cubic function that takes the PLR as the sole independent variable. For example, a potential curve can be used is like the following:
 \begin{equation}
 \mathrm{EIRFPLR} = 0.0865 \times \mathrm{PLR}^{2} - 0.006 \times \mathrm{PLR} + 0.9814, \mathrm{for } 0.25 \leq \mathrm{PLR} \leq 1
 \end{equation}
 
 \subsubsection{Defrosting Adjustment (Heating mode only)}
-If the defrost control type is OnDemand, then the defrost fuel use correction is modeled using the ambient air temperature as the independent variable. The inputs allows a cubic (or lower order) function. For example, one possible curve correlation can look like the following:  
+If the defrost control type is OnDemand, then the defrost fuel use correction is modeled using the ambient air temperature as the independent variable. The inputs allows a cubic (or lower order) function. For example, one possible curve correlation can look like the following:
 \begin{equation}
-\mathrm{EIRDEFROST} = -0.0011 \times T_{\mathrm{amb}}^{2} - 0.006 \times T_{\mathrm{amb}} + 1.0317, \mathrm{for} -8.89^{\circ}\mathrm{C} \leq T_{\mathrm{amb}} \leq 3.33^{\circ}\mathrm{C} 
+\mathrm{EIRDEFROST} = -0.0011 \times T_{\mathrm{amb}}^{2} - 0.006 \times T_{\mathrm{amb}} + 1.0317, \mathrm{for} -8.89^{\circ}\mathrm{C} \leq T_{\mathrm{amb}} \leq 3.33^{\circ}\mathrm{C}
 \end{equation}
 
 \subsubsection{Cycling Ratio Adjustment}
-The cycling ratio correction is also used for fuel use calculations when the PLR is below the minimum. This curve can be inputted by the user. An example correlation for CRF is as follows: 
+The cycling ratio correction is also used for fuel use calculations when the PLR is below the minimum. This curve can be inputted by the user. An example correlation for CRF is as follows:
 \begin{equation}
 \mathrm{CRF} = 0.4167 \times \mathrm{CR} + 0.5833,
 \end{equation}
 
-where $\mathrm{CRF}$ is the Cycling Ratio Factor; and $\mathrm{CR}$ is the Cycling Ratio, which is defined as: 
+where $\mathrm{CRF}$ is the Cycling Ratio Factor; and $\mathrm{CR}$ is the Cycling Ratio, which is defined as:
 
 \begin{equation}
 \mathrm{CR} = \frac{\mathrm{PLR}}{\mathrm{PLR}_{\mathrm{min}}}, \mathrm{for} 0.2 \leq \mathrm{PLR} \leq 0.25
 \end{equation}
 
-Please note that since the object is based on curve inputs, the user also has the flexibility of defining the curves by themselves---e.g. from the capacity function of temperature to the defrost EIR corrections. 
+Please note that since the object is based on curve inputs, the user also has the flexibility of defining the curves by themselves---e.g. from the capacity function of temperature to the defrost EIR corrections.
 
 \subsubsection{Electricity Use}
 
@@ -3099,7 +3099,7 @@ The heating capacity at speed level k is derived from the nominal (rated)
 capacity and a normalized capacity function of temperatures in Equation .
 
 \begin{equation}
-Capacity_{heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{amb},T_{leaving})	                 
+Capacity_{heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{amb},T_{leaving})
 \end{equation}
 
 Where $Capacity_{heating,k}$ is the heating capacity at speed level k.
@@ -3114,7 +3114,7 @@ the EIR adjustment function, and the EIR part load ratio adjustment curve, as is
 shown in equation .
 
 \begin{equation}\label{eq:heating_electricity_use}
-Electricity_{heating,k}=EIR_{heating,rated} \times EIRFT_{heating,k}(T_{amb}, T_{leaving}) \times EIRPLR_{heating,k}(PLR)       
+Electricity_{heating,k}=EIR_{heating,rated} \times EIRFT_{heating,k}(T_{amb}, T_{leaving}) \times EIRPLR_{heating,k}(PLR)
 \end{equation}
 
 $Electricity_{heating,k}$ is the electricity usage for heating at speed level k.
@@ -3130,7 +3130,7 @@ The cooling capacity at speed level k is derived from the nominal (rated)
 capacity and a normalized capacity function of temperatures in Equation .
 
 \begin{equation}
-Capacity_{cooling,k}=Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{amb},T_{leaving})	                 
+Capacity_{cooling,k}=Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{amb},T_{leaving})
 \end{equation}
 
 Where $Capacity_{cooling,k}$ is the cooling capacity at speed level k.
@@ -3145,7 +3145,7 @@ the EIR adjustment function, and the EIR part load ratio adjustment curve, as is
 shown in equation \ref{eq:cooling_electricity_use}.
 
 \begin{equation}\label{eq:cooling_electricity_use}
-Electricity_{cooling,k}=EIR_{cooling,rated} \times EIRFT_{cooling,k}(T_{amb}, T_{leaving}) \times EIRPLR_{cooling,k}(PLR)       
+Electricity_{cooling,k}=EIR_{cooling,rated} \times EIRFT_{cooling,k}(T_{amb}, T_{leaving}) \times EIRPLR_{cooling,k}(PLR)
 \end{equation}
 
 $Electricity_{cooling,k}$ is the electricity usage for cooling at speed level k.
@@ -3166,11 +3166,11 @@ as control targets.
 The defrost control of this object resembles the HeatPump:PlantLoop:EIR:*
 object, with three options: Timed, OnDemand, or TimedEmpirical.
 \begin{itemize}
-  \item 
+  \item
 when Timed or OnDemand is selected, defrost power is calculated as shown in
 the following equation.
 \begin{equation}
-Power_{defrost} = EIRFT_{defrost}(Capacity_{heating,rated}/1.01667) \times fracDefrostTime  
+Power_{defrost} = EIRFT_{defrost}(Capacity_{heating,rated}/1.01667) \times fracDefrostTime
 \end{equation}
 $Power_{defrost}$ is the power usage of defrosting.
 $EIRF_{defrost}(.)$ is from user input ``Defrost Energy Input Ratio Function of
@@ -3178,26 +3178,26 @@ Temperature Curve'' if it's present or 1/COP if it's blank. $Capacity_{heating,r
 is the ``Rated Heating Capacity'' input field. ``Timed'' and ``OnDemand'' differ in
 the fractional Defrost Time (fracDefrostTime). For ``Timed'', it gets value from
 the user input ``Heat Pump Defrost Time Period Fraction''. For ``OnDemand'', it is
-calculated as 
+calculated as
 \begin{equation}
-fracDefrostTime =1.0 / (1.0 + 0.01446 / OutdoorCoildw) 
+fracDefrostTime =1.0 / (1.0 + 0.01446 / OutdoorCoildw)
 \end{equation}
 
 Where
 
 \begin{equation}
-OutdoorCoildw=HumidityRatio_{outdoor}-HumidityRatio_{saturated}              
+OutdoorCoildw=HumidityRatio_{outdoor}-HumidityRatio_{saturated}
 \end{equation}
 $HumidityRatio_{saturated}$ is calculated using outdoor temperature and outdoor air barometric pressure
 
-\item when TimedEmpirical is selected, defrost power is calculated as shown in equation 
+\item when TimedEmpirical is selected, defrost power is calculated as shown in equation
 \begin{equation}
 Power_{defrost}=\frac{Capacity_{heating,rated}}{COP_{heating,ref}} \times
-defrostHeatEnergyFraction \times DefrostCycles                                           
+defrostHeatEnergyFraction \times DefrostCycles
 \end{equation}
 
-where $defrostHeatEnergyFraction$ is based on the user input curve ``Timed Empirical Defrost Heat Input Energy Fraction Curve''. 
-$COP_{heating,ref}$ is the reference heating COP. The $DefrostCycles$ is the number of defrost cycles in an hour. 
+where $defrostHeatEnergyFraction$ is based on the user input curve ``Timed Empirical Defrost Heat Input Energy Fraction Curve''.
+$COP_{heating,ref}$ is the reference heating COP. The $DefrostCycles$ is the number of defrost cycles in an hour.
 It is determined by the ``Timed Empirical Defrost Frequency Curve'', part load ratio, and cycling ratio.
 
 \end{itemize}
@@ -3229,57 +3229,57 @@ With this information, for a series of fixed-speed compressors, the available
 capacity for the kth fixed-speed compressor can be calculated using eq.
 
 \begin{equation}
-Capacity_{avail,heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{air,in},T_{leavingWaterSetpoint}) 
+Capacity_{avail,heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{air,in},T_{leavingWaterSetpoint})
 \end{equation}
 
 The appropriate number of fixed-speed compressors, a, is selected such that
 \begin{equation}
-\sum_{i=1}^{a} Capacity_{avail,heating,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,heating,i} 
+\sum_{i=1}^{a} Capacity_{avail,heating,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,heating,i}
 \end{equation}
 
 The cycling ratio of the (a+1)th compressor will be calculated
 
 \begin{equation}
-CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,heating,i}}{Capacity_{avail,heating,a+1}} 
+CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,heating,i}}{Capacity_{avail,heating,a+1}}
 \end{equation}
 
 When the plant loop demand does not exceed the available capacity, load-side
 actual heat transfer just equals the plant loop demand.
 
 \begin{equation}
-Q_{load} = Demand_{plantLoop} 
+Q_{load} = Demand_{plantLoop}
 \end{equation}
 
 When the plant loop demand is larger than the available capacity, then the
 actual load transfer is
 
 \begin{equation}
-Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,heating,i} 
+Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,heating,i}
 \end{equation}
 
 where maxSpeedLevel is the maximum number of compressor speed levels.
 
-The heating mode load-side (water) outlet temperature will be 
+The heating mode load-side (water) outlet temperature will be
 
 \begin{equation}
-T_{out,load} = T_{in,load} + \frac{Q_{load}}{m_{load}C_{load}} 
+T_{out,load} = T_{in,load} + \frac{Q_{load}}{m_{load}C_{load}}
 \end{equation}
 
 Where $T_{in,load}$ is the load side inlet temperature. $m_{load}$ is the load
 side mass flow rate. $C_{load}$ is the load-side specific heat.
 
-Power is evaluated using equation \ref{eq:heating_electricity_use}. 
+Power is evaluated using equation \ref{eq:heating_electricity_use}.
 
 In heating mode, source-side heat transfer will be
 
 \begin{equation}
-Q_{source} = Q_{load} - Power 
+Q_{source} = Q_{load} - Power
 \end{equation}
 
 The source-side outlet temperature is thus
 
 \begin{equation}
-T_{out,source} = T_{in,source} - \frac{Q_{source}}{m_{source}C_{source}} 
+T_{out,source} = T_{in,source} - \frac{Q_{source}}{m_{source}C_{source}}
 \end{equation}
 
 For a variable-speed compressor, the available capacity for the speed level k
@@ -3290,7 +3290,7 @@ Demand_{plantLoop} < Capacity_{avail,heating,a+1}$. When the plant loop demand
 is larger than the available capacity, then the actual load transfer is
 
 \begin{equation}
-Q_{load} = Capacity_{avail,heating,maxSpeedLevel} . 
+Q_{load} = Capacity_{avail,heating,maxSpeedLevel} .
 \end{equation}
 
 The other calculations are the same as the fixed-speed compressors.
@@ -3300,54 +3300,54 @@ The other calculations are the same as the fixed-speed compressors.
 The available cooling capacity at speed-level k can be calculated using eq .
 
 \begin{equation}
-Capacity_{avail,cooling,k} = Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{air,in},T_{leavingWaterSetpoint}) 
+Capacity_{avail,cooling,k} = Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{air,in},T_{leavingWaterSetpoint})
 \end{equation}
 
 The appropriate number of fixed-speed compressors, a, is selected such that
 \begin{equation}
-\sum_{i=1}^{a} Capacity_{avail,cooling,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,cooling,i} 
+\sum_{i=1}^{a} Capacity_{avail,cooling,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,cooling,i}
 \end{equation}
 
 The cycling ratio of the (a+1)th stage compressor will be calculated
 
 \begin{equation}
-CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,cooling,i}}{Capacity_{avail,cooling,a+1}} 
+CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,cooling,i}}{Capacity_{avail,cooling,a+1}}
 \end{equation}
 
 When the plant loop demand does not exceed the available capacity, load-side
 actual heat transfer just equals the plant loop demand.
 
 \begin{equation}
-Q_{load} = Demand_{plantLoop} 
+Q_{load} = Demand_{plantLoop}
 \end{equation}
 
 When the plant loop demand is larger than the available capacity, then the actual load transfer is
 
 \begin{equation}
-Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,cooling,i} 
+Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,cooling,i}
 \end{equation}
 
-The cooling mode load-side (water) outlet temperature will be 
+The cooling mode load-side (water) outlet temperature will be
 
 \begin{equation}
-T_{out,load} = T_{in,load} - \frac{Q_{load}}{m_{load}C_{load}} 
+T_{out,load} = T_{in,load} - \frac{Q_{load}}{m_{load}C_{load}}
 \end{equation}
 
 Where $T_{in,load}$ is the load side inlet temperature. $m_{load}$ is the load side mass
 flow rate. $C_{load}$ is the load-side specific heat.
 
-Power is evaluated using equation \ref{eq:cooling_electricity_use}. 
+Power is evaluated using equation \ref{eq:cooling_electricity_use}.
 
 In cooling mode, source-side heat transfer will be
 
 \begin{equation}
-Q_{source} = Q_{load} + Power 
+Q_{source} = Q_{load} + Power
 \end{equation}
 
 The source-side outlet temperature is thus
 
 \begin{equation}
-_{out,source} = T_{in,source} + \frac{Q_{source}}{m_{source}C_{source}} 
+_{out,source} = T_{in,source} + \frac{Q_{source}}{m_{source}C_{source}}
 \end{equation}
 
 \subsubsection{Crankcase heater}

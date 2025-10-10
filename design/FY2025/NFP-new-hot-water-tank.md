@@ -37,12 +37,12 @@ Key drawbacks of the existing tank object include,
   side requesting water flow) based on one temperature setpoint (default) or a
   temperature upper limit (storage tank mode). However, more complex charging
   control is sometimes needed. For example, in some applications, the charging
-  percentage needs to be a function of the top and bottom of the tank temperature, 
+  percentage needs to be a function of the top and bottom of the tank temperature,
   for example, a common logic of charging could be as follows
-  - if the bottom temperature < setpoint at the bottom, request flow. 
+  - if the bottom temperature < setpoint at the bottom, request flow.
   - if the top temperature > setpoint at the top, stop request flow
-  The current object does not allow for such complex charging percentage 
-  calculations nor does it permit control of this parameter via EMS or Python 
+  The current object does not allow for such complex charging percentage
+  calculations nor does it permit control of this parameter via EMS or Python
   plug-ins.
 - **Issue with autosizing**: Tank autosizing capability is present but with
   multiple issues (issue 8412, 8451, 9956). Actuators might need to be added to
@@ -87,8 +87,8 @@ Table 2. Comparison of input and output fields of the hot and water stratified t
 Table 3 and Table 4 compares the input and output fields among the
 ThermalStorage:* objects. The chilled water stratified tank has inputs in most
 input categories except for the charging related ones, where the ice storage
-tank has more information. The new hot water tank will include setpoints at both 
-the top and bottom of the tank to more flexibly control the tank charging. 
+tank has more information. The new hot water tank will include setpoints at both
+the top and bottom of the tank to more flexibly control the tank charging.
 This enhancement can facilitate a better model of more complex tank
 charging/discharging control.
 
@@ -363,7 +363,7 @@ The following list of actuators will be added to allow for more complex controls
 
 - Charging percent: specifies how full the tank is charged. It can be a function
   of all temperature nodes in the stratified tank. If this is defined, then the
-  tank control is based on this quantity rather than the temperature set points 
+  tank control is based on this quantity rather than the temperature set points
   at the top and bottom of the tank.
 - Node k temperature: the temperature at the kth stratified node. "k" ranges
   from 1 to the number of nodes.

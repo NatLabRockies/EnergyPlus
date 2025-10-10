@@ -14,7 +14,7 @@ An Improved Duct Model for a Single AirLoop
  - First revision after Technicalities call on 1/8/25
  - 12/25/2024
  - New Feature Proposal
- 
+
 
 ## Justification for New Feature ##
 
@@ -38,15 +38,15 @@ Reply: I agree. Remove the change.
 
 Jason: May have comments via E-mail communications
 
-Reply: I am ready for further dicussion. 
+Reply: I am ready for further dicussion.
 
 ### Discussion between Jason on 02/09/25###
 
-Jason DeGraw and Lixing Gu met in the ASHRAE Winter Meeting 2025 in Orlando. No further comments from Jason. 
+Jason DeGraw and Lixing Gu met in the ASHRAE Winter Meeting 2025 in Orlando. No further comments from Jason.
 
 ## Overview ##
 
-The roadmap was developed and accepted by the team in 2024. The section provides a brief history. Since the implemetation will be divided into several tasks, the section aslo specifies the implementation for the first task. 
+The roadmap was developed and accepted by the team in 2024. The section provides a brief history. Since the implemetation will be divided into several tasks, the section aslo specifies the implementation for the first task.
 
 ###Roadmap history###
 
@@ -91,7 +91,7 @@ This section provides input descriptions for the 3 new objects: Duct:Loss:Conduc
 
 \subsection{Duct:Loss:Conduction}\label{ductlossconduction}
 
-This object allows users to input ducts with conduction loss only for simplified duct model. The object is used without using Airflow Network model exclusively. 
+This object allows users to input ducts with conduction loss only for simplified duct model. The object is used without using Airflow Network model exclusively.
 
 \subsubsection{Field: Name}\label{field-name-duct-000}
 
@@ -149,7 +149,7 @@ An IDF example is provided below:
 
 \subsection{Duct:Loss:Leakage}\label{ductlossleakage}
 
-This object allows users to input duct leaks only for simplified duct model. The object is used without using Airflow Network model exclusively. 
+This object allows users to input duct leaks only for simplified duct model. The object is used without using Airflow Network model exclusively.
 
 \subsubsection{Field: Name}\label{field-name-duct-000}
 
@@ -178,7 +178,7 @@ An IDF example is provided below:
 
 \subsection{Duct:Loss:MakeupAir}\label{ductlossmakeupair}
 
-This object allows users to input makeup air caused by supply leaks only for simplified duct model. The object is used without using Airflow Network model exclusively. 
+This object allows users to input makeup air caused by supply leaks only for simplified duct model. The object is used without using Airflow Network model exclusively.
 
 \subsubsection{Field: Name}\label{field-name-duct-000}
 
@@ -215,7 +215,7 @@ This section presents inputs used in losses of both conduction and leakage, extr
 
 #### 3 new objects ####
 
-Three new objects has been proposed. Each object represents each loss type explicitly. 
+Three new objects has been proposed. Each object represents each loss type explicitly.
 
 	Duct:Loss:Conduction,
    	A1,  \field Name
@@ -266,7 +266,7 @@ Three new objects has been proposed. Each object represents each loss type expli
         \required-field
         \type object-list
         \object-list AirflowNetworkDistributionLinkageNames
- 
+
 #### Existing object AirflowNetwork:Distribution:Node ####
 
 One more choice is added as "Zone" in the Component Object Type or Node Type field. The added choice is highlighted in red.
@@ -319,7 +319,7 @@ One more choice is added as "Zone" in the Component Object Type or Node Type fie
       \note Enter the reference height used to calculate the relative pressure.
 
 
-Note for AirflowNetwork:Distribution:Node: 
+Note for AirflowNetwork:Distribution:Node:
 
 1. Component Name or Node Name
 
@@ -329,7 +329,7 @@ The field of Component Name or Node Name is either Air Node name or Zone name. I
 
 Since the proposed feature is used for duct energy losses from conduction and leakage, N1 field is not used in energy loss calculation. The outdoor air node is allowed as either leakage source or target.
 
-3. A new choice of A3 field is added as zone name. When AFN is fully implemented, the zone name is defined in AirflowNetwork:MultiZone:Zone. For the simplified duct model without using AFN, the added new choice can be used to define a zone for duct leakage calculation. Therefore, there is no need to use AirflowNetwork:MultiZone:Zone.  
+3. A new choice of A3 field is added as zone name. When AFN is fully implemented, the zone name is defined in AirflowNetwork:MultiZone:Zone. For the simplified duct model without using AFN, the added new choice can be used to define a zone for duct leakage calculation. Therefore, there is no need to use AirflowNetwork:MultiZone:Zone.
 
 #### Existing object AirflowNetwork:Distribution:Linkage ####
 
@@ -370,7 +370,7 @@ Since the proposed feature is used for duct energy losses from conduction and le
       \note The zone name is where AirflowNetwork:Distribution:Component:Duct is exposed. Leave this field blank if the duct
       \note conduction loss is ignored.
 
-Note for AirflowNetwork:Distribution:Linkage: 
+Note for AirflowNetwork:Distribution:Linkage:
 
 1. Conduction
 
@@ -388,7 +388,7 @@ The above specification to define supply and retunr leaks is used to catch mass 
 
 3. Restriction
 
-Although there is no restriction of the number of ducts and locations, it is proposed for Task 1 to have limits as follows. 
+Although there is no restriction of the number of ducts and locations, it is proposed for Task 1 to have limits as follows.
 
 3.1 There is a single duct used for SupplyTrunk and ReturnTrunk.
 
@@ -478,7 +478,7 @@ Although the change was proposed in the roadmap, Field N7 will be kept based on 
 
 Although I can require to add one more field for moisture diffusivity in the Material object, this property is driven by humidity ratio. As we know, heat transfer is driven by the temperature difference, while the mositure transfer is driven by partial vapor pressure difference. The humidity ratio, as an independent variable, may not be proper.
 
-Let's keep the field for the time being. We may need to think to use the partial vapor pressure as driving force to simulate moisture performance across walls. 
+Let's keep the field for the time being. We may need to think to use the partial vapor pressure as driving force to simulate moisture performance across walls.
 
 3. The Component:Duct is the only component listed in the Component Name defined in the Linkage object for conduction loss calculation.
 
@@ -555,11 +555,11 @@ Field Effective Leakage Ratio is used as leakage, a fraction of AirLoopHVAC flow
 
 An important factor for duct leakage is to introduce make up flow due to supply and return leaks. Since we don't use pressure to calculate make up airflow impact, we will allow users to specify makeup air flows and direction using existing AFN object, so that make up airflows can flow from outdoor to a zone, and from a zone to another zone. The requirements are as follows:
 
-1. The Node 1 name and Node 2 name in the AirflowNetwork:Distribution:Linkage object have to be either zone names for both fields or a zone name and an outdoor node name. The Node 1 name represents flow starting point, and the Node 2 name represents flow ending points. The flow direction for a linkage with a zone name and an outdoor node name should be from outdoor to a zone, equivalent to air infiltration. When both zone names are specified, the equivalent object should Zobe Mixing. 
+1. The Node 1 name and Node 2 name in the AirflowNetwork:Distribution:Linkage object have to be either zone names for both fields or a zone name and an outdoor node name. The Node 1 name represents flow starting point, and the Node 2 name represents flow ending points. The flow direction for a linkage with a zone name and an outdoor node name should be from outdoor to a zone, equivalent to air infiltration. When both zone names are specified, the equivalent object should Zobe Mixing.
 
 2. Exfiltration is not used in energy calculation. In other words, an outdoor air node can not be specified as Node 2 name.
 
-3. The current makeup air is limited in a single AirLoopHVAC. When multiple AirLoopHVACs are applied, makeup air movement between two zones can be very complicated. More deep discussion may be needed after implementation with a single AirLoopHVAC.  
+3. The current makeup air is limited in a single AirLoopHVAC. When multiple AirLoopHVACs are applied, makeup air movement between two zones can be very complicated. More deep discussion may be needed after implementation with a single AirLoopHVAC.
 
 An example of objects used to calculate duct leak loss in an IDF is:
 
@@ -763,7 +763,7 @@ Q<sub>lat</sub> = m<sub>mix</sub>h<sub>g</sub>(W<sub>j</sub> − W<sub>i</sub>)
 
 #### Add loss to zone load and system load ####
 
-This section provides treament pathway of losses to either a system or a zone. 
+This section provides treament pathway of losses to either a system or a zone.
 
 1. Duct conduction and leakage loss
 
@@ -771,11 +771,11 @@ When the system outlet node is replaced by the zone supply inlet zone, duct loss
 
 2. Makeup losses
 
-I have two choices for the makeup losses. The first choice is to add losses as a part of system load, so that all losses will be added every system iteration. The second choice is to treat makeup losses as zone load used in the next time step. 
+I have two choices for the makeup losses. The first choice is to add losses as a part of system load, so that all losses will be added every system iteration. The second choice is to treat makeup losses as zone load used in the next time step.
 
-Here is a reason: 
+Here is a reason:
 
-When makeup losses are added as zone gain, they are excluded in the predictor calculation, so that requested system load will not have makeup losses at beginning of every time step. Thereofre, the makeup losses needs to be caught in the next zone time step. 
+When makeup losses are added as zone gain, they are excluded in the predictor calculation, so that requested system load will not have makeup losses at beginning of every time step. Thereofre, the makeup losses needs to be caught in the next zone time step.
 
 I will try the first choice first. If not working well, the second choice will be implemented.
 
@@ -791,7 +791,7 @@ This section provides code implementation approach.
 
 ##### Conduction and leakage #####
 
-All losses from conduction and leakage will be added to a system as Duct loss. The implementation code is similar to the DuctLoss code in UntarySystem, Furnace and Multispeed AirToAir Heat pump mdules. The addon is summed by all conduction and leakage losses served to a system by the same Airloop.  
+All losses from conduction and leakage will be added to a system as Duct loss. The implementation code is similar to the DuctLoss code in UntarySystem, Furnace and Multispeed AirToAir Heat pump mdules. The addon is summed by all conduction and leakage losses served to a system by the same Airloop.
 
 ![DuctlossAddon](DuctlossAddon.png)
 
@@ -855,7 +855,7 @@ Call AFN model functions to get all required AFN objects
 
 ##### Local variables #####
 
-All new objects and AFN obejcts will have local array variables defined in the header file.   
+All new objects and AFN obejcts will have local array variables defined in the header file.
 
 #### InitDuctLoss ####
 

@@ -11,20 +11,20 @@ Allow multiple solvers to find a root
  - First revision based on conversation with Rich
  - 4/6/17
  - Original NFP
- 
+
 
 ## Justification for New Feature ##
 
 The Regula Falsi method is used to find a root. The main application of root finding in EnergyPlus is to find a part load ratio or mass flow rate at given equipment/system load. The method assumes a general curve between two points of “a” and “b” as a straight line to find a root, and is the only method used in EnergyPlus internally. However, it may not reach convergence when the given equipment/system load is small. Ticket 6862 shows divergence with a small load. The main concern is that a straight line approach may fail to find a root within a small range. A good solution method is needed to avoid possible divergence.
 
 ![Regula Falsi method](RegulaFalsiMethod.jpg)
-  
+
 ## E-mail and  Conference Call Conclusions ##
 
 ### First revision
 No comments were received. Therefore, no conference call was arranged. However, Rich and I had a talk about this new feature.
 
-#### Rich's opinion 
+#### Rich's opinion
 
 Rich would like to start to use bisection method first. There is a section in the VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl in the HVACVariableRefrigerantFlow.cc to narrow down the PLR range first before using the Regula Falsi method. He divides PLR into 10 sections with 0.1 increment. Then use a Do Loop to find a working range of PLR within 0.1 interval value that contains a solution. Finally, the Regula Falsi method is used to get a PLR solution.
 
@@ -32,7 +32,7 @@ In addition, he prefer do something internally without user involvement.
 
 #### My reply
 
-I will add new choices to let user select which algorithm is used.  
+I will add new choices to let user select which algorithm is used.
 
 	HVACSystemRootFindingAlgorithm,
 	  \memo Specifies a solving algorithm to find a root
@@ -45,7 +45,7 @@ I will add new choices to let user select which algorithm is used.
        \key RegulaFalsiThenBisection
        \default RegulaFalsi
   	N1 ; \field Number of Iteration Before Algorithm Switch
-       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is 
+       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is
        \note entered. When iteration number is greater than the value, algorithm switches.
        \type integer
        \default 0
@@ -67,7 +67,7 @@ Optional_double & XX_1, // Hign bound obtained with maximum number of allowed it
 
 	);
 
-If the optional argument of AlgorithmTypeNum, the algorithm will not be switched.   
+If the optional argument of AlgorithmTypeNum, the algorithm will not be switched.
 
 The XX_0 argument is an output value at low bound with the maximum number of allowed iterations. The XX_1 argument is an output value at low bound with the maximum number of allowed iterations.
 
@@ -89,60 +89,60 @@ Subject: Re: FW: NFP to allow multiple solvers to find a root in HVAC system sim
 
 I've made changes when RegulaFalsi can't find the solution for various reasons.
 
-In FanCoils here: 
+In FanCoils here:
 https://github.com/NREL/EnergyPlus/blob/develop/src/EnergyPlus/FanCoilUnits.cc#L2154
-when very low water flow rates were needed, and in UnitarySystem (and other places) like this: 
+when very low water flow rates were needed, and in UnitarySystem (and other places) like this:
 https://github.com/NREL/EnergyPlus/blob/develop/src/EnergyPlus/HVACUnitarySystem.cc#L7458-L7531
 
 I don't like doing this and think this new approach would eliminate any need for special cases.
 
 On 5/3/2017 1:39 PM, Michael J Witte wrote:
-> I agree with Rich on the new object - a necessary evil that user's 
+> I agree with Rich on the new object - a necessary evil that user's
 > won't know what to do with.
 >
-> SolveRegulaFalsi should really be renamed to something more general, 
-> like SolveRoot, or there should be a more general function that calls 
-> SolveRegulaFalsi.  I realize this would mean changing every existing 
-> call to SolveRegulaFalsi, but it should be a simple search/replace 
+> SolveRegulaFalsi should really be renamed to something more general,
+> like SolveRoot, or there should be a more general function that calls
+> SolveRegulaFalsi.  I realize this would mean changing every existing
+> call to SolveRegulaFalsi, but it should be a simple search/replace
 > across the code.
 >
-> Seems odd to put the new HVACSystemRootFindingAlgorithm variable into 
-> DataHeatBalance and read the new object from HeatBalanceManager.  How 
+> Seems odd to put the new HVACSystemRootFindingAlgorithm variable into
+> DataHeatBalance and read the new object from HeatBalanceManager.  How
 > about putting it in DataHVACGlobals instead?
 >
-> Rich - didn't you already add code to switch gears like this somewhere 
+> Rich - didn't you already add code to switch gears like this somewhere
 > (fancoil unit?) to fix a bug due to tiny loads?
 >
 > Mike
 >
 >
 > On 5/3/2017 10:29 AM, Richard Raustad wrote:
->> Regarding the use of a new object I would agree it's needed to get 0 
->> diff's during testing. How useful the new object is after that point 
+>> Regarding the use of a new object I would agree it's needed to get 0
+>> diff's during testing. How useful the new object is after that point
 >> is debatable (users won't know what to do with it).
 >>
 >> My only comments at this point is:
->> 1) a default value of 0 for Number of Iteration Before Algorithm 
+>> 1) a default value of 0 for Number of Iteration Before Algorithm
 >> Switch will never use both methods (unless iteration = 0 on first
->> pass) AND I assume this value will never be used for Algorithm choice 
->> of RegulaFalsi or Bisection. Since RegulaFalsi converges very fast 
->> (sometimes 1 or 2 iterations) I think a default of 5 would not be 
->> unreasonable. I'd be curious to see what diff's occur with a default 
->> of 5 using both BisectionThenRegulaFalsi and RegulaFalsiThenBisection 
->> and how each of these affects execution speed of the (annual?)test 
+>> pass) AND I assume this value will never be used for Algorithm choice
+>> of RegulaFalsi or Bisection. Since RegulaFalsi converges very fast
+>> (sometimes 1 or 2 iterations) I think a default of 5 would not be
+>> unreasonable. I'd be curious to see what diff's occur with a default
+>> of 5 using both BisectionThenRegulaFalsi and RegulaFalsiThenBisection
+>> and how each of these affects execution speed of the (annual?)test
 >> suite (I.e., multiple pull requests).
->> 2) when switching algorithms, I assume the new min and max found 
->> during the initial iteration loop will be used as the starting point 
+>> 2) when switching algorithms, I assume the new min and max found
+>> during the initial iteration loop will be used as the starting point
 >> for the next algorithm
->> 3) all this is done within the existing RegulaFalsi routine (i.e., no 
+>> 3) all this is done within the existing RegulaFalsi routine (i.e., no
 >> other change to existing code)
 >>
 >> min = 0
 >> max = 1
->> SolveRegulaFalsi( Acc, MaxIte, SolFla, PLR, CalcResidual, min, max, 
+>> SolveRegulaFalsi( Acc, MaxIte, SolFla, PLR, CalcResidual, min, max,
 >> Par );
 >>
->> assuming the first algorithm converged to a narrow limit after a few 
+>> assuming the first algorithm converged to a narrow limit after a few
 >> iterations, switching algorithms should start at this tighter limit
 >>
 >> example:
@@ -161,11 +161,11 @@ On 5/3/2017 1:39 PM, Michael J Witte wrote:
 >>
 >> continue solution using next algorithm
 >>
->> Whether or not both min and max are always pulled to tighter limits 
+>> Whether or not both min and max are always pulled to tighter limits
 >> during the first iteration loop using RegulaFalsi remains to be seen.
->> Using Bisection first would always tighten the min/max limits but 
->> might actually take longer to converge (ie., at least 2 or 3 
->> iterations to tighten the min/max limits using Bisection then 1, 2 or 
+>> Using Bisection first would always tighten the min/max limits but
+>> might actually take longer to converge (ie., at least 2 or 3
+>> iterations to tighten the min/max limits using Bisection then 1, 2 or
 >> n more iterations using RegulaFalsi).
 >>
 >>
@@ -174,13 +174,13 @@ On 5/3/2017 1:39 PM, Michael J Witte wrote:
 >> On 5/3/2017 10:25 AM, Lixing Gu wrote:
 >>> All:
 >>>
->>> After uploading an NFP two weeks ago, I have not received any 
->>> comments. However, Rich and I had a talk about this new feature 
+>>> After uploading an NFP two weeks ago, I have not received any
+>>> comments. However, Rich and I had a talk about this new feature
 >>> yesterday.
 >>>
->>> The revised NFP based on conversation with Rich was uploaded a while 
+>>> The revised NFP based on conversation with Rich was uploaded a while
 >>> ago for further review and comments:
->>> https://github.com/NREL/EnergyPlus/blob/AllowMultipleSolversToFindARoot/design/FY2017/NFP-AllowMultipleSolvers.md. 
+>>> https://github.com/NREL/EnergyPlus/blob/AllowMultipleSolversToFindARoot/design/FY2017/NFP-AllowMultipleSolvers.md.
 >>> I also added design document.
 >>>
 >>> Thanks.
@@ -202,7 +202,7 @@ Electric Vehicle Transportation Center
 http://evtc.fsec.ucf.edu/
 
 -----Original Message-----
-From: Lixing Gu [mailto:Gu@fsec.ucf.edu] 
+From: Lixing Gu [mailto:Gu@fsec.ucf.edu]
 Sent: Wednesday, May 03, 2017 1:49 PM
 To: 'Michael J Witte' <mjwitte@gard.com>; 'Richard Raustad' <rraustad@fsec.ucf.edu>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>
 Subject: RE: FW: NFP to allow multiple solvers to find a root in HVAC system simulations
@@ -217,8 +217,8 @@ I will add a section in DataHVACGlobals to read the new object.
 
 Thanks.
 
-Gu 
- 
+Gu
+
 
 -----Original Message-----
 From: Michael J Witte [mailto:mjwitte@gard.com]
@@ -237,14 +237,14 @@ Rich - didn't you already add code to switch gears like this somewhere (fancoil 
 Mike
 
 -----Original Message-----
-From: Lixing Gu [mailto:Gu@fsec.ucf.edu] 
+From: Lixing Gu [mailto:Gu@fsec.ucf.edu]
 Sent: Wednesday, May 03, 2017 1:42 PM
 To: 'Richard Raustad' <rraustad@fsec.ucf.edu>; 'Michael J Witte' <mjwitte@gard.com>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>
 Subject: RE: FW: NFP to allow multiple solvers to find a root in HVAC system simulations
 
 Rich:
 
-Thanks for your quick response. 
+Thanks for your quick response.
 
 Here are my replies to your comments:
 
@@ -259,22 +259,22 @@ Second call
 
 		General::SolveRegulaFalsi( ErrorToler, MaxIte, SolFla, Frac, Residual, TemMin, TemMax);
 
-3) Yes. The changes occur in SolveRegulaFalsi. 
+3) Yes. The changes occur in SolveRegulaFalsi.
 
 Thanks.
 
 Gu
 
- 
+
 ## Overview ##
 
-The Regula Falsi method is a unique solver to find a root with given load in EnergyPlus. However, the method is unable to find a solution with small loads sometimes. A hybrid approach is proposed to combine Regula Falsi and bisection methods together. Regula Falsi method will be used first. If the given load is too small and the number of iterations is above a certain number, the bisection method will be used to find a solution. The proposed approach will provide a solution to reduce possibility of divergence. 
+The Regula Falsi method is a unique solver to find a root with given load in EnergyPlus. However, the method is unable to find a solution with small loads sometimes. A hybrid approach is proposed to combine Regula Falsi and bisection methods together. Regula Falsi method will be used first. If the given load is too small and the number of iterations is above a certain number, the bisection method will be used to find a solution. The proposed approach will provide a solution to reduce possibility of divergence.
 
-The proposed new feature will give user choices to select different solution algorithms from a new object, as well as provide alternative ways for developers to call the solver with special cases internally.  
+The proposed new feature will give user choices to select different solution algorithms from a new object, as well as provide alternative ways for developers to call the solver with special cases internally.
 
 ## Approach ##
 
-The proposed approach is to use a hybrid approach by combining Regula Falsi and bisection methods together. Although bisection method is slow in general, it finds a solution eventually. From a point of view of convergence, the bisection method is better than Regula Falsi. The proposed approach is to use the Regula Falsi method first to narrow the working range. If the given load is too small and the number of iteration is above the value given in the Number of Iteration Before Bisection field in the proposed new object of HVACSystemRootFindingAlgorithm, the bisection method will be used.  The hybrid approach will take advantage of Regula Falsi to narrow the working range first and fast, and find a root eventually at given small loads using the bisection method when the Regula Falsi method may not find a solution. 
+The proposed approach is to use a hybrid approach by combining Regula Falsi and bisection methods together. Although bisection method is slow in general, it finds a solution eventually. From a point of view of convergence, the bisection method is better than Regula Falsi. The proposed approach is to use the Regula Falsi method first to narrow the working range. If the given load is too small and the number of iteration is above the value given in the Number of Iteration Before Bisection field in the proposed new object of HVACSystemRootFindingAlgorithm, the bisection method will be used.  The hybrid approach will take advantage of Regula Falsi to narrow the working range first and fast, and find a root eventually at given small loads using the bisection method when the Regula Falsi method may not find a solution.
 
 A new object is proposed:
 
@@ -289,7 +289,7 @@ A new object is proposed:
        \key RegulaFalsiThenBisection
        \default RegulaFalsi
   	N1 ; \field Number of Iteration Before Algorithm Switch
-       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is 
+       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is
        \note entered. When iteration number is greater than the value, algorithm switches.
        \type integer
        \default 5
@@ -297,7 +297,7 @@ A new object is proposed:
 ### Note
 
 It is possible to be hard-wired in the code without the new object. However, it may cause differences for every example file. In addition, the proposed object provides more flexibility for users to select which algorithm will be used. Furthermore, the new object may be expanded in the future, in case a new algorithm may be proposed and added.
-  
+
 ## Testing/Validation/Data Sources ##
 
 Compare simulation results using Regula Falsi only and multiple solvers.
@@ -315,7 +315,7 @@ algorithm will be used to find a part load ratio or mass flow rate at given equi
 
 ##### Field: Algorithm
 Four choices are allowed to select which solution algorithm will be used: RegulaFalsi, Bisection,  BisectionThenRegulaFalsi, and RegulaFalsiThenBisection. The RegulaFalsi
-selection is the default selection. Bisection selction will allow the program to use the bisection method to get a solution. The BisectionThenRegulaFalsi selection requires the program to apply the bisection method first. After the number of iteration is above the value defined in the next field, the RegulaFalsi algorithm will be applied. The RegulaFalsiThenBisection selection requires the program to apply the RegulaFalsi method first. After the number of iteration is above the value defined in the next field, the bisection algorithm will be applied.  
+selection is the default selection. Bisection selction will allow the program to use the bisection method to get a solution. The BisectionThenRegulaFalsi selection requires the program to apply the bisection method first. After the number of iteration is above the value defined in the next field, the RegulaFalsi algorithm will be applied. The RegulaFalsiThenBisection selection requires the program to apply the RegulaFalsi method first. After the number of iteration is above the value defined in the next field, the bisection algorithm will be applied.
 
 ##### Field: Number of Iteration Before Algorithm Switch
 This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is entered. When iteration number is greater than the value, algorithm switches either from RegulaFalsi to Bisection or from Bisection to RegulaFalsi.
@@ -341,7 +341,7 @@ A new object is proposed.
        \key RegulaFalsiThenBisection
        \default RegulaFalsi
   	N1 ; \field Number of Iteration Before Algorithm Switch
-       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is 
+       \note This field is used when RegulaFalsiThenBisection or BisectionThenRegulaFalsi is
        \note entered. When iteration number is greater than the value, algorithm switches.
        \type integer
        \default 0
@@ -368,9 +368,9 @@ No transition is needed.
 
 Three modules are revised: DataHVACGlobals, HeatBalanceManager, and General.
 
-### DataHVACGlobals 
+### DataHVACGlobals
 
-#### Create a struct to handle a new object of HVACSystemRootFindingAlgorithm 
+#### Create a struct to handle a new object of HVACSystemRootFindingAlgorithm
 
 	struct HVACSystemRootFindingAlgorithm
 	{
@@ -378,7 +378,7 @@ Three modules are revised: DataHVACGlobals, HeatBalanceManager, and General.
 		std::string Algorithm;           // Choice of algorithm
 		int TypeNum;                     // Type number: 1 RegulaFalsi; 2 Bisection; 3 RegulaFalsiThenBisection; 4 BisectionThenRegulaFalsi
 		int NumOfIter;                   // Number of Iteration Before Algorithm Switch
-		
+
 		// Default Constructor
 		HVACSystemRootFindingAlgorithm( ) :
 			NumOfIter( 5 )
@@ -388,14 +388,14 @@ Three modules are revised: DataHVACGlobals, HeatBalanceManager, and General.
 
 
 #### Add 5 parameters for algorithm selection
- 
+
 	// Parameters for HVACSystemRootFindingAlgorithm
 	int const RegulaFalsi( 1 );
 	int const Bisection( 2 );
 	int const BisectionThenRegulaFalsi( 3 );
 	int const RegulaFalsiThenBisection( 4 );
 	int const Alternation( 5 );
- 
+
 ### HeatBalanceManager
 
 #### Add a new section to read the new object of HVACSystemRootFindingAlgorithm in the GetProjectControlData function
@@ -451,7 +451,7 @@ Three modules are revised: DataHVACGlobals, HeatBalanceManager, and General.
 				XTemp = ( Y0 * X1 - Y1 * X0 ) / DY;
 			}
 		} else {
-			if ( (HVACSystemRootFinding.TypeNum == Bisection) || 
+			if ( (HVACSystemRootFinding.TypeNum == Bisection) ||
 				(HVACSystemRootFinding.TypeNum == RegulaFalsiThenBisection && NIte > HVACSystemRootFinding.NumOfIter) ||
 				(HVACSystemRootFinding.TypeNum == BisectionThenRegulaFalsi && NIte <= HVACSystemRootFinding.NumOfIter)
 				) {

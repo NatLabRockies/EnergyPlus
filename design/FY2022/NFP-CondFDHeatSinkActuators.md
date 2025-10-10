@@ -11,7 +11,7 @@ Last year, internal NREL users requested the addition of EMS actuators to the Co
 
 ## Implementation
 
-The new EMS actuator will leverage the capability already built into the CondFD code through the `ConstructionProperty:InternalHeatSource` object. This actuator will be tied to the heat flux input already defined by this object. The heat source will only be allowed to operate by adding heat to the node, i.e. one-directional. Negative values will be flagged with warning or cause the simulation to issue a fatal error. 
+The new EMS actuator will leverage the capability already built into the CondFD code through the `ConstructionProperty:InternalHeatSource` object. This actuator will be tied to the heat flux input already defined by this object. The heat source will only be allowed to operate by adding heat to the node, i.e. one-directional. Negative values will be flagged with warning or cause the simulation to issue a fatal error.
 
 When the `ConstructionProperty:InternalHeatSource` is present and adding heat to the surface material layers, this EMS actuator will *add* heat to what has already been defined by that object. Currently, there are no plans to warn the user that both the EMS actuator and the `InternalHeatSource` objects are tied to the same material layer.
 

@@ -486,7 +486,7 @@ For electric, hot gas, and hot brine defrost types, energy use by the defrost he
 If DefrostType is electric, then:
 
 \begin{equation}
-  P_{def} = {P'}_{def} L_{case} SCH_{defrost} 
+  P_{def} = {P'}_{def} L_{case} SCH_{defrost}
 \end{equation}
 
 Else if DefrostType is ElectricWithTempTermination, then:
@@ -556,7 +556,7 @@ The user specifies the defrost energy correction curve type and the name of the 
 % table 75
 \begin{longtable}[c]{p{1.5in}p{2.36in}p{2.13in}}
 \caption{Representative Defrost Energy Correction Curve Coefficients for Case Temperature Method \label{table:representative-defrost-energy-correction}} \tabularnewline
-\toprule 
+\toprule
 Coefficient & Single-shelf horizontal display case & Multi-shelf vertical display case \tabularnewline
 \midrule
 \endhead
@@ -609,7 +609,7 @@ If DefrostType is Electric, HotGas, or HotBrine, then:
 
 Otherwise:
 
-\begin{equation}  
+\begin{equation}
   \dot{Q}_{def} = 0.0
 \end{equation}
 
@@ -746,13 +746,13 @@ The user specifies the latent case credit curve type and the name of the cubic c
 % table 76
 \begin{longtable}[c]{p{1.5in}p{2.36in}p{2.13in}}
 \caption{Representative Latent Case Credit Curve Coefficients for Case Temperature Method \label{table:representative-latent-case-credit-curve}} \tabularnewline
-\toprule 
+\toprule
 Coefficient & Single-shelf horizontal & Multi-shelf vertical \tabularnewline
 \midrule
 \endfirsthead
 
 \caption{Representative Latent Case Credit Curve Coefficients for Case Temperature Method} \tabularnewline
-\toprule 
+\toprule
 Coefficient & Single-shelf horizontal & Multi-shelf vertical \tabularnewline
 \midrule
 \endhead
@@ -815,7 +815,7 @@ Control systems are now available that increase the evaporator temperature to im
   LF_{case} = \frac{\dot{Q}_{case,actual}}{\dot{Q}_{case,rated}}
 \end{equation}
 
-\begin{equation} 
+\begin{equation}
   T_{Evap,Allowed} = T_{case} - LF_{case}\PB{T_{case} - T_{Evap,Design}}
 \end{equation}
 
@@ -1140,7 +1140,7 @@ The total capacity is therefore a function of the sensible heat ratio, which is 
 \begin{equation}
   \begin{array}{rl}
                   \Delta T &= \min{ \Delta T_{max},\PB{T_{coil,inlet} - T_{evap}}} \\
-              q_{sens,max} &= ULF \cdot \Delta T \cdot \PB{1 - SCH_{Defrost,DripDown}} \cdot SCH_{Coil} \\ 
+              q_{sens,max} &= ULF \cdot \Delta T \cdot \PB{1 - SCH_{Defrost,DripDown}} \cdot SCH_{Coil} \\
     T_{Coil,exit,estimate} &= T_{Coil,inlet} - \frac{q_{sens,max}}{\dot{m}_{DryAir} C_{p,Coil Inlet Dry Air}} \\
     h_{Coil,exit,estimate} &= f\PB{T_{Coil,exit,estimate},P_{Barometric}}~~~~at~a~Relative~Humidity~of~1 \\
         Q_{Total,estimate} &= \dot{m}_{max}\PB{h_{Coil,Inlet} - h_{Coil,exit,estimate}} \\
@@ -2090,7 +2090,7 @@ During subcritical operation, the gas cooler behaves as a condenser and the cond
                  T_{cond,min}                           & if~T_{amb} \le T_{cond,min} - \Delta T \\
                  T_{amb} + \Delta T                     & if~T_{cond,min} - \Delta T < T_{amb} \le T_{trans} - \Delta T \\
                  T_{trans}                              & if~T_{trans} - \Delta T < T_{amb} < T_{trans} \\
-                 T_{sat,P = 7.2MPa}                     & if~T_{trans} \le {T_{amb}} < 30.978 
+                 T_{sat,P = 7.2MPa}                     & if~T_{trans} \le {T_{amb}} < 30.978
                \end{array}
              \right.
 \end{equation}

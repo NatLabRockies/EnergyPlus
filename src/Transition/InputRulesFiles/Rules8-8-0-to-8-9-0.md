@@ -6,7 +6,7 @@ This was previously an Excel workbook that made for very difficult version contr
 
 # Object Change: `ZoneHVAC:EquipmentList`
 
-Field 1 remains the same.  
+Field 1 remains the same.
 After F1, insert new alpha input choice field (A2) 'Load Distribution Scheme' with default key input value of 'SequentialLoad'.
 Shift all later fields down by 1. The old input fields F2 - Fn become the new F3-Fn+1. The new input field becomes F2.
 
@@ -52,7 +52,7 @@ Field F1(A1): Name, insert the unique name created for "ZoneHVAC:AirDistribution
 
 Field F2(A2): Air Distribution Unit Outlet Node Name, use Zone Supply Air Node Name input field (A3) value of the "AirTerminal:SingleDuct:Uncontrolled" object
 
-Field F3(A3): Air Terminal Object Type, insert "AirTerminal:SingleDuct:ConstantVolume:NoReheat"  
+Field F3(A3): Air Terminal Object Type, insert "AirTerminal:SingleDuct:ConstantVolume:NoReheat"
 
 Field F4(A4): Air Terminal Object Type, insert the Name of the "AirTerminal:SingleDuct:Uncontrolled" object, example "SPACE3-1 Direct Air"
 
@@ -64,15 +64,15 @@ Field >=F5(N1): Leave blank. Will use default.
 
 #### replace the "AirTerminal:SingleDuct:Uncontrolled" object with "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object
 
-Field F1(A1): Name, no change 
+Field F1(A1): Name, no change
 
-Field F2(A2): Availability Schedule Name, no change. 
+Field F2(A2): Availability Schedule Name, no change.
 
 Field F3(A3): Air Outlet Node Name, no change.
 
 Field F4(A4): Air Inlet Node Name, create a new inlet node name using the Field F3(A3) value above
 
-          Field F4(A4 = Field F3(A3) + "2AT" -> example, "SPACE3-1 Supply Inlet 2AT", 
+          Field F4(A4 = Field F3(A3) + "2AT" -> example, "SPACE3-1 Supply Inlet 2AT",
 
           save this new inlet node name for use as the "AirLoopHVAC:ZoneSplitter" or "AirLoopHVAC:SupplyPlenum" outlet node name
 
@@ -109,7 +109,7 @@ Field F4(A4): Inlet Node Name, no change
 
     modify one of the "Outlet X Node Name" of the "AirLoopHVAC:SupplyPlenum" that matches the Zone Supply Air Node Name input field value of current "AirTerminal:SingleDuct:Uncontrolled" object
 
-    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object. 
+    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object.
 
 Field >=FX(AX): Outlet X Node Name, modify the matching Outlet X Node Name, should be the same node name as the new Air Inlet Node Name of "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object, old name + 2AT -> example, "SPACE3-1 Supply Inlet 2AT"
 
@@ -185,7 +185,7 @@ d) change "Fuel Oil #2" or "Residual Oil" to "FuelOil#2"
 
 e) change "Propane" or "LPG" or "Propane Gas" to "PropaneGas"
 
-*Note for some objects, these synonyms for fuel types remained valid thru v9.2 due to modifications to the JSON schema, this includes: FuelFactors, AirConditioner:VariableRefrigerantFlow, 
+*Note for some objects, these synonyms for fuel types remained valid thru v9.2 due to modifications to the JSON schema, this includes: FuelFactors, AirConditioner:VariableRefrigerantFlow,
 WaterHeater:Mixed (Heater Fuel Type only), and Boiler:HotWater. So these transition rules appear again for v9.3 along with additional rules to standardize fule types across all objects.*
 
 # Object Change: GroundHeatExchanger:Vertical
@@ -200,12 +200,12 @@ GroundHeatExchanger:ResponseFactors
 
 ## 1. New GroundHeatExchanger:System object
 
-Fields F1:F4, no change (from 
+Fields F1:F4, no change (from
 
 Insert new F5 = "Site:GroundTemperature:Undisturbed:KusudaAchenbach"
 
 New field F6 = <object-name old F1> + " Ground Temps"
-	
+
 New fields F7:F8 = old F8:F9
 
 New field F9 = <object-name old F1> + " Response Factors"
@@ -217,7 +217,7 @@ New field F9 = <object-name old F1> + " Response Factors"
 *Old F fields are still incoming from old GroundHeatExchanger:Vertical object.*
 
 New field F1 = <object-name old F1> + " Properties"
-	
+
 New F2 = "1"
 
 New F3 = old F6

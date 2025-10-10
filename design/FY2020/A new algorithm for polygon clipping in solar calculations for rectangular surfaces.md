@@ -6,7 +6,7 @@ A new algorithm for polygon clipping in solar calculations for rectangular surfa
 
 **Lawrence Berkeley National Laboratory**
 
- - October 21, 2019 
+ - October 21, 2019
 
 ## Justification for New Feature
 
@@ -22,27 +22,27 @@ To clip a polygon against a rectangular region, we can go segment by segment and
 
 The `Slater & Barsky` algorithm relies on converting the line segment to be clipped into a parametric equation. Below is the general form for the x- and y- components of a parametric line:
 
-- <img src="https://latex.codecogs.com/svg.latex?  x = x_0 + t \Delta x" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  x = x_0 + t \Delta x" />
 
-- <img src="https://latex.codecogs.com/svg.latex?  y = y_0 + t \Delta y" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  y = y_0 + t \Delta y" />
 
 Letting our subject line be starting at (x_0, y_0) and ending at (x_1, x_1):
 
-- <img src="https://latex.codecogs.com/svg.latex?  \Delta x = x_1 - x_0" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  \Delta x = x_1 - x_0" />
 
-- <img src="https://latex.codecogs.com/svg.latex?  \Delta y = y_1 - y_0" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  \Delta y = y_1 - y_0" />
 
 Distances from the endpoints to the edges of the clipping rectangle that collide with the line are used to obtain two values of *t* that parameterize the equation, representing the pair of new endpoints.
 
 Once we have the two values of t, t_1 and t_2, we can calculate the clipped line endpoints (Note that t_2 > t_1).
 
-- <img src="https://latex.codecogs.com/svg.latex?  x'_1 = x_0 + t_1 \Delta x" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  x'_1 = x_0 + t_1 \Delta x" />
 
-- <img src="https://latex.codecogs.com/svg.latex?  y'_1 = y_0 + t_1 \Delta y" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  y'_1 = y_0 + t_1 \Delta y" />
 
-- <img src="https://latex.codecogs.com/svg.latex?  x'_2 = x_0 + t_2 \Delta x" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  x'_2 = x_0 + t_2 \Delta x" />
 
-- <img src="https://latex.codecogs.com/svg.latex?  y'_2 = y_0 + t_2 \Delta y" /> 
+- <img src="https://latex.codecogs.com/svg.latex?  y'_2 = y_0 + t_2 \Delta y" />
 
 The `Slater & Barsky` algorithm uses space subdivision to reduce the number of pre-emptive calculations. We break the plane into 9 parts, where region (4) is the clipping region.
 

@@ -1,12 +1,12 @@
-NFP – Account for Fan Heat when sizing zone cooling coils 
+NFP – Account for Fan Heat when sizing zone cooling coils
 
 FSEC, R. Raustad, May 18, 2018
 
 Initial NFP: Accepted May 30, 2018.
 
-Final NFP updated May 30, 2018. Accepted: 
+Final NFP updated May 30, 2018. Accepted:
 
-Design document included in description of approach and implementation. Accepted: 
+Design document included in description of approach and implementation. Accepted:
 
 #Justification for Feature Update:
 Cooling coils are required to deliver sufficient capacity to meet the zone load, the outdoor air load and fan heat. Currently only the zone load and outdoor air load (based on a mixed air temperature calculation at peak load) are used to size zone cooling coils. Recently, fan heat was included in air loop cooling coil sizing and this same methodology is needed for zone cooling coils.
@@ -166,13 +166,13 @@ To implement this new feature the fan index and type need to either be:
     1) ZoneEquipList(CurZoneEqNum).FanIndex = EquipmentType().FanIndex
 
     2) ZoneEquipList(CurZoneEqNum).FanEnumType = EquipmentType().fanEnumType
- 
+
  - passed to the sizing routine via globals
 
     1) DataFanIndexNum = EquipmentType().FanIndex
 
     2) DataFanEnumType = EquipmentType().fanEnumType
- 
+
 
 It may be better to use a similar approach as is done with air loops where information is stored in a common array. If this information would be used by other functions then this method is preferred. On the other hand, this information would only be used during sizing and data globals would provide a quick implementation.
 

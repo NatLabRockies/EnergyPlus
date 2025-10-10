@@ -2064,7 +2064,7 @@
     75.0,                    !- On Cycle Parasitic Electric Load {W}
     ,                        !- Sizing Factor
     Boiler,                  !- End-Use Subcategory
-    175.0;                   !- Off Cycle Parasitic Fuel Load {W}    
+    175.0;                   !- Off Cycle Parasitic Fuel Load {W}
 
   Curve:Quadratic,
     BoilerEfficiency,        !- Name

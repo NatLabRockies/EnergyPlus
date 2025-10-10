@@ -1010,20 +1010,20 @@ AirflowNetwork:MultiZone:Surface:EffectiveLeakageArea,
 \subsection{AirflowNetwork:MultiZone:SpecifiedFlowRate}\label{airflownetworkmultizonespecifiedflow}
 
 The specified flow object is used to specify flow through a surface. The object has three fields
-and will cause the mass flow $\dot m$ to be set appropriately as 
+and will cause the mass flow $\dot m$ to be set appropriately as
 %
 \begin{equation}
 \dot m = F
 \end{equation}
 %
-when the mass flow rate $F$ is specified or as 
+when the mass flow rate $F$ is specified or as
 %
 \begin{equation}
 \dot m = \rho Q
 \end{equation}
 %
 when the volume flow rate $Q$ is specified. A positive value of the flow directs the flow from node 1
-of the linkage to node 2, and a negative value directs the flow from node 2 to node 1 of the linkage. 
+of the linkage to node 2, and a negative value directs the flow from node 2 to node 1 of the linkage.
 For surface linkages that are part of the building envelope, a positive value means flow from inside
 to the outdoors (exfiltration) and a negative value is a flow from the outside to inside (infiltration).
 
@@ -2544,7 +2544,7 @@ This is the name for this instance of the AirflowNetwork:Distribution:DuctSizing
 MaximumVelocity: The duct diameter is calculated based on entered velocity as
 
 \begin{equation}
-D = \sqrt{\frac{4Q}{V \pi } } 
+D = \sqrt{\frac{4Q}{V \pi } }
 \end{equation}
 
 where Q = volumetric flow rate {m3}
@@ -2569,15 +2569,15 @@ This optional field is used if Duct Sizing Method is PressureLoss or PressureLos
 
 \paragraph{Field: Total Pressure Loss Across Supply Branch}\label{total-pressure-loss-across-supply-branch}
 
-This optional field with units Pa is used to calculate supply branch duct diameter based on Colesbrook's equation. 
+This optional field with units Pa is used to calculate supply branch duct diameter based on Colesbrook's equation.
 
 \paragraph{Field: Total Pressure Loss Across Return Truck}\label{total-pressure-loss-across-return-truck}
 
-This optional field with units Pa is used to calculate return trunk duct diameter based on Colesbrook's equation. 
+This optional field with units Pa is used to calculate return trunk duct diameter based on Colesbrook's equation.
 
 \paragraph{Field: Total Pressure Loss Across Return Branch}\label{total-pressure-loss-across-return-branch}
- 
-This optional field with units Pa is used to calculate return branch duct diameter based on Colesbrook's equation. 
+
+This optional field with units Pa is used to calculate return branch duct diameter based on Colesbrook's equation.
 
 An IDF example is provided below:
 
@@ -3403,7 +3403,7 @@ Duct conduction definitions:
 \item
  Retun Trunk duct: The connection of ReturnTrunk is between AirLoopHVAC:ZoneMixer and the outlet node (AirloopHVAC Demand Side Outlet Node) of AirLoopHVAC. A single return trunk is specified. In other words, there is a single return trunk for each AirLoopHVAC.
 \end{itemize}
- 
+
 Duct leakage definitions:
 
 \begin{itemize}
@@ -3537,7 +3537,7 @@ AirflowNetwork:Distribution:Component:Duct
 
 \subsection{Duct:Loss:Leakage}\label{ductlossleakage}
 
-This object allows users to input duct leaks only for simplified duct model. 
+This object allows users to input duct leaks only for simplified duct model.
 
 \subsubsection{Field: Name}\label{ductloss-field-name-duct-leakage}
 
@@ -3601,7 +3601,7 @@ AirflowNetwork:Distribution:Node
 
 \subsection{Duct:Loss:MakeupAir}\label{ductlossmakeupair}
 
-This object allows users to input makeup air caused by a sum of supply leaks greater than a sum of return leaks only for simplified duct model. 
+This object allows users to input makeup air caused by a sum of supply leaks greater than a sum of return leaks only for simplified duct model.
 
 \subsubsection{Field: Name}\label{duct-leakage-field-name-duct-000}
 

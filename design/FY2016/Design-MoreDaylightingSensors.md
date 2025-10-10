@@ -4,11 +4,11 @@ Design Document - More Daylighting Sensors/Integrate DElight
 **Jason Glazer, GARD Analytics, Inc.**
 
  - June 13, 2016
- 
+
 
 ## New Feature Proposal ##
 
-See the file "More Daylighting Control Sensors with Comments-Rev05.docx" for details on the justification,  overview, and IDD changes.  
+See the file "More Daylighting Control Sensors with Comments-Rev05.docx" for details on the justification,  overview, and IDD changes.
 
 ## Overview ##
 
@@ -19,7 +19,7 @@ The current source files that are related to following objects:
 - Daylighting:DELight:ReferencePoint
 - Daylighting:DELight:ComplexFenestration
 - Output:IlluminanceMap
- 
+
 are primarily:
 
 - DataDaylighting.cc
@@ -34,7 +34,7 @@ with small references in:
 - SurfaceGeometry.cc
 - DataErrorTracking.cc
 
-While the DElight inputs are handled in the DElightManagerF.cc file, the calculation routines are located in the "third_party\DElight\" directory and include 82 separate files that are .c .h .in and .txt files. No modification to these DElight calculation files is anticipated in this work. 
+While the DElight inputs are handled in the DElightManagerF.cc file, the calculation routines are located in the "third_party\DElight\" directory and include 82 separate files that are .c .h .in and .txt files. No modification to these DElight calculation files is anticipated in this work.
 
 The main data structures are defined in DataDaylighting.cc and are:
 
@@ -42,7 +42,7 @@ The main data structures are defined in DataDaylighting.cc and are:
 - IllumMap using the structure IllumMapData
 - IllumMapCalc using the structure IllumMapCalc
 
-For this effort if time is available, the ZoneDaylight array will be the focus of refactoring to make it an object oriented class. The other two data structures will be not be touched. 
+For this effort if time is available, the ZoneDaylight array will be the focus of refactoring to make it an object oriented class. The other two data structures will be not be touched.
 
 ## Approach for More Reference Points
 
@@ -78,7 +78,7 @@ and from DElightManagerF.cc:
 
 These functions frequently assign to the ZoneDaylight array. When refactored, we assume that these functions  will be made into methods for the new ZoneDaylightCalc class. It is possible that only portions of these functions that are directly related to the ZoneDaylightCalc class. Many other functions access the ZoneDaylight vector but at this point they are not planned on being refactored.
 
-The DaylightingManager.cc file is over 10,000 lines of code that is not object oriented and originally developed in Fortran. An attempt to make it object oriented will be made but if the effort exceeds the time available, it may not be completed. 
+The DaylightingManager.cc file is over 10,000 lines of code that is not object oriented and originally developed in Fortran. An attempt to make it object oriented will be made but if the effort exceeds the time available, it may not be completed.
 
 ## Old Short Variable Names ##
 

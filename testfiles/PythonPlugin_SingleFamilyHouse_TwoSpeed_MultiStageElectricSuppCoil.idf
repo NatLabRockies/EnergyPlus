@@ -2021,7 +2021,7 @@
   PythonPlugin:Variables,
     PythonGlobalVarsReport,              !- Name
     CoilSpeedLevelOverrideReport;  !- Variable Name 1
-    
+
   PythonPlugin:OutputVariable,
     PythonPlugin Coil Speed Level Override On,  !- Name
     CoilSpeedLevelOverrideReport,               !- Python Plugin Variable Name
@@ -2039,7 +2039,7 @@
     Averaged,                                   !- Type of Data in Variable
     SystemTimestep,                             !- Update Frequency
     ;                                     !- Units
-    
+
   Output:Variable,
     PythonPlugin Coil Speed Level Override On,  !- Name
     PythonPlugin:OutputVariable,      !- EMS Variable Name

@@ -147,7 +147,7 @@ See [7571](https://github.com/NREL/EnergyPlus/pull/7571)
 
 
 ### Water to Water Air-Source EIR Heat Pump
-The HeatPump:WaterToWater:EIR:Heating and HeatPump:WaterToWater:EIR:Cooling objects have been renamed to HeatPump:PlantLoop:EIR:Heating and HeatPump:PlantLoop:EIR:Cooling, and the respective output variables have been renamed from: 
+The HeatPump:WaterToWater:EIR:Heating and HeatPump:WaterToWater:EIR:Cooling objects have been renamed to HeatPump:PlantLoop:EIR:Heating and HeatPump:PlantLoop:EIR:Cooling, and the respective output variables have been renamed from:
 
 *Before*
 ```
@@ -209,7 +209,7 @@ See [PR #7743](https://github.com/NREL/EnergyPlus/pull/7743/)
 ### Default end use subcategory to General
 In the AUBPS end-use subcategory table, the "other" row would show up whenever an end-use subcategory
 was not specified. Now unless specified, end-uses are assumed to be "general" and show up in that row.
-It is now unlikely that the "other" row will be shown. 
+It is now unlikely that the "other" row will be shown.
 
 This results in additional end-use meters, e.g. General:Cooling:Electricity which may have not been present before.
 And it results in more outputs attached to the General:* meters.
@@ -217,12 +217,12 @@ And it results in more outputs attached to the General:* meters.
 See [PR #7794](https://github.com/NREL/EnergyPlus/pull/7794)
 See [7743](https://github.com/NREL/EnergyPlus/pull/7743/)
 
-See [7761](https://github.com/NREL/EnergyPlus/pull/7761) 
+See [7761](https://github.com/NREL/EnergyPlus/pull/7761)
 and the [NFP](https://github.com/energy-plus/EnergyPlus/blob/PerfOverrideAndReporting/design/FY2020/NFP-PerformanceOverRidesAndReporting.md)
 
 ### New _perflog.csv file as Log File for PerformancePrecisionTradeoffs
 
-A new file has been added with the suffix _perflog.csv specifically to help with 
+A new file has been added with the suffix _perflog.csv specifically to help with
 performance tuning for a specific input file. Instead of disappearing, it gets
 appended to each simulation so experimentation can be done. It appears when
 ever the PerformancePrecisionTradeoffs object is used. For each simulation a line is added
@@ -249,7 +249,7 @@ that contains the following:
 - Number of Warnings
 - Number of Severe
 
-See [7761](https://github.com/NREL/EnergyPlus/pull/7761) 
+See [7761](https://github.com/NREL/EnergyPlus/pull/7761)
 and the [NFP](https://github.com/energy-plus/EnergyPlus/blob/PerfOverrideAndReporting/design/FY2020/NFP-PerformanceOverRidesAndReporting.md)
 
 

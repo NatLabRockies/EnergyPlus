@@ -22,8 +22,8 @@
 **Richard Raustad, Florida Solar Energy Center**
 
  - NFP Initial draft submitted November 8, 2016
- - 
- 
+ -
+
 
 ## Justification for New Feature ##
 
@@ -45,7 +45,7 @@ ASHRAE Standard 90.1 requirements for capacity and fan speed control as well as 
         shall be able to reduce the airflow to no greater than the larger of the following:
         • Two-thirds of the full fan speed, or
         • The volume of outdoor air required to meet the ventilation requirements of Standard 62.1.
-        
+
 *Note from the author: In part (a) above, the phrase, “At cooling demands less than or equal to 50%…” may be confusing, so the Standard 90.1 User’s Manual clarifies by stating the following:*
 
         “The term ‘cooling demand’ refers to the zone sensible cooling load.That is, when the zone
@@ -90,7 +90,7 @@ To accomplish this control method, a new key was added to the four pipe fan coil
          \key MultiSpeedFan
          \key ASHRAE90VariableFan
 
-The maximum and minimum fan flow threshold is determined using existing inputs for Maximum Supply Air Flow Rate and Low Speed Supply Air Flow Ratio fields. 
+The maximum and minimum fan flow threshold is determined using existing inputs for Maximum Supply Air Flow Rate and Low Speed Supply Air Flow Ratio fields.
 
     ZoneHVAC:FourPipeFanCoil,
     N1 , \field Maximum Supply Air Flow Rate
@@ -102,7 +102,7 @@ The maximum and minimum fan flow threshold is determined using existing inputs f
          \minimum> 0.0
          \default 0.33
 
-This allows modeling of two-speed and variable-speed fans. The medium speed supply air flow ratio input field is not used at this time. The 2nd degree of freedom is the range of zone loads to be met. As described in the Standard, a portion of the **zone design sensible load** is used as the critical point. Using existing model inputs, the Low Speed Supply Air Flow Ratio input field will be used to denote this threshold. For water coils, a value of 50% is typically used. For DX equipment, a value of 67% is typically used. 
+This allows modeling of two-speed and variable-speed fans. The medium speed supply air flow ratio input field is not used at this time. The 2nd degree of freedom is the range of zone loads to be met. As described in the Standard, a portion of the **zone design sensible load** is used as the critical point. Using existing model inputs, the Low Speed Supply Air Flow Ratio input field will be used to denote this threshold. For water coils, a value of 50% is typically used. For DX equipment, a value of 67% is typically used.
 
 Finally, based on conference call feedback, two additional input fields were added to the end of the fan coil object such that the user could control the temperature limits and also avoid the need for autosizing. Units are missing in these fields "\units C".
 
@@ -138,7 +138,7 @@ Model inputs:
 ![](FanCoil_ASHRAE901_V86.png)<br>
 Figure - ASHRAE 90.1 SZVAV Fan Control in V8.6
 
-The simulation results when using the new temperature control inputs is shown in the following figure. 
+The simulation results when using the new temperature control inputs is shown in the following figure.
 
 Apparently, this aspect of the model fell short of perfection. Although the temperature limits are enforced, the fan coil air flow rate does not increase until the load threshold is exceeded. We may consider increasing supply air flow rate once the supply air temperature reaches the limits.<br>
 ![](FanCoil_ASHRAE901_V86_SPc.png)<br>
@@ -157,7 +157,7 @@ The team will:
 
 ## Testing/Validation/Data Sources ##
 
-Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption. 
+Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption.
 
 ## Input Description ##
 

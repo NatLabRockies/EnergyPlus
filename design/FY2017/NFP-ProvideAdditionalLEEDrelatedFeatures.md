@@ -25,7 +25,7 @@ Add CoolingTower:VariableSpeed to list of objects.
 The scope of work for this NFP is to enhance the functionality of reporting for LEED:
 
  - To provide more information as required by LEED submittals.
- - With details as required by the U.S. Green Building Council (USGBC), including the information needed for the Energy Performance Calculator and Table 1.4 spreadsheets. 
+ - With details as required by the U.S. Green Building Council (USGBC), including the information needed for the Energy Performance Calculator and Table 1.4 spreadsheets.
  - The updates will be focused on just the results that are not otherwise available in the EnergyPlus tabular reports.
 
 The expectation is that the results of this task will be used by an OpenStudio Measure for LEED Reporting being developed separately.
@@ -37,16 +37,16 @@ The NFP was based on reviewing the following file which is submitted when using 
 
 - v4_Minimum Energy Performance Calculator_v04.xlsm
 
-as well as reaching out to stakeholders. More details are available at  [NFP to Update the LEED Summary Report](https://github.com/NREL/EnergyPlus/blob/Update_LEED_Reporting/design/FY2017/NFP-UpdateLEEDSummaryReport.md). 
+as well as reaching out to stakeholders. More details are available at  [NFP to Update the LEED Summary Report](https://github.com/NREL/EnergyPlus/blob/Update_LEED_Reporting/design/FY2017/NFP-UpdateLEEDSummaryReport.md).
 
-Several issues related to the LEED reporting may be separately addressed, including: 
+Several issues related to the LEED reporting may be separately addressed, including:
 
 - https://github.com/NREL/EnergyPlus/issues/5672 EAp2-4/5. Demand data taken from Design Days instead of from Annual Peak
 - https://github.com/NREL/EnergyPlus/issues/5559 Add LEED reporting of peak end use and EFLH
 - https://github.com/NREL/EnergyPlus/issues/5895 LEED Summary EAp2-4/5 Report Problems
 - https://github.com/NREL/EnergyPlus/issues/5613 LEED Tables service water heating doesn't appear
 - https://github.com/NREL/EnergyPlus/issues/5956 Report VAV minimum volume setpoint
-- https://github.com/NREL/EnergyPlus/issues/5298 Outdoor Air Summary report improvements 
+- https://github.com/NREL/EnergyPlus/issues/5298 Outdoor Air Summary report improvements
 
 
 ## Testing/Validation/Data Sources ##
@@ -71,7 +71,7 @@ Many objects such as Lights and ElectricEquipment have an End-Use Subcategory fi
  - CoolingTower:SingleSpeed
  - CoolingTower:TwoSpeed
  - CoolingTower:VariableSpeed
- - CoolingTower:VariableSpeed:Merkel 
+ - CoolingTower:VariableSpeed:Merkel
  - WaterHeater:Mixed
 
 Using the following (or similar) field:
@@ -99,7 +99,7 @@ The following changes will be made to EnergyPlus output to provide input to the 
 
 - Change the energy and demand (EA2-4/5 table) so that it reflects each end use subcategory. The table will no longer use special end-use category strings to aggregate values in the table. Demands shown on the table would be the peak demand for the end-use or end-use subcategory. When an end-use subcategory is used, all energy not in that subcategory would be shown as the end-use and the word "other".
 
-EnergyPlus output reporting would enhanced only to add new outputs that are not already gatherable and are computationally expensive to produce. 
+EnergyPlus output reporting would enhanced only to add new outputs that are not already gatherable and are computationally expensive to produce.
 
 <b>Schedules-EFLH (Schedule Type=Fraction)</b><br><br>
 <table border="1" cellpadding="4" cellspacing="0">
@@ -313,7 +313,7 @@ No changes
 
 ## Example File and Transition Changes ##
 
-The end use subcategory fields will be updated. 
+The end use subcategory fields will be updated.
 
 ## References ##
 

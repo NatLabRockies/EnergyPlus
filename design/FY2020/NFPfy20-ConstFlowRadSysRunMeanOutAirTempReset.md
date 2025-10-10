@@ -5,7 +5,7 @@ Constant Flow Radiant System Control Temperature Setpoint Reset on Running Mean 
 
  - Original Date: June 8, 2020
  - Revision Date: none yet
- 
+
 
 ## Justification for New Feature ##
 
@@ -78,7 +78,7 @@ This field specifies the weighting factor that is used to calculate the running 
 \label{eq:RunningMeanOutdoorAirTemperatureEquation}
 \end{equation}
 
-where: 
+where:
 
 (\Theta)_rm is the current running mean outdoor air temperature that is used to control the radiant system
 

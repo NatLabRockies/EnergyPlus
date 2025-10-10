@@ -5030,7 +5030,7 @@
   Output:Variable,*,Unitary System Fan Part Load Ratio,timestep;
 
   Output:Variable,*,Cooling Coil Runtime Fraction,timestep;
-  
+
   Output:Variable,*,Cooling Coil Air Outlet Temperature,timestep; !- HVAC Average [C]
-  
+
   Output:Variable,*,Cooling Coil Air Outlet Humidity Ratio,timestep; !- HVAC Average [kgWater/kgDryAir]

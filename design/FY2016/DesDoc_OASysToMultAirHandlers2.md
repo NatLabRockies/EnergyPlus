@@ -7,13 +7,13 @@ Currently a DOAS (dedicated outdoor air system) in EnergyPlus is a normal AirLoo
 
 ### **Conference Call Conclusions**
 #### **Jan 06, 2016**
-*  Should the DOAS serving multiple air handlers be modeled on the AirLoopHVAC object or the AirLoopHVAC:OutdoorAirSystem? Consensus seemed to be on the AirLoopHVAC:OutdoorAirSystem. 
+*  Should the DOAS serving multiple air handlers be modeled on the AirLoopHVAC object or the AirLoopHVAC:OutdoorAirSystem? Consensus seemed to be on the AirLoopHVAC:OutdoorAirSystem.
 *  The DOAS will be supplying ventilation air. To allow economizer action, each  AirLoopHVAC:OutdoorAirSystem it connects to will need 2 outside air inlets. One for the DOAS connection and one for direct access to outside air for economizer action.
 *  Should the DOAS have branches or just in/out nodes like OutdoorAirSystem? I favor directly replicating OutdoorAirSystem.
 #### **June 25, 2016**
 * Contacted Fred W. Porter at NORESCO. Here are his comments
  * The DOAS AHU mostly needs to control discharge air temps, preheat, dehumidify, possibly w/reheat, and these days utilize energy recovery. The OA flow to each AHU may vary based on DCV and AHU scheduling and so the OA through the DOAS needs to vary at the same time.  The exhaust to the DOAS will almost always include toilet exhaust and may include some relief air. EA back to the DOAS will usually be 20% less than the OA so this has a very significant effect on performance. These units are sometimes the same as the unit supplying OA to zonal fan coils, etc, or directly to a few zones, so the solution should really be a flexible extension of that DOAS representation I think. DOAS units for AHUs typically won’t try to achieve “neutral” DAT however, so usually won’t have reheat coils, wraparound heat pipes, or passive dehumidification wheels. (As soon as I say  typically or usually, I get some design with the exact opposite within a week.) They almost always deliver the air to  the “inlet,” i.e. the mixed air plenum of the recirc AHU.
-* Larry Scheier confirmed that TRACE allows economizers on the AHU's in DOAS to AHU configurations. This means we will definitely need to add another outside air node (the economizer node) to the OutdoorAir:Mixer.  Brent Griffith suggested that we add it at the end of the input fields, allowing existing input files to work as is. 
+* Larry Scheier confirmed that TRACE allows economizers on the AHU's in DOAS to AHU configurations. This means we will definitely need to add another outside air node (the economizer node) to the OutdoorAir:Mixer.  Brent Griffith suggested that we add it at the end of the input fields, allowing existing input files to work as is.
 * From Fred W. Porter's comments, it is clear that many DOA systems feed zones and zone equipment directly  as well as air handling units. Brent suggested handling this by defining a separate air loop (AirLoopHVAC plus zone demand side) to handle this. This seems like a good solution to me.
 
 ### **Overview**
@@ -50,7 +50,7 @@ Here we will start seeing some impact on run time. Our proposal is to use method
 *Sizing:* we propose to use the existing *Sizing:System* object for  OAStoMAHs. The OAStoMAHs will be sized to the sum of its air loop design minimum ventilation air flow rates.
 ### **Implementation**
 #### High Level Scheme
-* Simulate AirLoopHVAC:OutdoorAirSystem:Mixer's. Call the data array OASysMixer. 
+* Simulate AirLoopHVAC:OutdoorAirSystem:Mixer's. Call the data array OASysMixer.
   1.  Loop over the AirLoopHVAC:OutdoorAirSystem:Mixer's
        * Loop over the inlet nodes (air loop OA mixer relief nodes). Combine the inlet flows, temperatures, humidity ratios etc. and put the results on the outlet node (an OAStoMAH return node.
 * Loop over AirLoopHVAC:OutdoorAirSystem's. If it is a OAStoMAH, simulate it. If it is a OASinSAL, skip.
@@ -116,7 +116,7 @@ Instead of defining a new OutAirSysHVAC object, I've decided to reuse AirLoopHVA
 
 
 ### **Testing/Validation Source(s):**
-Creating an example / test file for this new capability will be a major task in itself. We will most likely start with RefBldgMediumOfficeNew2004_Chicago. Once we have this file, we will use it to compare a "do nothing" OutdoorAirSystemHVAC with the case where there is no OutdoorAirSystemHVAC. We can also compare cases where the ventilation air conditioning is done within the air loop versus where it is done by an OutdoorAirSystemHVAC. 
+Creating an example / test file for this new capability will be a major task in itself. We will most likely start with RefBldgMediumOfficeNew2004_Chicago. Once we have this file, we will use it to compare a "do nothing" OutdoorAirSystemHVAC with the case where there is no OutdoorAirSystemHVAC. We can also compare cases where the ventilation air conditioning is done within the air loop versus where it is done by an OutdoorAirSystemHVAC.
 
 ### **IO Ref (draft)**
 

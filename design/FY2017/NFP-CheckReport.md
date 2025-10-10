@@ -5,11 +5,11 @@ Add Checksums Tabular Output Reports
 
  - October 31, 2016
  - November 10, 2016 - Revision 1
- 
+
 
 ## Justification for New Feature ##
 
-Output reporting in EnergyPlus is extremely detail-oriented, which is one of the strengths of the simulation engine. However, in some cases it would be useful to have in EnergyPlus a way to present to the user a summary of some of the key outputs, for a quick analysis of results. Users have specifically suggested that EnergyPlus should have some tabular output reports similar to the Checksums reports that Trane Trace 700 generates. 
+Output reporting in EnergyPlus is extremely detail-oriented, which is one of the strengths of the simulation engine. However, in some cases it would be useful to have in EnergyPlus a way to present to the user a summary of some of the key outputs, for a quick analysis of results. Users have specifically suggested that EnergyPlus should have some tabular output reports similar to the Checksums reports that Trane Trace 700 generates.
 
 
 ## E-mail and  Conference Call Conclusions ##
@@ -20,22 +20,22 @@ Comments received are summarized as:
 - Add total heating and cooling capacity per area report in the engineering checks section
 - Add total condenser-water-side pump power per flow rate for facility level engineering checks section
 - Add total chilled-water-side pump power per flow rate for facility level engineering checks section
-- Add table of zones for AirLoop report 
+- Add table of zones for AirLoop report
 - In general, add more checks to help detect errors
 
 ## Overview ##
 
-The Checksum reports consists of several parts including a breakdown of cooling and heating peak load, coil selection, areas, temperatures, airflows and engineering checks. The breakdown of cooling and heating peak load are very similar to the existing Zone Load Component Summary table that appears in the tabular reports. Due to this, the Zone Load Component Summary report will serve as the basis of the reporting enhancements. 
+The Checksum reports consists of several parts including a breakdown of cooling and heating peak load, coil selection, areas, temperatures, airflows and engineering checks. The breakdown of cooling and heating peak load are very similar to the existing Zone Load Component Summary table that appears in the tabular reports. Due to this, the Zone Load Component Summary report will serve as the basis of the reporting enhancements.
 
 The Checksum reports appear at the room, the zone, and the system level. The "room" has no direct correspondence in EnergyPlus but the system is essentially the AirLoop level. In addition, a facility  level summary would be added. The term "facility" is used to be consistent with the use with output meters to include all zones and HVAC.
 
 The reports that will be included will be:
 
-- Zone Load Component Summary 
+- Zone Load Component Summary
 - Airloop Load Component Summary
 - Facility Load Component Summary
 
-The current Zone Load Component Summary will be enhanced with new subtables which will also appear in the Airloop Load Component Summary and Facility Load Component Summary reports. For the AirLoop Load Component Summary and the Facilty Load Component summary, they will show the values for the peak load and components at the time and sizing period of the maximum for the AirLoop and Facilty. 
+The current Zone Load Component Summary will be enhanced with new subtables which will also appear in the Airloop Load Component Summary and Facility Load Component Summary reports. For the AirLoop Load Component Summary and the Facilty Load Component summary, they will show the values for the peak load and components at the time and sizing period of the maximum for the AirLoop and Facilty.
 
 The enhancements for the tabular reports will be:
 
@@ -52,7 +52,7 @@ All of these reporting enhancements will appear also in the SQL files since thes
 ## Approach ##
 
 The peak time for each airloop and the facilty will be used to collect additional data points using the same methodology as the Zone Component Load Summary report described in the Engineering Reference using the delayed components computed using the same "decay curve" approach as used in the Zone Load Component Summary report.
- 
+
 
 ## Testing/Validation/Data Sources ##
 
@@ -120,7 +120,7 @@ Timestamp: **2016-10-28 15:58:05**
 | Outside Dry Bulb Temperature [C] | 31.02 | -17.3 |
 | Outside Wet Bulb Temperature [C] | 23.14 | -17.3 |
 | Outside Humidity Ratio at Peak [kgWater/kgAir] | 0.01459 | 0.0084 |
-| Zone Dry Bulb Temperature [C] | 23.90 | 22.20 | 
+| Zone Dry Bulb Temperature [C] | 23.90 | 22.20 |
 | Zone Relative Humdity [%] | 52.91 | 22.78 |
 | Zone Humidity Ratio at Peak [kgWater/kgAir] | 0.00979 | 0.00377 |
 | Terminal supply temperature [C] | 10.0 | 30.0 |
@@ -140,7 +140,7 @@ Timestamp: **2016-10-28 15:58:05**
 **Engineering Checks**
 
 | | Cooling | Heating |
-| --- | ---: | ---: | 
+| --- | ---: | ---: |
 | Outside Air (%)| 14.0 | 10.1 |
 | Airflow per floor area [m3/s-m2] | 1.1 | 1.1 |
 | Airflow per total capacity [m3/2-W] | 1.1 | 1.1 |
@@ -165,7 +165,7 @@ The Engineering Checks table would not include pump related lines for the zone o
 
 ## Example File and Transition Changes ##
 
-The new reports will be added to several example files. 
+The new reports will be added to several example files.
 
 
 

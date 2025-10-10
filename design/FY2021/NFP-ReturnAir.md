@@ -7,7 +7,7 @@ Allow zone HVAC terminal units to draw return air from return air plenum and ret
 
  - Original draft, 12/15/20
 
- - First revision- 011521 
+ - First revision- 011521
 	Cover the first conference call on 1/13/21 and follow up E-mail communications
 
  - Second revision 01/25/21
@@ -15,7 +15,7 @@ Allow zone HVAC terminal units to draw return air from return air plenum and ret
 
  - Third revision 01/29/21
 	Cover the second conference call on 1/27/21 and follow up E-mail communications
- 
+
 
 ## Justification for New Feature ##
 
@@ -43,7 +43,7 @@ Attendees: Edwin Lee, Brent Griffith, Mike Witte, Rich Raustad, Jim Spielbauer, 
 
 The consensus agreement is provided below:
 
-1. Draw air from return duct 
+1. Draw air from return duct
 
 When zone HVAC equipment draws air from the return duct, the euivelant operation is to keep the exhaust node as the equipment inlet node. Instead of using zone air properties directly, the light fraction gain will be added into both exhaust and return air nodes weighted by mass flow rate.
 
@@ -63,7 +63,7 @@ The return air heat gain is handled in ZoneEquipmentManager::CalcZoneLeavingCond
 It calls some functions like SumAllReturnAirConvectionGains to collect the heat gains, but I don't see anything to apportion the lights heat gains across multiple nodes as a function of flow. That may become a messy problem.
 
 Mike
-  
+
 2. Draw air from return plenum
 
 
@@ -77,13 +77,13 @@ Brent:
 
 Thanks for quick response. You are right, I should use Induced Air Outlet Node or NodeList Name in the AirLoopHVAC:ReturnPlenum
 
- 
+
 Therefore, the Air Inlet Node in the Zone Equipment such PTAC will allow a node listed as Induced Air Outlet Node or NodeList Name.
 
 Thanks.
 
 Gu
-From: Brent Griffith [mailto:Brent.Griffith@EnergyArchmage.com] 
+From: Brent Griffith [mailto:Brent.Griffith@EnergyArchmage.com]
 Sent: Thursday, January 14, 2021 11:52 AM
 To: 'Lixing Gu' <gu@fsec.ucf.edu>
 Subject: RE: Feature Chat
@@ -92,11 +92,11 @@ Subject: RE: Feature Chat
 “Since the Air Inlet Node Name must be referred in the Zone Air Exhaust Node or NodeList Name field of the ZoneHVAC:EquipmentConnections object, the NodeList should include return plenum node.
 “
 
-No, the Air Inlet Node Name should allow nodes to be plenum induced air nodes in addition to zone exhaust.  The return plenum will have its own node, but the plenum induced air node is separate.  Please study the PIU terminals. 
+No, the Air Inlet Node Name should allow nodes to be plenum induced air nodes in addition to zone exhaust.  The return plenum will have its own node, but the plenum induced air node is separate.  Please study the PIU terminals.
 
 **E-mail comments from Mike**
 
-From: Michael J. Witte [mailto:mjwitte@gard.com] 
+From: Michael J. Witte [mailto:mjwitte@gard.com]
 Sent: Thursday, January 14, 2021 1:26 PM
 To: Lixing Gu <gu@fsec.ucf.edu>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>; thong@lbl.gov; 'Brent Griffith' <brent.griffith@energyarchmage.com>; 'Jim Spielbauer' <JSPIELBAUER@TRANE.COM>; 'Chidambaram, Nagappan' <Nagappan.Chidambaram@trane.com>; 'Rich Raustad' <rraustad@fsec.ucf.edu>
 Cc: 'Wu, Tiejun UTC CCS' <tiejun.wu@carrier.com>
@@ -105,30 +105,30 @@ Subject: Re: Feature Chat
 
 On 1/14/2021 9:38 AM, Lixing Gu wrote:
 All:
- 
+
 Thanks for everyone to attend the conference call and provide valuable comments.
- 
+
 Here are summary based on the call:
- 
+
 1.	Draw air from return node
 Revise the name of the last field in the Lights object, so that exhaust node as Zone equipment can be included. The Light heat gain will be calculated weighted by node mass flow rates.
- 
+
 Current: Return Air Heat Gain Node Name
- 
+
 Proposed: Return Air Heat Gain Node or NodeList Name
 
 I thought the plan was to use and Exhaust node for this and allow the lights heat gain to be applied to exhaust nodes as well as return nodes. If you use a return node, then the function that allocates return flows will need to avoid stepping on the mass flow rate that has been applied by the zone equipment on that particular return node. Using exhaust nodes avoids this problem.
 
 On the flip side, the return air heat gain function will have to look at both return nodes and exhaust nodes if you use an exhaust node. I think that's easier to tackle than figuring out which return nodes have active flow rates and which do not.
 
- 
+
 2.	Draw air from return plenum.
- 
+
 Allow the return plenum node as input of the Air Inlet Node Name field in Zone Equipment.
- 
+
 Since the Air Inlet Node Name must be referred in the Zone Air Exhaust Node or NodeList Name field of the ZoneHVAC:EquipmentConnections object, the NodeList should include return plenum node.
 
-No, the equipment inlet node should be in the ZonePlenum Induced Air Node List, not in the zone exhaust node list - otherwise it will draw the same flow rate from two places. 
+No, the equipment inlet node should be in the ZonePlenum Induced Air Node List, not in the zone exhaust node list - otherwise it will draw the same flow rate from two places.
 
 In this configuration, a Return Air Node in the same zone needs to be one of the ReturnPlenum inlet nodes.
 
@@ -162,14 +162,14 @@ I will check your concern during coding.
 
 Gu
 
-From: Michael J. Witte [mailto:mjwitte@gard.com] 
+From: Michael J. Witte [mailto:mjwitte@gard.com]
 Sent: Thursday, January 28, 2021 10:05 AM
 To: Lixing Gu <gu@fsec.ucf.edu>; 'Richard Raustad' <rraustad@fsec.ucf.edu>
 Cc: 'Brent Griffith' <brent.griffith@energyarchmage.com>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>
 Subject: Re: Use return air node as inlet node of zone equipment to draw zone air
 
 Gu:
-Here's my proposal. 
+Here's my proposal.
 Let's say you have a PTAC drawing from a plenum in a zone that also has an airloop and both return through the plenum.
 
 PTAC
@@ -192,7 +192,7 @@ Plenum Return From Zone , !- Zone Return Air Node or NodeList Name
 NodeList,
 Zone Supply Nodes, !- Name
 ADU Supply Outlet
-PTAC Outlet Node 
+PTAC Outlet Node
 
 Supply will enter the zone from the ADU and the PTAC.
 Flow to the return node will equal the sum of the ADU and PTAC supply flows with the current zone mass flow calculations.
@@ -211,12 +211,12 @@ The proposed approach and design document remain the same. It should be careful 
 
 1. Zone equipment operation only
 2. Zone equipment and AirLoop operate simultaneously
-3. AirLoop operates alone (no changes)  
+3. AirLoop operates alone (no changes)
 
 
 ## Overview ##
 
-The new feature requests Zone HVAC objects to draw inlet air from return plenum and return duct. It should be pointed out that no return duct losses are calculated in Existing EnergyPlus, except for the AirflowNetwork model (beyond the topic for this new feature). Instead, light heat from return fraction is added to the return node after mixing. Therefore, light heat will be added into the drawn air for the return duct scenario. There is no modification for the scenario with return plenum. 
+The new feature requests Zone HVAC objects to draw inlet air from return plenum and return duct. It should be pointed out that no return duct losses are calculated in Existing EnergyPlus, except for the AirflowNetwork model (beyond the topic for this new feature). Instead, light heat from return fraction is added to the return node after mixing. Therefore, light heat will be added into the drawn air for the return duct scenario. There is no modification for the scenario with return plenum.
 
 This new feature is applied to the system configuration only when a zone equipment and an AirLoop serve the same zone. The proposed approach is described below.
 
@@ -232,7 +232,7 @@ Allow the Zone HVAC equipment inlet node as one of Induced Air Outlet Node or No
 
 In this configuration, a Return Air Node in the same zone needs to be one of the ReturnPlenum inlet nodes.
 
-Since this feature allows the induced air nodes as inlet air node for zone HVAC equipment, I plan to make PTAC, PTHP, and UnitarySystem work first. If time and budget allow, more equipment types will be implemented. 
+Since this feature allows the induced air nodes as inlet air node for zone HVAC equipment, I plan to make PTAC, PTHP, and UnitarySystem work first. If time and budget allow, more equipment types will be implemented.
 
 ## Approach ##
 
@@ -241,11 +241,11 @@ This sectio proposes procedures to allow zone equipment to draw air from return 
 ### Retur duct ###
 
 Following steps are used to accomplish to allow zone equipment to draw air from retunr duct. The impact is heat gain from light return fraction. The input of exhaust node in the NodeList will be a trigger to allow the equipment to draw air from the return duct.
- 
+
 1. Keep equipment air inlet node as an exhaust node in a zone. No change occurs
 2. Add zone exhaust node in a NodeList in the revised field of "Return Air Heat Gain Node or NodeList Name" in the Lights object.
 3. Calculate air properties weighted by mass flow rates of both exhaust and return air nodes.
-  
+
 Nomanclature:
 
 m = Mass flow rate
@@ -264,15 +264,15 @@ W<sub>return</sub> = W<sub>zone</sub>
 
 Therefore
 
-Return node conditions: m<sub>return</sub>, T<sub>return</sub>, W<sub>return</sub> 
+Return node conditions: m<sub>return</sub>, T<sub>return</sub>, W<sub>return</sub>
 
-Zone HVAC entry conditions: m<sub>exhaust</sub>, T<sub>return</sub>, W<sub>return</sub> 
+Zone HVAC entry conditions: m<sub>exhaust</sub>, T<sub>return</sub>, W<sub>return</sub>
 
 Note: The mass flow rate at the exhaust node remains as is. The only changes are air properties at exhaust node and return node.
 
 ### Return plenum ###
 
-Folwoing steps are used to accomplish to allow zone equipment to draw air from retunr plenum. 
+Folwoing steps are used to accomplish to allow zone equipment to draw air from retunr plenum.
 
 1. Allow the Zone HVAC equipment inlet air node as one of "Induced Air Outlet Node or NodeList Name" defined in the AirLoopHVAC:ReturnPlenum object
 
@@ -282,9 +282,9 @@ The GetInput code will release existing restriction to accept the proposed chang
 
 m<sub>return</sub> = m<sub>AirLoopReturn</sub> + m<sub>ZoneHVAC</sub>
 
-Here is an example to describe what procedures will be used. Assume that there is a connection to a Zone HVAC equipment in Zone 1, there are 3 zones to return air into a return plenum as Zones 1, 2 and 3. This calculation procedure is provided below. The changes will be accordingly when there are more zones served by a return plenum.  
+Here is an example to describe what procedures will be used. Assume that there is a connection to a Zone HVAC equipment in Zone 1, there are 3 zones to return air into a return plenum as Zones 1, 2 and 3. This calculation procedure is provided below. The changes will be accordingly when there are more zones served by a return plenum.
 
-Zone air properties: 
+Zone air properties:
 
 T<sub>zone1</sub> and W<sub>zone1</sub>
 
@@ -296,7 +296,7 @@ Zone 1 return mass flow rate may be changed as below:
 
 m<sub>total1</sub> = m<sub>AirLoopReturn1</sub> + m<sub>ZoneHVAC</sub>
 
-There are no return mass flow rate changes in Zones 2 and 3 
+There are no return mass flow rate changes in Zones 2 and 3
 
 The existing return plenum calculation remain as is.
 
@@ -308,7 +308,7 @@ m<sub>InducedNode</sub> = m<sub>ZoneHVAC</sub>
 
 The air properties in both outlet nodes (induced and return plenum) are the same.
 
- 
+
 
 ## Testing/Validation/Data Sources ##
 
@@ -552,7 +552,7 @@ An example using ZONEHVAC:PACKAGEDTERMINALAIRCONDITIONER for the case to draw ai
     ,                        !- Return Air Fraction Calculated from Plenum Temperature
     ,                        !- Return Air Fraction Function of Plenum Temperature Coefficient 1
     ,                        !- Return Air Fraction Function of Plenum Temperature Coefficient 2
-    Zone1ReturnNodeList;          !- Return Air Heat Gain Node or NodeList Name 
+    Zone1ReturnNodeList;          !- Return Air Heat Gain Node or NodeList Name
 
   	NodeList,
     Zone1ReturnNodeList,           !- Name
@@ -716,7 +716,7 @@ The Lights object is modified by adding an optional field as Return Air Heat Gai
        \note Name of the return air node for this heat gain.
        \note If left blank, defaults to the first return air node for the zone.
        \note Leave this field blank when using a ZoneList name.
-       \note If a zone exhaust node is listed in the NodeList, the air properties are calculated 
+       \note If a zone exhaust node is listed in the NodeList, the air properties are calculated
        \note using both node mass flow rates and light return air heat gain
        \type node
 
@@ -786,7 +786,7 @@ If NodeListActive, then assign the number of nodes in the NodeLIst into this var
 
 #### Replace int ZoneReturnNum by Array1D<int> ZoneReturnNodeNum()
 
-Since a single node will be replaced by NodeList, 1-D array is needed to carry NodeList information. 
+Since a single node will be replaced by NodeList, 1-D array is needed to carry NodeList information.
 
 ### ZoneEquipmentManager ###
 
@@ -800,7 +800,7 @@ A new section will be added to perform followig calculations
 
 ### PackagedTerminalHeatPump ###
 
-The GetPTUnit function will be modified to allow Induced Air Outlet Node or NodeList Name as Inlet Air Node for both PTAC and PTHP. 
+The GetPTUnit function will be modified to allow Induced Air Outlet Node or NodeList Name as Inlet Air Node for both PTAC and PTHP.
 
 ### UnitarySystem ###
 
@@ -814,5 +814,5 @@ Both functions of InitAirZoneReturnPlenum and CalcAirZoneReturnPlenum may be mod
 2. Calculate zone plenumn outlet conditions using existing procedure
 3. Set air properties for all induced air nodes and return plenum node
 4. Split mass flow rate of plenum outlets for retur plenum node and induced nodes.
- 
+
 

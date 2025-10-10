@@ -1,9 +1,9 @@
- 
+
  ! ========================================================================
  ! The following was created by the Basement preprocessor program.
  ! Weather File Location=Chicago Ohare Intl Ap IL USA TMY3
- ! 
- 
+ !
+
 SurfaceProperty:OtherSideCoefficients,
   surfPropOthSdCoefBasementAvgWall,    !- Name
   0.0,                                 !- Combined Convective Radiative Film Coefficient
@@ -16,7 +16,7 @@ SurfaceProperty:OtherSideCoefficients,
   scheduleOSCBasementWallSurfaceTemp,  !- Constant Temperature Schedule Name
   No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
   24;                                  !- Period of Sinusoidal Variation
- 
+
 Schedule:Compact,
   scheduleOSCBasementWallSurfaceTemp,  !- Name
   Temperature,                         !- ScheduleType
@@ -68,7 +68,7 @@ Schedule:Compact,
   For:AllDays,                         !- Field
   Until:24:00,                         !- Field
   18.84;                               !- Field
- 
+
 SurfaceProperty:OtherSideCoefficients,
   surfPropOthSdCoefBasementAvgFloor,   !- Name
   0.0,                                 !- Combined Convective Radiative Film Coefficient
@@ -81,7 +81,7 @@ SurfaceProperty:OtherSideCoefficients,
   scheduleOSCBasementFloorTemp,        !- Constant Temperature Schedule Name
   No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
   24;                                  !- Period of Sinusoidal Variation
- 
+
 Schedule:Compact,
   scheduleOSCBasementFloorTemp,        !- Name
   Temperature,                         !- ScheduleType
@@ -133,7 +133,7 @@ Schedule:Compact,
   For:AllDays,                         !- Field
   Until:24:00,                         !- Field
   19.89;                               !- Field
- 
+
 SurfaceProperty:OtherSideCoefficients,
   surfPropOthSdCoefBasementUpperWall,  !- Name
   0.0,                                 !- Combined Convective Radiative Film Coefficient
@@ -146,7 +146,7 @@ SurfaceProperty:OtherSideCoefficients,
   scheduleOSCBasementUpperWallTemp,    !- Constant Temperature Schedule Name
   No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
   24;                                  !- Period of Sinusoidal Variation
- 
+
 Schedule:Compact,
   scheduleOSCBasementUpperWallTemp,    !- Name
   Temperature,                         !- ScheduleType
@@ -198,7 +198,7 @@ Schedule:Compact,
   For:AllDays,                         !- Field
   Until:24:00,                         !- Field
   18.18;                               !- Field
- 
+
 SurfaceProperty:OtherSideCoefficients,
   surfPropOthSdCoefBasementLowerWall,  !- Name
   0.0,                                 !- Combined Convective Radiative Film Coefficient
@@ -211,7 +211,7 @@ SurfaceProperty:OtherSideCoefficients,
   scheduleOSCBasementLowerWallTemp,    !- Constant Temperature Schedule Name
   No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
   24;                                  !- Period of Sinusoidal Variation
- 
+
 Schedule:Compact,
   scheduleOSCBasementLowerWallTemp,    !- Name
   Temperature,                         !- ScheduleType

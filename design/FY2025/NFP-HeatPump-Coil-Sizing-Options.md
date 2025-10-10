@@ -30,7 +30,7 @@ The AirloopHVAC:UnitarySystem uses the larger of the cooling and heating loads t
             EqSizing.DesHeatingLoad = EqSizing.DesCoolingLoad;
             state.dataSize->DXCoolCap = EqSizing.DesCoolingLoad; <-- **
         }
-            
+
 Other heat pump equipment types size the cooling coil and assumes the heating coil is the same size. Similar changes will be made to those equipment models.
 
 ## Approach ##
@@ -96,7 +96,7 @@ AirloopHVAC:UnitarySystem already uses the maximum cooling or heating load to si
         if (this->m_CoolingCoilType_Num != HVAC::Coil_CoolingWaterToAirHPVSEquationFit &&
                 this->m_HeatingCoilType_Num != HVAC::Coil_HeatingWaterToAirHPVSEquationFit) {
             EqSizing.Capacity = true;
-            
+
 Start new code:
 
             if (SizeToGreaterOfHeatingOrCooling && EqSizing.DesHeatingLoad > EqSizing.DesCoolingLoad * MaxHeatingCapacityToCoolingLoad) {
@@ -112,12 +112,12 @@ Start new code:
                 // this logic is subject to change as needed (i.e., it's a max ratio, not absolute)
                 EqSizing.DesHeatingLoad = EqSizing.DesCoolingLoad * MaxHeatingCapacityToCoolingLoad;
             }
-            
+
 End new code:
 
             state.dataSize->DXCoolCap = EqSizing.DesHeatingLoad;
         }
-            
+
 Other heat pump equipment types use the cooling load for setting coil size. This code is typically handeled in the coil models and will be updated similarly, or revised entirely using the above logic wherever DXCoolCap is set.
 
 DXCoils.cc is where cooling capacity is used to set heating capacity for non-UnitarySystem heat pump equipment.
@@ -175,7 +175,7 @@ The proposed approach to unify heat pump sizing methodology is to add new fields
            \units W/W
            \minimum 1.0
            \default 1.0
- 
+
     Sizing:System,
       A12, \field Heating Coil Sizing Method
            \type choice
@@ -193,7 +193,7 @@ These are the existing objects that will require code changes and whether those 
 
     AirloopHVAC:UnitarySystem,
       N1 , \field DX Heating Coil Sizing Ratio
-      
+
     ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
       N10, \field Rated Heating Capacity Sizing Ratio
 

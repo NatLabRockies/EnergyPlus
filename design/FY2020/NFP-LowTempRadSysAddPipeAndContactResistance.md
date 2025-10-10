@@ -5,7 +5,7 @@ Addition of Pipe Wall and Pipe to Surface Contact Resistance to the Low Temperat
 
  - Original Date: July 2, 2020
  - Revision Date
- 
+
 
 ## Justification for New Feature ##
 

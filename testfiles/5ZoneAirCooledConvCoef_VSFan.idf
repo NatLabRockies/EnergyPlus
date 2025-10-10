@@ -3490,7 +3490,7 @@
     INTERMITTENT,            !- Pump Control Type
     CoolingPumpAvailSched;   !- Pump Flow Rate Schedule Name
 
-  !- This object is used to virtually increase the 
+  !- This object is used to virtually increase the
   !- temeprature of the plenum zone to showcase the
   !- first stage of the `staged` variable speed control
   !- of the terminal PIUs
@@ -3503,7 +3503,7 @@
     5500,,,0,0.5,0;
 
   Schedule:Constant,AlwaysOn,Fraction,1;
-  
+
 
   Output:Variable,*,Zone Air Temperature,detailed;
   Output:Variable,*,Zone Air System Sensible Cooling Rate,detailed;

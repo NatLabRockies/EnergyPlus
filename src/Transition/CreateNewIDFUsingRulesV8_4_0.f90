@@ -119,7 +119,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
   CHARACTER(len=MaxNameLength) :: OutScheduleName
 
   LOGICAL :: ErrFlag
-  
+
   REAL :: IndirectOldFieldFive
   REAL :: IndirectOldFieldSix
   REAL :: IndirectNewFieldThirteen
@@ -370,7 +370,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1:CurArgs)=InArgs(1:CurArgs)
                 nodiff=.true.
-                                
+
               CASE('WATERHEATER:STRATIFIED')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1:63)  = InArgs(1:63)
@@ -378,7 +378,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(66:67) = InArgs(64:65)
                 CurArgs = CurArgs + 2
                 nodiff=.true.
-             
+
               CASE('WATERHEATER:HEATPUMP')
                 ObjectName = "WaterHeater:HeatPump:PumpedCondenser"
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -393,7 +393,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(25:35) = InArgs(24:34) ! move these up by 1 for added F24
                 ! DELETE InArgs(35)
                 OutArgs(36) = '' ! add new blank field F35
-                
+
                 ! For OutArgs(36) "Control Sensor 1 Height In Stratified Tank", we need to mine it from the stratified tank child object
                 ! We will start by initializing it to a blank string in case we couldn't find it
                 OutArgs(37) = '' ! Get appropriate height from waterheater:stratified object or leave blank in
@@ -429,10 +429,10 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                     END DO
                   END IF
                 END IF
-                OutArgs(38:39) = '' ! Finish 
+                OutArgs(38:39) = '' ! Finish
                 nodiff = .true.
                 CurArgs = CurArgs + 2 ! the net gain is +1 field
-                
+
               CASE('BRANCH')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1:CurArgs)=InArgs(1:CurArgs)
@@ -489,7 +489,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(5) = 'Autosize'
                 OutArgs(6:17) = InArgs(5:16)
                 CurArgs = CurArgs + 1
-                
+
               CASE('CONTROLLER:MECHANICALVENTILATION')
                 nodiff=.false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -567,7 +567,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2:4)=InArgs(14:16)
                 OutArgs(5:7)=InArgs(19:21)
                 CALL WriteOutIDFLines(DifLfn,ObjectName,7,OutArgs,NwFldNames,NwFldUnits)
-                Written = .true.                
+                Written = .true.
 
               CASE('PIPE:UNDERGROUND')
                 nodiff=.false.
@@ -603,7 +603,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 END DO
                 OutArgs(5:7)=InArgs(9:11)
                 CALL WriteOutIDFLines(DifLfn,ObjectName,7,OutArgs,NwFldNames,NwFldUnits)
-                Written = .true.     
+                Written = .true.
 
               CASE('GROUNDHEATEXCHANGER:HORIZONTALTRENCH')
                 nodiff=.false.
@@ -626,7 +626,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2:4)=InArgs(11:13)
                 OutArgs(5:7)=InArgs(19:21)
                 CALL WriteOutIDFLines(DifLfn,ObjectName,7,OutArgs,NwFldNames,NwFldUnits)
-                Written = .true.                
+                Written = .true.
 
               CASE('GROUNDHEATEXCHANGER:SLINKY')
                 nodiff=.false.
@@ -649,8 +649,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2:4)=InArgs(5:7)
                 OutArgs(5:7)=InArgs(20:22)
                 CALL WriteOutIDFLines(DifLfn,ObjectName,7,OutArgs,NwFldNames,NwFldUnits)
-                Written = .true.                
-              
+                Written = .true.
+
               ! This was actually missed in the 8.1 to 8.2 transition, so it is included here as a redundancy
               CASE('HVACTEMPLATE:PLANT:CHILLEDWATERLOOP')
                 nodiff=.false.

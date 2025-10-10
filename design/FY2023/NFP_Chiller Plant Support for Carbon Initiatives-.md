@@ -7,10 +7,10 @@ Chiller Plant Support for Carbon Initiatives
 
  - Original Date: Apr 24, 2023
  - Modified Date: May 5, 2023 (update changes to feature)
- 
+
 *Preface:*
 
-This new feature is a request provided by Trane North America. The plant configuration(s) described herein are currently deployed at several locations in the NE US. The Trane team has invested several months of development for this new feature and the following discussion is a result of that work. 
+This new feature is a request provided by Trane North America. The plant configuration(s) described herein are currently deployed at several locations in the NE US. The Trane team has invested several months of development for this new feature and the following discussion is a result of that work.
 
 *Acknowledgments:*
 
@@ -29,7 +29,7 @@ From a historical perspective, chilled water plants have traditionally used ther
 
 This proposal outlines a new feature for a plant supervisory controller and an expansion of the existing HeatPump:PlantLoop:EIR:Cooling and HeatPump:PlantLoop:EIR:Heating objects to include typical equipment operating features and limitations. The supervisory controller will build on the existing plant control techniques by adding a new object to manage control of the hot and cold water plants and the equipment serving those plants as *PlantEquipmentOperation:ChillerHeaterChangeover*. The existing HeatPump:PlantLoop:EIR objects will be improved to include new features, for example defrost controls, operating temperature limits, and allow controls to meet either a plant load or a chiller heater leaving water set point.
 
-The proposed approach would be to develop the new supervisory controller and add new functionality to the existing chiller heaters such that a plant of this type could be modeled. Added controls and alternate plant designs could be added in the future. 
+The proposed approach would be to develop the new supervisory controller and add new functionality to the existing chiller heaters such that a plant of this type could be modeled. Added controls and alternate plant designs could be added in the future.
 
 ## Overview ##
 
@@ -45,7 +45,7 @@ Notes on this figure:
  - Plant loop temperature fluctuations due to defrost are not explicitly modeled at this time (i.e., the defrost shock tank would absorb the majority of this temperature swing, but actual plant temperature changes are not modeled.
  - Thermal ice storage dispatch is not yet included as part of this feature.
 
- 
+
 ![divertingvalveplant](DivertingValvePlant.png)
 <p style="text-align: center;"> Figure 1. Advanced Heat Recovery Plant Design</p>
 
@@ -233,7 +233,7 @@ The new object used as a supervisory controller is shown here. The most notable 
 
     PlantEquipmentOperation:ChillerHeaterChangeover,
         \memo Plant equipment operation object to control switchover between chiller
-        \memo and heater operation of chiller heater heat pump serving 2 plant loops. 
+        \memo and heater operation of chiller heater heat pump serving 2 plant loops.
         \memo Poll zone loads and determine if plant should be in heating, cooling
         \memo or simultaneous heating and cooling and dispatch equipment accordingly.
     A1, \field Name
@@ -251,7 +251,7 @@ The new object used as a supervisory controller is shown here. The most notable 
         \minimum  0.0
         \maximum 20.0
     N3, \field Primary Heating Plant Setpoint at Outdoor High Temperature
-        \note 
+        \note
         \required-field
         \type real
         \units C
@@ -306,7 +306,7 @@ The new object used as a supervisory controller is shown here. The most notable 
     N8; \field Dedicated Recovery Heat Pump Control Load Capacity Factor
         \type real
         \default 0.1
-  
+
 
 ## Proposed additions to Meters:
 
@@ -319,7 +319,7 @@ HeatPump:PlantLoop:EIR:Heating
 HeatPump:PlantLoop:EIR:Cooling<br>
 HeatPump:PlantLoop:EIR:Heating
 
-    Heat Pump Part Load Ratio 
+    Heat Pump Part Load Ratio
     Heat Pump Cycling Ratio
 
 HeatPump:PlantLoop:EIR:Heating
@@ -338,7 +338,7 @@ PlantEquipmentOperation:ChillerHeaterChangeOver
     Supervisory Plant Operation Primary Plant Heating Load
     Supervisory Plant Operation Primary Plant Cooling Load
     Supervisory Plant Auxiliary Boiler Mode
-    
+
 
 ## Engineering and Input Output Reference Documents
 
@@ -358,7 +358,7 @@ Models ACS and ACX](https://www.trane.com/content/dam/Trane/Commercial/global/pr
 
 The HeatPump:PlantLoop:EIR object changes are fairly straight-forward. New class variables are added to represent each new input field. A code example for the new Control Type input field with a \default value = Load. Note here that the default value is not checked and assumed to be Load. The default field value will be further discussed in the next example.
 
-    constexpr std::array<std::string_view, 
+    constexpr std::array<std::string_view,
             static_cast<int>(ControlType::Num)> PLHPCtrlTypeNamesUC = {"SETPOINT", "LOAD"};
     auto const controlType = fields.find("control_type");
     if (controlType != fields.end()) {
@@ -441,7 +441,7 @@ And one example of a plant equipment operating scheme input:
       50000,                              !- Load Range 2 Lower Limit {W}
       10000000000000,                     !- Load Range 2 Upper Limit {W}
       Two AWHP Cooling Equipment List;    !- Range 2 Equipment List Name
-    
+
     PlantEquipmentList,
       One AWHP Cooling Equipment List,    !- Name
       HeatPump:PlantLoop:EIR:Cooling,     !- Equipment 1 Object Type
@@ -452,8 +452,8 @@ And one example of a plant equipment operating scheme input:
       HeatPump:PlantLoop:EIR:Cooling,     !- Equipment 1 Object Type
       AWHP_1 Cooling Side,                !- Equipment 1 Name
       HeatPump:PlantLoop:EIR:Cooling,     !- Equipment 2 Object Type
-      AWHP_2 Cooling Side;                !- Equipment 2 Name    
-      
+      AWHP_2 Cooling Side;                !- Equipment 2 Name
+
 The final 3 inputs of this new object holds the name of the chiller heater used for heat recovery between plant loops and a load factor where the heat recovery chiller heater is allowed to operate. The intention of this model is that the heat recovery chiller heater will meet low loads on one of the plants. When any primary equipment on that plant are active the heat recovery chiller heater is off. The use of a heat recovery heat pump is anticipated to be included with this new feature development effort.
 
 The supervisory class will reside in the unused source file EquipAndOperations.cc. The pointer to ChillerHeaterSupervisoryOperation will be added to state.

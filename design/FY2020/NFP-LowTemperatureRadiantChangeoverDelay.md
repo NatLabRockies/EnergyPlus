@@ -5,7 +5,7 @@ Implement Optional Time Delay Between Mode Changeover for Low Temperature Radian
 
  - Original Date: July 2, 2020
  - Revision Date: Version 2—July 2, 2020
- 
+
 
 ## Justification for New Feature ##
 

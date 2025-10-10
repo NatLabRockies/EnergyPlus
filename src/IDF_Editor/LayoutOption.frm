@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form LayoutOption 
+Begin VB.Form LayoutOption
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Layout Options"
    ClientHeight    =   5550
@@ -14,7 +14,7 @@ Begin VB.Form LayoutOption
    ScaleWidth      =   5745
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.PictureBox picTallTall 
+   Begin VB.PictureBox picTallTall
       BackColor       =   &H80000004&
       Height          =   2295
       Left            =   3000
@@ -23,32 +23,32 @@ Begin VB.Form LayoutOption
       TabIndex        =   4
       Top             =   2640
       Width           =   2655
-      Begin VB.Shape Shape16 
+      Begin VB.Shape Shape16
          Height          =   1935
          Left            =   120
          Top             =   120
          Width           =   1095
       End
-      Begin VB.Shape Shape15 
+      Begin VB.Shape Shape15
          Height          =   855
          Left            =   1320
          Top             =   120
          Width           =   495
       End
-      Begin VB.Shape Shape14 
+      Begin VB.Shape Shape14
          Height          =   855
          Left            =   1920
          Top             =   120
          Width           =   495
       End
-      Begin VB.Shape Shape13 
+      Begin VB.Shape Shape13
          Height          =   975
          Left            =   1320
          Top             =   1080
          Width           =   1095
       End
    End
-   Begin VB.PictureBox picTallShort 
+   Begin VB.PictureBox picTallShort
       BackColor       =   &H80000004&
       Height          =   2295
       Left            =   3000
@@ -57,32 +57,32 @@ Begin VB.Form LayoutOption
       TabIndex        =   3
       Top             =   120
       Width           =   2655
-      Begin VB.Shape Shape12 
+      Begin VB.Shape Shape12
          Height          =   1935
          Left            =   120
          Top             =   120
          Width           =   1095
       End
-      Begin VB.Shape Shape11 
+      Begin VB.Shape Shape11
          Height          =   375
          Left            =   1320
          Top             =   120
          Width           =   1095
       End
-      Begin VB.Shape Shape10 
+      Begin VB.Shape Shape10
          Height          =   375
          Left            =   1320
          Top             =   600
          Width           =   1095
       End
-      Begin VB.Shape Shape9 
+      Begin VB.Shape Shape9
          Height          =   975
          Left            =   1320
          Top             =   1080
          Width           =   1095
       End
    End
-   Begin VB.PictureBox picShortTall 
+   Begin VB.PictureBox picShortTall
       BackColor       =   &H80000004&
       Height          =   2295
       Left            =   120
@@ -91,32 +91,32 @@ Begin VB.Form LayoutOption
       TabIndex        =   2
       Top             =   2640
       Width           =   2655
-      Begin VB.Shape Shape8 
+      Begin VB.Shape Shape8
          Height          =   855
          Left            =   120
          Top             =   120
          Width           =   1095
       End
-      Begin VB.Shape Shape7 
+      Begin VB.Shape Shape7
          Height          =   855
          Left            =   1320
          Top             =   120
          Width           =   495
       End
-      Begin VB.Shape Shape6 
+      Begin VB.Shape Shape6
          Height          =   855
          Left            =   1920
          Top             =   120
          Width           =   495
       End
-      Begin VB.Shape Shape5 
+      Begin VB.Shape Shape5
          Height          =   975
          Left            =   120
          Top             =   1080
          Width           =   2295
       End
    End
-   Begin VB.PictureBox picShortShort 
+   Begin VB.PictureBox picShortShort
       BackColor       =   &H00E0E0E0&
       Height          =   2295
       Left            =   120
@@ -125,32 +125,32 @@ Begin VB.Form LayoutOption
       TabIndex        =   1
       Top             =   120
       Width           =   2655
-      Begin VB.Shape Shape4 
+      Begin VB.Shape Shape4
          Height          =   975
          Left            =   120
          Top             =   1080
          Width           =   2295
       End
-      Begin VB.Shape Shape3 
+      Begin VB.Shape Shape3
          Height          =   375
          Left            =   1320
          Top             =   600
          Width           =   1095
       End
-      Begin VB.Shape Shape2 
+      Begin VB.Shape Shape2
          Height          =   375
          Left            =   1320
          Top             =   120
          Width           =   1095
       End
-      Begin VB.Shape Shape1 
+      Begin VB.Shape Shape1
          Height          =   855
          Left            =   120
          Top             =   120
          Width           =   1095
       End
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375
@@ -258,15 +258,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

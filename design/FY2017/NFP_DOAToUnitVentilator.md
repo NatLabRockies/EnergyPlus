@@ -5,7 +5,7 @@ FSEC, B. Nigusse, December 22, 2016, Final NFP
 
 
 #Justification for Feature Update:
-In its current form, EnergyPlus 8.6 allow a central dedicated outdoor air system (DOAS) to provide conditioned outdoor air directly to the supply or the inlet side of *ZoneHVAC:FourPipeFanCoil*, *ZoneHVAC:WaterToAirHeatPump*, *ZoneHVAC:PackagedTerminalAirConditioner*, *ZoneHVAC:PackagedTerminalHeatPump*, *ZoneHVAC:TerminalUnit:VariableRefrigerantFlow*, or *AirLoopHVAC:UnitarySystemp* zoneHVAC equipment. Such an arrangement is commonly used in current building design practices and should be extended to other zoneHVAC equipment in EnergyPlus. While there is a credible work-around in EnergyPlus version 8.6 that is thermodynamically similar to the supply side delivery arrangement described above, the OA from the central DOAS is delivered to the zone directly instead of being mixed with the supply air at supply node of the zoneHVAC equipment. This effort will extend such capability to ***ZoneHVAC:UnitVentilator*** zoneHVAC equipment. The total airflow delivered to the zone is important to be established as it helps in sizing of the duct work and supply registers for the zone, and is also the more commonly used arrangement in practice. In addition to the total airflow, supply air and outdoor air conditions may also be set taking into account the mixing taking place upstream or downstream.   
+In its current form, EnergyPlus 8.6 allow a central dedicated outdoor air system (DOAS) to provide conditioned outdoor air directly to the supply or the inlet side of *ZoneHVAC:FourPipeFanCoil*, *ZoneHVAC:WaterToAirHeatPump*, *ZoneHVAC:PackagedTerminalAirConditioner*, *ZoneHVAC:PackagedTerminalHeatPump*, *ZoneHVAC:TerminalUnit:VariableRefrigerantFlow*, or *AirLoopHVAC:UnitarySystemp* zoneHVAC equipment. Such an arrangement is commonly used in current building design practices and should be extended to other zoneHVAC equipment in EnergyPlus. While there is a credible work-around in EnergyPlus version 8.6 that is thermodynamically similar to the supply side delivery arrangement described above, the OA from the central DOAS is delivered to the zone directly instead of being mixed with the supply air at supply node of the zoneHVAC equipment. This effort will extend such capability to ***ZoneHVAC:UnitVentilator*** zoneHVAC equipment. The total airflow delivered to the zone is important to be established as it helps in sizing of the duct work and supply registers for the zone, and is also the more commonly used arrangement in practice. In addition to the total airflow, supply air and outdoor air conditions may also be set taking into account the mixing taking place upstream or downstream.
 
 ##Conference Call Conclusions:
 
@@ -16,17 +16,17 @@ The arrangements shown in Figure 1 is supported in EnergyPlus version 8.6 for th
 
 -**ZoneHVAC:FourPipeFanCoil**
 
--**ZoneHVAC:WaterToAirHeatPump** 
+-**ZoneHVAC:WaterToAirHeatPump**
 
--**ZoneHVAC:PackagedTerminalAirConditioner** 
+-**ZoneHVAC:PackagedTerminalAirConditioner**
 
--**ZoneHVAC:PackagedTerminalHeatPump** 
+-**ZoneHVAC:PackagedTerminalHeatPump**
 
 -**ZoneHVAC:TerminalUnit:VariableRefrigerantFlow**
 
--**AirLoopHVAC:UnitarySystemp** 
+-**AirLoopHVAC:UnitarySystemp**
 
- 
+
 A central DOAS provides fresh air to the zone mixed either at the inlet or outlet of a local zoneHVAC equipment that conditions the recirculation air.
 
 ![Figure 1 Air Terminal OA Mixer at inlet and supply side of each zoneHVAC equipment](DOAToZoneHVACEquipment.png)
@@ -39,7 +39,7 @@ The *AirTerminal:SingleDuct:Mixer* object provides the zoneHVAC equipment object
 **Connecting Unit Ventilator to DOA**
 
 - Currently supported outdoor air control types for unit ventilator are: FixedAmount, VariablePercent and FixedTemperature. These Outdoor Air Control Types require the minimum and maximum outdoor air flow rates and the corresponding schedule input fields to work. The three outdoor air flow control types will be available when the unit ventilator is connected to DOA.
- 
+
 - Input fields: *Outdoor Air Node Name*, *Exhaust Air Node Name*, and *Mixed Air Node Name* in **ZoneHVAC:UnitVentilator** object are the node names that are required for *built-in* outdoor air mixer only. These three node names are not required if the UnitVentilator object is connected to DOA. Therefore, the required field restriction will be removed. The IDD will be modified to remove the restriction and appropriate note will be added for each of the three input fields. Eventually it is recommended to replace the "built-in" outdoor air mixer with a OutdoorAir:Mixer child object as it is done for other ZoneHVAC equipment.
 
 
@@ -186,9 +186,9 @@ Example of Unit Ventilator served with dedicated outdoor air (DOA). The Outdoor 
     0.001;                   !- Cooling Convergence Tolerance
 
 
-###AirTerminal:SingleDuct:Mixer 
+###AirTerminal:SingleDuct:Mixer
 This terminal unit mixer object is used to mix conditioned outdoor air (primary air) from DOAS air loop and recirculating (secondary air) and deliver it either to inlet and supply side of a local zoneHVAC equipment. The terminal unit mixer can be connected either to the inlet or supply side of the local zoneHVAC equipment and the connection type is specified by a user in the input field ***Terminal Unit Connection Type.*** If the *AirTerminal:SingleDuct:Mixer* object is connected to the supply side, a mix of conditioned outdoor air from a central dedicated outdoor air system (DOAS) with conditioned recirculation air from the local zoneHVAC equipment is supplied as a single stream to the conditioned zone at its inlet node. If the *AirTerminal:SingleDuct:Mixer* object is connected to the inlet side, a mix of outdoor air from the a central dedicated outdoor air system (DOAS) with un-conditioned recirculation air from a zone exhaust node is supplied to the zoneHVAC equipment inlet node. The mixer will sum the two air streams and average the air properties of the two incoming streams.
-   
+
 **Field: Name**
 
 Unique name for this air terminal mixer.
@@ -207,16 +207,16 @@ The name of the air outlet node of the mixer. This will be an inlet air node nam
 
 **Field: Mixer Primary Air Inlet Node Name**
 
-The name of the primary air (outdoor air) inlet node of the mixer. This will be an outlet node of an AirLoopHVAC:ZoneSplitter, providing the connection to the DOAS system. 
+The name of the primary air (outdoor air) inlet node of the mixer. This will be an outlet node of an AirLoopHVAC:ZoneSplitter, providing the connection to the DOAS system.
 
 **Field: Mixer Secondary Air Inlet Node Name**
- 
+
 The name of the secondary air (recirculating air) inlet node of the mixer. This will be the outlet air node name of the zoneHVAC equipment if the connection type in the input field *Terminal Unit Connection Type* below is ***SupplySide,*** or else this will be exhaust air node name of the zone that is being conditioned if the connection type in the input field *Terminal Unit Connection Type* below is ***InletSide.***
 
 **Field: Mixer Connection Type**
 
 This mixer connection type. Valid choices are *InletSide* or *SupplySide*. This is a required input field. If the mixer connection type selected is InletSide, then the mixer is connected on the inlet side of the ZoneHVAC equipment, or else if the mixer connection type selected is SupplySide, then the mixer is connected at the outlet side of the ZoneHVAC equipment.
-   
+
 The IDD entry for this object follows.
 
 **AirTerminal:SingleDuct:Mixer,**

@@ -5723,7 +5723,7 @@ This field is the name of a univariate curve or table that defines an EIR modifi
 
 \paragraph{Field: Heating To Cooling Capacity Sizing Ratio}\label{plhp_eir_heating_inputs_heating_to_cooling_capacity_sizing_ratio}
 
-This optional numeric field allows the user to choose a multiplier to size the Heating version of this object. The default value is 1.0. 
+This optional numeric field allows the user to choose a multiplier to size the Heating version of this object. The default value is 1.0.
 
 \paragraph{Field: Heat Pump Sizing Method}\label{plhp_eir_heating_inputs_heat_pump_sizing_method}
 
@@ -6034,7 +6034,7 @@ This output variable represents the cumulative heat transfer across the heat rec
 \paragraph{Heat Pump Heat Recovery Heat Transfer Rate {[}W{]}}\label{air-to-water-heat-pump-heat-recovery-heat-transfer-rate-w}
 
 This output variable represents the heat transfer across the heat recovery coil. The values are calculated for each HVAC system time step being simulated, and the results are averaged for the time step being reported.
-   
+
 \paragraph{Heat Pump Heat Recovery Outlet Temperature {[}C{]}}\label{air-to-water-heat-pump-heat-recovery-outlet-temperature-c}
 
 This output variable represents the average fluid temperature leaving the heat recovery coil. The values are calculated for each HVAC system time step being simulated, and the results are averaged for the time step being reported.
@@ -6054,7 +6054,7 @@ This output variable represents the average operating status of heat recovery op
 
 \subsection{HeatPump:AirToWater:FuelFired:Heating (and Cooling)}\label{plhp_fuelfired}
 
-HeatPump:AirToWater:FuelFired:Heating is a gas-fired (or fuel fired) air-to-water absorption heat pump that can be used for space heating and domestic hot water. 
+HeatPump:AirToWater:FuelFired:Heating is a gas-fired (or fuel fired) air-to-water absorption heat pump that can be used for space heating and domestic hot water.
 
 \subsubsection{Inputs}
 
@@ -6067,7 +6067,7 @@ The name of the gas-fired (fuel-fired) absorption heat pump system.
 
 The name of the water inlet node connection. For the heating mode, this will be likely the incoming DHW water node. For the cooling mode, this will be the chilled water inlet node.
 
-Note that here the ``water'' does not have to be literally mean ``water''. Rather it is the working fluid in the connected water side plant loop, which is can be some kind of glycol-water solution as well. 
+Note that here the ``water'' does not have to be literally mean ``water''. Rather it is the working fluid in the connected water side plant loop, which is can be some kind of glycol-water solution as well.
 
 \paragraph{Field: Water Outlet Node Name}
 The name of the water outlet node connection. For the heating mode, this will be likely the supply DHW water node. For the cooling mode, this will be the supply chilled water outlet node.
@@ -6233,7 +6233,7 @@ Aux_EIRPLR_CurveName, !-Auxiliary Electric Energy Input Ratio Function of PLR Cu
 
 \subsubsection{Outputs}
 
-The output variables for the fuel-fired (or gas-fired) absorption heat pump system are: 
+The output variables for the fuel-fired (or gas-fired) absorption heat pump system are:
 
 \begin{itemize}
 \item HVAC,average,Fuel-fired Absorption HeatPump Load Side Heat Transfer Rate [W]
@@ -6255,10 +6255,10 @@ This is the load side heat transfer rate for the fuel-fired absorption heat pump
 This is the accumulated value for the load side heat transfer energy for the fuel-fired absorption heat pump. The value will be positive for the heating mode, and negative for the cooling mode.
 
 \paragraph{Fuel-fired Absorption HeatPump Fuel Rate [W]}
-This is the fuel consumption rate in [W] of the fuel-fired absorption heat pump. 
+This is the fuel consumption rate in [W] of the fuel-fired absorption heat pump.
 
 \paragraph{Fuel-fired Absorption HeatPump Fuel Energy [J]}
-This is the accumulated fuel consumption in [J] of the fuel-fired absorption heat pump. 
+This is the accumulated fuel consumption in [J] of the fuel-fired absorption heat pump.
 
 \paragraph{Fuel-fired Absorption HeatPump Electricity Rate [W]}
 This is the electricity consumption rate in [W] of the fuel-fired absorption heat pump.
@@ -6306,15 +6306,15 @@ negative integer -k for k cooling units being on.
 System (EMS) program setting value in an actuator called ``Operating Mode''
 defined for a HeatPump:AirToWater:Heating or HeatPump:AirToWater:Cooling. The
 EMS program must set the operating mode to 0 for off, or an integer k for the
-number of units on. When the value is k, k heating (if the actuator is HeatPump:AirToWater:Heating) 
-or cooling (if the actuator is HeatPump:AirToWater:Cooling) component will be on. 
+number of units on. When the value is k, k heating (if the actuator is HeatPump:AirToWater:Heating)
+or cooling (if the actuator is HeatPump:AirToWater:Cooling) component will be on.
 When the value is 0, the heating or cooling component will be off.
 \item Load: the operating mode is determined by the load on the water side of
 the heat pump. If the load is positive, the unit will operate in heating mode.
 If the load is negative, the unit will operate in cooling mode. If the load is
 zero, the unit will be off.
 \end{itemize}
-\paragraph{Field: Operating Mode Control Option for Multiple Unit} 
+\paragraph{Field: Operating Mode Control Option for Multiple Unit}
 This field describes the modular behavior of the AWHP, where a few units are
 connected in parallel to supply larger capacity. This determines how many units
 are in heating mode and how many are in cooling mode when the load is too large
@@ -6356,7 +6356,7 @@ the outlet water temperature corresponding to rated heat pump performance
 \paragraph{Field: Rated Water Flow Rate in Heating Mode} This field is the
 condenser water flow rate corresponding to rated heat pump performance
 (capacity, COP). The default value is autosize.
-The autosized flow rate equals the plant loop design volume flow rate. 
+The autosized flow rate equals the plant loop design volume flow rate.
 This value could be either user-specified or autosized based on peak load and design
 temperature difference.
 \paragraph{Field: Minimum Outdoor Air Temperature in Heating Mode} This field is
@@ -6366,12 +6366,12 @@ the minimum outdoor temperature allowed for heating operation. Default value is
 the maximum outdoor temperature allowed for heating operation. Default value is
 100$^\circ$C. Heating is disabled above this temperature.
 \paragraph{Field: Minimum Leaving Water Temperature Curve Name in Heating Mode}
-This optional alpha field specifies the name of a univariate curve or table that defines 
-the minimum leaving water temperature. When the air-water temperature combination is outside of 
+This optional alpha field specifies the name of a univariate curve or table that defines
+the minimum leaving water temperature. When the air-water temperature combination is outside of
 the operation boundary, the heat pump will not operate.
 \paragraph{Field: Maximum Leaving Water Temperature Curve Name in Heating Mode}
-This optional alpha field specifies the name of a univariate curve or table that defines 
-the maximum leaving water temperature. When the air-water temperature combination is outside of 
+This optional alpha field specifies the name of a univariate curve or table that defines
+the maximum leaving water temperature. When the air-water temperature combination is outside of
 the operation boundary, the heat pump will not operate.
 \paragraph{Field: Minimum Part Load Ratio} This field is the minimum part load
 ratio of the heat pump. The default value is 0.1. Below this operating limit,
@@ -6393,7 +6393,7 @@ the outlet water temperature corresponding to rated heat pump performance
 \paragraph{Field: Rated Water Flow Rate in Cooling Mode} This field is the
 condenser water flow rate corresponding to rated heat pump performance
 (capacity, COP). The default value is autosize.
-The autosized flow rate equals the plant loop design volume flow rate. 
+The autosized flow rate equals the plant loop design volume flow rate.
 This value could be either user-specified or autosized based on peak load and design
 temperature difference.
 \paragraph{Field: Minimum Outdoor Air Temperature in Cooling Mode} This field is
@@ -6403,12 +6403,12 @@ the minimum outdoor temperature allowed for cooling operation. Default value is
 the maximum outdoor temperature allowed for cooling operation. Default value is
 100$^\circ$C. Cooling is disabled above this temperature.
 \paragraph{Field: Minimum Leaving Water Temperature Curve Name in Cooling Mode}
-This optional alpha field specifies the name of a univariate curve or table that defines 
-the minimum leaving water temperature. When the air-water temperature combination is outside of 
+This optional alpha field specifies the name of a univariate curve or table that defines
+the minimum leaving water temperature. When the air-water temperature combination is outside of
 the operation boundary, the heat pump will not operate.
 \paragraph{Field: Maximum Leaving Water Temperature Curve Name in Cooling Mode}
-This optional alpha field specifies the name of a univariate curve or table that defines 
-the maximum leaving water temperature. When the air-water temperature combination is outside of 
+This optional alpha field specifies the name of a univariate curve or table that defines
+the maximum leaving water temperature. When the air-water temperature combination is outside of
 the operation boundary, the heat pump will not operate.
 \paragraph{Field: Sizing Factor for Cooling} This field is a multiplier for the
 autosized capacity and flow rates. The default value is 1.0.
@@ -6450,10 +6450,10 @@ defrost control strategy is set to Timed.
 This optional alpha field specifies the name of a bivariate curve or table that
 defines the defrost energy based on outdoor air moisture content. This curve is
 used only when Timed or OnDemand defrost control is selected.
-\paragraph{Field: Heat Pump Multiplier} This field specifies the number of heat 
-pumps being modeled. The value must be an integer greater than or equal to 1. 
-The default value is 1.0, which means only one heat pump is used. This input 
-field is used to model modular heat pumps where multiple heat pump units are 
+\paragraph{Field: Heat Pump Multiplier} This field specifies the number of heat
+pumps being modeled. The value must be an integer greater than or equal to 1.
+The default value is 1.0, which means only one heat pump is used. This input
+field is used to model modular heat pumps where multiple heat pump units are
 connected in parallel to provide larger heating/cooling capacity.
 \paragraph{Field: Control Type} This field is the compressor control type for
 the heat pump. There are two options:
@@ -6471,7 +6471,7 @@ speed level part of the time and lower speed level the rest of the time. In the
 reported ``Heat Pump Speed Level in Heating Mode'' and ``Heat Pump Speed Level
 in Cooling Mode'', the fixed-speed heat pump will report an integer corresponding to
 the higher speed level. The variable-speed one will report a fractional speed
-level where the fraction is computed by interpolating the load between the capacities 
+level where the fraction is computed by interpolating the load between the capacities
 at the two speed levels.
 \paragraph{Field: Crankcase Heater Capacity} This field is the capacity of the
 compressor crankcase heater in Watts. The default value is 0.0, which means no
@@ -6547,7 +6547,7 @@ the corresponding rated EIR (1/COP). Note that if you believe the booster mode
 EIR is just a constant scaling up of the max-speed EIR at all
 air-water-temperature combinations, you can use the same performance curves as
 the max-speed EIR and only change the rated EIR at booster mode.
-For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP 
+For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP
 than the max-speed COP, you can use the same performance curves as the max-speed
 capacity and use 0.95 times the max-speed rated COP for the rated capacity at booster mode.
 \paragraph{Heating Energy Input Ratio Function of PLR Curve Name in Booster
@@ -6610,7 +6610,7 @@ the corresponding rated EIR (1/COP). Note that if you believe the booster mode
 EIR is just a constant scaling up of the max-speed EIR at all
 air-water-temperature combinations, you can use the same performance curves as
 the max-speed EIR and only change the rated EIR at booster mode.
-For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP 
+For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP
 than the max-speed COP, you can use the same performance curves as the max-speed
 capacity and use 0.95 times the max-speed rated COP for the rated capacity at booster mode.
 \paragraph{Cooling Energy Input Ratio Function of PLR Curve Name in Booster
@@ -6714,8 +6714,8 @@ rate of the heat pump in heating mode in W.
 \paragraph{Heat Pump Electricity Energy in Heating Mode {[}J{]}} The electricity
 energy of the heat pump in heating mode in J. It is the accumulated electricity
 consumed by the heat pump.
-\paragraph{Heat Pump Load Due To Defrost {[}W{]}} 
-This output represents the additional thermal load (in Watts) imposed on the heat pump 
+\paragraph{Heat Pump Load Due To Defrost {[}W{]}}
+This output represents the additional thermal load (in Watts) imposed on the heat pump
 system due to the defrost operation.
 \paragraph{Heat Pump Fractional Defrost Time {[}{]}} The fractional defrost
 time in heating mode. It is the ratio of the defrost time to the total operation
@@ -6730,9 +6730,9 @@ load side mass flow rate of the heat pump in heating mode.
 source side mass flow rate of the heat pump in heating mode.
 \paragraph{Heat Pump Total Heating Rate {[}W{]}} The total heating rate of the
 heat pump in W in heating mode.
-\paragraph{Heat Pump Number Of Heating Unit On {[}{]}} 
+\paragraph{Heat Pump Number Of Heating Unit On {[}{]}}
 This output represents the number of heat pump units that are currently operating
-in heating mode. If you have a multi-unit (multi-module) air-to-water heat pump, 
+in heating mode. If you have a multi-unit (multi-module) air-to-water heat pump,
 operatingMode indicates how many of those units are ON to meet the current heating load.
 It can range from 0 up to the maximum number of available heat pumps. For single-unit heat pumps,
 this value will be either 0 (off) or 1 (on).
@@ -6742,11 +6742,11 @@ fixed-speed heat pumps, this value is integers. For variable-speed heat pumps,
 this value is a continuous non-negative value. When the speed level is 0,
 the heat pump used for cooling is turned off.
 \paragraph{Heat Pump Speed Ratio in Heating Mode {[}{]}} For a multi-speed heat pump, the speed ratio
-indicates how far the current operating speed is between the two adjacent discrete speed levels. 
-When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as: 
+indicates how far the current operating speed is between the two adjacent discrete speed levels.
+When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as:
 speed ratio = (load - capacity at speed n-1) / (capacity at speed n - capacity at speed n-1).
 For a variable-speed heat pump, the speed ratio equals the part load ratio.
-When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio. 
+When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio.
 \paragraph{Heat Pump Air Flow Rate in Heating Mode {[}m3/s{]}}
 The air flow rate of the heat pump in heating mode in m3/s.
 \paragraph{Heat Pump Inlet Air Temperature in Heating Mode {[}C{]}}
@@ -6808,7 +6808,7 @@ load side mass flow rate of the heat pump in cooling mode.
 source side mass flow rate of the heat pump in cooling mode.
 \paragraph{Heat Pump Total Cooling Rate {[}W{]}} The total cooling rate of the
 heat pump in W in cooling mode.
-\paragraph{Heat Pump Number Of Cooling Unit On {[}{]}} 
+\paragraph{Heat Pump Number Of Cooling Unit On {[}{]}}
 This output represents the number of heat pump units that are currently operating
 in cooling mode. If you have a multi-unit (multi-module) air-to-water heat pump,
 operatingMode indicates how many of those units are ON to meet the current cooling load.
@@ -6820,11 +6820,11 @@ fixed-speed heat pumps, this value is integers. For variable-speed heat pumps,
 this value is a continuous non-negative value. When the speed level is 0,
 the heat pump used for cooling is turned off.
 \paragraph{Heat Pump Speed Ratio in Cooling Mode {[}{]}} For a multi-speed heat pump, the speed ratio
-indicates how far the current operating speed is between the two adjacent discrete speed levels. 
-When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as: 
+indicates how far the current operating speed is between the two adjacent discrete speed levels.
+When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as:
 speed ratio = (load - capacity at speed n-1) / (capacity at speed n - capacity at speed n-1).
 For a variable-speed heat pump, the speed ratio equals the part load ratio.
-When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio. 
+When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio.
 \paragraph{Heat Pump Air Flow Rate in Cooling Mode {[}m3/s{]}}
 The air flow rate of the heat pump in cooling mode in m3/s.
 \paragraph{Heat Pump Inlet Air Temperature in Cooling Mode {[}C{]}}
@@ -6990,7 +6990,7 @@ DistrictCooling, Purchased Cooling,
 
 \paragraph{District Cooling Water Rate {[}W{]}}\label{district-cooling-chilled-water-rate-w}
 
-This is the useful rate of cooling energy from purchased chilled water. 
+This is the useful rate of cooling energy from purchased chilled water.
 
 \paragraph{District Cooling Water Energy {[}J{]}}\label{district-cooling-chilled-water-energy-j}
 

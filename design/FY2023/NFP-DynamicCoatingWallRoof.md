@@ -10,7 +10,7 @@ Modeling Dynamic Coating for Opaque Surfaces
 
 ## Justification for Feature Update
 
-Currently, EnergyPlus assumes constant thermal and solar absorptance for exterior wall and roof materials. In order to model dynamic coatings with changing solar or thermal absorptance, users need to use the EnergyManagementSystem (EMS) feature to write code to overwrite these properties. Although this can be done by advanced users, it can be a challenge for normal EnergyPlus users as learning and debugging EMS code is not an easy task. 
+Currently, EnergyPlus assumes constant thermal and solar absorptance for exterior wall and roof materials. In order to model dynamic coatings with changing solar or thermal absorptance, users need to use the EnergyManagementSystem (EMS) feature to write code to overwrite these properties. Although this can be done by advanced users, it can be a challenge for normal EnergyPlus users as learning and debugging EMS code is not an easy task.
 
 The proposed new feature will enable user input of the stimulus-absorptance relationship in the form of a table or curve. The variables triggering solar or thermal absorptance change can be surface temperature, solar radiation, space heating/cooling status, a schedule, etc. An idd object will be added to capture detailed input of solar and thermal absorptance as a function of different triggers.
 
@@ -87,7 +87,7 @@ N/A
 ## Proposed Report Variables:
 
 N/A
- 
+
 ## References
 
 [1]	T. Karlessi, M. Santamouris, K. Apostolakis, A. Synnefa, and I. Livada, “Development and testing of thermochromic coatings for buildings and urban structures,” Sol. Energy, vol. 83, no. 4, pp. 538–551, 2009.<br>

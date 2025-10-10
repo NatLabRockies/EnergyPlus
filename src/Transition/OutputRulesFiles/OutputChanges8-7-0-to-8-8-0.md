@@ -13,13 +13,13 @@ The existing Zone Component Loads Summary report has been enhanced and new repor
 
 See [5923](https://github.com/NREL/EnergyPlus/pull/5923)
 
-### Adds additional records of User-Specified component sizing output to SQLite output file. 
+### Adds additional records of User-Specified component sizing output to SQLite output file.
 
 In the Component Sizing table report, autosized fields may report values for "Design Size", "User-Specified", or both.  Previously, for fields with both values, only the "Design Size" value was included in the Component Sizing table in the SQLite output.  Now both values are included in the SQLite output.
 
 See [6147](https://github.com/NREL/EnergyPlus/pull/6147)
 
-### Additions and Changes to LEED Summary Report 
+### Additions and Changes to LEED Summary Report
 
 A number of changes have been implemented in the LEED Summary tabular report:
 

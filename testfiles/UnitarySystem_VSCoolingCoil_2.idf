@@ -2086,7 +2086,7 @@
   Output:Variable,*,Heating Coil Defrost Electricity Energy,timestep;
 
   Output:Meter,Cooling:Electricity,timestep; !- [J]
-  
+
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 
   Output:Meter:MeterFileOnly,Electricity:Building,monthly;

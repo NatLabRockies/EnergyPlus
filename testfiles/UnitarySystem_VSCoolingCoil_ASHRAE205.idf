@@ -1780,7 +1780,7 @@
     Linear,
     , !- Rated Total Cooling Capacity
     ; !- Rated Steady-State Heating Capacity
-       
+
 
   Coil:Heating:DX:SingleSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
@@ -1891,7 +1891,7 @@
   Output:Variable,*,Heating Coil Defrost Electricity Energy,timestep;
 
   Output:Meter,Cooling:Electricity,timestep; !- [J]
-  
+
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 
   Output:Meter:MeterFileOnly,Electricity:Building,monthly;

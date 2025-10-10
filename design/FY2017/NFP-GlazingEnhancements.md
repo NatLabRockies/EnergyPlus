@@ -33,7 +33,7 @@
  - Received comments and made initial reply before the first conference call
  - Original: January 5, 2017
  - Submitted an NFP to the team
- 
+
 
 ## Justification for New Feature ##
 
@@ -46,7 +46,7 @@ The current EnergyPlus allows user-defined spectral dependent glazing properties
 #### Comments ####
 After submission of the NFP, here are comments received:
 
-From: Timmermans Tanguy [mailto:Tanguy.Timmermans@eu.agc.com] 
+From: Timmermans Tanguy [mailto:Tanguy.Timmermans@eu.agc.com]
 Sent: Monday, January 23, 2017 4:45 AM
 To: Tianzhen Hong <thong@lbl.gov>; Neal Kruis <neal.kruis@bigladdersoftware.com>
 Cc: D. Charlie Curcija <dccurcija@lbl.gov>; Lixing Gu <gu@fsec.ucf.edu>; energyplusdevteam@googlegroups.com; Jonsson Jacob <JCJonsson@lbl.gov>; Simon Vidanovic <DVVidanovic@lbl.gov>
@@ -68,7 +68,7 @@ Hopes this answer your comments, if you need additional details, let me know.
 Tanguy Timmermans
 Researcher, Physics of Products & Processes Department
 AGC Glass Europe
- 
+
 AGC European R&D Centre
 Postal address: Rue Louis Blériot, 12 – B-6041 Gosselies – Belgium
 Visitors address: Rue Ernest-Oscar Tips – B-6041 Gosselies – Belgium
@@ -85,8 +85,8 @@ Cc: D. Charlie Curcija <dccurcija@lbl.gov>; Lixing Gu <gu@fsec.ucf.edu>; energyp
 Subject: Re: [energyplusdevteam] NFP for glazing enhancements
 
 
-We looked at this enhancement (enabling user defined angle-dependency curves) several years ago, but it did not get implemented due to priority reason. 
-Gu, I think it is good to add new and user configurable angle-dependency curves for non-BSDF glazing. 
+We looked at this enhancement (enabling user defined angle-dependency curves) several years ago, but it did not get implemented due to priority reason.
+Gu, I think it is good to add new and user configurable angle-dependency curves for non-BSDF glazing.
 Tianzhen
 
 
@@ -99,7 +99,7 @@ Subject: Re: [energyplusdevteam] NFP for glazing enhancements
 I agree with Charlie regarding angle-dependency curves. The only angle dependencies for a typical window model (i.e., not complex fenestration) are hard coded for coated glass deep in the EnergyPlus source code. The ability to override these relationships as a user is important.
 
 
-From: D. Charlie Curcija [mailto:dccurcija@lbl.gov] 
+From: D. Charlie Curcija [mailto:dccurcija@lbl.gov]
 Sent: Friday, January 20, 2017 4:29 PM
 To: Neal Kruis <neal.kruis@bigladdersoftware.com>
 Cc: Lixing Gu <gu@fsec.ucf.edu>; energyplusdevteam@googlegroups.com; Timmermans Tanguy <Tanguy.Timmermans@eu.agc.com>; Jonsson Jacob <JCJonsson@lbl.gov>; Simon Vidanovic <DVVidanovic@lbl.gov>
@@ -107,7 +107,7 @@ Subject: Re: [energyplusdevteam] NFP for glazing enhancements
 
 BSDF is used for complex glazing and shading materials, where light can scatter. If light does not scatter, which is what this NFP seems to be about, there is no evidence that optical properties angle dependence is different at different wavelenghts, which would indicate that this NFP is providing solution in a search of a problem. The NFP wrongly states that "The existing EnergyPlus considers the glazing properties are a function of wavelength only". Optical properties of specular glazing can be both spectrally and angle dependent in E+. For non-coated and non-tinted glass, Fresnel formula is used, while for all others "bronze" glass formula is used. The real need in this area is to implement number of other angle-dependency curves that were published from research conducted in the past couple of decades. They better describe different classes of coated and tinted products. However, I don't think that there is implication that we need curve for each wavelength, which is basically what this NFP is trying to implement.
 
-Perhaps if Lixing can provide a clarification for the need for this feature, in light of my comments above, it would be good. 
+Perhaps if Lixing can provide a clarification for the need for this feature, in light of my comments above, it would be good.
 
 Charlie
 
@@ -122,16 +122,16 @@ Neal
 
 #### Lixing Gu reply
 
-Tanguy Timmermans clearly addressed Neil and Charlie comments. As also indicated by Tianzhen, the proposed new feature enhances non-BSDF glazing properties. There is no need to make it as a part of complex BSDF. In addition, if data sets are red from table objects, the input changes are very minor by adding an additional choice of the 
-Optical Data Type field in the WindowMaterial:Glazing object as SpectralAndIncidentAngle, and 3 new fields of optical dataset names to represent transmittance, front reflectance, and back reflectance, respectively.  
+Tanguy Timmermans clearly addressed Neil and Charlie comments. As also indicated by Tianzhen, the proposed new feature enhances non-BSDF glazing properties. There is no need to make it as a part of complex BSDF. In addition, if data sets are red from table objects, the input changes are very minor by adding an additional choice of the
+Optical Data Type field in the WindowMaterial:Glazing object as SpectralAndIncidentAngle, and 3 new fields of optical dataset names to represent transmittance, front reflectance, and back reflectance, respectively.
 
-In addition, the proposed optical properties as a function of both wavelength and incident angle. The existing E+ hard-codes the properties as a function of incident angle. The proposed change will give user flexibility to input optical properties. 
+In addition, the proposed optical properties as a function of both wavelength and incident angle. The existing E+ hard-codes the properties as a function of incident angle. The proposed change will give user flexibility to input optical properties.
 
 I will make changes in NFP based on Tnaguy's comments.
 
-I propose two choices to input optical datasets. The first choice is to add 3 new objects to read data, proposed earlier. The second choice is to use existing object of Table:TwoIndependentVariables. Minor modifications are needed. For example, two additional choice of the Input Unit Type field are added as wavelength (microns) and angle (degrees). The dimensionless of output unit type is available, there is no need to make any changes. An additional effort may be proposed to add an option to read datasets from an external file. The second choice is recommended, since no new objects will be created.  
+I propose two choices to input optical datasets. The first choice is to add 3 new objects to read data, proposed earlier. The second choice is to use existing object of Table:TwoIndependentVariables. Minor modifications are needed. For example, two additional choice of the Input Unit Type field are added as wavelength (microns) and angle (degrees). The dimensionless of output unit type is available, there is no need to make any changes. An additional effort may be proposed to add an option to read datasets from an external file. The second choice is recommended, since no new objects will be created.
 
-By the way, the Matrix:TwoDimension object is used in BSDF input. The object allows two-dimentional matrix of values only. The proposed datasets are three-dimentional matrix of values. Therefore, the existing object needs to be revised. Fortunately, the existing Table:TwoIndependentVariables meets input requirements with minor modification. That is why we propose to use the Table:TwoIndependentVariables as an alternative input data holder. 
+By the way, the Matrix:TwoDimension object is used in BSDF input. The object allows two-dimentional matrix of values only. The proposed datasets are three-dimentional matrix of values. Therefore, the existing object needs to be revised. Fortunately, the existing Table:TwoIndependentVariables meets input requirements with minor modification. That is why we propose to use the Table:TwoIndependentVariables as an alternative input data holder.
 
 More E-mail communications on 2/14/17
 
@@ -148,7 +148,7 @@ I like your suggestions to place 3 new dataset field names at the end of the obj
 I think there may be 3 options.
 
 1.	Existing data format from Table:MultiVariableLookup
-The data format is not nice. If there are 3 independent variables, it specify values of independent variables one-by-one, then specify values of dependent variable. Therefore, data are not easily readable. 
+The data format is not nice. If there are 3 independent variables, it specify values of independent variables one-by-one, then specify values of dependent variable. Therefore, data are not easily readable.
 
     1,                       !- Number of Independent Variables
 	 4,                       !- Number of Values for Independent Variable X1
@@ -178,8 +178,8 @@ We can discuss this issue in the conference call, although I prefer to use the s
 
 Thanks.
 
-Gu 
-From: Michael J Witte [mailto:mjwitte@gard.com] 
+Gu
+From: Michael J Witte [mailto:mjwitte@gard.com]
 Sent: Tuesday, February 14, 2017 10:43 AM
 To: Lixing Gu <gu@fsec.ucf.edu>; 'Neal Kruis' <neal.kruis@bigladdersoftware.com>; Simon Vidanovic <dvvidanovic@lbl.gov>; D. Charlie Curcija <dccurcija@lbl.gov>; 'Tianzhen Hong' <thong@lbl.gov>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>
 Cc: 'Timmermans Tanguy' <Tanguy.Timmermans@eu.agc.com>
@@ -192,7 +192,7 @@ Otherwise, this looks good to me.  I like using the existing table object, and I
 Mike
 
 ###Second revision
-  
+
 The first conference call was held on 2/14/17. The following people attended the conference call:
 
 Michael J Witte, GARD
@@ -202,7 +202,7 @@ D. Charlie Curcija, LBNL
 Tianzhen Hong, LBNL
 Edwin Lee, NREL
 Timmermans Tanguy, AGC Glass
-Lixing Gu, FSEC 
+Lixing Gu, FSEC
 
 Here is a summary based on discussion during the conference call
 
@@ -210,10 +210,10 @@ Here is a summary based on discussion during the conference call
 
 The new feature is needed based on following reasons:
 
-1. AGC measured data shows that optical properties are a function of wavelength and incident angles. It may be described by curves. However, tabular inputs are also a good approach with direct inputs from measured data without curve-fitting effort. In addition, some properties may not be defined as a simple curve.  
+1. AGC measured data shows that optical properties are a function of wavelength and incident angles. It may be described by curves. However, tabular inputs are also a good approach with direct inputs from measured data without curve-fitting effort. In addition, some properties may not be defined as a simple curve.
 2. Existing hard code to calculate optical properties is based on a single empirical curve. Tabular data input can provide more flexibility to users.
 3. ASHRAE SPC205 (Standard Representation of Performance Simulation  Data for HVAC&R and Other Facility Equipment) favors to use tabular data to represent optical properties. The proposed approach meets SPC205 requirements
- 
+
 
 #### Table:TwoIndependentVariables to hold optical tabular data
 
@@ -244,12 +244,12 @@ WindowMaterial:Glazing,
   A6 , \field Window Glass Spectral and Incident Angle Front Reflectance Data Set Table Name
 
   A7 ; \field Window Glass Spectral and Incident Angle Back Reflectance Data Set Table Name
- 
 
-#### Possible optional outputs 
+
+#### Possible optional outputs
 
 This section provides possible efforts if time and money are left.
- 
+
 1. Possible optical outputs based on certain range of wavelengths
 
 The certain ranges of wavelengths will include visible, infrared, and different colors.
@@ -258,39 +258,39 @@ The certain ranges of wavelengths will include visible, infrared, and different 
 
 The proposed tabular input may meet data range requirement. The only restriction is linear interpolation is performed between two data points.
 
-#### Future enhancements   
+#### Future enhancements
 
-A new Data:File object   
+A new Data:File object
 
 A new data object may be similar to Schedule:File. The format may be similar. However, the Schedule:File varies with time with a single independent variable, while Data:File needs multiple independent variables and allows to vary with single or multiple independent variables.
 
-I will write an item in the enhancement list. 
+I will write an item in the enhancement list.
 
 ###Third revision
 
-The third revision is to add design document based on existing WCE. 
+The third revision is to add design document based on existing WCE.
 
-### WCE Implementation 
+### WCE Implementation
 
-After implementation of the proposed WCE addition based on design document, unit tests and whole building simulations are performed to ensure the code performs as expected.   
+After implementation of the proposed WCE addition based on design document, unit tests and whole building simulations are performed to ensure the code performs as expected.
 
 #### Unit tests
 
-The unit tests were uploaded in the Lixing_Branch in https://github.com/LBNL-ETA/Windows-CalcEngine. 
+The unit tests were uploaded in the Lixing_Branch in https://github.com/LBNL-ETA/Windows-CalcEngine.
 
 1. Sample_AngularMeasurementsTest1
 
 This unit test under SpectralAveraging_tests tests common wavelength operation when different optical property data sets have different values of wavelengths, and liner interpolation of optical properties when optical properties specified at certain incident angles are not given in the optical datasets.
 
-Common wavelength operation is to create a new array of wavelength, containing all wavelength values from different datasets. In other words, wavelength values in different datasets are a subset of the new array. Then all datasets will be re-organized based on the wavelength values of the new array. New optical properties with new wavelength values (none exist in the original dataset) will be linearly interpolated.  
-  
+Common wavelength operation is to create a new array of wavelength, containing all wavelength values from different datasets. In other words, wavelength values in different datasets are a subset of the new array. Then all datasets will be re-organized based on the wavelength values of the new array. New optical properties with new wavelength values (none exist in the original dataset) will be linearly interpolated.
+
 2. TestSpecularAngularLayerProperty_102
 
-This unit test under SingleLayerOptics_tests tests optical properties integrated from a whole range of solar spectrum in a single layer at different incident angles. If a given angle matches one of dataset angles, optical properties are provided directly from the dataset. Otherwise, optical properties are linearly interpolated. In addition, results are compared based on each wavelength to ensure linear interpolation is performed correctly at each wavelength. 
-   
+This unit test under SingleLayerOptics_tests tests optical properties integrated from a whole range of solar spectrum in a single layer at different incident angles. If a given angle matches one of dataset angles, optical properties are provided directly from the dataset. Otherwise, optical properties are linearly interpolated. In addition, results are compared based on each wavelength to ensure linear interpolation is performed correctly at each wavelength.
+
 3. EquivalentSpecularAngularLayer_102_103
 
-This unit test under MultiLayerOptics_tests tests optical properties integrated from a whole range of solar spectrum in multiple layers at different angles. There are two layers in a window construction. The Optical Data Type is Spectral in the first layer, and SpectralAndAngle in the second layer with 4 incident angles at 0, 10, 40 and 90, respectively. If a given angle matches one of dataset angles, optical properties are provided directly from the dataset. Otherwise, optical properties are provided based on linear interpolation. Tested angles are 0, 10, 25, and 90. Output variables are optical properties of transmittance, reflectance and absorptance based on a whole range of sun spectrum. Summation testing is also performed to ensure a sum of transmittance, reflectance and absorptance is equal to 1.  
+This unit test under MultiLayerOptics_tests tests optical properties integrated from a whole range of solar spectrum in multiple layers at different angles. There are two layers in a window construction. The Optical Data Type is Spectral in the first layer, and SpectralAndAngle in the second layer with 4 incident angles at 0, 10, 40 and 90, respectively. If a given angle matches one of dataset angles, optical properties are provided directly from the dataset. Otherwise, optical properties are provided based on linear interpolation. Tested angles are 0, 10, 25, and 90. Output variables are optical properties of transmittance, reflectance and absorptance based on a whole range of sun spectrum. Summation testing is also performed to ensure a sum of transmittance, reflectance and absorptance is equal to 1.
 
 #### Whole building test
 
@@ -340,7 +340,7 @@ It should be pointed out that WCE version available in EnergyPlus branch is not 
 
 LBNL just updated WCE branch today (4/21/17). I am going to test it to see what happens.
 
-Based on current status mentioned above, WCE version may not be ready for AGC Glass to use right now. Adding this feature in the existing EnergyPlus based on the Winkelmann approach becomes necessary.   
+Based on current status mentioned above, WCE version may not be ready for AGC Glass to use right now. Adding this feature in the existing EnergyPlus based on the Winkelmann approach becomes necessary.
 
 #### Major changes
 
@@ -350,13 +350,13 @@ If SpectralAndAngle is entered, optical properties at different incident angles 
 
 The major revision to accommodate the new feature is a function of InitGlassOpticalCalculations() in the WindowManager module.
 
-The code changes will be composed of 3 sections. The first section is data input, which is commonly required by both WCE and existing one (Winkelmann approach). The second section is used in WCE only. The third section will be used by existing one only based on Winkelmann approach.  
+The code changes will be composed of 3 sections. The first section is data input, which is commonly required by both WCE and existing one (Winkelmann approach). The second section is used in WCE only. The third section will be used by existing one only based on Winkelmann approach.
 
 ## Overview ##
 
-Window glazing properties of transmittance, front reflectance, and back reflectance are a function of wavelength and incident angel. EnergyPlus allow users to only specify the spectral dependency and not the angular one. The optical properties are calculated based on an incident angle with hard code. The WindowMaterial:Glazing object has a field of Optical Data Type to allow users to select a choice of Spectral and enter Window Glass Spectral Data Set Name as a data set to input glazing data under the MaterialProperty:GlazingSpectralData object. The AGC Glass Europe found the glazing properties are not only a function of wavelength, as well as a function of incident angle, as shown in the above figure. These properties can be measured from testing. It is possible that these optical properties may not be covered by existing hard code as a function of incident angle. Therefore, the existing input structure can not simulate real performance using measured optical properties. A new functionality was proposed to enhance glazing properties as a function of both wavelength and incident angle. The added new functionality will improve window heat transfer calculations with more accurate prediction. 
+Window glazing properties of transmittance, front reflectance, and back reflectance are a function of wavelength and incident angel. EnergyPlus allow users to only specify the spectral dependency and not the angular one. The optical properties are calculated based on an incident angle with hard code. The WindowMaterial:Glazing object has a field of Optical Data Type to allow users to select a choice of Spectral and enter Window Glass Spectral Data Set Name as a data set to input glazing data under the MaterialProperty:GlazingSpectralData object. The AGC Glass Europe found the glazing properties are not only a function of wavelength, as well as a function of incident angle, as shown in the above figure. These properties can be measured from testing. It is possible that these optical properties may not be covered by existing hard code as a function of incident angle. Therefore, the existing input structure can not simulate real performance using measured optical properties. A new functionality was proposed to enhance glazing properties as a function of both wavelength and incident angle. The added new functionality will improve window heat transfer calculations with more accurate prediction.
 
-The code modifications will be based on Window Calculation Engine (WCE) submitted by LBNL and Winkelmann approach in the existing structure (proposed in the fourth revision). 
+The code modifications will be based on Window Calculation Engine (WCE) submitted by LBNL and Winkelmann approach in the existing structure (proposed in the fourth revision).
 
 ## Approach ##
 
@@ -364,14 +364,14 @@ The proposed approach will revise the existing object of WindowMaterial:Glazing,
 
 ### Revision of WindowMaterial:Glazing object ###
 
-The WindowMaterial:Glazing object will be revised by adding an additional choice of the 
-Optical Data Type field in the WindowMaterial:Glazing object as SpectralAndIncidentAngle, and 3 new fields of optical dataset or Table names to represent transmittance, front reflectance, and back reflectance, respectively. 
+The WindowMaterial:Glazing object will be revised by adding an additional choice of the
+Optical Data Type field in the WindowMaterial:Glazing object as SpectralAndIncidentAngle, and 3 new fields of optical dataset or Table names to represent transmittance, front reflectance, and back reflectance, respectively.
 
 It is possible to combine all optical properties as a single dataset name. However, the dataset will contain 5 columns to be listed as:
 
 Wavelength 1, Incident Angle 1, Transmittance 1, Front Reflectance 1, and Back Reflectance 1 ....
 
-Therefore, the dataset becomes very large and not readable easily. It is better to have 3 datasets to represent transmittance, front reflectance, and back reflectance, respectively. It also provides flexibility to allow each optical property may have values at different wavelengths and incident angles. Each dataset set up 2 independent variables (wavelength and incident angle) and 1 dependent variable (optical property). 
+Therefore, the dataset becomes very large and not readable easily. It is better to have 3 datasets to represent transmittance, front reflectance, and back reflectance, respectively. It also provides flexibility to allow each optical property may have values at different wavelengths and incident angles. Each dataset set up 2 independent variables (wavelength and incident angle) and 1 dependent variable (optical property).
 
 In order to avoid transition, the three new optional fields will be placed at the end of the object.
 
@@ -379,10 +379,10 @@ In order to avoid transition, the three new optional fields will be placed at th
 
 The existing object of Table:TwoIndependentVariables will be modified slightly to meet input requirements:
 
-1. Add two additional choices of Input Unit Type as wavelength (microns) and angle (degrees). 
+1. Add two additional choices of Input Unit Type as wavelength (microns) and angle (degrees).
 2. Allow an external file as inputs
 
-The existing object does not read data from an external file. An additional effort is proposed by adding an additional field as External File Name.    
+The existing object does not read data from an external file. An additional effort is proposed by adding an additional field as External File Name.
 
 ### Calculation procedure ###
 
@@ -420,11 +420,11 @@ Optical properties from EnergyPlus will be compared with spread sheet calculatio
 
 A possible validation for a single clear glass without coating will also be performed.
 
-If input values of optical properties are provided with calculation results from the theory at different incident angles for a choice of SpectralAndIncidentAngle, the optical properties at different incident angles should be the same as ones based on a choice of Spectral, if the same theory is used to calculate optical properties on a choice of Spectral. 
+If input values of optical properties are provided with calculation results from the theory at different incident angles for a choice of SpectralAndIncidentAngle, the optical properties at different incident angles should be the same as ones based on a choice of Spectral, if the same theory is used to calculate optical properties on a choice of Spectral.
 
 ## Input Output Reference Documentation ##
 
-This section is divided into two sub-sections. The first sub-section provides documentation related to revised objects. Any revisions are highlighted in red. The second sub-section presents documentation of new objects.  
+This section is divided into two sub-sections. The first sub-section provides documentation related to revised objects. Any revisions are highlighted in red. The second sub-section presents documentation of new objects.
 
 ### Revised objects ###
 
@@ -801,7 +801,7 @@ The normalization point for the data set. This field provides a method for autom
 
 <span style="color:red;">The name of an external file that represents the tabular data. This file would include all data after the Output Unit Type field below starting with the same format as idf: X1, Y1, Z1, X2, Y2, Z2, ..., Xn, Yn, Zn, and continuing until all input and output values have been entered. The tabular data may use either comma, space or tab delimited format. The field should include a full path with file name, for best results. The field must be \textless{} = 100 characters. The file name must not include commas or an exclamation point. A relative path or a simple file name should work with version 7.0 or later when using EP-Launch even though EP-Launch uses temporary directories as part of the execution of EnergyPlus. If using RunEPlus.bat to run EnergyPlus from the command line, a relative path or a simple file name may work if RunEPlus.bat is run from the folder that contains EnergyPlus.exe.
 
-<span style="color:red;">When the External File Name is entered, the following input fields are ignored. 
+<span style="color:red;">When the External File Name is entered, the following input fields are ignored.
 
 \paragraph{Data Pairs}\label{data-pairs-1}
 
@@ -905,7 +905,7 @@ The current value of the first and second independent variable passed to the per
 
 This section describes two revised objects: WindowMaterial:Glazing and Table:TwoIndependentVariables.
 
-### WindowMaterial:Glazing object  
+### WindowMaterial:Glazing object
 
 The WindowMaterial:Glazing object will be revised.
 
@@ -995,7 +995,7 @@ Any new additions will be highlighted in red.
        \type real
        \minimum> 0.0
        \maximum 1.0
-       \default 1.0 
+       \default 1.0
    	A4 ,  \field Solar Diffusing
        \type choice
        \key No
@@ -1219,7 +1219,7 @@ The spectral-average visible property is
 where <span>\({E_s}(\lambda )\)</span>is the solar spectral irradiance function and <span>\(V(\lambda )\)</span>is the photopic response function of the eye. The default functions are shown in Table 29 and Table 30. They can be overwritten by user defined solar and/or visible spectrum using the objects Site:SolarAndVisibleSpectrum and Site:SpectrumData. They are expressed as a set of values followed by the corresponding wavelengths for values.
 
 <span style="color:red;">When a choice of Spectral is entered as optical data type, the correlations to store glazing system's angular performance are generated based on angular performance at 10 degree increments. When a choice of SpectralAndAngel is entered as optical data type, no correlations will be generated. The optical properties will be calculated by linear interpolation at a give incident angle.</span>
-  
+
 If a glazing layer has optical properties that are roughly constant with wavelength, the wavelength-dependent values of *T<sub>i,i</sub>* , *R<sup>f</sup><sub>i,i</sub>* and *R<sup>b</sup><sub>i,i</sub>* in Eqs. to can be replaced with constant values for that layer.
 
 ## Example File and Transition Changes ##
@@ -1238,23 +1238,23 @@ I have got extensive help from Simon, LBNL, to develop this design document. Sin
 
 This section describes code changes and additions in EnergyPlus in HeatBalanceManager, Curve, DataHeatBalance, WindowManagerExteriorData, WindowManagerExteriorOptical, and WCE. The WCE contains 3 main projects: SPectralAveraging, SingleLayerOptics, and MultipleLayerOptics.
 
-The code changes will be composed of 3 sections. The first section is data input and commonly required by both WCE and existing one. The second section is used in WCE only. The third section will be used by existing one only. 
+The code changes will be composed of 3 sections. The first section is data input and commonly required by both WCE and existing one. The second section is used in WCE only. The third section will be used by existing one only.
 
 
 ### DataHeatBalance (Common) ###
 
-Four variables are added in the struct MaterialProperties: 
+Four variables are added in the struct MaterialProperties:
 
 	bool GlassSpectralAndAngle; // if SpectralAndAngle is an entered chcoice
 	int GlassSpecAngTransDataPtr; // Data set index of transmittance as a function of spectral and angle associated with a window glass material
-	int GlassSpecAngFRefleDataPtr; // Data set index of front reflectance as a function of spectral and angle associated with a window glass material 
-	int GlassSpecAngBRefleDataPtr; // Data set index of back reflectance as a function of spectral and angle associated with a window glass material 
+	int GlassSpecAngFRefleDataPtr; // Data set index of front reflectance as a function of spectral and angle associated with a window glass material
+	int GlassSpecAngBRefleDataPtr; // Data set index of back reflectance as a function of spectral and angle associated with a window glass material
 
 The additions are mainly used to catch the changes in revised idd object: WindowMaterial:Glazing.
 
 ### HeatBalanceManager (Common) ###
 
-A section of the GetMaterialData function in the HeatBalanceManager module will be revised to accommodate the idd changes. The changes also cover to get the table curve numbers for 3 optical properties.  
+A section of the GetMaterialData function in the HeatBalanceManager module will be revised to accommodate the idd changes. The changes also cover to get the table curve numbers for 3 optical properties.
 
 ### Curve (Common) ###
 
@@ -1271,7 +1271,7 @@ Three new functions will be created:
 
 		return TableInterpolationMethodNum;
 
-This function is called by GetMaterialData function in the HeatBalanceManager module and will return interpolation method to ensure the method should LinearInterpolationOfTable defined in the Interpolation Method field of the Table:TwoIndependentVariables object.   
+This function is called by GetMaterialData function in the HeatBalanceManager module and will return interpolation method to ensure the method should LinearInterpolationOfTable defined in the Interpolation Method field of the Table:TwoIndependentVariables object.
 
 ##### ReadTableDataFromFile (Common) ###
 
@@ -1296,14 +1296,14 @@ This function allows user inputs of optical properties are from an external file
 		int const BRefleCurveIndex
 	);
 
-This new function is to get common wavelengths and incident angles from 3 optical data sets to represent transmittance, front reflectance and back reflectance. The common wavelengths and incident angles include all values from 3 datasets, unless differences are less than 1e-6. It is possible to allow users to input difference values of wavelengths and incident angles for each property. Due to requirements of WCE, the same discrete values of wavelengths and incident angles are needed for WCE to read and process. Any missing values of optical properties will be linearly interpolated among two nearest points based on common wavelengths and incident angles.   
+This new function is to get common wavelengths and incident angles from 3 optical data sets to represent transmittance, front reflectance and back reflectance. The common wavelengths and incident angles include all values from 3 datasets, unless differences are less than 1e-6. It is possible to allow users to input difference values of wavelengths and incident angles for each property. Due to requirements of WCE, the same discrete values of wavelengths and incident angles are needed for WCE to read and process. Any missing values of optical properties will be linearly interpolated among two nearest points based on common wavelengths and incident angles.
 
 ### General ###
 
 A new function will be created to split data from a string. The function is adopted from OpenStudio.
 
 ##### splitString ###
- 
+
 	std::vector <std::string> splitString( const std::string &string, char delimiter );
 
 #### Revised functions ####
@@ -1324,7 +1324,7 @@ This module has a new function only.
 
 #### New function ###
 
-##### getSpectralSample (WCE) 
+##### getSpectralSample (WCE)
 
 	shared_ptr< CSpectralSampleData > CWCESpecturmProperties::getSpectralSample(  const int i, const int t_TransTablePtr, const int t_FRefleTablePtr, const int t_BRefleTablePtr ) {}
 
@@ -1345,7 +1345,7 @@ This function will be modified to to allow the third glass type as SpectralAndAn
     ///////////////////////////////////////////////////////////////////////////////
     CWCESpecularMaterialsFactory::CWCESpecularMaterialsFactory( const shared_ptr< MaterialProperties >& t_Material,
       const WavelengthRange t_Range ) : CWCEMaterialFactory( t_Material, t_Range ) {
-      
+
     }
 
     void CWCESpecularMaterialsFactory::init() {
@@ -1372,7 +1372,7 @@ This function will be modified to to allow the third glass type as SpectralAndAn
       } else {
         aSampleData = CWCESpecturmProperties::getSpectralSample( *m_MaterialProperties );
       }
-      
+
       shared_ptr< CSpectralSample > aSample = make_shared< CSpectralSample >( aSampleData, aSolarSpectrum );
 
       MaterialType aType = MaterialType::Monolithic;
@@ -1406,7 +1406,7 @@ The engine revisions include data structure and new classes.
 
 #### Data structure
 
-##### Solar data: Wavelength (micron), Cpetral Irradiance (W/m2) 
+##### Solar data: Wavelength (micron), Cpetral Irradiance (W/m2)
 
     shared_ptr< CSeries >  aSolarRadiation = make_shared< CSeries >();
 
@@ -1449,23 +1449,23 @@ New data format: Spectral and angular data, Common Wavelength
 
 ##### CSingleAngularMeasurement (WCE)
 
-This class processes optical data sets based on each incident angle. 
+This class processes optical data sets based on each incident angle.
 
 	class CSingleAngularMeasurement {
 	public:
 		CSingleAngularMeasurement( const std::shared_ptr< CSpectralSample > t_Data, const double t_Angle );
-Constructor with arguments of Spectral Data and Incident Angle 
+Constructor with arguments of Spectral Data and Incident Angle
 
 		double getAngle( ) const;
 		std::shared_ptr< CSpectralSample > getData( ) const;
         std::shared_ptr< std::vector< double > > getWavelengthsFromSample() const;
 		std::shared_ptr< CSpectralSample > Interpolate( const double t_Angle, const std::shared_ptr< CSpectralSample > t_Data1, const double t_Angle1, const std::shared_ptr< CSpectralSample > t_Data2, const double t_Angle2 ) const;
 Interpolate optical properties linearly between two spectral data sets with two nearest angles based on a given incident angle.
- 
+
 		void interpolate( const std::vector< double >& t_Wavelengths );
 
 Interpolate optical properties within a single spectral data linearly based on common wavelengths.
-  
+
 	private:
 		std::shared_ptr< CSpectralSample > m_Data;
 		double m_Angle;
@@ -1473,7 +1473,7 @@ Interpolate optical properties within a single spectral data linearly based on c
 
 ##### CAngularMeasurements (WCE)
 
-This class handles all Spectral and angular data with common wavelength. 
+This class handles all Spectral and angular data with common wavelength.
 
 	class CAngularMeasurements {
 	public:
@@ -1481,7 +1481,7 @@ This class handles all Spectral and angular data with common wavelength.
 		CAngularMeasurements( std::shared_ptr< CSingleAngularMeasurement > t_SingleMeasurement, const std::shared_ptr<
 			std::vector< double > > t_CommonWavelengths );
 
-Constructor with arguments of Combined Spectral Data and Angle, and Common Wavelengths 
+Constructor with arguments of Combined Spectral Data and Angle, and Common Wavelengths
 
 		// then you add function that will accept measurements at different angles
 		void addMeasurement( std::shared_ptr< CSingleAngularMeasurement > t_SingleMeasurement );
@@ -1494,7 +1494,7 @@ Add new data set at difference angles by linear interpolation if the given incid
 			// work
 		virtual void setSourceData( std::shared_ptr< FenestrationCommon::CSeries > t_SourceData );
 
-A virtual function to set solar source data to spectral data for each angle. 
+A virtual function to set solar source data to spectral data for each angle.
 
 Retrieve data set at a given incident angle.
 
@@ -1505,7 +1505,7 @@ Retrieve data set at a given incident angle.
 		std::shared_ptr< std::vector< double > > m_CommonWavelengths;
 		std::shared_ptr< CSingleAngularMeasurement > m_Angle;
 
-	}; 
+	};
 
 #### new classes under SingleLayerOptics namespace
 
@@ -1520,32 +1520,32 @@ Retrieve data set at a given incident angle.
 	  CMaterialMeasured( const std::shared_ptr< SpectralAveraging::CAngularMeasurements >& t_Measurements,
 		  const FenestrationCommon::WavelengthRange t_Range );
 
-Two constructors. The differences are that the first one requires two additional arguments of minimum and maximum wavelength for solar spectrum, and the other requires an additional argument of wavelength range. 
+Two constructors. The differences are that the first one requires two additional arguments of minimum and maximum wavelength for solar spectrum, and the other requires an additional argument of wavelength range.
 
 	  virtual void setSourceData( std::shared_ptr< FenestrationCommon::CSeries > t_SourceData );
 
-	  // In this case sample property is taken. Standard spectral data file contains T, Rf, Rb that is 
+	  // In this case sample property is taken. Standard spectral data file contains T, Rf, Rb that is
 	  // measured at certain wavelengths.
 	  double getPropertyAtAngle( const FenestrationCommon::Property t_Property,
 		  const FenestrationCommon::Side t_Side, const double t_Angle ) const;
 
-This function gets a single optical property for entire wavelength range at a given angle, side and property type. 
- 
+This function gets a single optical property for entire wavelength range at a given angle, side and property type.
+
 	  double getProperty( const FenestrationCommon::Property t_Property, const FenestrationCommon::Side t_Side ) const;
 
-This function gets a single optical property for entire wavelength range at a normal angle (0), side and property type. 
+This function gets a single optical property for entire wavelength range at a normal angle (0), side and property type.
 
 	  // Get properties at each wavelength and at given incident angle
 	  std::shared_ptr< std::vector< double > >
 		  getBandPropertiesAtAngle( const FenestrationCommon::Property t_Property,
 			  const FenestrationCommon::Side t_Side, const double t_Angle ) const;
 
-This function gets a single optical property at each wavelength at a given angle, side and property type. 
+This function gets a single optical property at each wavelength at a given angle, side and property type.
 
 	  std::shared_ptr< std::vector< double > >
 		  getBandProperties( const FenestrationCommon::Property t_Property, const FenestrationCommon::Side t_Side ) const;
 
-This function gets a single optical property at each wavelength at a normal angle (0 degree), side and property type. 
+This function gets a single optical property at each wavelength at a normal angle (0 degree), side and property type.
 
   	private:
 	  std::shared_ptr< std::vector< double > > calculateBandWavelengths( );
@@ -1557,4 +1557,4 @@ This function gets a single optical property at each wavelength at a normal angl
 
 The code will be modified by replacing a fixed number of incident angles at 10 by the total number of incident angle from input datasets.
 
-The common incident angle operation, similar to common wavelength operation, will be performed in multiple layers to ensure all layers in the same construction will have the same values of incident angles. 
+The common incident angle operation, similar to common wavelength operation, will be performed in multiple layers to ensure all layers in the same construction will have the same values of incident angles.

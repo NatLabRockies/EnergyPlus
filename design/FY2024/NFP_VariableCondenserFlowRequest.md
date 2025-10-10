@@ -53,11 +53,11 @@ A16, \field End-Use Subcategory
 A17, \field Condenser Flow Control
      \note Select the chiller condenser flow request mode. With "ConstantFlow" a chiller will always request
      \note its maximum condenser flow rate. With "ModulatedChillerPLR" the condenser flow request corresponds
-     \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With 
-     \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water 
+     \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With
+     \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water
      \note loop's part load ratio, see the "Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio
-     \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required 
-     \note to meet a condenser loop delta temperature, see the "Temperature Difference Across Condenser"  and 
+     \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required
+     \note to meet a condenser loop delta temperature, see the "Temperature Difference Across Condenser"  and
      \note "Temperature Difference Across Condenser Schedule Name" input.
      \note Use "ConstantFlow" when modeling a constant flow condenser plant loop, choose one of the other inputs
      \note when modeling a variable flow condenser plant loop.
@@ -69,17 +69,17 @@ A17, \field Condenser Flow Control
 A18, \field Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio Curve Name
      \note Condenser loop flow rate fraction as a function of the chiller water loop part load ratio. A linear
      \note curve is expected.
-     \note CWFR = C * PLR + D 
+     \note CWFR = C * PLR + D
      \note Where:
      \note CWFR is the condenser water flow fraction (actual/design)
-     \note C and D are coefficients, see "Optimizing Design & Control Of Chilled Water Plants, Part 5", 
+     \note C and D are coefficients, see "Optimizing Design & Control Of Chilled Water Plants, Part 5",
      \note S. Taylor, ASHRAE Journal June 2012 PLR is the chilled water plant loop part load ratio
      \note (actual/design). This input is only used when the "ModulatedLoopPLR" condenser flow control
      \note option is used.
      \type object-list
      \object-list UnivariateFunctions
 A20, \field Temperature Difference Across Condenser Schedule Name
-     \note A schedule that defines the temperature difference across the condenser. This input is used to 
+     \note A schedule that defines the temperature difference across the condenser. This input is used to
      \note calculate the condenser flow. This input is only used when "Condenser Flow Control" is set to
      \note "ModulatedDeltaTemperature".
      \type object-list
@@ -118,5 +118,5 @@ New example files will be provided to showcase the new feature.
 - "Optimizing Design & Control Of Chilled Water Plants, Part 2", S. Taylor, ASHRAE Journal Sept 2011
 - "Optimizing Design & Control Of Chilled Water Plants, Part 5", S. Taylor, ASHRAE Journal June 2012
 - "Optimizing Chilled Water Plan Control", M. Hydeman, ASHRAE Journal June 2007
-- "Carrier® ChillerVu™ Variable Flow Condenser Pump Application Guide", https://www.shareddocs.com/hvac/docs/1000/Public/0A/11-808-577-01.pdf 
+- "Carrier® ChillerVu™ Variable Flow Condenser Pump Application Guide", https://www.shareddocs.com/hvac/docs/1000/Public/0A/11-808-577-01.pdf
 - "Achieving Variable Condenser Water Flow with VFDs" https://www.esmagazine.com/articles/99689-achieving-variable-condenser-water-flow-with-vfds

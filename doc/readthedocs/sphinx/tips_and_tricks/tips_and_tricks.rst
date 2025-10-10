@@ -1000,7 +1000,7 @@ reflection from Shading Surface A.
    :width: 50.0%
 
    Limitations in modeling reflections from surfaces
-   
+
 Air wall, Open air connection between zones
 -------------------------------------------
 

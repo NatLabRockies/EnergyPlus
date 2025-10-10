@@ -7,9 +7,9 @@ This file documents the structural changes on the output of EnergyPlus that coul
 
 This will eventually become a more structured file, but currently it isn't clear what format is best. As an intermediate solution, and to allow the form to be formed organically, this plain text file is being used. Entries should be clearly delimited.  It isn't expected that there will be but maybe a couple each release at most. Entries should also include some reference back to the repo.  At least a PR number or whatever.
 
-### New table, Hybrid Model: Internal Thermal Mass, is added to tabular report. 
+### New table, Hybrid Model: Internal Thermal Mass, is added to tabular report.
 
-The table is only shown when hybrid model: internal thermal mass is flagged.  It has two columns, the first column indicates Hybrid Modeling (Y/N) and the second column provides Temperature Capacitance Multiplier values for each zone. 
+The table is only shown when hybrid model: internal thermal mass is flagged.  It has two columns, the first column indicates Hybrid Modeling (Y/N) and the second column provides Temperature Capacitance Multiplier values for each zone.
 
 See [5882](https://github.com/NREL/EnergyPlus/pull/5882)
 
@@ -17,7 +17,7 @@ See [5882](https://github.com/NREL/EnergyPlus/pull/5882)
 
 The column labeled Zone used to show the daylighting control name but has been fixed to show the zone name. In addition, the control name now appears in a column with the heading control name. Also the column heading "Daylighting Type" was changed to "Daylighting Method" to be more consistent with the input field of that it is reporting. This column also was always just showing "Detailed" previously and now shows either SplitFlux or DElight as appropriate.
 
-See [5945](https://github.com/NREL/EnergyPlus/pull/5945). 
+See [5945](https://github.com/NREL/EnergyPlus/pull/5945).
 
 ### Initialization Summary and EIO file
 

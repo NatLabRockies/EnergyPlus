@@ -423,7 +423,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2) = ''  ! new Availability Schedule Name field
                 OutArgs(3:CurArgs+1)=InArgs(2:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.
@@ -431,7 +431,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2) = ''  ! new Availability Schedule Name field
                 OutArgs(3:CurArgs+1)=InArgs(2:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.
@@ -439,7 +439,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2) = ''  ! new Availability Schedule Name field
                 OutArgs(3:CurArgs+1)=InArgs(2:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('COIL:COOLING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.
@@ -447,7 +447,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2) = ''  ! new Availability Schedule Name field
                 OutArgs(3:CurArgs+1)=InArgs(2:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('COIL:HEATING:WATERTOAIRHEATPUMP:PARAMETERESTIMATION')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.
@@ -463,7 +463,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(2) = ''  ! new Availability Schedule Name field
                 OutArgs(3:CurArgs+1)=InArgs(2:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('COIL:WATERHEATING:AIRTOWATERHEATPUMP:WRAPPED')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 nodiff=.false.

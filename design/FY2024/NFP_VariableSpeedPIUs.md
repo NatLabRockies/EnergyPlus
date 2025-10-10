@@ -5,7 +5,7 @@ Variable Speed Power Induction Units (Series/Parallel)
 
  - Original Date: 11/2023
  - Revision Date: N/A
- 
+
 
 ## Justification for New Feature ##
 
@@ -89,15 +89,15 @@ This field is used to determine the minimum fan speed as a fraction when modelin
 
 \paragraph{Field: Heating Control Type}\label{field-heat-control-type-parallelPIU}
 
-This field is used to declare how the heating coil is to be controlled. There are two choices, \textbf{Staged} or \textbf{Modulated}, see the control diagrams above. 
+This field is used to declare how the heating coil is to be controlled. There are two choices, \textbf{Staged} or \textbf{Modulated}, see the control diagrams above.
 
-Staged heat control has two stages. The first stage increases the fan flow first while leaving the reheat coil off.  The second stage runs the fan at full speed and brings on heating.  
+Staged heat control has two stages. The first stage increases the fan flow first while leaving the reheat coil off.  The second stage runs the fan at full speed and brings on heating.
 
-Modulated heat control has three stages and considers discharge air temperature. The first stage of heating leaves fan speed at the minimum and brings on heat until the design discharge air temperature is reached. The second stage of heating maintains the design discharge air temperature and ramps up the fan speed. The third stage of heating runs at full fan speed and allows the discharge air temperature to exceed the design up until it reaches a high limit. When using the Modulated heat control type the following two fields are needed for input on the discharge air temperatures. 
+Modulated heat control has three stages and considers discharge air temperature. The first stage of heating leaves fan speed at the minimum and brings on heat until the design discharge air temperature is reached. The second stage of heating maintains the design discharge air temperature and ramps up the fan speed. The third stage of heating runs at full fan speed and allows the discharge air temperature to exceed the design up until it reaches a high limit. When using the Modulated heat control type the following two fields are needed for input on the discharge air temperatures.
 
 \paragraph{Field: Design Heating Discharge Air Temperature}\label{field-heat-design-DAT-parallelPIU}
 
-This field is used to indicate the design discharge air temperature during stage two heating for Modulated heat control. There is a default of 32.1 C (90F). 
+This field is used to indicate the design discharge air temperature during stage two heating for Modulated heat control. There is a default of 32.1 C (90F).
 
 \paragraph{Field: High Limit Heating Discharge Air Temperature}\label{field-heat-limit-DAT-parallelPIU}
 
@@ -151,7 +151,7 @@ This field reports the total air mass flow rate discharging from the air termina
 
 \paragraph{Zone Air Terminal Primary Air Mass Flow Rate {[}kg/s{]}}
 
-This field reports the air mass flow entering the terminal from the primary node, typically a central air handling unit, in kg/s. The flow will vary during cooling when using a central variable speed fan. 
+This field reports the air mass flow entering the terminal from the primary node, typically a central air handling unit, in kg/s. The flow will vary during cooling when using a central variable speed fan.
 
 \paragraph{Zone Air Terminal Secondary Air Mass Flow Rate {[}kg/s{]}}
 
@@ -163,13 +163,13 @@ This field reports the drybulb temperature of the air leaving the terminal and d
 
 \paragraph{Zone Air Terminal Current Operation Control Stage}
 
-This field reports the current control stage of a PIU terminal. The controller diagrams above show the different stages.  This output helps to monitor what control stage the air terminal is in at a given time.  The output itself is an integer value that is mapped to a stage in the following list.  Note that the frequency of reporting needs to be at the highest level because averaging integers across more than one system timestep makes them meaningless. 
+This field reports the current control stage of a PIU terminal. The controller diagrams above show the different stages.  This output helps to monitor what control stage the air terminal is in at a given time.  The output itself is an integer value that is mapped to a stage in the following list.  Note that the frequency of reporting needs to be at the highest level because averaging integers across more than one system timestep makes them meaningless.
 
 \begin{itemize}
 \item
-  value = -1  => Not determined, should not occur, please report to developers  
+  value = -1  => Not determined, should not occur, please report to developers
 \item
-  value = 0 => Terminal Shut Down, system is not available. 
+  value = 0 => Terminal Shut Down, system is not available.
 \item
   value = 1 => First Stage Cooling
 \item
@@ -186,7 +186,7 @@ This field reports the current control stage of a PIU terminal. The controller d
   value = 10 => Third Stage Heating, Modulated Heat Control
 \item
   value = 11 => Legacy Constant Volume Cooling
-\item 
+\item
   value = 12 => Legacy Constant Volume Heating
 \end{itemize}
 

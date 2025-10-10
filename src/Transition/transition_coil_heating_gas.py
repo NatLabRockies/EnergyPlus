@@ -61,7 +61,7 @@ def add_fuel_type(filename):
     assert os.path.isfile(filename)
     with open(filename, 'rU') as f:
         filecontents = f.read()
-        
+
     def repl(m):
         if m.group(2) == 'Coil:Heating:Gas':
             try:
@@ -72,19 +72,19 @@ def add_fuel_type(filename):
                 post_whitespace = ' ' * width
                 pre, post = itemlist[2].split('\n')
                 itemlist[2] = '{}\n{}NaturalGas,{}!- FuelType\n{}'.format(pre, pre_whitespace, post_whitespace, post)
-                
+
                 group3 = ','.join(itemlist)
                 return m.group(1) + m.group(2) + ',' + group3 + ';'
             except:
                 return m.group()
         else:
             return m.group()
-    
+
     newfilecontents = re.sub(r'(\s*)([\w:]+),(.*?);', repl, filecontents, flags=re.DOTALL)
 
     with open(filename, 'w') as f:
         f.write(newfilecontents)
-    
+
 def main():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     example_file_dir = os.path.abspath(os.path.join(this_dir, '..', '..', 'testfiles'))

@@ -13,7 +13,7 @@ ASHRAE Thermal Comfort Standard 55 has been evolving in recent years to encourag
 
 In this new feature, we propose to implement the following adjustments according to ASHRAE Standard 55-2017 in EnergyPlus to facilitate more accurate comfort modeling:
 
-1) Add the cooling effect (CE) calculations, according to ASHRAE Standard 55-2017 NORMATIVE APPENDIX D. 
+1) Add the cooling effect (CE) calculations, according to ASHRAE Standard 55-2017 NORMATIVE APPENDIX D.
 
 2) Add a modified set of PMV/PPD calculations that consider the cooling effect of elevated air speed. Keep the original PMV/PPD calculations.
 
@@ -28,15 +28,15 @@ This proposal does not cover the calculations of effective radiant field which m
 
 ASHRAE Standard 55-2017 Section 5.3 requires that the Elevated Air Speed Comfort Zone Method be used when average air speed V<sub>a</sub> is greater than 0.20 m/s.
 
-The Standard Effective Temperature (SET) model shall be used to account for the cooling effect of air speeds greater than the 0.20 m/s. Specifically, for a given set of environmental and personal variables, including an elevated average air speed, an average air temperature t<sub>a</sub>, and a mean radiant temperature t<sub>r</sub>, the SET is first calculated. Then the average air speed V<sub>a</sub> is replaced by still air (0.1 m/s), and the average air temperature and radiant temperature are adjusted according to the cooling effect (CE). The CE of the elevated air speed is the value that, when subtracted equally from both the average air temperature and the mean radiant temperature, yields the same SET under still air as in the first SET calculation under elevated air speed. 
+The Standard Effective Temperature (SET) model shall be used to account for the cooling effect of air speeds greater than the 0.20 m/s. Specifically, for a given set of environmental and personal variables, including an elevated average air speed, an average air temperature t<sub>a</sub>, and a mean radiant temperature t<sub>r</sub>, the SET is first calculated. Then the average air speed V<sub>a</sub> is replaced by still air (0.1 m/s), and the average air temperature and radiant temperature are adjusted according to the cooling effect (CE). The CE of the elevated air speed is the value that, when subtracted equally from both the average air temperature and the mean radiant temperature, yields the same SET under still air as in the first SET calculation under elevated air speed.
 
 The following is a formal description of this process. To define the CE, we assert that it satisfies the following:
 
 SET(t<sub>a</sub>, t<sub>r</sub>, v<sub>elev</sub>, \*) = SET(t<sub>a</sub> - CE, t<sub>r</sub> - CE, v<sub>still</sub>, \*) &nbsp;&nbsp; Eq. (1)
 
-where t<sub>a</sub> is the average air temperature, t<sub>r</sub> is the mean radiant temperature, v<sub>elev</sub> is the elevated average air speed, such that v<sub>elev</sub> > 0.1 m/s, still is the elevated average air speed (v<sub>still</sub> = 0.1 m/s). The other parameters (indoor air humidity, clothing, metabolic rate) that stay the same are denoted by “\*”. 
+where t<sub>a</sub> is the average air temperature, t<sub>r</sub> is the mean radiant temperature, v<sub>elev</sub> is the elevated average air speed, such that v<sub>elev</sub> > 0.1 m/s, still is the elevated average air speed (v<sub>still</sub> = 0.1 m/s). The other parameters (indoor air humidity, clothing, metabolic rate) that stay the same are denoted by “\*”.
 
-We will modify the current PierceSET Two-Node method to calculate SET implemented in EnergyPlus to reflect the changes made in the ASHRAE 55- 2020 standard Apendix D4. We’ll calculate the CE using the modified PierceSET model. 
+We will modify the current PierceSET Two-Node method to calculate SET implemented in EnergyPlus to reflect the changes made in the ASHRAE 55- 2020 standard Apendix D4. We’ll calculate the CE using the modified PierceSET model.
 
 2. Adjusted ASHRAE 55 PMV/PPD calculations
 
@@ -48,7 +48,7 @@ PPD<sub>adj</sub> = 100 - 95 \* exp(-0.03353 \* PMV<sub>adj</sub><sup>4</sup> - 
 
 3. ASHRAE 55 PPD on draft at ankle level calculations
 
-Draft is unwanted local cooling of the body caused by air movement. It is most prevalent when the whole-body thermal sensation is cool (below neutral). Draft sensation depends on air speed, air temperature, activity, and clothing. Sensitivity to draft is greatest where the skin is not covered by clothing, especially the head region comprising the head, neck, and shoulders and the leg region comprising the ankles, feet, and legs. Draft at the lower leg region may occur in the buildings conditioned by thermally stratified systems, such as displacement ventilation and underfloor air distribution, or with cold-dropping airflow along external walls and/or windows. 
+Draft is unwanted local cooling of the body caused by air movement. It is most prevalent when the whole-body thermal sensation is cool (below neutral). Draft sensation depends on air speed, air temperature, activity, and clothing. Sensitivity to draft is greatest where the skin is not covered by clothing, especially the head region comprising the head, neck, and shoulders and the leg region comprising the ankles, feet, and legs. Draft at the lower leg region may occur in the buildings conditioned by thermally stratified systems, such as displacement ventilation and underfloor air distribution, or with cold-dropping airflow along external walls and/or windows.
 
 We will add another metric, namely the predicted percentage dissatisfied on draft at ankle level (PPD AD) to evaluate the ankle draft risk.This proposed model can evaluate PPD_AD as a function of PMV and air speed at ankle. The following is the equation to calculate PPD_AD.
 
@@ -71,7 +71,7 @@ People,
    \memo If you use a ZoneList in the Zone or ZoneList name field then this definition applies
    \memo to all the zones in the ZoneList.
    \min-fields 10
-   
+
    A14, \field Thermal Comfort Model 1 Type
        \type choice
        \key Fanger
@@ -131,11 +131,11 @@ No transition change required.
 
 From Stefano Schiavon <schiavon@berkeley.edu> on Dec 7, 2020, 12:03 PM:
 
-1. Dr Edward A. ARENS is working on an addendum to reduce the still airspeeds from 0.2 to 0.1 m/s and that this was already implemented in the CBE thermal comfort tool. The addendum on elevated air speed that (I believe) has been voted through SSPC 55 in 2020 autumn, going now to public review. It will be a pity to have EnergyPlus using the old airspeed value. It may take many years before this change could be updated in E+. It makes sense to fix it now. 
+1. Dr Edward A. ARENS is working on an addendum to reduce the still airspeeds from 0.2 to 0.1 m/s and that this was already implemented in the CBE thermal comfort tool. The addendum on elevated air speed that (I believe) has been voted through SSPC 55 in 2020 autumn, going now to public review. It will be a pity to have EnergyPlus using the old airspeed value. It may take many years before this change could be updated in E+. It makes sense to fix it now.
 
-2. The code in ASHRAE 55 has been modified due to issues that were discovered in the SET calculation. Ed Arens lead those changes. I doubt that they have been documented somewhere. If I recall correctly, the changes were related to the autogenerated air speed by physical movement and some unit transformation that was incorrect. 
+2. The code in ASHRAE 55 has been modified due to issues that were discovered in the SET calculation. Ed Arens lead those changes. I doubt that they have been documented somewhere. If I recall correctly, the changes were related to the autogenerated air speed by physical movement and some unit transformation that was incorrect.
 
-Reply: 
+Reply:
 
 We will using the new airspeed value in E+ implementation. We'll modify the current SET code implementations in EnergyPlus to reflect the modifications in ASHRAE 55.
 

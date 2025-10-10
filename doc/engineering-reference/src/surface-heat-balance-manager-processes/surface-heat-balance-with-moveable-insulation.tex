@@ -72,7 +72,7 @@ SurfTempIn(SurfNum) = (SurfCTFConstInPart(SurfNum) + SurfOpaqQRadSWInAbs(SurfNum
                        SurfNetLWRadToSurf(SurfNum) + SurfQdotRadHVACInPerArea(SurfNum) +
                        QAdditionalHeatSourceInside(SurfNum) +
                        IterDampConst * SurfTempInsOld(SurfNum)))
-                       / (construct.CTFInside(0) + HMovInsul - F1 * HMovInsul); 
+                       / (construct.CTFInside(0) + HMovInsul - F1 * HMovInsul);
 
 SurfTempInTmp(SurfNum) = (construct.CTFInside(0) * SurfTempIn(SurfNum) +
                           HMovInsul * SurfTempIn(SurfNum) -
@@ -326,13 +326,13 @@ From Equation~\ref{eq:HeatBalanceEquationCase8}:
 \begin{longtable}[c]{p{1.8in}p{1.2in}p{0.9in}p{0.9in}p{1.2in}}
 
 \caption{C++ Variables and Descriptions \label{table:c++-variables-and-descriptions}} \tabularnewline
-\toprule 
+\toprule
 C++ Variable & Description & Tarp Variable & Units & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables and Descriptions} \tabularnewline
-\toprule 
+\toprule
 C++ Variable & Description & Tarp Variable & Units & Description \tabularnewline
 \midrule
 \endhead

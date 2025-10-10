@@ -100,7 +100,7 @@ Reduced overall heat transfer coefficient (UA) causes reduced coil capacity, res
 \subsubsection{Modeling Approach - General}\label{modeling-approach-2}
 
 The coil fouling fault is described in the object \textbf{FaultModel:Fouling:Coil}. The fault model currently applies only to the `simple' water coils:
-\textbf{Coil:Heating:Water} and \textbf{Coil:Cooling:Water}. 
+\textbf{Coil:Heating:Water} and \textbf{Coil:Cooling:Water}.
 
 The \lstinline!FaultModel:Fouling:Coil! object allows the user to describe the fouling information in either of the two methods: \textbf{FouledUARated} or \textbf{FoulingFactor}.
 
@@ -180,7 +180,7 @@ Note that we do not allow bettering the coil UA, so the final result in either c
 
 \subsubsection{Modeling Approach - Cooling Coil}\label{modeling-approach-fouling-coil-cooling}
 
-When applied to a \textbf{Coil:Cooling:Water}, before the fault is applied, the current, non-fouled, $UA_{water}$ (\lstinline!WaterCoil(CoilNum).UACoilExternal!) and 
+When applied to a \textbf{Coil:Cooling:Water}, before the fault is applied, the current, non-fouled, $UA_{water}$ (\lstinline!WaterCoil(CoilNum).UACoilExternal!) and
 $UA_{air}$ (\lstinline!WaterCoil(CoilNum).UACoilInternal!) are first determined.
 
 \textbf{FoulingFactor}:
@@ -530,7 +530,7 @@ where:
 
 \(T_{evap-o,ff}\) is the evaporator outlet temperature in the fault-free case (reading, design value)
 
-\(T_{evap-i}\) is the evaporator inlet temperature value 
+\(T_{evap-i}\) is the evaporator inlet temperature value
 
 \(\Delta T\) is the difference between the temperature reading and the actual temperature.
 
@@ -548,7 +548,7 @@ where:
 
 \(T_{evap-o,f}\) is the evaporator outlet temperature value in the faulty case (actual value)
 
-\(T_{evap-i}\) is the evaporator inlet temperature value 
+\(T_{evap-i}\) is the evaporator inlet temperature value
 
 Note that operational faults only affect the HVAC operations, not the system design. Therefore, the fault model will only be applied at real weather simulations instead of the sizing and warm-up simulations. If the faulty sensor leads to a supply water temperature level that goes beyond the limits defined in the chiller object, the predefined bound values will be used as the actual supply water temperature \(T_{evap-o,f}\).
 
@@ -559,7 +559,7 @@ If there are multiple chillers operating together with one shared faulty supply 
 
 \subsubsection{Symptom}
 
-The condenser supply water temperature readings deviate from the actual water temperature levels due to sensor offset at the condenser inlet. Because this is usually used as the condenser loop temperature setpoint, the fault may affect the actual performance of cooling tower and condenser. It can result in inappropriate tower operations such as fan and pump cycling and water bypass. 
+The condenser supply water temperature readings deviate from the actual water temperature levels due to sensor offset at the condenser inlet. Because this is usually used as the condenser loop temperature setpoint, the fault may affect the actual performance of cooling tower and condenser. It can result in inappropriate tower operations such as fan and pump cycling and water bypass.
 
 \subsubsection{Modeling Approach}
 
@@ -577,7 +577,7 @@ The fault applies to a number of cooling tower types, namely:
   CoolingTower:VariableSpeed:MERKEL
 \end{itemize}
 
-The effect of an offset in a condenser supply water temperature sensor whose sole use is for calculation of the difference between the set-points and the actual values can be modeled as an equal and opposite offset: 
+The effect of an offset in a condenser supply water temperature sensor whose sole use is for calculation of the difference between the set-points and the actual values can be modeled as an equal and opposite offset:
 
 \begin{equation}
 T_{tower-o,f} = T_{tower-o,ff} - \Delta T
@@ -614,7 +614,7 @@ The fault applies to a number of cooling tower types, namely:
   CoolingTower:VariableSpeed:MERKEL
 \end{itemize}
 
-The fault model allows the user to describe the fouling using UA reduction factor, which is the ratio between the UA value at fouling case and that at fault free case. The factor is applicable to both the Design UA and Free Convection UA of the tower. 
+The fault model allows the user to describe the fouling using UA reduction factor, which is the ratio between the UA value at fouling case and that at fault free case. The factor is applicable to both the Design UA and Free Convection UA of the tower.
 
 \begin{equation}
 UA_{tower,f} = UA_{tower,ff} \times F_{UA}
@@ -735,7 +735,7 @@ The fault applies to a number of chiller types that can have water-cooled conden
   Chiller:CombustionTurbine
 \end{itemize}
 
-The fault does not apply to the absorption chillers that do not have water-based heat exchangers. 
+The fault does not apply to the absorption chillers that do not have water-based heat exchangers.
 
 The model allows the user to describe the fault using a dynamic fouling factor. The reference factor indicates the decrease of the reference capacity of the chiller, which is the ratio between the nominal capacity at fouling case and that at fault free case. The reference COP is decreased correspondingly.
 

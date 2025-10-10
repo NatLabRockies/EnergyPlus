@@ -7,7 +7,7 @@
 !
 ! Highlights:              Electric chiller with air cooled condenser; autosized preheating and precooling water coils in the
 !                          outside air stream controlled to preheat and precool setpoints.  Keeps Site:Location definition
-!                          rather than allowing the weather file information to overwrite it.  
+!                          rather than allowing the weather file information to overwrite it.
 !
 ! Simulation Location/Run: CHICAGO_IL_USA TMY2-94846, 2 design days, 2 run periods,
 !                          Run Control executes the run periods using the weather file

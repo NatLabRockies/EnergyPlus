@@ -7,13 +7,13 @@ EnergyPlus offers the different types of air models listed in the table below al
 % table 43
 \begin{longtable}[c]{p{1.5in}p{1.5in}p{3.0in}}
 \caption{Summary of room air models available in EnergyPlus \label{table:summary-of-room-air-models-available-in}} \tabularnewline
-\toprule 
+\toprule
 Air model name & Applicability & Input Objects Required \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Summary of room air models available in EnergyPlus} \tabularnewline
-\toprule 
+\toprule
 Air model name & Applicability & Input Objects Required \tabularnewline
 \midrule
 \endhead
@@ -1470,7 +1470,7 @@ Table~\ref{table:test-cases-used-to-develop-correlations} lists the cases used t
 % table 44
 \begin{longtable}[c]{@{}lllll@{}}
 \caption{Test cases used to develop correlations \label{table:test-cases-used-to-develop-correlations}} \tabularnewline
-\toprule 
+\toprule
 Case & Opening area & Room width & Room depth & Room height \tabularnewline
   & A (m\(^2\)) & W (m) & D (m) & H (m) \tabularnewline
 
@@ -1478,7 +1478,7 @@ Case & Opening area & Room width & Room depth & Room height \tabularnewline
 \endfirsthead
 
 \caption[]{Test cases used to develop correlations} \tabularnewline
-\toprule 
+\toprule
 Case & Opening area & Room width & Room depth & Room height \tabularnewline
   & A (m\(^2\)) & W (m) & D (m) & H (m) \tabularnewline
 
@@ -1507,13 +1507,13 @@ Case & Opening area & Room width & Room depth & Room height \tabularnewline
 % table 45
 \begin{longtable}[c]{p{1.25in}p{0.5in}p{0.5in}p{3.0in}}
 \caption{Definitions of output variables \label{table:definitions-of-output-variables}} \tabularnewline
-\toprule 
+\toprule
 Output variable & Symbol & Units & Definition \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Definitions of output variables} \tabularnewline
-\toprule 
+\toprule
 Output variable & Symbol & Units & Definition \tabularnewline
 \midrule
 \endhead
@@ -1530,13 +1530,13 @@ See also Figure~\ref{fig:jet-and-recirculation-regions-in-typical}. Note the \em
 % table 46
 \begin{longtable}[c]{p{1.0in}p{0.5in}p{2.0in}p{0.5in}p{0.5in}p{0.5in}}
 \caption{Correlation formulae in the form Y = aX + b \label{table:correlation-formulae-in-the-form-y-ax-+-b}} \tabularnewline
-\toprule 
+\toprule
 ~ & Y & X & a & b & R\(^2\) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Correlation formulae in the form Y = aX + b} \tabularnewline
-\toprule 
+\toprule
 ~ & Y & X & a & b & R\(^2\) \tabularnewline
 \midrule
 \endhead
@@ -1551,13 +1551,13 @@ Recirculation zone temperature rise & $\Delta$T\(_R\) & $\frac{q''_{RM}}{\rho {c
 % table 47
 \begin{longtable}[c]{p{0.5in}p{0.4in}p{0.4in}p{0.4in}p{0.4in}p{0.4in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}}
 \caption{Accuracy of correlation formulae in predicting test case results \label{table:accuracy-of-correlation-formulae-in}} \tabularnewline
-\toprule 
+\toprule
 Cases & Errors (\%) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Accuracy of correlation formulae in predicting test case results} \tabularnewline
-\toprule 
+\toprule
 Cases & Errors (\%) \tabularnewline
 \midrule
 \endhead
@@ -1683,7 +1683,7 @@ An accurate representation of system behavior must consider both the local heat 
   \begin{array}{rl}
     \rho C_p F R \frac{\partial T_W \left(r\right)}{\partial r} & = \frac{A_S h_S}{L} \left(T_S - T_W \left(r\right)\right) \\
     \rho C_p F R \frac{\partial T_R \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_J\left(x\right) - T_R \left(x\right)\right) \\
-    \rho C_p F \frac{\partial T_J \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_R\left(x\right) - T_J \left(x\right)\right) 
+    \rho C_p F \frac{\partial T_J \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_R\left(x\right) - T_J \left(x\right)\right)
   \end{array}
   \label{eq:DiffEqForTWrTRxTJx}
 \end{equation}
@@ -1762,7 +1762,7 @@ In this case, the following system of equations must be solved:
 \begin{array}{rl}
     \rho C_p F R \frac{\partial T_W \left(r\right)}{\partial r} & = -\frac{A_S h_S}{L} \left(T_S - T_W \left(r\right)\right) - \frac{G_R}{L_R} \\
     \rho C_p F R \frac{\partial T_R \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_J\left(x\right) - T_R \left(x\right)\right) \\
-    \rho C_p F \frac{\partial T_J \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_R\left(x\right) - T_J \left(x\right)\right) 
+    \rho C_p F \frac{\partial T_J \left(x\right)}{\partial x} & = \frac{A_{SL} h_{SL}}{L} \left(T_R\left(x\right) - T_J \left(x\right)\right)
   \end{array}
 \end{equation}
 
@@ -1777,13 +1777,13 @@ For simplicity the heat gains are considered to be evenly distributed along the 
 % table 48
 \begin{longtable}[c]{p{1.0in}p{1.0in}p{3.5in}}
 \caption{List of variables for CV model \label{table:list-of-variables-for-cv-model}} \tabularnewline
-\toprule 
+\toprule
 Symbol & Units & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{List of variables for CV model} \tabularnewline
-\toprule 
+\toprule
 Symbol & Units & Description \tabularnewline
 \midrule
 \endhead

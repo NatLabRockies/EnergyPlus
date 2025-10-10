@@ -6,13 +6,13 @@
 
 ## Overview
 
-Internal NREL users have requested the ability better model dynamic insulation and tunable PCM surfaces within EnergyPlus via the CondFD surfaces. They have also requested the ability to actuate these controls from the Python Plugin System - E+ API, as well as asked for additional report variables from the CondFD surfaces. This work enables these new workflows. 
+Internal NREL users have requested the ability better model dynamic insulation and tunable PCM surfaces within EnergyPlus via the CondFD surfaces. They have also requested the ability to actuate these controls from the Python Plugin System - E+ API, as well as asked for additional report variables from the CondFD surfaces. This work enables these new workflows.
 
 This project will add EMS actuators and appropriate E+ API functionality to allow users to directly specify the thermal conductivity (k) and specific heat (cp) values for the layers of a surface which correspond to a specific material layer.
 
 ## Implementation
 
-The EMS actuators have been implemented to be associated with each material layer of each surface. This results in the material properties for the entire material layer being updated rather than requiring the user to attempt to keep track of how many layers each respective material layer has and then define the actuators. 
+The EMS actuators have been implemented to be associated with each material layer of each surface. This results in the material properties for the entire material layer being updated rather than requiring the user to attempt to keep track of how many layers each respective material layer has and then define the actuators.
 
 As show in the figure below with three different material layers, three actuators for k and cp, respectively, are added to be associated with Material 1, Material 2, and Material 3. Modifications to the properties for Material 1 will result in modified property values for nodes 1 and 2L. Material 2 modifies nodes 2R, 3, and 4L, etc.
 
@@ -33,7 +33,7 @@ actuator_key = f"{surf_name}:{mat_name}"
 k_handle = self.api.exchange.get_actuator_handle(state, comp_type, ctrl_type, actuator_key)
 ```
 
-The code is not implemented to check or warn the user if the EMS user-defined property values violate the Fourier number used to determine node spacing which was determined upon surface initialization. 
+The code is not implemented to check or warn the user if the EMS user-defined property values violate the Fourier number used to determine node spacing which was determined upon surface initialization.
 
 $$\mbox{Fo} = \frac{\alpha \Delta t}{\Delta x^2}$$
 

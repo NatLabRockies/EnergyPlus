@@ -10,29 +10,29 @@ Equation-Fit Based Gas Fired Absorption Heat Pump (GAHP) Module
 
 
 ## Justification for New Feature ##
-The goal of the proposed new feature development is to add a new EnergyPlus model for a gas-fired (or fuel-fired) absorption heat pump which represents a potential new product line for space heating and domestic hot water (DHW) heating applications [1]. The equipment is intended to used in cold climates as a heat pump to provided space-heating to the space and hot water heating for domestic hot water. Currently, the heat pump is modeled by the feature requester using the "PlantComponent:UserDefined" object to connect the EMS programs into the plant simulation. This method is not standardized and lack scalability for different connections and equipment configurations. The proposed new feature will address the model needs for convenient and scalable modeling of such gas-fired absorption heat pump (GAHP) systems. 
+The goal of the proposed new feature development is to add a new EnergyPlus model for a gas-fired (or fuel-fired) absorption heat pump which represents a potential new product line for space heating and domestic hot water (DHW) heating applications [1]. The equipment is intended to used in cold climates as a heat pump to provided space-heating to the space and hot water heating for domestic hot water. Currently, the heat pump is modeled by the feature requester using the "PlantComponent:UserDefined" object to connect the EMS programs into the plant simulation. This method is not standardized and lack scalability for different connections and equipment configurations. The proposed new feature will address the model needs for convenient and scalable modeling of such gas-fired absorption heat pump (GAHP) systems.
 
-Current EnergyPlus has capabilities to model an absorption chillerheater and a heat pump separately. For example, an existing EnergyPlus object that can provide the basis for the absorption chiller is ChillerHeater:Absorption:DirectFired; and an existing EnergyPlus object that can provide the heat pump modeling capability is HeatPump:PlantLoop:EIR:Cooling/Heating. 
+Current EnergyPlus has capabilities to model an absorption chillerheater and a heat pump separately. For example, an existing EnergyPlus object that can provide the basis for the absorption chiller is ChillerHeater:Absorption:DirectFired; and an existing EnergyPlus object that can provide the heat pump modeling capability is HeatPump:PlantLoop:EIR:Cooling/Heating.
 
-ChillerHeater:Absorption:DirectFired: This is an DOE-2 type direct-fired absorption chiller models that allows heating and cooling connections (and operations) at the same time. Direct gas-fired absorption chiller-heater using performance curves. This component models fuel-fired heating and cooling with a possible air-cooled condenser option. However, the heating mode is intended to represent simply a boiler, but not a heat pump. The fundamental difference is that the general ChillerHeater:Absorption:DirectFired has an independent condenser units to reject heat; however, the gas-fired heat pump to be modeled in this study actually will have heat extracted from the condenser and feed to the hot-water or domestic hot water demand loop. 
+ChillerHeater:Absorption:DirectFired: This is an DOE-2 type direct-fired absorption chiller models that allows heating and cooling connections (and operations) at the same time. Direct gas-fired absorption chiller-heater using performance curves. This component models fuel-fired heating and cooling with a possible air-cooled condenser option. However, the heating mode is intended to represent simply a boiler, but not a heat pump. The fundamental difference is that the general ChillerHeater:Absorption:DirectFired has an independent condenser units to reject heat; however, the gas-fired heat pump to be modeled in this study actually will have heat extracted from the condenser and feed to the hot-water or domestic hot water demand loop.
 
-HeatPump:PlantLoop:EIR:Cooling/Heating: An EIR formulated air-to-water (or water-to-water) heat pump model. This component can model a general -purpose heat pump, either air-to-water or water-to-water. However, it does not have a fuel type option; and the heating mode currently does not allow defrost operations. Further, parameter input options are more general for a traditional electric heat pump configuration; but not specifically to a gas-fired absorption heat pump to be modeled in the current NFP. In order to model a gas-fired absorption heat pump, many input fields, including a set of different curves, need to be expanded or allow alternatives in order to fit GAHP in a the current general-purpose heat pump model. Further, the HeatPUmp:PlantLoop:EIR:Cooling/Heating modules can only deal with constant flows for the load modulation; while for the current development, more load modulation options are needed. 
+HeatPump:PlantLoop:EIR:Cooling/Heating: An EIR formulated air-to-water (or water-to-water) heat pump model. This component can model a general -purpose heat pump, either air-to-water or water-to-water. However, it does not have a fuel type option; and the heating mode currently does not allow defrost operations. Further, parameter input options are more general for a traditional electric heat pump configuration; but not specifically to a gas-fired absorption heat pump to be modeled in the current NFP. In order to model a gas-fired absorption heat pump, many input fields, including a set of different curves, need to be expanded or allow alternatives in order to fit GAHP in a the current general-purpose heat pump model. Further, the HeatPUmp:PlantLoop:EIR:Cooling/Heating modules can only deal with constant flows for the load modulation; while for the current development, more load modulation options are needed.
 
-In addition, for both of the two existing models ChillerHeater:Absorption:DirectFired and HeatPump:PlantLoop:EIR:Cooling/Heating---since these two models are for a general purpose absorption chiller heater or for a general purpose heat pump model (for both heating and cooling), they can be cumbersome in specifying, sizing, operations, and controls for the GAHP equipment modeling which is mainly in heating mode only. Further, there are more features that is applicable to the gas-fired absorption heat pump but not available in the current ChillerHeater:Absorption:DirectFired and HeatPump:PlantLoop:EIR:Cooling/Heating models, such as defrost options, flow control method, and standing by electricity options. 
+In addition, for both of the two existing models ChillerHeater:Absorption:DirectFired and HeatPump:PlantLoop:EIR:Cooling/Heating---since these two models are for a general purpose absorption chiller heater or for a general purpose heat pump model (for both heating and cooling), they can be cumbersome in specifying, sizing, operations, and controls for the GAHP equipment modeling which is mainly in heating mode only. Further, there are more features that is applicable to the gas-fired absorption heat pump but not available in the current ChillerHeater:Absorption:DirectFired and HeatPump:PlantLoop:EIR:Cooling/Heating models, such as defrost options, flow control method, and standing by electricity options.
 
 
 ## E-mail and Conference Call Conclusions ##
 ### E-mail Communications ###
-From 2022-04-22 to 2022-04-29, a few email exchanges with the feature requester (Alex Fridlyand) regarding the first draft NFP and a few related questions. Some comments and additional feedbacks were offered by Alex on the equipment's operation modes, typical application scenarios, typical input parameter values, and output variables. 
+From 2022-04-22 to 2022-04-29, a few email exchanges with the feature requester (Alex Fridlyand) regarding the first draft NFP and a few related questions. Some comments and additional feedbacks were offered by Alex on the equipment's operation modes, typical application scenarios, typical input parameter values, and output variables.
 
 ### Conference Call Communications ###
-On 2022-05-04, the NFP was presented to the development during a technicality conference call session. A few comments were gathered regarding: 1) how to reuse current objects, inputs, and code structures when developing the new model (Edwin Lee at NREL); and 2) the application scenarios of the new GAHP (Tianzhen Hong at LBNL). 
+On 2022-05-04, the NFP was presented to the development during a technicality conference call session. A few comments were gathered regarding: 1) how to reuse current objects, inputs, and code structures when developing the new model (Edwin Lee at NREL); and 2) the application scenarios of the new GAHP (Tianzhen Hong at LBNL).
 
-On 2022-05-11, a conference call meeting was made between the NFP authors and Edwin Lee, and Matt Mitchell at NREL for a further discussion about how to reuse current code structures. A few possible ways were discussed regarding minimize repeated code development. It was recommended to use the existing data/code structure similar to HeatPUmp:PlantLoop:EIR:Cooling/Heating objects by either direct modifying on the existing module or setting up an inheritance relationship; and the new IDD object proposed in the current NFP can still be the way to go regardless of the underlying data/code structure choice. 
+On 2022-05-11, a conference call meeting was made between the NFP authors and Edwin Lee, and Matt Mitchell at NREL for a further discussion about how to reuse current code structures. A few possible ways were discussed regarding minimize repeated code development. It was recommended to use the existing data/code structure similar to HeatPUmp:PlantLoop:EIR:Cooling/Heating objects by either direct modifying on the existing module or setting up an inheritance relationship; and the new IDD object proposed in the current NFP can still be the way to go regardless of the underlying data/code structure choice.
 
 ## Overview ##
 
-The proposed new feature will implement a gas-fire absorption heat pump model that would use equation-fit model with manufacture provided parameters. Currently the requester (GTI) uses a customized plant system component and EMS programs to implement the gas-fired absorption heat pump. The implemented model [1] is as follows: 
+The proposed new feature will implement a gas-fire absorption heat pump model that would use equation-fit model with manufacture provided parameters. Currently the requester (GTI) uses a customized plant system component and EMS programs to implement the gas-fired absorption heat pump. The implemented model [1] is as follows:
 
 $$ GAHP Heating Capacity = Rated Heating Capacity \times CAPFT $$
 
@@ -55,7 +55,7 @@ $$ CR = \frac{PLR}{PLR_{min}}, for 0.2 <= PLR <= 0.25 $$
 
 ## Approach ##
 
-The following new IDF object will be added to EnergyPlus to implement the absorption heat pump model, based on a new input data dictionary (IDD) definition has been proposed by GTI (e-mail from Alex Fridlyand on Nov 29, 2021), with a few addition of essential entries. The name of the object is HeatPump:AirToWater:FuelFired:Heating. 
+The following new IDF object will be added to EnergyPlus to implement the absorption heat pump model, based on a new input data dictionary (IDD) definition has been proposed by GTI (e-mail from Alex Fridlyand on Nov 29, 2021), with a few addition of essential entries. The name of the object is HeatPump:AirToWater:FuelFired:Heating.
 
 ### IDF Object for HeatPump:AirToWater:FuelFired:Heating
 
@@ -94,7 +94,7 @@ HeatPump:AirToWater:FuelFired:Heating,
 
 ### IDD entry for HeatPump:AirToWater:FuelFired:Heating ###
 
-A HeatPump:AirToWater:FuelFired:Heating object defines the basic inputs for an equation-fit gas-fired (or generally fuel-fired) absorption heat pump. 
+A HeatPump:AirToWater:FuelFired:Heating object defines the basic inputs for an equation-fit gas-fired (or generally fuel-fired) absorption heat pump.
 ```
 HeatPump:AirToWater:FuelFired:Heating,
   \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
@@ -264,7 +264,7 @@ HeatPump:AirToWater:FuelFired:Heating,
 
 ### IDD entry for HeatPump:AirToWater:FuelFired:Cooling ###
 
-A companion gas fired heat pump entry named HeatPump:AirToWater:FuelFired:Cooling with similar sets of input fields will also be added to the IDD file. The companion coil will be dealing with the input for the cooling mode operations and equipment sizing. For the input fields for the companion HeatPump:AirToWater:FuelFired:Cooling are similar to those for HeatPump:AirToWater:FuelFired:Heating, with the biggest difference being that the defrost options are no longer needed. 
+A companion gas fired heat pump entry named HeatPump:AirToWater:FuelFired:Cooling with similar sets of input fields will also be added to the IDD file. The companion coil will be dealing with the input for the cooling mode operations and equipment sizing. For the input fields for the companion HeatPump:AirToWater:FuelFired:Cooling are similar to those for HeatPump:AirToWater:FuelFired:Heating, with the biggest difference being that the defrost options are no longer needed.
 
 ```
 HeatPump:AirToWater:FuelFired:Cooling,
@@ -413,7 +413,7 @@ HeatPump:AirToWater:FuelFired:Cooling,
 
 ### Output Variables ###
 
-Output variables will reported for operation conditions, such as heating energy (rate), fuel energy (rate), electricity energy (rate)load, PLR, flow rate values. 
+Output variables will reported for operation conditions, such as heating energy (rate), fuel energy (rate), electricity energy (rate)load, PLR, flow rate values.
 
 The output variables are listed as follows:
 
@@ -436,13 +436,13 @@ The sizing for a couple of design parameters, such as nominal heating capacity, 
 
 ## Testing and Validation ##
 
-One or two unit tests will be developed to verify that: 
+One or two unit tests will be developed to verify that:
 1. the new input objects can be processed correctly;
 2. the model simulation system results, output variables, and reports are working properly.
 
 ## Example File and Transition Changes ##
 
-One new example file will be added to the test suite to demonstrate how to use this feature. 
+One new example file will be added to the test suite to demonstrate how to use this feature.
 
 Since the feature is based on completely newly added blocks, an older version would not carry the feature. Therefore a transition program is not needed for converting from earlier versions.
 
@@ -452,7 +452,7 @@ The proposed new feature development will add the following contents to the Inpu
 
 ### HeatPump:AirToWater:FuelFired:Heating Input Fields ###
 
-HeatPump:AirToWater:FuelFired:Heating is a gas-fired (or fuel fired) absorption heat pump that can be used for space heating and domestic hot water. It is can be considered a more efficient heat source (like a boiler) for hot water loop or DHW loop. It can be used as the heat source for a low temperature radiant heating system. 
+HeatPump:AirToWater:FuelFired:Heating is a gas-fired (or fuel fired) absorption heat pump that can be used for space heating and domestic hot water. It is can be considered a more efficient heat source (like a boiler) for hot water loop or DHW loop. It can be used as the heat source for a low temperature radiant heating system.
 
 The HeatPump:AirToWater:FuelFired:Heating will take the following input fields:
 
@@ -463,7 +463,7 @@ The name of the gas-fired (fuel-fired) absorption heat pump system.
 
 #### Field: Water Inlet Node Name ####
 
-Note that here the "water" does not literally mean "water". Rather it is the working fluid in the connected water side plant loop, which is usually some kind of glycol-water solution. 
+Note that here the "water" does not literally mean "water". Rather it is the working fluid in the connected water side plant loop, which is usually some kind of glycol-water solution.
 
 #### Field: Fuel Type ####
 This alpha field determines the type of fuel that the chiller uses. The default is NaturalGas. Valid values are NaturalGas, Propane, Diesel, Gasoline, FuelOilNo1, FuelOilNo2, OtherFuel1, OtherFuel2.
@@ -530,7 +530,7 @@ See the Input Output Reference documentation contents update above.
 
 ## Outputs Description ##
 
-The following output will be added the to the new gas-fired (fuel-fired) absorption heat pump system: 
+The following output will be added the to the new gas-fired (fuel-fired) absorption heat pump system:
 
 ```
 HVAC,average,Fuel-fired Absorption HeatPump Load Side Heating Transfer Rate [W]
@@ -552,7 +552,7 @@ The fundamental methods and equations used for the model, as well as the origina
 ## Designs ##
 
 ### New data struct ###
-A new data struct `EIRFuelFiredHeatPump` will be created, which is derived (and inherited) from the existing data struct named `EIRPlantLoopHeatPump`. This will allow the code to use a similar calling structure to simulate the equipment and seamlessly plug into the upper level plant loop simulations. 
+A new data struct `EIRFuelFiredHeatPump` will be created, which is derived (and inherited) from the existing data struct named `EIRPlantLoopHeatPump`. This will allow the code to use a similar calling structure to simulate the equipment and seamlessly plug into the upper level plant loop simulations.
 
 Two new plant loop equipment type named `HeatPumpFuelFiredHeating` and `HeatPumpFuelFiredCooling` will also be created as the new plant loop category names for the HeatPump:AirToWater:FuelFired:Heating/Cooling objects.
 
@@ -588,7 +588,7 @@ Following new member variables to the child `EIRFuelFiredHeatPump` struct to acc
         Real64 fuelEnergy = 0.0;
 ```
 
-A few existing methods (functions) in the parent needs to be overridden for the child struct, such as: 
+A few existing methods (functions) in the parent needs to be overridden for the child struct, such as:
 ```
         // Override parent methods to be declared
         void doPhysics(EnergyPlusData &state, Real64 currentLoad);
@@ -604,23 +604,23 @@ The overridden functions will have their own versions for the `EIRFuelFiredHeatP
 
 #### processInputForEIRPLHP() ####
 
-This function will be revised in the new child struct to process the input fields for the HeatPump:AirToWater:FuelFired:Heating/Cooling objects. It will read input information for the system's connection, equipment sizing, and operation mode. 
+This function will be revised in the new child struct to process the input fields for the HeatPump:AirToWater:FuelFired:Heating/Cooling objects. It will read input information for the system's connection, equipment sizing, and operation mode.
 
 #### sizeLoadSide() ####
 
 This function will be revised in the new child struct to size the GAHP equipment, such as the nominal heat capacity and design flow rate.
 
 #### pairUpCompanionCoils() ####
-This function will be revised in the new child struct to accommodate the cooling/heating pairing relationship the GAHP. 
+This function will be revised in the new child struct to accommodate the cooling/heating pairing relationship the GAHP.
 
 #### doPhysics() ####
-This function will be revised in the new child struct to model the GAHP. Compared to the parent version, the energy flows associated with fuel other than electricity will also be calculated, as well as the additional operation features needed to the fuel-fired heat pump. 
+This function will be revised in the new child struct to model the GAHP. Compared to the parent version, the energy flows associated with fuel other than electricity will also be calculated, as well as the additional operation features needed to the fuel-fired heat pump.
 
 #### oneTimeInit() ####
-This function will be revised in the new child struct to accommodate the output variables for the GAHP. Compared to the parent version, the energy flows associated with fuel will also be processed and reported here. 
+This function will be revised in the new child struct to accommodate the output variables for the GAHP. Compared to the parent version, the energy flows associated with fuel will also be processed and reported here.
 
 #### resetReportingVariables() ####
-This function will be revised in the new child struct to reset reporting variables, especially the energy values for a new timestep. For the GAHP, fuel energy related variables needs to be added to this overridden function. 
+This function will be revised in the new child struct to reset reporting variables, especially the energy values for a new timestep. For the GAHP, fuel energy related variables needs to be added to this overridden function.
 
 #### Others function(s) ####
 Any other functions that inovles a special treatment for the new fuel-fired heat pump would need to be overridden from the parent heat pump struct.

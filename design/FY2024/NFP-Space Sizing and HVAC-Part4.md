@@ -36,36 +36,36 @@ Space was added as a new concept in v9.6. Each EnergyPlus Zone contains one or m
 
   * assigning and allocating internal gains
   * specifying enclosure boundaries,
-  * reporting inputs grouped by space types, and 
+  * reporting inputs grouped by space types, and
   * reporting select output grouped by space types.
-  
+
 For the zone heat balance each thermal Zone is composed of one or more Spaces controlled by a single thermostat or HVAC system control point such as a VAV terminal unit.
 
 In version 23.1 options were added to perform the air heat balance for each Space or each Zone, and space-level heat balance output variables were added.
 
 In version 23.2, the following capabilities were added:
-  
+
   * When ZoneAirHeatBalanceAlgorithm "Do Space Heat Balance for Sizing" = Yes, zone sizing is also done for all spaces. The HVAC Sizing Summary table report will include subtables for Space Sensible Cooling and Heating as well as for Zone Sensible Cooling and Heating. Space Sizing will also be reported to the eio output. The space sizing results are reported, but not used.
 
   * Three new objects, SpaceHVAC:EquipmentConnections, SpaceHVAC:ZoneEquipmentSplitter, and SpaceHVAC:ZoneEquipmentMixer allow one or more zones to be simulated at the space level for HVAC, leading to independent air temperature and humidity in each space.
-  
+
   * For zone equipment serving multiple spaces, three thermostat control options (SingleSpace, Ideal, and Maximum).
 
 This NFP proposes additional optional capabilities:
 
   * Use the Space-level (room-by-room) sizing results to size Zone-level equipment to either the coincident or non-coincident peak across the Spaces (rooms).
-  
+
   * Refine existing Space-level HVAC simulation.
-  
+
   * Extend space HVAC to support more special objects (e.g. ZoneThermalChimney, if budget allows).
 
 
 
 ## Approach ##
 ### Sizing
-A new input will be added to Sizing:Zone to allow zone sizing using the non-coincident space peaks or the coincident peak. 
+A new input will be added to Sizing:Zone to allow zone sizing using the non-coincident space peaks or the coincident peak.
 
-Space sizing is an actual heat balance on each space. Currently zone sizing is an actual heat balance on each zone (as a whole) although some of the components for the zone heat balance are sums across the spaces (even when space heat balance is off). e.g. internal gains. The current zone sizing calculations will be used to calculate the coincident zone sizing using the combined spaces. 
+Space sizing is an actual heat balance on each space. Currently zone sizing is an actual heat balance on each zone (as a whole) although some of the components for the zone heat balance are sums across the spaces (even when space heat balance is off). e.g. internal gains. The current zone sizing calculations will be used to calculate the coincident zone sizing using the combined spaces.
 
 For the non-coincident zone sizing, the individual space peaks will be summed and other values (such as outdoor temperature) will be averaged.
 
@@ -189,7 +189,7 @@ The main calculation flow for Zone sizing is:
          * Move sizing data into final sizing array according to sizing method
          * Works on `CalcZoneSizing`, `CalcFinalZoneSizing`, `ZoneSizing`, and `FinalZoneSizing`
          * Lots going on in here.
-         
+
 ### HVAC ###
 
 The main calculation flow for Zone and Space HVAC in `HVACManager:ManageHVAC` is as follows, with notes about changes required for Space-HVAC.

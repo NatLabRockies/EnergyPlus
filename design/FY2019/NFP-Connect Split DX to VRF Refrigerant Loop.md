@@ -34,9 +34,9 @@ The common connection of VRF TU's and the VRF condenser is the ZoneTerminalUnitL
 The most straight-forward approach appears to be allowing the ZoneHVAC:TerminalUnit:VariableRefrigerantFlow object to be connected as zone (existing), air loop and outdoor air system equipment. Using this methodology, limited changes to the AirConditioner:VariableRefrigerantFlow and AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:\* objects are anticipated.
 
 ## Controls:
-  ZoneHVAC Equipment: no changes (currently load based control)  
-  AirloopHVAC Equipment: requires thermostat control zone input, load based control  
-  OutdoorAir Equipment: controlled to outlet node set point temperature (and humidity ratio?)  
+  ZoneHVAC Equipment: no changes (currently load based control)
+  AirloopHVAC Equipment: requires thermostat control zone input, load based control
+  OutdoorAir Equipment: controlled to outlet node set point temperature (and humidity ratio?)
 
 ## Testing/Validation/Data Sources ##
 
@@ -51,31 +51,31 @@ IO Ref text will be updated to include these new capabilities.
 Changes to the IDD appear to be minimal as no new objects will be added to E+. The only changes to model inputs are the allowed location of the TU object and thermostat location for controlling air loop equipment.
 
 ```
-ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,  
-        \memo Zone terminal unit with variable refrigerant flow (VRF) DX cooling and heating coils  
-        \memo (air-to-air heat pump). The VRF terminal units are served by an  
-        \memo AirConditioner:VariableRefrigerantFlow or  
-        \memo AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:* system.  
-        \min-fields 19  
-  A1 ,  \field Zone Terminal Unit Name  
-        \required-field  
-        \type alpha  
-        \reference ZoneTerminalUnitNames  
-        \reference DOAToZonalUnit  
-        \reference ZoneEquipmentNames  
+ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
+        \memo Zone terminal unit with variable refrigerant flow (VRF) DX cooling and heating coils
+        \memo (air-to-air heat pump). The VRF terminal units are served by an
+        \memo AirConditioner:VariableRefrigerantFlow or
+        \memo AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:* system.
+        \min-fields 19
+  A1 ,  \field Zone Terminal Unit Name
+        \required-field
+        \type alpha
+        \reference ZoneTerminalUnitNames
+        \reference DOAToZonalUnit
+        \reference ZoneEquipmentNames
 
-        -- new references as follows (not yet tested) --  
-        \reference-class-name validBranchEquipmentTypes  
-        \reference validBranchEquipmentNames  
-        \reference-class-name validOASysEquipmentTypes  
-        \reference validOASysEquipmentNames  
+        -- new references as follows (not yet tested) --
+        \reference-class-name validBranchEquipmentTypes
+        \reference validBranchEquipmentNames
+        \reference-class-name validOASysEquipmentTypes
+        \reference validOASysEquipmentNames
 
-        -- new field --  
-  A19;  \field Controlling Zone or Thermostat Location  
-        \note Used only for AirloopHVAC equipment on a main branch  
-        \type object-list  
-        \object-list ZoneNames  
-        \note Zone name where thermostat is located. Required for control of air loop equipment.  
+        -- new field --
+  A19;  \field Controlling Zone or Thermostat Location
+        \note Used only for AirloopHVAC equipment on a main branch
+        \type object-list
+        \object-list ZoneNames
+        \note Zone name where thermostat is located. Required for control of air loop equipment.
 ```
 
 ## Outputs Description ##
@@ -104,7 +104,7 @@ No transition required.
 
 ## Design Documentation ##
 
-Adding another air loop component, in this case ZoneHVAC:TerminalUnit:VariableRefrigerantFlow, perpetuates historical programming of individual component calls without regard to future code changes for air loop equipment and code maintenance. The Simulate call arguments for various air loop models use a CompIndex for array based access. The UnitarySystem was the first air loop model to use a pointer based Sim call, however, this pointer was not accessible to all air loop equipment (e.g. VRF, ChangeoverBypass). 
+Adding another air loop component, in this case ZoneHVAC:TerminalUnit:VariableRefrigerantFlow, perpetuates historical programming of individual component calls without regard to future code changes for air loop equipment and code maintenance. The Simulate call arguments for various air loop models use a CompIndex for array based access. The UnitarySystem was the first air loop model to use a pointer based Sim call, however, this pointer was not accessible to all air loop equipment (e.g. VRF, ChangeoverBypass).
 
 The declaration of the pointer, used by upper level managers (i.e., Air loop equipment, OA systems, zone equipment), was specific to the UnitarySystem and this declaration is no longer adequate.
 
@@ -223,7 +223,7 @@ DataZoneEquipment.hh
         std::vector<HVACSystemData *> compPointer;
 
 Instead of CompIndex being used on the call to the Sim function, the compPointer accesses that data and Sim function directly (as long as all model Sim functions are unified with the same arguments). Eventually, CompIndex will no longer be needed.
- 
+
 Now that the VRF terminal unit is allowed in the air loop, it should simply be a matter of inheriting the new class and storing the pointer in the same array previously used only for UnitarySystems. Similar changes to other HVAC equipment can now be made during ongoing refactoring efforts. The good news is that since the UnitarySystem can be used anywhere in the air simulation (i.e., air loops, OA systems, zone equipment, and zone OA units) this new OO method (with the help of reviewers updates) can be used with any HVAC equipment type.
 
 

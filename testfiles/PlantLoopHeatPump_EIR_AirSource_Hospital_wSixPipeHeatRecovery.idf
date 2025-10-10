@@ -23,10 +23,10 @@
 !                              25% of full value when ventilation system on.
 !
 ! HVAC:         2 Air-source eir heat pumps with heat recovery, natural gas boiler, 2 VAV systems, and 2 CAV systems
-!               Air economizer per 90.1-2004 on VAV systems. One of the heat pumps has hot water recovery. There are 
-!               primary and secondary plant loops for the hot water systems in a six pipe plant configuration. The 
+!               Air economizer per 90.1-2004 on VAV systems. One of the heat pumps has hot water recovery. There are
+!               primary and secondary plant loops for the hot water systems in a six pipe plant configuration. The
 !               primary hot water plant serves the space heating and service water heating plant loops.
-!               
+!
 !
 ! Exhaust:      Kitchen exhaust 2501 L/s (5300 cfm), 30% of exhaust make-up air from dining
 !               Kitchen exhaust fan modeled as exterior load to avoid getting double make-up air
@@ -21047,14 +21047,14 @@
     AWHP Cool Demand Branches,!- Demand Side Branch List Name
     AWHP Cool Demand Connectors,  !- Demand Side Connector List Name
     Optimal;                 !- Load Distribution Scheme
-    
+
 
   Sizing:Plant,
     AWHP Cool,               !- Plant or Condenser Loop Name
     Cooling,                 !- Loop Type
     6.67,                    !- Design Loop Exit Temperature {C}
     6.67;                    !- Loop Design Temperature Difference {deltaC}
-    
+
   HeatPump:PlantLoop:EIR:Cooling,
     AWHP 1 Cooling Coil,       !- Name
     AWHP 1 Cool Supply Inlet Node,   !- Load Side Inlet Node Name
@@ -21063,11 +21063,11 @@
     AWHP 1 Cooling Coil OA Inlet Node,  !- Source Side Inlet Node Name
     AWHP 1 Cooling Coil OA Oulet Node,  !- Source Side Outlet Node Name
     HW Heat-Recv Inlet Node, !- Heat Recovery Inlet Node Name
-    SecHeatSys Demand Outlet Node, !- Heat Recovery Outlet Node Name    
+    SecHeatSys Demand Outlet Node, !- Heat Recovery Outlet Node Name
     AWHP 1 Heating Side,     !- Companion Heat Pump Name
     autosize,                !- Load Side Reference Flow Rate {m3/s}
     autosize,                !- Source Side Reference Flow Rate {m3/s}
-    autosize,                !- Heat Recovery Reference Flow Rate       
+    autosize,                !- Heat Recovery Reference Flow Rate
     autosize,                !- Reference Capacity {W}
     6.10,                    !- Reference Coefficient of Performance {W/W}
     0.5,                     !- Sizing Factor
@@ -21087,7 +21087,7 @@
 
   OutdoorAir:NodeList,
     AWHP 1 Cooling Coil OA Inlet Node; !- Node or NodeList Name 1
-  
+
   HeatPump:PlantLoop:EIR:Cooling,
     AWHP 2 Cooling Coil,       !- Name
     AWHP 1 Cool Supply Outlet Node,   !- Load Side Inlet Node Name
@@ -21096,11 +21096,11 @@
     AWHP 2 Cooling Coil OA Inlet Node,  !- Source Side Inlet Node Name
     AWHP 2 Cooling Coil OA Oulet Node,  !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name      
+    ,                        !- Heat Recovery Outlet Node Name
     AWHP 2 Heating Side,     !- Companion Heat Pump Name
     autosize,                !- Load Side Reference Flow Rate {m3/s}
     autosize,                !- Source Side Reference Flow Rate {m3/s}
-    autosize,                !- Heat Recovery Reference Flow Rate       
+    autosize,                !- Heat Recovery Reference Flow Rate
     autosize,                !- Reference Capacity {W}
     5.5,                     !- Reference Coefficient of Performance {W/W}
     0.5,                     !- Sizing Factor
@@ -21113,7 +21113,7 @@
 
   OutdoorAir:NodeList,
     AWHP 2 Cooling Coil OA Inlet Node; !- Node or NodeList Name 1
-  
+
 
   Curve:Biquadratic,
     CoolCapCurveFuncTemp,    !- Name
@@ -21268,13 +21268,13 @@
     0,                       !- Coefficient 4 of the Part Load Performance Curve
     0.0,                     !- Design Minimum Flow Rate {m3/s}
     Intermittent;            !- Pump Control Type
-    
+
   SetpointManager:Scheduled,
     AWHP Cool Loop Setpoint Manager,  !- Name
     Temperature,             !- Control Variable
     CW-Loop-Temp-Schedule,   !- Schedule Name
     AWHP Cool Supply Outlet Node;  !- Setpoint Node or NodeList Name
-    
+
   ConnectorList,
     AWHP Cool Demand Connectors,  !- Name
     Connector:Splitter,           !- Connector 1 Object Type
@@ -21446,7 +21446,7 @@ SetpointManager:Scheduled,
 NodeList,
   PriHeatSys Loop Ctrl List,          !- Name
   PriHeatSys Supply Outlet Node;      !- Node 1 Name
-  
+
 Sizing:Plant,
   PriHeatSys,                             !- Plant or Condenser Loop Name
   Heating,                                !- Loop Type
@@ -21533,7 +21533,7 @@ Pump:VariableSpeed,
     AWHP 2 Heating Side,             !- Component 1 Name
     AWHP 1 Heating Coil LoadSide Outlet Node, !- Component 1 Inlet Node Name
     AWHP 2 Heating Coil LoadSide Outlet Node; !- Component 1 Outlet Node Name
-    
+
   HeatPump:PlantLoop:EIR:Heating,
     AWHP 1 Heating Side,     !- Name
     AWHP 1 Heating Coil LoadSide Inlet Node,  !- Load Side Inlet Node Name
@@ -21542,11 +21542,11 @@ Pump:VariableSpeed,
     AWHP 1 Heating Coil OutSideAir Inlet Node,  !- Source Side Inlet Node Name
     AWHP 1 Heating Coil OutSideAir Outlet Node, !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name      
+    ,                        !- Heat Recovery Outlet Node Name
     AWHP 1 Cooling Coil,     !- Companion Heat Pump Name
     autosize,                !- Load Side Reference Flow Rate {m3/s}
     autosize,                !- Source Side Reference Flow Rate {m3/s}
-    autosize,                !- Heat Recovery Reference Flow Rate   
+    autosize,                !- Heat Recovery Reference Flow Rate
     autosize,                !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
     0.5,                     !- Sizing Factor
@@ -21582,7 +21582,7 @@ Pump:VariableSpeed,
 !    AWHP 2 Heating Side,             !- Component 1 Name
 !    AWHP 2 Heating Coil LoadSide Inlet Node,  !- Component 1 Inlet Node Name
 !    AWHP 2 Heating Coil LoadSide Outlet Node; !- Component 1 Outlet Node Name
-    
+
   HeatPump:PlantLoop:EIR:Heating,
     AWHP 2 Heating Side,     !- Name
     AWHP 1 Heating Coil LoadSide Outlet Node,  !- Load Side Inlet Node Name
@@ -21591,11 +21591,11 @@ Pump:VariableSpeed,
     AWHP 2 Heating Coil OutSideAir Inlet Node,  !- Source Side Inlet Node Name
     AWHP 2 Heating Coil OutSideAir Outlet Node, !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name      
+    ,                        !- Heat Recovery Outlet Node Name
     AWHP 2 Cooling Coil,     !- Companion Heat Pump Name
     autosize,                !- Load Side Reference Flow Rate {m3/s}
     autosize,                !- Source Side Reference Flow Rate {m3/s}
-    autosize,                !- Heat Recovery Reference Flow Rate   
+    autosize,                !- Heat Recovery Reference Flow Rate
     autosize,                !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
     0.5,                     !- Sizing Factor
@@ -21619,11 +21619,11 @@ Pump:VariableSpeed,
     TimedDefrostFrequency,   !- Timed Empirical Defrost Frequency Curve Name
     TimedDefrostHeatLoad,    !- Timed Empirical Defrost Heat Load Penalty Curve Name
     TimedDefrostHeatEnergy;  !- Timed Empirical Defrost Heat Input Energy Fraction Curve Name
-    
+
   OutdoorAir:Node,
     AWHP 2 Heating Coil OutSideAir Inlet Node,  !- Name
     -1;                      !- Height Above Ground {m}
-    
+
 !-ACX Heating Capacity BiQuadratic created from Trane quadratic curves
 
   Curve:Biquadratic,
@@ -21745,7 +21745,7 @@ Pump:VariableSpeed,
     60.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature;             !- Output Unit Type
-    
+
 Branch,
   PriHeatSys Supply Outlet Branch,  !- Name
   ,                          !- Pressure Drop Curve Name
@@ -21753,7 +21753,7 @@ Branch,
   PriHeatSys Boiler,         !- Component 1 Name
   PriHeatSys Boiler Inlet Node,   !- Component 1 Inlet Node Name
   PriHeatSys Supply Outlet Node;  !- Component 1 Outlet Node Name
-  
+
 Boiler:HotWater,
   PriHeatSys Boiler,       !- Name
   NATURALGAS,              !- Fuel Type
@@ -21802,14 +21802,14 @@ Connector:Splitter,
   PriHeatSys Demand Splitter,  !- Name
   PriHeatSys Demand Inlet Branch, !- Inlet Branch Name
   PriHeatSys Demand Branch 1,  !- Outlet Branch Name 1
-  PriHeatSys Demand Branch 2,  !- Outlet Branch Name 2  
+  PriHeatSys Demand Branch 2,  !- Outlet Branch Name 2
   PriHeatSys Demand Bypass Branch; !- Outlet Branch Name 3
 
 Connector:Mixer,
   PriHeatSys Demand Mixer,         !- Name
   PriHeatSys Demand Outlet Branch, !- Outlet Branch Name
   PriHeatSys Demand Branch 1,      !- Inlet Branch Name 1
-  PriHeatSys Demand Branch 2,      !- Inlet Branch Name 1    
+  PriHeatSys Demand Branch 2,      !- Inlet Branch Name 1
   PriHeatSys Demand Bypass Branch; !- Inlet Branch Name 2
 
 Branch,
@@ -21854,15 +21854,15 @@ HeatExchanger:FluidToFluid,
   1,                                      !- Sizing Factor
   0,                                      !- Operation Minimum Temperature Limit {C}
   100;                                    !- Operation Maximum Temperature Limit {C}
-  
+
 Branch,
   PriHeatSys Demand Branch 2,             !- Name
-  ,                                       !- Pressure Drop Curve Name  
+  ,                                       !- Pressure Drop Curve Name
   HeatExchanger:FluidToFluid,             !- Component Object Type 1
   Primary to Main SWH Loop HW-HX,         !- Component Name 1
   PriHeatSys-SWHHX Demand Inlet Node,     !- Component Inlet Node Name 1
   PriHeatSys-SWHHX Demand Outlet Node;    !- Component Outlet Node Name 1
-  
+
 HeatExchanger:FluidToFluid,
   Primary to Main SWH Loop HW-HX,         !- Name
   ,                                       !- Availability Schedule Name
@@ -21884,7 +21884,7 @@ HeatExchanger:FluidToFluid,
   1,                                      !- Sizing Factor
   0,                                      !- Operation Minimum Temperature Limit {C}
   100;                                    !- Operation Maximum Temperature Limit {C}
-  
+
 Branch,
   PriHeatSys Demand Bypass Branch,           !- Name
   ,                                          !- Pressure Drop Curve Name
@@ -21935,7 +21935,7 @@ Pipe:Adiabatic,
     SecHeatSys Demand Branches,!- Demand Side Branch List Name
     SecHeatSys Demand Connectors,  !- Demand Side Connector List Name
     Optimal;                 !- Load Distribution Scheme
-    
+
   Sizing:Plant,
     SecHeatSys,              !- Plant or Condenser Loop Name
     Heating,                 !- Loop Type
@@ -21966,7 +21966,7 @@ Pipe:Adiabatic,
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,60.0;       !- Field 3
-    
+
   SetpointManager:Scheduled,
     SecHeatSys Boiler Setpoint Manager,  !- Name
     Temperature,             !- Control Variable
@@ -22008,7 +22008,7 @@ Pipe:Adiabatic,
     HeatExchanger:FluidToFluid,      !- Component Object Type 1
     Primary to HR Loop HW-HX,        !- Component Name 1
     SecHeatSys Supply Inlet Node,    !- Component Inlet Node Name 1
-    SecHeatSys CircPump Inlet Node,  !- Component Outlet Node Name 1 
+    SecHeatSys CircPump Inlet Node,  !- Component Outlet Node Name 1
     Pump:VariableSpeed,              !- Component 1 Object Type
     SecHeatSys Pump,                 !- Component 1 Name
     SecHeatSys CircPump Inlet Node,  !- Component 1 Inlet Node Name
@@ -22046,7 +22046,7 @@ Pipe:Adiabatic,
     0,                       !- Coefficient 4 of the Part Load Performance Curve
     0.0,                     !- Design Minimum Flow Rate {m3/s}
     Intermittent;            !- Pump Control Type
-    
+
   Branch,
     SecHeatSys Supply Outlet Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
@@ -22054,7 +22054,7 @@ Pipe:Adiabatic,
     SecHeatSys Supply Outlet Pipe,  !- Component 1 Name
     SecHeatSys Supply OutletPipe Inlet Node,  !- Component 1 Inlet Node Name
     SecHeatSys Supply Outlet Node;  !- Component 1 Outlet Node Name
-    
+
   ConnectorList,
     SecHeatSys Supply Connectors,  !- Name
     Connector:Splitter,      !- Connector 1 Object Type
@@ -22067,13 +22067,13 @@ Pipe:Adiabatic,
     SecHeatSys Supply Inlet Branch,  !- Inlet Branch Name
     SecHeatSys Supply Equipment Branch,  !- Outlet Branch 1 Name
     SecHeatSys Supply Equipment Bypass Branch;  !- Outlet Branch 2 Name
-    
+
   Connector:Mixer,
     SecHeatSys Supply Mixer,   !- Name
     SecHeatSys Supply Outlet Branch,  !- Outlet Branch Name
     SecHeatSys Supply Equipment Branch,  !- Inlet Branch 1 Name
     SecHeatSys Supply Equipment Bypass Branch;  !- Inlet Branch 2 Name
-    
+
   BranchList,
     SecHeatSys Demand Branches,!- Name
     SecHeatSys Demand Inlet Branch,  !- Branch 1 Name
@@ -23847,7 +23847,7 @@ Pipe:Adiabatic,
     HeatExchanger:FluidToFluid,   !- Component Object Type 1
     Primary to Main SWH Loop HW-HX, !- Component Name 1
     SWHSys1 Supply Inlet Node,    !- Component Inlet Node Name 1
-    SWHSys1 CircPump Inlet Node,  !- Component Outlet Node Name 1  
+    SWHSys1 CircPump Inlet Node,  !- Component Outlet Node Name 1
     Pump:VariableSpeed,           !- Component 1 Object Type
     SWHSys1 Pump,                 !- Component 1 Name
     SWHSys1 CircPump Inlet Node,  !- Component 1 Inlet Node Name
@@ -24522,19 +24522,19 @@ Pipe:Adiabatic,
     45.0,                    !- Secondary Distribution Heating Plant Setpoint Temperature {C}
     All Conditioned Zones,   !- Zone Load Polling ZoneList Name
     AWHP Cool Operation Scheme, !- Cooling Only Load Plant Equipment Operation Cooling Load Name
-    AWHP Heat Operation Scheme, !- Heating Only Load Plant Equipment Operation Heating Load Name 
-    ,                        !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name  
+    AWHP Heat Operation Scheme, !- Heating Only Load Plant Equipment Operation Heating Load Name
+    ,                        !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name
     ,                        !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
     ,                        !- Dedicated Chilled Water Return Recovery Heat Pump Name
     ;                        !- Dedicated Hot Water Return Recovery Heat Pump Name
-    
+
 
   PlantEquipmentOperationSchemes,
     AWHP Cool Loop Operation Scheme List,  !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
     AWHP Operation Scheme,       !- Control Scheme 1 Name
     PlantAlwaysOnSch;            !- Control Scheme 1 Schedule Name
-    
+
   PlantEquipmentOperation:CoolingLoad,
     AWHP Cool Operation Scheme,  !- Name
     0.0,                         !- Load Range 1 Lower Limit {W}
@@ -24543,19 +24543,19 @@ Pipe:Adiabatic,
     1000000,                     !- Load Range 2 Lower Limit {W}
     10000000000000,              !- Load Range 2 Upper Limit {W}
     Two AWHP Cooling Equipment List; !- Range 2 Equipment List Name
-    
+
   PlantEquipmentList,
     Two AWHP Cooling Equipment List,   !- Name
     HeatPump:PlantLoop:EIR:Cooling,    !- Equipment Object Type 1
     AWHP 1 Cooling Coil,               !- Equipment Name 1
     HeatPump:PlantLoop:EIR:Cooling,    !- Equipment Object Type 2
     AWHP 2 Cooling Coil;               !- Equipment Name 2
-    
+
   PlantEquipmentList,
     One AWHP Cooling Equipment List,   !- Name
     HeatPump:PlantLoop:EIR:Cooling,    !- Equipment Object Type 1
     AWHP 1 Cooling Coil;               !- Equipment Name 1
-    
+
   PlantEquipmentOperationSchemes,
     PriHeatSys Operation Schemes,      !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
@@ -24570,14 +24570,14 @@ Pipe:Adiabatic,
     1000000,                            !- Load Range 2 Lower Limit {W}
     10000000000000,                     !- Load Range 2 Upper Limit {W}
     Two AWHP Heating Equipment List;    !- Range 2 Equipment List Name
-    
+
   PlantEquipmentList,
     Two AWHP Heating Equipment List,   !- Name
     HeatPump:PlantLoop:EIR:Heating,    !- Component 1 Object Type
     AWHP 1 Heating Side,               !- Component 1 Name
     HeatPump:PlantLoop:EIR:Heating,    !- Component 2 Object Type
     AWHP 2 Heating Side;               !- Component 2 Name
-    
+
   PlantEquipmentOperation:HeatingLoad,
     One AWHP Heating Operation Scheme,  !- Name
     0.0,                                !- Load Range 1 Lower Limit {W}
@@ -24588,7 +24588,7 @@ Pipe:Adiabatic,
     One AWHP Heating Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
     AWHP 2 Heating Side;             !- Equipment 1 Name
-  
+
   PlantEquipmentOperationSchemes,
     SecHeatSys Loop Operation Scheme List,  !- Name
     PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
@@ -24605,9 +24605,9 @@ Pipe:Adiabatic,
     SecHeatSys Equipment List, !- Name
     Boiler:HotWater,           !- Equipment 1 Object Type
     SecHeatSys Boiler;         !- Equipment 1 Name
-        
+
    ZoneList,
-    All Conditioned Zones,    !- Name   
+    All Conditioned Zones,    !- Name
     BASEMENT,                 !- Zone 1 Name
     CORRIDOR_FLR_1,           !- Zone 2 Name
     CORRIDOR_FLR_2,           !- Zone 3 Name
@@ -24664,7 +24664,7 @@ Pipe:Adiabatic,
     PHYSTHERAPY_FLR_3,        !- Zone 54 Name
     RADIOLOGY_FLR_4;          !- Zone 55 Name
 
-    
+
 ! *******************************************************************************
 
 
@@ -24694,7 +24694,7 @@ Pipe:Adiabatic,
   Output:Variable,*,Boiler Part Load Ratio,timestep;
 
   Output:Variable,*,Plant System Cycle On Off Status,timestep;
-  
+
   Output:Variable,BASEMENT, Zone Air Temperature,timestep;
   Output:Variable,CORRIDOR_FLR_1, Zone Air Temperature,timestep;
   Output:Variable,CORRIDOR_FLR_2, Zone Air Temperature,timestep;
@@ -24714,7 +24714,7 @@ Pipe:Adiabatic,
   Output:Variable,RADIOLOGY_FLR_4, Zone Air Temperature,timestep;
 
   Output:Variable,*,Heat Pump Part Load Ratio,timestep;
-  Output:Variable,*,Heat Pump Cycling Ratio,timestep; 
+  Output:Variable,*,Heat Pump Cycling Ratio,timestep;
   Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,timestep;
   Output:Variable,*,Heat Pump Source Side Heat Transfer Rate,timestep;
   Output:Variable,*,Heat Pump Load Side Inlet Temperature,timestep;
@@ -24728,5 +24728,5 @@ Pipe:Adiabatic,
   Output:Variable,*,Heat Pump Heat Recovery Operation Status,timestep;
   Output:Variable,SWHSys1 Pump-SWHSys1 Water HeaterNode, System Node Temperature,timestep;
   Output:Variable,SWHSys1 Supply Equipment Outlet Node, System Node Temperature,timestep;
-  
-  !Output:Diagnostics,DisplayExtraWarnings; 
+
+  !Output:Diagnostics,DisplayExtraWarnings;

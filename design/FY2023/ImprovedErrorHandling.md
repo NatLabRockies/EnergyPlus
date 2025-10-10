@@ -19,7 +19,7 @@ To meet this need, I think development would follow something like this:
 - Refactor the error message routines to not just emit to the err file but also add them to the new error manager
   - (at this point I should be able to get no diffs)
 - Try to find "nearly" identical error messages and bring them together
-  - I would expect this to cause valid diffs in the err file as minor wording changes are collected together 
+  - I would expect this to cause valid diffs in the err file as minor wording changes are collected together
 - Create a set of ID categories, and modify the error emission to report the error ID
 - Use the error manager to generate the JSON error file
 - Create an auto-generated document for the different error message IDs

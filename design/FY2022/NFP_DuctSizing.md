@@ -7,8 +7,8 @@ AirflowNetwork Duct Autosizing
 
  - Second revision, 04/21/22
  - First draft, 04/13/22
- - 
- 
+ -
+
 
 ## Justification for New Feature ##
 
@@ -30,11 +30,11 @@ Duct leakage will not be considered for duct sizing. In order to compensate poss
 
 3. New fields
 
-All proposed new fields will be added in the existing AirflowNetwork:SimulationControl object. No new object will be created, since no comments were mentioned for the IDD change during the conference call. 
+All proposed new fields will be added in the existing AirflowNetwork:SimulationControl object. No new object will be created, since no comments were mentioned for the IDD change during the conference call.
 
 4. Duct shape
 
-The proposed duct shape for this phase will be a round duct. Since hydrolic diameter input is a field for autosize, the Corss Section Area will be calculated after autosizing in AirflowNetwork:Distribution:Component:Duct object.   
+The proposed duct shape for this phase will be a round duct. Since hydrolic diameter input is a field for autosize, the Corss Section Area will be calculated after autosizing in AirflowNetwork:Distribution:Component:Duct object.
 
 ### E-mail communication with Tianzhen ###
 
@@ -44,54 +44,54 @@ Thanks for clarification.
 On Apr 20, 2022, at 7:52 PM, gu@fsec.ucf.edu wrote:
 
 Tianzhen:
- 
+
 No. I don’t allow this happens for now, because all ducts in each branch or trunk should have same diameter. I will think of later after Phase 1.
- 
+
 Thanks.
- 
+
 Gu
- 
-From: Tianzhen Hong <thong@lbl.gov> 
+
+From: Tianzhen Hong <thong@lbl.gov>
 Sent: Wednesday, April 20, 2022 7:46 PM
 To: Lixing Gu <gu@fsec.ucf.edu>
 Subject: Re: NFP on duct sizing
- 
+
 Gu,
- 
+
 On item 3, do you allow a mix of auto-size and manual/entered sizes?
- 
+
 Tianzhen
- 
+
 On Wed, Apr 20, 2022 at 1:18 PM Lixing Gu <gu@fsec.ucf.edu> wrote:
 Tianzhen:
- 
+
 Thanks for your comments. Here are my answers:
- 
+
 1.       Will make a change as "Duct Sizing Method"
 2.       Yes. Your understanding is correct. It is intended to have a choice for “None”.
 3.       Yes. Since each truck or branch have the same airflow, they should have the same size for each truck or branch.
- 
+
 I will incorporate your comments and my reply in the updated NFP.
- 
+
 Thanks.
- 
-Gu 
- 
-From: Tianzhen Hong <thong@lbl.gov> 
+
+Gu
+
+From: Tianzhen Hong <thong@lbl.gov>
 Sent: Wednesday, April 20, 2022 3:13 PM
 To: Lixing Gu <gu@fsec.ucf.edu>
 Cc: Lee, Edwin <Edwin.Lee@nrel.gov>; Mike Witte <MJWitte@gard.com>
 Subject: NFP on duct sizing
- 
+
 Gu,
- 
+
 A nice feature to add.
- 
+
 To finish up the comments:
 1. The field name Duct Sizing Type may be named "Duct Sizing Method" to be consistent with naming convention
 2. You have a default None for the sizing method. Is the intent to keep the IDD object even if the duct sizing feature is not used at all. This is fine, allowing users to switch back easily. In EnergyPlus, when None is selected, I would assume the object is basically ignored and not needed.
 3. Do you require all air ducts to be auto-sized? or some can be auto-sized while others are manually sized?
- 
+
 Tianzhen
 
 ### Actions from the first conference call and E-mail communication ###
@@ -118,8 +118,8 @@ Here are assumptions used to implement Phase 1. Figure 1 shows schematic air dis
 
 ####Supply duct####
 
-The supply ducts will be divided into two sections based on current duct configuration: Truck and Branch. The truck section includes ducts between Return Air Path Outlet Node in Demand Side Inlet Node in AirLoopHVAC, and Inlet Node in AirLoopHVAC:ZoneSplitter. The branch section includes ducts between Outlet Nodes in AirLoopHVAC:ZoneSplitter, and Inlet Node in ZoneTernminal Units defined in ZoneHVAC:AirDistributionUnit. 
-  
+The supply ducts will be divided into two sections based on current duct configuration: Truck and Branch. The truck section includes ducts between Return Air Path Outlet Node in Demand Side Inlet Node in AirLoopHVAC, and Inlet Node in AirLoopHVAC:ZoneSplitter. The branch section includes ducts between Outlet Nodes in AirLoopHVAC:ZoneSplitter, and Inlet Node in ZoneTernminal Units defined in ZoneHVAC:AirDistributionUnit.
+
 ####Return duct####
 
 The return ducts will be divided into two sections based on current duct configurqation: Truck and Branch. The truck section includes ducts between Demand Side Outlet Node in AirLoopHVAC, and Outlet Node in AirLoopHVAC:ZoneMixer. The branch section includes ducts between Inlet Nodes in AirLoopHVAC:ZoneMixer, and Zone Return Air Node defined in ZoneHVAC:EquipmentConnections.
@@ -128,7 +128,7 @@ The return ducts will be divided into two sections based on current duct configu
 
 The mass flow rates are available from either system sizing or user inputs. Each truck has the same mass flow rate as max fan flow rate. Each branch has the same flow rate as max flow rate from the corresponding ZoneTernminal Unit.
 
-All ducts in the same truck or branch have the same size as diameter, due to the same mass flow rate and velocity. 
+All ducts in the same truck or branch have the same size as diameter, due to the same mass flow rate and velocity.
 
 ####Relationship between total pressure and static pressure####
 
@@ -150,7 +150,7 @@ g = Acceleration of gravity
 
 z<sub>1</sub>, z<sub>2</sub> = Entry and exit elevations
 
-When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing. 
+When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing.
 
 ###Duct losses ###
 
@@ -184,7 +184,7 @@ For a round duct:
 
 V = Q/A = Q / (D<sub>h</sub><sup>2</sup> * &pi; / 4)
 
-When &Delta;P given, and the relationship between D<sub>h</sub> and V is also given, there is only a single unknow D<sub>h</sub>. The value can be obtained through iteration. 
+When &Delta;P given, and the relationship between D<sub>h</sub> and V is also given, there is only a single unknow D<sub>h</sub>. The value can be obtained through iteration.
 
 When the max velocity and mass flow rate are given, the hydraulic diameter can be calculated, so that the total pressure drop can be calculated.
 
@@ -199,7 +199,7 @@ When sizing is requested, no hard input values of hydrolic diameter will be allo
 
 The proposed new fields can be added at the end of the AirflowNetwork:SimulationControl object as optional. Or a new sizing object may be created: Sizing:AFN:Ducts with the same fields.
 
-Based on conference call, no comments are provided for this discussion. I propose to add new fields in the existing AirflowNetwork:SimulationControl object. No new object will be created. 
+Based on conference call, no comments are provided for this discussion. I propose to add new fields in the existing AirflowNetwork:SimulationControl object. No new object will be created.
 
 ## Testing/Validation/Data Sources ##
 
@@ -333,15 +333,15 @@ This optional field is used if Duct Sizing Method is PressureLoss or PressureLos
 
 \paragraph{Field: Total Pressure Loss Across Supply Branch}\label{total-pressure-loss-across-supply-branch}
 
-This optional field with units Pa is used to calculate supply branch duct diameter based on Colesbrook's equation. 
+This optional field with units Pa is used to calculate supply branch duct diameter based on Colesbrook's equation.
 
 \paragraph{Field: Total Pressure Loss Across Return Truck}\label{total-pressure-loss-across-return-truck}
 
-This optional field with units Pa is used to calculate return trunk duct diameter based on Colesbrook's equation. 
+This optional field with units Pa is used to calculate return trunk duct diameter based on Colesbrook's equation.
 
 \paragraph{Field: Total Pressure Loss Across Return Branch}\label{total-pressure-loss-across-return-branch}
- 
-This optional field with units Pa is used to calculate return branch duct diameter based on Colesbrook's equation. 
+
+This optional field with units Pa is used to calculate return branch duct diameter based on Colesbrook's equation.
 </span>
 
 An IDF example is shown below:
@@ -388,7 +388,7 @@ AirflowNetwork:SimulationControl,
 
 ## Input Description ##
 
-Six new optional fields are proposed in the AirflowNetwork:SimulationControl object. The new fields cover duct sizing type, and total pressure loses for supply and retun ducts. Both supply and return ducts are divided into two sections: trunk and branch. All branches have the same pressure drop to represent equal friction method. The new fields in the object are highlighted in red. 
+Six new optional fields are proposed in the AirflowNetwork:SimulationControl object. The new fields cover duct sizing type, and total pressure loses for supply and retun ducts. Both supply and return ducts are divided into two sections: trunk and branch. All branches have the same pressure drop to represent equal friction method. The new fields in the object are highlighted in red.
 
 There are several choices for trunk sizing: maximum velocity, pressure loss, or combination. The combination uses the pressure loss first. Then velocity will be checked. If the velocity is less than the maximum velocity, the pressure loss method results will be used. Otherwise, the maximum velocity will be used to calculate duct diameter.
 
@@ -547,9 +547,9 @@ The pressure loss method will be applied to all branches, so that all ducts have
       \maximum 25.0
       \default 5.0
       \note Used only if Duct Sizing Type = MaximumVelocity or PressureLossWithMaximumVelocity.
-      \note When MaximumVelocity is entered, duct diameter is calculated at D = flow rate / 
+      \note When MaximumVelocity is entered, duct diameter is calculated at D = flow rate /
       \note cross section area.
-      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on 
+      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
       \note PressureLoss. The value is used to check to ensure the final velocity is less than
       \note the maximum value. If greater, final value will be obtained from MaximumVelocity.
       \note This field is apply for truck size, while branch size is based on total pressure drop.
@@ -558,8 +558,8 @@ The pressure loss method will be applied to all branches, so that all ducts have
       \units Pa
       \minimum >0.0
       \note Used only if Duct Sizing Type = PressureLoss or PressureLossWithMaximumVelocity.
-      \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation  
-      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on 
+      \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation
+      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
       \note PressureLoss. The value is used to check to ensure the final velocity is less than
       \note the maximum value. If greater, final value will be obtained from MaximumVelocity.
       \note This field is apply for truck size, while branch size is based on total pressure drop.
@@ -567,17 +567,17 @@ The pressure loss method will be applied to all branches, so that all ducts have
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrrook's equation  
+      \note Duct diameter is calculated using Colebrrook's equation
  	N11 , \field Total Pressure Loss Across Return Trunk
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrrook's equation  
+      \note Duct diameter is calculated using Colebrrook's equation
  	N12 ; \field Total Pressure Loss Across Return Branch
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrrook's equation  
+      \note Duct diameter is calculated using Colebrrook's equation
 </span>
 
 ## Outputs Description ##
@@ -596,9 +596,9 @@ There are two methods used to size duct diameter and cross section area by assum
 
 The cross section area (A) is calculated below
 
-A =  \frac{Q}{V} 
+A =  \frac{Q}{V}
 
-where 
+where
 
 A = Cross section area {m2}
 
@@ -608,7 +608,7 @@ V = Maximum velocity {m/s}
 
 The duct diameter is calculated as
 
-D = \sqrt{\frac{4Q}{V \pi } } 
+D = \sqrt{\frac{4Q}{V \pi } }
 
 where
 
@@ -623,7 +623,7 @@ V = Maximum velocity {m/s}
 
 The total pressure loss across a duct may be expressed as
 
-\Delta P =  \big( P_{1} +  \rho  \frac{V_{1}^2}{2}  )  - \big( P_{2} +  \rho  \frac{V_{2}^2}{2}  ) +  \rho g(z_{1} - z_{2} ) 
+\Delta P =  \big( P_{1} +  \rho  \frac{V_{1}^2}{2}  )  - \big( P_{2} +  \rho  \frac{V_{2}^2}{2}  ) +  \rho g(z_{1} - z_{2} )
 
 where
 
@@ -639,11 +639,11 @@ g = Acceleration of gravity {m/s2}
 
 z_1, z_2 = Entry and exit elevations {m}
 
-When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing. 
+When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing.
 
 The total pressure loss in either a truck or a branch can be calculated using Darcy-Weisbach Equation (Eq. 34 in Chpater 21, 2017 ASHRAE HOF)
 
-\Delta P =  \big( \frac{1000 f L}{D} +  \Sigma C ) *  \frac{ \rho  V^{2} }{2}  
+\Delta P =  \big( \frac{1000 f L}{D} +  \Sigma C ) *  \frac{ \rho  V^{2} }{2}
 
 f = Friction factor {dimensionless}
 
@@ -659,7 +659,7 @@ C = Local loss coefficient for all ducts {dimensionless}
 
 where the friction factor can be represented by Colebrrook's equation:
 
-\frac{1}{\sqrt{f}} = -2 log\big( \frac{ \varepsilon }{3.7 D} +  \frac{2.51}{Re\sqrt{f}}) 
+\frac{1}{\sqrt{f}} = -2 log\big( \frac{ \varepsilon }{3.7 D} +  \frac{2.51}{Re\sqrt{f}})
 
 Re = 66.4 *D *V
 
@@ -672,7 +672,7 @@ The cross section area
 A = \frac{D^2 * \pi}{4}
 
 
-When ΔP given, and the relationship between D and V is also given, there is only a single unknow D. The value can be obtained through iteration. 
+When ΔP given, and the relationship between D and V is also given, there is only a single unknow D. The value can be obtained through iteration.
 
 
 ## Example File and Transition Changes ##
@@ -726,7 +726,7 @@ Based on trunk and branch definitions, a loop for every linkage, with duct compo
 
 Note:
 
-If we assume all Surface Roughness values are the same in the same trunk or branch, a simple iteration will be performed to find a solution for all ducts in the same trunk or branch.    
+If we assume all Surface Roughness values are the same in the same trunk or branch, a simple iteration will be performed to find a solution for all ducts in the same trunk or branch.
 
 
 

@@ -4,22 +4,22 @@ Enhance Outdoor Air Reporting
 **Jason Glazer and Mike Witte, GARD Analytics**
 
  - November 20, 2019
- - December 30, 2019 - added Outdoor Air Limiting Factor tables, new output variables, shortened some table title names, added at and above 
- minimum to Total Outdoor Air by Airloop table, added "time at minimum" and "time above minimum" and moved "time below minimum" to 
+ - December 30, 2019 - added Outdoor Air Limiting Factor tables, new output variables, shortened some table title names, added at and above
+ minimum to Total Outdoor Air by Airloop table, added "time at minimum" and "time above minimum" and moved "time below minimum" to
  a single table.
- - January 23, 2020 - remove ACH (air changes per hour) tables and columns, remove minimum outdoor air during occupancy tables, 
+ - January 23, 2020 - remove ACH (air changes per hour) tables and columns, remove minimum outdoor air during occupancy tables,
  move and rename the required airflow rate based on 62.1 computed each timestep to Voz-dyn and the associated times,
- added Time Above Zero When Unoccupied 
+ added Time Above Zero When Unoccupied
  - January 27, 2020 - changed "Dynamic Zone Outdoor Airflow - Voz-dyn" to "Dynamic Target Ventilation - Voz-dyn"
  - April 16, 2020 - added Design Document portion
- 
+
 
 ## Justification for New Feature ##
 
-Currently, users seeking to use EnergyPlus for LEED work need to document the use of Outdoor Air (OA) in their models. While 
-the current Outdoor Air Summary in EnergyPlus provides some information to help these users, it does not provide enough information. 
-Users often find it difficult to compare the OA delivered for proposed vs. baseline simulations, especially with economizers 
-and zone equipment. 
+Currently, users seeking to use EnergyPlus for LEED work need to document the use of Outdoor Air (OA) in their models. While
+the current Outdoor Air Summary in EnergyPlus provides some information to help these users, it does not provide enough information.
+Users often find it difficult to compare the OA delivered for proposed vs. baseline simulations, especially with economizers
+and zone equipment.
 
 ## Overview ##
 
@@ -40,33 +40,33 @@ https://github.com/NREL/EnergyPlus/issues/5298
 Which stated:
 
 > Users often find it difficult to compare the outdoor air delivered for proposed vs baseline simulations. The logical place to look
-> is the Outdoor Air Summary Report and the component sizing report. The component sizing report shows the minimum outdoor air flow 
-> rates for Controller:OutdoorAir objects that have autosized OA flow rates, but there is no building total. But this would only 
+> is the Outdoor Air Summary Report and the component sizing report. The component sizing report shows the minimum outdoor air flow
+> rates for Controller:OutdoorAir objects that have autosized OA flow rates, but there is no building total. But this would only
 > cover air handlers, not zone equipment. OA flow rates show up in some other tables as well, but again, no building totals.
-> The Outdoor Air Summary report has average and minimum OA flow rates during occupied hours listed by zone, reported as ACH. It 
-> would be helpful to add flow in CFM or m3/s to these tables, and to add a total row for the entire building. Economizers can 
+> The Outdoor Air Summary report has average and minimum OA flow rates during occupied hours listed by zone, reported as ACH. It
+> would be helpful to add flow in CFM or m3/s to these tables, and to add a total row for the entire building. Economizers can
 > cloud the issue as well. Is it useful to report what the minimum flows would be if the economizer was not operating?
 
-More than a dozen people who were known to regularly submit projects under LEED using EnergyPlus were specifically asked to comment on 
+More than a dozen people who were known to regularly submit projects under LEED using EnergyPlus were specifically asked to comment on
 the issue and provided comments:
 
 - The total minimum OA for the building needs to be compared between the Baseline and Proposed Case models.
 
-- The Controller:OutdoorAir component sizing summary only shows values if the min/max were autosized. If the user enters a hard value 
+- The Controller:OutdoorAir component sizing summary only shows values if the min/max were autosized. If the user enters a hard value
 the table is empty. The hard value should be reported as well when not autosized.
 
-- Include design (not including the economizer mode where OA may equal SA) and minimum (to check that area ventilation requirement is 
-modeled correctly if DCV is included) occupied ventilation by system (both zone level and air handlers) and a total for the building 
-in the Outdoor Air Summary report. 
+- Include design (not including the economizer mode where OA may equal SA) and minimum (to check that area ventilation requirement is
+modeled correctly if DCV is included) occupied ventilation by system (both zone level and air handlers) and a total for the building
+in the Outdoor Air Summary report.
 
-- If it would make more sense, this information could be included in a new report. You could label the new report as ASHRAE 62 
-Ventilation Summary, Mechanical Ventilation Summary, etc. 
+- If it would make more sense, this information could be included in a new report. You could label the new report as ASHRAE 62
+Ventilation Summary, Mechanical Ventilation Summary, etc.
 
-- Thinking about tabular reports (hence forgetting about tables of hour versus month (weekends v weekends too) showing OA numbers), 
-I would say that two metrics would be useful: "total outdoor air volume (m3) for the run period, per zone and building" and "total 
+- Thinking about tabular reports (hence forgetting about tables of hour versus month (weekends v weekends too) showing OA numbers),
+I would say that two metrics would be useful: "total outdoor air volume (m3) for the run period, per zone and building" and "total
 outdoor air volume when economizer is off." That would help see whether the deviation in absolute numbers are off because of economizer
-or not. It would require setting a new output variable to keep track of OA only when econ isn't running, so annoying and probably 
-tedious but doable. 
+or not. It would require setting a new output variable to keep track of OA only when econ isn't running, so annoying and probably
+tedious but doable.
 
 
 
@@ -213,7 +213,7 @@ The current report is shown below
 <i>Values shown for a single zone without multipliers</i>
 <br><br>
 
-After reviewing the original task as well as the input received issue #5298, the proposed updated Outdoor Air Summary report 
+After reviewing the original task as well as the input received issue #5298, the proposed updated Outdoor Air Summary report
 will appear as shown below.
 
 ### Proposed New Report ###
@@ -694,7 +694,7 @@ New output variables would include:
 
 Additional output varibles will be included that correspond to columns not already defined.
 
-The OutputDetailsAndExamples documentation includes a section on eplustbl.htm containing a 
+The OutputDetailsAndExamples documentation includes a section on eplustbl.htm containing a
 description and example of the Outdoor Air Summary which would be updated.
 
 ## Engineering Reference ##
@@ -719,14 +719,14 @@ from the old report to the new report, and add subtables and new columns to supp
 - Update OutputReportTabular::FillRemainingPredefinedEntries() to support the new report columns and remove unused columns
 of results from the old report.
 
-- Update SystemReports::ReportMaxVentilationLoads() which calculates the OA mass flow rate for each zone for both zone 
-equipment and air loops. 
+- Update SystemReports::ReportMaxVentilationLoads() which calculates the OA mass flow rate for each zone for both zone
+equipment and air loops.
 
-- Update DataZoneEquipment::CalcDesignSpecificationOutdoorAir() which is called by SingleDuct.cc::CalcOAMassFlow() 
-to support the new output columns. 
+- Update DataZoneEquipment::CalcDesignSpecificationOutdoorAir() which is called by SingleDuct.cc::CalcOAMassFlow()
+to support the new output columns.
 
 - Update MixedAir::CalcOAController to support the new output columns.
 
-Additional changes may be required to create the data needed for all the columns for the revised outdoor air summary 
+Additional changes may be required to create the data needed for all the columns for the revised outdoor air summary
 report subtables.
 

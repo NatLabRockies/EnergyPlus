@@ -16,7 +16,7 @@
 ! converted into EnergyPlus objects using scripts/dev/update_nist_escalation.py
 ! https://www.energy.gov/eere/femp/building-life-cycle-cost-programs
 !
-! Kneifel, J. D. (2024). Energy Price Indices and Discount Factors for Life-Cycle Cost Analysis 2024: 
+! Kneifel, J. D. (2024). Energy Price Indices and Discount Factors for Life-Cycle Cost Analysis 2024:
 ! National Institute of Standards and Technology. https://doi.org/10.6028/nist.ir.85-3273-39
 !
 ! Includes normal ENCOST file as well as division level data in the same format.

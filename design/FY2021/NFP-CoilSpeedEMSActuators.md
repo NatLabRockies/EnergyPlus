@@ -22,7 +22,7 @@ Currently, both `AirLoopHVAC:UnitarySystem` or `AirLoopHVAC:UnitaryHeatPump` hav
 
 The actuators will be implemented to override the unitary system DX coil speed level.
 
-Actuator-specific unique key values are determined from the unitary system (or unitary heat pump) name. 
+Actuator-specific unique key values are determined from the unitary system (or unitary heat pump) name.
 The following example Python codes show a possible implementation of the unique handler.
 
 ```python

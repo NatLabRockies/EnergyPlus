@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmDuplicateAndChange 
+Begin VB.Form frmDuplicateAndChange
    Caption         =   "Duplicate and Change..."
    ClientHeight    =   1695
    ClientLeft      =   60
@@ -9,7 +9,7 @@ Begin VB.Form frmDuplicateAndChange
    ScaleHeight     =   1695
    ScaleWidth      =   8220
    StartUpPosition =   3  'Windows Default
-   Begin VB.CommandButton cmdCancel 
+   Begin VB.CommandButton cmdCancel
       Cancel          =   -1  'True
       Caption         =   "Cancel"
       Height          =   375
@@ -18,7 +18,7 @@ Begin VB.Form frmDuplicateAndChange
       Top             =   1200
       Width           =   1575
    End
-   Begin VB.CommandButton cmdOk 
+   Begin VB.CommandButton cmdOk
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375
@@ -27,7 +27,7 @@ Begin VB.Form frmDuplicateAndChange
       Top             =   1200
       Width           =   1575
    End
-   Begin VB.TextBox txtChgInDup 
+   Begin VB.TextBox txtChgInDup
       Height          =   375
       Left            =   2640
       TabIndex        =   3
@@ -35,7 +35,7 @@ Begin VB.Form frmDuplicateAndChange
       Top             =   600
       Width           =   5415
    End
-   Begin VB.TextBox txtOriginal 
+   Begin VB.TextBox txtOriginal
       Height          =   375
       Left            =   2640
       TabIndex        =   0
@@ -43,7 +43,7 @@ Begin VB.Form frmDuplicateAndChange
       Top             =   120
       Width           =   5415
    End
-   Begin VB.Label Label2 
+   Begin VB.Label Label2
       Caption         =   "Changed Text in Duplicate"
       Height          =   255
       Left            =   360
@@ -51,7 +51,7 @@ Begin VB.Form frmDuplicateAndChange
       Top             =   720
       Width           =   1935
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Original Text"
       Height          =   255
       Left            =   360

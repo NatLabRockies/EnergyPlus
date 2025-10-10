@@ -12,32 +12,32 @@ This will eventually become a more structured file, but currently it isn't clear
 
 The Zone Summary table in the Input Verification and Results Summary Report always had a column labeled "Gross Wall Area" which was the above ground wall area for each zone. This change relabeled that column to be called "Above Ground Gross Wall Area" and added an entirely new column called "Underground Gross Wall Area" that shows the amount of underground wall area for each zone.
 
-See [5588](https://github.com/NREL/EnergyPlus/pull/5588). 
+See [5588](https://github.com/NREL/EnergyPlus/pull/5588).
 
 
 ### Life-Cycle Cost Report Updated for Water
 
-1. The "Energy Cost Cash Flows (Without Escalation)" table has been renamed "Energy and Water Cost Cash Flows (Without Escalation)". 
+1. The "Energy Cost Cash Flows (Without Escalation)" table has been renamed "Energy and Water Cost Cash Flows (Without Escalation)".
 
-2. The "Operating Cash Flow by Category (Without Escalation)" table used to combine energy and water costs in the Energy column and have zeros in the Water column. Now energy costs are in the Energy column and water costs are in the Water column. 
+2. The "Operating Cash Flow by Category (Without Escalation)" table used to combine energy and water costs in the Energy column and have zeros in the Water column. Now energy costs are in the Energy column and water costs are in the Water column.
 
-3. The "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)" table used to show water costs with the Energy in the Category column and Energy Cost in the Kind column but now show Water and Water Cost in those respective columns. 
+3. The "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)" table used to show water costs with the Energy in the Category column and Energy Cost in the Kind column but now show Water and Water Cost in those respective columns.
 
-4. The Present Value by Category table used to include the sum of energy and water present values in the Energy row and zero in the Water row but now the present values of energy costs and water costs are in the appropriate row. 
+4. The Present Value by Category table used to include the sum of energy and water present values in the Energy row and zero in the Water row but now the present values of energy costs and water costs are in the appropriate row.
 
-See [5594](https://github.com/NREL/EnergyPlus/pull/5594). 
+See [5594](https://github.com/NREL/EnergyPlus/pull/5594).
 
 ### Degree days in tabular reports correspond to ASHRAE Standard 90.1 degree day bases
 
 Impacts the LEED Summary report table SEc1.1A-General Information and the Climatic Data Summary report. The #5083 issue was resolved and indicated that the temperature bases used for reporting the heating and cooling degree days were not consistent with ASHRAE Standard 90.1 which uses CDD50 and HDD65 (Fahrenheit). These correspond to CDD10 and HDD18 (Celsius). Previously these were reversed and using CDD65 and HDD50 instead. In addition made changes to use the terms "standard" to be "ASHRAE Handbook 2009" for the reporting of the degree day values in the Climatic Data Summary report.
 
-See [5572](https://github.com/NREL/EnergyPlus/pull/5572). 
+See [5572](https://github.com/NREL/EnergyPlus/pull/5572).
 
 ### Economics, Tariff, and Life Cycle Cost Reports Explicitly Requested
 
 The Economics Results Summary Report, Tariff Report, and Life-Cycle Cost Report now need to be specifically requested rather than being automatically generated if specific objects are present in the file. To get the reports individually use EconomicResultSummary, TariffReport, and LifeCycleCostReport respectively in the Output:Table:SummaryReports object. These are also available when using any of the AllSummary options. The reports are unchanged just they way of generating them has changed.
 
-See [5598](https://github.com/NREL/EnergyPlus/pull/5598). 
+See [5598](https://github.com/NREL/EnergyPlus/pull/5598).
 
 
 ### JtoKWH Unit Conversion Impacts LEED Summary Report
@@ -48,7 +48,7 @@ See [5616](https://github.com/NREL/EnergyPlus/pull/5616).
 
 ### New Rows for District Heating and Cooling Virtual Rate in LEED EAp2-3 Table
 
-When district heating or cooling is used, additional rows in the LEED EAp2-3 are shown with the virtual rates for those energy sources are shown.   
+When district heating or cooling is used, additional rows in the LEED EAp2-3 are shown with the virtual rates for those energy sources are shown.
 
 See [5639](https://github.com/NREL/EnergyPlus/pull/5639).
 
@@ -71,18 +71,18 @@ Four new columns were added in the middle of this table which summarizes the Con
  - Outdoor Air ACH [ach]
  - Outdoor Air Method (one of "Flow/Person", "Flow/Zone", "Flow/Area", "AirChanges/Hour", "Sum", "Maximum")
  - Outdoor Air Schedule Name (if no schedule is specified, then this column is blank)
- 
+
 The following changes were made to existing columns
  - Air Distribution Effectiveness in Cooling Mode and Air Distribution Effectiveness in Heating Mode are now blank if there is an Air Distribution Effectiveness Schedule Name specified (previously these columns would show 1.0)
  - Air Distribution Effectiveness Schedule heading changed to Air Distribution Effectiveness Schedule Name
- 
+
 See [5794](https://github.com/NREL/EnergyPlus/pull/5794).
 
 ### Daylighting output variables reference control object rather than zone object
 
 The variables such as these (as well as ones with higher numbers) use the name of the Daylighting:Controls object instead of the name of the zone.
 
-- Daylighting Reference Point 1 Illuminance 
+- Daylighting Reference Point 1 Illuminance
 - Daylighting Reference Point 1 Glare Index []
 - Daylighting Reference Point 1 Glare Index Setpoint Exceeded Time [hr]
 - Daylighting Reference Point 1 Daylight Illuminance Setpoint Exceeded Time [hr]

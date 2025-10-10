@@ -5107,7 +5107,7 @@
     0.002, !- Glass Thickness
     1.526, !- Glass Refraction Index
     4.0; !- Glass Extinction Coefficient
- 
+
   SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
     ZN_1_FLR_1_SEC_3_Ceiling_BIPVT, !- Name
     OSCM_ZN_1_FLR_1_SEC_3,  !- Boundary Conditions Model Name
@@ -5681,7 +5681,7 @@
   Output:Variable,ZN_1_FLR_1_SEC_1:Sys_OA-ZN_1_FLR_1_SEC_1:SysCoolCNode,System Node Temperature,timestep;
 
   Output:Variable,ZN_1_FLR_1_SEC_1:Sys_OA-ZN_1_FLR_1_SEC_1:SysCoolCNode,System Node Mass Flow Rate,timestep;
-  
+
   Output:Variable,*,Surface Other Side Conditions Modeled Convection Air Temperature,timestep;
 
   Output:Variable,*,Surface Other Side Conditions Modeled Convection Heat Transfer Coefficient,timestep;
