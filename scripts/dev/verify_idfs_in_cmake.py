@@ -54,44 +54,61 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import json
-import os
 import re
-import sys
+from itertools import chain
+from pathlib import Path
 
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-test_files_dir = os.path.join(current_script_dir, "..", "..", "testfiles")
+from base_hook import (
+    TESTFILES_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    get_base_parser,
+    report_log_messages,
+)
 
-cmake_lists_file = os.path.join(test_files_dir, "CMakeLists.txt")
-cmake_list_idf_files = set()
-with open(cmake_lists_file) as f:
-    contents = f.read()
-    matches = re.findall(r"\(([^)]+)\)", contents, re.MULTILINE)
+TEST_CMAKELISTS_FILE = TESTFILES_DIR / "CMakeLists.txt"
+assert TEST_CMAKELISTS_FILE.exists(), f"Cannot find '{TEST_CMAKELISTS_FILE}'"
+
+RE_CMAKE = re.compile(r"\(([^)]+)\)", re.MULTILINE)
+
+
+def get_cmake_list_idf_files(verbose: bool = False) -> set[Path]:
+    """Parse the testfiles/CMakeLists.txt file and return a set of all IDF files.
+
+    Returns:
+        set[Path]: Set of Path objects for each IDF file listed in the CMake, paths are absolute
+    """
+    result = set()
+    content = TEST_CMAKELISTS_FILE.read_text()
+    matches = RE_CMAKE.findall(content)
     for match in matches:
         if "IDF_FILE" in match:
             cleaned_match = match.replace("\n", "")
             tokens = cleaned_match.split()  # special case that allows multiple whitespace delimiters
             filename = tokens[1]
-            cmake_list_idf_files.add(filename)
+            result.add(filename)
         elif "PYTHON_FILE" in match:  # API-based IDF runs
             cleaned_match = match.replace("\n", "")
             tokens = cleaned_match.split()  # special case that allows multiple whitespace delimiters
             filename = tokens[1]
             filename = "API/" + filename.replace(".py", ".idf")  # assuming the file is named the same as the py file
-            cmake_list_idf_files.add(filename)
+            result.add(filename)
+    filepaths = {TESTFILES_DIR / f for f in result}
+    # CMake would throw an error if the file didn't exist, but just in case, check here too
+    for f in filepaths:
+        if not f.exists():
+            print(f"ERROR: File listed in CMakeLists.txt but does not exist: {f}")
+            raise SystemExit(1)
+    if verbose:
+        print(f"Found {len(filepaths)} IDF files listed in testfiles/CMakeLists.txt")
+    return filepaths
 
-found_idf_files = set()
-for root, dirs, files in os.walk(test_files_dir):
-    for s_file in files:
-        if s_file.endswith(".idf") or s_file.endswith(".imf"):
-            if root == test_files_dir:
-                found_idf_files.add(s_file)
-            else:
-                folder = os.path.basename(os.path.normpath(root))
-                found_idf_files.add(os.path.join(folder, s_file))
 
 # there are a few files we purposely skip
-files_to_skip = {
+FILES_TO_SKIP = {
     "_1a-Long0.0.idf",
     "_ExternalInterface-actuator.idf",
     "_ExternalInterface-schedule.idf",
@@ -102,30 +119,58 @@ files_to_skip = {
     "HVAC3ZoneMat-Const.imf",
     "_1ZoneUncontrolled_ForAPITesting.idf",
 }
-found_idf_files_trimmed = found_idf_files - files_to_skip
 
-# the CMakeLists file will always have "forward" slashes
-# on Linux and Mac, the list of found IDFs will also have "forward" slashes
-# but on Windows, the path delimiter will be a backslash
-# so replace all backslashes here before comparing anything.
-found_idf_files_refined = set()
-for fil in found_idf_files_trimmed:
-    found_idf_files_refined.add(fil.replace("\\", "/"))
 
-# check if any are missing in cmake
-need_to_add_to_cmake = found_idf_files_refined.difference(cmake_list_idf_files)
-if len(need_to_add_to_cmake) > 0:
-    for this_file in sorted(need_to_add_to_cmake):
-        print(
-            json.dumps(
-                {
-                    "tool": "verify_idfs_in_cmake",
-                    "filename": this_file,
-                    "file": this_file,
-                    "line": 0,
-                    "messagetype": "error",
-                    "message": "File missing from testfiles/CMakeLists.txt",
-                }
+def get_found_idf_files() -> set[Path]:
+    """Recursively search the testfiles directory for all .idf and .imf files.
+
+    It excludes any fil that are named in FILES_TO_SKIP
+
+    Returns:
+        set[Path]: Set of Path objects for each IDF file found, paths are absolute
+    """
+    exts = {".idf", ".imf"}
+    all_files = list(chain.from_iterable([TESTFILES_DIR.glob(f"**/*.{e}") for e in exts]))
+    return {f for f in all_files if f.name not in FILES_TO_SKIP}
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Verify IDFs in testfiles CMake")
+    args = parser.parse_args()
+
+    cmake_list_idf_files = get_cmake_list_idf_files(verbose=args.verbose)
+
+    exts = {".idf", ".imf"}
+    if args.files:
+        n_ori = len(args.files)
+        files = {f for f in args.files if f.suffix in exts and f.name not in FILES_TO_SKIP}
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = collect_files(base_dir=TESTFILES_DIR, extensions=exts, recursive=True)
+        files = {f for f in files if f.name not in FILES_TO_SKIP}
+        if args.verbose:
+            print(f"Found {len(files)} IDF files in testfiles/")
+
+    # check if any are missing in cmake
+    need_to_add_to_cmake = files.difference(cmake_list_idf_files)
+    if not need_to_add_to_cmake:
+        if args.verbose:
+            print("All IDF files are listed in testfiles/CMakeLists.txt")
+        raise SystemExit(0)
+
+    if args.verbose:
+        print(f"Found {len(need_to_add_to_cmake)} IDF files missing from testfiles/CMakeLists.txt")
+
+    log_messages: list[LogMessage] = []
+    for filepath in need_to_add_to_cmake:
+        log_messages.append(
+            ErrorMessage(
+                tool="verify_idfs_in_cmake",
+                filepath=filepath,
+                message="File missing from testfiles/CMakeLists.txt",
             )
         )
-    sys.exit(1)
+
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

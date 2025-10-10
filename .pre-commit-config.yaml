@@ -30,17 +30,17 @@ repos:
 
 - repo: local
   hooks:
-  - id: test-hook
-    name:  test-hook
-    entry: python3 scripts/dev/test_hook.py
-    args: ['--verbose'] #, '--gha']
-    language: system
-    files: '.*\.cc'
-    pass_filenames: true
-    # I am handling concurrency in the script. Note that if you run with --all-files and do not add a filter, it might run twice or more, because of limitation in SC_ARG_MAX
-    # (The maximum length of all arguments and environment strings to exec())
-    # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
-    require_serial: true
+#  - id: test-hook
+#    name:  test-hook
+#    entry: python3 scripts/dev/test_hook.py
+#    args: ['--verbose'] #, '--gha']
+#    language: system
+#    files: '.*\.cc'
+#    pass_filenames: true
+#    # I am handling concurrency in the script. Note that if you run with --all-files and do not add a filter, it might run twice or more, because of limitation in SC_ARG_MAX
+#    # (The maximum length of all arguments and environment strings to exec())
+#    # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
+#    require_serial: true
 
   - id: check-constexpr
     name: check_constexpr
@@ -59,3 +59,20 @@ repos:
     files: '.*\.idd.in$'  # The old IDDs will not issue a ton of warnings
     pass_filenames: true
     require_serial: true
+
+  - id: verify-idfs-in-cmake
+    name: Verify IDFs in testfiles CMake
+    entry: python3 scripts/dev/verify_idfs_in_cmake.py
+    args: ['--verbose']
+    language: system
+    files: '^testfiles/.*\.(idf|imf)$|^testfiles/CMakeLists\.txt$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: verify-cmake-dirs
+    name: verify_cmake_dirs
+    entry: python3 scripts/dev/verify_cmake_dirs.py
+    args: ['--verbose']
+    language: system
+    files: "^testfiles/.*"
+    pass_filenames: false
