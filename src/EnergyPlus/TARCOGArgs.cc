@@ -612,10 +612,14 @@ void PrepVariablesISO15099(int const nlayer,
                 // bi...the idea here is to have glass-to-glass width the same as before scaling
                 // bi...TODO: check for outdoor and indoor blinds! SCW model is only applicable to in-between SDs!!!
                 thick(i) = SlatWidth(i) * std::cos(SlatAngle(i) * Constant::Pi / 180.0);
-                if (i > 1) gap(i - 1) += (1.0 - SDScalar) / 2.0 * thick(i); // Autodesk:BoundsViolation gap(i-1) @ i=1: Added if condition
+                if (i > 1) {
+                    gap(i - 1) += (1.0 - SDScalar) / 2.0 * thick(i); // Autodesk:BoundsViolation gap(i-1) @ i=1: Added if condition
+                }
                 gap(i) += (1.0 - SDScalar) / 2.0 * thick(i);
                 thick(i) *= SDScalar;
-                if (thick(i) < SlatThick(i)) thick(i) = SlatThick(i);
+                if (thick(i) < SlatThick(i)) {
+                    thick(i) = SlatThick(i);
+                }
             } else if ((ThermalMod == TARCOGThermalModel::ISO15099) || (ThermalMod == TARCOGThermalModel::CSM)) {
                 thick(i) = SlatThick(i);
                 const Real64 slatAngRad = SlatAngle(i) * 2.0 * Constant::Pi / 360.0;

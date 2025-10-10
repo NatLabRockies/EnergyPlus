@@ -1031,8 +1031,10 @@ void InitEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
         for (int EvapUnitNum = 1; EvapUnitNum <= state.dataEvapCoolers->NumEvapCool; ++EvapUnitNum) {
 
             // only check evap coolers that are supposed to have a control node
-            if ((evapCond.evapCoolerType != EvapCoolerType::IndirectRDDSpecial) && (evapCond.evapCoolerType != EvapCoolerType::DirectResearchSpecial))
+            if ((evapCond.evapCoolerType != EvapCoolerType::IndirectRDDSpecial) &&
+                (evapCond.evapCoolerType != EvapCoolerType::DirectResearchSpecial)) {
                 continue;
+            }
 
             int ControlNode = state.dataEvapCoolers->EvapCond(EvapUnitNum).EvapControlNodeNum;
             if (ControlNode > 0) {
@@ -1217,7 +1219,9 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
                 }
             }
         }
-        if (!CoolerOnMainAirLoop) CoolerOnOApath = true;
+        if (!CoolerOnMainAirLoop) {
+            CoolerOnOApath = true;
+        }
     }
 
     // Start with the indirect volume flow rate
@@ -1396,7 +1400,9 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
         if (CurSysNum > 0 && !IsAutoSize && !SizingDesRunThisAirSys) {
             HardSizeNoDesRun = true;
         }
-        if (SizingDesRunThisAirSys) HardSizeNoDesRun = false; // Check if design information is available
+        if (SizingDesRunThisAirSys) {
+            HardSizeNoDesRun = false; // Check if design information is available
+        }
         // Design air flow rate
         if (CurSysNum > 0) { // central system
             if (!IsAutoSize && !SizingDesRunThisAirSys) {
@@ -1705,7 +1711,9 @@ void CalcDirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 const P
                  0.914869 * PadDepth * AirVel - 1.48241 * AirVel * pow_2(PadDepth) - 1.89919e-2 * pow_3(AirVel) * PadDepth +
                  1.13137 * pow_3(PadDepth) * AirVel + 3.27622e-2 * pow_3(AirVel) * pow_2(PadDepth) - 0.145384 * pow_3(PadDepth) * pow_2(AirVel);
 
-        if (SatEff >= 1.0) SatEff = 1.0;
+        if (SatEff >= 1.0) {
+            SatEff = 1.0;
+        }
         if (SatEff < 0.0) { // we have a serious problem.  Pad Area and/or depth not suitable for system air flow rates
             ShowSevereError(state, format("EVAPCOOLER:DIRECT:CELDEKPAD: {} has a problem", thisEvapCond.Name));
             ShowContinueError(state, "Check size of Pad Area and/or Pad Depth in input");
@@ -1741,7 +1749,9 @@ void CalcDirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 const P
         RhoWater = Psychrometrics::RhoH2O(thisEvapCond.OutletTemp);
         thisEvapCond.EvapWaterConsumpRate = (thisEvapCond.OutletHumRat - thisEvapCond.InletHumRat) * thisEvapCond.InletMassFlowRate / RhoWater;
         // A numerical check to keep from having very tiny negative water consumption values being reported
-        if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+        if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+            thisEvapCond.EvapWaterConsumpRate = 0.0;
+        }
 
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
@@ -1811,7 +1821,9 @@ void CalcDryIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
                  0.914869 * PadDepth * AirVel - 1.48241 * AirVel * pow_2(PadDepth) - 1.89919e-2 * pow_3(AirVel) * PadDepth +
                  1.13137 * pow_3(PadDepth) * AirVel + 3.27622e-2 * pow_3(AirVel) * pow_2(PadDepth) - 0.145384 * pow_3(PadDepth) * pow_2(AirVel);
 
-        if (SatEff >= 1.0) SatEff = 1.0;
+        if (SatEff >= 1.0) {
+            SatEff = 1.0;
+        }
         thisEvapCond.SatEff = SatEff;
         //***************************************************************************
         //   TEMP LEAVING DRY BULB IS CALCULATED FROM SATURATION EFFICIENCY AS THE
@@ -1881,7 +1893,9 @@ void CalcDryIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
         thisEvapCond.EvapWaterConsumpRate =
             PartLoadRatio * (HumRatSec - thisEvapCond.SecInletHumRat) * thisEvapCond.IndirectVolFlowRate * RhoAir / RhoWater;
         // A numerical check to keep from having very tiny negative water consumption values being reported
-        if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+        if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+            thisEvapCond.EvapWaterConsumpRate = 0.0;
+        }
 
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
@@ -1941,7 +1955,9 @@ void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
 
         StageEff = thisEvapCond.WetCoilMaxEfficiency - min(thisEvapCond.WetCoilFlowRatio * CFMAir / CFMSec, thisEvapCond.WetCoilMaxEfficiency);
 
-        if (StageEff >= 1.0) StageEff = 1.0;
+        if (StageEff >= 1.0) {
+            StageEff = 1.0;
+        }
         // This is a rough approximation of the Total Indirect Stage Efficiency.  I think that
         //   this would mainly be used for evap sizing purposes.
 
@@ -2009,7 +2025,9 @@ void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
         RhoWater = Psychrometrics::RhoH2O(thisEvapCond.SecInletTemp);
         thisEvapCond.EvapWaterConsumpRate = (QHX / StageEff) / (2500000.0 * RhoWater);
         // A numerical check to keep from having very tiny negative water consumption values being reported
-        if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+        if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+            thisEvapCond.EvapWaterConsumpRate = 0.0;
+        }
 
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
@@ -2179,7 +2197,9 @@ void CalcIndirectResearchSpecialEvapCooler(EnergyPlusData &state, int const Evap
         StageEff = thisEvapCond.WetCoilMaxEfficiency;
 
         // This is model is for special indirect cooler with efficiency greater than 1.0
-        if (StageEff >= 1.5) StageEff = 1.5;
+        if (StageEff >= 1.5) {
+            StageEff = 1.5;
+        }
 
         thisEvapCond.StageEff = StageEff;
 
@@ -2313,13 +2333,17 @@ void CalcIndirectResearchSpecialEvapCooler(EnergyPlusData &state, int const Evap
             DriftVdot = EvapVdot * thisEvapCond.DriftFraction;
             if (thisEvapCond.BlowDownRatio > 0.0) {
                 BlowDownVdot = EvapVdot / (thisEvapCond.BlowDownRatio - 1) - DriftVdot;
-                if (BlowDownVdot < 0.0) BlowDownVdot = 0.0;
+                if (BlowDownVdot < 0.0) {
+                    BlowDownVdot = 0.0;
+                }
             } else {
                 BlowDownVdot = 0.0;
             }
             thisEvapCond.EvapWaterConsumpRate = EvapVdot + DriftVdot + BlowDownVdot;
             // A numerical check to keep from having very tiny negative water consumption values being reported
-            if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+            if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+                thisEvapCond.EvapWaterConsumpRate = 0.0;
+            }
         }
 
     } else {
@@ -2724,13 +2748,17 @@ void CalcIndirectResearchSpecialEvapCoolerAdvanced(EnergyPlusData &state,
             DriftVdot = EvapVdot * thisEvapCond.DriftFraction;
             if (thisEvapCond.BlowDownRatio > 0.0) {
                 BlowDownVdot = EvapVdot / (thisEvapCond.BlowDownRatio - 1) - DriftVdot;
-                if (BlowDownVdot < 0.0) BlowDownVdot = 0.0;
+                if (BlowDownVdot < 0.0) {
+                    BlowDownVdot = 0.0;
+                }
             } else {
                 BlowDownVdot = 0.0;
             }
             thisEvapCond.EvapWaterConsumpRate = EvapVdot + DriftVdot + BlowDownVdot;
             // A numerical check to keep from having very tiny negative water consumption values being reported
-            if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+            if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+                thisEvapCond.EvapWaterConsumpRate = 0.0;
+            }
         } else {
             thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
             thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
@@ -3162,7 +3190,9 @@ void CalcDirectResearchSpecialEvapCooler(EnergyPlusData &state, int const EvapCo
 
         if (thisEvapCond.BlowDownRatio > 0.0) {
             BlowDownVdot = EvapVdot / (thisEvapCond.BlowDownRatio - 1.0) - DriftVdot;
-            if (BlowDownVdot < 0.0) BlowDownVdot = 0.0;
+            if (BlowDownVdot < 0.0) {
+                BlowDownVdot = 0.0;
+            }
         } else {
             BlowDownVdot = 0.0;
         }
@@ -3170,7 +3200,9 @@ void CalcDirectResearchSpecialEvapCooler(EnergyPlusData &state, int const EvapCo
         thisEvapCond.EvapWaterConsumpRate = EvapVdot + DriftVdot + BlowDownVdot;
 
         // A numerical check to keep from having very tiny negative water consumption values being reported
-        if (thisEvapCond.EvapWaterConsumpRate < 0.0) thisEvapCond.EvapWaterConsumpRate = 0.0;
+        if (thisEvapCond.EvapWaterConsumpRate < 0.0) {
+            thisEvapCond.EvapWaterConsumpRate = 0.0;
+        }
 
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
@@ -3484,7 +3516,9 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
 
             // get the zone numer served by the zoneHVAC evaporative cooler
             for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                    continue;
+                }
                 for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++NodeNum) {
                     if (thisZoneEvapUnit.UnitOutletNodeNum == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum)) {
                         thisZoneEvapUnit.ZonePtr = CtrlZone;
@@ -3919,7 +3953,9 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
 
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) stringOverride = "design_supply_air_flow_rate [m3/s]";
+                if (state.dataGlobal->isEpJSON) {
+                    stringOverride = "design_supply_air_flow_rate [m3/s]";
+                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -3942,7 +3978,9 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
 
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) stringOverride = "design_supply_air_flow_rate [m3/s]";
+                if (state.dataGlobal->isEpJSON) {
+                    stringOverride = "design_supply_air_flow_rate [m3/s]";
+                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                 zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -3960,7 +3998,9 @@ void SizeZoneEvaporativeCoolerUnit(EnergyPlusData &state, int const UnitNum) // 
             TempSize = zoneEvapUnit.DesignAirVolumeFlowRate;
             CoolingAirFlowSizer sizingCoolingAirFlow;
             std::string stringOverride = "Design Supply Air Flow Rate [m3/s]";
-            if (state.dataGlobal->isEpJSON) stringOverride = "design_supply_air_flow_rate [m3/s]";
+            if (state.dataGlobal->isEpJSON) {
+                stringOverride = "design_supply_air_flow_rate [m3/s]";
+            }
             sizingCoolingAirFlow.overrideSizingString(stringOverride);
             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
             zoneEvapUnit.DesignAirVolumeFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -4225,7 +4265,9 @@ void ControlZoneEvapUnitOutput(EnergyPlusData &state,
                                         zoneEvapUnit.Name));
                 ShowContinueError(state, "Check input for Fan Placement.");
                 ShowContinueErrorTimeStamp(state, "");
-                if (state.dataGlobal->WarmupFlag) ShowContinueError(state, "Error occurred during warmup days.");
+                if (state.dataGlobal->WarmupFlag) {
+                    ShowContinueError(state, "Error occurred during warmup days.");
+                }
             }
             ShowRecurringWarningErrorAtEnd(
                 state,
@@ -4351,7 +4393,9 @@ void ControlVSEvapUnitToMeetLoad(EnergyPlusData &state,
                                         zoneEvapUnit.Name));
                 ShowContinueError(state, "Check input for Fan Placement.");
                 ShowContinueErrorTimeStamp(state, "");
-                if (state.dataGlobal->WarmupFlag) ShowContinueError(state, "Error occurred during warmup days.");
+                if (state.dataGlobal->WarmupFlag) {
+                    ShowContinueError(state, "Error occurred during warmup days.");
+                }
             }
             ShowRecurringWarningErrorAtEnd(state,
                                            "Zone Evaporative Cooler unit control failed (limits exceeded) for ZoneHVAC:EvaporativeCoolerUnit =\"" +

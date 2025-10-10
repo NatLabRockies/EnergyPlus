@@ -73,7 +73,9 @@ void CoilCoolingDXCurveFitSpeed::instantiateFromInputSpec(EnergyPlus::EnergyPlus
     this->original_input_specs = input_data;
     this->name = input_data.name;
     this->active_fraction_of_face_coil_area = input_data.active_fraction_of_coil_face_area;
-    if (this->active_fraction_of_face_coil_area < 1.0) this->adjustForFaceArea = true;
+    if (this->active_fraction_of_face_coil_area < 1.0) {
+        this->adjustForFaceArea = true;
+    }
     this->rated_evap_fan_power_per_volume_flow_rate = input_data.rated_evaporator_fan_power_per_volume_flow_rate;
     this->rated_evap_fan_power_per_volume_flow_rate_2023 = input_data.rated_evaporator_fan_power_per_volume_flow_rate_2023;
     this->evap_condenser_pump_power_fraction = input_data.rated_evaporative_condenser_pump_power_fraction;
@@ -358,7 +360,9 @@ void CoilCoolingDXCurveFitSpeed::size(EnergyPlus::EnergyPlusData &state)
 
     CoolingAirFlowSizer sizingCoolingAirFlow;
     std::string stringOverride = "Rated Air Flow Rate [m3/s]";
-    if (state.dataGlobal->isEpJSON) stringOverride = "rated_air_flow_rate [m3/s]";
+    if (state.dataGlobal->isEpJSON) {
+        stringOverride = "rated_air_flow_rate [m3/s]";
+    }
     std::string preFixString;
     // if (maxSpeeds > 1) preFixString = "Speed " + std::to_string(speedNum + 1) + " ";
     // stringOverride = preFixString + stringOverride;
@@ -513,7 +517,9 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
             }
             // Check for dry evaporator conditions (win < wadp)
             if (wADP > inletw || (Counter >= 1 && Counter < MaxIter)) {
-                if (inletw == 0.0) inletw = 0.00001;
+                if (inletw == 0.0) {
+                    inletw = 0.00001;
+                }
                 Real64 werror = (inletw - wADP) / inletw;
                 // Increase InletAirHumRatTemp at constant InletAirTemp to find coil dry-out point. Then use the
                 // capacity at the dry-out point to determine exiting conditions from coil. This is required
@@ -521,7 +527,9 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
                 inletw = RF * wADP + (1.0 - RF) * inletw;
                 inletWetBulb = Psychrometrics::PsyTwbFnTdbWPb(state, inletNode.Temp, inletw, ambPressure);
                 ++Counter;
-                if (std::abs(werror) > Tolerance) continue; // Recalculate with modified inlet conditions
+                if (std::abs(werror) > Tolerance) {
+                    continue; // Recalculate with modified inlet conditions
+                }
                 break;
             } else {
                 break;
@@ -535,7 +543,9 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
     if (indexPLRFPLF > 0) {
         PLF = Curve::CurveValue(state, indexPLRFPLF, PLR); // Calculate part-load factor
     }
-    if (fanOp == HVAC::FanOp::Cycling) state.dataHVACGlobal->OnOffFanPartLoadFraction = PLF;
+    if (fanOp == HVAC::FanOp::Cycling) {
+        state.dataHVACGlobal->OnOffFanPartLoadFraction = PLF;
+    }
 
     Real64 EIRTempModFac = 1.0; // EIR as a function of temperature curve result
     if (indexEIRFT > 0) {
@@ -573,7 +583,9 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
         Real64 HeatingRTF = 0.0;
         SHR = calcEffectiveSHR(inletNode, inletWetBulb, SHR, RTF, ratedLatentCapacity, QLatActual, HeatingRTF);
         // Calculate full load output conditions
-        if (SHR > 1.0) SHR = 1.0;
+        if (SHR > 1.0) {
+            SHR = 1.0;
+        }
         hTinwout = inletNode.Enthalpy - (1.0 - SHR) * hDelta;
         if (SHR < 1.0) {
             outletNode.HumRat = Psychrometrics::PsyWFnTdbH(state, inletNode.Temp, hTinwout, RoutineName);
@@ -655,7 +667,9 @@ Real64 CoilCoolingDXCurveFitSpeed::CalcBypassFactor(EnergyPlus::EnergyPlusData &
     Real64 deltaT = tdb - outtdb;
     Real64 deltaHumRat = w - outw;
     Real64 slopeAtConds = 0.0;
-    if (deltaT > 0.0) slopeAtConds = deltaHumRat / deltaT;
+    if (deltaT > 0.0) {
+        slopeAtConds = deltaHumRat / deltaT;
+    }
     if (slopeAtConds <= 0.0) {
         ShowSevereError(state, this->object_name + " \"" + this->name + "\"");
         ShowContinueError(state, "...Invalid slope or outlet air condition when calculating cooling coil bypass factor.");
@@ -689,7 +703,9 @@ Real64 CoilCoolingDXCurveFitSpeed::CalcBypassFactor(EnergyPlus::EnergyPlusData &
     while ((iter <= maxIter) && (tolerance > 0.001)) {
 
         // Do for IterMax iterations or until the error gets below .1%
-        if (iter > 0) adp_tdb += deltaADPTemp;
+        if (iter > 0) {
+            adp_tdb += deltaADPTemp;
+        }
         ++iter;
         //  Find new slope using guessed Tadp
         adp_w = min(outw, Psychrometrics::PsyWFnTdpPb(state, adp_tdb, DataEnvironment::StdPressureSeaLevel));
@@ -854,8 +870,12 @@ Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const DataLoopNode::NodeData
     //  Calculate part-load or "effective" sensible heat ratio
     SHReff = 1.0 - (1.0 - SHRss) * LHRmult;
 
-    if (SHReff < SHRss) SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
-    if (SHReff > 1.0) SHReff = 1.0;     // Effective sensible heat ratio can't be greater than 1.0
+    if (SHReff < SHRss) {
+        SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
+    }
+    if (SHReff > 1.0) {
+        SHReff = 1.0; // Effective sensible heat ratio can't be greater than 1.0
+    }
 
     return SHReff;
 }

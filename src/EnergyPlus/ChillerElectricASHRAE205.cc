@@ -449,7 +449,9 @@ ASHRAE205ChillerSpecs *ASHRAE205ChillerSpecs::factory(EnergyPlusData &state, std
     auto thisObj = std::find_if(state.dataChillerElectricASHRAE205->Electric205Chiller.begin(),
                                 state.dataChillerElectricASHRAE205->Electric205Chiller.end(),
                                 [&objectName](const ASHRAE205ChillerSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataChillerElectricASHRAE205->Electric205Chiller.end()) return thisObj;
+    if (thisObj != state.dataChillerElectricASHRAE205->Electric205Chiller.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("ASHRAE205ChillerSpecs::factory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     return nullptr;                                                                                                         // LCOV_EXCL_LINE
@@ -694,7 +696,9 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
         if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
         } else {
-            if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+            if (this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->EvapVolFlowRateWasAutoSized) {
@@ -764,7 +768,9 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                                  (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
 
         } else {
-            if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+            if (this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->CondVolFlowRateWasAutoSized) {
@@ -832,7 +838,9 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
                 bool bPRINT = true; // TRUE if sizing is reported to output (eio)
                 AutoCalculateSizer sizerCondAirFlow;
                 std::string stringOverride = "Condenser Maximum Requested Flow Rate  [m3/s]";
-                if (state.dataGlobal->isEpJSON) stringOverride = "condenser_maximum_requested_flow_rate [m3/s]";
+                if (state.dataGlobal->isEpJSON) {
+                    stringOverride = "condenser_maximum_requested_flow_rate [m3/s]";
+                }
                 sizerCondAirFlow.overrideSizingString(stringOverride);
                 sizerCondAirFlow.initializeWithinEP(state, CompType, this->Name, bPRINT, RoutineName);
                 this->CondVolFlowRate = sizerCondAirFlow.size(state, TempSize, ErrorsFound);
@@ -1168,7 +1176,9 @@ void ASHRAE205ChillerSpecs::findEvaporatorMassFlowRate(EnergyPlusData &state, Re
 
             if (evapDeltaTemp != 0) {
                 this->EvapMassFlowRate = max(0.0, (std::abs(load) / Cp / evapDeltaTemp));
-                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
+                    this->PossibleSubcooling = true;
+                }
                 // Check to see if the Maximum is exceeded, if so set to maximum
                 this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                 // Use PlantUtilities::SetComponentFlowRate to decide actual flow

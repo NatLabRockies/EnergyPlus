@@ -2572,12 +2572,13 @@ namespace StandardRatings {
             // if CondenserType is AirCooled
             if (CondenserType(spnum) == DataHeatBalance::RefrigCondenserType::Air) {
                 // Cooling Coil | Calculate the net cooling capacity at the rated conditions (23.89C(75F) Wet Bulb and 35.0C(95F) Dry Bulb )
-                if (HVAC::coilTypeIsCooling[(int)coilType])
+                if (HVAC::coilTypeIsCooling[(int)coilType]) {
                     TotCapTempModFac(spnum) =
                         Curve::CurveValue(state, CapFTempCurveIndex(spnum), CoolingCoilInletAirWetBulbTempRated, CoilInletAirCoolDryBulbIEER);
-                else // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
+                } else { // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
                     TotCapTempModFac(spnum) =
                         Curve::CurveValue(state, CapFTempCurveIndex(spnum), CoilHeatingInletAirWetBulbTempIEER, CoilHeatingInletAirCoolDryBulbIEER);
+                }
             }
             // if CondenserType is WaterCooled
             if (CondenserType(spnum) == DataHeatBalance::RefrigCondenserType::Water) {
@@ -2711,14 +2712,26 @@ namespace StandardRatings {
                 }
             }
 
-            if (smallerThanSpeedB != 0) speedsForB.push_back(smallerThanSpeedB);
-            if (largerThanSpeedB != 0) speedsForB.push_back(largerThanSpeedB);
+            if (smallerThanSpeedB != 0) {
+                speedsForB.push_back(smallerThanSpeedB);
+            }
+            if (largerThanSpeedB != 0) {
+                speedsForB.push_back(largerThanSpeedB);
+            }
 
-            if (smallerThanSpeedC != 0) speedsForC.push_back(smallerThanSpeedC);
-            if (largerThanSpeedC != 0) speedsForC.push_back(largerThanSpeedC);
+            if (smallerThanSpeedC != 0) {
+                speedsForC.push_back(smallerThanSpeedC);
+            }
+            if (largerThanSpeedC != 0) {
+                speedsForC.push_back(largerThanSpeedC);
+            }
 
-            if (smallerThanSpeedD != 0) speedsForD.push_back(smallerThanSpeedD);
-            if (largerThanSpeedD != 0) speedsForD.push_back(largerThanSpeedD);
+            if (smallerThanSpeedD != 0) {
+                speedsForD.push_back(smallerThanSpeedD);
+            }
+            if (largerThanSpeedD != 0) {
+                speedsForD.push_back(largerThanSpeedD);
+            }
 
             // int totalEERCount = speedsForA.size() + speedsForB.size() + speedsForC.size() + speedsForD.size();
             // For A | 100% - ReducedPLRIEER[3]
@@ -2743,7 +2756,9 @@ namespace StandardRatings {
             Real64 EER_BLow(0.0);
             Real64 EER_BHigh(0.0);
             for (int i = 1; i <= 2; ++i) {
-                if ((unsigned long)i > speedsForB.size()) continue;
+                if ((unsigned long)i > speedsForB.size()) {
+                    continue;
+                }
 
                 RedCapNum = speedsForB(i);
                 OutdoorUnitInletAirDryBulbTempReduced = GetOutdoorUnitInletAirDryBulbTempReduced(0.75, CondenserType(RedCapNum));
@@ -2764,10 +2779,11 @@ namespace StandardRatings {
                 if (speedsForB.size() == 1) {
                     B = EER;
                 } else {
-                    if (i == 1)
+                    if (i == 1) {
                         EER_BLow = EER; // ?? Check first is low or high
-                    else if (i == 2)
+                    } else if (i == 2) {
                         EER_BHigh = EER;
+                    }
                 }
             }
             // Do the interpolation for B if required
@@ -2779,7 +2795,9 @@ namespace StandardRatings {
             Real64 EER_CLow(0.0);
             Real64 EER_CHigh(0.0);
             for (int i = 1; i <= 2; ++i) {
-                if ((unsigned long)i > speedsForC.size()) continue;
+                if ((unsigned long)i > speedsForC.size()) {
+                    continue;
+                }
 
                 RedCapNum = speedsForC(i);
                 OutdoorUnitInletAirDryBulbTempReduced = GetOutdoorUnitInletAirDryBulbTempReduced(0.50, CondenserType(RedCapNum));
@@ -2800,10 +2818,11 @@ namespace StandardRatings {
                 if (speedsForC.size() == 1) {
                     C = EER;
                 } else {
-                    if (i == 1)
+                    if (i == 1) {
                         EER_CLow = EER; // ?? Check first is low or high
-                    else if (i == 2)
+                    } else if (i == 2) {
                         EER_CHigh = EER;
+                    }
                 }
             }
             // Do the interpolation for C if required
@@ -2815,7 +2834,9 @@ namespace StandardRatings {
             Real64 EER_DLow(0.0);
             Real64 EER_DHigh(0.0);
             for (int i = 1; i <= 2; ++i) {
-                if ((unsigned long)i > speedsForD.size()) continue;
+                if ((unsigned long)i > speedsForD.size()) {
+                    continue;
+                }
 
                 RedCapNum = speedsForD(i);
                 OutdoorUnitInletAirDryBulbTempReduced = GetOutdoorUnitInletAirDryBulbTempReduced(0.25, CondenserType(RedCapNum));
@@ -2836,10 +2857,11 @@ namespace StandardRatings {
                 if (speedsForD.size() == 1) {
                     D = EER;
                 } else {
-                    if (i == 1)
+                    if (i == 1) {
                         EER_DLow = EER; // ?? Check first is low or high
-                    else if (i == 2)
+                    } else if (i == 2) {
                         EER_DHigh = EER;
+                    }
                 }
             }
             // Do the interpolation for D if required
@@ -2936,12 +2958,13 @@ namespace StandardRatings {
             // if CondenserType is AirCooled
             if (CondenserType(spnum) == DataHeatBalance::RefrigCondenserType::Air) {
                 // Cooling Coil | Calculate the net cooling capacity at the rated conditions (23.89C(75F) Wet Bulb and 35.0C(95F) Dry Bulb )
-                if (HVAC::coilTypeIsCooling[(int)coilType])
+                if (HVAC::coilTypeIsCooling[(int)coilType]) {
                     TotCapTempModFac(spnum) =
                         Curve::CurveValue(state, CapFTempCurveIndex(spnum), CoolingCoilInletAirWetBulbTempRated, CoilInletAirCoolDryBulbIEER);
-                else // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
+                } else { // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
                     TotCapTempModFac(spnum) =
                         Curve::CurveValue(state, CapFTempCurveIndex(spnum), CoilHeatingInletAirWetBulbTempIEER, CoilHeatingInletAirCoolDryBulbIEER);
+                }
             }
             // if CondenserType is WaterCooled
             if (CondenserType(spnum) == DataHeatBalance::RefrigCondenserType::Water) {
@@ -3044,7 +3067,9 @@ namespace StandardRatings {
             Real64 EER_BLow(0.0);
             Real64 EER_BHigh(0.0);
             for (int i = 1; i <= 2; ++i) {
-                if ((unsigned long)i > speedsForB.size()) continue;
+                if ((unsigned long)i > speedsForB.size()) {
+                    continue;
+                }
 
                 RedCapNum = speedsForB(i);
                 OutdoorUnitInletAirDryBulbTempReduced = GetOutdoorUnitInletAirDryBulbTempReduced(0.75, CondenserType(RedCapNum));
@@ -3063,10 +3088,11 @@ namespace StandardRatings {
                                                EIRFlowModFac(RedCapNum),
                                                ReducedPLRIEER[2]);
 
-                if (i == 1)
+                if (i == 1) {
                     EER_BLow = EER; // ?? Check first is low or high
-                else if (i == 2)
+                } else if (i == 2) {
                     EER_BHigh = EER;
+                }
             }
             // Do the interpolation for B if required
             if (speedsForB.size() == 2) {
@@ -3077,7 +3103,9 @@ namespace StandardRatings {
             Real64 EER_CLow(0.0);
             Real64 EER_CHigh(0.0);
             for (int i = 1; i <= 2; ++i) {
-                if ((unsigned long)i > speedsForC.size()) continue;
+                if ((unsigned long)i > speedsForC.size()) {
+                    continue;
+                }
 
                 RedCapNum = speedsForC(i);
                 OutdoorUnitInletAirDryBulbTempReduced = GetOutdoorUnitInletAirDryBulbTempReduced(0.50, CondenserType(RedCapNum));
@@ -3096,10 +3124,11 @@ namespace StandardRatings {
                                                EIRFlowModFac(RedCapNum),
                                                ReducedPLRIEER[1]);
 
-                if (i == 1)
+                if (i == 1) {
                     EER_CLow = EER; // ?? Check first is low or high
-                else if (i == 2)
+                } else if (i == 2) {
                     EER_CHigh = EER;
+                }
             }
             // Do the interpolation for C if required
             if (speedsForC.size() == 2) {
@@ -3245,20 +3274,24 @@ namespace StandardRatings {
             if (_condenserType(spnum) == DataHeatBalance::RefrigCondenserType::Air) { // Case: CondenserType is AirCooled
                 if (spnum == 3 || spnum == 4) {
                     // Cooling Coil | Calculate the net cooling capacity at the rated conditions (23.89C(75F) Wet Bulb and 35.0C(95F) Dry Bulb )
-                    if (HVAC::coilTypeIsCooling[(int)coilType])
+                    if (HVAC::coilTypeIsCooling[(int)coilType]) {
                         TotCapTempModFac(spnum) =
                             Curve::CurveValue(state, CapFTempCurveIndex(1), CoolingCoilInletAirWetBulbTempRated, CoilInletAirCoolDryBulbIEER);
-                    else // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
+                    } else { // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb
+                             // )
                         TotCapTempModFac(spnum) =
                             Curve::CurveValue(state, CapFTempCurveIndex(1), CoilHeatingInletAirWetBulbTempIEER, CoilHeatingInletAirCoolDryBulbIEER);
+                    }
                 } else if (spnum == 1 || spnum == 2) {
                     // Cooling Coil | Calculate the net cooling capacity at the rated conditions (23.89C(75F) Wet Bulb and 35.0C(95F) Dry Bulb )
-                    if (HVAC::coilTypeIsCooling[(int)coilType])
+                    if (HVAC::coilTypeIsCooling[(int)coilType]) {
                         TotCapTempModFac(spnum) =
                             Curve::CurveValue(state, CapFTempCurveIndex(2), CoolingCoilInletAirWetBulbTempRated, CoilInletAirCoolDryBulbIEER);
-                    else // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb )
+                    } else { // Heating Coil | Calculate the net cooling capacity at the rated conditions (6.11C(43F) Wet Bulb and 8.33C(47F) Dry Bulb
+                             // )
                         TotCapTempModFac(spnum) =
                             Curve::CurveValue(state, CapFTempCurveIndex(2), CoilHeatingInletAirWetBulbTempIEER, CoilHeatingInletAirCoolDryBulbIEER);
+                    }
                 }
             } else if (_condenserType(spnum) == DataHeatBalance::RefrigCondenserType::Water) { // Case: CondenserType is WaterCooled
                 // Calculate the net cooling capacity at the rated conditions (35.0C(95F) Outlet and 29.44C(85F) Inlet )
@@ -3375,11 +3408,12 @@ namespace StandardRatings {
         // if CondenserType is AirCooled
         if (CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
             // Calculate the net cooling capacity at the rated conditions (19.44C(67F) Wet Bulb and 35.0C(95F) Dry Bulb )
-            if (HVAC::coilTypeIsCooling[(int)coilType])
+            if (HVAC::coilTypeIsCooling[(int)coilType]) {
                 TotCapTempModFac = Curve::CurveValue(state, CapFTempCurveIndex, CoilInletAirWetBulbTemp, CoilInletAirCoolDryBulbIEER);
-            else
+            } else {
                 TotCapTempModFac =
                     Curve::CurveValue(state, CapFTempCurveIndex, CoilHeatingInletAirWetBulbTempIEER, CoilHeatingInletAirCoolDryBulbIEER);
+            }
         }
         // if CondenserType is WaterCooled
         if (CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
@@ -5904,7 +5938,9 @@ namespace StandardRatings {
                 }
 
                 if (BuildingHeatingLoad <= HeatingCapacityLS) {
-                    if (HeatingCapacityLS > 0.0) PartLoadRatio = min(1.0, BuildingHeatingLoad / HeatingCapacityLS);
+                    if (HeatingCapacityLS > 0.0) {
+                        PartLoadRatio = min(1.0, BuildingHeatingLoad / HeatingCapacityLS);
+                    }
                     NetTotHeatCapBinned = BuildingHeatingLoad;
                     PartLoadFraction = 1.0 - CyclicDegradationCoeff * (1.0 - PartLoadRatio);
                     TotHeatElecPowerBinnedHP = (PartLoadRatio / PartLoadFraction) * HeatingElecPowerLS * LowTempCutOutFactor;

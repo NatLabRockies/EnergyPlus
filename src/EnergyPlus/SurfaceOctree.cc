@@ -84,7 +84,9 @@ namespace EnergyPlus {
 bool SurfaceOctreeCube::contains(Surface const &surface) const
 {
     for (Vertex const &v : surface.Vertex) { // All surface vertices must be in cube
-        if (!contains(v)) return false;
+        if (!contains(v)) {
+            return false;
+        }
     }
     return true;
 }
@@ -229,7 +231,9 @@ void SurfaceOctreeCube::surfaceBranch(Surface &surface)
 bool SurfaceOctreeCube::contains(Vertex const &l, Vertex const &u, Surface const &surface)
 {
     for (Vertex const &v : surface.Vertex) { // All surface vertices must be in cube
-        if (!contains(l, u, v)) return false;
+        if (!contains(l, u, v)) {
+            return false;
+        }
     }
     return true;
 }

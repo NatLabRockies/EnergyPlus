@@ -99,7 +99,9 @@ namespace BoilerSteam {
         auto myBoiler = std::find_if(state.dataBoilerSteam->Boiler.begin(),
                                      state.dataBoilerSteam->Boiler.end(),
                                      [&objectName](const BoilerSpecs &boiler) { return boiler.Name == objectName; });
-        if (myBoiler != state.dataBoilerSteam->Boiler.end()) return myBoiler;
+        if (myBoiler != state.dataBoilerSteam->Boiler.end()) {
+            return myBoiler;
+        }
 
         // If we didn't find it, fatal
         ShowFatalError(state, format("LocalBoilerSteamFactory: Error getting inputs for steam boiler named: {}", objectName)); // LCOV_EXCL_LINE
@@ -164,7 +166,9 @@ namespace BoilerSteam {
         }
 
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataBoilerSteam->Boiler)) return;
+        if (allocated(state.dataBoilerSteam->Boiler)) {
+            return;
+        }
 
         // Boiler will have fuel input to it , that is it !
         state.dataBoilerSteam->Boiler.allocate(numBoilers);
@@ -215,7 +219,9 @@ namespace BoilerSteam {
             thisBoiler.FullLoadCoef[1] = state.dataIPShortCut->rNumericArgs(9);
             thisBoiler.FullLoadCoef[2] = state.dataIPShortCut->rNumericArgs(10);
             thisBoiler.SizFac = state.dataIPShortCut->rNumericArgs(11);
-            if (thisBoiler.SizFac <= 0.0) thisBoiler.SizFac = 1.0;
+            if (thisBoiler.SizFac <= 0.0) {
+                thisBoiler.SizFac = 1.0;
+            }
 
             if ((state.dataIPShortCut->rNumericArgs(8) + state.dataIPShortCut->rNumericArgs(9) + state.dataIPShortCut->rNumericArgs(10)) == 0.0) {
                 ShowSevereError(state,
@@ -498,7 +504,9 @@ namespace BoilerSteam {
                                  state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate +
                              state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * SteamDensity * LatentEnthSteam);
             } else {
-                if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+                if (this->NomCapWasAutoSized) {
+                    tmpNomCap = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->NomCapWasAutoSized) {
@@ -648,8 +656,9 @@ namespace BoilerSteam {
         // if the component control is SERIESACTIVE we set the component flow to inlet flow so that flow resolver
         // will not shut down the branch
         if (MyLoad <= 0.0 || !RunFlag) {
-            if (EquipFlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive)
+            if (EquipFlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive) {
                 this->BoilerMassFlowRate = state.dataLoopNodes->Node(this->BoilerInletNodeNum).MassFlowRate;
+            }
             return;
         }
 

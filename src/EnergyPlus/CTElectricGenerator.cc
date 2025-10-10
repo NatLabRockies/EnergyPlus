@@ -108,7 +108,9 @@ namespace CTElectricGenerator {
         auto myCTGen = std::find_if(state.dataCTElectricGenerator->CTGenerator.begin(),
                                     state.dataCTElectricGenerator->CTGenerator.end(),
                                     [&objectName](const CTGeneratorData &CTElecGen) { return CTElecGen.Name == objectName; });
-        if (myCTGen != state.dataCTElectricGenerator->CTGenerator.end()) return myCTGen;
+        if (myCTGen != state.dataCTElectricGenerator->CTGenerator.end()) {
+            return myCTGen;
+        }
         // If we didn't find it, fatal
         ShowFatalError(state,
                        format("LocalCombustionTurbineGeneratorFactory: Error getting inputs for combustion turbine generator named: {}",
@@ -663,7 +665,9 @@ namespace CTElectricGenerator {
         if (HeatRecOutTemp > this->HeatRecMaxTemp) {
             if (this->HeatRecMaxTemp != heatRecInTemp) {
                 MinHeatRecMdot = (QExhaustRec + QLubeOilRec) / (heatRecCp * (this->HeatRecMaxTemp - heatRecInTemp));
-                if (MinHeatRecMdot < 0.0) MinHeatRecMdot = 0.0;
+                if (MinHeatRecMdot < 0.0) {
+                    MinHeatRecMdot = 0.0;
+                }
             }
 
             // Recalculate Outlet Temperature, with adjusted flowrate

@@ -103,8 +103,9 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
 
     if (NumOfBranches > 0) {
         state->dataBranchInputManager->Branch.allocate(NumOfBranches);
-        for (auto &e : state->dataBranchInputManager->Branch)
+        for (auto &e : state->dataBranchInputManager->Branch) {
             e.AssignedLoopName.clear();
+        }
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, "NodeList", NumParams, NumAlphas, NumNumbers);
         NodeNums.dimension(NumParams, 0);
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, NumParams, NumAlphas, NumNumbers);
@@ -268,8 +269,9 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
 
     if (NumOfBranches > 0) {
         state->dataBranchInputManager->Branch.allocate(NumOfBranches);
-        for (auto &e : state->dataBranchInputManager->Branch)
+        for (auto &e : state->dataBranchInputManager->Branch) {
             e.AssignedLoopName.clear();
+        }
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, "NodeList", NumParams, NumAlphas, NumNumbers);
         NodeNums.dimension(NumParams, 0);
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, NumParams, NumAlphas, NumNumbers);

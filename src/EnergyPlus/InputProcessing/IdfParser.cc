@@ -120,14 +120,16 @@ std::string IdfParser::encode(json const &root, json const &schema)
             for (size_t i = 0; i < legacy_idd_field.size(); i++) {
                 std::string const &entry = legacy_idd_field[i].get<std::string>();
                 if (obj_in.value().find(entry) == obj_in.value().end()) {
-                    if (entry == "name")
+                    if (entry == "name") {
                         encoded += std::string{end_of_field} + obj_in.key();
-                    else
+                    } else {
                         skipped_fields++;
+                    }
                     continue;
                 }
-                for (size_t j = 0; j < skipped_fields; j++)
+                for (size_t j = 0; j < skipped_fields; j++) {
                     encoded += end_of_field;
+                }
                 skipped_fields = 0;
                 encoded += end_of_field;
                 auto const &val = obj_in.value()[entry];
@@ -156,8 +158,9 @@ std::string IdfParser::encode(json const &root, json const &schema)
                         skipped_fields++;
                         continue;
                     }
-                    for (size_t j = 0; j < skipped_fields; j++)
+                    for (size_t j = 0; j < skipped_fields; j++) {
                         encoded += end_of_field;
+                    }
                     skipped_fields = 0;
                     encoded += end_of_field;
                     if (cur_extension_obj[tmp].is_string()) {
@@ -176,7 +179,9 @@ std::string IdfParser::encode(json const &root, json const &schema)
 
 std::string IdfParser::normalizeObjectType(std::string const &objectType)
 {
-    if (objectType.empty()) return std::string{};
+    if (objectType.empty()) {
+        return std::string{};
+    }
     std::string key = convertToUpper(objectType);
     auto tmp_umit = objectTypeMap.find(key);
     if (tmp_umit != objectTypeMap.end()) {
@@ -244,8 +249,9 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
             if (obj_name.empty()) {
                 errors_.emplace_back(
                     fmt::format("Line: {} Index: {} - \"{}\" is not a valid Object Type.", cur_line_num, index_into_cur_line, parsed_obj_name));
-                while (token != Token::SEMICOLON && token != Token::END)
+                while (token != Token::SEMICOLON && token != Token::END) {
                     token = next_token(idf, index);
+                }
                 continue;
             }
 
@@ -411,7 +417,9 @@ json IdfParser::parse_object(
             size_t const size = legacy_idd_extensibles_array.size();
             std::string const &field_name = legacy_idd_extensibles_array[extensible_index % size].get<std::string>();
             json val = parse_value(idf, index, success, schema_obj_extensions->at(field_name));
-            if (!success) return root;
+            if (!success) {
+                return root;
+            }
             extensible[field_name] = std::move(val);
             was_value_parsed = true;
             extensible_index++;
@@ -432,10 +440,14 @@ json IdfParser::parse_object(
                 }
             } else {
                 json val = parse_value(idf, index, success, find_field_iter.value());
-                if (!success) return root;
+                if (!success) {
+                    return root;
+                }
                 root[field] = std::move(val);
             }
-            if (!success) return root;
+            if (!success) {
+                return root;
+            }
         }
     }
     if (!array_of_extensions.empty()) {
@@ -713,7 +725,9 @@ void IdfParser::eat_whitespace(std::string_view idf, size_t &index)
 void IdfParser::eat_comment(std::string_view idf, size_t &index)
 {
     while (true) {
-        if (index == idf_size) break;
+        if (index == idf_size) {
+            break;
+        }
         if (idf[index] == '\n') {
             increment_both_index(index, cur_line_num);
             index_into_cur_line = 0;

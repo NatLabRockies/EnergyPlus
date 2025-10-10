@@ -111,7 +111,9 @@ APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
         localDataEntries.emplace_back("OutputMeter", "", "", meter->Name, format("{}", EnergyPlus::Constant::unitNames[(int)meter->units]));
     }
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
-        if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) continue;
+        if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) {
+            continue;
+        }
         if (variable->name.empty() && variable->keyUC.empty()) {
             break;
         }
@@ -197,7 +199,9 @@ char *listAllAPIDataCSV(EnergyPlusState state)
     }
     output.append("**VARIABLES**\n");
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
-        if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) continue;
+        if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) {
+            continue;
+        }
         if (variable->name.empty() && variable->keyUC.empty()) {
             break;
         }

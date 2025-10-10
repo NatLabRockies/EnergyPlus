@@ -258,7 +258,9 @@ Real64 HeatingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
         }
         // override sizing string
         if (this->overrideSizeString) {
-            if (this->isEpJSON) this->sizingString = "heating_supply_air_flow_rate [m3/s]";
+            if (this->isEpJSON) {
+                this->sizingString = "heating_supply_air_flow_rate [m3/s]";
+            }
         }
         if (this->dataScalableSizingON) {
             if (this->zoneAirFlowSizMethod == DataSizing::SupplyAirFlowRate || this->zoneAirFlowSizMethod == DataSizing::None) {

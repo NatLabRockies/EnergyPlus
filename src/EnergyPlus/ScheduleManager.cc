@@ -104,13 +104,17 @@ namespace Sched {
 
     Real64 ScheduleBase::getMinVal(EnergyPlusData &state)
     {
-        if (!isMinMaxSet) setMinMaxVals(state);
+        if (!isMinMaxSet) {
+            setMinMaxVals(state);
+        }
         return minVal;
     }
 
     Real64 ScheduleBase::getMaxVal(EnergyPlusData &state)
     {
-        if (!isMinMaxSet) setMinMaxVals(state);
+        if (!isMinMaxSet) {
+            setMinMaxVals(state);
+        }
         return maxVal;
     }
 
@@ -167,12 +171,19 @@ namespace Sched {
     {
         auto &s_sched = state.dataSched;
 
-        if (this->schedTypeNum == SchedNum_Invalid) return false;
+        if (this->schedTypeNum == SchedNum_Invalid) {
+            return false;
+        }
         auto *schedType = s_sched->scheduleTypes[this->schedTypeNum];
-        if (!schedType->isLimited) return false;
+        if (!schedType->isLimited) {
+            return false;
+        }
 
-        for (int i = 0; i < Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour; ++i)
-            if (this->tsVals[i] < schedType->minVal || this->tsVals[i] > schedType->maxVal) return true;
+        for (int i = 0; i < Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour; ++i) {
+            if (this->tsVals[i] < schedType->minVal || this->tsVals[i] > schedType->maxVal) {
+                return true;
+            }
+        }
 
         return false;
     } // ScheduleDay::checkValsForLimitViolations()
@@ -180,12 +191,19 @@ namespace Sched {
     bool DaySchedule::checkValsForBadIntegers(EnergyPlusData &state) const
     {
         auto &s_sched = state.dataSched;
-        if (this->schedTypeNum == SchedNum_Invalid) return false;
+        if (this->schedTypeNum == SchedNum_Invalid) {
+            return false;
+        }
         auto *schedType = s_sched->scheduleTypes[this->schedTypeNum];
-        if (schedType->isReal) return false;
+        if (schedType->isReal) {
+            return false;
+        }
         // Make sure each is integer
-        for (int i = 0; i < Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour; ++i)
-            if (this->tsVals[i] != int(this->tsVals[i])) return true;
+        for (int i = 0; i < Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour; ++i) {
+            if (this->tsVals[i] != int(this->tsVals[i])) {
+                return true;
+            }
+        }
         return false;
     } // ScheduleDay::checkValsForBadIntegers()
 
@@ -351,7 +369,6 @@ namespace Sched {
         int NumFields;
         //  LOGICAL RptSchedule
 
-        int RptLevel;
         int MinutesPerItem;
         int NumExpectedItems;
         std::array<bool, (int)DayType::Num> allDays;
@@ -512,7 +529,9 @@ namespace Sched {
             // # 'THROUGH" => Number of additional week schedules
             // # 'FOR' => Number of additional day schedules
             for (Count = 3; Count <= NumAlphas; ++Count) {
-                if (has_prefix(Alphas(Count), "UNTIL")) ++MaxNums1;
+                if (has_prefix(Alphas(Count), "UNTIL")) {
+                    ++MaxNums1;
+                }
             }
         }
         if (MaxNums1 > MaxNums) {
@@ -1059,7 +1078,9 @@ namespace Sched {
 
             //  Have processed all named days, check to make sure all given
             for (int iDayType = iDayType_Sun; iDayType < (int)DayType::Num; ++iDayType) {
-                if (allDays[iDayType] == true) continue;
+                if (allDays[iDayType] == true) {
+                    continue;
+                }
                 ShowSevereError(state, format("{}: {}=\"{}\", Missing some day assignments", routineName, CurrentModuleObject, Alphas(1)));
                 ErrorsFound = true;
                 break;
@@ -1289,7 +1310,9 @@ namespace Sched {
                 ++NumField;
 
                 while (NumField < NumAlphas) { // Continues until next "Through"
-                    if (has_prefix(Alphas(NumField), "THROUGH")) goto For_exit;
+                    if (has_prefix(Alphas(NumField), "THROUGH")) {
+                        goto For_exit;
+                    }
                     //   "For" must be next, adds to "# Day Schedules"
                     if (!has_prefix(Alphas(NumField), "FOR")) {
                         ShowSevereCustom(state, eoh, format("Looking for \"For\" field, found={}", Alphas(NumField)));
@@ -1340,8 +1363,12 @@ namespace Sched {
                     xxcount = 0;
                     UntilFld = NumField;
                     while (true) {
-                        if (has_prefix(Alphas(NumField), "FOR")) break;
-                        if (has_prefix(Alphas(NumField), "THROUGH")) break;
+                        if (has_prefix(Alphas(NumField), "FOR")) {
+                            break;
+                        }
+                        if (has_prefix(Alphas(NumField), "THROUGH")) {
+                            break;
+                        }
                         if (has_prefix(Alphas(NumField), "UNTIL")) {
                             // Process Until/Value pairs for later processing by other routine.
                             ++NumField;
@@ -1360,7 +1387,9 @@ namespace Sched {
                             ErrorsFound = true;
                             goto Through_exit;
                         }
-                        if (Alphas(NumField).empty()) break;
+                        if (Alphas(NumField).empty()) {
+                            break;
+                        }
                     }
 
                     // Process Untils, Numbers
@@ -1390,13 +1419,17 @@ namespace Sched {
 
             For_exit:;
                 for (int iDayType = iDayType_Sun; iDayType < (int)DayType::Num; ++iDayType) {
-                    if (allDays[iDayType] == true) continue;
+                    if (allDays[iDayType] == true) {
+                        continue;
+                    }
 
                     ShowWarningCustom(state, eoh, format("has missing day types in Through={}", CurrentThrough));
                     ShowContinueError(state, format("Last \"For\" field={}", LastFor));
                     std::string errmsg = "Missing day types=,";
                     for (int kDayType = iDayType_Sun; kDayType < (int)DayType::Num; ++kDayType) {
-                        if (allDays[kDayType]) continue;
+                        if (allDays[kDayType]) {
+                            continue;
+                        }
                         errmsg.erase(errmsg.length() - 1);
                         errmsg = format("{} \"{}\",-", errmsg, dayTypeNames[kDayType]);
                     }
@@ -1458,7 +1491,7 @@ namespace Sched {
         //         \type choice
         //         \key Comma
         //         \key Tab
-        //         \key Fixed
+        //         \key Space
         //         \key Semicolon
         //         \default Comma
         //    A5 , \field Interpolate to Timestep
@@ -1516,7 +1549,9 @@ namespace Sched {
             curcolCount = Numbers(1);
             // Numbers(2) - number of rows to skip
             skiprowCount = Numbers(2);
-            if (Numbers(3) == 0) Numbers(3) = 8760.0;
+            if (Numbers(3) == 0) {
+                Numbers(3) = 8760.0;
+            }
             if (Numbers(3) != 8760 && Numbers(3) != 8784) {
                 ShowSevereCustom(
                     state,
@@ -1647,7 +1682,9 @@ namespace Sched {
                     // create string of which day of year
                     ++iDay;
                     ++hDay;
-                    if (iDay > 366) break;
+                    if (iDay > 366) {
+                        break;
+                    }
                     // increment both since a week schedule is being defined for each day so that a day is valid
                     // no matter what the day type that is used in a design day.
 
@@ -1717,7 +1754,9 @@ namespace Sched {
                 if (column_it != headers.end()) {
                     column = std::distance(headers.begin(), column_it);
                 }
-                if (column == 0) continue; // Skip timestamp column and any duplicate column, which will be 0 as well since it won't be found.
+                if (column == 0) {
+                    continue; // Skip timestamp column and any duplicate column, which will be 0 as well since it won't be found.
+                }
                 auto const column_values = values_json.at(column).get<std::vector<Real64>>(); // (AUTO_OK_OBJ)
 
                 std::string curName = format("{}_shading", header);
@@ -2012,10 +2051,14 @@ namespace Sched {
         // Validate by ScheduleLimitsType
         for (auto *sched : s_sched->schedules) {
 
-            if (sched->schedTypeNum == SchedNum_Invalid) continue;
+            if (sched->schedTypeNum == SchedNum_Invalid) {
+                continue;
+            }
 
             auto const *schedType = s_sched->scheduleTypes[sched->schedTypeNum];
-            if (!schedType->isLimited) continue;
+            if (!schedType->isLimited) {
+                continue;
+            }
 
             if (!sched->checkMinMaxVals(state, Clusive::In, schedType->minVal, Clusive::In, schedType->maxVal)) {
                 ErrorObjectHeader eoh{routineName, "Schedule", sched->Name};
@@ -2032,8 +2075,13 @@ namespace Sched {
             CurrentModuleObject = "Output:Schedules";
             NumFields = s_ip->getNumObjectsFound(state, CurrentModuleObject);
 
+            // Report the ScheduleTypeLimits only once, not for each report level.
+            if (NumFields > 0) {
+                ReportScheduleTypeLimits(state);
+            }
+
+            std::set<ReportLevel> reportLevelSet;
             //    RptSchedule=.FALSE.
-            RptLevel = 1;
             for (int Count = 1; Count <= NumFields; ++Count) {
                 s_ip->getObjectItem(state, CurrentModuleObject, Count, Alphas, NumAlphas, Numbers, NumNumbers, Status);
 
@@ -2045,7 +2093,16 @@ namespace Sched {
                     ShowWarningInvalidKey(state, eoh, cAlphaFields(1), Alphas(1), "HOURLY report will be done");
                     reportLevel = ReportLevel::Hourly;
                 }
-                ReportScheduleDetails(state, reportLevel);
+                if (auto [it, inserted] = reportLevelSet.insert(reportLevel); inserted) {
+                    // If this is the first time we see this report level, we need to report the details
+                    ReportScheduleDetails(state, reportLevel);
+                } else {
+                    ShowWarningCustom(state,
+                                      eoh,
+                                      format("Report level {} has already been processed. This report level will not be processed again.",
+                                             reportLevelNames[(int)reportLevel]));
+                    continue;
+                }
             }
         }
 
@@ -2059,6 +2116,47 @@ namespace Sched {
         print(state.files.audit, "{}\n", "  Processing Schedule Input -- Complete");
     } // ProcessScheduleInput()
 
+    void ReportScheduleTypeLimits(EnergyPlusData &state)
+    {
+        std::string YesNoLimited;
+        std::string minValStr;
+        std::string maxValStr;
+        std::string YesNoContinous;
+
+        std::string_view constexpr scheduleTypeLimitTableName("ScheduleTypeLimits");
+        print(state.files.eio, "! <{}>,Name,Limited? {{Yes/No}},Minimum,Maximum,Continuous? {{Yes/No - Discrete}}\n", scheduleTypeLimitTableName);
+
+        for (auto const *schedType : state.dataSched->scheduleTypes) {
+            if (schedType->isLimited) {
+                YesNoLimited = "Yes";
+                minValStr = format("{:.2R}", schedType->minVal);
+                strip(minValStr);
+                maxValStr = format("{:.2R}", schedType->maxVal);
+                strip(maxValStr);
+                if (schedType->isReal) {
+                    YesNoContinous = "Yes";
+                } else {
+                    YesNoContinous = "No";
+                    minValStr = fmt::to_string((int)schedType->minVal);
+                    maxValStr = fmt::to_string((int)schedType->maxVal);
+                }
+            } else {
+                YesNoLimited = "No";
+                minValStr = "N/A";
+                maxValStr = "N/A";
+                YesNoContinous = "N/A";
+            }
+            print(state.files.eio,
+                  "{},{},{},{},{},{}\n",
+                  scheduleTypeLimitTableName,
+                  schedType->Name,
+                  YesNoLimited,
+                  minValStr,
+                  maxValStr,
+                  YesNoContinous);
+        }
+    }
+
     void ReportScheduleDetails(EnergyPlusData &state,
                                ReportLevel const LevelOfDetail) // =1: hourly; =2: timestep; = 3: make IDF excerpt
     {
@@ -2071,321 +2169,139 @@ namespace Sched {
         // This subroutine puts the details of the Schedules on the .eio file (Inits file).
 
         // SUBROUTINE PARAMETER DEFINITIONS:
+
+        assert(LevelOfDetail != ReportLevel::Invalid);
+
         constexpr std::array<std::string_view, 12> Months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
         constexpr std::array<std::string_view, 25> HrField = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
                                                               "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int NumF;
-        int PMon;
-        int PDay;
-        Array1D_string ShowMinute;
-        Array1D_string TimeHHMM;
-        std::string NoAverageLinear;
-        std::string YesNo2;
-        std::string Num1;
-        std::string Num2;
-        Array2D_string RoundTSValue;
-        std::string_view constexpr SchDFmtdata{",{}"};
 
         auto const &s_glob = state.dataGlobal;
         auto const &s_sched = state.dataSched;
 
-        ShowMinute.allocate(s_glob->TimeStepsInHour);
-        TimeHHMM.allocate(s_glob->TimeStepsInHour * Constant::iHoursInDay);
-        RoundTSValue.allocate(s_glob->TimeStepsInHour, Constant::iHoursInDay);
-        ShowMinute = std::string{};
-        TimeHHMM = std::string{};
-        RoundTSValue = std::string{};
-
-        int CurMinute = s_glob->MinutesInTimeStep;
-        for (int Count = 1; Count <= s_glob->TimeStepsInHour - 1; ++Count) {
-            ShowMinute(Count) = format("{:02}", CurMinute);
-            CurMinute += s_glob->MinutesInTimeStep;
+        std::vector<std::string> times;
+        int const NumTimesInDay = (LevelOfDetail == ReportLevel::TimeStep) ? s_glob->TimeStepsInHour * Constant::iHoursInDay : Constant::iHoursInDay;
+        if (LevelOfDetail == ReportLevel::TimeStep) {
+            times.reserve(NumTimesInDay);
+        } else if (LevelOfDetail == ReportLevel::Hourly) {
+            times.reserve(NumTimesInDay);
+        } else {
+            assert(false); // Invalid report level
         }
-        ShowMinute(s_glob->TimeStepsInHour) = "00";
 
-        switch (LevelOfDetail) {
-        case ReportLevel::Hourly:
-        case ReportLevel::TimeStep: {
-            NumF = 1;
-            for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                if (LevelOfDetail == ReportLevel::TimeStep) {
-                    for (int ts = 1; ts <= s_glob->TimeStepsInHour - 1; ++ts) {
-                        TimeHHMM(NumF) = format("{}:{}", HrField[hr], ShowMinute(ts));
-                        ++NumF;
-                    }
+        for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+            if (LevelOfDetail == ReportLevel::TimeStep) {
+                for (int ts = 0; ts < s_glob->TimeStepsInHour - 1; ++ts) {
+                    times.emplace_back(fmt::format("{}:{:02}", HrField[hr], ((ts + 1)) * s_glob->MinutesInTimeStep));
                 }
-                TimeHHMM(NumF) = format("{}:{}", HrField[hr + 1], ShowMinute(s_glob->TimeStepsInHour));
-                ++NumF;
             }
-            --NumF;
+            times.emplace_back(fmt::format("{}:00", HrField[hr + 1]));
+        }
+        assert(times.size() == NumTimesInDay);
 
-            // SchTFmt Schedule Types Header
-            {
-                std::string_view constexpr SchTFmt0("! Schedule Details Report={} =====================\n");
-                std::string_view constexpr SchDFmt{",{}"};
-                print(state.files.eio, SchTFmt0, reportLevelNames[(int)LevelOfDetail]);
+        std::string_view const &reportLevelName = reportLevelNames[(int)LevelOfDetail];
+        std::string const dayScheduleTableName = format("DaySchedule - {}", reportLevelName);
+        std::string const weekScheduleTableName = format("WeekSchedule - {}", reportLevelName); // TODO: "Schedule:Week:Daily" ?
+        std::string const scheduleTableName = format("Schedule - {}", reportLevelName);         // TODO: "Detailed Schedule" maybe?
 
-                std::string_view constexpr SchTFmt("! <ScheduleType>,Name,Limited? {Yes/No},Minimum,Maximum,Continuous? {Yes/No - Discrete}");
-                print(state.files.eio, "{}\n", SchTFmt);
-                std::string_view constexpr SchDFmt0("! <DaySchedule>,Name,ScheduleType,Interpolated {Yes/No},Time (HH:MM) =>");
-                print(state.files.eio, "{}", SchDFmt0);
-                for (int Count = 1; Count <= NumF; ++Count) {
-                    print(state.files.eio, SchDFmt, TimeHHMM(Count));
-                }
-                print(state.files.eio, "\n");
-                // SchWFmt Header (WeekSchedule)
-                std::string SchWFmt("! <WeekSchedule>,Name");
-                for (int Count = 1; Count < (int)DayType::Num; ++Count) {
-                    SchWFmt = format("{},{}", SchWFmt, dayTypeNames[Count]);
-                }
-                print(state.files.eio, "{}\n", SchWFmt);
-                std::string_view constexpr SchSFmt("! <Schedule>,Name,ScheduleType,{Until Date,WeekSchedule}** Repeated until Dec 31");
-                print(state.files.eio, "{}\n", SchSFmt);
+        // Schedule Types Header
+        {
+            // This is just a top level separator, for convenience/neatness, will not match any actual data
+            print(state.files.eio, "! Schedule Details Report={} =====================\n", reportLevelName);
+
+            // ! <DaySchedule_Hourly>,Name,ScheduleType,Interpolated {Yes/No},Time (HH:MM) =>,00:15,00:30,..23:45,24.00
+            print(state.files.eio, "! <{}>,Name,ScheduleType,Interpolated {{Average/Linear/No}},Time (HH:MM) =>", dayScheduleTableName);
+            for (const auto &time : times) {
+                print(state.files.eio, ",{}", time);
             }
+            print(state.files.eio, "\n");
 
-            for (auto const *schedType : s_sched->scheduleTypes) {
-                if (schedType->isLimited) {
-                    NoAverageLinear = "Average";
-                    Num1 = format("{:.2R}", schedType->minVal);
-                    strip(Num1);
-                    Num2 = format("{:.2R}", schedType->maxVal);
-                    strip(Num2);
-                    if (schedType->isReal) {
-                        YesNo2 = "Yes";
-                    } else {
-                        YesNo2 = "No";
-                        Num1 = fmt::to_string((int)schedType->minVal);
-                        Num2 = fmt::to_string((int)schedType->maxVal);
-                    }
-                } else {
-                    NoAverageLinear = "No";
-                    Num1 = "N/A";
-                    Num2 = "N/A";
-                    YesNo2 = "N/A";
-                }
-                std::string_view constexpr SchTFmtdata("ScheduleTypeLimits,{},{},{},{},{}\n");
-                print(state.files.eio, SchTFmtdata, schedType->Name, NoAverageLinear, Num1, Num2, YesNo2);
+            // ! <WeekSchedule_Hourly>,Name,Sunday,Monday,...,Saturday,Holiday,SummerDesignDay,WinterDesignDay,CustomDay1,CustomDay2
+            print(state.files.eio, "! <{}>,Name", weekScheduleTableName);
+            for (int Count = 1; Count < (int)DayType::Num; ++Count) {
+                print(state.files.eio, ",{}", dayTypeNames[Count]);
             }
+            print(state.files.eio, "\n");
 
-            for (auto *daySched : s_sched->daySchedules) {
+            // ! <Schedule_Hourly>,Name,ScheduleType,{Until Date,WeekSchedule}** Repeated until Dec 31
+            print(state.files.eio, "! <{}>,Name,ScheduleType,{{Until Date,WeekSchedule}}** Repeated until Dec 31\n", scheduleTableName);
+        }
 
-                NoAverageLinear = interpolationNames[(int)daySched->interpolation];
+        for (auto *daySched : s_sched->daySchedules) {
+
+            print(state.files.eio,
+                  "{},{},{},{},{}",
+                  dayScheduleTableName,
+                  daySched->Name,
+                  (daySched->schedTypeNum == SchedNum_Invalid) ? "" : s_sched->scheduleTypes[daySched->schedTypeNum]->Name,
+                  interpolationNames[(int)daySched->interpolation],
+                  "Values:");
+
+            if (LevelOfDetail == ReportLevel::Hourly) {
+                for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+                    print(state.files.eio, ",{:.2R}", daySched->tsVals[(hr + 1) * s_glob->TimeStepsInHour - 1]);
+                }
+            } else if (LevelOfDetail == ReportLevel::TimeStep) {
                 for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
                     for (int ts = 0; ts < s_glob->TimeStepsInHour; ++ts) {
-                        RoundTSValue(ts + 1, hr + 1) = format("{:.2R}", daySched->tsVals[hr * s_glob->TimeStepsInHour + ts]);
+                        print(state.files.eio, ",{:.2R}", daySched->tsVals[hr * s_glob->TimeStepsInHour + ts]);
                     }
                 }
-                std::string_view constexpr SchDFmtdata0("DaySchedule,{},{},{},{}");
-                print(state.files.eio,
-                      SchDFmtdata0,
-                      daySched->Name,
-                      (daySched->schedTypeNum == SchedNum_Invalid) ? "" : s_sched->scheduleTypes[daySched->schedTypeNum]->Name,
-                      NoAverageLinear,
-                      "Values:");
-
-                switch (LevelOfDetail) {
-                case ReportLevel::Hourly: {
-                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                        print(state.files.eio, SchDFmtdata, RoundTSValue(s_glob->TimeStepsInHour, hr + 1));
-                    }
-                } break;
-
-                case ReportLevel::TimeStep: {
-                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                        for (int ts = 0; ts < s_glob->TimeStepsInHour; ++ts) {
-                            print(state.files.eio, SchDFmtdata, RoundTSValue(ts + 1, hr + 1));
-                        }
-                    }
-                } break;
-                default:
-                    assert(false);
-                }
-                print(state.files.eio, "\n");
+            } else {
+                assert(false);
             }
-
-            for (auto *weekSched : s_sched->weekSchedules) {
-
-                std::string_view constexpr SchWFmtdata("Schedule:Week:Daily,{}");
-                print(state.files.eio, SchWFmtdata, weekSched->Name);
-
-                for (int NumF = 1; NumF < (int)DayType::Num; ++NumF) {
-                    print(state.files.eio, ",{}", weekSched->dayScheds[NumF]->Name);
-                }
-                print(state.files.eio, "\n");
-            }
-
-            for (auto *sched : s_sched->schedules) {
-
-                if (sched->type == SchedType::Constant) continue;
-
-                auto *schedDetailed = dynamic_cast<ScheduleDetailed *>(sched);
-                assert(schedDetailed != nullptr);
-
-                int NumF = 1;
-                print(state.files.eio,
-                      "Schedule,{},{}",
-                      schedDetailed->Name,
-                      (sched->schedTypeNum == SchedNum_Invalid) ? "" : s_sched->scheduleTypes[sched->schedTypeNum]->Name);
-
-                while (NumF <= 366) {
-
-                    auto *weekSched = schedDetailed->weekScheds[NumF];
-                    std::string_view constexpr ThruFmt(",Through {} {:02},{}");
-                    while (schedDetailed->weekScheds[NumF] == weekSched && NumF <= 366) {
-                        if (NumF == 366) {
-                            General::InvOrdinalDay(NumF, PMon, PDay, 1);
-                            print(state.files.eio, ThruFmt, Months[PMon - 1], PDay, weekSched->Name);
-                        }
-                        ++NumF;
-                        if (NumF > 366) break; // compound If might have a problem unless this included.
-                    }
-                    if (NumF <= 366) {
-                        General::InvOrdinalDay(NumF - 1, PMon, PDay, 1);
-                        print(state.files.eio, ThruFmt, Months[PMon - 1], PDay, weekSched->Name);
-                    }
-                }
-                print(state.files.eio, "\n");
-            }
-        } break;
-
-        default:
-            break;
+            print(state.files.eio, "\n");
         }
 
-        // So this section of the code was not accessible.  The input processor would never have let anything but hourly or timestep on the object
-        // This code is obviously not covered by any of our integration or unit tests.
-        //            for (Count = 1; Count <= s_sched->NumSchedules; ++Count) {
-        //                print(state.files.debug, "\n");
-        //                print(state.files.debug, "  Schedule:Compact,\n");
-        //                print(state.files.debug, "    {},           !- Name\n", s_sched->Schedule(Count).Name);
-        //                print(state.files.debug,
-        //                      "    {},          !- ScheduleTypeLimits\n",
-        //                      s_sched->ScheduleType(s_sched->Schedule(Count).ScheduleTypePtr).Name);
-        //                NumF = 1;
-        //                while (NumF <= 366) {
-        //                    TS = s_sched->Schedule(Count).WeekSchedulePointer(NumF);
-        //                    while (s_sched->Schedule(Count).WeekSchedulePointer(NumF) == TS && NumF <= 366) {
-        //                        if (NumF == 366) {
-        //                            General::InvOrdinalDay(NumF, PMon, PDay, 1);
-        //                            print(state.files.debug, "    Through: {}/{},\n", PMon, PDay);
-        //                            iDayP = 0;
-        //                            for (DT = 2; DT <= 6; ++DT) {
-        //                                print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                                iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                                iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                                if (iDay != iDayP) {
-        //                                    for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                        print(state.files.debug,
-        //                                              "    Until: {}:{},{:.2R},\n",
-        //                                              Hr,
-        //                                              ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                              s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                                    }
-        //                                } else {
-        //                                    print(state.files.debug, "    Same as previous\n");
-        //                                }
-        //                                iDayP = iDay;
-        //                            }
-        //                            DT = 1;
-        //                            print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                            iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                            iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                            if (iDay != iDayP) {
-        //                                for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                    print(state.files.debug,
-        //                                          "    Until: {}:{},{:.2R},\n",
-        //                                          Hr,
-        //                                          ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                          s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                                }
-        //                            } else {
-        //                                print(state.files.debug, "    Same as previous\n");
-        //                            }
-        //                            iDayP = iDay;
-        //                            for (DT = 7; DT <= MaxDayTypes; ++DT) {
-        //                                print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                                iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                                iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                                if (iDay != iDayP) {
-        //                                    for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                        print(state.files.debug,
-        //                                              "    Until: {}:{},{:.2R},\n",
-        //                                              Hr,
-        //                                              ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                              s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                                    }
-        //                                } else {
-        //                                    print(state.files.debug, "    Same as previous\n");
-        //                                }
-        //                                iDayP = iDay;
-        //                            }
-        //                        }
-        //                        ++NumF;
-        //                        if (NumF > 366) break; // compound If might have a problem unless this included.
-        //                    }
-        //                    if (NumF <= 366) {
-        //                        General::InvOrdinalDay(NumF - 1, PMon, PDay, 1);
-        //                        print(state.files.debug, "    Through: {}/{},\n", PMon, PDay);
-        //                        iDayP = 0;
-        //                        for (DT = 2; DT <= 6; ++DT) {
-        //                            print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                            iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                            iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                            if (iDay != iDayP) {
-        //                                for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                    print(state.files.debug,
-        //                                          "    Until: {}:{},{:.2R},\n",
-        //                                          Hr,
-        //                                          ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                          s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                                }
-        //                            } else {
-        //                                print(state.files.debug, "    Same as previous\n");
-        //                            }
-        //                            iDayP = iDay;
-        //                        }
-        //                        DT = 1;
-        //                        print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                        iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                        iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                        if (iDay != iDayP) {
-        //                            for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                print(state.files.debug,
-        //                                      "    Until: {}:{},{:.2R},\n",
-        //                                      Hr,
-        //                                      ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                      s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                            }
-        //                        } else {
-        //                            print(state.files.debug, "    Same as previous\n");
-        //                        }
-        //                        iDayP = iDay;
-        //                        for (DT = 7; DT <= MaxDayTypes; ++DT) {
-        //                            print(state.files.debug, "    For: {},\n", ValidDayTypes(DT));
-        //                            iWeek = s_sched->Schedule(Count).WeekSchedulePointer(NumF - 1);
-        //                            iDay = s_sched->WeekSchedule(iWeek).DaySchedulePointer(DT);
-        //                            if (iDay != iDayP) {
-        //                                for (Hr = 1; Hr <= 24; ++Hr) {
-        //                                    print(state.files.debug,
-        //                                          "    Until: {}:{},{:.2R},\n",
-        //                                          Hr,
-        //                                          ShowMinute(s_glob->NumOfTimeStepInHour),
-        //                                          s_sched->DaySchedule(iDay).TSValue(s_glob->NumOfTimeStepInHour, Hr));
-        //                                }
-        //                            } else {
-        //                                print(state.files.debug, "    Same as previous\n");
-        //                            }
-        //                            iDayP = iDay;
-        //                        }
-        //                    }
-        //                }
-        //            }
+        for (auto *weekSched : s_sched->weekSchedules) {
+            print(state.files.eio, "{},{}", weekScheduleTableName, weekSched->Name);
+            for (int DayNum = 1; DayNum < (int)DayType::Num; ++DayNum) {
+                print(state.files.eio, ",{}", weekSched->dayScheds[DayNum]->Name);
+            }
+            print(state.files.eio, "\n");
+        }
 
-        ShowMinute.deallocate();
-        TimeHHMM.deallocate();
-        RoundTSValue.deallocate();
+        for (auto *sched : s_sched->schedules) {
+
+            if (sched->type == SchedType::Constant) {
+                continue;
+            }
+
+            auto *schedDetailed = dynamic_cast<ScheduleDetailed *>(sched);
+            assert(schedDetailed != nullptr);
+
+            print(state.files.eio,
+                  "{},{},{}",
+                  scheduleTableName,
+                  schedDetailed->Name,
+                  (sched->schedTypeNum == SchedNum_Invalid) ? "" : s_sched->scheduleTypes[sched->schedTypeNum]->Name);
+
+            int PMon = 0;
+            int PDay = 0;
+            std::string_view constexpr ThruFmt(",Through {} {:02},{}");
+            int DayNum = 1;
+            while (DayNum <= 366) {
+                auto *weekSched = schedDetailed->weekScheds[DayNum];
+                while (schedDetailed->weekScheds[DayNum] == weekSched && DayNum <= 366) {
+                    if (DayNum == 366) {
+                        General::InvOrdinalDay(DayNum, PMon, PDay, 1);
+                        print(state.files.eio, ThruFmt, Months[PMon - 1], PDay, weekSched->Name);
+                    }
+                    ++DayNum;
+                    if (DayNum > 366) {
+                        break; // compound If might have a problem unless this included.
+                    }
+                }
+                if (DayNum <= 366) {
+                    General::InvOrdinalDay(DayNum - 1, PMon, PDay, 1);
+                    print(state.files.eio, ThruFmt, Months[PMon - 1], PDay, weekSched->Name);
+                }
+            }
+            print(state.files.eio, "\n");
+        }
+
     } // ReportScheduleDetails()
 
     Real64 GetCurrentScheduleValue(EnergyPlusData const &state, int const schedNum)
@@ -2432,7 +2348,9 @@ namespace Sched {
         // of the year (rather than just the "current time").
         auto const &s_glob = state.dataGlobal;
 
-        if (this->EMSActuatedOn) return this->EMSVal;
+        if (this->EMSActuatedOn) {
+            return this->EMSVal;
+        }
 
         //  so, current date, but maybe TimeStep added
 
@@ -2461,9 +2379,15 @@ namespace Sched {
 
         auto const *weekSched = this->weekScheds[thisDayOfYear];
         auto const *daySched = (thisHolidayNum > 0) ? weekSched->dayScheds[thisHolidayNum] : weekSched->dayScheds[thisDayOfWeek];
+        if (daySched == nullptr) {
+            // We already warned in ProcessScheduleInput that there were missing days: Missing day types will have 0.0 as Schedule Values
+            return 0.0;
+        }
 
         // If Unspecified or equal to zero, use NumOfTimeStepInHour, otherwise use supplied
-        if (ts <= 0) ts = s_glob->TimeStepsInHour;
+        if (ts <= 0) {
+            ts = s_glob->TimeStepsInHour;
+        }
 
         return daySched->tsVals[(thisHr - 1) * s_glob->TimeStepsInHour + (ts - 1)];
     } // ScheduleDetailed::getHrTsVal()
@@ -2495,7 +2419,9 @@ namespace Sched {
         auto const &s_sched = state.dataSched;
 
         auto found = s_sched->scheduleMap.find(name);
-        if (found == s_sched->scheduleMap.end()) return nullptr;
+        if (found == s_sched->scheduleMap.end()) {
+            return nullptr;
+        }
 
         int schedNum = found->second;
 
@@ -2512,7 +2438,9 @@ namespace Sched {
                 schedDetailed->isUsed = true;
                 for (int iWeek = 1; iWeek <= 366; ++iWeek) {
                     if (auto *weekSched = schedDetailed->weekScheds[iWeek]; weekSched != nullptr) {
-                        if (weekSched->isUsed) continue;
+                        if (weekSched->isUsed) {
+                            continue;
+                        }
 
                         weekSched->isUsed = true;
                         for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
@@ -2537,7 +2465,9 @@ namespace Sched {
         auto const &s_sched = state.dataSched;
 
         auto found = s_sched->weekScheduleMap.find(name);
-        if (found == s_sched->weekScheduleMap.end()) return nullptr;
+        if (found == s_sched->weekScheduleMap.end()) {
+            return nullptr;
+        }
 
         int weekSchedNum = found->second;
 
@@ -2547,7 +2477,9 @@ namespace Sched {
             weekSched->isUsed = true;
             for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
                 auto *daySched = weekSched->dayScheds[iDayType];
-                if (daySched == nullptr) continue;
+                if (daySched == nullptr) {
+                    continue;
+                }
                 daySched->isUsed = true;
             }
         }
@@ -2571,7 +2503,9 @@ namespace Sched {
         auto const &s_sched = state.dataSched;
 
         auto found = s_sched->dayScheduleMap.find(name);
-        if (found == s_sched->dayScheduleMap.end()) return nullptr;
+        if (found == s_sched->dayScheduleMap.end()) {
+            return nullptr;
+        }
 
         int daySchedNum = found->second;
 
@@ -2745,7 +2679,9 @@ namespace Sched {
 
             if (interpolation == Interpolation::Linear) {
                 totalMinutes = (endHr - begHr) * Constant::iMinutesInHour + (endMin - begMin) + 1;
-                if (totalMinutes == 0) totalMinutes = 1; // protect future division
+                if (totalMinutes == 0) {
+                    totalMinutes = 1; // protect future division
+                }
                 if (Count == 1) {
                     StartValue = Numbers(Count); // assume first period is flat
                     EndValue = Numbers(Count);
@@ -3165,10 +3101,11 @@ namespace Sched {
         this->minVal = this->maxVal = this->tsVals[0];
         for (int i = 0; i < Constant::iHoursInDay * s_glob->TimeStepsInHour; ++i) {
             Real64 value = this->tsVals[i];
-            if (value < this->minVal)
+            if (value < this->minVal) {
                 this->minVal = value;
-            else if (value > this->maxVal)
+            } else if (value > this->maxVal) {
                 this->maxVal = value;
+            }
         }
 
         this->isMinMaxSet = true;
@@ -3179,7 +3116,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *daySched1 = this->dayScheds[1];
-        if (!daySched1->isMinMaxSet) daySched1->setMinMaxVals(state);
+        if (!daySched1->isMinMaxSet) {
+            daySched1->setMinMaxVals(state);
+        }
 
         this->minVal = daySched1->minVal;
         this->maxVal = daySched1->maxVal;
@@ -3187,11 +3126,19 @@ namespace Sched {
         auto *daySchedPrev = daySched1;
         for (int iDay = 2; iDay < (int)DayType::Num; ++iDay) {
             auto *daySched = this->dayScheds[iDay];
-            if (daySched == daySchedPrev) continue;
+            if (daySched == daySchedPrev) {
+                continue;
+            }
 
-            if (!daySched->isMinMaxSet) daySched->setMinMaxVals(state);
-            if (daySched->minVal < this->minVal) this->minVal = daySched->minVal;
-            if (daySched->maxVal > this->maxVal) this->maxVal = daySched->maxVal;
+            if (!daySched->isMinMaxSet) {
+                daySched->setMinMaxVals(state);
+            }
+            if (daySched->minVal < this->minVal) {
+                this->minVal = daySched->minVal;
+            }
+            if (daySched->maxVal > this->maxVal) {
+                this->maxVal = daySched->maxVal;
+            }
             daySchedPrev = daySched;
         }
 
@@ -3203,7 +3150,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *weekSched1 = this->weekScheds[1];
-        if (!weekSched1->isMinMaxSet) weekSched1->setMinMaxVals(state);
+        if (!weekSched1->isMinMaxSet) {
+            weekSched1->setMinMaxVals(state);
+        }
 
         this->minVal = weekSched1->minVal;
         this->maxVal = weekSched1->maxVal;
@@ -3212,12 +3161,22 @@ namespace Sched {
 
         for (int iWeek = 2; iWeek <= 366; ++iWeek) {
             auto *weekSched = this->weekScheds[iWeek];
-            if (iWeek == 366 && weekSched == nullptr) continue;
-            if (weekSched == weekSchedPrev) continue;
-            if (!weekSched->isMinMaxSet) weekSched->setMinMaxVals(state);
+            if (iWeek == 366 && weekSched == nullptr) {
+                continue;
+            }
+            if (weekSched == weekSchedPrev) {
+                continue;
+            }
+            if (!weekSched->isMinMaxSet) {
+                weekSched->setMinMaxVals(state);
+            }
 
-            if (weekSched->minVal < this->minVal) this->minVal = weekSched->minVal;
-            if (weekSched->maxVal > this->maxVal) this->maxVal = weekSched->maxVal;
+            if (weekSched->minVal < this->minVal) {
+                this->minVal = weekSched->minVal;
+            }
+            if (weekSched->maxVal > this->maxVal) {
+                this->maxVal = weekSched->maxVal;
+            }
             weekSchedPrev = weekSched;
         }
 
@@ -3325,14 +3284,20 @@ namespace Sched {
 
         for (int iWeek = 1; iWeek <= 366; ++iWeek) {
             auto const *weekSched = this->weekScheds[iWeek];
-            if (weekSchedChecked[weekSched->Num]) continue;
+            if (weekSchedChecked[weekSched->Num]) {
+                continue;
+            }
 
             for (int iDay = 1; iDay < (int)DayType::Num; ++iDay) {
                 auto const *daySched = weekSched->dayScheds[iDay];
-                if (daySchedChecked[daySched->Num]) continue;
+                if (daySchedChecked[daySched->Num]) {
+                    continue;
+                }
 
                 for (int i = 0; i < Constant::iHoursInDay * s_glob->TimeStepsInHour; ++i) {
-                    if (daySched->tsVals[i] == value) return true;
+                    if (daySched->tsVals[i] == value) {
+                        return true;
+                    }
                 }
                 daySchedChecked[daySched->Num] = true;
             }
@@ -3381,14 +3346,20 @@ namespace Sched {
 
         for (int iWeek = 1; iWeek <= 366; ++iWeek) {
             auto const *weekSched = this->weekScheds[iWeek];
-            if (weekSchedChecked[weekSched->Num]) continue;
+            if (weekSchedChecked[weekSched->Num]) {
+                continue;
+            }
 
             for (int iDay = 1; iDay < (int)DayType::Num; ++iDay) {
                 auto const *daySched = weekSched->dayScheds[iDay];
-                if (daySchedChecked[daySched->Num]) continue;
+                if (daySchedChecked[daySched->Num]) {
+                    continue;
+                }
 
                 for (int i = 0; i < Constant::iHoursInDay * s_glob->TimeStepsInHour; ++i) {
-                    if (daySched->tsVals[i] > 0.0 && daySched->tsVals[i] < 1.0) return true;
+                    if (daySched->tsVals[i] > 0.0 && daySched->tsVals[i] < 1.0) {
+                        return true;
+                    }
                 }
                 daySchedChecked[daySched->Num] = true;
             }
@@ -3418,7 +3389,9 @@ namespace Sched {
 
         auto const &s_sched = state.dataSched;
 
-        if (!this->isMinMaxSet) this->setMinMaxVals(state);
+        if (!this->isMinMaxSet) {
+            this->setMinMaxVals(state);
+        }
 
         if (!this->MaxMinByDayTypeSet[(int)days]) {
 
@@ -3438,15 +3411,23 @@ namespace Sched {
 
             for (int iDay = 1; iDay <= 366; ++iDay) {
                 auto const *weekSched = this->weekScheds[iDay];
-                if (weekSchedChecked[weekSched->Num]) continue;
+                if (weekSchedChecked[weekSched->Num]) {
+                    continue;
+                }
 
                 for (int jDayType = 1; jDayType < (int)DayType::Num; ++jDayType) {
-                    if (!dayTypeFilter[jDayType]) continue;
+                    if (!dayTypeFilter[jDayType]) {
+                        continue;
+                    }
 
                     auto *daySched = weekSched->dayScheds[jDayType];
-                    if (daySchedChecked[daySched->Num]) continue;
+                    if (daySchedChecked[daySched->Num]) {
+                        continue;
+                    }
 
-                    if (!daySched->isMinMaxSet) daySched->setMinMaxVals(state);
+                    if (!daySched->isMinMaxSet) {
+                        daySched->setMinMaxVals(state);
+                    }
 
                     if (firstSet) {
                         this->MinByDayType[(int)days] = daySched->minVal;
@@ -3480,7 +3461,9 @@ namespace Sched {
         if (s_sched->DoScheduleReportingSetup) { // CurrentModuleObject='Any Schedule'
             for (auto *sched : s_sched->schedules) {
                 // No variables for the built-in AlwaysOn and AlwaysOff schedules
-                if (sched->Num == SchedNum_AlwaysOff || sched->Num == SchedNum_AlwaysOn) continue;
+                if (sched->Num == SchedNum_AlwaysOff || sched->Num == SchedNum_AlwaysOn) {
+                    continue;
+                }
 
                 // Set Up Reporting
                 SetupOutputVariable(state,
@@ -3514,7 +3497,9 @@ namespace Sched {
         auto const &s_glob = state.dataGlobal;
 
         for (auto const *sched : s_sched->schedules) {
-            if (sched->isUsed) continue;
+            if (sched->isUsed) {
+                continue;
+            }
             if (NeedOrphanMessage && s_glob->DisplayUnusedSchedules) {
                 ShowWarningError(state, "The following schedule names are \"Unused Schedules\".  These schedules are in the idf");
                 ShowContinueError(state, " file but are never obtained by the simulation and therefore are NOT used.");
@@ -3536,8 +3521,12 @@ namespace Sched {
         NumCount = 0;
 
         for (auto *weekSched : s_sched->weekSchedules) {
-            if (weekSched->isUsed) continue;
-            if (weekSched->Name.empty()) continue;
+            if (weekSched->isUsed) {
+                continue;
+            }
+            if (weekSched->Name.empty()) {
+                continue;
+            }
             if (NeedOrphanMessage && s_glob->DisplayUnusedSchedules) {
                 ShowWarningError(state, "The following week schedule names are \"Unused Schedules\".  These schedules are in the idf");
                 ShowContinueError(state, " file but are never obtained by the simulation and therefore are NOT used.");
@@ -3559,8 +3548,12 @@ namespace Sched {
         NumCount = 0;
 
         for (auto *daySched : s_sched->daySchedules) {
-            if (daySched->isUsed) continue;
-            if (daySched->Name.empty()) continue;
+            if (daySched->isUsed) {
+                continue;
+            }
+            if (daySched->Name.empty()) {
+                continue;
+            }
             if (NeedOrphanMessage && s_glob->DisplayUnusedSchedules) {
                 ShowWarningError(state, "The following day schedule names are \"Unused Schedules\".  These schedules are in the idf");
                 ShowContinueError(state, " file but are never obtained by the simulation and therefore are NOT used.");
@@ -3579,7 +3572,9 @@ namespace Sched {
             NeedUseMessage = true;
         }
 
-        if (NeedUseMessage) ShowMessage(state, "Use Output:Diagnostics,DisplayUnusedSchedules; to see them.");
+        if (NeedUseMessage) {
+            ShowMessage(state, "Use Output:Diagnostics,DisplayUnusedSchedules; to see them.");
+        }
     } // ReportOrphanSchedules()
 
     // returns the annual full load hours for a schedule - essentially the sum of the hourly values
@@ -3588,7 +3583,9 @@ namespace Sched {
                                                     bool const isLeapYear     // true if it is a leap year containing February 29
     )
     {
-        if (StartDayOfWeek < iDayType_Sun || StartDayOfWeek > iDayType_Sat) return 0.0; // Assert this instead?
+        if (StartDayOfWeek < iDayType_Sun || StartDayOfWeek > iDayType_Sat) {
+            return 0.0; // Assert this instead?
+        }
 
         int DaysInYear = (isLeapYear) ? 366 : 365;
         return DaysInYear * Constant::iHoursInDay * this->currentVal;
@@ -3609,7 +3606,9 @@ namespace Sched {
         int DayT = StartDayOfWeek;
         Real64 TotalHours = 0.0;
 
-        if (DayT < iDayType_Sun || DayT > iDayType_Sat) return TotalHours;
+        if (DayT < iDayType_Sun || DayT > iDayType_Sat) {
+            return TotalHours;
+        }
 
         for (int iDay = 1; iDay <= DaysInYear; ++iDay) {
             auto const *weekSched = this->weekScheds[iDay];
@@ -3617,7 +3616,9 @@ namespace Sched {
 
             TotalHours += daySched->sumTsVals / double(s_glob->TimeStepsInHour);
             ++DayT;
-            if (DayT > iDayType_Sat) DayT = iDayType_Sun;
+            if (DayT > iDayType_Sat) {
+                DayT = iDayType_Sun;
+            }
         }
 
         return TotalHours;
@@ -3657,7 +3658,9 @@ namespace Sched {
         int DayT = StartDayOfWeek;
         Real64 TotalHours = 0.0;
 
-        if (DayT < iDayType_Sun || DayT > iDayType_Sat) return TotalHours;
+        if (DayT < iDayType_Sun || DayT > iDayType_Sat) {
+            return TotalHours;
+        }
 
         for (int iDay = 1; iDay <= DaysInYear; ++iDay) {
             auto const *weekSched = this->weekScheds[iDay];
@@ -3669,7 +3672,9 @@ namespace Sched {
             }
 
             ++DayT;
-            if (DayT > iDayType_Sat) DayT = iDayType_Sun;
+            if (DayT > iDayType_Sat) {
+                DayT = iDayType_Sun;
+            }
         }
 
         return TotalHours;
@@ -3683,7 +3688,9 @@ namespace Sched {
     {
         int DaysInYear = (isItLeapYear) ? 366 : 365;
 
-        if (StartDayOfWeek < iDayType_Sun || StartDayOfWeek > iDayType_Sat) return 0.0; // Assert this instead?
+        if (StartDayOfWeek < iDayType_Sun || StartDayOfWeek > iDayType_Sat) {
+            return 0.0; // Assert this instead?
+        }
 
         return (this->currentVal > 0.0) ? (Constant::rHoursInDay * DaysInYear) : 0;
     } // ScheduleConstant::getHoursGreaterThan1Percent()
@@ -3776,7 +3783,9 @@ namespace Sched {
         ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
         ShowContinueError(
             state, format("{} = {}, schedule contains values that are {} {}", fieldName, fieldVal, cluMin == Clusive::In ? "<" : "<=", minVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
     void ShowSevereBadMax(EnergyPlusData &state,
@@ -3790,7 +3799,9 @@ namespace Sched {
         ShowSevereError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
         ShowContinueError(
             state, format("{} = {}, schedule contains values that are {} {}", fieldName, fieldVal, cluMax == Clusive::In ? ">" : ">=", maxVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
     void ShowSevereBadMinMax(EnergyPlusData &state,
@@ -3812,7 +3823,9 @@ namespace Sched {
                                  minVal,
                                  cluMax == Clusive::In ? ">" : ">=",
                                  maxVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
     void ShowWarningBadMin(EnergyPlusData &state,
@@ -3826,7 +3839,9 @@ namespace Sched {
         ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
         ShowContinueError(
             state, format("{} = {}, schedule contains values that are {} {}", fieldName, fieldVal, cluMin == Clusive::In ? "<" : "<=", minVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
     void ShowWarningBadMax(EnergyPlusData &state,
@@ -3840,7 +3855,9 @@ namespace Sched {
         ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
         ShowContinueError(
             state, format("{} = {}, schedule contains values that are {} {}", fieldName, fieldVal, cluMax == Clusive::In ? ">" : ">=", maxVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
     void ShowWarningBadMinMax(EnergyPlusData &state,
@@ -3862,7 +3879,9 @@ namespace Sched {
                                  minVal,
                                  cluMax == Clusive::In ? ">" : ">=",
                                  maxVal));
-        if (!msg.empty()) ShowContinueError(state, format("{}", msg));
+        if (!msg.empty()) {
+            ShowContinueError(state, format("{}", msg));
+        }
     }
 
 } // namespace Sched

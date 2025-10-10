@@ -460,7 +460,9 @@ namespace FourPipeBeam {
 
             // Fill the Zone Equipment data with the supply air inlet node number of this unit.
             for (int ctrlZone = 1; ctrlZone <= state.dataGlobal->NumOfZones; ++ctrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(ctrlZone).IsControlled) continue;
+                if (!state.dataZoneEquip->ZoneEquipConfig(ctrlZone).IsControlled) {
+                    continue;
+                }
                 for (int supAirIn = 1; supAirIn <= state.dataZoneEquip->ZoneEquipConfig(ctrlZone).NumInletNodes; ++supAirIn) {
                     if (thisBeam->airOutNodeNum == state.dataZoneEquip->ZoneEquipConfig(ctrlZone).InletNode(supAirIn)) {
                         thisBeam->zoneIndex = ctrlZone;
@@ -773,7 +775,7 @@ namespace FourPipeBeam {
                     // should not come here, developer exception
                 }
             } // no air flow rate
-        }     // no beam length
+        } // no beam length
 
         if (noHardSizeAnchorAvailable && (state.dataSize->CurZoneEqNum > 0) &&
             (state.dataSize->CurTermUnitSizingNum > 0)) { // need to use central sizing results to calculate

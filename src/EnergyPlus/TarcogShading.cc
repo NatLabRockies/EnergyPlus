@@ -283,7 +283,9 @@ namespace TarcogShading {
                                 speed);
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
                     Tgaps(2) = Tgap;
                     // Ebgap(3) = sigma * Tgap ** 4
@@ -347,7 +349,9 @@ namespace TarcogShading {
                                 speed);
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
                     Tgaps(nlayer) = Tgap;
                     hcgas(nlayer) = hcvs / 2.0;
@@ -369,7 +373,9 @@ namespace TarcogShading {
 
                     hc1 = hcgas(i);
                     hc2 = hcgas(i + 1);
-                    if (i > 1) s1 = gap(i - 1);
+                    if (i > 1) {
+                        s1 = gap(i - 1);
+                    }
                     s2 = gap(i);
 
                     // speed1 = vvent(i)
@@ -457,7 +463,9 @@ namespace TarcogShading {
                     }
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
                     // if (vvent(i).gt.0) then !not implemented for inside shading yet
                     //  nperr = 1006
@@ -479,7 +487,7 @@ namespace TarcogShading {
                     vfreevent(i) = speed1;
                     vfreevent(i + 1) = speed2;
                 } // if ((i.gt.1).and.(i.lt.nlayer)) then
-            }     // if (LayerType(i).eq.SHADING) then
+            } // if (LayerType(i).eq.SHADING) then
         }
     }
 
@@ -733,7 +741,9 @@ namespace TarcogShading {
                  ErrorMessage);
 
         // exit on error:
-        if ((nperr > 0) && (nperr < 1000)) return;
+        if ((nperr > 0) && (nperr < 1000)) {
+            return;
+        }
 
         // dr...check for error messages
         if ((Tgap1 * Tgap2) == 0) {
@@ -1051,7 +1061,9 @@ namespace TarcogShading {
         //                nperr, ErrorMessage)
 
         // exit on error:
-        if ((nperr > 0) && (nperr < 1000)) return;
+        if ((nperr > 0) && (nperr < 1000)) {
+            return;
+        }
 
         // dr...check for error messages
         if ((Tgap * Tenv) == 0.0) {
@@ -1096,7 +1108,9 @@ namespace TarcogShading {
                      nperr,
                      ErrorMessage);
 
-            if ((nperr > 0) && (nperr < 1000)) return;
+            if ((nperr > 0) && (nperr < 1000)) {
+                return;
+            }
 
             //  A = dens0 * T0 * gravity * ABS(cos(tilt)) * ABS(Tgap - Tenv) / (Tgap * Tenv)
 

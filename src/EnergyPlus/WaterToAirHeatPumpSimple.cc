@@ -1049,11 +1049,13 @@ namespace WaterToAirHeatPumpSimple {
         } else {
             state.dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag(HPNum) = true;
             if (simpleWatertoAirHP.coilPlantType == DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit) {
-                if (simpleWatertoAirHP.CompanionHeatingCoilNum > 0)
+                if (simpleWatertoAirHP.CompanionHeatingCoilNum > 0) {
                     state.dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag(simpleWatertoAirHP.CompanionHeatingCoilNum) = true;
+                }
             } else {
-                if (simpleWatertoAirHP.CompanionCoolingCoilNum > 0)
+                if (simpleWatertoAirHP.CompanionCoolingCoilNum > 0) {
                     state.dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag(simpleWatertoAirHP.CompanionCoolingCoilNum) = true;
+                }
             }
         }
 
@@ -1455,7 +1457,9 @@ namespace WaterToAirHeatPumpSimple {
             if (simpleWatertoAirHP.RatedCapCoolTotal == DataSizing::AutoSize) {
                 RatedCapCoolTotalAutoSized = true;
             }
-            if (SizingDesRunThisAirSys || SizingDesRunThisZone) HardSizeNoDesRun = false;
+            if (SizingDesRunThisAirSys || SizingDesRunThisZone) {
+                HardSizeNoDesRun = false;
+            }
             if (state.dataSize->CurSysNum > 0) {
                 if (!RatedCapCoolTotalAutoSized && !SizingDesRunThisAirSys) { // Simulation continue
                     HardSizeNoDesRun = true;
@@ -1725,7 +1729,9 @@ namespace WaterToAirHeatPumpSimple {
             if (simpleWatertoAirHP.RatedCapCoolSens == DataSizing::AutoSize && simpleWatertoAirHP.coilType == HVAC::CoilType::CoolingWAHPSimple) {
                 RatedCapCoolSensAutoSized = true;
             }
-            if (SizingDesRunThisAirSys || SizingDesRunThisZone) HardSizeNoDesRun = false;
+            if (SizingDesRunThisAirSys || SizingDesRunThisZone) {
+                HardSizeNoDesRun = false;
+            }
             if (state.dataSize->CurSysNum > 0) {
                 if (!RatedCapCoolSensAutoSized && !SizingDesRunThisAirSys) { // Simulation continue
                     HardSizeNoDesRun = true;
@@ -2279,7 +2285,9 @@ namespace WaterToAirHeatPumpSimple {
             if (simpleWatertoAirHP.RatedCapHeat == DataSizing::AutoSize) {
                 IsAutoSize = true;
             }
-            if (SizingDesRunThisAirSys || SizingDesRunThisZone) HardSizeNoDesRun = false;
+            if (SizingDesRunThisAirSys || SizingDesRunThisZone) {
+                HardSizeNoDesRun = false;
+            }
             if (IsAutoSize) {
                 if (state.dataSize->CurSysNum > 0) {
                     CheckSysSizing(
@@ -3182,8 +3190,9 @@ namespace WaterToAirHeatPumpSimple {
         DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state.dataHeatBal->HeatReclaimSimple_WAHPCoil(HPNum);
         HeatReclaim.WaterHeatingDesuperheaterReclaimedHeatTotal = 0.0;
         if (allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
-            for (auto const &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)
+            for (auto const &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
                 HeatReclaim.WaterHeatingDesuperheaterReclaimedHeatTotal += num;
+            }
         }
         simpleWatertoAirHP.QSource -= HeatReclaim.WaterHeatingDesuperheaterReclaimedHeatTotal;
 
@@ -3696,8 +3705,12 @@ namespace WaterToAirHeatPumpSimple {
         //  Calculate part-load or "effective" sensible heat ratio
         SHReff = 1.0 - (1.0 - SHRss) * LHRmult;
 
-        if (SHReff < SHRss) SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
-        if (SHReff > 1.0) SHReff = 1.0;     // Effective sensible heat ratio can't be greater than 1.0
+        if (SHReff < SHRss) {
+            SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
+        }
+        if (SHReff > 1.0) {
+            SHReff = 1.0; // Effective sensible heat ratio can't be greater than 1.0
+        }
 
         return SHReff;
     }
@@ -3985,7 +3998,9 @@ namespace WaterToAirHeatPumpSimple {
 
         int WhichCoil = Util::FindItemInList(CoilName, state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP);
 
-        if (WhichCoil == 0) return;
+        if (WhichCoil == 0) {
+            return;
+        }
 
         auto &wahp = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(WhichCoil);
         if (wahp.coilType == HVAC::CoilType::CoolingWAHPSimple) {

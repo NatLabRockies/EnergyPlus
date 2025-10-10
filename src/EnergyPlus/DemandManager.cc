@@ -647,10 +647,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.LimitControl = static_cast<ManagerLimit>(getEnumValue(ManagerLimitNamesUC, Util::makeUPPER(AlphArray(3))));
             ErrorsFound = ErrorsFound || (demandMgr.LimitControl == ManagerLimit::Invalid);
 
-            if (NumArray(1) == 0.0)
+            if (NumArray(1) == 0.0) {
                 demandMgr.LimitDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.LimitDuration = NumArray(1);
+            }
 
             demandMgr.LowerLimit = NumArray(2);
 
@@ -658,10 +659,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.SelectionControl = static_cast<ManagerSelection>(getEnumValue(ManagerSelectionNamesUC, Util::makeUPPER(AlphArray(4))));
             ErrorsFound = ErrorsFound || (demandMgr.SelectionControl == ManagerSelection::Invalid);
 
-            if (NumArray(4) == 0.0)
+            if (NumArray(4) == 0.0) {
                 demandMgr.RotationDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.RotationDuration = NumArray(4);
+            }
 
             demandMgr.NumOfLoads = NumAlphas - 4;
 
@@ -732,10 +734,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.LimitControl = static_cast<ManagerLimit>(getEnumValue(ManagerLimitNamesUC, Util::makeUPPER(AlphArray(3))));
             ErrorsFound = ErrorsFound || (demandMgr.LimitControl == ManagerLimit::Invalid);
 
-            if (NumArray(1) == 0.0)
+            if (NumArray(1) == 0.0) {
                 demandMgr.LimitDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.LimitDuration = NumArray(1);
+            }
 
             demandMgr.LowerLimit = NumArray(2);
 
@@ -743,10 +746,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.SelectionControl = static_cast<ManagerSelection>(getEnumValue(ManagerSelectionNamesUC, Util::makeUPPER(AlphArray(4))));
             ErrorsFound = ErrorsFound || (demandMgr.SelectionControl == ManagerSelection::Invalid);
 
-            if (NumArray(4) == 0.0)
+            if (NumArray(4) == 0.0) {
                 demandMgr.RotationDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.RotationDuration = NumArray(4);
+            }
 
             // Count actual pointers to controlled zones
             demandMgr.NumOfLoads = 0;
@@ -839,10 +843,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.LimitControl = static_cast<ManagerLimit>(getEnumValue(ManagerLimitNamesUC, Util::makeUPPER(AlphArray(3))));
             ErrorsFound = ErrorsFound || (demandMgr.LimitControl == ManagerLimit::Invalid);
 
-            if (NumArray(1) == 0.0)
+            if (NumArray(1) == 0.0) {
                 demandMgr.LimitDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.LimitDuration = NumArray(1);
+            }
 
             demandMgr.LowerLimit = NumArray(2);
 
@@ -850,10 +855,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.SelectionControl = static_cast<ManagerSelection>(getEnumValue(ManagerSelectionNamesUC, Util::makeUPPER(AlphArray(4))));
             ErrorsFound = ErrorsFound || (demandMgr.SelectionControl == ManagerSelection::Invalid);
 
-            if (NumArray(4) == 0.0)
+            if (NumArray(4) == 0.0) {
                 demandMgr.RotationDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.RotationDuration = NumArray(4);
+            }
 
             // Count actual pointers to controlled zones
             demandMgr.NumOfLoads = 0;
@@ -946,10 +952,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.LimitControl = static_cast<ManagerLimit>(getEnumValue(ManagerLimitNamesUC, Util::makeUPPER(AlphArray(3))));
             ErrorsFound = ErrorsFound || (demandMgr.LimitControl == ManagerLimit::Invalid);
 
-            if (NumArray(1) == 0.0)
+            if (NumArray(1) == 0.0) {
                 demandMgr.LimitDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.LimitDuration = NumArray(1);
+            }
 
             demandMgr.LowerLimit = NumArray(2);
             demandMgr.UpperLimit = NumArray(3);
@@ -967,10 +974,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.SelectionControl = static_cast<ManagerSelection>(getEnumValue(ManagerSelectionNamesUC, Util::makeUPPER(AlphArray(4))));
             ErrorsFound = ErrorsFound || (demandMgr.SelectionControl == ManagerSelection::Invalid);
 
-            if (NumArray(5) == 0.0)
+            if (NumArray(5) == 0.0) {
                 demandMgr.RotationDuration = state.dataGlobal->MinutesInTimeStep;
-            else
+            } else {
                 demandMgr.RotationDuration = NumArray(5);
+            }
 
             // Count actual pointers to controlled zones
             demandMgr.NumOfLoads = 0;
@@ -1061,8 +1069,12 @@ void GetDemandManagerInput(EnergyPlusData &state)
 
             demandMgr.LimitDuration = (NumArray(1) == 0.0) ? state.dataGlobal->MinutesInTimeStep : NumArray(1);
 
-            if (demandMgr.LimitControl == ManagerLimit::Fixed) demandMgr.FixedRate = NumArray(2);
-            if (demandMgr.LimitControl == ManagerLimit::ReductionRatio) demandMgr.ReductionRatio = NumArray(3);
+            if (demandMgr.LimitControl == ManagerLimit::Fixed) {
+                demandMgr.FixedRate = NumArray(2);
+            }
+            if (demandMgr.LimitControl == ManagerLimit::ReductionRatio) {
+                demandMgr.ReductionRatio = NumArray(3);
+            }
 
             demandMgr.LowerLimit = NumArray(4);
 
@@ -1136,10 +1148,16 @@ void SurveyDemandManagers(EnergyPlusData &state)
 
         demandMgr.CanReduceDemand = false;
 
-        if (!demandMgr.Available) continue;
-        if (demandMgr.LimitControl == ManagerLimit::Off) continue;
+        if (!demandMgr.Available) {
+            continue;
+        }
+        if (demandMgr.LimitControl == ManagerLimit::Off) {
+            continue;
+        }
 
-        if (demandMgr.Active) continue; // This works for FIXED control action, but not VARIABLE
+        if (demandMgr.Active) {
+            continue; // This works for FIXED control action, but not VARIABLE
+        }
         // VARIABLE control could actually reduce demand farther, even if active already
 
         for (int LoadNum = 1; LoadNum <= demandMgr.NumOfLoads; ++LoadNum) {
@@ -1198,7 +1216,9 @@ void ActivateDemandManagers(EnergyPlusData &state)
                     // Set next rotated load (from last time it was active)
                     int RotatedLoadNum = demandMgr.RotatedLoadNum;
                     ++RotatedLoadNum;
-                    if (RotatedLoadNum > demandMgr.NumOfLoads) RotatedLoadNum = 1;
+                    if (RotatedLoadNum > demandMgr.NumOfLoads) {
+                        RotatedLoadNum = 1;
+                    }
                     demandMgr.RotatedLoadNum = RotatedLoadNum;
 
                     // Turn OFF limiting for the new rotated load
@@ -1222,7 +1242,9 @@ void ActivateDemandManagers(EnergyPlusData &state)
                     // Set next rotated load (from last time it was active)
                     int RotatedLoadNum = demandMgr.RotatedLoadNum;
                     ++RotatedLoadNum;
-                    if (RotatedLoadNum > demandMgr.NumOfLoads) RotatedLoadNum = 1;
+                    if (RotatedLoadNum > demandMgr.NumOfLoads) {
+                        RotatedLoadNum = 1;
+                    }
                     demandMgr.RotatedLoadNum = RotatedLoadNum;
 
                     // Turn ON limiting for the new rotated load
@@ -1307,7 +1329,9 @@ void UpdateDemandManagers(EnergyPlusData &state)
 
                                 // Set next rotated load
                                 ++RotatedLoadNum;
-                                if (RotatedLoadNum > demandMgr.NumOfLoads) RotatedLoadNum = 1;
+                                if (RotatedLoadNum > demandMgr.NumOfLoads) {
+                                    RotatedLoadNum = 1;
+                                }
                                 demandMgr.RotatedLoadNum = RotatedLoadNum;
 
                                 // Turn OFF limiting for the new rotated load
@@ -1331,7 +1355,9 @@ void UpdateDemandManagers(EnergyPlusData &state)
 
                                 // Set next rotated load
                                 ++RotatedLoadNum;
-                                if (RotatedLoadNum > demandMgr.NumOfLoads) RotatedLoadNum = 1;
+                                if (RotatedLoadNum > demandMgr.NumOfLoads) {
+                                    RotatedLoadNum = 1;
+                                }
                                 demandMgr.RotatedLoadNum = RotatedLoadNum;
 
                                 // Turn ON limiting for the new rotated load
@@ -1443,7 +1469,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
     case ManagerType::ExtLights: {
         LowestPower = state.dataExteriorEnergyUse->ExteriorLights(LoadPtr).DesignLevel * demandMgr.LowerLimit;
         if (Action == DemandAction::CheckCanReduce) {
-            if (state.dataExteriorEnergyUse->ExteriorLights(LoadPtr).Power > LowestPower) CanReduceDemand = true;
+            if (state.dataExteriorEnergyUse->ExteriorLights(LoadPtr).Power > LowestPower) {
+                CanReduceDemand = true;
+            }
         } else if (Action == DemandAction::SetLimit) {
             state.dataExteriorEnergyUse->ExteriorLights(LoadPtr).ManageDemand = true;
             state.dataExteriorEnergyUse->ExteriorLights(LoadPtr).DemandLimit = LowestPower;
@@ -1455,7 +1483,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
     case ManagerType::Lights: {
         LowestPower = state.dataHeatBal->Lights(LoadPtr).DesignLevel * demandMgr.LowerLimit;
         if (Action == DemandAction::CheckCanReduce) {
-            if (state.dataHeatBal->Lights(LoadPtr).Power > LowestPower) CanReduceDemand = true;
+            if (state.dataHeatBal->Lights(LoadPtr).Power > LowestPower) {
+                CanReduceDemand = true;
+            }
         } else if (Action == DemandAction::SetLimit) {
             state.dataHeatBal->Lights(LoadPtr).ManageDemand = true;
             state.dataHeatBal->Lights(LoadPtr).DemandLimit = LowestPower;
@@ -1467,7 +1497,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
     case ManagerType::ElecEquip: {
         LowestPower = state.dataHeatBal->ZoneElectric(LoadPtr).DesignLevel * demandMgr.LowerLimit;
         if (Action == DemandAction::CheckCanReduce) {
-            if (state.dataHeatBal->ZoneElectric(LoadPtr).Power > LowestPower) CanReduceDemand = true;
+            if (state.dataHeatBal->ZoneElectric(LoadPtr).Power > LowestPower) {
+                CanReduceDemand = true;
+            }
         } else if (Action == DemandAction::SetLimit) {
             state.dataHeatBal->ZoneElectric(LoadPtr).ManageDemand = true;
             state.dataHeatBal->ZoneElectric(LoadPtr).DemandLimit = LowestPower;
@@ -1480,8 +1512,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
         auto &tempZone = state.dataZoneCtrls->TempControlledZone(LoadPtr);
         auto &zoneTstatSetpt = s_dhbf->zoneTstatSetpts(tempZone.ActualZoneNum);
         if (Action == DemandAction::CheckCanReduce) {
-            if (zoneTstatSetpt.setptLo > demandMgr.LowerLimit || zoneTstatSetpt.setptHi < demandMgr.UpperLimit)
+            if (zoneTstatSetpt.setptLo > demandMgr.LowerLimit || zoneTstatSetpt.setptHi < demandMgr.UpperLimit) {
                 CanReduceDemand = true; // Heating | Cooling
+            }
         } else if (Action == DemandAction::SetLimit) {
             tempZone.ManageDemand = true;
             tempZone.HeatingResetLimit = demandMgr.LowerLimit;
@@ -1494,8 +1527,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
             if (state.dataHeatBalFanSys->ComfortControlType(comfortZone.ActualZoneNum) != HVAC::SetptType::Uncontrolled) {
                 auto &zoneTstatSetpt = s_dhbf->zoneTstatSetpts(comfortZone.ActualZoneNum);
                 if (Action == DemandAction::CheckCanReduce) {
-                    if (zoneTstatSetpt.setptLo > demandMgr.LowerLimit || zoneTstatSetpt.setptHi < demandMgr.UpperLimit)
+                    if (zoneTstatSetpt.setptLo > demandMgr.LowerLimit || zoneTstatSetpt.setptHi < demandMgr.UpperLimit) {
                         CanReduceDemand = true; // Heating
+                    }
                 } else if (Action == DemandAction::SetLimit) {
                     comfortZone.ManageDemand = true;
                     comfortZone.HeatingResetLimit = demandMgr.LowerLimit;

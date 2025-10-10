@@ -73,7 +73,9 @@ TEST_F(EnergyPlusFixture, DataPlant_verifyTwoNodeNumsOnSamePlantLoop)
 {
 
     // not using the DataPlantTest base class because of how specific this one is and that one is very general
-    if (state->dataPlnt->PlantLoop.allocated()) state->dataPlnt->PlantLoop.deallocate();
+    if (state->dataPlnt->PlantLoop.allocated()) {
+        state->dataPlnt->PlantLoop.deallocate();
+    }
     state->dataPlnt->TotNumLoops = 2;
     state->dataPlnt->PlantLoop.allocate(2);
 

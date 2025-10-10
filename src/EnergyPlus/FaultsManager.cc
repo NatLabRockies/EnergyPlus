@@ -240,7 +240,9 @@ namespace FaultsManager {
         Array1D<Real64> rNumericArgs(10); // Numeric input items for object
         std::string cFaultCurrentObject;
 
-        if (state.dataFaultsMgr->RunFaultMgrOnceFlag) return;
+        if (state.dataFaultsMgr->RunFaultMgrOnceFlag) {
+            return;
+        }
 
         // check number of faults
         state.dataFaultsMgr->NumFaults = 0;
@@ -300,28 +302,42 @@ namespace FaultsManager {
         }
 
         // allocate fault array
-        if (state.dataFaultsMgr->NumFaultyEconomizer > 0) state.dataFaultsMgr->FaultsEconomizer.allocate(state.dataFaultsMgr->NumFaultyEconomizer);
-        if (state.dataFaultsMgr->NumFouledCoil > 0) state.dataFaultsMgr->FouledCoils.allocate(state.dataFaultsMgr->NumFouledCoil);
-        if (state.dataFaultsMgr->NumFaultyThermostat > 0)
+        if (state.dataFaultsMgr->NumFaultyEconomizer > 0) {
+            state.dataFaultsMgr->FaultsEconomizer.allocate(state.dataFaultsMgr->NumFaultyEconomizer);
+        }
+        if (state.dataFaultsMgr->NumFouledCoil > 0) {
+            state.dataFaultsMgr->FouledCoils.allocate(state.dataFaultsMgr->NumFouledCoil);
+        }
+        if (state.dataFaultsMgr->NumFaultyThermostat > 0) {
             state.dataFaultsMgr->FaultsThermostatOffset.allocate(state.dataFaultsMgr->NumFaultyThermostat);
-        if (state.dataFaultsMgr->NumFaultyHumidistat > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyHumidistat > 0) {
             state.dataFaultsMgr->FaultsHumidistatOffset.allocate(state.dataFaultsMgr->NumFaultyHumidistat);
-        if (state.dataFaultsMgr->NumFaultyAirFilter > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyAirFilter > 0) {
             state.dataFaultsMgr->FaultsFouledAirFilters.allocate(state.dataFaultsMgr->NumFaultyAirFilter);
-        if (state.dataFaultsMgr->NumFaultyChillerSWTSensor > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyChillerSWTSensor > 0) {
             state.dataFaultsMgr->FaultsChillerSWTSensor.allocate(state.dataFaultsMgr->NumFaultyChillerSWTSensor);
-        if (state.dataFaultsMgr->NumFaultyCondenserSWTSensor > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyCondenserSWTSensor > 0) {
             state.dataFaultsMgr->FaultsCondenserSWTSensor.allocate(state.dataFaultsMgr->NumFaultyCondenserSWTSensor);
-        if (state.dataFaultsMgr->NumFaultyTowerFouling > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyTowerFouling > 0) {
             state.dataFaultsMgr->FaultsTowerFouling.allocate(state.dataFaultsMgr->NumFaultyTowerFouling);
-        if (state.dataFaultsMgr->NumFaultyCoilSATSensor > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyCoilSATSensor > 0) {
             state.dataFaultsMgr->FaultsCoilSATSensor.allocate(state.dataFaultsMgr->NumFaultyCoilSATSensor);
-        if (state.dataFaultsMgr->NumFaultyBoilerFouling > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyBoilerFouling > 0) {
             state.dataFaultsMgr->FaultsBoilerFouling.allocate(state.dataFaultsMgr->NumFaultyBoilerFouling);
-        if (state.dataFaultsMgr->NumFaultyChillerFouling > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyChillerFouling > 0) {
             state.dataFaultsMgr->FaultsChillerFouling.allocate(state.dataFaultsMgr->NumFaultyChillerFouling);
-        if (state.dataFaultsMgr->NumFaultyEvapCoolerFouling > 0)
+        }
+        if (state.dataFaultsMgr->NumFaultyEvapCoolerFouling > 0) {
             state.dataFaultsMgr->FaultsEvapCoolerFouling.allocate(state.dataFaultsMgr->NumFaultyEvapCoolerFouling);
+        }
 
         // read faults input of Evaporative Cooler Fouling
         for (int jFault_EvapCoolerFouling = 1; jFault_EvapCoolerFouling <= state.dataFaultsMgr->NumFaultyEvapCoolerFouling;
@@ -1840,7 +1856,9 @@ namespace FaultsManager {
         }
 
         // The more severe the fouling fault is (i.e., larger FaultFac), the less the FoulingFactor is
-        if (FaultFac > 0.0) FoulingFactor = min(this->FoulingFactor / FaultFac, 1.0);
+        if (FaultFac > 0.0) {
+            FoulingFactor = min(this->FoulingFactor / FaultFac, 1.0);
+        }
 
         return FoulingFactor;
     }
@@ -1868,7 +1886,9 @@ namespace FaultsManager {
         }
 
         // The more severe the fouling fault is (i.e., larger FaultFac), the less the UAReductionFactor is
-        if (FaultFac > 0.0) UAReductionFactorAct = min(this->UAReductionFactor / FaultFac, 1.0);
+        if (FaultFac > 0.0) {
+            UAReductionFactorAct = min(this->UAReductionFactor / FaultFac, 1.0);
+        }
 
         return UAReductionFactorAct;
     }

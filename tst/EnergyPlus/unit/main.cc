@@ -51,11 +51,11 @@
 #include <gtest/gtest.h>
 
 #ifdef DEBUG_ARITHM_GCC_OR_CLANG
-#include <EnergyPlus/fenv_missing.h>
+#    include <EnergyPlus/fenv_missing.h>
 #endif
 
 #ifdef DEBUG_ARITHM_MSVC
-#include <cfloat>
+#    include <cfloat>
 #endif
 
 // Google Test main

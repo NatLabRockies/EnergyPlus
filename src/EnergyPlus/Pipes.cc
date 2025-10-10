@@ -106,7 +106,9 @@ void LocalPipeData::simulate(EnergyPlusData &state,
         this->EnvrnFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->EnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->EnvrnFlag = true;
+    }
 
     PlantUtilities::SafeCopyPlantNode(state, this->InletNodeNum, this->OutletNodeNum, this->plantLoc.loopNum);
 }

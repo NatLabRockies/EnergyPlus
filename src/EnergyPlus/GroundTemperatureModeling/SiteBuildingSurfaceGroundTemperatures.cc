@@ -101,8 +101,9 @@ namespace GroundTemp {
             // Assign the ground temps to the variable
             for (int i = 1; i <= 12; ++i) {
                 thisModel->buildingSurfaceGroundTemps[i - 1] = state.dataIPShortCut->rNumericArgs(i);
-                if (thisModel->buildingSurfaceGroundTemps[i - 1] < 15.0 || thisModel->buildingSurfaceGroundTemps[i - 1] > 25.0)
+                if (thisModel->buildingSurfaceGroundTemps[i - 1] < 15.0 || thisModel->buildingSurfaceGroundTemps[i - 1] > 25.0) {
                     genErrorMessage = true;
+                }
             }
 
             state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::BuildingSurface)] = true;

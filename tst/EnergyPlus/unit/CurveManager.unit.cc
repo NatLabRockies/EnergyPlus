@@ -1953,7 +1953,6 @@ INSTANTIATE_TEST_SUITE_P(CurveManager,
                                             "Minimum Value of z [0.80] > Maximum Value of z [0.50]"}),
                          [](const testing::TestParamInfo<CurveManagerValidationFixture::ParamType> &info) -> std::string {
                              auto object_name = info.param.object_name;
-                             std::replace_if(
-                                 object_name.begin(), object_name.end(), [](char c) { return !std::isalnum(c); }, '_');
+                             std::replace_if(object_name.begin(), object_name.end(), [](char c) { return !std::isalnum(c); }, '_');
                              return object_name + "_" + info.param.tested_dim;
                          });

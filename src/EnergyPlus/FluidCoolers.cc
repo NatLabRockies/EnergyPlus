@@ -107,7 +107,9 @@ FluidCoolerspecs *FluidCoolerspecs::factory(EnergyPlusData &state, DataPlant::Pl
         state.dataFluidCoolers->SimpleFluidCooler.begin(),
         state.dataFluidCoolers->SimpleFluidCooler.end(),
         [objectType, &objectName](const FluidCoolerspecs &myObj) { return myObj.FluidCoolerType == objectType && myObj.Name == objectName; });
-    if (thisObj != state.dataFluidCoolers->SimpleFluidCooler.end()) return thisObj;
+    if (thisObj != state.dataFluidCoolers->SimpleFluidCooler.end()) {
+        return thisObj;
+    }
 
     // If we didn't find it, fatal
     ShowFatalError(state, format("FluidCooler::factory: Error getting inputs for cooler named: {}", objectName));
@@ -178,13 +180,16 @@ void GetFluidCoolerInput(EnergyPlusData &state)
     int const NumTwoSpeedFluidCoolers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "FluidCooler:TwoSpeed");
     state.dataFluidCoolers->NumSimpleFluidCoolers = NumSingleSpeedFluidCoolers + NumTwoSpeedFluidCoolers;
 
-    if (state.dataFluidCoolers->NumSimpleFluidCoolers <= 0)
+    if (state.dataFluidCoolers->NumSimpleFluidCoolers <= 0) {
         ShowFatalError(state,
                        "No fluid cooler objects found in input, however, a branch object has specified a fluid cooler. Search the input for "
                        "fluid cooler to determine the cause for this error.");
+    }
 
     // See if load distribution manager has already gotten the input
-    if (allocated(state.dataFluidCoolers->SimpleFluidCooler)) return;
+    if (allocated(state.dataFluidCoolers->SimpleFluidCooler)) {
+        return;
+    }
     state.dataFluidCoolers->GetFluidCoolerInputFlag = false;
 
     // Allocate data structures to hold fluid cooler input data, report data and fluid cooler inlet conditions
@@ -977,10 +982,14 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
 
             if (state.dataSize->PlantSizData(PltSizCondNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpDesignWaterFlowRate = state.dataSize->PlantSizData(PltSizCondNum).DesVolFlowRate;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->DesignWaterFlowRate = tmpDesignWaterFlowRate;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->DesignWaterFlowRate = tmpDesignWaterFlowRate;
+                }
             } else {
                 tmpDesignWaterFlowRate = 0.0;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->DesignWaterFlowRate = tmpDesignWaterFlowRate;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->DesignWaterFlowRate = tmpDesignWaterFlowRate;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -1015,9 +1024,13 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
             Cp = state.dataPlnt->PlantLoop(this->plantLoc.loopNum)
                      .glycol->getSpecificHeat(state, state.dataSize->PlantSizData(PltSizCondNum).ExitTemp, CalledFrom);
             DesFluidCoolerLoad = rho * Cp * tmpDesignWaterFlowRate * state.dataSize->PlantSizData(PltSizCondNum).DeltaT;
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->FluidCoolerNominalCapacity = DesFluidCoolerLoad;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->FluidCoolerNominalCapacity = DesFluidCoolerLoad;
+            }
         } else {
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->FluidCoolerNominalCapacity = 0.0;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->FluidCoolerNominalCapacity = 0.0;
+            }
         }
     }
 
@@ -1025,11 +1038,15 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
         // We assume the nominal fan power is 0.0105 times the design load
         if (this->PerformanceInputMethod_Num == PerfInputMethod::NOMINAL_CAPACITY) {
             tmpHighSpeedFanPower = 0.0105 * this->FluidCoolerNominalCapacity;
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFanPower = tmpHighSpeedFanPower;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->HighSpeedFanPower = tmpHighSpeedFanPower;
+            }
         } else {
             if (DesFluidCoolerLoad > 0.0) {
                 tmpHighSpeedFanPower = 0.0105 * DesFluidCoolerLoad;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                }
             } else if (PltSizCondNum > 0) {
                 if (state.dataSize->PlantSizData(PltSizCondNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
 
@@ -1041,10 +1058,14 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
 
                     DesFluidCoolerLoad = rho * Cp * tmpDesignWaterFlowRate * state.dataSize->PlantSizData(PltSizCondNum).DeltaT;
                     tmpHighSpeedFanPower = 0.0105 * DesFluidCoolerLoad;
-                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                        this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                    }
                 } else {
                     tmpHighSpeedFanPower = 0.0;
-                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                        this->HighSpeedFanPower = tmpHighSpeedFanPower;
+                    }
                 }
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1093,11 +1114,15 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
     if (this->HighSpeedAirFlowRateWasAutoSized) {
         if (this->PerformanceInputMethod_Num == PerfInputMethod::NOMINAL_CAPACITY) {
             tmpHighSpeedAirFlowRate = this->FluidCoolerNominalCapacity / (this->DesignEnteringWaterTemp - this->DesignEnteringAirTemp) * 4.0;
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+            }
         } else {
             if (DesFluidCoolerLoad > 0.0) {
                 tmpHighSpeedAirFlowRate = DesFluidCoolerLoad / (this->DesignEnteringWaterTemp - this->DesignEnteringAirTemp) * 4.0;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                }
             } else if (PltSizCondNum > 0) {
                 if (state.dataSize->PlantSizData(PltSizCondNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
 
@@ -1109,10 +1134,14 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
 
                     DesFluidCoolerLoad = rho * Cp * tmpDesignWaterFlowRate * state.dataSize->PlantSizData(PltSizCondNum).DeltaT;
                     tmpHighSpeedAirFlowRate = DesFluidCoolerLoad / (this->DesignEnteringWaterTemp - this->DesignEnteringAirTemp) * 4.0;
-                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                        this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                    }
                 } else {
                     tmpHighSpeedAirFlowRate = 0.0;
-                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                    if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                        this->HighSpeedAirFlowRate = tmpHighSpeedAirFlowRate;
+                    }
                 }
             } else {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1221,11 +1250,15 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                     ShowFatalError(state, format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
                 }
                 tmpHighSpeedEvapFluidCoolerUA = UA;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFluidCoolerUA = tmpHighSpeedEvapFluidCoolerUA;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->HighSpeedFluidCoolerUA = tmpHighSpeedEvapFluidCoolerUA;
+                }
                 this->FluidCoolerNominalCapacity = DesFluidCoolerLoad;
             } else {
                 tmpHighSpeedEvapFluidCoolerUA = 0.0;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFluidCoolerUA = tmpHighSpeedEvapFluidCoolerUA;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->HighSpeedFluidCoolerUA = tmpHighSpeedEvapFluidCoolerUA;
+                }
             }
             if (this->FluidCoolerType == DataPlant::PlantEquipmentType::FluidCooler_SingleSpd) {
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1332,9 +1365,13 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                     ShowFatalError(state, format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
                 }
             }
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFluidCoolerUA = UA;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->HighSpeedFluidCoolerUA = UA;
+            }
         } else {
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->HighSpeedFluidCoolerUA = 0.0;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->HighSpeedFluidCoolerUA = 0.0;
+            }
         }
         if (this->FluidCoolerType == DataPlant::PlantEquipmentType::FluidCooler_SingleSpd) {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1502,9 +1539,13 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                 ShowContinueError(state, format("Calculated water outlet temp at high UA [C](UA = {:.2R} W/C) = {:.2R}", UA1, OutWaterTempAtUA1));
                 ShowFatalError(state, format("Autosizing of Fluid Cooler UA failed for fluid cooler = {}", this->Name));
             }
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->LowSpeedFluidCoolerUA = UA;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->LowSpeedFluidCoolerUA = UA;
+            }
         } else {
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->LowSpeedFluidCoolerUA = 0.0;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->LowSpeedFluidCoolerUA = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -1663,7 +1704,9 @@ void FluidCoolerspecs::calcSingleSpeed(EnergyPlusData &state)
     }
 
     //   MassFlowTol is a parameter to indicate a no flow condition
-    if (this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance) return;
+    if (this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance) {
+        return;
+    }
 
     if (this->OutletWaterTemp < TempSetPoint) { // already there don't need to run the cooler
         return;
@@ -1767,8 +1810,9 @@ void FluidCoolerspecs::calcTwoSpeed(EnergyPlusData &state)
 
     // MassFlowTol is a parameter to indicate a no flow condition
     if (this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance ||
-        state.dataPlnt->PlantLoop(this->plantLoc.loopNum).LoopSide(this->plantLoc.loopSideNum).FlowLock == DataPlant::FlowLock::Unlocked)
+        state.dataPlnt->PlantLoop(this->plantLoc.loopNum).LoopSide(this->plantLoc.loopSideNum).FlowLock == DataPlant::FlowLock::Unlocked) {
         return;
+    }
 
     // set local variable for fluid cooler
     this->WaterMassFlowRate = state.dataLoopNodes->Node(this->WaterInletNodeNum).MassFlowRate;
@@ -1840,7 +1884,9 @@ void CalcFluidCoolerOutlet(
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("CalcFluidCoolerOutlet");
 
-    if (UAdesign == 0.0) return;
+    if (UAdesign == 0.0) {
+        return;
+    }
 
     auto &fluidCooler = state.dataFluidCoolers->SimpleFluidCooler(FluidCoolerNum);
     // set local fluid cooler inlet and outlet temperature variables
@@ -1893,8 +1939,9 @@ void FluidCoolerspecs::update(EnergyPlusData &state)
     state.dataLoopNodes->Node(waterOutletNode).Temp = this->OutletWaterTemp;
 
     if (state.dataPlnt->PlantLoop(this->plantLoc.loopNum).LoopSide(this->plantLoc.loopSideNum).FlowLock == DataPlant::FlowLock::Unlocked ||
-        state.dataGlobal->WarmupFlag)
+        state.dataGlobal->WarmupFlag) {
         return;
+    }
 
     // Check flow rate through fluid cooler and compare to design flow rate, show warning if greater than Design * Multiplier
     if (state.dataLoopNodes->Node(waterOutletNode).MassFlowRate > this->DesWaterMassFlowRate * this->FluidCoolerMassFlowRateMultiplier) {

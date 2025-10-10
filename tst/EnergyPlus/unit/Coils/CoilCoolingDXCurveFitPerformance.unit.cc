@@ -50,7 +50,7 @@
 
 // EnergyPlus Headers
 #include "CoilCoolingDXFixture.hh"
-#include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 
 using namespace EnergyPlus;

@@ -856,7 +856,9 @@ namespace ElectricBaseboardRadiator {
         ElecBaseboardSysOn = false;
 
         // If this was never allocated, then there are no radiant systems in this input file (just RETURN)
-        if (state.dataElectBaseboardRad->NumElecBaseboards == 0) return;
+        if (state.dataElectBaseboardRad->NumElecBaseboards == 0) {
+            return;
+        }
 
         // If it was allocated, then we have to check to see if this was running at all...
         for (auto &elecBaseboard : state.dataElectBaseboardRad->ElecBaseboard) {

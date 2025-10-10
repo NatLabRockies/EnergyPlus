@@ -1110,8 +1110,8 @@ void TARCOG90(EnergyPlusData &state,
                     ErrorMessage = "Deflection calculations failed to converge";
                 }
             } // do while (.not.(converged))
-        }     // if ((CalcDeflection.eq.DeflectionCalculation::TEMPERATURE).or.(CalcDeflection.eq.DeflectionCalculation::GAP_WIDTHS)) then
-    }         // if (GoAhead(nperr)) then
+        } // if ((CalcDeflection.eq.DeflectionCalculation::TEMPERATURE).or.(CalcDeflection.eq.DeflectionCalculation::GAP_WIDTHS)) then
+    } // if (GoAhead(nperr)) then
 
     FinishDebugOutputFiles(files, nperr);
 }

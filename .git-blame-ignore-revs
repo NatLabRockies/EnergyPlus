@@ -528,3 +528,6 @@ fec99239575da7f77999cf82f4140f38a8026b80
 # [chore] Typo cooing -> cooling [Julien Marrec, 2025-01-23]
 ab5c96312d0cddec395e9616f23a8bd5f433ac6e
 # 25 files changed, 132 insertions(+), 131 deletions(-)
+
+# Apply clang-format-19 and clang-tidy --checks=-*,readability-braces-around-statements [Julien Marrec, 2025-05-23]
+9985a5f1a0f9e6fbb59033996f2d17f2a8eaf6fb

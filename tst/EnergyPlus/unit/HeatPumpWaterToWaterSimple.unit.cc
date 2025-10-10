@@ -767,8 +767,12 @@ TEST_F(EnergyPlusFixture, PlantLoopSourceSideTest)
 
         Weather::GetNextEnvironment(*state, Available, ErrorsFound);
 
-        if (!Available) break;
-        if (ErrorsFound) break;
+        if (!Available) {
+            break;
+        }
+        if (ErrorsFound) {
+            break;
+        }
 
         ++EnvCount;
 

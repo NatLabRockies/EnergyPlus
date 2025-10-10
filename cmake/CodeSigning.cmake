@@ -10,10 +10,11 @@ This module defines functions to codesign, notarize and staple macOS files.
 
     codesign_files_macos(
                          SIGNING_IDENTITY <identity>
-                         [FORCE] [VERBOSE]
+                         [FORCE] [VERBOSE] [DEEP]
                          [IDENTIFIER <identifier>]
                          [PREFIX <prefix>]
                          [OPTIONS <options>...]
+                         [ENTITLEMENTS <entitlements_file>]
                          FILES <files>...
     )
 
@@ -34,6 +35,9 @@ This module defines functions to codesign, notarize and staple macOS files.
   ``FORCE``
     If specified, will append ``--force``
 
+  ``DEEP``
+    If specified, will append ``--deep``. Note that this is supposedly deprecated by the ``codesign`` utility.
+
   ``OPTIONS options...``
     Specifies the options to pass to ``--options``. If not specified, uses ``--options runtime``
 
@@ -41,8 +45,10 @@ This module defines functions to codesign, notarize and staple macOS files.
     Passed as ``--identifier identifier``.
 
   ``PREFIX``
-    What to pass to ``--prefix``. eg 'org.nrel.EnergyPlus.' with a **trailing dot**. Ignored if ``IDENTIFIER`` is passed
+    What to pass to ``--prefix``. eg 'com.domain.MyApp.' with a **trailing dot**. Ignored if ``IDENTIFIER`` is passed
 
+  ``ENTITLEMENTS entitlements_file``
+    The entitlements xml file to use
 
 .. cmake:command:: notarize_files_macos
 
@@ -97,6 +103,9 @@ This module defines functions to codesign, notarize and staple macOS files.
     Authenticate using credentials stored in the Keychain by notarytool.
     Use the profile name that you previously provided via the ``xcrun notarytool store-credentials`` command
 
+  * :cmake:variable:`CPACK_CODESIGNING_MACOS_IDENTIFIER`
+
+    What is passed as --identifier to the codesign signing. Defaults to ``com.domain.MyApp``
 
 .. cmake:command:: register_install_codesign_target
 
@@ -139,8 +148,8 @@ endfunction()
 #------------------------------------------------------------------------------
 function(codesign_files_macos)
   set(prefix "")
-  set(valueLessKeywords FORCE VERBOSE)
-  set(singleValueKeywords SIGNING_IDENTITY IDENTIFIER PREFIX)
+  set(valueLessKeywords FORCE VERBOSE DEEP)
+  set(singleValueKeywords SIGNING_IDENTITY IDENTIFIER PREFIX ENTITLEMENTS)
   set(multiValueKeywords FILES OPTIONS)
   cmake_parse_arguments(
     PARSE_ARGV 0 # Start at one with NAME is the first param
@@ -186,6 +195,10 @@ function(codesign_files_macos)
     list(APPEND cmd --force)
   endif()
 
+  if(_DEEP)
+    list(APPEND cmd --deep)
+  endif()
+
   list(APPEND cmd --timestamp)
   list(APPEND cmd --options "${options_str}")
 
@@ -193,6 +206,14 @@ function(codesign_files_macos)
     list(APPEND cmd "--identifier" "${_IDENTIFIER}")
   elseif(_PREFIX)
     list(APPEND cmd "--prefix" "${_PREFIX}")
+  endif()
+
+  if (_ENTITLEMENTS)
+    if (NOT EXISTS "${_ENTITLEMENTS}")
+      message(FATAL_ERROR "Can't sign with entitlements ${_ENTITLEMENTS}, no file exists at that path.")
+    endif ()
+
+    list(APPEND cmd "--entitlements" "${_ENTITLEMENTS}")
   endif()
 
   foreach(path ${_FILES})
@@ -340,6 +361,9 @@ function(setup_macos_codesigning_variables)
       endif ()
     endforeach()
   endif()
+
+  set(CPACK_CODESIGNING_MACOS_IDENTIFIER "org.nrel.EnergyPlus" CACHE STRING "The code signing identifier, passed as --identifier")
+
   # Populate drop-down box in cmake-gui with the list of valid codesigning identities.
   set_property(CACHE CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION PROPERTY STRINGS "${idents}")
 
@@ -356,32 +380,66 @@ function(setup_macos_codesigning_variables)
 endfunction()
 #------------------------------------------------------------------------------
 
-function(register_install_codesign_target TARGET_NAME DESTINATION)
+function(register_install_codesign_target TARGET_NAME DESTINATION COMPONENT)
+
+  set(prefix "")
+  set(valueLessKeywords "")
+  set(singleValueKeywords ENTITLEMENTS)
+  set(multiValueKeywords "")
+  cmake_parse_arguments(
+    PARSE_ARGV 3 # We have 3 positional keywords that are required
+      "${prefix}"
+      "${valueLessKeywords}"
+      "${singleValueKeywords}"
+      "${multiValueKeywords}"
+  )
 
   if(NOT TARGET ${TARGET_NAME})
-    message("${TARGET_NAME} is not a valid target")
-    return()
+    message(FATAL_ERROR "${TARGET_NAME} is not a valid target")
   endif()
 
   if(NOT APPLE)
-    message("Not Apple")
+    message(DEBUG "Not Apple, skipping signing")
     return()
   endif()
 
   if(NOT CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
-    message("Missing CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION")
+    message(DEBUG "Missing CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION, skipping signing")
     return()
   endif()
 
-  install(
-    CODE "
-    include(\"${CMAKE_CURRENT_FUNCTION_LIST_FILE}\")
-    codesign_files_macos(
-      FILES \"\${CMAKE_INSTALL_PREFIX}/${DESTINATION}/$<TARGET_FILE_NAME:${TARGET_NAME}>\"
-      SIGNING_IDENTITY \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\"
-      IDENTIFIER \"org.nrel.EnergyPlus.${TARGET_NAME}\"
-      FORCE VERBOSE
-      )
-  ")
+  if(NOT CPACK_CODESIGNING_MACOS_IDENTIFIER)
+    message(DEBUG "Missing CPACK_CODESIGNING_MACOS_IDENTIFIER, skipping signing")
+    return()
+  endif()
+
+  if (_ENTITLEMENTS)
+    install(
+      CODE "
+      include(\"${CMAKE_CURRENT_FUNCTION_LIST_FILE}\")
+      codesign_files_macos(
+        FILES \"\${CMAKE_INSTALL_PREFIX}/${DESTINATION}/$<IF:$<BOOL:$<TARGET_PROPERTY:${TARGET_NAME},MACOSX_BUNDLE>>,$<TARGET_BUNDLE_DIR_NAME:${TARGET_NAME}>,$<TARGET_FILE_NAME:${TARGET_NAME}>>\"
+        SIGNING_IDENTITY \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\"
+        IDENTIFIER \"${CPACK_CODESIGNING_MACOS_IDENTIFIER}.${TARGET_NAME}\"
+        FORCE VERBOSE $<$<BOOL:$<TARGET_PROPERTY:${TARGET_NAME},MACOSX_BUNDLE>>:DEEP>
+        ENTITLEMENTS \"${_ENTITLEMENTS}\"
+        )
+    "
+      COMPONENT ${COMPONENT}
+    )
+  else()
+    install(
+      CODE "
+      include(\"${CMAKE_CURRENT_FUNCTION_LIST_FILE}\")
+      codesign_files_macos(
+        FILES \"\${CMAKE_INSTALL_PREFIX}/${DESTINATION}/$<IF:$<BOOL:$<TARGET_PROPERTY:${TARGET_NAME},MACOSX_BUNDLE>>,$<TARGET_BUNDLE_DIR_NAME:${TARGET_NAME}>,$<TARGET_FILE_NAME:${TARGET_NAME}>>\"
+        SIGNING_IDENTITY \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\"
+        IDENTIFIER \"${CPACK_CODESIGNING_MACOS_IDENTIFIER}.${TARGET_NAME}\"
+        FORCE VERBOSE $<$<BOOL:$<TARGET_PROPERTY:${TARGET_NAME},MACOSX_BUNDLE>>:DEEP>
+        )
+    "
+      COMPONENT ${COMPONENT}
+    )
+  endif()
 
 endfunction()

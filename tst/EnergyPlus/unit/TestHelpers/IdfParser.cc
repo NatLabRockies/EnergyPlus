@@ -58,7 +58,9 @@ std::vector<std::vector<std::string>> IdfParser::decode(std::string const &idf)
 std::vector<std::vector<std::string>> IdfParser::decode(std::string const &idf, bool &success)
 {
     success = true;
-    if (idf.empty()) return std::vector<std::vector<std::string>>();
+    if (idf.empty()) {
+        return std::vector<std::vector<std::string>>();
+    }
 
     size_t index = 0;
     return parse_idf(idf, index, success);
@@ -95,7 +97,9 @@ std::vector<std::vector<std::string>> IdfParser::parse_idf(std::string const &id
         } else {
 
             auto const array = parse_object(idf, index, success);
-            if (!array.empty()) obj.push_back(array);
+            if (!array.empty()) {
+                obj.push_back(array);
+            }
         }
     }
 
@@ -194,7 +198,9 @@ std::string IdfParser::parse_string(std::string const &idf, size_t &index, bool 
             index--;
             break;
         } else if (c == '\\') {
-            if (index == idf_size) break;
+            if (index == idf_size) {
+                break;
+            }
             c = idf[index++];
             if (c == '"') {
                 s += '"';
@@ -245,8 +251,12 @@ void IdfParser::eat_comment(std::string const &idf, size_t &index)
 {
     auto const idf_size = idf.size();
     while (true) {
-        if (index == idf_size) break;
-        if (idf[index++] == '\n') break;
+        if (index == idf_size) {
+            break;
+        }
+        if (idf[index++] == '\n') {
+            break;
+        }
     }
 }
 

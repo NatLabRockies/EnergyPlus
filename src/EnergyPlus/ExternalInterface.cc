@@ -980,9 +980,13 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
         // So this check that if I entered two different things and get the same end filename, then it's wrong?
         for (int j = 1; j <= state.dataExternalInterface->NumFMUObjects; ++j) {
             for (int k = 2; k <= state.dataExternalInterface->NumFMUObjects; ++k) {
-                if (!Util::SameString(strippedFileName(j), strippedFileName(k))) continue;
+                if (!Util::SameString(strippedFileName(j), strippedFileName(k))) {
+                    continue;
+                }
                 // base file names are the same
-                if (Util::SameString(fullFileName(j), fullFileName(k))) continue;
+                if (Util::SameString(fullFileName(j), fullFileName(k))) {
+                    continue;
+                }
                 ShowSevereError(state, "ExternalInterface/InitExternalInterfaceFMUImport:");
                 ShowContinueError(state, "duplicate file names (but not same file) entered.");
                 ShowContinueError(state, format("...entered file name=\"{}\"", state.dataExternalInterface->FMU(j).Name));

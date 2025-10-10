@@ -275,8 +275,8 @@ HeatPump:AirToWater:FuelFired:Heating,
     NotModulated,            !- Flow Mode
     DryBulb,                 !- Outdoor Air Temperature Curve Input Variable
     EnteringCondenser,       !- Water Temperature Curve Input Variable
-    CapCurveFuncTemp,        !- Normalized Capacity Function of Temperature Curve Name
-    EIRCurveFuncTemp,        !- Fuel Energy Input Ratio Function of Temperature Curve Name
+    HeatingCapCurveFuncTemp,        !- Normalized Capacity Function of Temperature Curve Name
+    HeatingEIRCurveFuncTemp,        !- Fuel Energy Input Ratio Function of Temperature Curve Name
     EIRCurveFuncPLR,         !- Fuel Energy Input Ratio Function of PLR Curve Name
     0.2,                     !- Minimum Part Load Ratio
     1.0,                     !- Maximum Part Load Ratio
@@ -334,6 +334,24 @@ HeatPump:AirToWater:FuelFired:Heating,
     -100,                    !- Minimum Value of x
     100;                     !- Maximum Value of x
 
+!- From Table 3 in "Pathways to Decarbonization of Residential Heating", Fridlyand et al. (2021)
+  Curve:Biquadratic,
+    HeatingCapCurveFuncTemp, !- Name
+    1.011452,                !- Coefficient1 Constant
+    0.004093,                !- Coefficient2 x
+    -0.00014,                !- Coefficient3 x**2
+    0.00428,                 !- Coefficient4 y
+    -0.000086,               !- Coefficient5 y**2
+    0.00000226,              !- Coefficient6 x*y
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    -30.0,                   !- Minimum Value of y
+    10.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
 
   Curve:Biquadratic,
     CapCurveFuncTemp,        !- Name
@@ -347,6 +365,28 @@ HeatPump:AirToWater:FuelFired:Heating,
     10.0,                    !- Maximum Value of x
     24.0,                    !- Minimum Value of y
     35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+!- Adapted from Table 3 in "Pathways to Decarbonization of Residential Heating", Fridlyand et al. (2021)
+!- The curve from Table 3 output an adjusted EIR and not an EIR modifier
+!- The curve from Table 3 has been renormalized at the ANSI rating conditions of 95°F return and 47°F ambient to represent an EIR modifier
+
+  Curve:Biquadratic,
+    HeatingEIRCurveFuncTemp, !- Name
+    0.559888009625229,       !- Coefficient1 Constant
+    0.0171957698511524,      !- Coefficient2 x
+    -0.0000891729967627554,  !- Coefficient3 x**2
+    -0.00464869065091091,    !- Coefficient4 y
+    0.00009648225879249,     !- Coefficient5 y**2
+    -0.0000701689154854473,  !- Coefficient6 x*y
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    -30.0,                   !- Minimum Value of y
+    10.0,                    !- Maximum Value of y
     ,                        !- Minimum Curve Output
     ,                        !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X

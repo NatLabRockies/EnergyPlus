@@ -488,14 +488,14 @@ struct WindowManagerData : BaseGlobalStruct
     std::array<Real64, Window::maxGlassLayers> thick = {0.0};                           // Glass layer thickness (m)
     std::array<Real64, Window::maxGlassLayers> scon = {0.0};                            // Glass layer conductance--conductivity/thickness (W/m2-K)
 
-    std::array<Real64, 2 *Window::maxGlassLayers> tir = {0.0};  // Front and back IR transmittance for each glass layer
-    std::array<Real64, 2 *Window::maxGlassLayers> emis = {0.0}; // Front and back IR emissivity for each glass layer
-    std::array<Real64, 2 *Window::maxGlassLayers> rir = {0.0};  // Front and back IR reflectance for each glass layer
-                                                                //  (program calculates from tir and emis)
-    std::array<Real64, 2 *Window::maxGlassLayers> AbsRadGlassFace = {
-        0.0};                                                         // Solar radiation and IR radiation from internal gains absorbed by glass face
-    std::array<Real64, 2 *Window::maxGlassLayers> thetas = {0.0};     // Glass surface temperatures (K)
-    std::array<Real64, 2 *Window::maxGlassLayers> thetasPrev = {0.0}; // Previous-iteration glass surface temperatures (K)
+    std::array<Real64, 2 * Window::maxGlassLayers> tir = {0.0};  // Front and back IR transmittance for each glass layer
+    std::array<Real64, 2 * Window::maxGlassLayers> emis = {0.0}; // Front and back IR emissivity for each glass layer
+    std::array<Real64, 2 * Window::maxGlassLayers> rir = {0.0};  // Front and back IR reflectance for each glass layer
+                                                                 //  (program calculates from tir and emis)
+    std::array<Real64, 2 * Window::maxGlassLayers> AbsRadGlassFace = {
+        0.0};                                                          // Solar radiation and IR radiation from internal gains absorbed by glass face
+    std::array<Real64, 2 * Window::maxGlassLayers> thetas = {0.0};     // Glass surface temperatures (K)
+    std::array<Real64, 2 * Window::maxGlassLayers> thetasPrev = {0.0}; // Previous-iteration glass surface temperatures (K)
 
     std::array<Real64, Window::maxGlassLayers> hrgap = {0.0}; // Radiative gap conductance
 

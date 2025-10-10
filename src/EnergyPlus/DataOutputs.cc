@@ -173,17 +173,27 @@ bool FindItemInVariableList(const EnergyPlusData &state, std::string_view const 
     // in the list of required variables for a simulation.
 
     auto const found_variable = state.dataOutput->OutputVariablesForSimulation.find(VariableName);
-    if (found_variable == state.dataOutput->OutputVariablesForSimulation.end()) return false;
+    if (found_variable == state.dataOutput->OutputVariablesForSimulation.end()) {
+        return false;
+    }
 
     auto found_key = found_variable->second.find(KeyedValue);
-    if (found_key != found_variable->second.end()) return true;
+    if (found_key != found_variable->second.end()) {
+        return true;
+    }
 
     found_key = found_variable->second.find("*");
-    if (found_key != found_variable->second.end()) return true;
+    if (found_key != found_variable->second.end()) {
+        return true;
+    }
 
     for (auto it = found_variable->second.begin(); it != found_variable->second.end(); ++it) {
-        if (equali(KeyedValue, it->second.key)) return true;
-        if (it->second.is_simple_string) continue;
+        if (equali(KeyedValue, it->second.key)) {
+            return true;
+        }
+        if (it->second.is_simple_string) {
+            continue;
+        }
         if ((it->second.pattern != nullptr && RE2::FullMatch(std::string{KeyedValue}, *it->second.pattern)) || // match against regex as written
             (it->second.case_insensitive_pattern != nullptr &&
              RE2::FullMatch(std::string{KeyedValue}, *it->second.case_insensitive_pattern)) // attempt case-insensitive regex comparison

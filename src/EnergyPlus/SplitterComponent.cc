@@ -194,8 +194,9 @@ namespace SplitterComponent {
         CurrentModuleObject = "AirLoopHVAC:ZoneSplitter";
         state.dataSplitterComponent->NumSplitters = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
 
-        if (state.dataSplitterComponent->NumSplitters > 0)
+        if (state.dataSplitterComponent->NumSplitters > 0) {
             state.dataSplitterComponent->SplitterCond.allocate(state.dataSplitterComponent->NumSplitters);
+        }
         state.dataSplitterComponent->CheckEquipName.dimension(state.dataSplitterComponent->NumSplitters, true);
 
         state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumParams, NumAlphas, NumNums);
@@ -279,7 +280,9 @@ namespace SplitterComponent {
         for (SplitterNum = 1; SplitterNum <= state.dataSplitterComponent->NumSplitters; ++SplitterNum) {
             NodeNum = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
             for (OutNodeNum1 = 1; OutNodeNum1 <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++OutNodeNum1) {
-                if (NodeNum != state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum1)) continue;
+                if (NodeNum != state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum1)) {
+                    continue;
+                }
                 ShowSevereError(state,
                                 format("{} = {} specifies an outlet node name the same as the inlet node.",
                                        CurrentModuleObject,
@@ -292,8 +295,9 @@ namespace SplitterComponent {
                 for (OutNodeNum2 = OutNodeNum1 + 1; OutNodeNum2 <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes;
                      ++OutNodeNum2) {
                     if (state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum1) !=
-                        state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum2))
+                        state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(OutNodeNum2)) {
                         continue;
+                    }
                     ShowSevereError(state,
                                     format("{} = {} specifies duplicate outlet nodes in its outlet node list.",
                                            CurrentModuleObject,

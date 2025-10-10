@@ -798,7 +798,9 @@ void GetStandAloneERV(EnergyPlusData &state)
                 } else {
                     bool HStatFound = false;
                     for (NumHstatZone = 1; NumHstatZone <= state.dataZoneCtrls->NumHumidityControlZones; ++NumHstatZone) {
-                        if (state.dataZoneCtrls->HumidityControlZone(NumHstatZone).ActualZoneNum != HStatZoneNum) continue;
+                        if (state.dataZoneCtrls->HumidityControlZone(NumHstatZone).ActualZoneNum != HStatZoneNum) {
+                            continue;
+                        }
                         HStatFound = true;
                         break;
                     }
@@ -1075,8 +1077,9 @@ void InitStandAloneERV(EnergyPlusData &state,
         state.dataHVACStandAloneERV->ZoneEquipmentListChecked = true;
         for (int Loop = 1; Loop <= state.dataHVACStandAloneERV->NumStandAloneERVs; ++Loop) {
             if (DataZoneEquipment::CheckZoneEquipmentList(
-                    state, state.dataHVACStandAloneERV->StandAloneERV(Loop).UnitType, state.dataHVACStandAloneERV->StandAloneERV(Loop).Name))
+                    state, state.dataHVACStandAloneERV->StandAloneERV(Loop).UnitType, state.dataHVACStandAloneERV->StandAloneERV(Loop).Name)) {
                 continue;
+            }
             ShowSevereError(state,
                             format("InitStandAloneERV: Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
                                    state.dataHVACStandAloneERV->StandAloneERV(Loop).UnitType,
@@ -1247,7 +1250,9 @@ void SizeStandAloneERV(EnergyPlusData &state, int const StandAloneERVNum)
         Real64 NumberOfPeople = 0.0;
         Real64 MaxPeopleSch = 0.0;
         for (int PeopleNum = 1; PeopleNum <= state.dataHeatBal->TotPeople; ++PeopleNum) {
-            if (ZoneNum != state.dataHeatBal->People(PeopleNum).ZonePtr) continue;
+            if (ZoneNum != state.dataHeatBal->People(PeopleNum).ZonePtr) {
+                continue;
+            }
             MaxPeopleSch = state.dataHeatBal->People(PeopleNum).sched->getMaxVal(state);
             NumberOfPeople = NumberOfPeople + (state.dataHeatBal->People(PeopleNum).NumberOfPeople * MaxPeopleSch);
         }

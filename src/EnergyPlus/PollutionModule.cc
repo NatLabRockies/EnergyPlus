@@ -110,7 +110,9 @@ void CalculatePollution(EnergyPlusData &state)
     // METHODOLOGY EMPLOYED:
     // Uses the status flags to trigger events.
 
-    if (!state.dataPollution->PollutionReportSetup) return;
+    if (!state.dataPollution->PollutionReportSetup) {
+        return;
+    }
 
     //   Call the Routine to Read the Energy Values from the EnergyPlus Meters
     ReadEnergyMeters(state);
@@ -206,7 +208,9 @@ void GetPollutionFactorInput(EnergyPlusData &state)
     auto &ipsc = state.dataIPShortCut;
     auto &pm = state.dataPollution;
 
-    if (!pm->GetInputFlagPollution) return; // Input already gotten
+    if (!pm->GetInputFlagPollution) {
+        return; // Input already gotten
+    }
     pm->GetInputFlagPollution = false;
 
     ipsc->cCurrentModuleObject = "EnvironmentalImpactFactors";
@@ -418,7 +422,9 @@ void SetupPollutionMeterReporting(EnergyPlusData &state)
     // We are using this list rather than the enumeration to preserve the order in which meters are created to avoid ordering diffs.
     for (PollFuel pollFuel : pm->pollFuelFactorList) {
 
-        if (!pm->pollCoeffs[(int)pollFuel].used) continue;
+        if (!pm->pollCoeffs[(int)pollFuel].used) {
+            continue;
+        }
 
         auto &pollComp = pm->pollComps[(int)pollFuel2pollFuelComponent[(int)pollFuel]];
 
@@ -590,7 +596,9 @@ void CalcPollution(EnergyPlusData &state)
                 Real64 pollutantVal = pollCoeff.pollutantCoeffs[iPoll];
 
                 // Why are these two the exceptions?
-                if (iPoll != (int)Pollutant::Water && iPoll != (int)Pollutant::NuclearLow) pollutantVal *= 0.001;
+                if (iPoll != (int)Pollutant::Water && iPoll != (int)Pollutant::NuclearLow) {
+                    pollutantVal *= 0.001;
+                }
 
                 if (pollCoeff.pollutantScheds[iPoll] != nullptr) {
                     pollutantVal *= pollCoeff.pollutantScheds[iPoll]->getCurrentVal();
@@ -600,7 +608,7 @@ void CalcPollution(EnergyPlusData &state)
 
             pm->pollutantVals[iPoll] += pollComp.pollutantVals[iPoll];
         } // for (iPollFactor)
-    }     // for (iPoll)
+    } // for (iPoll)
 
     pm->TotCarbonEquivFromN2O = pm->pollutantVals[(int)Pollutant::N2O] * pm->CarbonEquivN2O;
     pm->TotCarbonEquivFromCH4 = pm->pollutantVals[(int)Pollutant::CH4] * pm->CarbonEquivCH4;
@@ -683,8 +691,9 @@ void ReadEnergyMeters(EnergyPlusData &state)
         pm->facilityMeterVals[(int)PollFacilityMeter::Electricity] - pm->facilityMeterVals[(int)PollFacilityMeter::ElectricityProduced] +
         pm->facilityMeterVals[(int)PollFacilityMeter::CoolPurchased] / pm->PurchCoolCOP;
 
-    if (pm->facilityMeterFuelComponentVals[(int)PollFuelComponent::Electricity] < 0.0)
+    if (pm->facilityMeterFuelComponentVals[(int)PollFuelComponent::Electricity] < 0.0) {
         pm->facilityMeterFuelComponentVals[(int)PollFuelComponent::Electricity] = 0.0;
+    }
 
     // The Natural Gas fuel type will be summed from the meters with the District Heating using an efficiency.
     pm->facilityMeterFuelComponentVals[(int)PollFuelComponent::NaturalGas] =

@@ -145,7 +145,9 @@ int PluginManager::numActiveCallbacks(const EnergyPlusData &state)
 
 void runAnyRegisteredCallbacks(EnergyPlusData &state, EMSManager::EMSCallFrom const iCalledFrom, bool &anyRan)
 {
-    if (state.dataGlobal->KickOffSimulation) return;
+    if (state.dataGlobal->KickOffSimulation) {
+        return;
+    }
     for (auto const &cb : state.dataPluginManager->callbacks[iCalledFrom]) {
         if (iCalledFrom == EMSManager::EMSCallFrom::UserDefinedComponentModel) {
             continue; // these are called -intentionally- using the runSingleUserDefinedCallback method
@@ -156,7 +158,9 @@ void runAnyRegisteredCallbacks(EnergyPlusData &state, EMSManager::EMSCallFrom co
 #if LINK_WITH_PYTHON
     for (auto &plugin : state.dataPluginManager->plugins) {
         if (plugin.runDuringWarmup || !state.dataGlobal->WarmupFlag) {
-            if (plugin.run(state, iCalledFrom)) anyRan = true;
+            if (plugin.run(state, iCalledFrom)) {
+                anyRan = true;
+            }
         }
     }
 #endif
@@ -371,7 +375,7 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                 }
             }
         } // for (instance)
-    }     // if (OutputVarInstances > 0)
+    } // if (OutputVarInstances > 0)
 #endif
 } // setupOutputVariables()
 
@@ -996,23 +1000,57 @@ void PluginInstance::shutdown() const
 #if LINK_WITH_PYTHON
     Py_DECREF(this->pClassInstance);
     Py_DECREF(this->pModule); // PyImport_Import returns a new reference, decrement it
-    if (this->bHasBeginNewEnvironment) Py_DECREF(this->pBeginNewEnvironment);
-    if (this->bHasAfterNewEnvironmentWarmUpIsComplete) Py_DECREF(this->pAfterNewEnvironmentWarmUpIsComplete);
-    if (this->bHasBeginZoneTimestepBeforeInitHeatBalance) Py_DECREF(this->pBeginZoneTimestepBeforeInitHeatBalance);
-    if (this->bHasBeginZoneTimestepAfterInitHeatBalance) Py_DECREF(this->pBeginZoneTimestepAfterInitHeatBalance);
-    if (this->bHasBeginTimestepBeforePredictor) Py_DECREF(this->pBeginTimestepBeforePredictor);
-    if (this->bHasAfterPredictorBeforeHVACManagers) Py_DECREF(this->pAfterPredictorBeforeHVACManagers);
-    if (this->bHasAfterPredictorAfterHVACManagers) Py_DECREF(this->pAfterPredictorAfterHVACManagers);
-    if (this->bHasInsideHVACSystemIterationLoop) Py_DECREF(this->pInsideHVACSystemIterationLoop);
-    if (this->bHasEndOfZoneTimestepBeforeZoneReporting) Py_DECREF(this->pEndOfZoneTimestepBeforeZoneReporting);
-    if (this->bHasEndOfZoneTimestepAfterZoneReporting) Py_DECREF(this->pEndOfZoneTimestepAfterZoneReporting);
-    if (this->bHasEndOfSystemTimestepBeforeHVACReporting) Py_DECREF(this->pEndOfSystemTimestepBeforeHVACReporting);
-    if (this->bHasEndOfSystemTimestepAfterHVACReporting) Py_DECREF(this->pEndOfSystemTimestepAfterHVACReporting);
-    if (this->bHasEndOfZoneSizing) Py_DECREF(this->pEndOfZoneSizing);
-    if (this->bHasEndOfSystemSizing) Py_DECREF(this->pEndOfSystemSizing);
-    if (this->bHasAfterComponentInputReadIn) Py_DECREF(this->pAfterComponentInputReadIn);
-    if (this->bHasUserDefinedComponentModel) Py_DECREF(this->pUserDefinedComponentModel);
-    if (this->bHasUnitarySystemSizing) Py_DECREF(this->pUnitarySystemSizing);
+    if (this->bHasBeginNewEnvironment) {
+        Py_DECREF(this->pBeginNewEnvironment);
+    }
+    if (this->bHasAfterNewEnvironmentWarmUpIsComplete) {
+        Py_DECREF(this->pAfterNewEnvironmentWarmUpIsComplete);
+    }
+    if (this->bHasBeginZoneTimestepBeforeInitHeatBalance) {
+        Py_DECREF(this->pBeginZoneTimestepBeforeInitHeatBalance);
+    }
+    if (this->bHasBeginZoneTimestepAfterInitHeatBalance) {
+        Py_DECREF(this->pBeginZoneTimestepAfterInitHeatBalance);
+    }
+    if (this->bHasBeginTimestepBeforePredictor) {
+        Py_DECREF(this->pBeginTimestepBeforePredictor);
+    }
+    if (this->bHasAfterPredictorBeforeHVACManagers) {
+        Py_DECREF(this->pAfterPredictorBeforeHVACManagers);
+    }
+    if (this->bHasAfterPredictorAfterHVACManagers) {
+        Py_DECREF(this->pAfterPredictorAfterHVACManagers);
+    }
+    if (this->bHasInsideHVACSystemIterationLoop) {
+        Py_DECREF(this->pInsideHVACSystemIterationLoop);
+    }
+    if (this->bHasEndOfZoneTimestepBeforeZoneReporting) {
+        Py_DECREF(this->pEndOfZoneTimestepBeforeZoneReporting);
+    }
+    if (this->bHasEndOfZoneTimestepAfterZoneReporting) {
+        Py_DECREF(this->pEndOfZoneTimestepAfterZoneReporting);
+    }
+    if (this->bHasEndOfSystemTimestepBeforeHVACReporting) {
+        Py_DECREF(this->pEndOfSystemTimestepBeforeHVACReporting);
+    }
+    if (this->bHasEndOfSystemTimestepAfterHVACReporting) {
+        Py_DECREF(this->pEndOfSystemTimestepAfterHVACReporting);
+    }
+    if (this->bHasEndOfZoneSizing) {
+        Py_DECREF(this->pEndOfZoneSizing);
+    }
+    if (this->bHasEndOfSystemSizing) {
+        Py_DECREF(this->pEndOfSystemSizing);
+    }
+    if (this->bHasAfterComponentInputReadIn) {
+        Py_DECREF(this->pAfterComponentInputReadIn);
+    }
+    if (this->bHasUserDefinedComponentModel) {
+        Py_DECREF(this->pUserDefinedComponentModel);
+    }
+    if (this->bHasUnitarySystemSizing) {
+        Py_DECREF(this->pUnitarySystemSizing);
+    }
 #endif
 }
 
@@ -1507,7 +1545,9 @@ int PluginManager::getUserDefinedCallbackIndex(const EnergyPlusData &state, cons
 
 void PluginManager::runSingleUserDefinedCallback(EnergyPlusData &state, int index)
 {
-    if (state.dataGlobal->KickOffSimulation) return;              // Maybe?
+    if (state.dataGlobal->KickOffSimulation) {
+        return; // Maybe?
+    }
     state.dataPluginManager->userDefinedCallbacks[index](&state); // Check Index first
 }
 

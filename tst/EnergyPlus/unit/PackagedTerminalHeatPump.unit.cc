@@ -3893,7 +3893,9 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     SplitterComponent::GetSplitterInput(*state);
     state->dataUnitarySystems->getInputOnceFlag = false;
     for (int i = 1; i <= state->dataGlobal->NumOfZones; ++i) {
-        if (!state->dataZoneEquip->ZoneEquipConfig(i).IsControlled) continue;
+        if (!state->dataZoneEquip->ZoneEquipConfig(i).IsControlled) {
+            continue;
+        }
         state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(i).ZoneNode).Temp =
             state->dataZoneTempPredictorCorrector->zoneHeatBalance(i).MAT;
         state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(i).ZoneNode).HumRat =
@@ -3960,7 +3962,9 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     state->dataLoopNodes->Node(mixerReturnNode).MassFlowRate = 0.26908 * 1.2;
     state->dataLoopNodes->Node(mixerMixedNode).MassFlowRateMaxAvail = 0.26908 * 1.2;
     for (int i = 1; i <= state->dataGlobal->NumOfZones; ++i) {
-        if (!state->dataZoneEquip->ZoneEquipConfig(i).IsControlled) continue;
+        if (!state->dataZoneEquip->ZoneEquipConfig(i).IsControlled) {
+            continue;
+        }
         state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(i).ZoneNode).Temp =
             state->dataZoneTempPredictorCorrector->zoneHeatBalance(i).MAT;
         state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(i).ZoneNode).HumRat =

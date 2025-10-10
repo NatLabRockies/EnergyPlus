@@ -318,7 +318,9 @@ namespace DualDuct {
                     // Fill the Zone Equipment data with the inlet node numbers of this unit.
                     for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                         auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZone);
-                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                            continue;
+                        }
                         for (SupAirIn = 1; SupAirIn <= thisZoneEquipConfig.NumInletNodes; ++SupAirIn) {
                             if (thisDD.OutletNodeNum == thisZoneEquipConfig.InletNode(SupAirIn)) {
                                 if (state.dataZoneEquip->ZoneEquipConfig(CtrlZone).AirDistUnitCool(SupAirIn).OutNode > 0) {
@@ -455,7 +457,9 @@ namespace DualDuct {
                     // Fill the Zone Equipment data with the inlet node numbers of this unit.
                     for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                         auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZone);
-                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                            continue;
+                        }
                         for (SupAirIn = 1; SupAirIn <= thisZoneEquipConfig.NumInletNodes; ++SupAirIn) {
                             if (thisDD.OutletNodeNum == thisZoneEquipConfig.InletNode(SupAirIn)) {
                                 thisZoneEquipConfig.AirDistUnitCool(SupAirIn).InNode = thisDD.ColdAirInletNodeNum;
@@ -622,7 +626,9 @@ namespace DualDuct {
                     // Fill the Zone Equipment data with the inlet node numbers of this unit.
                     for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                         auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZone);
-                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                            continue;
+                        }
                         for (SupAirIn = 1; SupAirIn <= thisZoneEquipConfig.NumInletNodes; ++SupAirIn) {
                             if (thisDD.OutletNodeNum == thisZoneEquipConfig.InletNode(SupAirIn)) {
                                 if (thisDD.RecircIsUsed) {
@@ -753,10 +759,13 @@ namespace DualDuct {
             state.dataDualDuct->ZoneEquipmentListChecked = true;
             // Check to see if there is a Air Distribution Unit on the Zone Equipment List
             for (Loop = 1; Loop <= state.dataDualDuct->NumDDAirTerminal; ++Loop) {
-                if (this->ADUNum == 0) continue;
-                if (DataZoneEquipment::CheckZoneEquipmentList(
-                        state, "ZONEHVAC:AIRDISTRIBUTIONUNIT", state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name))
+                if (this->ADUNum == 0) {
                     continue;
+                }
+                if (DataZoneEquipment::CheckZoneEquipmentList(
+                        state, "ZONEHVAC:AIRDISTRIBUTIONUNIT", state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name)) {
+                    continue;
+                }
                 ShowSevereError(state,
                                 format("InitDualDuct: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
                                        state.dataDefineEquipment->AirDistUnit(this->ADUNum).Name));
@@ -811,7 +820,9 @@ namespace DualDuct {
                 // Initialize for DualDuct:VAV:OutdoorAir
                 OutNode = this->OutletNodeNum;
                 OAInNode = this->OAInletNodeNum;
-                if (this->RecircIsUsed) RAInNode = this->RecircAirInletNodeNum;
+                if (this->RecircIsUsed) {
+                    RAInNode = this->RecircAirInletNodeNum;
+                }
                 state.dataLoopNodes->Node(OutNode).MassFlowRateMax = this->MaxAirMassFlowRate;
                 state.dataLoopNodes->Node(OutNode).MassFlowRateMin = 0.0;
                 this->dd_airterminalOAInlet.AirMassFlowRateMax = this->DesignOAFlowRate * state.dataEnvrn->StdRhoAir;
@@ -826,7 +837,9 @@ namespace DualDuct {
                 // figure per person by design level for the OA duct.
                 PeopleFlow = 0.0;
                 for (Loop = 1; Loop <= state.dataHeatBal->TotPeople; ++Loop) {
-                    if (state.dataHeatBal->People(Loop).ZonePtr != this->CtrlZoneNum) continue;
+                    if (state.dataHeatBal->People(Loop).ZonePtr != this->CtrlZoneNum) {
+                        continue;
+                    }
                     DataSizing::OAFlowCalcMethod damperOAFlowMethod = state.dataSize->OARequirements(this->OARequirementsPtr).OAFlowMethod;
                     if (damperOAFlowMethod == DataSizing::OAFlowCalcMethod::PerPerson || damperOAFlowMethod == DataSizing::OAFlowCalcMethod::Sum ||
                         damperOAFlowMethod == DataSizing::OAFlowCalcMethod::Max) {
@@ -862,7 +875,9 @@ namespace DualDuct {
             OutNode = this->OutletNodeNum;
         } else if (this->DamperType == DualDuctDamper::OutdoorAir) {
             OAInNode = this->OAInletNodeNum;
-            if (this->RecircIsUsed) RAInNode = this->RecircAirInletNodeNum;
+            if (this->RecircIsUsed) {
+                RAInNode = this->RecircAirInletNodeNum;
+            }
             OutNode = this->OutletNodeNum;
         }
 
@@ -1448,7 +1463,9 @@ namespace DualDuct {
         // Calculate all of the required Cp's
         CpAirZn = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(ZoneNodeNum).HumRat);
         CpAirSysOA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(OAInletNodeNum).HumRat);
-        if (this->RecircIsUsed) CpAirSysRA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(RecircInletNodeNum).HumRat);
+        if (this->RecircIsUsed) {
+            CpAirSysRA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(RecircInletNodeNum).HumRat);
+        }
 
         // Set the OA Damper to the calculated ventilation flow rate
         this->dd_airterminalOAInlet.AirMassFlowRate = OAMassFlow;
@@ -1645,7 +1662,9 @@ namespace DualDuct {
         if (AirLoopNum > 0) {
             AirLoopOAFrac = state.dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac;
             // If no additional input from user, RETURN from subroutine
-            if (this->NoOAFlowInputFromUser) return;
+            if (this->NoOAFlowInputFromUser) {
+                return;
+            }
             // Calculate outdoor air flow rate, zone multipliers are applied in GetInput
             if (AirLoopOAFrac > 0.0) {
                 bool constexpr UseMinOASchFlag(true); // Always use min OA schedule in calculations.
@@ -1691,7 +1710,9 @@ namespace DualDuct {
             ShowSevereError(
                 state,
                 format("CalcOAOnlyMassFlow: Problem in AirTerminal:DualDuct:VAV:OutdoorAir = {}, check outdoor air specification", this->Name));
-            if (present(MaxOAVolFlow)) MaxOAVolFlow = 0.0;
+            if (present(MaxOAVolFlow)) {
+                MaxOAVolFlow = 0.0;
+            }
             return;
         }
 
@@ -1848,9 +1869,10 @@ namespace DualDuct {
             "! <Dual Duct Damper>,<Dual Duct Damper Count>,<Dual Duct Damper Name>,<Inlet Node>,<Outlet Node>,<Inlet "
             "Node Type>,<AirLoopHVAC Name>");
 
-        if (!allocated(state.dataDualDuct->dd_airterminal))
+        if (!allocated(state.dataDualDuct->dd_airterminal)) {
             return; // Autodesk Bug: Can arrive here with Damper unallocated (SimulateDualDuct not yet called) with NumDDAirTerminal either set >0 or
-                    // uninitialized
+        }
+        // uninitialized
 
         // Report Dual Duct Dampers to BND File
         print(state.files.bnd, "{}\n", "! ===============================================================");
@@ -1868,20 +1890,28 @@ namespace DualDuct {
                 Found = 0;
                 for (int Count3 = 1; Count3 <= state.dataZoneEquip->SupplyAirPath(Count2).NumOutletNodes; ++Count3) {
                     if (state.dataDualDuct->dd_airterminal(Count1).HotAirInletNodeNum ==
-                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3))
+                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3)) {
                         Found = Count3;
+                    }
                     if (state.dataDualDuct->dd_airterminal(Count1).ColdAirInletNodeNum ==
-                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3))
+                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3)) {
                         Found = Count3;
-                    if (state.dataDualDuct->dd_airterminal(Count1).OAInletNodeNum == state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3))
+                    }
+                    if (state.dataDualDuct->dd_airterminal(Count1).OAInletNodeNum == state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3)) {
                         Found = Count3;
+                    }
                     if (state.dataDualDuct->dd_airterminal(Count1).RecircAirInletNodeNum ==
-                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3))
+                        state.dataZoneEquip->SupplyAirPath(Count2).OutletNode(Count3)) {
                         Found = Count3;
+                    }
                 }
-                if (Found != 0) break;
+                if (Found != 0) {
+                    break;
+                }
             }
-            if (Found == 0) SupplyAirPathNum = 0;
+            if (Found == 0) {
+                SupplyAirPathNum = 0;
+            }
 
             // Determine which air loop this dual duct damper is connected to
             Found = 0;
@@ -1892,26 +1922,35 @@ namespace DualDuct {
                 for (int Count3 = 1; Count3 <= state.dataAirLoop->AirToZoneNodeInfo(Count2).NumSupplyNodes; ++Count3) {
                     if (SupplyAirPathNum != 0) {
                         if (state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).InletNodeNum ==
-                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3))
+                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3)) {
                             Found = Count3;
+                        }
                     } else {
                         if (state.dataDualDuct->dd_airterminal(Count1).HotAirInletNodeNum ==
-                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3))
+                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3)) {
                             Found = Count3;
+                        }
                         if (state.dataDualDuct->dd_airterminal(Count1).ColdAirInletNodeNum ==
-                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3))
+                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3)) {
                             Found = Count3;
+                        }
                         if (state.dataDualDuct->dd_airterminal(Count1).OAInletNodeNum ==
-                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3))
+                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3)) {
                             Found = Count3;
+                        }
                         if (state.dataDualDuct->dd_airterminal(Count1).RecircAirInletNodeNum ==
-                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3))
+                            state.dataAirLoop->AirToZoneNodeInfo(Count2).ZoneEquipSupplyNodeNum(Count3)) {
                             Found = Count3;
+                        }
                     }
                 }
-                if (Found != 0) break;
+                if (Found != 0) {
+                    break;
+                }
             }
-            if (Found == 0) ChrName = "**Unknown**";
+            if (Found == 0) {
+                ChrName = "**Unknown**";
+            }
 
             std::string_view damperType = cmoNameArray[static_cast<int>(state.dataDualDuct->dd_airterminal(Count1).DamperType)];
             if ((state.dataDualDuct->dd_airterminal(Count1).DamperType == DualDuctDamper::ConstantVolume) ||

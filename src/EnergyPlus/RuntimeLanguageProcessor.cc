@@ -289,27 +289,53 @@ void BeginEnvrnInitializeRuntimeLanguage(EnergyPlusData &state)
     // reinitialize state of Erl variable values to zero, this gets sensors and internal variables used
     for (ErlVariableNum = 1; ErlVariableNum <= state.dataRuntimeLang->NumErlVariables; ++ErlVariableNum) {
         // but skip constant built-in variables so don't overwrite them
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->NullVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->FalseVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->TrueVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->OffVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->OnVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->PiVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->ZoneTimeStepVariableNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->ActualDateAndTimeNum) continue;
-        if (ErlVariableNum == state.dataRuntimeLangProcessor->ActualTimeNum) continue;
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->NullVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->FalseVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->TrueVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->OffVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->OnVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->PiVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->ZoneTimeStepVariableNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->ActualDateAndTimeNum) {
+            continue;
+        }
+        if (ErlVariableNum == state.dataRuntimeLangProcessor->ActualTimeNum) {
+            continue;
+        }
 
         // need to preserve curve index variables
         CycleThisVariable = false;
         for (loop = 1; loop <= state.dataRuntimeLang->NumEMSCurveIndices; ++loop) {
-            if (ErlVariableNum == state.dataRuntimeLangProcessor->CurveIndexVariableNums(loop)) CycleThisVariable = true;
+            if (ErlVariableNum == state.dataRuntimeLangProcessor->CurveIndexVariableNums(loop)) {
+                CycleThisVariable = true;
+            }
         }
-        if (CycleThisVariable) continue;
+        if (CycleThisVariable) {
+            continue;
+        }
         CycleThisVariable = false;
         for (loop = 1; loop <= state.dataRuntimeLang->NumEMSConstructionIndices; ++loop) {
-            if (ErlVariableNum == state.dataRuntimeLangProcessor->ConstructionIndexVariableNums(loop)) CycleThisVariable = true;
+            if (ErlVariableNum == state.dataRuntimeLangProcessor->ConstructionIndexVariableNums(loop)) {
+                CycleThisVariable = true;
+            }
         }
-        if (CycleThisVariable) continue;
+        if (CycleThisVariable) {
+            continue;
+        }
 
         if (state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value.initialized) {
             state.dataRuntimeLang->ErlVariable(ErlVariableNum).Value =
@@ -482,7 +508,9 @@ void ParseStack(EnergyPlusData &state, int const StackNum)
                 AddError(state, StackNum, LineNum, "Program or Subroutine name missing for the RUN instruction.");
             } else {
                 Pos = scan(Remainder, ' ');
-                if (Pos == std::string::npos) Pos = Remainder.length();
+                if (Pos == std::string::npos) {
+                    Pos = Remainder.length();
+                }
                 Variable = Util::makeUPPER(stripped(Remainder.substr(0, Pos))); // really the subroutine, or reference to instruction set
                 StackNum2 = Util::FindItemInList(Variable, state.dataRuntimeLang->ErlStack);
                 if (StackNum2 == 0) {
@@ -623,7 +651,9 @@ void ParseStack(EnergyPlusData &state, int const StackNum)
             --NestedIfDepth;
 
         } else if (Keyword == "WHILE") {
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "WHILE \"{}\"\n", Line);
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "WHILE \"{}\"\n", Line);
+            }
             if (Remainder.empty()) {
                 AddError(state, StackNum, LineNum, "Expression missing for the WHILE instruction.");
                 ExpressionNum = 0;
@@ -643,7 +673,9 @@ void ParseStack(EnergyPlusData &state, int const StackNum)
             }
 
         } else if (Keyword == "ENDWHILE") {
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "ENDWHILE \"{}\"\n", Line);
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "ENDWHILE \"{}\"\n", Line);
+            }
             if (NestedWhileDepth == 0) {
                 AddError(state, StackNum, LineNum, "Starting WHILE instruction missing for the ENDWHILE instruction.");
                 break;
@@ -662,7 +694,9 @@ void ParseStack(EnergyPlusData &state, int const StackNum)
             SavedWhileExpressionNum = 0;
 
         } else {
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "ERROR \"{}\"\n", Line);
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "ERROR \"{}\"\n", Line);
+            }
             AddError(state, StackNum, LineNum, "Unknown keyword [" + Keyword + "].");
         }
 
@@ -828,7 +862,9 @@ ErlValueType EvaluateStack(EnergyPlusData &state, int const StackNum)
                 // There probably shouldn't be any of these
 
             } else if (SELECT_CASE_var == DataRuntimeLanguage::ErlKeywordParam::Return) {
-                if (thisInstruction.Argument1 > 0) ReturnValue = EvaluateExpression(state, thisInstruction.Argument1, seriousErrorFound);
+                if (thisInstruction.Argument1 > 0) {
+                    ReturnValue = EvaluateExpression(state, thisInstruction.Argument1, seriousErrorFound);
+                }
                 WriteTrace(state, StackNum, InstructionNum, ReturnValue, seriousErrorFound);
                 break; // RETURN always terminates an instruction stack
 
@@ -966,11 +1002,15 @@ void WriteTrace(EnergyPlusData &state, int const StackNum, int const Instruction
     std::string TimeString;
     std::string DuringWarmup;
 
-    if ((!state.dataRuntimeLang->OutputFullEMSTrace) && (!state.dataRuntimeLang->OutputEMSErrors) && (!seriousErrorFound)) return;
+    if ((!state.dataRuntimeLang->OutputFullEMSTrace) && (!state.dataRuntimeLang->OutputEMSErrors) && (!seriousErrorFound)) {
+        return;
+    }
 
     if ((state.dataRuntimeLang->OutputEMSErrors) && (!state.dataRuntimeLang->OutputFullEMSTrace) && (!seriousErrorFound)) {
         // see if error needs to be reported.
-        if (ReturnValue.Type != Value::Error) return;
+        if (ReturnValue.Type != Value::Error) {
+            return;
+        }
     }
 
     if (!state.dataRuntimeLangProcessor->WriteTraceMyOneTimeFlag) {
@@ -1122,7 +1162,9 @@ void ParseExpression(EnergyPlusData &state,
             MultFound = false;
             DivFound = false;
 
-            if (NextChar == '.') PeriodFound = true;
+            if (NextChar == '.') {
+                PeriodFound = true;
+            }
 
             while (Pos < LastPos) {
                 NextChar = String[Pos];
@@ -1181,9 +1223,13 @@ void ParseExpression(EnergyPlusData &state,
             if (!ErrorFlag) {
                 state.dataRuntimeLangProcessor->PEToken(NumTokens).Type = Token::Number;
                 state.dataRuntimeLangProcessor->PEToken(NumTokens).String = StringToken;
-                if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "Number=\"{}\"\n", StringToken);
+                if (state.dataSysVars->DeveloperFlag) {
+                    print(state.files.debug, "Number=\"{}\"\n", StringToken);
+                }
                 state.dataRuntimeLangProcessor->PEToken(NumTokens).Number = Util::ProcessNumber(StringToken, ErrorFlag);
-                if (state.dataSysVars->DeveloperFlag && ErrorFlag) print(state.files.debug, "{}\n", "Numeric error flagged");
+                if (state.dataSysVars->DeveloperFlag && ErrorFlag) {
+                    print(state.files.debug, "{}\n", "Numeric error flagged");
+                }
                 if (MinusFound) {
                     state.dataRuntimeLangProcessor->PEToken(NumTokens).Number = -state.dataRuntimeLangProcessor->PEToken(NumTokens).Number;
                     MinusFound = false;
@@ -1222,7 +1268,9 @@ void ParseExpression(EnergyPlusData &state,
             // Save the variable token
             state.dataRuntimeLangProcessor->PEToken(NumTokens).Type = Token::Variable;
             state.dataRuntimeLangProcessor->PEToken(NumTokens).String = StringToken;
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "Variable=\"{}\"\n", StringToken);
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "Variable=\"{}\"\n", StringToken);
+            }
             state.dataRuntimeLangProcessor->PEToken(NumTokens).Variable = NewEMSVariable(state, StringToken, StackNum);
 
         } else if (is_any_of(NextChar, "+-*/^=<>@|&")) {
@@ -1268,7 +1316,9 @@ void ParseExpression(EnergyPlusData &state,
                 const std::string potential_match = String.substr(Pos, len);
 
                 if ((case_insensitive && Util::SameString(potential_match, string)) || (!case_insensitive && potential_match == string)) {
-                    if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "OPERATOR \"{}\"\n", potential_match);
+                    if (state.dataSysVars->DeveloperFlag) {
+                        print(state.files.debug, "OPERATOR \"{}\"\n", potential_match);
+                    }
                     state.dataRuntimeLangProcessor->PEToken(NumTokens).Operator = op;
                     state.dataRuntimeLangProcessor->PEToken(NumTokens).String = potential_match;
                     Pos += (len - 1);
@@ -1330,7 +1380,9 @@ void ParseExpression(EnergyPlusData &state,
                     i_parse("@TOMORROWLIQUIDPRECIP", ErlFunc::TomorrowLiquidPrecip)) {
                     // was a built in function operator
                 } else { // throw error
-                    if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "ERROR \"{}\"\n", String);
+                    if (state.dataSysVars->DeveloperFlag) {
+                        print(state.files.debug, "ERROR \"{}\"\n", String);
+                    }
                     ShowFatalError(state, format("EMS Runtime Language: did not find valid input for built-in function ={}", String));
                 }
             } else {
@@ -1339,7 +1391,9 @@ void ParseExpression(EnergyPlusData &state,
                 MultFound = false;
                 DivFound = false;
 
-                if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "OPERATOR \"{}\"\n", StringToken);
+                if (state.dataSysVars->DeveloperFlag) {
+                    print(state.files.debug, "OPERATOR \"{}\"\n", StringToken);
+                }
 
                 if (StringToken == "+") {
                     if (!OperatorProcessing) {
@@ -1380,7 +1434,9 @@ void ParseExpression(EnergyPlusData &state,
                     state.dataRuntimeLangProcessor->PEToken(NumTokens).String = StringToken;
                 } else {
                     // Uh OH, this should never happen! throw error
-                    if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "ERROR \"{}\"\n", StringToken);
+                    if (state.dataSysVars->DeveloperFlag) {
+                        print(state.files.debug, "ERROR \"{}\"\n", StringToken);
+                    }
                     ShowFatalError(state, format("EMS, caught unexpected token = \"{}\" ; while parsing string={}", StringToken, String));
                 }
             }
@@ -1391,18 +1447,24 @@ void ParseExpression(EnergyPlusData &state,
             // Parse a parenthesis token
             ++Pos;
             StringToken = NextChar;
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "PAREN \"{}\"\n", StringToken);
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "PAREN \"{}\"\n", StringToken);
+            }
             state.dataRuntimeLangProcessor->PEToken(NumTokens).Type = Token::Parenthesis;
             state.dataRuntimeLangProcessor->PEToken(NumTokens).String = StringToken;
             if (NextChar == '(') {
                 state.dataRuntimeLangProcessor->PEToken(NumTokens).Parenthesis = Token::ParenthesisLeft;
                 OperatorProcessing = true;
             }
-            if (NextChar == ')') state.dataRuntimeLangProcessor->PEToken(NumTokens).Parenthesis = Token::ParenthesisRight;
+            if (NextChar == ')') {
+                state.dataRuntimeLangProcessor->PEToken(NumTokens).Parenthesis = Token::ParenthesisRight;
+            }
 
         } else if (is_any_of(NextChar, "\"")) {
             // Parse a string literal token
-            if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "{}\n", "LITERAL STRING");
+            if (state.dataSysVars->DeveloperFlag) {
+                print(state.files.debug, "{}\n", "LITERAL STRING");
+            }
             ++Pos;
 
         } else {
@@ -1411,7 +1473,9 @@ void ParseExpression(EnergyPlusData &state,
     }
 
     if (NumErrors > 0) {
-        if (state.dataSysVars->DeveloperFlag) print(state.files.debug, "{}\n", "ERROR OUT");
+        if (state.dataSysVars->DeveloperFlag) {
+            print(state.files.debug, "{}\n", "ERROR OUT");
+        }
         ShowFatalError(state, "EMS, previous errors cause termination.");
     }
 
@@ -1473,7 +1537,9 @@ int ProcessTokens(
         for (TokenNum = 1; TokenNum <= NumTokens; ++TokenNum) {
             if (Token(TokenNum).Type == Token::Parenthesis) {
                 if (Token(TokenNum).Parenthesis == Token::ParenthesisLeft) {
-                    if (Depth == 0) Pos = TokenNum; // Record position of first left parenthesis
+                    if (Depth == 0) {
+                        Pos = TokenNum; // Record position of first left parenthesis
+                    }
                     ++Depth;
                 }
                 if (Token(TokenNum).Parenthesis == Token::ParenthesisRight) {
@@ -2028,7 +2094,9 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
                     tmpRANDU1 = 2.0 * tmpRANDU1 - 1.0;
                     tmpRANDU2 = 2.0 * tmpRANDU2 - 1.0;
                     UnitCircleTest = square(tmpRANDU1) + square(tmpRANDU2);
-                    if (UnitCircleTest > 0.0 && UnitCircleTest < 1.0) break;
+                    if (UnitCircleTest > 0.0 && UnitCircleTest < 1.0) {
+                        break;
+                    }
                 }
                 tmpRANDG = std::sqrt(-2.0 * std::log(UnitCircleTest) / UnitCircleTest);
                 tmpRANDG *= tmpRANDU1; // standard normal ran
@@ -3425,7 +3493,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 // Last field is index key, no indexing here so mimic weather output data
 
             } // RuntimeReportVarNum
-        }     // NumEMSOutputVariables > 0
+        } // NumEMSOutputVariables > 0
 
         if (state.dataRuntimeLang->NumEMSMeteredOutputVariables > 0) {
             cCurrentModuleObject = "EnergyManagementSystem:MeteredOutputVariable";
@@ -3892,7 +3960,9 @@ int FindEMSVariable(EnergyPlusData &state,
         }
     }
 
-    if (!Found) VariableNum = 0;
+    if (!Found) {
+        VariableNum = 0;
+    }
 
     return VariableNum;
 }

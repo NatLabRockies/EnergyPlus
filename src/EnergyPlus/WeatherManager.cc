@@ -211,7 +211,9 @@ namespace Weather {
                 ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3));
                 errorsFound = true;
             }
-            if (errorsFound) break;
+            if (errorsFound) {
+                break;
+            }
         }
         if (errorsFound) {
             ShowFatalError(state, "Previous input problems cause program termination");
@@ -270,7 +272,9 @@ namespace Weather {
         auto const &ipsc = state.dataIPShortCut;
 
         ipsc->cCurrentModuleObject = "Site:VariableLocation";
-        if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, ipsc->cCurrentModuleObject) == 0) return;
+        if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, ipsc->cCurrentModuleObject) == 0) {
+            return;
+        }
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                  ipsc->cCurrentModuleObject,
                                                                  1,
@@ -790,17 +794,21 @@ namespace Weather {
                                                         (state.dataWeather->DesDayInput(state.dataWeather->Envrn).MaxDryBulb -
                                                          state.dataWeather->DesDayInput(state.dataWeather->Envrn).DailyDBRange)) /
                                                        2.0;
-                        if (state.dataHeatBal->AdaptiveComfortRequested_ASH55)
+                        if (state.dataHeatBal->AdaptiveComfortRequested_ASH55) {
                             ThermalComfort::CalcThermalComfortAdaptiveASH55(state, true, false, GrossApproxAvgDryBulb);
-                        if (state.dataHeatBal->AdaptiveComfortRequested_CEN15251)
+                        }
+                        if (state.dataHeatBal->AdaptiveComfortRequested_CEN15251) {
                             ThermalComfort::CalcThermalComfortAdaptiveCEN15251(state, true, false, GrossApproxAvgDryBulb);
+                        }
                     }
                 } else {
                     if (state.dataGlobal->DoWeathSim || state.dataGlobal->DoDesDaySim) {
-                        if (state.dataHeatBal->AdaptiveComfortRequested_ASH55)
+                        if (state.dataHeatBal->AdaptiveComfortRequested_ASH55) {
                             ThermalComfort::CalcThermalComfortAdaptiveASH55(state, true, true, 0.0);
-                        if (state.dataHeatBal->AdaptiveComfortRequested_CEN15251)
+                        }
+                        if (state.dataHeatBal->AdaptiveComfortRequested_CEN15251) {
                             ThermalComfort::CalcThermalComfortAdaptiveCEN15251(state, true, true, 0.0);
+                        }
                     }
                 }
             }
@@ -815,12 +823,16 @@ namespace Weather {
                     ShowSevereError(state, "Weather Simulation requested, but no weather file attached.");
                     ErrorsFound = true;
                 }
-                if (!state.dataGlobal->DoingHVACSizingSimulations) state.dataWeather->Envrn = 0;
+                if (!state.dataGlobal->DoingHVACSizingSimulations) {
+                    state.dataWeather->Envrn = 0;
+                }
                 Available = false;
             } else if ((state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather) &&
                        (!state.dataWeather->WeatherFileExists && !state.dataGlobal->DoWeathSim)) {
                 Available = false;
-                if (!state.dataGlobal->DoingHVACSizingSimulations) state.dataWeather->Envrn = 0;
+                if (!state.dataGlobal->DoingHVACSizingSimulations) {
+                    state.dataWeather->Envrn = 0;
+                }
             } else if ((state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather) && state.dataGlobal->DoingSizing) {
                 Available = false;
                 state.dataWeather->Envrn = 0;
@@ -872,7 +884,9 @@ namespace Weather {
 
                         if (envCurr.ActualWeather && !state.dataWeather->WFAllowsLeapYears) {
                             for (int year = envCurr.StartYear; year <= envCurr.EndYear; year++) {
-                                if (!isLeapYear(year)) continue;
+                                if (!isLeapYear(year)) {
+                                    continue;
+                                }
 
                                 ShowSevereError(
                                     state,
@@ -896,8 +910,12 @@ namespace Weather {
                                     ShowContinueError(state, "...to match the RunPeriod, the DATA PERIOD should be mm/dd/yyyy for both, or");
                                     ShowContinueError(state, "(...set \"Treat Weather as Actual\" to \"No\".)");
                                 }
-                                if (!General::BetweenDates(envCurr.StartDate, runStartJulian, runEndJulian)) continue;
-                                if (!General::BetweenDates(envCurr.EndDate, runStartJulian, runEndJulian)) continue;
+                                if (!General::BetweenDates(envCurr.StartDate, runStartJulian, runEndJulian)) {
+                                    continue;
+                                }
+                                if (!General::BetweenDates(envCurr.EndDate, runStartJulian, runEndJulian)) {
+                                    continue;
+                                }
                                 OkRun = true;
                                 break;
                             }
@@ -915,8 +933,12 @@ namespace Weather {
                                     OkRun = true;
                                     break;
                                 }
-                                if (!General::BetweenDates(envCurr.StartJDay, runStartOrdinal, runEndOrdinal)) continue;
-                                if (!General::BetweenDates(envCurr.EndJDay, runStartOrdinal, runEndOrdinal)) continue;
+                                if (!General::BetweenDates(envCurr.StartJDay, runStartOrdinal, runEndOrdinal)) {
+                                    continue;
+                                }
+                                if (!General::BetweenDates(envCurr.EndJDay, runStartOrdinal, runEndOrdinal)) {
+                                    continue;
+                                }
                                 OkRun = true;
                             }
                         }
@@ -1061,8 +1083,12 @@ namespace Weather {
                             state.dataWeather->WeekDayTypes(i) = TWeekDay;
                             TWeekDay = mod(TWeekDay, 7) + 1;
                             ++i;
-                            if (i > 366) i = 1;
-                            if (i == JDay5End) break;
+                            if (i > 366) {
+                                i = 1;
+                            }
+                            if (i == JDay5End) {
+                                break;
+                            }
                         }
 
                         state.dataWeather->DaylightSavingIsActive =
@@ -1225,7 +1251,9 @@ namespace Weather {
         int CurWeekDay{StWeekDay};
         for (int i = 1; i <= StDay - 1; ++i) {
             --CurWeekDay;
-            if (CurWeekDay == 0) CurWeekDay = 7;
+            if (CurWeekDay == 0) {
+                CurWeekDay = 7;
+            }
         }
 
         WeekDays(StMon) = CurWeekDay;
@@ -1258,7 +1286,9 @@ namespace Weather {
             CurWeekDay = StWeekDay;
             for (int i = 1; i <= StDay - 1; ++i) {
                 --CurWeekDay;
-                if (CurWeekDay == 0) CurWeekDay = 7;
+                if (CurWeekDay == 0) {
+                    CurWeekDay = 7;
+                }
             }
 
             for (int i = StMon - 1; i >= 1; --i) {
@@ -1356,7 +1386,9 @@ namespace Weather {
                 CurWeekDay = WeekDays(StartMonth);
                 for (int i = 1; i <= StartMonthDay - 1; ++i) {
                     --CurWeekDay;
-                    if (CurWeekDay == 0) CurWeekDay = 7;
+                    if (CurWeekDay == 0) {
+                        CurWeekDay = 7;
+                    }
                 }
 
                 for (int i = StartMonth - 1; i >= 1; --i) {
@@ -1451,7 +1483,9 @@ namespace Weather {
                     CurWeekDay = WeekDays(StartMonth);
                     for (int i = 1; i <= StartMonthDay - 1; ++i) {
                         --CurWeekDay;
-                        if (CurWeekDay == 0) CurWeekDay = 7;
+                        if (CurWeekDay == 0) {
+                            CurWeekDay = 7;
+                        }
                     }
 
                     for (int i = StartMonth - 1; i >= 1; --i) {
@@ -1601,19 +1635,27 @@ namespace Weather {
         state.dataWeather->SpecialDayTypes = 0;
         for (int i = 1; i <= state.dataWeather->NumSpecialDays; ++i) {
             auto &specialDay = state.dataWeather->SpecialDays(i);
-            if (specialDay.WthrFile && !state.dataWeather->UseSpecialDays) continue;
+            if (specialDay.WthrFile && !state.dataWeather->UseSpecialDays) {
+                continue;
+            }
             if (specialDay.dateType <= DateType::MonthDay) {
                 JDay = General::OrdinalDay(specialDay.Month, specialDay.Day, state.dataWeather->LeapYearAdd);
                 if (specialDay.Duration == 1 && state.dataWeather->Environment(state.dataWeather->Envrn).ApplyWeekendRule) {
                     if (state.dataWeather->WeekDayTypes(JDay) == static_cast<int>(Sched::DayType::Sunday)) {
                         // Sunday, must go to Monday
                         ++JDay;
-                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) JDay = 1;
+                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) {
+                            JDay = 1;
+                        }
                     } else if (state.dataWeather->WeekDayTypes(JDay) == (int)Sched::DayType::Saturday) {
                         ++JDay;
-                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) JDay = 1;
+                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) {
+                            JDay = 1;
+                        }
                         ++JDay;
-                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) JDay = 1;
+                        if (JDay == 366 && state.dataWeather->LeapYearAdd == 0) {
+                            JDay = 1;
+                        }
                     }
                 }
                 General::InvOrdinalDay(JDay, specialDay.ActStMon, specialDay.ActStDay, state.dataWeather->LeapYearAdd);
@@ -1653,8 +1695,12 @@ namespace Weather {
             int JDay1 = JDay - 1;
             for (int j = 0; j <= specialDay.Duration - 1; ++j) {
                 ++JDay1;
-                if (JDay1 == 366 && state.dataWeather->LeapYearAdd == 0) JDay1 = 1;
-                if (JDay1 == 367) JDay1 = 1;
+                if (JDay1 == 366 && state.dataWeather->LeapYearAdd == 0) {
+                    JDay1 = 1;
+                }
+                if (JDay1 == 367) {
+                    JDay1 = 1;
+                }
                 state.dataWeather->SpecialDayTypes(JDay1) = specialDay.DayType;
             }
         }
@@ -1803,9 +1849,10 @@ namespace Weather {
                             // need to reset MonWeekDay and WeekDayTypes
                             int JDay5Start = General::OrdinalDay(envCurr.StartMonth, envCurr.StartDay, state.dataWeather->LeapYearAdd);
                             int JDay5End = General::OrdinalDay(envCurr.EndMonth, envCurr.EndDay, state.dataWeather->LeapYearAdd);
-                            if (!envCurr.ActualWeather)
+                            if (!envCurr.ActualWeather) {
                                 state.dataWeather->curSimDayForEndOfRunPeriod =
                                     state.dataGlobal->DayOfSim + envCurr.RawSimDays + state.dataWeather->LeapYearAdd - 1;
+                            }
 
                             {
                                 int i = JDay5Start;
@@ -1814,8 +1861,12 @@ namespace Weather {
                                     state.dataWeather->WeekDayTypes(i) = TWeekDay;
                                     TWeekDay = mod(TWeekDay, 7) + 1;
                                     ++i;
-                                    if (i > 366) i = 1;
-                                    if (i == JDay5End) break;
+                                    if (i > 366) {
+                                        i = 1;
+                                    }
+                                    if (i == JDay5End) {
+                                        break;
+                                    }
                                 }
                             }
                             ResetWeekDaysByMonth(state,
@@ -1838,10 +1889,12 @@ namespace Weather {
                         ++envCurr.CurrentYear;
                         envCurr.IsLeapYear = isLeapYear(envCurr.CurrentYear);
                         state.dataEnvrn->CurrentYearIsLeapYear = envCurr.IsLeapYear;
-                        if (state.dataEnvrn->CurrentYearIsLeapYear && !state.dataWeather->WFAllowsLeapYears)
+                        if (state.dataEnvrn->CurrentYearIsLeapYear && !state.dataWeather->WFAllowsLeapYears) {
                             state.dataEnvrn->CurrentYearIsLeapYear = false;
-                        if (state.dataGlobal->DayOfSim < state.dataWeather->curSimDayForEndOfRunPeriod && state.dataEnvrn->CurrentYearIsLeapYear)
+                        }
+                        if (state.dataGlobal->DayOfSim < state.dataWeather->curSimDayForEndOfRunPeriod && state.dataEnvrn->CurrentYearIsLeapYear) {
                             ++state.dataWeather->curSimDayForEndOfRunPeriod;
+                        }
                     }
 
                     state.dataWeather->LeapYearAdd = (int)(state.dataEnvrn->CurrentYearIsLeapYear && state.dataWeather->WFAllowsLeapYears);
@@ -1880,7 +1933,7 @@ namespace Weather {
                                 envCurr.minHeatingOADPSizing = Tdp;
                             }
                         } // for (iTS)
-                    }     // for (iHr)
+                    } // for (iHr)
                 }
             }
 
@@ -2048,10 +2101,14 @@ namespace Weather {
 
         auto const &today = state.dataWeather->wvarsHrTsToday(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay);
         state.dataEnvrn->OutDryBulbTemp = today.OutDryBulbTemp;
-        if (state.dataEnvrn->EMSOutDryBulbOverrideOn) state.dataEnvrn->OutDryBulbTemp = state.dataEnvrn->EMSOutDryBulbOverrideValue;
+        if (state.dataEnvrn->EMSOutDryBulbOverrideOn) {
+            state.dataEnvrn->OutDryBulbTemp = state.dataEnvrn->EMSOutDryBulbOverrideValue;
+        }
         state.dataEnvrn->OutBaroPress = today.OutBaroPress;
         state.dataEnvrn->OutDewPointTemp = today.OutDewPointTemp;
-        if (state.dataEnvrn->EMSOutDewPointTempOverrideOn) state.dataEnvrn->OutDewPointTemp = state.dataEnvrn->EMSOutDewPointTempOverrideValue;
+        if (state.dataEnvrn->EMSOutDewPointTempOverrideOn) {
+            state.dataEnvrn->OutDewPointTemp = state.dataEnvrn->EMSOutDewPointTempOverrideValue;
+        }
         state.dataEnvrn->OutRelHum = today.OutRelHum;
         state.dataEnvrn->OutRelHumValue = state.dataEnvrn->OutRelHum / 100.0;
         if (state.dataEnvrn->EMSOutRelHumOverrideOn) {
@@ -2112,16 +2169,24 @@ namespace Weather {
         }
 
         state.dataEnvrn->WindSpeed = today.WindSpeed;
-        if (state.dataEnvrn->EMSWindSpeedOverrideOn) state.dataEnvrn->WindSpeed = state.dataEnvrn->EMSWindSpeedOverrideValue;
+        if (state.dataEnvrn->EMSWindSpeedOverrideOn) {
+            state.dataEnvrn->WindSpeed = state.dataEnvrn->EMSWindSpeedOverrideValue;
+        }
         state.dataEnvrn->WindDir = today.WindDir;
-        if (state.dataEnvrn->EMSWindDirOverrideOn) state.dataEnvrn->WindDir = state.dataEnvrn->EMSWindDirOverrideValue;
+        if (state.dataEnvrn->EMSWindDirOverrideOn) {
+            state.dataEnvrn->WindDir = state.dataEnvrn->EMSWindDirOverrideValue;
+        }
         state.dataWeather->HorizIRSky = today.HorizIRSky;
         state.dataEnvrn->SkyTemp = today.SkyTemp;
         state.dataEnvrn->SkyTempKelvin = state.dataEnvrn->SkyTemp + Constant::Kelvin;
         state.dataEnvrn->DifSolarRad = today.DifSolarRad;
-        if (state.dataEnvrn->EMSDifSolarRadOverrideOn) state.dataEnvrn->DifSolarRad = state.dataEnvrn->EMSDifSolarRadOverrideValue;
+        if (state.dataEnvrn->EMSDifSolarRadOverrideOn) {
+            state.dataEnvrn->DifSolarRad = state.dataEnvrn->EMSDifSolarRadOverrideValue;
+        }
         state.dataEnvrn->BeamSolarRad = today.BeamSolarRad;
-        if (state.dataEnvrn->EMSBeamSolarRadOverrideOn) state.dataEnvrn->BeamSolarRad = state.dataEnvrn->EMSBeamSolarRadOverrideValue;
+        if (state.dataEnvrn->EMSBeamSolarRadOverrideOn) {
+            state.dataEnvrn->BeamSolarRad = state.dataEnvrn->EMSBeamSolarRadOverrideValue;
+        }
         state.dataEnvrn->LiquidPrecipitation = today.LiquidPrecip / 1000.0; // convert from mm to m
         if ((state.dataEnvrn->RunPeriodEnvironment) && (!state.dataGlobal->WarmupFlag)) {
             int month = state.dataEnvrn->Month;
@@ -2172,8 +2237,12 @@ namespace Weather {
         state.dataEnvrn->OutAirDensity =
             Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->OutBaroPress, state.dataEnvrn->OutDryBulbTemp, state.dataEnvrn->OutHumRat);
 
-        if (state.dataEnvrn->OutDryBulbTemp < state.dataEnvrn->OutWetBulbTemp) state.dataEnvrn->OutWetBulbTemp = state.dataEnvrn->OutDryBulbTemp;
-        if (state.dataEnvrn->OutDewPointTemp > state.dataEnvrn->OutWetBulbTemp) state.dataEnvrn->OutDewPointTemp = state.dataEnvrn->OutWetBulbTemp;
+        if (state.dataEnvrn->OutDryBulbTemp < state.dataEnvrn->OutWetBulbTemp) {
+            state.dataEnvrn->OutWetBulbTemp = state.dataEnvrn->OutDryBulbTemp;
+        }
+        if (state.dataEnvrn->OutDewPointTemp > state.dataEnvrn->OutWetBulbTemp) {
+            state.dataEnvrn->OutDewPointTemp = state.dataEnvrn->OutWetBulbTemp;
+        }
 
         DayltgCurrentExtHorizIllum(state);
 
@@ -2651,10 +2720,18 @@ namespace Weather {
                     }
 
                     //         Set possible missing values
-                    if (ETHoriz < 0.0) ETHoriz = 9999.0;
-                    if (ETDirect < 0.0) ETDirect = 9999.0;
-                    if (IRHoriz <= 0.0) IRHoriz = 9999.0;
-                    if (GLBHoriz < 0.0) GLBHoriz = 9999.0;
+                    if (ETHoriz < 0.0) {
+                        ETHoriz = 9999.0;
+                    }
+                    if (ETDirect < 0.0) {
+                        ETDirect = 9999.0;
+                    }
+                    if (IRHoriz <= 0.0) {
+                        IRHoriz = 9999.0;
+                    }
+                    if (GLBHoriz < 0.0) {
+                        GLBHoriz = 9999.0;
+                    }
                     if (state.dataEnvrn->DisplayWeatherMissingDataWarnings) {
                         if (DirectRad >= 9999.0) {
                             ++state.dataWeather->wvarsMissedCounts.BeamSolarRad;
@@ -2671,25 +2748,63 @@ namespace Weather {
                             ++state.dataWeather->wvarsOutOfRangeCounts.DifSolarRad;
                         }
                     }
-                    if (GLBHorizIllum < 0.0) GLBHorizIllum = 999999.0;
-                    if (DirectNrmIllum < 0.0) DirectNrmIllum = 999999.0;
-                    if (DiffuseHorizIllum < 0.0) DiffuseHorizIllum = 999999.0;
-                    if (ZenLum < 0.0) ZenLum = 99999.0;
-                    if (AtmPress < 0.0) AtmPress = 999999.0;
-                    if (WindSpeed < 0.0) WindSpeed = 999.0;
-                    if (WindDir < -360.0 || WindDir > 360.0) WindDir = 999.0;
-                    if (TotalSkyCover < 0.0) TotalSkyCover = 99.0;
-                    if (RelHum < 0.0) RelHum = 999.0;
-                    if (OpaqueSkyCover < 0.0) OpaqueSkyCover = 99.0;
-                    if (Visibility < 0.0) Visibility = 9999.0;
-                    if (CeilHeight < 0.0) CeilHeight = 9999.0;
-                    if (PresWeathObs < 0) PresWeathObs = 9;
-                    if (PrecipWater < 0.0) PrecipWater = 999.0;
-                    if (AerosolOptDepth < 0.0) AerosolOptDepth = 999.0;
-                    if (SnowDepth < 0.0) SnowDepth = 999.0;
-                    if (DaysSinceLastSnow < 0.0) DaysSinceLastSnow = 99.0;
-                    if (Albedo < 0.0) Albedo = 999.0;
-                    if (LiquidPrecip < 0.0) LiquidPrecip = 999.0;
+                    if (GLBHorizIllum < 0.0) {
+                        GLBHorizIllum = 999999.0;
+                    }
+                    if (DirectNrmIllum < 0.0) {
+                        DirectNrmIllum = 999999.0;
+                    }
+                    if (DiffuseHorizIllum < 0.0) {
+                        DiffuseHorizIllum = 999999.0;
+                    }
+                    if (ZenLum < 0.0) {
+                        ZenLum = 99999.0;
+                    }
+                    if (AtmPress < 0.0) {
+                        AtmPress = 999999.0;
+                    }
+                    if (WindSpeed < 0.0) {
+                        WindSpeed = 999.0;
+                    }
+                    if (WindDir < -360.0 || WindDir > 360.0) {
+                        WindDir = 999.0;
+                    }
+                    if (TotalSkyCover < 0.0) {
+                        TotalSkyCover = 99.0;
+                    }
+                    if (RelHum < 0.0) {
+                        RelHum = 999.0;
+                    }
+                    if (OpaqueSkyCover < 0.0) {
+                        OpaqueSkyCover = 99.0;
+                    }
+                    if (Visibility < 0.0) {
+                        Visibility = 9999.0;
+                    }
+                    if (CeilHeight < 0.0) {
+                        CeilHeight = 9999.0;
+                    }
+                    if (PresWeathObs < 0) {
+                        PresWeathObs = 9;
+                    }
+                    if (PrecipWater < 0.0) {
+                        PrecipWater = 999.0;
+                    }
+                    if (AerosolOptDepth < 0.0) {
+                        AerosolOptDepth = 999.0;
+                    }
+                    if (SnowDepth < 0.0) {
+                        SnowDepth = 999.0;
+                    }
+                    if (DaysSinceLastSnow < 0.0) {
+                        DaysSinceLastSnow = 99.0;
+                    }
+                    if (Albedo < 0.0) {
+                        Albedo = 999.0;
+                    }
+                    if (LiquidPrecip < 0.0) {
+                        LiquidPrecip = 999.0;
+                    }
 
                     if (hour == 1 && CurTimeStep == 1) {
                         if (WMonth == 2 && WDay == 29 && (!state.dataEnvrn->CurrentYearIsLeapYear || !state.dataWeather->WFAllowsLeapYears)) {
@@ -2742,7 +2857,9 @@ namespace Weather {
                             state.dataWeather->SpecialDayTypes(state.dataWeather->TomorrowVariables.DayOfYear);
                     }
 
-                    if (SkipThisDay) continue;
+                    if (SkipThisDay) {
+                        continue;
+                    }
 
                     // Check out missing values
 
@@ -2834,15 +2951,33 @@ namespace Weather {
 
                     calcSky(state, tomorrow.HorizIRSky, tomorrow.SkyTemp, OpaqueSkyCover, DryBulb, DewPoint, RelHum, IRHoriz);
 
-                    if (ETHoriz >= 9999.0) ETHoriz = 0.0;
-                    if (ETDirect >= 9999.0) ETDirect = 0.0;
-                    if (GLBHoriz >= 9999.0) GLBHoriz = 0.0;
-                    if (DirectRad >= 9999.0) DirectRad = 0.0;
-                    if (DiffuseRad >= 9999.0) DiffuseRad = 0.0;
-                    if (GLBHorizIllum >= 999900.0) GLBHorizIllum = 0.0;
-                    if (DirectNrmIllum >= 999900.0) DirectNrmIllum = 0.0;
-                    if (DiffuseHorizIllum >= 999900.0) DiffuseHorizIllum = 0.0;
-                    if (ZenLum >= 99990.0) ZenLum = 0.0;
+                    if (ETHoriz >= 9999.0) {
+                        ETHoriz = 0.0;
+                    }
+                    if (ETDirect >= 9999.0) {
+                        ETDirect = 0.0;
+                    }
+                    if (GLBHoriz >= 9999.0) {
+                        GLBHoriz = 0.0;
+                    }
+                    if (DirectRad >= 9999.0) {
+                        DirectRad = 0.0;
+                    }
+                    if (DiffuseRad >= 9999.0) {
+                        DiffuseRad = 0.0;
+                    }
+                    if (GLBHorizIllum >= 999900.0) {
+                        GLBHorizIllum = 0.0;
+                    }
+                    if (DirectNrmIllum >= 999900.0) {
+                        DirectNrmIllum = 0.0;
+                    }
+                    if (DiffuseHorizIllum >= 999900.0) {
+                        DiffuseHorizIllum = 0.0;
+                    }
+                    if (ZenLum >= 99990.0) {
+                        ZenLum = 0.0;
+                    }
                     if (state.dataEnvrn->IgnoreSolarRadiation) {
                         GLBHoriz = 0.0;
                         DirectRad = 0.0;
@@ -2860,14 +2995,18 @@ namespace Weather {
 
                     tomorrow.IsRain = false;
                     if (PresWeathObs == 0) {
-                        if (PresWeathConds(1) < 9 || PresWeathConds(2) < 9 || PresWeathConds(3) < 9) tomorrow.IsRain = true;
+                        if (PresWeathConds(1) < 9 || PresWeathConds(2) < 9 || PresWeathConds(3) < 9) {
+                            tomorrow.IsRain = true;
+                        }
                     } else {
                         tomorrow.IsRain = false;
                     }
                     tomorrow.IsSnow = (SnowDepth > 0.0);
 
                     // default if rain but none on weather file
-                    if (tomorrow.IsRain && tomorrow.LiquidPrecip == 0.0) tomorrow.LiquidPrecip = 2.0; // 2mm in an hour ~ .08 inch
+                    if (tomorrow.IsRain && tomorrow.LiquidPrecip == 0.0) {
+                        tomorrow.LiquidPrecip = 2.0; // 2mm in an hour ~ .08 inch
+                    }
 
                     state.dataWeather->wvarsMissing.OutDryBulbTemp = DryBulb;
                     state.dataWeather->wvarsMissing.OutDewPointTemp = DewPoint;
@@ -3238,7 +3377,9 @@ namespace Weather {
                                             CeilHeight,
                                             RField21);
 
-            if (!succeeded) ErrorInterpretWeatherDataLine(state, WYear, WMonth, WDay, WHour, WMinute, Line, current_line);
+            if (!succeeded) {
+                ErrorInterpretWeatherDataLine(state, WYear, WMonth, WDay, WHour, WMinute, Line, current_line);
+            }
             current_line.remove_prefix(nth_pos);
         }
         pos = index(current_line, ',');
@@ -3309,7 +3450,9 @@ namespace Weather {
             strip(PresWeathCodes);
             if (len(PresWeathCodes) == 9) {
                 for (pos = 0; pos < 9; ++pos) {
-                    if (!has(ValidDigits, PresWeathCodes[pos])) PresWeathCodes[pos] = '9';
+                    if (!has(ValidDigits, PresWeathCodes[pos])) {
+                        PresWeathCodes[pos] = '9';
+                    }
                 }
 
                 // we are trying to read a string of 9 integers with no spaces, each
@@ -3430,11 +3573,15 @@ namespace Weather {
 
         // Day of week defaults to Monday, if day type specified, then that is used.
         designDay.DayOfWeek = 2;
-        if (desDayInput.DayType <= 7) designDay.DayOfWeek = desDayInput.DayType;
+        if (desDayInput.DayType <= 7) {
+            designDay.DayOfWeek = desDayInput.DayType;
+        }
 
         // set Holiday as indicated by user input
         designDay.HolidayIndex = 0;
-        if (desDayInput.DayType > 7) designDay.HolidayIndex = desDayInput.DayType;
+        if (desDayInput.DayType > 7) {
+            designDay.HolidayIndex = desDayInput.DayType;
+        }
 
         designDay.DaylightSavingIndex = desDayInput.DSTIndicator;
 
@@ -3545,10 +3692,12 @@ namespace Weather {
         case DesDayHumIndType::RelHumSch: {
             // nothing to do -- DDHumIndModifier already contains the scheduled Relative Humidity
             ConstantHumidityRatio = false;
-            for (int hr = 0; hr < Constant::iHoursInDay; ++hr)
-                for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts)
+            for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+                for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
                     state.dataWeather->wvarsHrTsTomorrow(ts + 1, hr + 1).OutRelHum =
                         state.dataWeather->desDayMods(EnvrnNum)(ts + 1, hr + 1).OutRelHum;
+                }
+            }
         } break;
         case DesDayHumIndType::WBProfDef:
         case DesDayHumIndType::WBProfDif:
@@ -3729,7 +3878,9 @@ namespace Weather {
                             Real64 KT = TotHoriz / HO; // Radiation ratio
                             KT = min(KT, 0.75);
                             DiffRad = TotHoriz * (1.0045 + KT * (0.04349 + KT * (-3.5227 + 2.6313 * KT)));
-                            if (desDayInput.SkyClear > 0.70) DiffRad = TotHoriz * C / (C + CosZenith);
+                            if (desDayInput.SkyClear > 0.70) {
+                                DiffRad = TotHoriz * C / (C + CosZenith);
+                            }
                             BeamRad = (TotHoriz - DiffRad) / CosZenith;
                             DiffRad = max(0.0, DiffRad);
                             BeamRad = max(0.0, BeamRad);
@@ -3778,14 +3929,18 @@ namespace Weather {
                 }
 
                 // override result to 0 per environment var (for testing)
-                if (state.dataEnvrn->IgnoreSolarRadiation || state.dataEnvrn->IgnoreBeamRadiation) BeamRad = 0.0;
-                if (state.dataEnvrn->IgnoreSolarRadiation || state.dataEnvrn->IgnoreDiffuseRadiation) DiffRad = 0.0;
+                if (state.dataEnvrn->IgnoreSolarRadiation || state.dataEnvrn->IgnoreBeamRadiation) {
+                    BeamRad = 0.0;
+                }
+                if (state.dataEnvrn->IgnoreSolarRadiation || state.dataEnvrn->IgnoreDiffuseRadiation) {
+                    DiffRad = 0.0;
+                }
 
                 tomorrowTs.BeamSolarRad = BeamRad;
                 tomorrowTs.DifSolarRad = DiffRad;
 
             } // Timestep (TS) Loop
-        }     // Hour Loop
+        } // Hour Loop
 
         // back-fill hour values from timesteps
         // hour values = integrated over hour ending at time of hour
@@ -3848,7 +4003,7 @@ namespace Weather {
             default: {
             } break;
             } // switch (skyTempModel)
-        }     // if (envCurr.WP_Type1 != 0)
+        } // if (envCurr.WP_Type1 != 0)
 
         state.dataGlobal->WarmupFlag = SaveWarmupFlag;
     }
@@ -4232,7 +4387,9 @@ namespace Weather {
                 }
                 std::string::size_type const Pos = FindNonSpace(Line.data);
                 std::string::size_type const HdPos = index(Line.data, epwHeaders[typeNum]);
-                if (Pos != HdPos) continue;
+                if (Pos != HdPos) {
+                    continue;
+                }
                 ProcessEPWHeader(state, static_cast<EpwHeaderType>(typeNum), Line.data, ErrorsFound);
             }
         } else { // Header already processed, just read
@@ -5640,7 +5797,9 @@ namespace Weather {
 
         for (int i = 1; i <= state.dataWeather->NumSpecialDays; ++i) {
             auto const &specialDay = state.dataWeather->SpecialDays(i);
-            if (specialDay.WthrFile) continue;
+            if (specialDay.WthrFile) {
+                continue;
+            }
 
             int Warn = 0;
 
@@ -5815,8 +5974,9 @@ namespace Weather {
 
         state.dataWeather->DesDayInput.allocate(TotDesDays); // Allocate the array to the # of DD's
         state.dataWeather->desDayMods.allocate(TotDesDays);
-        for (int iDD = 1; iDD <= TotDesDays; ++iDD)
+        for (int iDD = 1; iDD <= TotDesDays; ++iDD) {
             state.dataWeather->desDayMods(iDD).allocate(state.dataGlobal->TimeStepsInHour, Constant::iHoursInDay);
+        }
 
         state.dataWeather->spSiteSchedules.dimension(TotDesDays, Weather::SPSiteSchedules());
 
@@ -6035,7 +6195,9 @@ namespace Weather {
                 Real64 testval = std::numeric_limits<Real64>::min();
                 for (int iHr = 1; iHr <= Constant::iHoursInDay; ++iHr) {
                     for (int iTS = 1; iTS <= state.dataGlobal->TimeStepsInHour; ++iTS) {
-                        if (desDayModsEnvrn(iTS, iHr).OutDryBulbTemp > testval) testval = desDayModsEnvrn(iTS, iHr).OutDryBulbTemp;
+                        if (desDayModsEnvrn(iTS, iHr).OutDryBulbTemp > testval) {
+                            testval = desDayModsEnvrn(iTS, iHr).OutDryBulbTemp;
+                        }
                     }
                 }
 
@@ -6196,9 +6358,11 @@ namespace Weather {
                 } else {
                     std::vector<Real64> const &dayVals = desDayInput.humIndSched->getDayVals(state);
                     auto &desDayModsEnvrn = state.dataWeather->desDayMods(EnvrnNum);
-                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr)
-                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts)
+                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
                             desDayModsEnvrn(ts + 1, hr + 1).OutRelHum = dayVals[hr * state.dataGlobal->TimeStepsInHour + ts];
+                        }
+                    }
 
                     if (std::find(state.dataWeather->spSiteSchedNums.begin(),
                                   state.dataWeather->spSiteSchedNums.end(),
@@ -6238,7 +6402,7 @@ namespace Weather {
                     default: {
                     } break;
                     } // switch (desDayInput.HumIndType)
-                }     // if (desDayInput.HumIndSchPtr == 0)
+                } // if (desDayInput.HumIndSchPtr == 0)
 
             } else if (desDayInput.HumIndType == DesDayHumIndType::WBProfDef) {
                 // re WetBulbProfileDefaultMultipliers
@@ -6296,9 +6460,11 @@ namespace Weather {
                 } else {
                     std::vector<Real64> const &dayVals = desDayInput.beamSolarSched->getDayVals(state);
                     auto &desDayModsEnvrn = state.dataWeather->desDayMods(EnvrnNum);
-                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr)
-                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts)
+                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
                             desDayModsEnvrn(ts + 1, hr + 1).BeamSolarRad = dayVals[hr * state.dataGlobal->TimeStepsInHour + ts];
+                        }
+                    }
 
                     unitType = Constant::Units::W_m2;
                     // units = "[W/m2]";
@@ -6332,9 +6498,11 @@ namespace Weather {
                 } else {
                     std::vector<Real64> const &dayVals = desDayInput.diffuseSolarSched->getDayVals(state);
                     auto &desDayModsEnvrn = state.dataWeather->desDayMods(EnvrnNum);
-                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr)
-                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts)
+                    for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
+                        for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
                             desDayModsEnvrn(ts + 1, hr + 1).DifSolarRad = dayVals[hr * state.dataGlobal->TimeStepsInHour + ts];
+                        }
+                    }
 
                     // units = "[W/m2]";
                     unitType = Constant::Units::W_m2;
@@ -6492,7 +6660,9 @@ namespace Weather {
             state.dataEnvrn->Longitude = LocProps(2);
             state.dataEnvrn->TimeZoneNumber = LocProps(3);
             state.dataEnvrn->Elevation = LocProps(4);
-            if (Util::SameString(LocAlphas(2), "Yes")) state.dataWeather->keepUserSiteLocationDefinition = true;
+            if (Util::SameString(LocAlphas(2), "Yes")) {
+                state.dataWeather->keepUserSiteLocationDefinition = true;
+            }
             state.dataWeather->LocationGathered = true;
         }
     }
@@ -6561,7 +6731,9 @@ namespace Weather {
                 Found = 0;
                 for (int j = 1; j <= state.dataWeather->NumOfEnvrn; ++j) {
                     auto &environJ = state.dataWeather->Environment(j);
-                    if (environJ.KindOfEnvrn != Constant::KindOfSim::RunPeriodWeather) continue;
+                    if (environJ.KindOfEnvrn != Constant::KindOfSim::RunPeriodWeather) {
+                        continue;
+                    }
                     if (environJ.WP_Type1 != 0) {
                         ShowSevereError(state,
                                         format("{}: {}=\"{}\", indicated Environment Name already assigned.",
@@ -6870,7 +7042,7 @@ namespace Weather {
             int NumNums;                 // Number of elements in the numeric array
             int IOStat;                  // IO Status when calling get input subroutine
             Array1D_string AlphArray(2); // Character string data
-            Array1D<Real64> NumArray(2); // Numeric data
+            Array1D<Real64> NumArray(4); // Numeric data
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      ipsc->cCurrentModuleObject,
                                                                      1,
@@ -6921,6 +7093,9 @@ namespace Weather {
             } break;
             } // switch
 
+            state.dataWeather->WaterMainsTempsMultiplier = NumArray(3);
+            state.dataWeather->WaterMainsTempsOffset = NumArray(4);
+
         } else if (NumObjects > 1) {
             ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
@@ -6948,14 +7123,19 @@ namespace Weather {
             state.dataEnvrn->WaterMainsTemp = state.dataWeather->waterMainsTempSched->getCurrentVal();
             break;
         case WaterMainsTempCalcMethod::Correlation:
-            state.dataEnvrn->WaterMainsTemp = WaterMainsTempFromCorrelation(
-                state, state.dataWeather->WaterMainsTempsAnnualAvgAirTemp, state.dataWeather->WaterMainsTempsMaxDiffAirTemp);
+            state.dataEnvrn->WaterMainsTemp = WaterMainsTempFromCorrelation(state,
+                                                                            state.dataWeather->WaterMainsTempsAnnualAvgAirTemp,
+                                                                            state.dataWeather->WaterMainsTempsMaxDiffAirTemp,
+                                                                            state.dataWeather->WaterMainsTempsMultiplier,
+                                                                            state.dataWeather->WaterMainsTempsOffset);
             break;
         case WaterMainsTempCalcMethod::CorrelationFromWeatherFile:
             if (state.dataWeather->OADryBulbAverage.OADryBulbWeatherDataProcessed) {
                 state.dataEnvrn->WaterMainsTemp = WaterMainsTempFromCorrelation(state,
                                                                                 state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp,
-                                                                                state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff);
+                                                                                state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff,
+                                                                                state.dataWeather->WaterMainsTempsMultiplier,
+                                                                                state.dataWeather->WaterMainsTempsOffset);
             } else {
                 state.dataEnvrn->WaterMainsTemp = 10.0; // 50 F
             }
@@ -6966,8 +7146,11 @@ namespace Weather {
         }
     }
 
-    Real64
-    WaterMainsTempFromCorrelation(EnergyPlusData const &state, Real64 const AnnualOAAvgDryBulbTemp, Real64 const MonthlyOAAvgDryBulbTempMaxDiff)
+    Real64 WaterMainsTempFromCorrelation(EnergyPlusData const &state,
+                                         Real64 const AnnualOAAvgDryBulbTemp,
+                                         Real64 const MonthlyOAAvgDryBulbTempMaxDiff,
+                                         Real64 const TemperatureMultiplier,
+                                         Real64 const TemperatureOffset)
     {
 
         // SUBROUTINE INFORMATION:
@@ -7004,10 +7187,17 @@ namespace Weather {
             Tavg + Offset +
             Ratio * (Tdiff / 2.0) * latitude_sign * std::sin((0.986 * (state.dataEnvrn->DayOfYear - 15.0 - Lag) - 90) * Constant::DegToRad);
 
-        if (CurrentWaterMainsTemp < 32.0) CurrentWaterMainsTemp = 32.0;
+        if (CurrentWaterMainsTemp < 32.0) {
+            CurrentWaterMainsTemp = 32.0;
+        }
 
         // Convert F to C
-        return (CurrentWaterMainsTemp - 32.0) * (5.0 / 9.0);
+        CurrentWaterMainsTemp = (CurrentWaterMainsTemp - 32.0) * (5.0 / 9.0);
+
+        // apply temperature multiplier and offset
+        CurrentWaterMainsTemp = CurrentWaterMainsTemp * TemperatureMultiplier + TemperatureOffset;
+
+        return CurrentWaterMainsTemp;
     }
     void GetWeatherStation(EnergyPlusData &state, bool &ErrorsFound)
     {
@@ -7038,10 +7228,18 @@ namespace Weather {
             state.dataInputProcessing->inputProcessor->getObjectItem(
                 state, ipsc->cCurrentModuleObject, 1, AlphArray, NumAlphas, NumArray, NumNums, IOStat);
 
-            if (NumNums > 0) WeatherFileWindSensorHeight = NumArray(1);
-            if (NumNums > 1) WeatherFileWindExp = NumArray(2);
-            if (NumNums > 2) WeatherFileWindBLHeight = NumArray(3);
-            if (NumNums > 3) WeatherFileTempSensorHeight = NumArray(4);
+            if (NumNums > 0) {
+                WeatherFileWindSensorHeight = NumArray(1);
+            }
+            if (NumNums > 1) {
+                WeatherFileWindExp = NumArray(2);
+            }
+            if (NumNums > 2) {
+                WeatherFileWindBLHeight = NumArray(3);
+            }
+            if (NumNums > 3) {
+                WeatherFileTempSensorHeight = NumArray(4);
+            }
 
         } else if (NumObjects > 1) {
             ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
@@ -7239,7 +7437,9 @@ namespace Weather {
             longh(-i) = longh(-i + 1) - 15.0;
         }
         Real64 temp = mod(Longitude, 360.0);
-        if (temp > 180.0) temp -= 180.0;
+        if (temp > 180.0) {
+            temp -= 180.0;
+        }
         Real64 tz; // resultant tz meridian
         for (int i = -12; i <= 12; ++i) {
             if (temp > longl(i) && temp <= longh(i)) {
@@ -7276,7 +7476,9 @@ namespace Weather {
             ShowContinueError(state, format("Line={}", Line));
             ShowFatalError(state, "Previous conditions cause termination.");
         }
-        if (Pos != std::string::npos) Line.erase(0, Pos + 1);
+        if (Pos != std::string::npos) {
+            Line.erase(0, Pos + 1);
+        }
 
         switch (headerType) {
         case Weather::EpwHeaderType::Location: {
@@ -7620,7 +7822,9 @@ namespace Weather {
                         }
                         Line.erase(0, Pos + 1);
                     }
-                    if (actcount == 12) state.dataWeather->wthFCGroundTemps = true;
+                    if (actcount == 12) {
+                        state.dataWeather->wthFCGroundTemps = true;
+                    }
                 }
             }
         } break;
@@ -7815,8 +8019,9 @@ namespace Weather {
                     state.dataWeather->DataPeriods.allocate(state.dataWeather->NumDataPeriods);
                     NumHdArgs += 4 * state.dataWeather->NumDataPeriods;
                     if (state.dataWeather->NumDataPeriods > 0) {
-                        for (auto &e : state.dataWeather->DataPeriods)
+                        for (auto &e : state.dataWeather->DataPeriods) {
                             e.NumDays = 0;
+                        }
                     }
 
                 } else if (i == 2) {
@@ -7861,7 +8066,9 @@ namespace Weather {
                                 dataPeriod.StMon = PMonth;
                                 dataPeriod.StDay = PDay;
                                 dataPeriod.StYear = PYear;
-                                if (PYear != 0) dataPeriod.HasYearData = true;
+                                if (PYear != 0) {
+                                    dataPeriod.HasYearData = true;
+                                }
                             } else {
                                 ShowSevereError(state,
                                                 format("Data Periods must be of the form <DayOfYear> or <Month Day> (WeatherFile), found={}",
@@ -7948,7 +8155,9 @@ namespace Weather {
                                OptionalOutputFileRef{state.files.eso});
             }
             uppercase(Line.data);
-            if (has(Line.data, Header)) break;
+            if (has(Line.data, Header)) {
+                break;
+            }
         }
 
         // Dummy process Data Periods line
@@ -7991,7 +8200,9 @@ namespace Weather {
                 int const NumPeriods = Util::ProcessNumber(Line.data.substr(0, Pos), IOStatus);
                 NumHdArgs += 4 * NumPeriods;
             } else if ((i >= 3)) {
-                if (mod(i - 3, 4) == 0) ++CurCount;
+                if (mod(i - 3, 4) == 0) {
+                    ++CurCount;
+                }
             }
             Line.data.erase(0, Pos + 1);
         }
@@ -8015,7 +8226,9 @@ namespace Weather {
         static constexpr std::string_view RangeString("Out of Range Data Found on Weather Data File");
         static constexpr std::string_view rgFmt("Out of Range {} [{},{}], Number of items={:5}");
 
-        if (!state.dataEnvrn->DisplayWeatherMissingDataWarnings) return;
+        if (!state.dataEnvrn->DisplayWeatherMissingDataWarnings) {
+            return;
+        }
 
         bool MissedHeader = false;
         auto missedHeaderCheck = [&](Real64 const value, std::string const &description) {
@@ -8054,7 +8267,9 @@ namespace Weather {
                         OutOfRangeHeader = true;
                     }
                     ShowMessage(state, EnergyPlus::format(rgFmt, description, rangeLow, rangeHigh, value));
-                    if (!extraMsg.empty()) ShowMessage(state, std::string{extraMsg});
+                    if (!extraMsg.empty()) {
+                        ShowMessage(state, std::string{extraMsg});
+                    }
                 }
             };
         outOfRangeHeaderCheck(state.dataWeather->wvarsOutOfRangeCounts.OutDryBulbTemp, "Dry Bulb Temperatures", ">=-90", "<=70", "");
@@ -8261,7 +8476,7 @@ namespace Weather {
             envCurr.UseRain = runPer.useRain;
             envCurr.UseSnow = runPer.useSnow;
             envCurr.firstHrInterpUseHr1 = runPer.firstHrInterpUsingHr1; // first hour interpolation choice
-        }                                                               // for (i)
+        } // for (i)
     }
 
     bool isLeapYear(int const Year)
@@ -8352,7 +8567,9 @@ namespace Weather {
         }
 
         state.dataEnvrn->DayOfWeek = mod(day + (13 * (Gmm + 1) / 5) + Gyyyy + (Gyyyy / 4) + 6 * (Gyyyy / 100) + (Gyyyy / 400), 7);
-        if (state.dataEnvrn->DayOfWeek == 0) state.dataEnvrn->DayOfWeek = 7;
+        if (state.dataEnvrn->DayOfWeek == 0) {
+            state.dataEnvrn->DayOfWeek = 7;
+        }
 
         return static_cast<Sched::DayType>(state.dataEnvrn->DayOfWeek);
     }
@@ -8538,7 +8755,9 @@ namespace Weather {
                 // calculate annual average outdoor air dry-bulb temperature and monthly daily average
                 // outdoor air temperature maximum difference
                 int AnnualNumberOfDays = 365;
-                if (epwHasLeapYear) AnnualNumberOfDays++;
+                if (epwHasLeapYear) {
+                    AnnualNumberOfDays++;
+                }
                 this->AnnualAvgOADryBulbTemp = AnnualDailyAverageDryBulbTempSum / AnnualNumberOfDays;
                 this->MonthlyAvgOADryBulbTempMaxDiff = MonthlyDailyDryBulbMax - MonthlyDailyDryBulbMin;
                 this->MonthlyDailyAverageDryBulbTemp = MonthlyAverageDryBulbTemp;
@@ -8585,9 +8804,7 @@ namespace Weather {
             break;
         case WaterMainsTempCalcMethod::Correlation:
             *eiostream << "Site Water Mains Temperature Information,";
-            *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << ","
-                       << "NA"
-                       << ",";
+            *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
             *eiostream << format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
                        << format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
             *eiostream << "NA\n";
@@ -8595,34 +8812,17 @@ namespace Weather {
         case WaterMainsTempCalcMethod::CorrelationFromWeatherFile:
             if (state.dataWeather->OADryBulbAverage.OADryBulbWeatherDataProcessed) {
                 *eiostream << "Site Water Mains Temperature Information,";
-                *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << ","
-                           << "NA"
-                           << ",";
+                *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
                 *eiostream << format("{:.2R}", state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp) << ","
-                           << format("{:.2R}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << ","
-                           << "NA\n";
+                           << format("{:.2R}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << "," << "NA\n";
             } else {
                 *eiostream << "Site Water Mains Temperature Information,";
-                *eiostream << "FixedDefault"
-                           << ","
-                           << "NA"
-                           << ","
-                           << "NA"
-                           << ","
-                           << "NA"
-                           << "," << format("{:.1R}", 10.0) << '\n';
+                *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
             }
             break;
         default:
             *eiostream << "Site Water Mains Temperature Information,";
-            *eiostream << "FixedDefault"
-                       << ","
-                       << "NA"
-                       << ","
-                       << "NA"
-                       << ","
-                       << "NA"
-                       << "," << format("{:.1R}", 10.0) << '\n';
+            *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
             break;
         }
 
@@ -8638,7 +8838,9 @@ namespace Weather {
                  Real64 RelHum,
                  Real64 IRHoriz)
     {
-        if (IRHoriz <= 0.0) IRHoriz = 9999.0;
+        if (IRHoriz <= 0.0) {
+            IRHoriz = 9999.0;
+        }
 
         auto const &envCurr = state.dataWeather->Environment(state.dataWeather->Envrn);
         if (!envCurr.UseWeatherFileHorizontalIR || IRHoriz >= 9999.0) {

@@ -204,7 +204,9 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
     }
 
     // Trim the demand to zero if it is very small
-    if (std::abs(LoadToLoopSetPoint) < LoopDemandTol) LoadToLoopSetPoint = 0.0;
+    if (std::abs(LoadToLoopSetPoint) < LoopDemandTol) {
+        LoadToLoopSetPoint = 0.0;
+    }
 
     this->UnmetDemand = LoadToLoopSetPoint;
 }

@@ -184,7 +184,7 @@ namespace Sched {
         Real64 minVal = 0.0; // minimum of all TSValue's
         bool isMinMaxSet = false;
 
-        ScheduleBase(){};
+        ScheduleBase() = default;
 
         virtual void can_instantiate() = 0; // abstract base class
 
@@ -199,8 +199,8 @@ namespace Sched {
 
     struct DayOrYearSchedule : ScheduleBase
     {
-        DayOrYearSchedule(){};
-        virtual ~DayOrYearSchedule(){};
+        DayOrYearSchedule() = default;
+        virtual ~DayOrYearSchedule() = default;
 
         virtual std::vector<Real64> const &getDayVals([[maybe_unused]] EnergyPlusData &state, int jDay = -1, int dayOfWeek = -1) = 0;
     };
@@ -213,12 +213,8 @@ namespace Sched {
         std::vector<Real64> tsVals;                      // Value array by simulation timestep
         Real64 sumTsVals = 0.0;
 
-        DaySchedule()
-        {
-        }
-        virtual ~DaySchedule()
-        {
-        }
+        DaySchedule() = default;
+        virtual ~DaySchedule() = default;
         void can_instantiate()
         {
             assert(false);
@@ -239,12 +235,8 @@ namespace Sched {
         // Members
         std::array<DaySchedule *, (int)DayType::Num> dayScheds = {nullptr};
 
-        WeekSchedule()
-        {
-        }
-        virtual ~WeekSchedule()
-        {
-        }
+        WeekSchedule() = default;
+        virtual ~WeekSchedule() = default;
         void can_instantiate()
         {
             assert(false);
@@ -268,7 +260,7 @@ namespace Sched {
             type = SchedType::Constant;
         }
 
-        virtual ~Schedule(){};
+        virtual ~Schedule() = default;
 
         Real64 getCurrentVal() const
         {
@@ -299,7 +291,7 @@ namespace Sched {
             type = SchedType::Constant;
         }
 
-        virtual ~ScheduleConstant(){};
+        virtual ~ScheduleConstant() = default;
 
         void can_instantiate()
         {
@@ -340,7 +332,7 @@ namespace Sched {
             type = SchedType::Year;
         }
 
-        virtual ~ScheduleDetailed(){};
+        virtual ~ScheduleDetailed() = default;
 
         void can_instantiate()
         {
@@ -376,6 +368,9 @@ namespace Sched {
     void ProcessScheduleInput(EnergyPlusData &state);
 
     void InitConstantScheduleData(EnergyPlusData &state);
+
+    // If any Output:Schedules object is found, report to EIO
+    void ReportScheduleTypeLimits(EnergyPlusData &state);
 
     void ReportScheduleDetails(EnergyPlusData &state, ReportLevel const LevelOfDetail);
 
@@ -534,23 +529,27 @@ struct ScheduleManagerData : BaseGlobalStruct
         ScheduleInputProcessed = false;
         ScheduleFileShadingProcessed = false;
 
-        for (int i = 0; i < (int)scheduleTypes.size(); ++i)
+        for (int i = 0; i < (int)scheduleTypes.size(); ++i) {
             delete scheduleTypes[i];
+        }
         scheduleTypes.clear(); // Allowed Schedule Types
         scheduleTypeMap.clear();
 
-        for (int i = 0; i < (int)schedules.size(); ++i)
+        for (int i = 0; i < (int)schedules.size(); ++i) {
             delete schedules[i];
+        }
         schedules.clear(); // Schedule Storage
         scheduleMap.clear();
 
-        for (int i = 0; i < (int)daySchedules.size(); ++i)
+        for (int i = 0; i < (int)daySchedules.size(); ++i) {
             delete daySchedules[i];
+        }
         daySchedules.clear();
         dayScheduleMap.clear();
 
-        for (int i = 0; i < (int)weekSchedules.size(); ++i)
+        for (int i = 0; i < (int)weekSchedules.size(); ++i) {
             delete weekSchedules[i];
+        }
         weekSchedules.clear();
         weekScheduleMap.clear();
     }

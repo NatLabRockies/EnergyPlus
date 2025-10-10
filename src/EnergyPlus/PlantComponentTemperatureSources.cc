@@ -275,9 +275,13 @@ namespace PlantComponentTemperatureSources {
         if (PltSizNum > 0) {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate; //* WaterSource(SourceNum)%SizFac
-                if (!this->DesVolFlowRateWasAutoSized) tmpVolFlowRate = this->DesVolFlowRate;
+                if (!this->DesVolFlowRateWasAutoSized) {
+                    tmpVolFlowRate = this->DesVolFlowRate;
+                }
             } else {
-                if (this->DesVolFlowRateWasAutoSized) tmpVolFlowRate = 0.0;
+                if (this->DesVolFlowRateWasAutoSized) {
+                    tmpVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->DesVolFlowRateWasAutoSized) {
@@ -462,7 +466,9 @@ namespace PlantComponentTemperatureSources {
         }
 
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataPlantCompTempSrc->WaterSource)) return; // probably not possible, and probably should throw error
+        if (allocated(state.dataPlantCompTempSrc->WaterSource)) {
+            return; // probably not possible, and probably should throw error
+        }
         state.dataPlantCompTempSrc->WaterSource.allocate(state.dataPlantCompTempSrc->NumSources);
 
         // fill arrays

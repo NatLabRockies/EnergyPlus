@@ -812,7 +812,9 @@ namespace Humidifiers {
 
             if (!HardSizeNoDesRun) {
                 NomCapVolDes = MassFlowDes * (OutletHumRatDes - InletHumRatDes) / RhoH2O(Constant::InitConvTemp);
-                if (NomCapVolDes < 0.0) NomCapVolDes = 0.0; // No humidity demand
+                if (NomCapVolDes < 0.0) {
+                    NomCapVolDes = 0.0; // No humidity demand
+                }
 
                 if (IsAutoSize) {
                     NomCapVol = NomCapVolDes;
@@ -985,12 +987,22 @@ namespace Humidifiers {
         Real64 HumRatSatIn; // humidity ratio at saturation at the inlet temperature [kgWater/kgDryAir]
 
         UnitOn = true;
-        if (HumRatSet <= 0.0) UnitOn = false;
-        if (AirInMassFlowRate <= SmallMassFlow) UnitOn = false;
-        if (availSched->getCurrentVal() <= 0.0) UnitOn = false;
-        if (AirInHumRat >= HumRatSet) UnitOn = false;
+        if (HumRatSet <= 0.0) {
+            UnitOn = false;
+        }
+        if (AirInMassFlowRate <= SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (availSched->getCurrentVal() <= 0.0) {
+            UnitOn = false;
+        }
+        if (AirInHumRat >= HumRatSet) {
+            UnitOn = false;
+        }
         HumRatSatIn = PsyWFnTdbRhPb(state, AirInTemp, 1.0, state.dataEnvrn->OutBaroPress, RoutineName);
-        if (AirInHumRat >= HumRatSatIn) UnitOn = false;
+        if (AirInHumRat >= HumRatSatIn) {
+            UnitOn = false;
+        }
         if (UnitOn) {
             // AirMassFlowRate*AirInHumRat + WaterAddNeeded = AirMassFlowRate*HumRatSet
             WaterAddNeeded = AirInMassFlowRate * (HumRatSet - AirInHumRat);

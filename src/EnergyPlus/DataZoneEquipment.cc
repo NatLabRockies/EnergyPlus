@@ -421,7 +421,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
     if (state.dataHeatBal->doSpaceHeatBalanceSizing || state.dataHeatBal->doSpaceHeatBalanceSimulation) {
         // Auto-assign the system node name for spaces in controlled zones that do not have a SpaceHVAC:EquipmentConnections input
         for (auto &thisZone : state.dataHeatBal->Zone) {
-            if (!thisZone.IsControlled) continue;
+            if (!thisZone.IsControlled) {
+                continue;
+            }
             int spaceCount = 0;
             for (int spaceNum : thisZone.spaceIndexes) {
                 ++spaceCount;
@@ -473,8 +475,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
         for (int Loop1 = 1; Loop1 <= overallEquipCount; ++Loop1) {
             for (int Loop2 = Loop1 + 1; Loop2 <= overallEquipCount; ++Loop2) {
                 if (ZoneEquipListAcct(Loop1).ObjectType != ZoneEquipListAcct(Loop2).ObjectType ||
-                    ZoneEquipListAcct(Loop1).ObjectName != ZoneEquipListAcct(Loop2).ObjectName)
+                    ZoneEquipListAcct(Loop1).ObjectName != ZoneEquipListAcct(Loop2).ObjectName) {
                     continue;
+                }
                 // Duplicated -- not allowed
                 ShowSevereError(state, format("{}{}, duplicate items in ZoneHVAC:EquipmentList.", RoutineName, CurrentModuleObject));
                 ShowContinueError(state,
@@ -495,8 +498,9 @@ void GetZoneEquipmentData(EnergyPlusData &state)
     for (int ControlledZoneLoop = 1; ControlledZoneLoop <= state.dataGlobal->NumOfZones; ++ControlledZoneLoop) {
         state.dataZoneEquip->GetZoneEquipmentDataFound = Util::FindItemInList(
             state.dataZoneEquip->ZoneEquipList(ControlledZoneLoop).Name, state.dataZoneEquip->ZoneEquipConfig, &EquipConfiguration::EquipListName);
-        if (state.dataZoneEquip->GetZoneEquipmentDataFound > 0)
+        if (state.dataZoneEquip->GetZoneEquipmentDataFound > 0) {
             state.dataZoneEquip->ZoneEquipConfig(state.dataZoneEquip->GetZoneEquipmentDataFound).EquipListIndex = ControlledZoneLoop;
+        }
     } // end loop over controlled zones
 
     EndUniqueNodeCheck(state, "ZoneHVAC:EquipmentConnections");
@@ -1548,17 +1552,23 @@ bool CheckZoneEquipmentList(EnergyPlusData &state,
 
     CtrlZoneNumLocal = 0;
     IsOnList = false;
-    for (Loop = 1; Loop <= state.dataGlobal->NumOfZones; ++Loop) {           // NumOfZoneEquipLists
-        if (state.dataZoneEquip->ZoneEquipList(Loop).Name.empty()) continue; // dimensioned by NumOfZones.  Only valid ones have names.
+    for (Loop = 1; Loop <= state.dataGlobal->NumOfZones; ++Loop) { // NumOfZoneEquipLists
+        if (state.dataZoneEquip->ZoneEquipList(Loop).Name.empty()) {
+            continue; // dimensioned by NumOfZones.  Only valid ones have names.
+        }
         for (ListLoop = 1; ListLoop <= state.dataZoneEquip->ZoneEquipList(Loop).NumOfEquipTypes; ++ListLoop) {
 
-            if (!Util::SameString(state.dataZoneEquip->ZoneEquipList(Loop).EquipTypeName(ListLoop), ComponentType)) continue;
+            if (!Util::SameString(state.dataZoneEquip->ZoneEquipList(Loop).EquipTypeName(ListLoop), ComponentType)) {
+                continue;
+            }
             if (ComponentName == "*") {
                 IsOnList = true;
                 CtrlZoneNumLocal = Loop;
                 goto EquipList_exit;
             }
-            if (!Util::SameString(state.dataZoneEquip->ZoneEquipList(Loop).EquipName(ListLoop), ComponentName)) continue;
+            if (!Util::SameString(state.dataZoneEquip->ZoneEquipList(Loop).EquipName(ListLoop), ComponentName)) {
+                continue;
+            }
             IsOnList = true;
             CtrlZoneNumLocal = Loop;
             goto EquipList_exit;
@@ -1786,7 +1796,9 @@ int GetZoneEquipControlledZoneNum(EnergyPlusData &state, DataZoneEquipment::Zone
     int ControlZoneNum = 0;
 
     for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+            continue;
+        }
         for (int Num = 1; Num <= state.dataZoneEquip->ZoneEquipList(CtrlZone).NumOfEquipTypes; ++Num) {
             if (zoneEquipType == state.dataZoneEquip->ZoneEquipList(CtrlZone).EquipType(Num) &&
                 Util::SameString(EquipmentName, state.dataZoneEquip->ZoneEquipList(CtrlZone).EquipName(Num))) {
@@ -1806,9 +1818,13 @@ void CheckSharedExhaust(EnergyPlusData &state)
 {
     int ExhastNodeNum = 0;
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-        if (state.dataZoneEquip->ZoneEquipConfig(ZoneNum).NumReturnNodes < 2) continue;
+        if (state.dataZoneEquip->ZoneEquipConfig(ZoneNum).NumReturnNodes < 2) {
+            continue;
+        }
         for (int nodeCount = 1; nodeCount <= state.dataZoneEquip->ZoneEquipConfig(ZoneNum).NumReturnNodes; ++nodeCount) {
-            if (state.dataZoneEquip->ZoneEquipConfig(ZoneNum).SharedExhaustNode(nodeCount) == LightReturnExhaustConfig::Shared) continue;
+            if (state.dataZoneEquip->ZoneEquipConfig(ZoneNum).SharedExhaustNode(nodeCount) == LightReturnExhaustConfig::Shared) {
+                continue;
+            }
             ExhastNodeNum = state.dataZoneEquip->ZoneEquipConfig(ZoneNum).ReturnNodeExhaustNodeNum(nodeCount);
             if (ExhastNodeNum > 0) {
                 state.dataZoneEquip->ZoneEquipConfig(ZoneNum).SharedExhaustNode(nodeCount) = LightReturnExhaustConfig::Single;
@@ -1865,7 +1881,9 @@ void ZoneEquipmentSplitterMixer::size(EnergyPlusData &state)
 {
     bool anyAutoSize =
         std::any_of(spaces.begin(), spaces.end(), [](ZoneEquipSplitterMixerSpace const &s) { return s.fraction == DataSizing::AutoSize; });
-    if (!anyAutoSize) return;
+    if (!anyAutoSize) {
+        return;
+    }
 
     if (!state.dataHeatBal->doSpaceHeatBalanceSizing && (this->spaceSizingBasis == DataZoneEquipment::SpaceEquipSizingBasis::DesignCoolingLoad ||
                                                          (this->spaceSizingBasis == DataZoneEquipment::SpaceEquipSizingBasis::DesignHeatingLoad))) {
@@ -1965,7 +1983,9 @@ void ZoneEquipmentSplitterMixer::size(EnergyPlusData &state)
 
 void ZoneMixer::setOutletConditions(EnergyPlusData &state)
 {
-    if (this->outletNodeNum == 0) return;
+    if (this->outletNodeNum == 0) {
+        return;
+    }
 
     Real64 sumEnthalpy = 0.0;
     Real64 sumHumRat = 0.0;
@@ -2025,7 +2045,9 @@ void ZoneReturnMixer::setInletConditions(EnergyPlusData &state)
 }
 void ZoneEquipmentMixer::setInletFlows(EnergyPlusData &state)
 {
-    if (this->outletNodeNum == 0) return;
+    if (this->outletNodeNum == 0) {
+        return;
+    }
 
     auto &equipInletNode = state.dataLoopNodes->Node(this->outletNodeNum);
     for (auto &mixerSpace : this->spaces) {
@@ -2038,7 +2060,9 @@ void ZoneEquipmentMixer::setInletFlows(EnergyPlusData &state)
 
 void ZoneReturnMixer::setInletFlows(EnergyPlusData &state)
 {
-    if (this->outletNodeNum == 0) return;
+    if (this->outletNodeNum == 0) {
+        return;
+    }
     auto &outletNode = state.dataLoopNodes->Node(this->outletNodeNum);
 
     Real64 sumMixerInletMassFlow = 0;
@@ -2302,7 +2326,9 @@ void EquipConfiguration::calcReturnFlows(EnergyPlusData &state,
 
             int inletNum = this->ReturnNodeInletNum(returnNum); // which inlet node matches this return node (same airloop)
             int ADUNum = 0;
-            if (inletNum > 0) ADUNum = this->InletNodeADUNum(inletNum);
+            if (inletNum > 0) {
+                ADUNum = this->InletNodeADUNum(inletNum);
+            }
             int airLoop = this->ReturnNodeAirLoopNum(returnNum);
             Real64 airLoopReturnFrac = 1.0;
             if (airLoop > 0) {
@@ -2379,7 +2405,9 @@ void EquipConfiguration::calcReturnFlows(EnergyPlusData &state,
             totReturnFlow += returnNodeMassFlow;
             retNodeData.MassFlowRate = returnNodeMassFlow;
             retNodeData.MassFlowRateMinAvail = 0.0;
-            if (!this->FixedReturnFlow(returnNum)) totVarReturnFlow += returnNodeMassFlow;
+            if (!this->FixedReturnFlow(returnNum)) {
+                totVarReturnFlow += returnNodeMassFlow;
+            }
         }
     }
 

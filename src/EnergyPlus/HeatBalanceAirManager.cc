@@ -2606,11 +2606,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     } else if (!thisMixing.deltaTempSched->checkMinVal(state, Clusive::In, -MixingTempLimit)) {
                         Sched::ShowSevereBadMin(state, eoh, cAlphaFieldNames(6), cAlphaArgs(6), Clusive::In, -MixingTempLimit);
                         ErrorsFound = true;
-                    } else if (!lNumericFieldBlanks(5))
+                    } else if (!lNumericFieldBlanks(5)) {
                         ShowWarningCustom(
                             state,
                             eoh,
                             format("{} and {} are provided, {} will be used.", cAlphaFieldNames(6), cNumericFieldNames(5), cAlphaFieldNames(6)));
+                    }
                 }
 
                 // Min indoor temp
@@ -2814,7 +2815,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         // check zones which are used only as a source zones
         for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
             for (int Loop = 1; Loop <= state.dataHeatBal->TotMixing; ++Loop) {
-                if (ZoneNum != state.dataHeatBal->Mixing(Loop).FromZone) continue;
+                if (ZoneNum != state.dataHeatBal->Mixing(Loop).FromZone) {
+                    continue;
+                }
                 state.dataHeatBal->MassConservation(ZoneNum).IsOnlySourceZone = true;
                 for (int Loop1 = 1; Loop1 <= state.dataHeatBal->TotMixing; ++Loop1) {
                     if (ZoneNum == state.dataHeatBal->Mixing(Loop1).ZonePtr) {
@@ -2850,7 +2853,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 state.dataHeatBal->MassConservation(ZoneNum).IsSourceAndReceivingZone = true;
             }
         }
-        if (allocated(ZoneMixingNum)) ZoneMixingNum.deallocate();
+        if (allocated(ZoneMixingNum)) {
+            ZoneMixingNum.deallocate();
+        }
     }
 
     // zone mass conservation calculation order starts with receiving zones
@@ -3400,8 +3405,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     state.dataHeatBal->TotRefDoorMixing = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
     if (state.dataHeatBal->TotRefDoorMixing > 0) {
         state.dataHeatBal->RefDoorMixing.allocate(state.dataGlobal->NumOfZones);
-        for (auto &e : state.dataHeatBal->RefDoorMixing)
+        for (auto &e : state.dataHeatBal->RefDoorMixing) {
             e.NumRefDoorConnections = 0;
+        }
 
         for (int Loop = 1; Loop <= state.dataHeatBal->TotRefDoorMixing; ++Loop) {
 
@@ -3536,7 +3542,9 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
             if (zoneA.RefDoorMixFlag && zoneB.RefDoorMixFlag) {
                 if (zoneA.NumRefDoorConnections > 1) {
                     for (int ConnectTest = 1; ConnectTest <= (ConnectionNumber - 1); ++ConnectTest) {
-                        if (zoneA.MateZonePtr(ConnectTest) != zoneA.MateZonePtr(ConnectionNumber)) continue;
+                        if (zoneA.MateZonePtr(ConnectTest) != zoneA.MateZonePtr(ConnectionNumber)) {
+                            continue;
+                        }
                         ShowSevereError(
                             state,
                             format("{}{}=\"{}\", and {}", RoutineName, cCurrentModuleObject, cAlphaArgs(1), zoneA.DoorMixingObjectName(ConnectTest)));
@@ -3547,8 +3555,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                                  state.dataHeatBal->Zone(ZoneNumB).Name));
                         ErrorsFound = true;
                     } // ConnectTest
-                }     // NumRefDoorconnections > 1
-            } else {  // Both zones need to be flagged with ref doors
+                } // NumRefDoorconnections > 1
+            } else { // Both zones need to be flagged with ref doors
                 zoneA.RefDoorMixFlag = true;
                 zoneB.RefDoorMixFlag = true;
             } // Both zones already flagged with ref doors
@@ -3635,7 +3643,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                            cAlphaArgs(5)));
                     ErrorsFound = true;
                 } // =none, etc.
-            }     // Blank
+            } // Blank
 
             if (ZoneNumA > 0) {
                 if (RepVarSet(ZoneNumA)) {
@@ -3821,7 +3829,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                                  state.dataHeatBal->RefDoorMixing(ZoneNumA).EMSRefDoorFlowRate(ConnectionNumber));
             }
         } // DO Loop=1,TotRefDoorMixing
-    }     // TotRefDoorMixing > 0)
+    } // TotRefDoorMixing > 0)
 
     RepVarSet.deallocate();
     cAlphaArgs.deallocate();
@@ -3842,13 +3850,14 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     };
 
     for (int Loop = 1; Loop <= state.dataHeatBal->TotInfiltration; ++Loop) {
-        if (Loop == 1)
+        if (Loop == 1) {
             print(state.files.eio,
                   Format_721,
                   "ZoneInfiltration",
                   "Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s-m2},Volume Flow Rate/Exterior Surface Area {m3/s-m2},ACH - "
                   "Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - "
                   "Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}");
+        }
 
         int ZoneNum = state.dataHeatBal->Infiltration(Loop).ZonePtr;
         if (ZoneNum == 0) {
@@ -3963,12 +3972,13 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
     TotMixingFlow.dimension(state.dataGlobal->NumOfZones, 0.0);
     for (int Loop = 1; Loop <= state.dataHeatBal->TotMixing; ++Loop) {
-        if (Loop == 1)
+        if (Loop == 1) {
             print(state.files.eio,
                   Format_721,
                   "Mixing",
                   "Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s-m2},Volume Flow Rate/person Area {m3/s-person},ACH - Air "
                   "Changes per Hour,From/Source Zone,Delta Temperature {C}");
+        }
 
         int ZoneNum = state.dataHeatBal->Mixing(Loop).ZonePtr;
         if (ZoneNum == 0) {
@@ -4033,10 +4043,12 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         static constexpr std::string_view Format_724("! <{} Airflow Stats Nominal>, {}\n");
         print(state.files.eio,
               Format_724,
-              "RefrigerationDoorMixing ",
+              "RefrigerationDoorMixing",
               "Name, Zone 1 Name,Zone 2 Name,Door Opening Schedule Name,Door Height {m},Door Area {m2},Door Protection Type");
         for (ZoneNumA = 1; ZoneNumA <= (state.dataGlobal->NumOfZones - 1); ++ZoneNumA) {
-            if (!state.dataHeatBal->RefDoorMixing(ZoneNumA).RefDoorMixFlag) continue;
+            if (!state.dataHeatBal->RefDoorMixing(ZoneNumA).RefDoorMixFlag) {
+                continue;
+            }
             for (ConnectionNumber = 1; ConnectionNumber <= state.dataHeatBal->RefDoorMixing(ZoneNumA).NumRefDoorConnections; ++ConnectionNumber) {
                 ZoneNumB = state.dataHeatBal->RefDoorMixing(ZoneNumA).MateZonePtr(ConnectionNumber);
                 // TotMixingFlow(ZoneNum)=TotMixingFlow(ZoneNum)+RefDoorMixing(Loop)%!DesignLevel
@@ -4052,8 +4064,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                       state.dataHeatBal->RefDoorMixing(ZoneNumA).DoorArea(ConnectionNumber),
                       state.dataHeatBal->RefDoorMixing(ZoneNumA).DoorProtTypeName(ConnectionNumber));
             } // ConnectionNumber
-        }     // ZoneNumA
-    }         //(TotRefDoorMixing .GT. 0)
+        } // ZoneNumA
+    } //(TotRefDoorMixing .GT. 0)
 
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
         state.dataHeatBal->Zone(ZoneNum).NominalInfilVent = TotInfilVentFlow(ZoneNum);
@@ -4425,7 +4437,9 @@ void InitSimpleMixingConvectiveHeatGains(EnergyPlusData &state)
         // Process the scheduled Mixing for air heat balance
         for (auto &thisMixing : state.dataHeatBal->Mixing) {
             thisMixing.DesiredAirFlowRate = thisMixing.DesignLevel * thisMixing.sched->getCurrentVal();
-            if (thisMixing.EMSSimpleMixingOn) thisMixing.DesiredAirFlowRate = thisMixing.EMSimpleMixingFlowRate;
+            if (thisMixing.EMSSimpleMixingOn) {
+                thisMixing.DesiredAirFlowRate = thisMixing.EMSimpleMixingFlowRate;
+            }
             thisMixing.DesiredAirFlowRateSaved = thisMixing.DesiredAirFlowRate;
         }
 
@@ -4450,7 +4464,9 @@ void InitSimpleMixingConvectiveHeatGains(EnergyPlusData &state)
         // Process the scheduled CrossMixing for air heat balance
         for (auto &thisCrossMix : state.dataHeatBal->CrossMixing) {
             thisCrossMix.DesiredAirFlowRate = thisCrossMix.DesignLevel * thisCrossMix.sched->getCurrentVal();
-            if (thisCrossMix.EMSSimpleMixingOn) thisCrossMix.DesiredAirFlowRate = thisCrossMix.EMSimpleMixingFlowRate;
+            if (thisCrossMix.EMSSimpleMixingOn) {
+                thisCrossMix.DesiredAirFlowRate = thisCrossMix.EMSimpleMixingFlowRate;
+            }
         }
 
         // Note - do each Pair a Single time, so must do increment reports for both zones
@@ -4462,11 +4478,15 @@ void InitSimpleMixingConvectiveHeatGains(EnergyPlusData &state)
             for (int NZ = 1; NZ <= (state.dataGlobal->NumOfZones - 1);
                  ++NZ) { // Can't have %ZonePtr==NumOfZones because lesser zone # of pair placed in ZonePtr in input
                 auto &thisRefDoor = state.dataHeatBal->RefDoorMixing(NZ);
-                if (!thisRefDoor.RefDoorMixFlag) continue;
+                if (!thisRefDoor.RefDoorMixFlag) {
+                    continue;
+                }
                 if (thisRefDoor.ZonePtr == NZ) {
                     for (int J = 1; J <= thisRefDoor.NumRefDoorConnections; ++J) {
                         thisRefDoor.VolRefDoorFlowRate(J) = 0.0;
-                        if (thisRefDoor.EMSRefDoorMixingOn(J)) thisRefDoor.VolRefDoorFlowRate(J) = thisRefDoor.EMSRefDoorFlowRate(J);
+                        if (thisRefDoor.EMSRefDoorMixingOn(J)) {
+                            thisRefDoor.VolRefDoorFlowRate(J) = thisRefDoor.EMSRefDoorFlowRate(J);
+                        }
                     }
                 }
             }

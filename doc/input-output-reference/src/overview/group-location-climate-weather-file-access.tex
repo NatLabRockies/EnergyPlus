@@ -30,7 +30,7 @@ This field represents the elevation of the facility in meters (relative to sea l
 
 \paragraph{Field: Keep Site Location Information}\label{keep-site-location-information}
 
-This field controls whether or not the above inforation is kept or overwritten when an annual run is performed using an attached, existing weather file.  There are two choices for this optional field: Yes or No.  When set to Yes, the site information in the above fields is kept and the values obtained from the weather file are ignored.  This option can be useful when the nearest weather station might have a significant difference in one of the parameters such as being at a much higher altitude or being across a time zone boundary.  The default value for this parameter is No which means that the values for latitude, longitude, time zone, and elevation will be overwritten by what is contained in the weather file.
+This field controls whether or not the above information is kept or overwritten when an annual run is performed using an attached, existing weather file.  There are two choices for this optional field: Yes or No.  When set to Yes, the site information in the above fields is kept and the values obtained from the weather file are ignored.  This option can be useful when the nearest weather station might have a significant difference in one of the parameters such as being at a much higher altitude or being across a time zone boundary.  The default value for this parameter is No which means that the values for latitude, longitude, time zone, and elevation will be overwritten by what is contained in the weather file.
 
 \begin{callout}
 Note that throughout this document units are provided for various input fields.  Units with their abbreviations are shown in Appendix A.
@@ -598,7 +598,7 @@ utility periods or simulating several years of differing weather data. Leap days
 actual weather (see ``Treat as Actual Weather'' below), but will be processed and used during leap years
 when the days are present in the weather file and enabled in the weather file header. Note that when the
 weather is treated as non-actual, the leap day will be skipped if it is not present, resulting in incorrect
-day types for the remainder of the year. Further, the weather data interpolation for the first hour can also be specified to use Hour1 (natural) or Hour24 (considering warning up). 
+day types for the remainder of the year. Further, the weather data interpolation for the first hour can also be specified to use Hour1 (natural) or Hour24 (considering warning up).
 
 \subsubsection{Inputs}\label{inputs-5-016}
 
@@ -1070,10 +1070,10 @@ Site:HeightVariation,
 
 \subsection{Site:GroundTemperature:BuildingSurface}\label{sitegroundtemperaturebuildingsurface}
 
-Ground temperatures are used for the ground heat transfer model. There can be only one ground temperature object included, and it is used as the outside surface temperature for all surfaces with Outside Boundary Condition = Ground. The object is options if you have no surfaces with ground contact. The outside surface temperature for individual surfaces can be specified using the OtherSideCoefficients (ref: \hyperref[surfacepropertyothersidecoefficients]{SurfaceProperty:OtherSideCoefficients}) object that allows Toutside to be set with a schedule. This permits using any number of different outside face temperatures in addition to the ground temperature.
+Ground temperatures are used for the ground heat transfer model. There can be only one ground temperature object included, and it is used as the outside surface temperature for all surfaces with Outside Boundary Condition = Ground. The object is optional if there are no surfaces with ground contact. The outside surface temperature for individual surfaces can be specified using the OtherSideCoefficients (ref: \hyperref[surfacepropertyothersidecoefficients]{SurfaceProperty:OtherSideCoefficients}) object that allows Toutside to be set with a schedule. This permits using any number of different outside face temperatures in addition to the ground temperature.
 
 \begin{callout}
-Caution: The ``undisturbed'' ground temperatures calculated by the weather converter should not be used in building losses but are appropriate to be used in the \hyperref[sitegroundtemperatureshallow]{Site:GroundTemperature:Shallow} and \hyperref[sitegroundtemperaturedeep]{Site:GroundTemperature:Deep} objects. The reasoning (for building losses) is that these values are too extreme for the soil under a conditioned building. For best results, use the Slab or Basement program described in this document to calculate custom monthly average ground temperatures (see the Ground Heat Transfer section). This is especially important for residential applications and very small buildings. If one of these ground temperature preprocessors is not used, for typical commercial buildings in the USA, a reasonable default value is \SI{2}{\degreeCelsius} less than the average indoor space temperature.
+Caution: The ``undisturbed'' ground temperatures calculated by the weather converter should not be used to calculate building losses but are appropriate to be used in the \hyperref[sitegroundtemperatureshallow]{Site:GroundTemperature:Shallow} and \hyperref[sitegroundtemperaturedeep]{Site:GroundTemperature:Deep} objects. The reason the ''undisturbed'' ground temperatures should not be used to calculate building losses is that these values are too extreme for the soil underneath a conditioned building. For best results, the Slab or Basement program described in this document to calculate custom monthly average ground temperatures (see the (ref: \hyperref[group-detailed-ground-heat-transfer] {Detailed Ground Heat Transfer}) section) should be used. This is especially important for residential applications and very small buildings. When considering a typical commercial building in the USA, a reasonable default value is \SI{2}{\degreeCelsius} less than the average indoor space temperature if the user elects to not run either the Slab or Basement program.
 \end{callout}
 
 More information about determining appropriate ground temperatures is given in the Auxiliary Programs document.
@@ -1770,6 +1770,24 @@ If the calculation method is Correlation, this field is used in the calculation 
 
 If the calculation method is Correlation, this field is used in the calculation as the maximum difference in monthly average outdoor air temperatures {[}\(\Delta\)C{]}. If the calculation method is Schedule or CorrelationFromWeatherFile, this field is ignored.
 
+\paragraph{Field: Temperature Multiplier}\label{field-temperature-multiplier}
+
+If the calculation method is Correlation or CorrelationFromWeatherFile, the field further adjusts the calculated water mains temperature using the equation below. The default value is one, which means no adjustment. If the calculation method is Schedule, this field is ignored.
+
+\begin{equation}
+{T_{final}} = {T_{calculated}} * {Multiplier} + {Offset}
+\end{equation}
+
+\paragraph{Field: Temperature Offset}\label{field-temperature-offset}
+
+If the calculation method is Correlation or CorrelationFromWeatherFile, the field {[}C{]} further adjusts the calculated water mains temperature using the equation below. The default value is zero, which means no offset. If the calculation method is Schedule, this field is ignored.
+
+\begin{equation}
+{T_{final}} = {T_{calculated}} * {Multiplier} + {Offset}
+\end{equation}
+
+IDF example:
+
 \begin{lstlisting}
 Site:WaterMainsTemperature,
   Correlation,  !- Calculation Method {SCHEDULE | CORRELATION | CORRELATIONFROMWEATHERFILE}
@@ -2106,11 +2124,11 @@ Site Direct Solar Radiation Rate per Area is amount of solar radiation in \si{W/
 
 \subsubsection{Site Total Sky Cover {[]}}\label{site-total-sky-cover}
 
-This is the total sky cover in tenths of sky. The value ranges from 0 (clear) to 10 (full cover). 
+This is the total sky cover in tenths of sky. The value ranges from 0 (clear) to 10 (full cover).
 
 \subsubsection{Site Opaque Sky Cover {[]}}\label{site-opaque-sky-cover}
 
-This is the opaque sky cover in tenths of sky. The value ranges from 0 (clear) to 10 (full cover). 
+This is the opaque sky cover in tenths of sky. The value ranges from 0 (clear) to 10 (full cover).
 
 \subsubsection{Site Precipitation Depth {[}m{]}}\label{site-precipitation-depth-m}
 

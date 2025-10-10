@@ -101,8 +101,12 @@ void InitComponentNodes(EnergyPlusData &state, Real64 const MinCompMdot, Real64 
     tmpMinCompMdot = MinCompMdot;
     tmpMaxCompMdot = MaxCompMdot;
     // trap bad values that can happen before all the setup is done
-    if (tmpMinCompMdot < 0.0) tmpMinCompMdot = 0.0;
-    if (tmpMaxCompMdot < 0.0) tmpMaxCompMdot = 0.0;
+    if (tmpMinCompMdot < 0.0) {
+        tmpMinCompMdot = 0.0;
+    }
+    if (tmpMaxCompMdot < 0.0) {
+        tmpMaxCompMdot = 0.0;
+    }
 
     // reset outlet node
     state.dataLoopNodes->Node(OutletNode).MassFlowRate = 0.0;
@@ -209,7 +213,9 @@ void SetComponentFlowRate(EnergyPlusData &state,
                     SeriesBranchMaxAvail = min(thisInletNode.MassFlowRateMaxAvail, SeriesBranchMaxAvail);
                     SeriesBranchMinAvail = max(thisInletNode.MassFlowRateMinAvail, SeriesBranchMinAvail);
                     // check to see if any component on branch uses EMS On/Off Supervisory control to shut down flow
-                    if (thisComp.EMSLoadOverrideOn && thisComp.EMSLoadOverrideValue == 0.0) EMSLoadOverride = true;
+                    if (thisComp.EMSLoadOverrideOn && thisComp.EMSLoadOverrideValue == 0.0) {
+                        EMSLoadOverride = true;
+                    }
                 }
 
                 if (EMSLoadOverride) { // actuate EMS controlled components to 0 if On/Off Supervisory control is active off
@@ -225,7 +231,9 @@ void SetComponentFlowRate(EnergyPlusData &state,
                 CompFlow = min(CompFlow, SeriesBranchHardwareMaxLim);
                 CompFlow = min(CompFlow, SeriesBranchMaxAvail);
 
-                if (CompFlow < DataBranchAirLoopPlant::MassFlowTolerance) CompFlow = 0.0;
+                if (CompFlow < DataBranchAirLoopPlant::MassFlowTolerance) {
+                    CompFlow = 0.0;
+                }
                 state.dataLoopNodes->Node(OutletNode).MassFlowRate = CompFlow;
                 state.dataLoopNodes->Node(InletNode).MassFlowRate = state.dataLoopNodes->Node(OutletNode).MassFlowRate;
                 for (int CompNum = 1; CompNum <= plantLoc.branch->TotalComponents; ++CompNum) {
@@ -252,15 +260,18 @@ void SetComponentFlowRate(EnergyPlusData &state,
                 for (int CompNum = 1; CompNum <= plantLoc.branch->TotalComponents; ++CompNum) {
                     // check to see if any component on branch uses EMS On/Off Supervisory control to shut down flow
                     auto const &thisComp = plantLoc.branch->Comp(CompNum);
-                    if (thisComp.EMSLoadOverrideOn && thisComp.EMSLoadOverrideValue == 0.0) EMSLoadOverride = true;
+                    if (thisComp.EMSLoadOverrideOn && thisComp.EMSLoadOverrideValue == 0.0) {
+                        EMSLoadOverride = true;
+                    }
                 }
 
                 if (EMSLoadOverride) { // actuate EMS controlled components to 0 if On/Off Supervisory control is active off
                     state.dataLoopNodes->Node(OutletNode).MassFlowRate = 0.0;
                 }
 
-                if (state.dataLoopNodes->Node(OutletNode).MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance)
+                if (state.dataLoopNodes->Node(OutletNode).MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
                     state.dataLoopNodes->Node(OutletNode).MassFlowRate = 0.0;
+                }
                 CompFlow = state.dataLoopNodes->Node(OutletNode).MassFlowRate;
                 state.dataLoopNodes->Node(InletNode).MassFlowRate = state.dataLoopNodes->Node(OutletNode).MassFlowRate;
             }
@@ -344,7 +355,9 @@ void SetActuatedBranchFlowRate(EnergyPlusData &state,
                 // check to see if any component on branch uses EMS On/Off Supervisory control to shut down flow
                 for (int CompNum = 1, CompNum_end = branch.TotalComponents; CompNum <= CompNum_end; ++CompNum) {
                     auto const &comp = branch.Comp(CompNum);
-                    if (comp.EMSLoadOverrideOn && comp.EMSLoadOverrideValue == 0.0) EMSLoadOverride = true;
+                    if (comp.EMSLoadOverrideOn && comp.EMSLoadOverrideValue == 0.0) {
+                        EMSLoadOverride = true;
+                    }
                 }
                 if (EMSLoadOverride) { // actuate EMS controlled components to 0 if On/Off Supervisory control is active off
                     a_node.MassFlowRate = 0.0;
@@ -353,7 +366,9 @@ void SetActuatedBranchFlowRate(EnergyPlusData &state,
 
                 a_node.MassFlowRate = min(a_node.MassFlowRateMaxAvail, a_node.MassFlowRate);
                 a_node.MassFlowRate = min(a_node.MassFlowRateMax, a_node.MassFlowRate);
-                if (a_node.MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) a_node.MassFlowRate = 0.0;
+                if (a_node.MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
+                    a_node.MassFlowRate = 0.0;
+                }
                 for (int CompNum = 1, CompNum_end = branch.TotalComponents; CompNum <= CompNum_end; ++CompNum) {
                     auto const &comp = branch.Comp(CompNum);
                     if (ActuatedNode == comp.NodeNumIn) {
@@ -969,13 +984,21 @@ void UpdateChillerComponentCondenserSide(EnergyPlusData &state,
     Real64 Cp;
 
     // check if any conditions have changed
-    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
+        DidAnythingChange = true;
+    }
 
     // could also check heat rate against McDeltaT from node data
 
@@ -1057,13 +1080,21 @@ void UpdateComponentHeatRecoverySide(EnergyPlusData &state,
     Real64 Cp;                                 // local fluid specific heat
 
     // check if any conditions have changed
-    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
+        DidAnythingChange = true;
+    }
 
-    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
+        DidAnythingChange = true;
+    }
 
     // could also check heat rate against McDeltaT from node data
 
@@ -1139,7 +1170,9 @@ void UpdateAbsorberChillerComponentGeneratorSide(EnergyPlusData &state,
     DataPlant::LoopSideLocation OtherLoopSide; // local loop side pointer for remote connected loop
 
     // check if any conditions have changed
-    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) DidAnythingChange = true;
+    if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
+        DidAnythingChange = true;
+    }
 
     if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelGeneratorHeatRate > 0.0)) {
 
@@ -1191,7 +1224,7 @@ void InterConnectTwoPlantLoopSides(EnergyPlusData &state,
     if (Loop1PlantLoc.loopNum == 0 || Loop1PlantLoc.loopSideNum == DataPlant::LoopSideLocation::Invalid || Loop2PlantLoc.loopNum == 0 ||
         Loop2PlantLoc.loopSideNum == DataPlant::LoopSideLocation::Invalid) {
         return; // Associated ScanPlantLoopsForObject couldn't find the component in the the plant loop structure...
-    }           // This is a Fatal error condition
+    } // This is a Fatal error condition
 
     bool const Loop2DemandsOnLoop1(!Loop1DemandsOnLoop2);
 
@@ -1365,7 +1398,9 @@ void RegisterPlantCompDesignFlow(EnergyPlusData &state,
             Found = true;
             thisCallNodeIndex = PlantCompNum;
         }
-        if (Found) break;
+        if (Found) {
+            break;
+        }
     }
 
     if (!Found) {        // grow structure and add new node at the end
@@ -1480,10 +1515,14 @@ void TightenNodeMinMaxAvails(EnergyPlusData &state, int const NodeNum, Real64 co
     OldMaxAvail = state.dataLoopNodes->Node(NodeNum).MassFlowRateMaxAvail;
 
     // If the new min avail is higher than previous, and it isn't higher than the max avail, update MIN AVAIL
-    if ((NewMinAvail > OldMinAvail) && (NewMinAvail <= OldMaxAvail)) state.dataLoopNodes->Node(NodeNum).MassFlowRateMinAvail = NewMinAvail;
+    if ((NewMinAvail > OldMinAvail) && (NewMinAvail <= OldMaxAvail)) {
+        state.dataLoopNodes->Node(NodeNum).MassFlowRateMinAvail = NewMinAvail;
+    }
 
     // If the new max avail is lower than previous, and it isn't lower than the min avail, update MAX AVAIL
-    if ((NewMaxAvail < OldMaxAvail) && (NewMaxAvail >= OldMinAvail)) state.dataLoopNodes->Node(NodeNum).MassFlowRateMaxAvail = NewMaxAvail;
+    if ((NewMaxAvail < OldMaxAvail) && (NewMaxAvail >= OldMinAvail)) {
+        state.dataLoopNodes->Node(NodeNum).MassFlowRateMaxAvail = NewMaxAvail;
+    }
 }
 
 Real64 BoundValueToWithinTwoValues(Real64 const ValueToBound, Real64 const LowerBound, Real64 const UpperBound)
@@ -1817,7 +1856,9 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
         } else {
             ShowContinueError(state, format("during sizing: called by {}", CallerName));
         }
-        if (outFoundCount > 0) ShowContinueError(state, format("Node was found as outlet node (for component) {} time(s).", outFoundCount));
+        if (outFoundCount > 0) {
+            ShowContinueError(state, format("Node was found as outlet node (for component) {} time(s).", outFoundCount));
+        }
         ShowContinueError(state, "Possible error in Branch inputs.  For more information, look for other error messages related to this node name.");
         // fatal?
     }
@@ -1826,13 +1867,21 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
 // Utility function, mostly for unit tests.
 void SetPlantLocationLinks(EnergyPlusData &state, PlantLocation &plantLoc)
 {
-    if (plantLoc.loopNum == 0) return;
+    if (plantLoc.loopNum == 0) {
+        return;
+    }
     plantLoc.loop = &state.dataPlnt->PlantLoop(plantLoc.loopNum);
-    if (plantLoc.loopSideNum == DataPlant::LoopSideLocation::Invalid) return;
+    if (plantLoc.loopSideNum == DataPlant::LoopSideLocation::Invalid) {
+        return;
+    }
     plantLoc.side = &plantLoc.loop->LoopSide(plantLoc.loopSideNum);
-    if (plantLoc.branchNum == 0) return;
+    if (plantLoc.branchNum == 0) {
+        return;
+    }
     plantLoc.branch = &plantLoc.side->Branch(plantLoc.branchNum);
-    if (plantLoc.compNum == 0) return;
+    if (plantLoc.compNum == 0) {
+        return;
+    }
     plantLoc.comp = &plantLoc.branch->Comp(plantLoc.compNum);
 }
 
@@ -2026,7 +2075,9 @@ MinFlowIfBranchHasVSPump(EnergyPlusData &state, PlantLocation const &plantLoc, b
         if (component.Type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
             component.Type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
             foundBranchPump = true;
-            if (component.CompNum > 0) branchPumpMinFlowLimit = state.dataPumps->PumpEquip(component.CompNum).MassFlowRateMin;
+            if (component.CompNum > 0) {
+                branchPumpMinFlowLimit = state.dataPumps->PumpEquip(component.CompNum).MassFlowRateMin;
+            }
             break;
         }
     }
@@ -2040,7 +2091,9 @@ MinFlowIfBranchHasVSPump(EnergyPlusData &state, PlantLocation const &plantLoc, b
                 if (component.Type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
                     component.Type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                     foundLoopPump = true;
-                    if (component.CompNum > 0) branchPumpMinFlowLimit = state.dataPumps->PumpEquip(component.CompNum).MassFlowRateMin;
+                    if (component.CompNum > 0) {
+                        branchPumpMinFlowLimit = state.dataPumps->PumpEquip(component.CompNum).MassFlowRateMin;
+                    }
                     break;
                 }
             }

@@ -11250,8 +11250,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestNoZoneEqpSupportZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = state->dataFans->fans(2)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_Generic;
     state->dataHVACStandAloneERV->StandAloneERV(1).hxName = "ERV Heat Exchanger";
+    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
 
     // Check validation and expected errors
     ASSERT_THROW(state->afn->validate_distribution(), std::runtime_error);
@@ -11443,8 +11443,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = state->dataFans->fans(2)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_Generic;
     state->dataHVACStandAloneERV->StandAloneERV(1).hxName = "ERV Heat Exchanger";
+    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
 
     // Check validation and expected warning
     state->afn->validate_distribution();
@@ -11621,8 +11621,8 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportUnbalancedZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = fan2->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_Generic;
     state->dataHVACStandAloneERV->StandAloneERV(1).hxName = "ERV Heat Exchanger";
+    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
 
     // Check validation and expected errors
     ASSERT_THROW(state->afn->validate_distribution(), std::runtime_error);

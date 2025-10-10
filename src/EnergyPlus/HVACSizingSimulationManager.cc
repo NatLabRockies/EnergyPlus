@@ -219,17 +219,29 @@ void ManageHVACSizingSimulation(EnergyPlusData &state, bool &ErrorsFound)
         for (int i = 1; i <= state.dataWeather->NumOfEnvrn; ++i) { // loop over environments
 
             Weather::GetNextEnvironment(state, Available, ErrorsFound);
-            if (ErrorsFound) break;
-            if (!Available) continue;
+            if (ErrorsFound) {
+                break;
+            }
+            if (!Available) {
+                continue;
+            }
 
             hvacSizingSimulationManager->sizingLogger.SetupSizingLogsNewEnvironment(state);
 
             //    if (!DoDesDaySim) continue; // not sure about this, may need to force users to set this on input for this method, but maybe not
-            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather) continue;
-            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::DesignDay) continue;
-            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodDesign) continue;
+            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather) {
+                continue;
+            }
+            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::DesignDay) {
+                continue;
+            }
+            if (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodDesign) {
+                continue;
+            }
 
-            if (state.dataWeather->Environment(state.dataWeather->Envrn).HVACSizingIterationNum != HVACSizingIterCount) continue;
+            if (state.dataWeather->Environment(state.dataWeather->Envrn).HVACSizingIterationNum != HVACSizingIterCount) {
+                continue;
+            }
 
             if (state.dataSysVars->ReportDuringHVACSizingSimulation) {
                 if (state.dataSQLiteProcedures->sqlite) {
@@ -258,7 +270,9 @@ void ManageHVACSizingSimulation(EnergyPlusData &state, bool &ErrorsFound)
 
                 // Let's always do a transaction, except we'll roll it back if need be
                 // if (ReportDuringHVACSizingSimulation) {
-                if (state.dataSQLiteProcedures->sqlite) state.dataSQLiteProcedures->sqlite->sqliteBegin(); // setup for one transaction per day
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->sqliteBegin(); // setup for one transaction per day
+                }
                 // }
                 ++state.dataGlobal->DayOfSim;
                 state.dataGlobal->DayOfSimChr = fmt::to_string(state.dataGlobal->DayOfSim);

@@ -143,12 +143,14 @@ namespace Window {
                 auto &surfShade = state.dataSurface->surfShades(SurfNum);
                 Real64 EffShBlEmiss = surfShade.effShadeEmi;
                 Real64 EffGlEmiss = surfShade.effGlassEmi;
-                surfShade.effShadeEmi = Interp(construction.effShadeBlindEmi[surfShade.blind.slatAngIdxLo],
-                                               construction.effShadeBlindEmi[surfShade.blind.slatAngIdxHi],
-                                               surfShade.blind.slatAngInterpFac);
-                surfShade.effGlassEmi = Interp(construction.effGlassEmi[surfShade.blind.slatAngIdxLo],
-                                               construction.effGlassEmi[surfShade.blind.slatAngIdxHi],
-                                               surfShade.blind.slatAngInterpFac);
+                if (surfShade.blind.movableSlats) {
+                    surfShade.effShadeEmi = Interp(construction.effShadeBlindEmi[surfShade.blind.slatAngIdxLo],
+                                                   construction.effShadeBlindEmi[surfShade.blind.slatAngIdxHi],
+                                                   surfShade.blind.slatAngInterpFac);
+                    surfShade.effGlassEmi = Interp(construction.effGlassEmi[surfShade.blind.slatAngIdxLo],
+                                                   construction.effGlassEmi[surfShade.blind.slatAngIdxHi],
+                                                   surfShade.blind.slatAngInterpFac);
+                }
                 state.dataSurface->SurfWinEffInsSurfTemp(SurfNum) =
                     (EffShBlEmiss * SurfInsideTemp + EffGlEmiss * (state.dataWindowManager->thetas[2 * totSolidLayers - 3] - Constant::Kelvin)) /
                     (EffShBlEmiss + EffGlEmiss);
@@ -951,16 +953,18 @@ namespace Window {
             ShadeFlag = WinShadingType::IntBlind;
         } else if (TotGlassLay == 2) {
             auto const *mat3 = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(3));
-            if (mat3->group == Material::Group::Shade)
+            if (mat3->group == Material::Group::Shade) {
                 ShadeFlag = WinShadingType::BGShade;
-            else if (mat3->group == Material::Group::Blind)
+            } else if (mat3->group == Material::Group::Blind) {
                 ShadeFlag = WinShadingType::BGBlind;
+            }
         } else if (TotGlassLay == 3) {
             auto const *mat5 = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(5));
-            if (mat5->group == Material::Group::Shade)
+            if (mat5->group == Material::Group::Shade) {
                 ShadeFlag = WinShadingType::BGShade;
-            else if (mat5->group == Material::Group::Blind)
+            } else if (mat5->group == Material::Group::Blind) {
                 ShadeFlag = WinShadingType::BGBlind;
+            }
         }
 
         return ShadeFlag;

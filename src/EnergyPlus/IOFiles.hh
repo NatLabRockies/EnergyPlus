@@ -75,7 +75,9 @@ struct DoubleWrapper
 {
     // this cannot be marked explicit
     // we need the implicit conversion for it to work
-    DoubleWrapper(double val) : value(val){};
+    // clang-format off
+    DoubleWrapper(double val) : value(val) {};
+    // clang-format on
     operator double() const
     {
         return value;
@@ -148,15 +150,21 @@ private:
         //    [[fill]align]
         switch (specs_.align) {
         case align_t::left:
-            if (specs_.fill.size()) buffer.append(specs_.fill);
+            if (specs_.fill.size()) {
+                buffer.append(specs_.fill);
+            }
             buffer.push_back('<');
             break;
         case align_t::right:
-            if (specs_.fill.size()) buffer.append(specs_.fill);
+            if (specs_.fill.size()) {
+                buffer.append(specs_.fill);
+            }
             buffer.push_back('>');
             break;
         case align_t::center:
-            if (specs_.fill.size()) buffer.append(specs_.fill);
+            if (specs_.fill.size()) {
+                buffer.append(specs_.fill);
+            }
             buffer.push_back('^');
             break;
         case align_t::none:
@@ -229,7 +237,9 @@ public:
     {
         auto begin = ctx.begin(), end = ctx.end();
         format_str_ = begin;
-        if (begin == end) return begin;
+        if (begin == end) {
+            return begin;
+        }
         using handler_type = fmt::detail::dynamic_specs_handler<ParseContext>;
         auto it = fmt::detail::parse_format_specs(begin, end, handler_type(specs_, ctx));
         return it;
@@ -258,9 +268,15 @@ public:
         handle_specs(ctx);
         detail::specs_checker<null_handler> checker(null_handler(), detail::mapped_type_constant<double, FormatContext>::value);
         checker.on_align(specs_.align);
-        if (specs_.sign != sign::none) checker.on_sign(specs_.sign);
-        if (specs_.alt) checker.on_hash();
-        if (specs_.precision >= 0) checker.end_precision();
+        if (specs_.sign != sign::none) {
+            checker.on_sign(specs_.sign);
+        }
+        if (specs_.alt) {
+            checker.on_hash();
+        }
+        if (specs_.precision >= 0) {
+            checker.end_precision();
+        }
 
         // matches Fortran's 'E' format
         if (specs_.type == 'Z') {
@@ -492,7 +508,7 @@ inline constexpr bool is_fortran_syntax(const std::string_view format_str)
 
 class InputOutputFile;
 template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args>
-void print(InputOutputFile &outputFile, std::string_view format_str, Args &&... args);
+void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args);
 
 inline constexpr FormatSyntax check_syntax(const std::string_view format_str)
 {
@@ -610,7 +626,7 @@ public:
 private:
     std::unique_ptr<std::iostream> os;
     bool print_to_dev_null = false;
-    template <FormatSyntax, typename... Args> friend void print(InputOutputFile &outputFile, std::string_view format_str, Args &&... args);
+    template <FormatSyntax, typename... Args> friend void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args);
     friend class IOFiles;
 };
 
@@ -809,7 +825,7 @@ public:
     }
 };
 
-template <typename... Args> void vprint(std::ostream &os, std::string_view format_str, const Args &... args)
+template <typename... Args> void vprint(std::ostream &os, std::string_view format_str, const Args &...args)
 {
     //    assert(os.good());
     auto buffer = fmt::memory_buffer();
@@ -821,7 +837,7 @@ template <typename... Args> void vprint(std::ostream &os, std::string_view forma
     os.write(buffer.data(), buffer.size());
 }
 
-template <typename... Args> std::string vprint(std::string_view format_str, const Args &... args)
+template <typename... Args> std::string vprint(std::string_view format_str, const Args &...args)
 {
     auto buffer = fmt::memory_buffer();
     try {
@@ -855,19 +871,19 @@ template <typename... Args> std::string vprint(std::string_view format_str, cons
 //
 
 namespace {
-    template <typename... Args> void print_fortran_syntax(std::ostream &os, std::string_view format_str, const Args &... args)
+    template <typename... Args> void print_fortran_syntax(std::ostream &os, std::string_view format_str, const Args &...args)
     {
         EnergyPlus::vprint<std::conditional_t<std::is_same_v<double, Args>, DoubleWrapper, Args>...>(os, format_str, args...);
     }
 
-    template <typename... Args> std::string format_fortran_syntax(std::string_view format_str, const Args &... args)
+    template <typename... Args> std::string format_fortran_syntax(std::string_view format_str, const Args &...args)
     {
         return EnergyPlus::vprint<std::conditional_t<std::is_same_v<double, Args>, DoubleWrapper, Args>...>(format_str, args...);
     }
 } // namespace
 
 template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args>
-void print(std::ostream &os, std::string_view format_str, Args &&... args)
+void print(std::ostream &os, std::string_view format_str, Args &&...args)
 {
     if constexpr (formatSyntax == FormatSyntax::Fortran) {
         print_fortran_syntax(os, format_str, args...);
@@ -878,7 +894,7 @@ void print(std::ostream &os, std::string_view format_str, Args &&... args)
     }
 }
 
-template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFile &outputFile, std::string_view format_str, Args &&... args)
+template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args)
 {
     auto *outputStream = [&]() -> std::ostream * {
         if (outputFile.os) {
@@ -901,7 +917,7 @@ template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFil
     }
 }
 
-template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args> std::string format(std::string_view format_str, Args &&... args)
+template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args> std::string format(std::string_view format_str, Args &&...args)
 {
     if constexpr (formatSyntax == FormatSyntax::Fortran) {
         return format_fortran_syntax(format_str, args...);

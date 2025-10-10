@@ -130,11 +130,10 @@ namespace HeatPumpWaterToWaterCOOLING {
               MaxPartLoadRat(0.0), OptPartLoadRat(0.0), LoadSideVolFlowRate(0.0), LoadSideDesignMassFlow(0.0), SourceSideVolFlowRate(0.0),
               SourceSideDesignMassFlow(0.0), SourceSideInletNodeNum(0), SourceSideOutletNodeNum(0), LoadSideInletNodeNum(0), LoadSideOutletNodeNum(0),
               SourceSideUACoeff(0.0), LoadSideUACoeff(0.0), CompPistonDisp(0.0), CompClearanceFactor(0.0), CompSucPressDrop(0.0), SuperheatTemp(0.0),
-              PowerLosses(0.0), LossFactor(0.0), HighPressCutoff(0.0), LowPressCutoff(0.0), IsOn(false),
-              MustRun(false), SourcePlantLoc{}, LoadPlantLoc{}, CondMassFlowIndex(0), Power(0.0), Energy(0.0), QLoad(0.0), QLoadEnergy(0.0),
-              QSource(0.0), QSourceEnergy(0.0), LoadSideWaterInletTemp(0.0), SourceSideWaterInletTemp(0.0), LoadSideWaterOutletTemp(0.0),
-              SourceSideWaterOutletTemp(0.0), Running(0), LoadSideWaterMassFlowRate(0.0), SourceSideWaterMassFlowRate(0.0), plantScanFlag(true),
-              beginEnvironFlag(true)
+              PowerLosses(0.0), LossFactor(0.0), HighPressCutoff(0.0), LowPressCutoff(0.0), IsOn(false), MustRun(false), SourcePlantLoc{},
+              LoadPlantLoc{}, CondMassFlowIndex(0), Power(0.0), Energy(0.0), QLoad(0.0), QLoadEnergy(0.0), QSource(0.0), QSourceEnergy(0.0),
+              LoadSideWaterInletTemp(0.0), SourceSideWaterInletTemp(0.0), LoadSideWaterOutletTemp(0.0), SourceSideWaterOutletTemp(0.0), Running(0),
+              LoadSideWaterMassFlowRate(0.0), SourceSideWaterMassFlowRate(0.0), plantScanFlag(true), beginEnvironFlag(true)
         {
         }
 

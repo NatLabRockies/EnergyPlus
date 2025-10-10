@@ -488,7 +488,9 @@ void SetupNodeVarsForReporting(EnergyPlusData &state)
                   NodeID,
                   DataLoopNode::NodeFluidTypeNames[static_cast<int>(Node.FluidType)],
                   state.dataNodeInputMgr->NodeRef(NumNode));
-            if (state.dataNodeInputMgr->NodeRef(NumNode) == 0) ++Count0;
+            if (state.dataNodeInputMgr->NodeRef(NumNode) == 0) {
+                ++Count0;
+            }
         }
         // Show suspicious node names on the Branch-Node Details file
         if (Count0 > 0) {
@@ -501,7 +503,9 @@ void SetupNodeVarsForReporting(EnergyPlusData &state)
             for (int NumNode = 1; NumNode <= state.dataNodeInputMgr->NumOfUniqueNodeNames; ++NumNode) {
                 auto &Node = state.dataLoopNodes->Node(NumNode);
                 auto &NodeID = state.dataLoopNodes->NodeID(NumNode);
-                if (state.dataNodeInputMgr->NodeRef(NumNode) > 0) continue;
+                if (state.dataNodeInputMgr->NodeRef(NumNode) > 0) {
+                    continue;
+                }
                 print(state.files.bnd,
                       " Suspicious Node,{},{},{},{}\n",
                       NumNode,
@@ -554,7 +558,9 @@ void GetNodeListsInput(EnergyPlusData &state, bool &ErrorsFound) // Set to true 
     for (int Loop = 1; Loop <= state.dataNodeInputMgr->NumOfNodeLists; ++Loop) {
         state.dataInputProcessing->inputProcessor->getObjectItem(
             state, CurrentModuleObject, Loop, cAlphas, NumAlphas, rNumbers, NumNumbers, IOStatus);
-        if (Util::IsNameEmpty(state, cAlphas(1), CurrentModuleObject, localErrorsFound)) continue;
+        if (Util::IsNameEmpty(state, cAlphas(1), CurrentModuleObject, localErrorsFound)) {
+            continue;
+        }
 
         ++NCount;
         state.dataNodeInputMgr->NodeLists(NCount).Name = cAlphas(1);
@@ -597,8 +603,9 @@ void GetNodeListsInput(EnergyPlusData &state, bool &ErrorsFound) // Set to true 
         flagError = true;
         for (int Loop1 = 1; Loop1 <= state.dataNodeInputMgr->NodeLists(NCount).NumOfNodesInList; ++Loop1) {
             for (int Loop2 = Loop1 + 1; Loop2 <= state.dataNodeInputMgr->NodeLists(NCount).NumOfNodesInList; ++Loop2) {
-                if (state.dataNodeInputMgr->NodeLists(NCount).NodeNumbers(Loop1) != state.dataNodeInputMgr->NodeLists(NCount).NodeNumbers(Loop2))
+                if (state.dataNodeInputMgr->NodeLists(NCount).NodeNumbers(Loop1) != state.dataNodeInputMgr->NodeLists(NCount).NodeNumbers(Loop2)) {
                     continue;
+                }
                 if (flagError) { // only list nodelist name once
                     ShowSevereError(state, format("{}{}=\"{}\" has duplicate nodes:", RoutineName, CurrentModuleObject, cAlphas(1)));
                     flagError = false;
@@ -617,9 +624,12 @@ void GetNodeListsInput(EnergyPlusData &state, bool &ErrorsFound) // Set to true 
     for (int Loop = 1; Loop <= state.dataNodeInputMgr->NumOfNodeLists; ++Loop) {
         for (int Loop2 = 1; Loop2 <= state.dataNodeInputMgr->NodeLists(Loop).NumOfNodesInList; ++Loop2) {
             for (int Loop1 = 1; Loop1 <= state.dataNodeInputMgr->NumOfNodeLists; ++Loop1) {
-                if (Loop == Loop1) continue; // within a nodelist have already checked to see if node name duplicates nodelist name
-                if (!Util::SameString(state.dataNodeInputMgr->NodeLists(Loop).NodeNames(Loop2), state.dataNodeInputMgr->NodeLists(Loop1).Name))
+                if (Loop == Loop1) {
+                    continue; // within a nodelist have already checked to see if node name duplicates nodelist name
+                }
+                if (!Util::SameString(state.dataNodeInputMgr->NodeLists(Loop).NodeNames(Loop2), state.dataNodeInputMgr->NodeLists(Loop1).Name)) {
                     continue;
+                }
                 ShowSevereError(
                     state,
                     format(
@@ -1089,8 +1099,9 @@ void CalcMoreNodeInfo(EnergyPlusData &state)
             RhoAirCurrent = PsyRhoAirFnPbTdbW(
                 state, state.dataEnvrn->OutBaroPress, state.dataLoopNodes->Node(iNode).Temp, state.dataLoopNodes->Node(iNode).HumRat);
             state.dataLoopNodes->MoreNodeInfo(iNode).Density = RhoAirCurrent;
-            if (RhoAirCurrent != 0.0)
+            if (RhoAirCurrent != 0.0) {
                 state.dataLoopNodes->MoreNodeInfo(iNode).VolFlowRateCrntRho = state.dataLoopNodes->Node(iNode).MassFlowRate / RhoAirCurrent;
+            }
             state.dataLoopNodes->MoreNodeInfo(iNode).ReportEnthalpy =
                 PsyHFnTdbW(state.dataLoopNodes->Node(iNode).Temp, state.dataLoopNodes->Node(iNode).HumRat);
             if (ReportWetBulb) {

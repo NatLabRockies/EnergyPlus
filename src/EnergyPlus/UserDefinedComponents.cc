@@ -117,8 +117,12 @@ namespace UserDefinedComponents {
         this->initialize(state, calledFromLocation.loopNum, myLoad);
 
         for (int loop = 1; loop <= this->NumPlantConnections; ++loop) {
-            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) continue;
-            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) continue;
+            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) {
+                continue;
+            }
+            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) {
+                continue;
+            }
             thisLoop = loop;
         }
 
@@ -155,8 +159,12 @@ namespace UserDefinedComponents {
     {
         int thisLoop = 0;
         for (int loop = 1; loop <= this->NumPlantConnections; ++loop) {
-            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) continue;
-            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) continue;
+            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) {
+                continue;
+            }
+            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) {
+                continue;
+            }
             thisLoop = loop;
         }
 
@@ -188,8 +196,12 @@ namespace UserDefinedComponents {
         int thisLoop = 0;
 
         for (int loop = 1; loop <= this->NumPlantConnections; ++loop) {
-            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) continue;
-            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) continue;
+            if (calledFromLocation.loopNum != this->Loop(loop).plantLoc.loopNum) {
+                continue;
+            }
+            if (calledFromLocation.loopSideNum != this->Loop(loop).plantLoc.loopSideNum) {
+                continue;
+            }
             thisLoop = loop;
         }
 
@@ -1016,14 +1028,28 @@ namespace UserDefinedComponents {
 
                 // make sure user has entered at least some erl program managers to actually calculate something
                 int MgrCountTest = 0;
-                if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).ErlSimProgramMngr > 0) MgrCountTest = 1;
+                if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).ErlSimProgramMngr > 0) {
+                    MgrCountTest = 1;
+                }
                 for (int ConnectionLoop = 1; ConnectionLoop <= NumPlantConnections; ++ConnectionLoop) {
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).ErlInitProgramMngr > 0) ++MgrCountTest;
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).ErlSimProgramMngr > 0) ++MgrCountTest;
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).initPluginLocation >= 0) ++MgrCountTest;
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).simPluginLocation >= 0) ++MgrCountTest;
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).initCallbackIndex >= 0) ++MgrCountTest;
-                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).simCallbackIndex >= 0) ++MgrCountTest;
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).ErlInitProgramMngr > 0) {
+                        ++MgrCountTest;
+                    }
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).ErlSimProgramMngr > 0) {
+                        ++MgrCountTest;
+                    }
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).initPluginLocation >= 0) {
+                        ++MgrCountTest;
+                    }
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).simPluginLocation >= 0) {
+                        ++MgrCountTest;
+                    }
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).initCallbackIndex >= 0) {
+                        ++MgrCountTest;
+                    }
+                    if (state.dataUserDefinedComponents->UserPlantComp(CompLoop).Loop(ConnectionLoop).simCallbackIndex >= 0) {
+                        ++MgrCountTest;
+                    }
                 }
                 if (MgrCountTest == 0) {
                     ShowSevereError(state, format("Invalid {}={}", cCurrentModuleObject, cAlphaArgs(1)));
@@ -2096,7 +2122,9 @@ namespace UserDefinedComponents {
 
                 // Fill the Zone Equipment data with the inlet node number of this unit.
                 for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                        continue;
+                    }
                     for (int SupAirIn = 1; SupAirIn <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++SupAirIn) {
                         if (state.dataUserDefinedComponents->UserAirTerminal(CompLoop).AirLoop.OutletNodeNum ==
                             state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(SupAirIn)) {
@@ -2437,7 +2465,9 @@ namespace UserDefinedComponents {
 
         this->oneTimeInit(state);
 
-        if (LoopNum <= 0 || LoopNum > this->NumPlantConnections) return;
+        if (LoopNum <= 0 || LoopNum > this->NumPlantConnections) {
+            return;
+        }
 
         // fill internal variable targets
         this->Loop(LoopNum).MyLoad = MyLoad;

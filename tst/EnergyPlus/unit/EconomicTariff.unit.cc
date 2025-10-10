@@ -434,6 +434,7 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariffReporting_Test)
     state->dataEconTariff->tariff(3).isSelected = true;
     state->dataEconTariff->tariff(3).totalAnnualCost = 55.22;
     state->dataEconTariff->tariff(3).totalAnnualEnergy = 8.64;
+    state->dataEconTariff->tariff(3).kindMtr = EconomicTariff::MeterType::Other;
     state->dataEconTariff->tariff(3).reportMeterIndx = GetMeterIndex(*state, "DISTRICTCOOLING:FACILITY");
     state->dataEconTariff->tariff(3).demandWindow = DemandWindow::Day;
 
@@ -441,8 +442,13 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariffReporting_Test)
     state->dataEconTariff->tariff(4).isSelected = true;
     state->dataEconTariff->tariff(4).totalAnnualCost = 15.98;
     state->dataEconTariff->tariff(4).totalAnnualEnergy = 1.47;
+    state->dataEconTariff->tariff(4).kindMtr = EconomicTariff::MeterType::Other;
     state->dataEconTariff->tariff(4).reportMeterIndx = GetMeterIndex(*state, "DISTRICTHEATINGWATER:FACILITY");
     state->dataEconTariff->tariff(4).demandWindow = DemandWindow::Day;
+
+    for (auto &tariff : state->dataEconTariff->tariff) {
+        tariff.demandWindow = EconomicTariff::DemandWindow::Hour;
+    }
 
     SetPredefinedTables(*state); // need to setup the predefined table entry numbers
 

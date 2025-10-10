@@ -467,15 +467,14 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     // Std 229 Air Heat Recovery
     int pdstAirHR = 0;
-    int pdchAirHRInputObjName = 0;              // name
     int pdchAirHRInputObjType = 0;              // input object type
     int pdchAirHRPlateOrRotary = 0;             // plate/rotary
     int pdchAirHRSenEffAt100PerHeatAirFlow = 0; // Sensible Effectiveness at 100% Heating Air Flow
     int pdchAirHRSenEffAt100PerCoolAirFlow = 0; // Sensible Effectiveness at 100% Cooling Air Flow
     int pdchAirHRLatEffAt100PerHeatAirFlow = 0; // Latent Effectiveness at 100% Heating Air Flow
     int pdchAirHRLatEffAt100PerCoolAirFlow = 0; // Latent Effectiveness at 100% Cooling Air Flow
-    int pdchAirHRExhaustAirflow = 0;            // Exhaust airflow
-    int pdchAirHROutdoorAirflow = 0;            // Outdoor airflow
+    int pdchAirHRExhaustAirflow = 0;            // Exhaust (Secondary) airflow
+    int pdchAirHRSupplyAirflow = 0;             // Supply (Outdoor) airflow
 
     // Envelope Report
     int pdrEnvelope = 0;

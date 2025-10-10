@@ -1233,7 +1233,9 @@ TEST_F(ConvectionCoefficientsFixture, TestCalcZoneSystemACH)
     Real64 ACHAnswer;
     Real64 ACHExpected;
 
-    if (!allocated(state->dataHeatBal->Zone)) state->dataHeatBal->Zone.allocate(TotalNumberofZones);
+    if (!allocated(state->dataHeatBal->Zone)) {
+        state->dataHeatBal->Zone.allocate(TotalNumberofZones);
+    }
     state->dataHeatBal->Zone(ZoneNum).Volume = 100.0;
     state->dataHeatBal->Zone(ZoneNum).SystemZoneNodeNumber = 1;
     state->dataGlobal->BeginEnvrnFlag = false;
@@ -1243,7 +1245,9 @@ TEST_F(ConvectionCoefficientsFixture, TestCalcZoneSystemACH)
     Real64 ZoneNode = state->dataHeatBal->Zone(ZoneNum).SystemZoneNodeNumber;
 
     // Test 1: Node not allocated, returns a zero ACH
-    if (allocated(state->dataLoopNodes->Node)) state->dataLoopNodes->Node.deallocate();
+    if (allocated(state->dataLoopNodes->Node)) {
+        state->dataLoopNodes->Node.deallocate();
+    }
     ACHExpected = 0.0;
     ACHAnswer = Convect::CalcZoneSystemACH(*state, ZoneNum);
     EXPECT_NEAR(ACHExpected, ACHAnswer, 0.0001);

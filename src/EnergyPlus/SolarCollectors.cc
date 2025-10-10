@@ -269,7 +269,9 @@ namespace SolarCollectors {
                 }
             } // ParametersNum
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors in {} input.", CurrentModuleParamObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors in {} input.", CurrentModuleParamObject));
+            }
         }
 
         if (state.dataSolarCollectors->NumOfCollectors > 0) {
@@ -519,7 +521,9 @@ namespace SolarCollectors {
 
             } // end of ParametersNum
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors in {} input.", CurrentModuleParamObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors in {} input.", CurrentModuleParamObject));
+            }
 
             CurrentModuleObject = "SolarCollector:IntegralCollectorStorage";
 
@@ -723,7 +727,9 @@ namespace SolarCollectors {
 
             } // ICSNum
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors in {} input.", CurrentModuleObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors in {} input.", CurrentModuleObject));
+            }
         }
     }
 
@@ -958,7 +964,9 @@ namespace SolarCollectors {
             }
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) this->Init = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->Init = true;
+        }
 
         if (this->SetDiffRadFlag && this->InitICS) {
             // calculates the sky and ground reflective diffuse radiation optical properties (only one time)
@@ -1260,8 +1268,9 @@ namespace SolarCollectors {
                 }
             }
 
-            if (state.dataSolarCollectors->Parameters(ParamNum).TestType == TestTypeEnum::INLET)
+            if (state.dataSolarCollectors->Parameters(ParamNum).TestType == TestTypeEnum::INLET) {
                 break; // Inlet temperature test correlations do not need to iterate
+            }
 
             if (Iteration > 100) {
                 if (this->IterErrIndex == 0) {
@@ -1467,7 +1476,9 @@ namespace SolarCollectors {
         Real64 efficiency = 0.0; // Thermal efficiency of solar energy conversion
         if (state.dataHeatBal->SurfQRadSWOutIncident(SurfNum) > 0.0) {
             efficiency = (this->HeatGainRate + this->StoredHeatRate) / (state.dataHeatBal->SurfQRadSWOutIncident(SurfNum) * area);
-            if (efficiency < 0.0) efficiency = 0.0;
+            if (efficiency < 0.0) {
+                efficiency = 0.0;
+            }
         }
         this->Efficiency = efficiency;
     }
@@ -1727,7 +1738,9 @@ namespace SolarCollectors {
 
         // solar absorptance of the individual cover
         AbsCover1 = 0.5 * (AbsorPerp(1) + AbsorPara(1));
-        if (state.dataSolarCollectors->Parameters(ParamNum).NumOfCovers == 2) AbsCover2 = 0.5 * (AbsorPerp(2) + AbsorPara(2));
+        if (state.dataSolarCollectors->Parameters(ParamNum).NumOfCovers == 2) {
+            AbsCover2 = 0.5 * (AbsorPerp(2) + AbsorPara(2));
+        }
 
         // calculate from outer to inner cover:
         TransSys =
@@ -1951,7 +1964,9 @@ namespace SolarCollectors {
         Real64 Tref = 0.5 * (TempSurf1 + TempSurf2);
         int Index = 0;
         while (Index < NumOfPropDivisions) {
-            if (Tref < Temps[Index]) break; // DO loop
+            if (Tref < Temps[Index]) {
+                break; // DO loop
+            }
             ++Index;
         }
 
@@ -2075,7 +2090,9 @@ namespace SolarCollectors {
                 NuL = 0.13 * std::pow(RaNum, 1.0 / 3.0);
             } else {
                 NuL = 0.16 * std::pow(RaNum, 1.0 / 3.0);
-                if (RaNum <= 1708.0) NuL = 1.0;
+                if (RaNum <= 1708.0) {
+                    NuL = 1.0;
+                }
             }
         }
         hConvA2W = NuL * CondOfWater / Lc;

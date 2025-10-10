@@ -464,7 +464,7 @@ namespace OutputProcessor {
 
         std::vector<int> meterNums; // Meter Numbers
 
-        virtual ~OutVar(){};
+        virtual ~OutVar() = default;
 
         std::string multiplierString() const;
 
@@ -981,24 +981,29 @@ struct OutputProcessorData : BaseGlobalStruct
         this->GetMeterIndexFirstCall = true;
         this->InitFlag = true;
 
-        for (int i = 0; i < (int)OutputProcessor::TimeStepType::Num; ++i)
+        for (int i = 0; i < (int)OutputProcessor::TimeStepType::Num; ++i) {
             new (&this->TimeValue[i]) OutputProcessor::TimeSteps();
+        }
 
-        for (int i = 0; i < (int)this->outVars.size(); ++i)
+        for (int i = 0; i < (int)this->outVars.size(); ++i) {
             delete this->outVars[i];
+        }
         this->outVars.clear();
 
-        for (int i = 0; i < (int)this->ddOutVars.size(); ++i)
+        for (int i = 0; i < (int)this->ddOutVars.size(); ++i) {
             delete this->ddOutVars[i];
+        }
         this->ddOutVars.clear();
         this->ddOutVarMap.clear();
 
-        for (int i = 0; i < (int)this->reqVars.size(); ++i)
+        for (int i = 0; i < (int)this->reqVars.size(); ++i) {
             delete this->reqVars[i];
+        }
         this->reqVars.clear();
 
-        for (int i = 0; i < (int)this->meters.size(); ++i)
+        for (int i = 0; i < (int)this->meters.size(); ++i) {
             delete this->meters[i];
+        }
         this->meters.clear();
         this->meterMap.clear();
 

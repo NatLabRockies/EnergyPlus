@@ -1519,7 +1519,9 @@ void InitializePumps(EnergyPlusData &state, int const PumpNum)
     }
 
     // Reset the local environment flag for the next environment
-    if (!state.dataGlobal->BeginEnvrnFlag) thisPump.PumpInitFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        thisPump.PumpInitFlag = true;
+    }
 
     // zero out module level working variables
     auto const &daPumps = state.dataPumps;

@@ -117,14 +117,17 @@ namespace WaterUse {
             }
 
             if (state.dataWaterUse->numWaterConnections > 0) {
-                for (auto &e : state.dataWaterUse->WaterConnections)
+                for (auto &e : state.dataWaterUse->WaterConnections) {
                     e.TotalMassFlowRate = 0.0;
+                }
             }
 
             state.dataWaterUse->MyEnvrnFlagLocal = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) state.dataWaterUse->MyEnvrnFlagLocal = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            state.dataWaterUse->MyEnvrnFlagLocal = true;
+        }
 
         // Simulate all unconnected WATER USE EQUIPMENT objects
         for (auto &waterEquipment : state.dataWaterUse->WaterEquipment) {
@@ -139,7 +142,9 @@ namespace WaterUse {
         // Simulate WATER USE CONNECTIONS objects and connected WATER USE EQUIPMENT objects
         for (auto &waterConnection : state.dataWaterUse->WaterConnections) {
 
-            if (!waterConnection.StandAlone) continue; // only model non plant connections here
+            if (!waterConnection.StandAlone) {
+                continue; // only model non plant connections here
+            }
 
             waterConnection.InitConnections(state);
 
@@ -226,14 +231,17 @@ namespace WaterUse {
             }
 
             if (state.dataWaterUse->numWaterConnections > 0) {
-                for (auto &waterConnections : state.dataWaterUse->WaterConnections)
+                for (auto &waterConnections : state.dataWaterUse->WaterConnections) {
                     waterConnections.TotalMassFlowRate = 0.0;
+                }
             }
 
             this->MyEnvrnFlag = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlag = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->MyEnvrnFlag = true;
+        }
 
         this->InitConnections(state);
 
@@ -359,7 +367,9 @@ namespace WaterUse {
 
             } // WaterEquipNum
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            }
         }
 
         state.dataIPShortCut->cCurrentModuleObject = "WaterUse:Connections";
@@ -509,7 +519,9 @@ namespace WaterUse {
 
             } // WaterConnNum
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            }
 
             if (state.dataWaterUse->numWaterConnections > 0) {
                 state.dataWaterUse->CheckEquipName.allocate(state.dataWaterUse->numWaterConnections);
@@ -999,9 +1011,12 @@ namespace WaterUse {
 
         // Get the requested total flow rate
         this->TotalVolFlowRate = this->PeakVolFlowRate;
-        if (this->Zone > 0)
+        if (this->Zone > 0) {
             this->TotalVolFlowRate *= state.dataHeatBal->Zone(this->Zone).Multiplier * state.dataHeatBal->Zone(this->Zone).ListMultiplier;
-        if (this->flowRateFracSched != nullptr) this->TotalVolFlowRate *= this->flowRateFracSched->getCurrentVal();
+        }
+        if (this->flowRateFracSched != nullptr) {
+            this->TotalVolFlowRate *= this->flowRateFracSched->getCurrentVal();
+        }
 
         this->TotalMassFlowRate = this->TotalVolFlowRate * calcH2ODensity(state);
 
@@ -1251,7 +1266,9 @@ namespace WaterUse {
                 this->Init = false;
             }
 
-            if (!state.dataGlobal->BeginEnvrnFlag) this->Init = true;
+            if (!state.dataGlobal->BeginEnvrnFlag) {
+                this->Init = true;
+            }
 
             if (this->InletNode > 0) {
                 if (!state.dataGlobal->DoingSizing) {
@@ -1588,7 +1605,9 @@ namespace WaterUse {
 
         static bool MyEnvrnFlagLocal = true;
 
-        if (state.dataWaterUse->numWaterEquipment == 0) return;
+        if (state.dataWaterUse->numWaterEquipment == 0) {
+            return;
+        }
 
         if (state.dataGlobal->BeginEnvrnFlag && MyEnvrnFlagLocal) {
             for (auto &e : state.dataWaterUse->WaterEquipment) {
@@ -1610,10 +1629,14 @@ namespace WaterUse {
             MyEnvrnFlagLocal = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) MyEnvrnFlagLocal = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            MyEnvrnFlagLocal = true;
+        }
 
         for (int WaterEquipNum = 1; WaterEquipNum <= state.dataWaterUse->numWaterEquipment; ++WaterEquipNum) {
-            if (state.dataWaterUse->WaterEquipment(WaterEquipNum).Zone == 0) continue;
+            if (state.dataWaterUse->WaterEquipment(WaterEquipNum).Zone == 0) {
+                continue;
+            }
             int ZoneNum = state.dataWaterUse->WaterEquipment(WaterEquipNum).Zone;
             state.dataWaterUse->WaterEquipment(WaterEquipNum).SensibleRateNoMultiplier =
                 state.dataWaterUse->WaterEquipment(WaterEquipNum).SensibleRate /

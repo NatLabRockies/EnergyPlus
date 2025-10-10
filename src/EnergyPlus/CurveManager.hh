@@ -466,8 +466,9 @@ struct CurveManagerData : BaseGlobalStruct
 
     void clear_state() override
     {
-        for (Curve::Curve *c : curves)
+        for (Curve::Curve *c : curves) {
             delete c;
+        }
         curves.clear();
         curveMap.clear();
     }

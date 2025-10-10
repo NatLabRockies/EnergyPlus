@@ -768,7 +768,9 @@ namespace ICEngineElectricGenerator {
             Real64 MinHeatRecMdot;
             if (this->HeatRecMaxTemp != HeatRecInTemp) {
                 MinHeatRecMdot = (EnergyRecovered) / (HeatRecCp * (this->HeatRecMaxTemp - HeatRecInTemp));
-                if (MinHeatRecMdot < 0.0) MinHeatRecMdot = 0.0;
+                if (MinHeatRecMdot < 0.0) {
+                    MinHeatRecMdot = 0.0;
+                }
             } else {
                 MinHeatRecMdot = 0.0;
             }

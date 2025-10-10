@@ -54,6 +54,7 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -5513,7 +5514,9 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 
     for (int iSizingType = DataSizing::None; iSizingType <= DataSizing::FlowPerCoolingCapacity; ++iSizingType) {
 
-        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) continue; // not allowed for cooling air flow
+        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) {
+            continue; // not allowed for cooling air flow
+        }
 
         thisSys.Name = format("UnitarySystem:CoolingOnly #{}", iSizingType);
         thisSys.m_CoolingSAFMethod = SizingTypes(iSizingType);
@@ -5525,11 +5528,16 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 
         // for FractionOfAutosizedCoolingAirflow, set sizing data to 1.005 and UnitarySystem MaxCoolAirVolFlow to 1, they will multiply and
         // yield 1.005
-        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow)
+        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
             state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesCoolVolFlow = 1.005;
-        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) thisSys.m_MaxCoolAirVolFlow = 1.0;
+        }
+        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
+            thisSys.m_MaxCoolAirVolFlow = 1.0;
+        }
         // for FlowPerCoolingCapacity, do the division so sizing will yield 1.005
-        if (iSizingType == DataSizing::FlowPerCoolingCapacity) thisSys.m_MaxCoolAirVolFlow = 1.005 / 16192.574019749998;
+        if (iSizingType == DataSizing::FlowPerCoolingCapacity) {
+            thisSys.m_MaxCoolAirVolFlow = 1.005 / 16192.574019749998;
+        }
 
         mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
@@ -5572,8 +5580,12 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 
     for (int iSizingType = DataSizing::None; iSizingType <= DataSizing::FlowPerHeatingCapacity; ++iSizingType) {
 
-        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) continue; // not allowed for heating air flow
-        if (iSizingType == DataSizing::FlowPerCoolingCapacity) continue;            // not allowed for heating air flow
+        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
+            continue; // not allowed for heating air flow
+        }
+        if (iSizingType == DataSizing::FlowPerCoolingCapacity) {
+            continue; // not allowed for heating air flow
+        }
 
         thisSys.Name = format("UnitarySystem:HeatingOnly #{}", iSizingType);
         thisSys.m_HeatingSAFMethod = SizingTypes(iSizingType);
@@ -5585,11 +5597,16 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 
         // for FractionOfAutosizedHeatingAirflow, set sizing data to 1.005 and UnitarySystem MaxHeatAirVolFlow to 1, they will multiply and
         // yield 1.005
-        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow)
+        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) {
             state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow = 1.005;
-        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) thisSys.m_MaxHeatAirVolFlow = 1.0;
+        }
+        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) {
+            thisSys.m_MaxHeatAirVolFlow = 1.0;
+        }
         // for FlowPerHeatingCapacity, do the division so sizing will yield 1.005
-        if (iSizingType == DataSizing::FlowPerHeatingCapacity) thisSys.m_MaxHeatAirVolFlow = 1.005 / 15148.243236712493;
+        if (iSizingType == DataSizing::FlowPerHeatingCapacity) {
+            thisSys.m_MaxHeatAirVolFlow = 1.005 / 15148.243236712493;
+        }
 
         mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
@@ -5637,10 +5654,18 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 
         iCoolingSizingType = iSizingType;
         iHeatingSizingType = iSizingType;
-        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) iHeatingSizingType = DataSizing::FractionOfAutosizedHeatingAirflow;
-        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) iCoolingSizingType = DataSizing::FractionOfAutosizedCoolingAirflow;
-        if (iSizingType == DataSizing::FlowPerCoolingCapacity) iHeatingSizingType = DataSizing::FlowPerHeatingCapacity;
-        if (iSizingType == DataSizing::FlowPerHeatingCapacity) iCoolingSizingType = DataSizing::FlowPerCoolingCapacity;
+        if (iSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
+            iHeatingSizingType = DataSizing::FractionOfAutosizedHeatingAirflow;
+        }
+        if (iSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) {
+            iCoolingSizingType = DataSizing::FractionOfAutosizedCoolingAirflow;
+        }
+        if (iSizingType == DataSizing::FlowPerCoolingCapacity) {
+            iHeatingSizingType = DataSizing::FlowPerHeatingCapacity;
+        }
+        if (iSizingType == DataSizing::FlowPerHeatingCapacity) {
+            iCoolingSizingType = DataSizing::FlowPerCoolingCapacity;
+        }
         thisSys.Name = format("UnitarySystem:CoolingAndHeating #{}", iSizingType);
         thisSys.m_CoolingSAFMethod = SizingTypes(iCoolingSizingType);
         thisSys.m_HeatingSAFMethod = SizingTypes(iHeatingSizingType);
@@ -5656,11 +5681,16 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
         state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesHeatingLoad = 0.0;
         // for FractionOfAutosizedCoolingAirflow, set sizing data to 1.005 and UnitarySystem MaxCoolAirVolFlow to 1, they will multiply and
         // yield 1.005
-        if (iCoolingSizingType == DataSizing::FractionOfAutosizedCoolingAirflow)
+        if (iCoolingSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
             state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesCoolVolFlow = 1.005;
-        if (iCoolingSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) thisSys.m_MaxCoolAirVolFlow = 1.0;
+        }
+        if (iCoolingSizingType == DataSizing::FractionOfAutosizedCoolingAirflow) {
+            thisSys.m_MaxCoolAirVolFlow = 1.0;
+        }
         // for FlowPerCoolingCapacity, do the division so sizing will yield 1.005
-        if (iCoolingSizingType == DataSizing::FlowPerCoolingCapacity) thisSys.m_MaxCoolAirVolFlow = 1.005 / 16192.574019750005;
+        if (iCoolingSizingType == DataSizing::FlowPerCoolingCapacity) {
+            thisSys.m_MaxCoolAirVolFlow = 1.005 / 16192.574019750005;
+        }
         // for FractionOfAutosizedHeatingAirflow, set sizing data to 1.005 and UnitarySystem MaxHeatAirVolFlow to 1, they will multiply and
         // yield 1.005
         if (iHeatingSizingType == DataSizing::FractionOfAutosizedHeatingAirflow) {
@@ -5668,7 +5698,9 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
             thisSys.m_MaxHeatAirVolFlow = 1.0;
         }
         // for FlowPerHeatingCapacity, do the division so sizing will yield 1.005
-        if (iHeatingSizingType == DataSizing::FlowPerHeatingCapacity) thisSys.m_MaxHeatAirVolFlow = 1.005 / 1431.9234900374995;
+        if (iHeatingSizingType == DataSizing::FlowPerHeatingCapacity) {
+            thisSys.m_MaxHeatAirVolFlow = 1.005 / 1431.9234900374995;
+        }
 
         mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
@@ -16534,8 +16566,9 @@ Dimensionless;	!- Output Unit Type
                       SenOutput,
                       LatOutput);
     auto &coilCoolingDX = state->dataCoilCoolingDX->coilCoolingDXs[0];
-    EXPECT_EQ(coilCoolingDX.performance.OperatingMode, 3);
-    EXPECT_EQ(coilCoolingDX.performance.ModeRatio, 1.0);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(coilCoolingDX.performance.get())};
+    EXPECT_EQ(performance->OperatingMode, 3);
+    EXPECT_EQ(performance->ModeRatio, 1.0);
     EXPECT_NEAR(thisSys->CoilSHR, thisSys->LoadSHR, 0.001);
     EXPECT_NEAR(SenOutput, -227.705, 0.1);
     EXPECT_NEAR(LatOutput, -1531, 0.1);
@@ -16573,8 +16606,8 @@ Dimensionless;	!- Output Unit Type
                       ZoneEquipFlag,
                       SenOutput,
                       LatOutput);
-    EXPECT_EQ(coilCoolingDX.performance.OperatingMode, 3);
-    EXPECT_NEAR(coilCoolingDX.performance.ModeRatio, 0.1991, 0.001);
+    EXPECT_EQ(performance->OperatingMode, 3);
+    EXPECT_NEAR(performance->ModeRatio, 0.1991, 0.001);
     EXPECT_NEAR(thisSys->LoadSHR, 0.57154, 0.001);
     EXPECT_NEAR(thisSys->CoilSHR, 0.5266, 0.001);
     EXPECT_NEAR(SenOutput, -397.032, 0.1);
@@ -16604,8 +16637,8 @@ Dimensionless;	!- Output Unit Type
                       ZoneEquipFlag,
                       SenOutput,
                       LatOutput);
-    EXPECT_EQ(coilCoolingDX.performance.OperatingMode, 1);
-    EXPECT_EQ(coilCoolingDX.performance.ModeRatio, 0.0);
+    EXPECT_EQ(performance->OperatingMode, 1);
+    EXPECT_EQ(performance->ModeRatio, 0.0);
     EXPECT_NEAR(thisSys->LoadSHR, 0.98533, 0.001);
     EXPECT_NEAR(thisSys->CoilSHR, 0.98246, 0.001);
     EXPECT_NEAR(SenOutput, -2000.0, 0.5);
@@ -20779,27 +20812,28 @@ Curve:Biquadratic, EIRFT, 1, 0, 0, 0, 0, 0, 0, 100, 0, 100, , , Temperature, Tem
 
     // size ClgCoil dx
     this_dx_clg_coil.size(*state);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(this_dx_clg_coil.performance.get())};
     // check dx ClgCoil name
     EXPECT_EQ(this_dx_clg_coil.name, "DX CLGCOIL");
     // check the normal operating mode autosized values
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.name, "DX CLGCOIL OPERATING MODE");
-    EXPECT_TRUE(this_dx_clg_coil.performance.normalMode.ratedEvapAirFlowRateIsAutosized);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.ratedEvapAirFlowRate, 0.1, 0.0001);
-    EXPECT_TRUE(this_dx_clg_coil.performance.normalMode.ratedGrossTotalCapIsAutosized);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.ratedGrossTotalCap, 1913.6314, 0.0001);
+    EXPECT_EQ(performance->normalMode.name, "DX CLGCOIL OPERATING MODE");
+    EXPECT_TRUE(performance->normalMode.ratedEvapAirFlowRateIsAutosized);
+    EXPECT_NEAR(performance->normalMode.ratedEvapAirFlowRate, 0.1, 0.0001);
+    EXPECT_TRUE(performance->normalMode.ratedGrossTotalCapIsAutosized);
+    EXPECT_NEAR(performance->normalMode.ratedGrossTotalCap, 1913.6314, 0.0001);
     // check flow rates and capacities at different dx cooling coil speeds
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[0].name, "DX CLGCOIL SPEED 1 PERFORMANCE");
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[0].evap_air_flow_rate, 0.1 * 0.25, 0.0001);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[0].rated_total_capacity, 1913.6314 * 0.25, 0.0001);
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[1].name, "DX CLGCOIL SPEED 2 PERFORMANCE");
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[1].evap_air_flow_rate, 0.1 * 0.50, 0.0001);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[1].rated_total_capacity, 1913.6314 * 0.50, 0.0001);
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[2].name, "DX CLGCOIL SPEED 3 PERFORMANCE");
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[2].evap_air_flow_rate, 0.1 * 0.75, 0.0001);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[2].rated_total_capacity, 1913.6314 * 0.75, 0.0001);
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[3].name, "DX CLGCOIL SPEED 4 PERFORMANCE");
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[3].evap_air_flow_rate, 0.1, 0.0001);
-    EXPECT_NEAR(this_dx_clg_coil.performance.normalMode.speeds[3].rated_total_capacity, 1913.6314 * 1, 0.0001);
+    EXPECT_EQ(performance->normalMode.speeds[0].name, "DX CLGCOIL SPEED 1 PERFORMANCE");
+    EXPECT_NEAR(performance->normalMode.speeds[0].evap_air_flow_rate, 0.1 * 0.25, 0.0001);
+    EXPECT_NEAR(performance->normalMode.speeds[0].rated_total_capacity, 1913.6314 * 0.25, 0.0001);
+    EXPECT_EQ(performance->normalMode.speeds[1].name, "DX CLGCOIL SPEED 2 PERFORMANCE");
+    EXPECT_NEAR(performance->normalMode.speeds[1].evap_air_flow_rate, 0.1 * 0.50, 0.0001);
+    EXPECT_NEAR(performance->normalMode.speeds[1].rated_total_capacity, 1913.6314 * 0.50, 0.0001);
+    EXPECT_EQ(performance->normalMode.speeds[2].name, "DX CLGCOIL SPEED 3 PERFORMANCE");
+    EXPECT_NEAR(performance->normalMode.speeds[2].evap_air_flow_rate, 0.1 * 0.75, 0.0001);
+    EXPECT_NEAR(performance->normalMode.speeds[2].rated_total_capacity, 1913.6314 * 0.75, 0.0001);
+    EXPECT_EQ(performance->normalMode.speeds[3].name, "DX CLGCOIL SPEED 4 PERFORMANCE");
+    EXPECT_NEAR(performance->normalMode.speeds[3].evap_air_flow_rate, 0.1, 0.0001);
+    EXPECT_NEAR(performance->normalMode.speeds[3].rated_total_capacity, 1913.6314 * 1, 0.0001);
 }
 
 TEST_F(ZoneUnitarySysTest, UnitarySystemModel_StagedThermostaTest)

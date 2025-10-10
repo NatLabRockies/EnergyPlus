@@ -1363,6 +1363,8 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_ComputeNominalUwithConvCoeffsTest)
     // in DataHeatBalance.cc
     int numTypesSurfaceClass = static_cast<int>(DataSurfaces::SurfaceClass::Num);
     bool surfClassOK = false;
-    if (numTypesSurfaceClass == 15) surfClassOK = true;
+    if (numTypesSurfaceClass == 15) {
+        surfClassOK = true;
+    }
     EXPECT_TRUE(surfClassOK);
 }

@@ -566,11 +566,19 @@ namespace GeneratorDynamicsManager {
             break;
         } // previous case
 
-        if (PLRforSubtimestepStartUp < 0.0) PLRforSubtimestepStartUp = 0.0;
-        if (PLRforSubtimestepStartUp > 1.0) PLRforSubtimestepStartUp = 1.0;
+        if (PLRforSubtimestepStartUp < 0.0) {
+            PLRforSubtimestepStartUp = 0.0;
+        }
+        if (PLRforSubtimestepStartUp > 1.0) {
+            PLRforSubtimestepStartUp = 1.0;
+        }
 
-        if (PLRforSubtimestepShutDown < 0.0) PLRforSubtimestepShutDown = 0.0;
-        if (PLRforSubtimestepShutDown > 1.0) PLRforSubtimestepShutDown = 1.0;
+        if (PLRforSubtimestepShutDown < 0.0) {
+            PLRforSubtimestepShutDown = 0.0;
+        }
+        if (PLRforSubtimestepShutDown > 1.0) {
+            PLRforSubtimestepShutDown = 1.0;
+        }
 
         if (newOpMode == DataGenerators::OperatingMode::WarmUp) {
             Pel = PelInput * PLRforSubtimestepStartUp;

@@ -218,9 +218,15 @@ namespace Curve {
         } break;
         }
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -272,9 +278,15 @@ namespace Curve {
         } break;
         }
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -320,9 +332,15 @@ namespace Curve {
         } break;
         }
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -357,9 +375,15 @@ namespace Curve {
         } break;
         }
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -396,9 +420,15 @@ namespace Curve {
         }
         }
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -424,9 +454,15 @@ namespace Curve {
         // tables are the only 6-D curves, for now at least
         Real64 Val = BtwxtTableInterpolation(state, V1, V2, V3, V4, V5, V6);
 
-        if (this->outputLimits.minPresent) Val = max(Val, this->outputLimits.min);
-        if (this->outputLimits.maxPresent) Val = min(Val, this->outputLimits.max);
-        if (this->EMSOverrideOn) Val = this->EMSOverrideCurveValue;
+        if (this->outputLimits.minPresent) {
+            Val = max(Val, this->outputLimits.min);
+        }
+        if (this->outputLimits.maxPresent) {
+            Val = min(Val, this->outputLimits.max);
+        }
+        if (this->EMSOverrideOn) {
+            Val = this->EMSOverrideCurveValue;
+        }
 
         this->output = Val;
         return Val;
@@ -2375,7 +2411,9 @@ namespace Curve {
                                 state.dataCurveManager->btwxtManager.tableFiles.emplace(filePath, tableFile);
                             }
 
-                            if (ErrorsFound) continue; // Unable to load file so continue on to see if there are other errors before fataling
+                            if (ErrorsFound) {
+                                continue; // Unable to load file so continue on to see if there are other errors before fataling
+                            }
 
                             axis = state.dataCurveManager->btwxtManager.tableFiles[filePath].getArray(state, {colNum, rowNum});
 
@@ -2580,7 +2618,9 @@ namespace Curve {
                         state.dataCurveManager->btwxtManager.tableFiles.emplace(filePath, tableFile);
                     }
 
-                    if (ErrorsFound) continue; // Unable to load file so continue on to see if there are other errors before fataling
+                    if (ErrorsFound) {
+                        continue; // Unable to load file so continue on to see if there are other errors before fataling
+                    }
 
                     lookupValues = state.dataCurveManager->btwxtManager.tableFiles[filePath].getArray(state, {colNum, rowNum});
 
@@ -3014,13 +3054,16 @@ namespace Curve {
         // Returns true if errors found
         Curve const *thisCurve = state.dataCurveManager->curves(CurveIndex);
         int curveDim = thisCurve->numDims;
-        if (std::find(validDims.begin(), validDims.end(), curveDim) != validDims.end()) return false;
+        if (std::find(validDims.begin(), validDims.end(), curveDim) != validDims.end()) {
+            return false;
+        }
 
         ErrorObjectHeader eoh{routineName, objectType, objectName};
 
         std::string validDimsString = fmt::to_string(validDims[0]);
-        for (std::size_t i = 1; i < validDims.size(); i++)
+        for (std::size_t i = 1; i < validDims.size(); i++) {
             validDimsString += format(" or {}", validDims[i]);
+        }
 
         ShowSevereCurveDims(state, eoh, curveFieldText, thisCurve->Name, validDimsString, curveDim);
         return true;

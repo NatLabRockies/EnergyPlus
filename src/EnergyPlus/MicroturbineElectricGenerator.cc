@@ -1128,7 +1128,9 @@ void MTGeneratorSpecs::InitMTGenerators(EnergyPlusData &state,
 
     this->oneTimeInit(state); // end one time inits
 
-    if (!this->HeatRecActive) return;
+    if (!this->HeatRecActive) {
+        return;
+    }
 
     // Do the Begin Environment initializations
     if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag) {
@@ -1628,7 +1630,9 @@ void MTGeneratorSpecs::CalcMTGeneratorModel(EnergyPlusData &state,
 
             if (this->HeatRecMaxWaterTemp != HeatRecInTemp) {
                 MinHeatRecMdot = QHeatRecToWater / (HeatRecCp * (this->HeatRecMaxWaterTemp - HeatRecInTemp));
-                if (MinHeatRecMdot < 0.0) MinHeatRecMdot = 0.0;
+                if (MinHeatRecMdot < 0.0) {
+                    MinHeatRecMdot = 0.0;
+                }
             }
 
             //       Recalculate outlet water temperature with minimum flow rate (will normally match the max water outlet temp,

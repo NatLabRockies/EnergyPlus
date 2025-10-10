@@ -261,3 +261,66 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_ProcessNumber)
     EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
 }
+
+TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
+{
+    // Test for Defect #11111: Autosized ZoneHVAC:LowTemperatureRadiant:VariableFlow with no Design Object throws allocation error
+    std::string nameResult;
+    std::string expectedName;
+    int ptrResult;
+    int expectedPtr;
+    std::string userName;
+    Array1D_string userNames;
+    userNames.allocate(4);
+    userNames = {"First Name", "Second Name", "Third Name", "Fourth Name"};
+    std::string objectType;
+    std::string objectName;
+    bool gotErrors;
+
+    // Test 1: Valid input (userName matches one of the userNames)
+    userName = "Second Name";
+    expectedName = "Second Name";
+    expectedPtr = 2;
+    objectType = {"ZoneHVAC:LowTemperatureRadiant:VariableFlow"};
+    objectName = {"MyVarFlowRadSys"};
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    EXPECT_FALSE(gotErrors);
+    EXPECT_EQ(nameResult, expectedName);
+    EXPECT_EQ(ptrResult, expectedPtr);
+
+    // Test 2: Invalid input (userName does not match one of the userNames)
+    userName = "No Name";
+    expectedName = "";
+    expectedPtr = 0;
+    objectType = {"ZoneHVAC:Baseboard:RadiantConvective:Water"};
+    objectName = {"MyWaterBB"};
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    std::string const error_stringTest2 = delimited_string({
+        "   ** Severe  ** Object = ZoneHVAC:Baseboard:RadiantConvective:Water with the Name = MyWaterBB has an invalid Design Object Name = No Name.",
+        "   **   ~~~   **   The Design Object Name was not found or was left blank.  This is not allowed.",
+        "   **   ~~~   **   A valid Design Object Name must be provided for any ZoneHVAC:Baseboard:RadiantConvective:Water object.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringTest2, true));
+    EXPECT_TRUE(gotErrors);
+
+    // Test 3: Invalid input (userName is blank)
+    userName = "";
+    expectedName = "";
+    expectedPtr = 0;
+    objectType = {"ZoneHVAC:Baseboard:RadiantConvective:Steam"};
+    objectName = {"MySteamBB"};
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    std::string const error_stringTest3 = delimited_string({
+        "   ** Severe  ** Object = ZoneHVAC:Baseboard:RadiantConvective:Steam with the Name = MySteamBB has an invalid Design Object Name = .",
+        "   **   ~~~   **   The Design Object Name was not found or was left blank.  This is not allowed.",
+        "   **   ~~~   **   A valid Design Object Name must be provided for any ZoneHVAC:Baseboard:RadiantConvective:Steam object.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringTest3, true));
+    EXPECT_TRUE(gotErrors);
+}

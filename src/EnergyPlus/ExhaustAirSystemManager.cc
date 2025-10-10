@@ -99,7 +99,9 @@ namespace ExhaustAirSystemManager {
 
     void GetExhaustAirSystemInput(EnergyPlusData &state)
     {
-        if (!state.dataExhAirSystemMrg->GetInputFlag) return;
+        if (!state.dataExhAirSystemMrg->GetInputFlag) {
+            return;
+        }
         // state.dataExhAirSystemMrg->GetInputFlag = false;
 
         // Locals
@@ -288,7 +290,9 @@ namespace ExhaustAirSystemManager {
                                                                           state.dataEnvrn->OutBaroPress,
                                                                           state.dataLoopNodes->Node(outletNode_Num).Temp,
                                                                           state.dataLoopNodes->Node(outletNode_Num).HumRat);
-            if (RhoAirCurrent <= 0.0) RhoAirCurrent = state.dataEnvrn->StdRhoAir;
+            if (RhoAirCurrent <= 0.0) {
+                RhoAirCurrent = state.dataEnvrn->StdRhoAir;
+            }
             thisExhSys.centralFan_VolumeFlowRate_Cur = state.dataLoopNodes->Node(outletNode_Num).MassFlowRate / RhoAirCurrent;
 
             thisExhSys.centralFan_Power = state.dataFans->fans(thisExhSys.CentralFanIndex)->totalPower;
@@ -311,7 +315,9 @@ namespace ExhaustAirSystemManager {
                                                                           state.dataEnvrn->OutBaroPress,
                                                                           state.dataLoopNodes->Node(outletNode_Num).Temp,
                                                                           state.dataLoopNodes->Node(outletNode_Num).HumRat);
-            if (RhoAirCurrent <= 0.0) RhoAirCurrent = state.dataEnvrn->StdRhoAir;
+            if (RhoAirCurrent <= 0.0) {
+                RhoAirCurrent = state.dataEnvrn->StdRhoAir;
+            }
             thisExhSys.centralFan_VolumeFlowRate_Cur = fan->outletAirMassFlowRate / RhoAirCurrent;
 
             thisExhSys.centralFan_Power = fan->totalPower * 1000.0;

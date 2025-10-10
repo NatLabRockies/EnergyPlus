@@ -755,7 +755,9 @@ void MicroCHPDataStruct::InitMicroCHPNoNormalizeGenerators(EnergyPlusData &state
         this->MySizeFlag = false;
     }
 
-    if (this->MySizeFlag) return;
+    if (this->MySizeFlag) {
+        return;
+    }
 
     int DynaCntrlNum = this->DynamicsControlID;
 
@@ -1031,8 +1033,12 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
     } break;
     case DataGenerators::OperatingMode::Normal: {
         if (PLRforSubtimestepStartUp < 1.0) {
-            if (RunFlagElectCenter) Pnetss = MyElectricLoad; // W
-            if (RunFlagPlant) Pnetss = AllowedLoad;
+            if (RunFlagElectCenter) {
+                Pnetss = MyElectricLoad; // W
+            }
+            if (RunFlagPlant) {
+                Pnetss = AllowedLoad;
+            }
         } else {
             Pnetss = AllowedLoad;
         }
@@ -1183,7 +1189,9 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
                                                        this->A42Model.MCcw,
                                                        MdotCW * Cp);
 
-        if (EnergyBalOK && (i > 4)) break;
+        if (EnergyBalOK && (i > 4)) {
+            break;
+        }
     }
 
     this->PlantMassFlowRate = MdotCW;
@@ -1332,11 +1340,14 @@ void FigureMicroCHPZoneGains(EnergyPlusData &state)
     // This routine adds up the various skin losses and then
     //  sets the values in the ZoneIntGain structure
 
-    if (state.dataCHPElectGen->NumMicroCHPs == 0) return;
+    if (state.dataCHPElectGen->NumMicroCHPs == 0) {
+        return;
+    }
 
     if (state.dataGlobal->BeginEnvrnFlag && state.dataCHPElectGen->MyEnvrnFlag) {
-        for (auto &e : state.dataGenerator->FuelSupply)
+        for (auto &e : state.dataGenerator->FuelSupply) {
             e.QskinLoss = 0.0;
+        }
         for (auto &e : state.dataCHPElectGen->MicroCHP) {
             e.A42Model.QdotSkin = 0.0;
             e.A42Model.SkinLossConvect = 0.0;
@@ -1345,7 +1356,9 @@ void FigureMicroCHPZoneGains(EnergyPlusData &state)
         state.dataCHPElectGen->MyEnvrnFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) state.dataCHPElectGen->MyEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        state.dataCHPElectGen->MyEnvrnFlag = true;
+    }
 
     for (int CHPnum = 1; CHPnum <= state.dataCHPElectGen->NumMicroCHPs; ++CHPnum) {
         Real64 TotalZoneHeatGain = state.dataGenerator->FuelSupply(state.dataCHPElectGen->MicroCHP(CHPnum).FuelSupplyID).QskinLoss +

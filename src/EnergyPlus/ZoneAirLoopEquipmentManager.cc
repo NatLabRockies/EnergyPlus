@@ -465,8 +465,9 @@ namespace ZoneAirLoopEquipmentManager {
                     auto &thisZoneEqConfig(state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum));
                     thisADU.ZoneNum = ControlledZoneNum;
                     for (int inletNum = 1; inletNum <= thisZoneEqConfig.NumInletNodes; ++inletNum) {
-                        if (thisZoneEqConfig.InletNode(inletNum) == thisADU.OutletNodeNum)
+                        if (thisZoneEqConfig.InletNode(inletNum) == thisADU.OutletNodeNum) {
                             thisZoneEqConfig.InletNodeADUNum(inletNum) = AirDistUnitNum;
+                        }
                     }
                 }
 

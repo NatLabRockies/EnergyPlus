@@ -1109,11 +1109,11 @@ Note that both tab and comma separated files easily import into Excel\textsupers
 
 The Sizing:Zone object provides the data needed to perform a zone design air flow calculation for a single zone. This calculation assumes a variable amount of supply air at a fixed temperature and humidity. The information needed consists of the zone inlet supply air conditions: temperature and humidity ratio for heating and cooling. The calculation is done for every design day included in the input. The maximum cooling load and air flow and the maximum heating load and air flow are then saved for the system level design calculations and for the component automatic sizing calculations.
 
-The Sizing:Zone object is also the place where the user can specify the design outdoor air flow rate by referencing the name of a design specification outdoor air object. This can be specified in a number of ways (ref. \hyperref[designspecificationoutdoorair]{DesignSpecification:OutdoorAir}).This data is saved for use in the system sizing calculation or for sizing zone components that use outdoor air.
+The Sizing:Zone object is also the place where the user can specify the design outdoor air flow rate by referencing the name of a design specification outdoor air object. This can be specified in a number of ways (ref. \hyperref[designspecificationoutdoorair]{DesignSpecification:OutdoorAir}). This data is saved for use in the system sizing calculation or for sizing zone components that use outdoor air.
 
 The user can also place limits on the heating and design cooling air flow rates. See \emph{~Heating Design Air Flow Method} and \emph{Cooling Design Air Flow Method} below and the explanations of the various heating and cooling flow input fields.
 
-The user can ask the zone design calculation to take into account the effect of a Dedicated Outdoor Air System on the zone design loads and airflow rates. The design calculation will calculate the heat addition rate to the zone of an idealized SOA system and add or subtract the result from the total zone loads and flow rates.
+The user can ask the zone design calculation to take into account the effect of a Dedicated Outdoor Air (DOA) System on the zone design loads and airflow rates. The design calculation will calculate the heat addition rate to the zone of an idealized DOA system and add or subtract the result from the total zone loads and flow rates.
 
 Latent zone loads can also be calulated when specifying a \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} other than Sensible Load Only No Latent Load. The design latent cooling and heating air flow will be calculated using the specified supply air humidity ratio and saved for further processing. Depending on the user choice for \emph{Zone Load Sizing Method},  the sensible, latent or largest load will determine the air flow rate used for the simulation. Care should be used to select appropriate values for \emph{Zone Cooling Design Supply Air Temperature}, \emph{Zone Heating Design Supply Air Temperature}, \emph{Zone Dehumidification Design Supply Air Humidity Ratio} and \emph{Zone Humidification Design Supply Air Humidity Ratio} as these values determine the zone sensible and latent mass flow rates. The larger the temperature difference, the smaller the air flow. Similarly, the larger the humidity ratio difference, the smaller the air flow. Coordinating these inputs will provide accurate results for air mass flow rate and which loads (i.e., sensible or latent) are largest.
 
@@ -1305,8 +1305,12 @@ An IDF example:
 
   Sizing:Zone,
       SPACE5-1,                !- Name of a zone
+      SupplyAirTemperature,    !- Zone cooling design supply air temperature input method
       14.,                     !- Zone cooling design supply air temperature {C}
+      0.0,                     !- Zone cooling design supply air temperature difference {C}
+      SupplyAirTemperature,    !- Zone heating design supply air temperature input method
       50.,                     !- Zone heating design supply air temperature {C}
+      0.0,                     !- Zone heating design supply air temperature difference {C}
       0.009,                   !- Zone cooling design supply air humidity ratio {kg-H2O/kg-air}
       0.004,                   !- Zone heating design supply air humidity ratio {kg-H2O/kg-air}
       DSOA1,                   !- Design Specification Outdoor Air Object Name

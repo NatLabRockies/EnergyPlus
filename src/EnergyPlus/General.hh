@@ -221,8 +221,9 @@ namespace General {
     )
     {
         Array1D_string ItemNames(Items.size());
-        for (std::size_t i = 0, e = Items.size(); i < e; ++i)
+        for (std::size_t i = 0, e = Items.size(); i < e; ++i) {
             ItemNames[i] = Items[i].Name;
+        }
         CheckCreatedZoneItemName(state, calledFrom, CurrentObject, ZoneName, MaxZoneNameLength, ItemName, ItemNames, NumItems, ResultName, errFlag);
     }
 

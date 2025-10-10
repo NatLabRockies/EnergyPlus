@@ -416,7 +416,9 @@ int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath
     // as possible and contain all "simulation" code in other modules and files.
     using namespace EnergyPlus;
     int status = initializeEnergyPlus(state, filepath);
-    if (status || state.dataGlobal->outputEpJSONConversionOnly) return status;
+    if (status || state.dataGlobal->outputEpJSONConversionOnly) {
+        return status;
+    }
     try {
         EnergyPlus::SimulationManager::ManageSimulation(state);
     } catch (const EnergyPlus::FatalError &e) {
@@ -450,9 +452,15 @@ int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<
     state.dataGlobal->eplusRunningViaAPI = true;
 
     // clean out any stdin, stderr, stdout flags from a prior call
-    if (!std::cin.good()) std::cin.clear();
-    if (!std::cerr.good()) std::cerr.clear();
-    if (!std::cout.good()) std::cout.clear();
+    if (!std::cin.good()) {
+        std::cin.clear();
+    }
+    if (!std::cerr.good()) {
+        std::cerr.clear();
+    }
+    if (!std::cout.good()) {
+        std::cout.clear();
+    }
 
     int return_code = EnergyPlus::CommandLineInterface::ProcessArgs(state, args);
     if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::Failure)) {

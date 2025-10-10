@@ -453,8 +453,17 @@ namespace HWBaseboardRadiator {
             thisHWBaseboard.Name = state.dataIPShortCut->cAlphaArgs(1);                          // Name of this baseboard
             thisHWBaseboard.EquipType = DataPlant::PlantEquipmentType::Baseboard_Rad_Conv_Water; //'ZoneHVAC:Baseboard:RadiantConvective:Water'
 
-            thisHWBaseboard.designObjectName = state.dataIPShortCut->cAlphaArgs(2); // Name of the design object for this baseboard
-            thisHWBaseboard.DesignObjectPtr = Util::FindItemInList(thisHWBaseboard.designObjectName, HWBaseboardDesignNames);
+            Util::setDesignObjectNameAndPointer(state,
+                                                thisHWBaseboard.designObjectName,
+                                                thisHWBaseboard.DesignObjectPtr,
+                                                state.dataIPShortCut->cAlphaArgs(2),
+                                                HWBaseboardDesignNames,
+                                                cCMO_BBRadiator_Water,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                ErrorsFound);
+            if (ErrorsFound) {
+                break;
+            }
             HWBaseboardDesignData &HWBaseboardDesignDataObject =
                 state.dataHWBaseboardRad->HWBaseboardDesignObject(thisHWBaseboard.DesignObjectPtr); // Contains the data for the design object
 
@@ -1420,12 +1429,16 @@ namespace HWBaseboardRadiator {
         HWBaseboardSysOn = false;
 
         // If there are no baseboards in this input file, just RETURN
-        if (state.dataHWBaseboardRad->NumHWBaseboards == 0) return;
+        if (state.dataHWBaseboardRad->NumHWBaseboards == 0) {
+            return;
+        }
 
         // If there are baseboards, then we have to check to see if this was running at all...
         for (auto &thisHWBaseboard : state.dataHWBaseboardRad->HWBaseboard) {
             thisHWBaseboard.QBBRadSource = thisHWBaseboard.QBBRadSrcAvg;
-            if (thisHWBaseboard.QBBRadSrcAvg != 0.0) HWBaseboardSysOn = true;
+            if (thisHWBaseboard.QBBRadSrcAvg != 0.0) {
+                HWBaseboardSysOn = true;
+            }
         }
 
         DistributeBBRadGains(state); // QBBRadSource has been modified so we need to redistribute gains
@@ -1469,7 +1482,9 @@ namespace HWBaseboardRadiator {
             HWBaseboardDesignData const &HWBaseboardDesignDataObject =
                 state.dataHWBaseboardRad->HWBaseboardDesignObject(thisHWBB.DesignObjectPtr); // Contains the data for the design object
             int ZoneNum = thisHWBB.ZonePtr;
-            if (ZoneNum <= 0) continue;
+            if (ZoneNum <= 0) {
+                continue;
+            }
             state.dataHeatBalFanSys->ZoneQHWBaseboardToPerson(ZoneNum) += thisHWBB.QBBRadSource * HWBaseboardDesignDataObject.FracDistribPerson;
 
             for (int RadSurfNum = 1; RadSurfNum <= thisHWBB.TotSurfToDistrib; ++RadSurfNum) {

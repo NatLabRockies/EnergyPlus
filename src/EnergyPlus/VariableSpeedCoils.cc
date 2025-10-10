@@ -2026,8 +2026,8 @@ namespace VariableSpeedCoils {
             }
 
             if (Util::SameString(AlphArray(7), "ReverseCycle")) vsCoil.DefrostStrategy = ReverseCycle;
-            if (Util::SameString(AlphArray(7), "Resistive")) vsCoil.DefrostStrategy = Resistive;
-            if (vsCoil.DefrostStrategy == 0) {
+            else if (Util::SameString(AlphArray(7), "Resistive")) vsCoil.DefrostStrategy = Resistive;
+            else {
                 ShowSevereError(
                     state,
                     format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, vsCoil.Name));
@@ -2037,8 +2037,8 @@ namespace VariableSpeedCoils {
             }
 
             if (Util::SameString(AlphArray(8), "Timed")) vsCoil.DefrostControl = Timed;
-            if (Util::SameString(AlphArray(8), "OnDemand")) vsCoil.DefrostControl = OnDemand;
-            if (vsCoil.DefrostControl == 0) {
+            else if (Util::SameString(AlphArray(8), "OnDemand")) vsCoil.DefrostControl = OnDemand;
+            else {
                 ShowSevereError(
                     state,
                     format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, vsCoil.Name));
@@ -2283,7 +2283,9 @@ namespace VariableSpeedCoils {
                 }
             }
 
-            if (ErrorsFound) continue;
+            if (ErrorsFound) {
+                continue;
+            }
 
             for (int I = 1; I <= vsCoil.NumOfSpeeds; ++I) {
                 vsCoil.MSRatedPercentTotCap(I) = vsCoil.MSRatedTotCap(I) / vsCoil.MSRatedTotCap(vsCoil.NumOfSpeeds);
@@ -5045,7 +5047,7 @@ namespace VariableSpeedCoils {
             vsCoil.RatedPowerHeat = vsCoil.RatedCapWH / vsCoil.RatedCOPHeat;
             vsCoil.RatedCapCoolTotal = vsCoil.RatedCapWH * (1.0 - 1.0 / vsCoil.RatedCOPHeat);
         } break;
-        }
+        } // switch(vsCoil.coilType)
 
         // Size water volumetric flow rate
         if ((vsCoil.RatedWaterVolFlowRate == DataSizing::AutoSize) &&
@@ -5057,7 +5059,7 @@ namespace VariableSpeedCoils {
         //   WSHP condenser can be on either a plant loop or condenser loop. Test each to find plant sizing number.
         //   first check to see if coil is connected to a plant loop, no warning on this CALL
         if (RatedWaterFlowAutoSized) {
-            if (vsCoil.CondenserType == DataHeatBalance::RefrigCondenserType::Water)
+            if (vsCoil.CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
                 PltSizNum = PlantUtilities::MyPlantSizingIndex(state,
                                                                format("COIL:{}{}", vsCoil.CoolHeatType, CurrentObjSubfix),
                                                                vsCoil.Name,
@@ -5065,12 +5067,11 @@ namespace VariableSpeedCoils {
                                                                vsCoil.WaterOutletNodeNum,
                                                                ErrorsFound,
                                                                false);
+            }
 
             if (PltSizNum > 0) {
-                rho = state.dataPlnt->PlantLoop(vsCoil.plantLoc.loopNum)
-                          .glycol->getDensity(state, state.dataSize->PlantSizData(PltSizNum).ExitTemp, RoutineNameAlt);
-                cp = state.dataPlnt->PlantLoop(vsCoil.plantLoc.loopNum)
-                         .glycol->getSpecificHeat(state, state.dataSize->PlantSizData(PltSizNum).ExitTemp, RoutineNameAlt);
+                rho = vsCoil.plantLoc.loop->glycol->getDensity(state, state.dataSize->PlantSizData(PltSizNum).ExitTemp, RoutineNameAlt);
+                cp = vsCoil.plantLoc.loop->glycol->getSpecificHeat(state, state.dataSize->PlantSizData(PltSizNum).ExitTemp, RoutineNameAlt);
 
                 if (vsCoil.coilType == HVAC::CoilType::HeatingWAHPVariableSpeedEquationFit ||
                     vsCoil.coilType == HVAC::CoilType::HeatingDXVariableSpeed) {
@@ -5879,9 +5880,10 @@ namespace VariableSpeedCoils {
             if (PLF < 0.7) {
                 PLF = 0.7;
             }
-            if (fanOp == HVAC::FanOp::Cycling)
+            if (fanOp == HVAC::FanOp::Cycling) {
                 state.dataHVACGlobal->OnOffFanPartLoadFraction =
                     PLF; // save PLF for fan model, don't change fan power for constant fan mode if coil is off
+            }
             // calculate the run time fraction
             vsCoil.RunFrac = PartLoadRatio / PLF;
             vsCoil.PartLoadRatio = PartLoadRatio;
@@ -5933,7 +5935,9 @@ namespace VariableSpeedCoils {
                                               vsCoil.MSRatedAirMassFlowRate(SpeedCal),
                                               state.dataVariableSpeedCoils->LoadSideMassFlowRate);
 
-                if (CBFSpeed > 0.999) CBFSpeed = 0.999;
+                if (CBFSpeed > 0.999) {
+                    CBFSpeed = 0.999;
+                }
 
                 CalcTotCapSHR_VSWSHP(state,
                                      state.dataVariableSpeedCoils->LoadSideInletDBTemp,
@@ -5983,7 +5987,9 @@ namespace VariableSpeedCoils {
                                               vsCoil.MSRatedAirMassFlowRate(SpeedCal),
                                               state.dataVariableSpeedCoils->LoadSideMassFlowRate);
 
-                if (CBFSpeed > 0.999) CBFSpeed = 0.999;
+                if (CBFSpeed > 0.999) {
+                    CBFSpeed = 0.999;
+                }
 
                 CalcTotCapSHR_VSWSHP(state,
                                      state.dataVariableSpeedCoils->LoadSideInletDBTemp,
@@ -6040,7 +6046,9 @@ namespace VariableSpeedCoils {
 
                 CBFSpeed = std::exp(-AoEff / state.dataVariableSpeedCoils->LoadSideMassFlowRate);
 
-                if (CBFSpeed > 0.999) CBFSpeed = 0.999;
+                if (CBFSpeed > 0.999) {
+                    CBFSpeed = 0.999;
+                }
 
                 CalcTotCapSHR_VSWSHP(state,
                                      state.dataVariableSpeedCoils->LoadSideInletDBTemp,
@@ -6311,8 +6319,9 @@ namespace VariableSpeedCoils {
             vsCoil.OutletWaterTemp = 0.0;
             vsCoil.OutletWaterEnthalpy = 0.0;
             state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).AvailCapacity = state.dataVariableSpeedCoils->QSource;
-            if (state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal > 0.0)
+            if (state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal > 0.0) {
                 state.dataVariableSpeedCoils->QSource -= state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal;
+            }
         } else {
             vsCoil.WaterMassFlowRate = state.dataVariableSpeedCoils->SourceSideMassFlowRate;
             vsCoil.OutletWaterTemp =
@@ -6322,8 +6331,9 @@ namespace VariableSpeedCoils {
                 state.dataVariableSpeedCoils->SourceSideInletEnth +
                 state.dataVariableSpeedCoils->QSource / state.dataVariableSpeedCoils->SourceSideMassFlowRate;
             state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).AvailCapacity = state.dataVariableSpeedCoils->QSource;
-            if (state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal > 0.0)
+            if (state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal > 0.0) {
                 state.dataVariableSpeedCoils->QSource -= state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).WaterHeatingDesuperheaterReclaimedHeatTotal;
+            }
         }
         state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).QSource = state.dataVariableSpeedCoils->QSource;
         state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).EnergySource = state.dataVariableSpeedCoils->QSource * TimeStepSysSec;
@@ -6468,7 +6478,9 @@ namespace VariableSpeedCoils {
             state.dataVariableSpeedCoils->LoadSideInletHumRat = state.dataLoopNodes->Node(EvapInletNode).HumRat;
             LoadPressure = state.dataLoopNodes->Node(EvapInletNode).Press;
             // prevent the air pressure not given
-            if (LoadPressure < 10.0) LoadPressure = state.dataEnvrn->OutBaroPress;
+            if (LoadPressure < 10.0) {
+                LoadPressure = state.dataEnvrn->OutBaroPress;
+            }
 
             state.dataVariableSpeedCoils->LoadSideInletWBTemp = state.dataLoopNodes->Node(EvapInletNode).OutAirWetBulb;
             state.dataVariableSpeedCoils->LoadSideInletEnth = state.dataLoopNodes->Node(EvapInletNode).Enthalpy;
@@ -6513,9 +6525,10 @@ namespace VariableSpeedCoils {
             if (PLF < 0.7) {
                 PLF = 0.7;
             }
-            if (fanOp == HVAC::FanOp::Cycling)
+            if (fanOp == HVAC::FanOp::Cycling) {
                 state.dataHVACGlobal->OnOffFanPartLoadFraction =
                     PLF; // save PLF for fan model, don't change fan power for constant fan mode if coil is off
+            }
             // calculate the run time fraction
             vsCoil.RunFrac = PartLoadRatio / PLF;
             vsCoil.PartLoadRatio = PartLoadRatio;
@@ -6744,8 +6757,9 @@ namespace VariableSpeedCoils {
                 if (vsCoil.CondPumpPowerInCOP) {
                     //       make sure fan power is full load fan power
                     CompressorPower = OperatingHeatingPower - vsCoil.HPWHCondPumpElecNomPower;
-                    if ((OperatingHeatingPower + locFanElecPower / HPRTF) > 0.0)
+                    if ((OperatingHeatingPower + locFanElecPower / HPRTF) > 0.0) {
                         TankHeatingCOP = TotalTankHeatingCapacity / (OperatingHeatingPower + locFanElecPower / HPRTF);
+                    }
                 } else {
                     CompressorPower = OperatingHeatingPower;
                     if ((OperatingHeatingPower + locFanElecPower / HPRTF +
@@ -6768,7 +6782,9 @@ namespace VariableSpeedCoils {
         SHR = 1.0;
         // if indoor, calculate SHR
         if (EvapInletNode != 0) {
-            if (CBFSpeed > 0.999) CBFSpeed = 0.999;
+            if (CBFSpeed > 0.999) {
+                CBFSpeed = 0.999;
+            }
 
             if (CBFSpeed < 0.001) {
                 SHR = 1.0;
@@ -7095,9 +7111,10 @@ namespace VariableSpeedCoils {
             if (PLF < 0.7) {
                 PLF = 0.7;
             }
-            if (fanOp == HVAC::FanOp::Cycling)
+            if (fanOp == HVAC::FanOp::Cycling) {
                 state.dataHVACGlobal->OnOffFanPartLoadFraction =
                     PLF; // save PLF for fan model, don't change fan power for constant fan mode if coil is off
+            }
             // calculate the run time fraction
             vsCoil.RunFrac = PartLoadRatio / PLF;
             vsCoil.PartLoadRatio = PartLoadRatio;
@@ -8192,8 +8209,12 @@ namespace VariableSpeedCoils {
         //  Calculate part-load or "effective" sensible heat ratio
         SHReff = 1.0 - (1.0 - SHRss) * LHRmult;
 
-        if (SHReff < SHRss) SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
-        if (SHReff > 1.0) SHReff = 1.0;     // Effective sensible heat ratio can't be greater than 1.0
+        if (SHReff < SHRss) {
+            SHReff = SHRss; // Effective SHR can be less than the steady-state SHR
+        }
+        if (SHReff > 1.0) {
+            SHReff = 1.0; // Effective sensible heat ratio can't be greater than 1.0
+        }
 
         return SHReff;
     }
@@ -8327,7 +8348,9 @@ namespace VariableSpeedCoils {
 
             //   Check for dry evaporator conditions (win < wadp)
             if (wADP > InletHumRatCalc || (Counter >= 1 && Counter < MaxIter)) {
-                if (InletHumRatCalc == 0.0) InletHumRatCalc = 0.00001;
+                if (InletHumRatCalc == 0.0) {
+                    InletHumRatCalc = 0.00001;
+                }
                 werror = (InletHumRatCalc - wADP) / InletHumRatCalc;
                 //     Increase InletHumRatCalc at constant inlet air temp to find coil dry-out point. Then use the
                 //     capacity at the dry-out point to determine exiting conditions from coil. This is required
@@ -8346,7 +8369,9 @@ namespace VariableSpeedCoils {
         } // END LOOP
 
         //  Calculate full load output conditions
-        if (SHRCalc > 1.0 || Counter > 0) SHRCalc = 1.0; // if Counter > 0 means a dry coil so SHR = 1
+        if (SHRCalc > 1.0 || Counter > 0) {
+            SHRCalc = 1.0; // if Counter > 0 means a dry coil so SHR = 1
+        }
 
         SHR = SHRCalc;
         TotCap1 = TotCapCalc1;

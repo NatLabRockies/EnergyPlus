@@ -1,4 +1,4 @@
 sphinx-rtd-theme
 sphinx>3
 Jinja2<3.1 # cannot import name 'environmentfilter' from 'jinja2'
-urllib3==1.26.19
+urllib3==2.5.0

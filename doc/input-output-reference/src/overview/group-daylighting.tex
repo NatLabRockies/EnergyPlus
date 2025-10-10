@@ -158,6 +158,8 @@ This object is referenced by \hyperref[daylightingcontrols-000]{Daylighting:Cont
 
 When the DElight Daylighting Method is used, there may be up to a maximum of 100 reference points for each zone. Each Reference Point that is input does NOT need to be included in the control of the electric lighting system within the zone. This is determined by the fraction of the zone controlled by each Reference Point, which can be input as 0. Note when the DElight Daylighting Method is used, that the sum of all Reference Point control fractions must equal 1 to obtain correct overall results.
 
+It should also be noted that daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). While an error is reported for a reference point that is too close to a window, no error message is generated when the user defines a point that is too close to a wall.
+
 \subsubsection{Inputs}\label{inputs-010}
 
 \paragraph{Field: Name}\label{field-name-002}
@@ -507,6 +509,13 @@ The amount by which the overhead electric lighting power in a space or zone is m
 
 The Output:IlluminanceMap object expands on the reporting capabilities of the daylighting simulation. For any space or zone simulated with \hyperref[daylightingcontrols-000]{Daylighting:Controls}, the illuminance map can generate up to 2,500 points of additional daylighting illuminance values. The resulting map is output as a comma delimited text file that can be imported into a spreadsheet program for rapid visualization of the daylighting illuminance patterns in a space or zone. The values are produced on an hourly basis. The Z height of the map is constant (parallel to a flat floor). More than one illuminance map can be created for a space or zone. IlluminanceMap output is available only when SplitFlux daylighting method is selected in \hyperref[daylightingcontrols-000]{Daylighting:Controls} object.
 
+When using the Output:IlluminanceMap object, the user should note the following:
+
+\begin{itemize}
+\item Daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). An error is reported for a reference point that is too close to a window, but no error is reported for a point that is too close to a wall.
+\item Since not all zones are rectangular, it is possible to have map points that are outside the zone. Any illuminance registered at these points is inaccurate and, additionally, a ``*'' marks these values for easy observance.
+\end{itemize}
+
 \subsubsection{Inputs}\label{inputs-4-006}
 
 \paragraph{Field: Name}\label{field-name-2-007}
@@ -545,8 +554,6 @@ The maximum Y coordinate boundary for the map.
 
 The number of daylighting reference points in the Y direction from the minimum to the maximum boundaries. The maximum number of points that can be generated is 2500 (Number of X Grid Points X Number of Y Grid Points).
 
-Note:~ Daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). An error is reported for a reference point that is too close to a window, but no error is reported for a point that is too close to a wall.
-
 \begin{lstlisting}
 
 Output:IlluminanceMap,
@@ -560,8 +567,6 @@ Output:IlluminanceMap,
     9.9,             ! Y Maximum Coordinate [m]
     10;              ! Number of Y grid Points
 \end{lstlisting}
-
-Since not all zones are rectangular, it is possible to have map points that are outside the zone. Any illuminance registered at these points is inaccurate and, additionally, a ``*'' marks these values for easy observance.
 
 \subsection{OutputControl:IlluminanceMap:Style}\label{outputcontrolilluminancemapstyle}
 

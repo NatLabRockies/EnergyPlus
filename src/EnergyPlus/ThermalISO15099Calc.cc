@@ -455,7 +455,9 @@ void Calc_ISO15099(EnergyPlusData &state,
     // if (GoAhead(nperr)) call propcon90(ISO15099,mgas,xgcon,xgvis,xgcp,xgrho,xwght,nperr)
 
     // exit on error
-    if (!(GoAhead(nperr))) return;
+    if (!(GoAhead(nperr))) {
+        return;
+    }
 
     // bi...Write intermediate results to output file:
     if (files.WriteDebugOutput) {
@@ -590,7 +592,9 @@ void Calc_ISO15099(EnergyPlusData &state,
             }
         }
 
-        if (!(GoAhead(nperr))) return;
+        if (!(GoAhead(nperr))) {
+            return;
+        }
 
         // No need to store results in case of non-ufactor run
         if ((SHGCCalc > 0) && (dir > 0.0)) {
@@ -730,7 +734,9 @@ void Calc_ISO15099(EnergyPlusData &state,
         NumOfIterations = NumOfIter;
 
         // exit on error:
-        if (!(GoAhead(nperr))) return;
+        if (!(GoAhead(nperr))) {
+            return;
+        }
 
         // bi...Keep hcout, hcin in case this is an unshaded system:
         HcUnshadedOut = hcout;
@@ -986,7 +992,9 @@ void Calc_ISO15099(EnergyPlusData &state,
 
             NumOfIterations = NumOfIter_NOSD;
             // exit on error
-            if (!(GoAhead(nperr))) return;
+            if (!(GoAhead(nperr))) {
+                return;
+            }
 
             // bi...  Keep these values:
             HcUnshadedOut = hcout_NOSD;
@@ -1043,8 +1051,8 @@ void Calc_ISO15099(EnergyPlusData &state,
                                      NumOfIter_NOSD); // Autodesk:Uninit shgc_NOSD, sc_NOSD, hflux_NOSD,
                                                       // ShadeHcRatioIn_NOSD, ShadeHcRatioOut_NOSD were
                                                       // uninitialized
-            }                                         // end if UnshadedDebug = 1
-        }                                             // end if NeedUnshadedRun...
+            } // end if UnshadedDebug = 1
+        } // end if NeedUnshadedRun...
 
         // bi Set T6-related quantities keff, keffc: (using non-solar pass results)
         if (nlayer > 1) {
@@ -1558,7 +1566,9 @@ void therm1d(EnergyPlusData &state,
                            ErrorMessage);
 
         // exit on error
-        if (!(GoAhead(nperr))) return;
+        if (!(GoAhead(nperr))) {
+            return;
+        }
 
         // bi...Override hhat values near SHADING DEVICE layer(s), but only for CSM thermal model:
         if ((ThermalMod == TARCOGThermalModel::CSM) && (SDLayerIndex > 0)) {
@@ -1628,7 +1638,9 @@ void therm1d(EnergyPlusData &state,
                     vfreevent);
 
             // exit on error
-            if (!(GoAhead(nperr))) return;
+            if (!(GoAhead(nperr))) {
+                return;
+            }
 
             matrixQBalance(nlayer,
                            a,
@@ -1762,7 +1774,9 @@ void therm1d(EnergyPlusData &state,
                                   nperr);
         }
 
-        if (!(GoAhead(nperr))) return;
+        if (!(GoAhead(nperr))) {
+            return;
+        }
 
         prevDifference = curDifference;
 
@@ -2689,7 +2703,9 @@ void filmg(EnergyPlusData &state,
         tmean = Tgap(i + 1); // Tgap(1) is exterior environment
         delt = std::abs(theta(j) - theta(k));
         // Temperatures should not be equal. This can happen in initial temperature guess before iterations started
-        if (delt == 0.0) delt = 1.0e-6;
+        if (delt == 0.0) {
+            delt = 1.0e-6;
+        }
         for (l = 1; l <= nmix(i + 1); ++l) {
             state.dataThermalISO15099Calc->ipropg(l) = iprop(l, i + 1);
             state.dataThermalISO15099Calc->frctg(l) = frct(l, i + 1);

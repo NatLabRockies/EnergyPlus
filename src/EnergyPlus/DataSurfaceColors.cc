@@ -98,11 +98,15 @@ bool MatchAndSetColorTextString(EnergyPlusData &state,
     };
 
     // ColorType must be "DXF"
-    if (ColorType != "DXF") return false;
+    if (ColorType != "DXF") {
+        return false;
+    }
 
     // try to find enum value
     int foundIdx = getEnumValue(colorkeys, Util::makeUPPER(String));
-    if (foundIdx == -1) return false;
+    if (foundIdx == -1) {
+        return false;
+    }
 
     // if we've made it here, we found the value
     state.dataSurfColor->DXFcolorno[foundIdx] = SetValue;

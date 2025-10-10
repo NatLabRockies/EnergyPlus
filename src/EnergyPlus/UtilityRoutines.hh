@@ -418,7 +418,9 @@ namespace Util {
     template <typename A> inline int FindItemInList(std::string_view const String, MArray1<A, std::string> const &ListOfItems, int const NumItems)
     {
         for (int Count = 1; Count <= NumItems; ++Count) {
-            if (String == ListOfItems(Count)) return Count;
+            if (String == ListOfItems(Count)) {
+                return Count;
+            }
         }
         return 0; // Not found
     }
@@ -433,7 +435,9 @@ namespace Util {
     inline int FindItemInList(std::string_view const String, Container const &ListOfItems, int const NumItems)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
-            if (String == ListOfItems[i].Name) return int(i + 1); // 1-based return index
+            if (String == ListOfItems[i].Name) {
+                return int(i + 1); // 1-based return index
+            }
         }
         return 0; // Not found
     }
@@ -451,7 +455,9 @@ namespace Util {
     FindItemInList(std::string_view const String, Container const &ListOfItems, std::string Container::value_type::*name_p, int const NumItems)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
-            if (String == ListOfItems[i].*name_p) return int(i + 1); // 1-based return index
+            if (String == ListOfItems[i].*name_p) {
+                return int(i + 1); // 1-based return index
+            }
         }
         return 0; // Not found
     }
@@ -479,7 +485,9 @@ namespace Util {
         bool Found(false);
         while ((!Found) || (Probe != 0)) {
             Probe = (UBnd - LBnd) / 2;
-            if (Probe == 0) break;
+            if (Probe == 0) {
+                break;
+            }
             Probe += LBnd;
             if (equali(String, ListOfItems(Probe))) {
                 Found = true;
@@ -505,10 +513,14 @@ namespace Util {
         // );
 
         auto const it = std::find_if(first, last, [&str](const valueType &s) { return s.name == str; });
-        if (it != last) return it - first + 1; // 1-based return index
+        if (it != last) {
+            return it - first + 1; // 1-based return index
+        }
 
         auto const it2 = std::find_if(first, last, [&str](const valueType &s) { return equali(s.name, str); });
-        if (it2 != last) return it2 - first + 1; // 1-based return index
+        if (it2 != last) {
+            return it2 - first + 1; // 1-based return index
+        }
 
         return 0; // Not found
     }
@@ -520,10 +532,14 @@ namespace Util {
         // Named" );
 
         auto const it = std::find_if(first, last, [&str](const valueType &s) { return s->name == str; });
-        if (it != last) return it - first + 1; // 1-based return index
+        if (it != last) {
+            return it - first + 1; // 1-based return index
+        }
 
         auto const it2 = std::find_if(first, last, [&str](const valueType &s) { return equali(s->name, str); });
-        if (it2 != last) return it2 - first + 1; // 1-based return index
+        if (it2 != last) {
+            return it2 - first + 1; // 1-based return index
+        }
 
         return 0; // Not found
     }
@@ -550,9 +566,13 @@ namespace Util {
     template <typename A> inline int FindItem(std::string_view const String, MArray1<A, std::string> const &ListOfItems, int const NumItems)
     {
         int const item_number(Util::FindItemInList(String, ListOfItems, NumItems));
-        if (item_number != 0) return item_number;
+        if (item_number != 0) {
+            return item_number;
+        }
         for (int Count = 1; Count <= NumItems; ++Count) {
-            if (equali(String, ListOfItems(Count))) return Count;
+            if (equali(String, ListOfItems(Count))) {
+                return Count;
+            }
         }
         return 0; // Not found
     }
@@ -567,9 +587,13 @@ namespace Util {
     inline int FindItem(std::string_view const String, Container const &ListOfItems, int const NumItems)
     {
         int const item_number(Util::FindItemInList(String, ListOfItems, NumItems));
-        if (item_number != 0) return item_number;
+        if (item_number != 0) {
+            return item_number;
+        }
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
-            if (equali(String, ListOfItems[i].Name)) return i + 1; // 1-based return index
+            if (equali(String, ListOfItems[i].Name)) {
+                return i + 1; // 1-based return index
+            }
         }
         return 0; // Not found
     }
@@ -586,9 +610,13 @@ namespace Util {
     inline int FindItem(std::string_view const String, Container const &ListOfItems, std::string Container::value_type::*name_p, int const NumItems)
     {
         int const item_number(Util::FindItemInList(String, ListOfItems, name_p, NumItems));
-        if (item_number != 0) return item_number;
+        if (item_number != 0) {
+            return item_number;
+        }
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
-            if (equali(String, ListOfItems[i].*name_p)) return i + 1; // 1-based return index
+            if (equali(String, ListOfItems[i].*name_p)) {
+                return i + 1; // 1-based return index
+            }
         }
         return 0; // Not found
     }
@@ -764,6 +792,15 @@ namespace Util {
 
     bool IsNameEmpty(EnergyPlusData &state, std::string &NameToVerify, std::string_view StringToDisplay, bool &ErrorFound);
 
+    void setDesignObjectNameAndPointer(EnergyPlusData &state,
+                                       std::string &nameToBeSet,         // field that is being set once a match is found
+                                       int &ptrToBeSet,                  // pointer that is being set once a match is found
+                                       std::string const userName,       // name to be found searching through the list
+                                       Array1S_string const listOfNames, // list of names in which the userName must be found
+                                       std::string const itemType,       // string containing type of base object
+                                       std::string const itemName,       // string containing name of base object
+                                       bool &errorFound);                // set to true if an error is found
+
     // Two structs for case insensitive containers.
     // Eg: for unordered_map, we need to have a case insenstive hasher and a case insensitive comparator
     // (The default allocator for unordered_map is fine)
@@ -787,7 +824,9 @@ namespace Util {
 constexpr int getEnumValue(const gsl::span<const std::string_view> sList, const std::string_view s)
 {
     for (unsigned int i = 0; i < sList.size(); ++i) {
-        if (sList[i] == s) return i;
+        if (sList[i] == s) {
+            return i;
+        }
     }
     return -1;
 }

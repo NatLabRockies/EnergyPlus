@@ -101,7 +101,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
         Vector2D const &w(vertices[(i + 1) % n]);
         area += (v.x * w.y) - (w.x * v.y);
     }
-    if (area < 0.0) std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
+    if (area < 0.0) {
+        std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
+    }
 
     // Set up edge vectors for ray--surface intersection tests
     edges.reserve(n);
@@ -115,8 +117,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     } else if ((shapeCat == ShapeCat::Nonconvex) || (n >= nVerticesBig)) { // Set up slabs
         assert(n >= 4u);
         slabYs.reserve(n);
-        for (size_type i = 0; i < n; ++i)
+        for (size_type i = 0; i < n; ++i) {
             slabYs.push_back(vertices[i].y);
+        }
         std::sort(slabYs.begin(), slabYs.end());                     // Sort the vertex y coordinates
         auto const iClip(std::unique(slabYs.begin(), slabYs.end())); // Remove duplicate y-coordinate elements
         slabYs.erase(iClip, slabYs.end());
@@ -614,8 +617,9 @@ void CheckSurfaceOutBulbTempAt(EnergyPlusData &state)
     Real64 minBulb = 0.0;
     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; SurfNum++) {
         minBulb = min(minBulb, state.dataSurface->SurfOutDryBulbTemp(SurfNum), state.dataSurface->SurfOutWetBulbTemp(SurfNum));
-        if (minBulb < -100.0)
+        if (minBulb < -100.0) {
             SetOutBulbTempAt_error(state, "Surface", state.dataSurface->Surface(SurfNum).Centroid.z, state.dataSurface->Surface(SurfNum).Name);
+        }
     }
 }
 
@@ -630,7 +634,9 @@ void SetSurfaceWindSpeedAt(EnergyPlusData &state)
     } else {
 
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; SurfNum++) {
-            if (!state.dataSurface->Surface(SurfNum).ExtWind) continue;
+            if (!state.dataSurface->Surface(SurfNum).ExtWind) {
+                continue;
+            }
             Real64 const Z(state.dataSurface->Surface(SurfNum).Centroid.z); // Centroid value
             if (Z <= 0.0) {
                 state.dataSurface->SurfOutWindSpeed(SurfNum) = 0.0;
@@ -734,14 +740,22 @@ Real64 AbsBackSide(EnergyPlusData &state, int SurfNum)
 
 void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
 {
-    if (!state.dataMaterial->AnyVariableAbsorptance) return;
+    if (!state.dataMaterial->AnyVariableAbsorptance) {
+        return;
+    }
     for (int surfNum : state.dataSurface->AllHTSurfaceList) {
         auto const &thisSurface = state.dataSurface->Surface(surfNum);
         auto const &thisConstruct = state.dataConstruction->Construct(thisSurface.Construction);
-        if (thisConstruct.TotLayers == 0) continue;
-        if (thisConstruct.LayerPoint(1) == 0) continue; // error finding material number
+        if (thisConstruct.TotLayers == 0) {
+            continue;
+        }
+        if (thisConstruct.LayerPoint(1) == 0) {
+            continue; // error finding material number
+        }
         auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
-        if (mat->group != Material::Group::Regular) continue;
+        if (mat->group != Material::Group::Regular) {
+            continue;
+        }
 
         if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
             // check for dynamic coating defined on interior surface
@@ -760,7 +774,9 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
         auto const &thisConstruct = state.dataConstruction->Construct(ConstrNum);
         for (int Layer = 2; Layer <= thisConstruct.TotLayers; ++Layer) {
             auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(Layer));
-            if (mat->group != Material::Group::Regular) continue;
+            if (mat->group != Material::Group::Regular) {
+                continue;
+            }
             if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
                 ShowWarningError(state,
                                  format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
@@ -778,9 +794,13 @@ Compass4 AzimuthToCompass4(Real64 azimuth)
         Real64 lo = Compass4AzimuthLo[c4];
         Real64 hi = Compass4AzimuthHi[c4];
         if (lo > hi) {
-            if (azimuth >= lo || azimuth < hi) return static_cast<Compass4>(c4);
+            if (azimuth >= lo || azimuth < hi) {
+                return static_cast<Compass4>(c4);
+            }
         } else {
-            if (azimuth >= lo && azimuth < hi) return static_cast<Compass4>(c4);
+            if (azimuth >= lo && azimuth < hi) {
+                return static_cast<Compass4>(c4);
+            }
         }
     }
     assert(false);
@@ -794,9 +814,13 @@ Compass8 AzimuthToCompass8(Real64 azimuth)
         Real64 lo = Compass8AzimuthLo[c8];
         Real64 hi = Compass8AzimuthHi[c8];
         if (lo > hi) {
-            if (azimuth >= lo || azimuth < hi) return static_cast<Compass8>(c8);
+            if (azimuth >= lo || azimuth < hi) {
+                return static_cast<Compass8>(c8);
+            }
         } else {
-            if (azimuth >= lo && azimuth < hi) return static_cast<Compass8>(c8);
+            if (azimuth >= lo && azimuth < hi) {
+                return static_cast<Compass8>(c8);
+            }
         }
     }
     assert(false);

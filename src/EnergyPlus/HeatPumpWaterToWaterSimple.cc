@@ -112,7 +112,9 @@ GshpSpecs *GshpSpecs::factory(EnergyPlusData &state, DataPlant::PlantEquipmentTy
         std::find_if(state.dataHPWaterToWaterSimple->GSHP.begin(),
                      state.dataHPWaterToWaterSimple->GSHP.end(),
                      [&eir_wwhp_name, &wwhp_type](const GshpSpecs &myObj) { return (myObj.Name == eir_wwhp_name && myObj.WWHPType == wwhp_type); });
-    if (thisObj != state.dataHPWaterToWaterSimple->GSHP.end()) return thisObj;
+    if (thisObj != state.dataHPWaterToWaterSimple->GSHP.end()) {
+        return thisObj;
+    }
 
     ShowFatalError(state, format("EquationFit_WWHP factory: Error getting inputs for wwhp named: {}", eir_wwhp_name));
     return nullptr;
@@ -744,14 +746,17 @@ void GshpSpecs::InitWatertoWaterHP(EnergyPlusData &state,
 
         PlantUtilities::InitComponentNodes(state, 0.0, this->SourceSideDesignMassFlow, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum);
 
-        if (state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint == DataLoopNode::SensedNodeFlagValue)
+        if (state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint == DataLoopNode::SensedNodeFlagValue) {
             state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint = 0.0;
+        }
         state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp = state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint + 30;
 
         this->MyEnvrnFlag = false;
     }
     // Reset the environment flag
-    if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->MyEnvrnFlag = true;
+    }
 
     if (MyLoad > 0.0 && GSHPTypeNum == DataPlant::PlantEquipmentType::HPWaterEFHeating) {
         this->MustRun = true;
@@ -874,8 +879,12 @@ void GshpSpecs::sizeCoolingWaterToWaterHP(EnergyPlusData &state)
             Real64 Cp = state.dataPlnt->PlantLoop(this->LoadPlantLoc.loopNum).glycol->getSpecificHeat(state, Constant::CWInitConvTemp, RoutineName);
             tmpCoolingCap = Cp * rho * state.dataSize->PlantSizData(pltLoadSizNum).DeltaT * tmpLoadSideVolFlowRate;
         } else {
-            if (this->ratedCapCoolWasAutoSized) tmpCoolingCap = 0.0;
-            if (this->ratedLoadVolFlowCoolWasAutoSized) tmpLoadSideVolFlowRate = 0.0;
+            if (this->ratedCapCoolWasAutoSized) {
+                tmpCoolingCap = 0.0;
+            }
+            if (this->ratedLoadVolFlowCoolWasAutoSized) {
+                tmpLoadSideVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->ratedCapCoolWasAutoSized) {
@@ -1034,7 +1043,9 @@ void GshpSpecs::sizeCoolingWaterToWaterHP(EnergyPlusData &state)
                 state, "HeatPump:WaterToWater:EquationFit:Cooling", this->Name, "User-Specified Nominal Capacity [W]", this->RatedCapCool);
         }
     }
-    if (!this->ratedLoadVolFlowCoolWasAutoSized) tmpLoadSideVolFlowRate = this->RatedLoadVolFlowCool;
+    if (!this->ratedLoadVolFlowCoolWasAutoSized) {
+        tmpLoadSideVolFlowRate = this->RatedLoadVolFlowCool;
+    }
     int pltSourceSizNum = state.dataPlnt->PlantLoop(this->SourcePlantLoc.loopNum).PlantSizNum;
     if (pltSourceSizNum > 0) {
         Real64 rho = state.dataPlnt->PlantLoop(this->SourcePlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
@@ -1094,8 +1105,12 @@ void GshpSpecs::sizeCoolingWaterToWaterHP(EnergyPlusData &state)
             tmpSourceSideVolFlowRate = nomSourceSideVolFlowUser;
         }
     }
-    if (!this->ratedSourceVolFlowCoolWasAutoSized) tmpSourceSideVolFlowRate = this->RatedSourceVolFlowCool;
-    if (!this->ratedCapCoolWasAutoSized) tmpCoolingCap = this->RatedCapCool;
+    if (!this->ratedSourceVolFlowCoolWasAutoSized) {
+        tmpSourceSideVolFlowRate = this->RatedSourceVolFlowCool;
+    }
+    if (!this->ratedCapCoolWasAutoSized) {
+        tmpCoolingCap = this->RatedCapCool;
+    }
     if (this->ratedPowerCoolWasAutoSized) {
         tmpPowerDraw = tmpCoolingCap / this->refCOP;
         this->RatedPowerCool = tmpPowerDraw;
@@ -1206,8 +1221,12 @@ void GshpSpecs::sizeHeatingWaterToWaterHP(EnergyPlusData &state)
             Real64 Cp = state.dataPlnt->PlantLoop(this->LoadPlantLoc.loopNum).glycol->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);
             tmpHeatingCap = Cp * rho * state.dataSize->PlantSizData(pltLoadSizNum).DeltaT * tmpLoadSideVolFlowRate;
         } else {
-            if (this->ratedCapHeatWasAutoSized) tmpHeatingCap = 0.0;
-            if (this->ratedLoadVolFlowHeatWasAutoSized) tmpLoadSideVolFlowRate = 0.0;
+            if (this->ratedCapHeatWasAutoSized) {
+                tmpHeatingCap = 0.0;
+            }
+            if (this->ratedLoadVolFlowHeatWasAutoSized) {
+                tmpLoadSideVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->ratedCapHeatWasAutoSized) {
@@ -1365,7 +1384,9 @@ void GshpSpecs::sizeHeatingWaterToWaterHP(EnergyPlusData &state)
                 state, "HeatPump:WaterToWater:EquationFit:Heating", this->Name, "User-Specified Nominal Capacity [W]", this->RatedCapHeat);
         }
     }
-    if (!this->ratedLoadVolFlowHeatWasAutoSized) tmpLoadSideVolFlowRate = this->RatedLoadVolFlowHeat;
+    if (!this->ratedLoadVolFlowHeatWasAutoSized) {
+        tmpLoadSideVolFlowRate = this->RatedLoadVolFlowHeat;
+    }
     int pltSourceSizNum = state.dataPlnt->PlantLoop(this->SourcePlantLoc.loopNum).PlantSizNum;
     if (pltSourceSizNum > 0) {
         Real64 rho = state.dataPlnt->PlantLoop(this->SourcePlantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -1424,8 +1445,12 @@ void GshpSpecs::sizeHeatingWaterToWaterHP(EnergyPlusData &state)
             tmpSourceSideVolFlowRate = nomSourceSideVolFlowUser;
         }
     }
-    if (!this->ratedSourceVolFlowHeatWasAutoSized) tmpSourceSideVolFlowRate = this->RatedSourceVolFlowHeat;
-    if (!this->ratedCapHeatWasAutoSized) tmpHeatingCap = this->RatedCapHeat;
+    if (!this->ratedSourceVolFlowHeatWasAutoSized) {
+        tmpSourceSideVolFlowRate = this->RatedSourceVolFlowHeat;
+    }
+    if (!this->ratedCapHeatWasAutoSized) {
+        tmpHeatingCap = this->RatedCapHeat;
+    }
     if (this->ratedPowerHeatWasAutoSized) {
         tmpPowerDraw = tmpHeatingCap / this->refCOP;
         this->RatedPowerHeat = tmpPowerDraw;

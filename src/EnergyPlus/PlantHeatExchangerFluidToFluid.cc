@@ -238,7 +238,9 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
     cCurrentModuleObject = "HeatExchanger:FluidToFluid";
 
     state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-    if (state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs == 0) return;
+    if (state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs == 0) {
+        return;
+    }
 
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, cCurrentModuleObject, TotalArgs, NumAlphas, NumNums);
     MaxNumNumbers = NumNums;
@@ -458,17 +460,17 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
             }
 
             std::string endUseCat = Util::makeUPPER(cAlphaArgs(10));
-            if (endUseCat == "FREECOOLING")
+            if (endUseCat == "FREECOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::FreeCooling;
-            else if (endUseCat == "HEATREJECTION")
+            } else if (endUseCat == "HEATREJECTION") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRejection;
-            else if (endUseCat == "HEATRECOVERYFORCOOLING")
+            } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForCooling;
-            else if (endUseCat == "HEATRECOVERYFORCOOLING")
+            } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForHeating;
-            else if (endUseCat == "LOOPTOLOOP")
+            } else if (endUseCat == "LOOPTOLOOP") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::LoopToLoop;
-            else {
+            } else {
                 ShowWarningError(
                     state,
                     format("{} = {}, {} is an invalid value for {}", cCurrentModuleObject, cAlphaArgs(1), cAlphaArgs(10), cAlphaFieldNames(10)));
@@ -712,10 +714,14 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
         if (PltSizNumSupSide > 0) {
             if (state.dataSize->PlantSizData(PltSizNumSupSide).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpSupSideDesignVolFlowRate = state.dataSize->PlantSizData(PltSizNumSupSide).DesVolFlowRate * this->SizingFactor;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->SupplySideLoop.DesignVolumeFlowRate = tmpSupSideDesignVolFlowRate;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->SupplySideLoop.DesignVolumeFlowRate = tmpSupSideDesignVolFlowRate;
+                }
             } else {
                 tmpSupSideDesignVolFlowRate = 0.0;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->SupplySideLoop.DesignVolumeFlowRate = tmpSupSideDesignVolFlowRate;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->SupplySideLoop.DesignVolumeFlowRate = tmpSupSideDesignVolFlowRate;
+                }
             }
             if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                 BaseSizer::reportSizerOutput(state,
@@ -745,10 +751,14 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
     if (this->DemandSideLoop.DesignVolumeFlowRateWasAutoSized) {
         if (tmpSupSideDesignVolFlowRate > HVAC::SmallWaterVolFlow) {
             tmpDmdSideDesignVolFlowRate = tmpSupSideDesignVolFlowRate;
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->DemandSideLoop.DesignVolumeFlowRate = tmpDmdSideDesignVolFlowRate;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->DemandSideLoop.DesignVolumeFlowRate = tmpDmdSideDesignVolFlowRate;
+            }
         } else {
             tmpDmdSideDesignVolFlowRate = 0.0;
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->DemandSideLoop.DesignVolumeFlowRate = tmpDmdSideDesignVolFlowRate;
+            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                this->DemandSideLoop.DesignVolumeFlowRate = tmpDmdSideDesignVolFlowRate;
+            }
         }
         if (state.dataPlnt->PlantFinalSizesOkayToReport) {
             BaseSizer::reportSizerOutput(state,
@@ -804,9 +814,13 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
                 Real64 rho = this->SupplySideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
 
                 Real64 tmpDesCap = Cp * rho * tmpDeltaTSupLoop * tmpSupSideDesignVolFlowRate;
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->UA = tmpDesCap / tmpDeltaTloopToLoop;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->UA = tmpDesCap / tmpDeltaTloopToLoop;
+                }
             } else {
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) this->UA = 0.0;
+                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                    this->UA = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                 BaseSizer::reportSizerOutput(

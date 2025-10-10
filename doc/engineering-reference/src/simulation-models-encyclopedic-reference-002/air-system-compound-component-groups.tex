@@ -2994,9 +2994,9 @@ The heating and cooling capacities are derived from the nominal (rated) capacity
 \mathrm{GAHP Heating/Cooling Capacity} = \mathrm{Rated Capacity} \times \mathrm{CAPFT}
 \end{equation}
 
-The temperatures used for the equation model are the ambient air temperature ($T_{mathrm{amb}}$) and the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side.
+The temperatures used for the equation model are the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side and the ambient air temperature ($T_{mathrm{amb}}$).
 \begin{equation}
-\mathrm{CAPFT} = a_1 \times T_{\mathrm{amb}} + b_1 \times T_{\mathrm{amb}}^{2} + c_1 \times T_{\mathrm{ret}} + d_1 \times T_{\mathrm{ret}}^{2} + e_1 \times T_{\mathrm{amb}} \times T_{\mathrm{ret}} + f_1
+\mathrm{CAPFT} = a + b \times T_{\mathrm{ret}} + c \times T_{\mathrm{ret}}^{2} + d \times T_{\mathrm{amb}} + e \times T_{\mathrm{amb}}^{2} + f \times T_{\mathrm{amb}} \times T_{\mathrm{ret}}
 \end{equation}
 
 \subsubsection{Part Load Ratio}
@@ -3015,13 +3015,13 @@ The fuel usage is calculated using the following formula, taking consideration o
 \subsubsection{EIR Temperature Adjustment}
 A typical EIR temperature correction function will involve two independent temperature variables---the ambient air temperature ($T_{mathrm{amb}}$) and the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side. 
 \begin{equation}
-\mathrm{EIRFT} = a_2 \times Tamb + b_2 \times T_{\mathrm{amb}}^{2} + c_2 \times T_{\mathrm{ret}}^{2} + d_2 \times T_{\mathrm{ret}}^{2} + e_2 \times T_{\mathrm{amb}} \times T_{\mathrm{ret}} + f_2
+\mathrm{EIRFT} = a + b \times T_{\mathrm{ret}} + c \times T_{\mathrm{ret}}^{2} + d \times T_{\mathrm{amb}} + e \times T_{\mathrm{amb}}^{2} + f \times T_{\mathrm{amb}} \times T_{\mathrm{ret}}
 \end{equation}
 
 \subsubsection{EIR PLR Adjustment}
 The EIR PLR correction function is a cubic function that takes the PLR as the sole independent variable. For example, a potential curve can be used is like the following:  
 \begin{equation}
-\mathrm{EIRFPLR} = 0.0865 \times \mathrm{PLR}^{2} - 0.006 \times \mathrm{PLR} + 0.9814, \mathrm{for} 0.25 \leq \mathrm{PLR} \leq 1 
+\mathrm{EIRFPLR} = 0.0865 \times \mathrm{PLR}^{2} - 0.006 \times \mathrm{PLR} + 0.9814, \mathrm{for } 0.25 \leq \mathrm{PLR} \leq 1
 \end{equation}
 
 \subsubsection{Defrosting Adjustment (Heating mode only)}
@@ -3044,10 +3044,14 @@ where $\mathrm{CRF}$ is the Cycling Ratio Factor; and $\mathrm{CR}$ is the Cycli
 
 Please note that since the object is based on curve inputs, the user also has the flexibility of defining the curves by themselves---e.g. from the capacity function of temperature to the defrost EIR corrections. 
 
-\subsubsection{Electricty Use}
+\subsubsection{Electricity Use}
 
 The electricity use for the fuel-fired absorption heat pump is modeled using EIR (Electricity based relation) input curves. The two part of electricity use is the ``auxiliary electricity'' and the ``standby electricity'':
 \begin{equation}
-\mathrm{Electricity use} = \mathrm{Norminal Auxiliary Power} \times \mathrm{EIR}_{\mathrm{auxiliary}} + \mathrm{Electricty}_{\mathrm{Standby}},
+\mathrm{Electricity use} = \mathrm{Norminal Auxiliary Power} \times \mathrm{EIR}_{\mathrm{auxiliary}} + \mathrm{Electricity}_{\mathrm{Standby}},
 \end{equation}
-where $\mathrm{EIR}_{\mathrm{auxiliary}}$ are supplied by the curve input, and $\mathrm{Norminal Auxiliary Power}$ and $\mathrm{Electricty}_{\mathrm{Standby}}$ are supplied by the equipment standby electricity inputs. 
+Where $\mathrm{Norminal Auxiliary Power}$ and $\mathrm{Electricity}_{\mathrm{Standby}}$ are user inputs and where $\mathrm{EIR}_{\mathrm{auxiliary}}$ is a curve modifier defined as follows and involves two independent temperature variables---the ambient air temperature ($T_{mathrm{amb}}$) and the returning (or entering) water temperature ($T_{\mathrm{ret}}$) of the load side.
+
+\begin{equation}
+\mathrm{EIR}_{\mathrm{auxiliary}} = a + b \times T_{\mathrm{ret}} + c \times T_{\mathrm{ret}}^{2} + d \times T_{\mathrm{amb}} + e \times T_{\mathrm{amb}}^{2} + f \times T_{\mathrm{amb}} \times T_{\mathrm{ret}}
+\end{equation}

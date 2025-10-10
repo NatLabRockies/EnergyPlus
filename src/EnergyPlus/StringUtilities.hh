@@ -65,7 +65,9 @@ inline std::stringstream stringReader(std::string_view str)
 template <class T, typename = std::enable_if_t<std::is_same_v<T, double> || std::is_same_v<T, int>>>
 bool readListItem(std::string_view input, size_t &index, T &param)
 {
-    if (index >= input.size()) return false;
+    if (index >= input.size()) {
+        return false;
+    }
 
     input.remove_prefix(index);
 
@@ -121,7 +123,9 @@ template <typename Param> bool readItem(std::string_view input, Param &&param)
 
 inline auto nth_occurrence(std::string_view input_str, std::string_view search_str, std::size_t Nth)
 {
-    if (Nth == 0) return std::string_view::npos;
+    if (Nth == 0) {
+        return std::string_view::npos;
+    }
     std::string_view::size_type pos = 0;
     size_t cnt{};
 
@@ -141,7 +145,9 @@ inline auto nth_occurrence(std::string_view input_str, std::string_view search_s
 // eg: Given a string test="aa,bb,cc", nth_occurrence(test, ',', x), for x = 1 it gives 3, and for x = 2 it gives 6
 inline auto nth_occurrence(std::string_view input_str, char const search_char, std::size_t Nth)
 {
-    if (Nth == 0) return std::string_view::npos;
+    if (Nth == 0) {
+        return std::string_view::npos;
+    }
     std::string_view::size_type pos = 0;
     size_t cnt{};
 
@@ -157,7 +163,7 @@ inline auto nth_occurrence(std::string_view input_str, char const search_char, s
     return pos;
 }
 
-template <typename... Param> bool readList(std::string_view input, Param &&... param)
+template <typename... Param> bool readList(std::string_view input, Param &&...param)
 {
     if constexpr (std::conjunction_v<std::is_same<double &, Param>...> || std::conjunction_v<std::is_same<int &, Param>...>) {
         size_t index = 0;

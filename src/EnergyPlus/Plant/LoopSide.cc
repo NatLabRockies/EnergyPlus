@@ -271,7 +271,9 @@ namespace DataPlant {
         }
 
         // Return early if we only needed to do the one branch
-        if (NumParallelPaths <= 0) return;
+        if (NumParallelPaths <= 0) {
+            return;
+        }
 
         // Now, if we have multiple parallel branches, I think the easiest way is to go all the way from the inlet node
         //  of each parallel branch to the loop outlet node and check the flow path
@@ -489,7 +491,9 @@ namespace DataPlant {
             //      for demand components Node(ComponentOutletNode)%MassFlowRateMaxAvail = MaxAvail
 
             //~ If this value matches then we are good to move to the next component
-            if (std::abs(MassFlow - MassFlowRateFound) < CriteriaDelta_MassFlowRate) continue;
+            if (std::abs(MassFlow - MassFlowRateFound) < CriteriaDelta_MassFlowRate) {
+                continue;
+            }
             //~ Since there is a difference, we have to decide what to do based on the component type:
             //~  For plant connections, don't do anything, it SHOULD work itself out
             //~  For air connections, trip the LoopSide air flag
@@ -600,7 +604,9 @@ namespace DataPlant {
 
         for (int BranchGroup = 1; BranchGroup <= NumBranchGroups; ++BranchGroup) {
 
-            if ((BranchGroup > 1) && (this->TotalBranches == 1)) break;
+            if ((BranchGroup > 1) && (this->TotalBranches == 1)) {
+                break;
+            }
 
             switch (BranchGroup) {
             case InletBranchOrOneBranchHalfLoop:
@@ -833,7 +839,9 @@ namespace DataPlant {
         }
 
         // Trim the demand to zero if it is very small
-        if (std::abs(LoadToLoopSetPoint) < DataPlant::LoopDemandTol) LoadToLoopSetPoint = 0.0;
+        if (std::abs(LoadToLoopSetPoint) < DataPlant::LoopDemandTol) {
+            LoadToLoopSetPoint = 0.0;
+        }
 
         return LoadToLoopSetPoint;
     }
@@ -911,7 +919,9 @@ namespace DataPlant {
                 // reference
                 auto &branch(loop_side.Branch(BranchCounter));
 
-                if (BranchCounter > 1 && BranchCounter < NumBranchesOnThisLoopSide) ++ParallelBranchIndex;
+                if (BranchCounter > 1 && BranchCounter < NumBranchesOnThisLoopSide) {
+                    ++ParallelBranchIndex;
+                }
 
                 if (branch.disableOverrideForCSBranchPumping) {
                     branch.RequestedMassFlow = 0.0;
@@ -1117,7 +1127,9 @@ namespace DataPlant {
                     auto const &loop_branches(loop_side.Branch);
                     for (int BranchCounter = 1; BranchCounter <= NumBranchesOnThisLoopSide; ++BranchCounter) {
                         auto const &loop_branch(loop_branches(BranchCounter));
-                        if (BranchCounter > 1 && BranchCounter < NumBranchesOnThisLoopSide) ++ParallelBranchIndex;
+                        if (BranchCounter > 1 && BranchCounter < NumBranchesOnThisLoopSide) {
+                            ++ParallelBranchIndex;
+                        }
                         if (loop_branch.HasConstantSpeedBranchPump) {
                             Real64 const branch_mass_flow(loop_branch.ConstantSpeedBranchMassFlow);
                             if (loop_branch.max_abs_Comp_MyLoad() > HVAC::SmallLoad) {
@@ -1456,16 +1468,21 @@ namespace DataPlant {
                         // branch flow is min of requested flow and remaining flow
                         state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate =
                             min(state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate, FlowRemaining);
-                        if (state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance)
+                        if (state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
                             state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = 0.0;
+                        }
                         this->PushBranchFlowCharacteristics(
                             state, SplitterBranchOut, state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate, FirstHVACIteration);
                         FlowRemaining -= state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate;
-                        if (FlowRemaining < DataBranchAirLoopPlant::MassFlowTolerance) FlowRemaining = 0.0;
+                        if (FlowRemaining < DataBranchAirLoopPlant::MassFlowTolerance) {
+                            FlowRemaining = 0.0;
+                        }
                     }
                 }
                 // IF the active branches take the entire loop flow, return
-                if (FlowRemaining == 0.0) return;
+                if (FlowRemaining == 0.0) {
+                    return;
+                }
 
                 // 2) Distribute remaining flow to PASSIVE branches
                 totalMax = 0.0;
@@ -1503,7 +1520,9 @@ namespace DataPlant {
                     }
                 } // totalMax <=0 and flow should be assigned to active branches
                 // IF the passive branches take the remaining loop flow, return
-                if (FlowRemaining == 0.0) return;
+                if (FlowRemaining == 0.0) {
+                    return;
+                }
 
                 // 3) Distribute remaining flow to the BYPASS
                 for (int OutletNum = 1; OutletNum <= this->Splitter.TotalOutletNodes; ++OutletNum) {
@@ -1518,7 +1537,9 @@ namespace DataPlant {
                     }
                 }
                 // IF the bypass take the remaining loop flow, return
-                if (FlowRemaining == 0.0) return;
+                if (FlowRemaining == 0.0) {
+                    return;
+                }
 
                 // 4) If PASSIVE branches and BYPASS are at max and there's still flow, distribute remaining flow to ACTIVE branches but only those
                 // that had a non-zero flow request. Try to leave branches off that wanted to be off.
@@ -1544,10 +1565,14 @@ namespace DataPlant {
                             // adjust the remaining flow
                             FlowRemaining -= (state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate - StartingFlowRate);
                         }
-                        if (FlowRemaining == 0) break;
+                        if (FlowRemaining == 0) {
+                            break;
+                        }
                     }
                     // IF the active branches take the remaining loop flow, return
-                    if (FlowRemaining == 0.0) return;
+                    if (FlowRemaining == 0.0) {
+                        return;
+                    }
 
                     // 5)  Step 4) could have left ACTIVE branches < MaxAvail.  Check to makes sure all ACTIVE branches are at MaxAvail
                     for (int OutletNum = 1; OutletNum <= NumSplitOutlets; ++OutletNum) {
@@ -1566,7 +1591,9 @@ namespace DataPlant {
                     }
                 }
                 // IF the active branches take the remaining loop flow, return
-                if (FlowRemaining == 0.0) return;
+                if (FlowRemaining == 0.0) {
+                    return;
+                }
 
                 // 6) Adjust Inlet branch and outlet branch flow rates to match parallel branch rate
                 TotParallelBranchFlowReq = 0.0;
@@ -1775,7 +1802,9 @@ namespace DataPlant {
 
         // So now we have made one pass through all of the available components on these branches, skipping load based
         // If we didn't encounter any load based objects during the first pass, then we must be done!
-        if (!EncounteredLRBObjDuringPass1) return;
+        if (!EncounteredLRBObjDuringPass1) {
+            return;
+        }
 
         // If we have load based now, we should go ahead and distribute the load
         // If not then this branch group is done, since flow path validation was previously done
@@ -1859,7 +1888,9 @@ namespace DataPlant {
 
         // So now we have made the load range based pass through all the components on each branch
         // If we didn't see any other component types, then we are done, go away
-        if (!EncounteredNonLBObjDuringPass2) return;
+        if (!EncounteredNonLBObjDuringPass2) {
+            return;
+        }
 
         // If we did encounter other objects than we just need to go back through and simulate them
         for (int BranchCounter = FirstBranchNum; BranchCounter <= LastBranchNum; ++BranchCounter) {
@@ -1986,7 +2017,9 @@ namespace DataPlant {
         }
 
         // Leave early if there wasn't a mass flow rate or request
-        if (ComponentMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) return;
+        if (ComponentMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
+            return;
+        }
 
         // Get an average temperature for the property call
         Real64 const InletTemp(state.dataLoopNodes->Node(InletNode).Temp);

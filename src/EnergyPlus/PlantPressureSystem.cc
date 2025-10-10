@@ -122,8 +122,9 @@ void SimPressureDropSystem(EnergyPlusData &state,
 
     // Exit out of any calculation routines if we don't do pressure simulation for this loop
     if ((state.dataPlnt->PlantLoop(LoopNum).PressureSimType == DataPlant::PressSimType::NoPressure) &&
-        ((CallType == DataPlant::PressureCall::Calc) || (CallType == DataPlant::PressureCall::Update)))
+        ((CallType == DataPlant::PressureCall::Calc) || (CallType == DataPlant::PressureCall::Update))) {
         return;
+    }
 
     // Pass to another routine based on calling flag
     switch (CallType) {
@@ -284,7 +285,9 @@ void InitPressureDrop(EnergyPlusData &state, int const LoopNum, bool const First
 
         } // Has pressure components
 
-        if (ErrorsFound) ShowFatalError(state, "Preceding errors cause program termination");
+        if (ErrorsFound) {
+            ShowFatalError(state, "Preceding errors cause program termination");
+        }
 
         // Also issue one time warning if there is a mismatch between plant loop simulation type and whether objects were entered
         if (loop.HasPressureComponents && (loop.PressureSimType == DataPlant::PressSimType::NoPressure)) {
@@ -472,7 +475,9 @@ void UpdatePressureDrop(EnergyPlusData &state, int const LoopNum)
     Real64 TempVal_SumOfOneByRootK;
 
     // Exit if not needed
-    if (!state.dataPlnt->PlantLoop(LoopNum).HasPressureComponents) return;
+    if (!state.dataPlnt->PlantLoop(LoopNum).HasPressureComponents) {
+        return;
+    }
 
     // Now go through and update the pressure drops as needed
     FoundAPumpOnBranch = false;
@@ -510,9 +515,13 @@ void UpdatePressureDrop(EnergyPlusData &state, int const LoopNum)
             //**********************!
 
             //***PARALLEL BRANCHES***!
-            if (allocated(ParallelBranchPressureDrops)) ParallelBranchPressureDrops.deallocate();
+            if (allocated(ParallelBranchPressureDrops)) {
+                ParallelBranchPressureDrops.deallocate();
+            }
             ParallelBranchPressureDrops.allocate(NumBranches - 2);
-            if (allocated(ParallelBranchInletPressures)) ParallelBranchInletPressures.deallocate();
+            if (allocated(ParallelBranchInletPressures)) {
+                ParallelBranchInletPressures.deallocate();
+            }
             ParallelBranchInletPressures.allocate(NumBranches - 2);
             ParallelBranchCounter = 0;
 
@@ -591,7 +600,9 @@ void UpdatePressureDrop(EnergyPlusData &state, int const LoopNum)
         EffectiveLoopSideKValue += state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(1).PressureEffectiveK;
 
         // If there is only one branch then move to the other loop side
-        if (size(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch) == 1) continue;
+        if (size(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch) == 1) {
+            continue;
+        }
 
         // Add parallel branches if necessary by adding them as SUM(1/(sqrt(K_i)))
         TempVal_SumOfOneByRootK = 0.0;
@@ -605,7 +616,9 @@ void UpdatePressureDrop(EnergyPlusData &state, int const LoopNum)
         }
 
         // Add parallel branches if they are greater than zero, by taking the sum and performing (1/(SUM^2))
-        if (TempVal_SumOfOneByRootK > 0.0) EffectiveLoopSideKValue += (1.0 / pow_2(TempVal_SumOfOneByRootK));
+        if (TempVal_SumOfOneByRootK > 0.0) {
+            EffectiveLoopSideKValue += (1.0 / pow_2(TempVal_SumOfOneByRootK));
+        }
 
         // Always take the last branch K, it will be in series
         BranchNum = size(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch);

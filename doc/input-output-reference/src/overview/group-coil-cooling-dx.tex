@@ -6,11 +6,11 @@ This coil input structure is meant to supplant the coil objects from previous En
 \def\labelenumi{\arabic{enumi}.}
 \item Coil:Cooling:DX - Defines where the coil's evaporator and condenser sections are connected to the HVAC system through node connections to air loops or zones (if condenser section rejects heat to a zone), as well as the coil's availability.
 
-\item Coil:Cooling:DX:CurveFit:Performance - Defines how the coil operates over a range of operating conditions.
+\item Coil:Cooling:DX:CurveFit:Performance or Coil:Cooling:DX:ASHRAE205:Performance - Defines how the coil operates over a range of operating conditions.
 
-\item Coil:Cooling:DX:CurveFit:OperatingMode - Defines the rated coil characteristics (capacity, evaporator section air flow rate, etc.) and capacity control method for a given operating mode. Operating modes are generally used to describe humidity control strategies for DX cooling coil arrangements that enable enhanced dehumidification.
+\item Coil:Cooling:DX:CurveFit:OperatingMode (CurveFit only) - Defines the rated coil characteristics (capacity, evaporator section air flow rate, etc.) and capacity control method for a given operating mode. Operating modes are generally used to describe humidity control strategies for DX cooling coil arrangements that enable enhanced dehumidification.
 
-\item Coil:Cooling:DX:CurveFit:Speed - Defines DX cooling coil performance for a specific speed within a single operating mode.
+\item Coil:Cooling:DX:CurveFit:Speed  (CurveFit only) - Defines DX cooling coil performance for a specific speed within a single operating mode.
 \end{enumerate}
 Note: The Coil:Cooling:DX:CurveFit:Performance object also allows users to input 3 operating modes: Base Operating Mode, Alternative Operating Mode 1, and Alternative Operating Mode 2. When the Base Operating Mode is an only mode input, the coil performs like a regular cooling DX coil and no specific dehumidification capability. The alternative operating mode 1 is used for enhanced dehumidification. When all 3 modes are inputs, the coil performs as a subcool reheat coil. When load sensible heat ratio (SHR), defined as sensible cooling load / (sensible cooling load + latent cooling load), is greater than the SHR in the Base Operating Mode at given inlet air conditions, the coil performs in Base Operating Mode only. When the load SHR is less than the SHR in the Base Operating Mode and greater than the SHR in the Alternative Operating Mode 1 at the same given inlet air conditions, the coil performs combination of both Base Operating Mode, and Alternative Operating Mode 1. Mode ratio determines a fraction of time Alternative Operating Mode 1 operates and the rest (1 - Mode ratio) of time Base Operating Mode operates in a single time step. When the load SHR is less than the SHR in the Alternative Operating Mode 1 and greater than the SHR in the Alternative Operating Mode 2 at the same given inlet air conditions, the coil performs combination of both Base Operating Mode, and Alternative Operating Mode 2. Mode ratio determines a fraction of time Alternative Operating Mode 2 operates and (1 - Mode ratio) of time Base Operating Mode operates in a single time step.  When the load SHR is greater than the SHR in the Alternative Operating Mode 2, the coil performs as Alternative Operating Mode 2 alone.   
 
@@ -54,7 +54,7 @@ The name of the HVAC system node to which the condenser of the DX cooling coil s
 
 \paragraph{Field: Performance Object Name}\label{field-performance-object-name-6-001}
 
-The name of the Coil:Cooling:DX:CurveFit:Performance object that defines this coil's performance specifications.
+The name of the Coil:Cooling:DX:CurveFit:Performance or Coil:Cooling:DX:ASHRAE205:Performance object that defines this coil's performance specifications.
 
 \paragraph{Field: Condensate Collection Water Storage Tank Name}
 
@@ -63,6 +63,33 @@ This field is optional. It is used to describe where condensate from the coil is
 \paragraph{Field: Evaporative Condenser Supply Water Storage Tank Name}\label{field-evaporative-condenser-supply-water-storage-tank-name-000}
 
 This field is optional. It is used to describe where the coil obtains water used for evaporative cooling of its condenser. If blank or omitted, then the unit will obtain water directly from the mains. If the name of a WaterUse:Storage object is used here, then the unit will obtain its water from that tank. If a tank is specified, the unit will attempt to obtain all the water it uses from the tank. However, if the tank cannot provide all the water the condenser needs, then the unit will still operate and obtain the rest of the water it needs from the mains (referred to as StarvedWater).
+
+\subsection{Coil:Cooling:DX:ASHRAE205:Performance}\label{coilcoolingdxashrae205performance}
+
+This object defines basic unit control and ASHRAE205 representation file for one Coil:Cooling:DX object. 
+
+\subsubsection{Inputs}
+
+\paragraph{Field: Name}
+
+A unique user-assigned name for an instance of a cooling coil performance specification. Any reference to this cooling coil performance specification by a cooling coil object will use this name.
+
+\paragraph{Field: Representation File Name}
+
+The filename of the ASHRAE205 chiller representation (.json or .cbor).
+
+\paragraph{Field: Performance Interpolation Method}
+
+This alpha field specifies how performance data from the Representation File will be interpolated.
+Choices are "Linear" and "Cubic."
+
+\paragraph{Field: Rated Total Cooling Capacity}
+
+Not yet implemented / reserved for future use. Full load cooling capacity at AHRI 210/240 "A" test conditions.
+
+\paragraph{Field: Rated Steady-State Heating Capacity}
+
+Not yet implemented / reserved for future use. Full load heating capacity at AHRI 210/240 "H1" test conditions.
 
 \subsection{Coil:Cooling:DX:CurveFit:Performance}\label{coilcoolingdxcurvefitperformance}
 
@@ -77,6 +104,11 @@ A unique user-assigned name for an instance of a cooling coil performance specif
 \paragraph{Field: Crankcase Heater Capacity}
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. AirLoopHVAC:UnitaryHeatPump:AirToAir or PackageTerminal: HeatPump:AirToAir), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
 
 \paragraph{Field: Minimum Outdoor Dry-Bulb Temperature for Compressor Operation}
 
@@ -126,15 +158,6 @@ The name corresponding to a Coil:Cooling:DX:CurveFit:OperatingMode object. Opera
 The name corresponding to a Coil:Cooling:DX:CurveFit:OperatingMode object. Operating Mode is used as to represent a reheat mode as a subcool reheat coil. If field is blank, the base operating mode will be used. This field is optional.
 
 If there are 3 operating modes, it represents a subcool-reheat mode coil. The Operating Mode 1 represents a base operating mode coil. The Operating Mode 2 represents a subcool mode coil with lower SHR than the Operating Mode 1. The Operating Mode 3 represents a reheat mode coil with lower SHR than the Operating Mode 2. All 3 operation modes work together to represent a subcool reheat coil model. The operation procedure is described in \ref{coilcoolingdx}  
-
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-0}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
 
 \subsection{Coil:Cooling:DX:CurveFit:OperatingMode}\label{coilcoolingdxcurvefitoperatingmode}
 

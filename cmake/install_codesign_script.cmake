@@ -11,6 +11,7 @@ Pre-conditions:
 - **Important: In the scope of this** ``install(SCRIPT)``, you must define
 
     * :cmake:variable:`CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION`
+    * :cmake:variable:`CPACK_CODESIGNING_MACOS_IDENTIFIER`
     * You need to also set a variable ``FILES_TO_SIGN``
 
 **In the scope** meaning that you have to issue some ``install(CODE ..)`` commands prior to calling it, and they must be:
@@ -32,8 +33,9 @@ Usage::
 
   if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
     set(FILES_TO_SIGN "fileA" "fileB")
-    install(CODE "set(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\")" COMPONENT Unspecified)
     install(CODE "set(FILES_TO_SIGN \"${FILES_TO_SIGN}\")" COMPONENT Unspecified)
+    install(CODE "set(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\")" COMPONENT Unspecified)
+    install(CODE "set(CPACK_CODESIGNING_MACOS_IDENTIFIER \"${CPACK_CODESIGNING_MACOS_IDENTIFIER}\")" COMPONENT Unspecified)
     # call the script
     install(SCRIPT "${CMAKE_CURRENT_LIST_DIR}/install_codesign_script.cmake" COMPONENT Unspecified)
   endif()
@@ -89,9 +91,16 @@ message("Codesigning inner executables and library from ${CMAKE_CURRENT_LIST_FIL
 
 message("CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 message("CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION=${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}")
+message("CPACK_CODESIGNING_MACOS_IDENTIFIER=${CPACK_CODESIGNING_MACOS_IDENTIFIER}")
+message("CMAKE_INSTALL_COMPONENT=${CMAKE_INSTALL_COMPONENT}")
+message("CPACK_GENERATOR=${CPACK_GENERATOR}")
 
 if(NOT CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
   message(FATAL_ERROR "CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION is required")
+endif()
+
+if(NOT CPACK_CODESIGNING_MACOS_IDENTIFIER)
+  message(FATAL_ERROR "CPACK_CODESIGNING_MACOS_IDENTIFIER is required")
 endif()
 
 if(NOT FILES_TO_SIGN)
@@ -99,32 +108,38 @@ if(NOT FILES_TO_SIGN)
 endif()
 
 foreach(path ${FILES_TO_SIGN})
-  list(APPEND FULL_PATHS "${CMAKE_INSTALL_PREFIX}/${path}")
+  list(APPEND _FULL_PATHS "${CMAKE_INSTALL_PREFIX}/${path}")
 endforeach()
 
 file(GLOB _all_root_dylibs "${CMAKE_INSTALL_PREFIX}/lib*.dylib")
 foreach(path ${_all_root_dylibs})
   message("${path}")
   if(NOT IS_SYMLINK ${path})
-    list(FIND FULL_PATHS ${path} _found)
+    list(FIND _FULL_PATHS ${path} _found)
     if(_found EQUAL -1)
-      list(APPEND ROOT_DYLIBS ${path})
+      list(APPEND _ROOT_DYLIBS ${path})
     endif()
   endif()
 endforeach()
 
-file(GLOB PYTHON_SOS "${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/*.so" "${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/*.dylib")
+file(GLOB _PYTHON_SOS "${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/*.so" "${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/*.dylib")
 
-print_relative_paths(PREFIX "FULL_PATHS=" ABSOLUTE_PATHS ${FULL_PATHS})
-print_relative_paths(PREFIX "ROOT_DYLIBS=" ABSOLUTE_PATHS ${ROOT_DYLIBS})
-print_relative_paths(PREFIX "PYTHON_SOS, in ${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/=" ABSOLUTE_PATHS ${PYTHON_SOS} NAME_ONLY)
+print_relative_paths(PREFIX "FULL_PATHS=" ABSOLUTE_PATHS ${_FULL_PATHS})
+print_relative_paths(PREFIX "ROOT_DYLIBS=" ABSOLUTE_PATHS ${_ROOT_DYLIBS})
+print_relative_paths(PREFIX "PYTHON_SOS, in ${CMAKE_INSTALL_PREFIX}/python_lib/lib-dynload/=" ABSOLUTE_PATHS ${_PYTHON_SOS} NAME_ONLY)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CodeSigning.cmake)
 codesign_files_macos(
-  FILES ${FULL_PATHS} ${ROOT_DYLIBS} ${PYTHON_SOS}
+  FILES ${_FULL_PATHS} ${_ROOT_DYLIBS} ${_PYTHON_SOS}
   SIGNING_IDENTITY ${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}
-  PREFIX "org.nrel.EnergyPlus."
+  PREFIX "${CPACK_CODESIGNING_MACOS_IDENTIFIER}."
   FORCE VERBOSE
 )
+
+# Clean up to avoid multiple passes (several components) appending to a pre-existing list
+unset(FILES_TO_SIGN)
+unset(_FULL_PATHS)
+unset(_ROOT_DYLIBS)
+unset(_PYTHON_SOS)
 
 message("Finished Codesigning inner executables and library")

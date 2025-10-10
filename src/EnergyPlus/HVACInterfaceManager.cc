@@ -876,7 +876,9 @@ void ManageSingleCommonPipe(EnergyPlusData &state,
     // accordingly.
 
     // One time call to set up report variables and set common pipe 'type' flag
-    if (!state.dataHVACInterfaceMgr->CommonPipeSetupFinished) SetupCommonPipes(state);
+    if (!state.dataHVACInterfaceMgr->CommonPipeSetupFinished) {
+        SetupCommonPipes(state);
+    }
 
     auto &plantCommonPipe = state.dataHVACInterfaceMgr->PlantCommonPipe(LoopNum);
 
@@ -1002,7 +1004,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
     constexpr int MaxIterLimitCaseB(4);
 
     // one time setups
-    if (!state.dataHVACInterfaceMgr->CommonPipeSetupFinished) SetupCommonPipes(state);
+    if (!state.dataHVACInterfaceMgr->CommonPipeSetupFinished) {
+        SetupCommonPipes(state);
+    }
 
     auto &plantCommonPipe(state.dataHVACInterfaceMgr->PlantCommonPipe(plantLoc.loopNum));
     auto &thisPlantLoop = state.dataPlnt->PlantLoop(plantLoc.loopNum);
@@ -1083,18 +1087,26 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
             // eq 1
             if (std::abs(TempSecOutTankOut - TempCPPrimaryCntrlSetPoint) > DataPlant::DeltaTempTol) {
                 MdotPriToSec = MdotPriRCLeg * (TempCPPrimaryCntrlSetPoint - TempPriOutTankOut) / (TempSecOutTankOut - TempCPPrimaryCntrlSetPoint);
-                if (MdotPriToSec < DataBranchAirLoopPlant::MassFlowTolerance) MdotPriToSec = 0.0;
-                if (MdotPriToSec > MdotSec) MdotPriToSec = MdotSec;
+                if (MdotPriToSec < DataBranchAirLoopPlant::MassFlowTolerance) {
+                    MdotPriToSec = 0.0;
+                }
+                if (MdotPriToSec > MdotSec) {
+                    MdotPriToSec = MdotSec;
+                }
             } else {
                 MdotPriToSec = MdotSec; //  what to do (?)
             }
             // eq. 5
             MdotPriRCLeg = MdotPri - MdotPriToSec;
-            if (MdotPriRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) MdotPriRCLeg = 0.0;
+            if (MdotPriRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) {
+                MdotPriRCLeg = 0.0;
+            }
 
             // eq. 4
             MdotSecRCLeg = MdotSec - MdotPriToSec;
-            if (MdotSecRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) MdotSecRCLeg = 0.0;
+            if (MdotSecRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) {
+                MdotSecRCLeg = 0.0;
+            }
 
             // eq  6
             if ((MdotPriToSec + MdotSecRCLeg) > DataBranchAirLoopPlant::MassFlowTolerance) {
@@ -1110,7 +1122,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
 
                     MdotPri = (MdotPriRCLeg * TempPriOutTankOut + MdotPriToSec * TempSecOutTankOut) / (TempCPPrimaryCntrlSetPoint);
 
-                    if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) MdotPri = 0.0;
+                    if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) {
+                        MdotPri = 0.0;
+                    }
                 } else {
                     MdotPri = MdotSec;
                 }
@@ -1135,8 +1149,12 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
             // eq 1,
             if (std::abs(TempPriOutTankOut - TempSecOutTankOut) > DataPlant::DeltaTempTol) {
                 MdotPriToSec = MdotSec * (TempCPSecondaryCntrlSetPoint - TempSecOutTankOut) / (TempPriOutTankOut - TempSecOutTankOut);
-                if (MdotPriToSec < DataBranchAirLoopPlant::MassFlowTolerance) MdotPriToSec = 0.0;
-                if (MdotPriToSec > MdotSec) MdotPriToSec = MdotSec;
+                if (MdotPriToSec < DataBranchAirLoopPlant::MassFlowTolerance) {
+                    MdotPriToSec = 0.0;
+                }
+                if (MdotPriToSec > MdotSec) {
+                    MdotPriToSec = MdotSec;
+                }
             } else {
                 MdotPriToSec = MdotSec;
             }
@@ -1153,7 +1171,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                 // MdotPri is a variable to be calculated and flow request made
                 if (std::abs(TempPriOutTankOut - TempPriInlet) > DataPlant::DeltaTempTol) {
                     MdotPri = MdotSec * (TempCPSecondaryCntrlSetPoint - TempSecOutTankOut) / (TempPriOutTankOut - TempPriInlet);
-                    if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) MdotPri = 0.0;
+                    if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) {
+                        MdotPri = 0.0;
+                    }
                 } else {
                     MdotPri = MdotSec;
                 }
@@ -1163,11 +1183,15 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
 
             // eq. 4
             MdotSecRCLeg = MdotSec - MdotPriToSec;
-            if (MdotSecRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) MdotSecRCLeg = 0.0;
+            if (MdotSecRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) {
+                MdotSecRCLeg = 0.0;
+            }
 
             // eq. 5
             MdotPriRCLeg = MdotPri - MdotPriToSec;
-            if (MdotPriRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) MdotPriRCLeg = 0.0;
+            if (MdotPriRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) {
+                MdotPriRCLeg = 0.0;
+            }
 
             // eq  6
             if ((MdotPriToSec + MdotSecRCLeg) > DataBranchAirLoopPlant::MassFlowTolerance) {

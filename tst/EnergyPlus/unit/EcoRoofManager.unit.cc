@@ -55,6 +55,7 @@
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataWater.hh>
@@ -315,6 +316,90 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_initEcoRoofTest)
     EXPECT_NEAR(thisEcoRoof->Tg, expectedAnswer, allowableTolerance);
     EXPECT_NEAR(thisEcoRoof->Tf, expectedAnswer, allowableTolerance);
     EXPECT_FALSE(thisEcoRoof->CalcEcoRoofMyEnvrnFlag);
+}
+
+TEST_F(EnergyPlusFixture, EcoRoofManager_initEcoRoofFirstTimeErrorTest)
+{
+    std::string const idf_objects = delimited_string({
+        "Version, " + DataStringGlobals::MatchVersion + ";",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->init_state(*state);
+    int surfNum = 1;
+    int constrNum = 1;
+    Real64 expectedAnswer;
+    Real64 allowableTolerance = 0.000001;
+
+    state->dataConstruction->Construct.allocate(constrNum);
+    auto *mat = new Material::MaterialEcoRoof;
+    state->dataMaterial->materials.push_back(mat);
+    state->dataSurface->Surface.allocate(surfNum);
+
+    auto &thisConstruct = state->dataConstruction->Construct(constrNum);
+    auto &thisEcoRoof = state->dataEcoRoofMgr;
+
+    thisConstruct.LayerPoint.allocate(1);
+    thisConstruct.LayerPoint(1) = 1;
+    state->dataSurface->Surface(surfNum).Name = "ZN6_S_SPACE_2:ROOF";
+
+    // Test 1: Normal Operation (Heat Transfer Model = CTF)-->no error messages
+    state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CTF;
+    thisEcoRoof->FirstEcoSurf = 0;
+    thisEcoRoof->EcoRoofbeginFlag = true;
+    initEcoRoofFirstTime(*state, surfNum, constrNum);
+
+    // Test 2: Improper HT Model Selected (Heat Transfer Model = CondFD)-->error messages produced
+    state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CondFD;
+    thisEcoRoof->FirstEcoSurf = 0;
+    thisEcoRoof->EcoRoofbeginFlag = true;
+
+    EXPECT_THROW(initEcoRoofFirstTime(*state, surfNum, constrNum), EnergyPlus::FatalError);
+
+    std::string const error_string = delimited_string({
+        "   ** Severe  ** initEcoRoofFirstTime: EcoRoof simulation but HeatBalanceAlgorithm is not ConductionTransferFunction(CTF). EcoRoof model "
+        "currently works only with CTF heat balance solution algorithm.",
+        "   **   ~~~   ** Occurs for surface named ZN6_S_SPACE_2:ROOF",
+        "   **   ~~~   ** Check input syntax for HeatBalanceAlgorithm, SurfaceProperty:HeatTransferAlgorithm,",
+        "   **   ~~~   ** SurfaceProperty:HeatTransferAlgorithm:MultipleSurface, and SurfaceProperty:HeatTransferAlgorithm:SurfaceList ",
+        "   **   ~~~   ** to verify that the solution method is set to CTF for the surface that is an EcoRoof.",
+        "   **  Fatal  ** initEcoRoofFirstTime: Program terminates due to preceding conditions.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=1",
+        "   ..... Last severe error=initEcoRoofFirstTime: EcoRoof simulation but HeatBalanceAlgorithm is not ConductionTransferFunction(CTF). "
+        "EcoRoof model currently works only with CTF heat balance solution algorithm.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+
+    // Test 3: Improper HT Model Selected (Heat Transfer Model = HAMT)-->error messages produced
+    state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::HAMT;
+    thisEcoRoof->FirstEcoSurf = 0;
+    thisEcoRoof->EcoRoofbeginFlag = true;
+    state->dataErrTracking->TotalSevereErrors = 0;
+
+    EXPECT_THROW(initEcoRoofFirstTime(*state, surfNum, constrNum), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+
+    // Test 4: Improper HT Model Selected (Heat Transfer Model = EMPD)-->error messages produced
+    state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::EMPD;
+    thisEcoRoof->FirstEcoSurf = 0;
+    thisEcoRoof->EcoRoofbeginFlag = true;
+    state->dataErrTracking->TotalSevereErrors = 0;
+
+    EXPECT_THROW(initEcoRoofFirstTime(*state, surfNum, constrNum), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+
+    // Test 5: Improper HT Model Selected (Heat Transfer Model = Kiva)-->error messages produced
+    state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::Kiva;
+    thisEcoRoof->FirstEcoSurf = 0;
+    thisEcoRoof->EcoRoofbeginFlag = true;
+    state->dataErrTracking->TotalSevereErrors = 0;
+
+    EXPECT_THROW(initEcoRoofFirstTime(*state, surfNum, constrNum), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
 } // namespace EnergyPlus

@@ -88,7 +88,7 @@ static constexpr std::array<std::string_view, static_cast<int>(OutputTypes::Num)
 
 static constexpr auto outputTypeExperimentalStart = OutputTypes::CBOR;
 
-template <typename... Args> void displayMessage(std::string_view str_format, Args &&... args)
+template <typename... Args> void displayMessage(std::string_view str_format, Args &&...args)
 {
     fmt::print(std::cout, str_format, args...);
     std::cout.write("\n", 1);

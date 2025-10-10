@@ -141,7 +141,9 @@ void SwimmingPoolData::simulate(EnergyPlusData &state,
 
     this->update(state);
 
-    if (state.dataSwimmingPools->NumSwimmingPools > 0) HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(state);
+    if (state.dataSwimmingPools->NumSwimmingPools > 0) {
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(state);
+    }
 
     this->report(state);
 }
@@ -494,7 +496,9 @@ void SwimmingPoolData::initialize(EnergyPlusData &state, bool const FirstHVACIte
         this->MyEnvrnFlagGeneral = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlagGeneral = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->MyEnvrnFlagGeneral = true;
+    }
 
     if (state.dataGlobal->BeginEnvrnFlag) {
         this->PoolWaterTemp = 23.0;
@@ -978,7 +982,9 @@ void SwimmingPoolData::calcSwimmingPoolEvap(EnergyPlusData &state,
     Real64 PSatPool = Psychrometrics::PsyPsatFnTemp(state, this->PoolWaterTemp, RoutineName);
     Real64 PParAir =
         Psychrometrics::PsyPsatFnTemp(state, MAT, RoutineName) * Psychrometrics::PsyRhFnTdbWPb(state, MAT, HumRat, state.dataEnvrn->OutBaroPress);
-    if (PSatPool < PParAir) PSatPool = PParAir;
+    if (PSatPool < PParAir) {
+        PSatPool = PParAir;
+    }
     this->SatPressPoolWaterTemp = PSatPool;
     this->PartPressZoneAirTemp = PParAir;
     EvapRate = (0.1 * (state.dataSurface->Surface(SurfNum).Area / DataConversions::CFA) * this->CurActivityFactor * ((PSatPool - PParAir) * CFinHg)) *
@@ -1016,7 +1022,9 @@ void SwimmingPoolData::update(EnergyPlusData &state)
     PlantUtilities::SafeCopyPlantNode(state, this->WaterInletNode, this->WaterOutletNode);
 
     Real64 WaterMassFlow = state.dataLoopNodes->Node(this->WaterInletNode).MassFlowRate; // water mass flow rate
-    if (WaterMassFlow > 0.0) state.dataLoopNodes->Node(this->WaterOutletNode).Temp = this->PoolWaterTemp;
+    if (WaterMassFlow > 0.0) {
+        state.dataLoopNodes->Node(this->WaterOutletNode).Temp = this->PoolWaterTemp;
+    }
 }
 
 void SwimmingPoolData::oneTimeInit_new([[maybe_unused]] EnergyPlusData &state)
@@ -1095,11 +1103,15 @@ void UpdatePoolSourceValAvg(EnergyPlusData &state, bool &SwimmingPoolOn) // .TRU
 
     // If there are no pools, then just RETURN
 
-    if (state.dataSwimmingPools->NumSwimmingPools == 0) return;
+    if (state.dataSwimmingPools->NumSwimmingPools == 0) {
+        return;
+    }
 
     for (int PoolNum = 1; PoolNum <= state.dataSwimmingPools->NumSwimmingPools; ++PoolNum) {
         auto const &thisPool = state.dataSwimmingPools->Pool(PoolNum);
-        if (thisPool.QPoolSrcAvg != 0.0) SwimmingPoolOn = true;
+        if (thisPool.QPoolSrcAvg != 0.0) {
+            SwimmingPoolOn = true;
+        }
         int SurfNum = thisPool.SurfacePtr; // surface number index
         state.dataHeatBalFanSys->QPoolSurfNumerator(SurfNum) = thisPool.QPoolSrcAvg;
         state.dataHeatBalFanSys->PoolHeatTransCoefs(SurfNum) = thisPool.HeatTransCoefsAvg;

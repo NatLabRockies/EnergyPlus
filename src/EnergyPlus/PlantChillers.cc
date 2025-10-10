@@ -186,7 +186,9 @@ namespace PlantChillers {
         }
 
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataPlantChillers->ElectricChiller)) return;
+        if (allocated(state.dataPlantChillers->ElectricChiller)) {
+            return;
+        }
 
         // ALLOCATE ARRAYS
         state.dataPlantChillers->ElectricChiller.allocate(state.dataPlantChillers->NumElectricChillers);
@@ -434,7 +436,9 @@ namespace PlantChillers {
             thisChiller.FullLoadCoef(3) = state.dataIPShortCut->rNumericArgs(19);
             thisChiller.TempLowLimitEvapOut = state.dataIPShortCut->rNumericArgs(20);
             thisChiller.SizFac = state.dataIPShortCut->rNumericArgs(22);
-            if (thisChiller.SizFac <= 0.0) thisChiller.SizFac = 1.0;
+            if (thisChiller.SizFac <= 0.0) {
+                thisChiller.SizFac = 1.0;
+            }
 
             thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, state.dataIPShortCut->cAlphaArgs(7)));
             if (thisChiller.FlowMode == DataPlant::FlowMode::Invalid) {
@@ -939,9 +943,9 @@ namespace PlantChillers {
                                 }
                             }
                         } // IF (.NOT. AnyEnergyManagementSystemInModel) THEN
-                    }     // IF(THeatRecSetpoint == DataLoopNode::SensedNodeFlagValue)THEN
-                }         // IF(ElectricChiller(ChillNum)%HeatRecSetpointNodeNum > 0)THEN
-            }             // IF (ElectricChiller(ChillNum)%HeatRecActive) THEN
+                    } // IF(THeatRecSetpoint == DataLoopNode::SensedNodeFlagValue)THEN
+                } // IF(ElectricChiller(ChillNum)%HeatRecSetpointNodeNum > 0)THEN
+            } // IF (ElectricChiller(ChillNum)%HeatRecActive) THEN
 
             this->MyEnvrnFlag = false;
         }
@@ -1027,7 +1031,9 @@ namespace PlantChillers {
                 tmpNomCap =
                     Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+                if (this->NomCapWasAutoSized) {
+                    tmpNomCap = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->NomCapWasAutoSized) {
@@ -1078,7 +1084,9 @@ namespace PlantChillers {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+                if (this->EvapVolFlowRateWasAutoSized) {
+                    tmpEvapVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->EvapVolFlowRateWasAutoSized) {
@@ -1140,7 +1148,9 @@ namespace PlantChillers {
                 Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondIn, RoutineName);
                 tmpCondVolFlowRate = tmpNomCap * (1.0 + 1.0 / this->COP) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
             } else {
-                if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+                if (this->CondVolFlowRateWasAutoSized) {
+                    tmpCondVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->CondVolFlowRateWasAutoSized) {
@@ -1204,7 +1214,9 @@ namespace PlantChillers {
 
         if (this->HeatRecActive) {
             Real64 tmpHeatRecVolFlowRate = this->CondVolFlowRate * this->HeatRecCapacityFraction;
-            if (!this->DesignHeatRecVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            if (!this->DesignHeatRecVolFlowRateWasAutoSized) {
+                tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->DesignHeatRecVolFlowRateWasAutoSized) {
                     this->DesignHeatRecVolFlowRate = tmpHeatRecVolFlowRate;
@@ -1599,7 +1611,9 @@ namespace PlantChillers {
                     // Calculate desired flow to request based on load
                     this->EvapMassFlowRate = std::abs(this->QEvaporator / Cp / EvapDeltaTemp);
                     // Check to see if the Maximum is exceeded, if so set to maximum
-                    if ((this->EvapMassFlowRate - EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+                    if ((this->EvapMassFlowRate - EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
+                        this->PossibleSubcooling = true;
+                    }
                     this->EvapMassFlowRate = min(EvapMassFlowRateMax, this->EvapMassFlowRate);
                     // Use SetComponentFlowRate to decide actual flow
                     PlantUtilities::SetComponentFlowRate(
@@ -1785,7 +1799,9 @@ namespace PlantChillers {
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             if (this->CondMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
                 // If Heat Recovery specified for this vapor compression chiller, then Qcondenser will be adjusted by this subroutine
-                if (this->HeatRecActive) this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+                if (this->HeatRecActive) {
+                    this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+                }
                 Real64 CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, condInletTemp, RoutineName);
                 this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + condInletTemp;
             } else {
@@ -1801,7 +1817,9 @@ namespace PlantChillers {
             }
 
             // If Heat Recovery specified for this vapor compression chiller, then Qcondenser will be adjusted by this subroutine
-            if (this->HeatRecActive) this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+            if (this->HeatRecActive) {
+                this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+            }
             if (this->CondMassFlowRate > 0.0) {
                 Real64 CpCond = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(this->CondInletNodeNum).HumRat);
                 this->CondOutletTemp = condInletTemp + this->QCondenser / this->CondMassFlowRate / CpCond;
@@ -2175,7 +2193,9 @@ namespace PlantChillers {
             ErrorsFound = true;
         }
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataPlantChillers->EngineDrivenChiller)) return;
+        if (allocated(state.dataPlantChillers->EngineDrivenChiller)) {
+            return;
+        }
 
         // ALLOCATE ARRAYS
         state.dataPlantChillers->EngineDrivenChiller.allocate(state.dataPlantChillers->NumEngineDrivenChillers);
@@ -2562,7 +2582,9 @@ namespace PlantChillers {
 
             thisChiller.HeatRecMaxTemp = state.dataIPShortCut->rNumericArgs(27);
             thisChiller.SizFac = state.dataIPShortCut->rNumericArgs(28);
-            if (thisChiller.SizFac <= 0.0) thisChiller.SizFac = 1.0;
+            if (thisChiller.SizFac <= 0.0) {
+                thisChiller.SizFac = 1.0;
+            }
 
             //   Basin heater power as a function of temperature must be greater than or equal to 0
             thisChiller.BasinHeaterPowerFTempDiff = state.dataIPShortCut->rNumericArgs(29);
@@ -3021,7 +3043,9 @@ namespace PlantChillers {
                 tmpNomCap =
                     Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+                if (this->NomCapWasAutoSized) {
+                    tmpNomCap = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->NomCapWasAutoSized) {
@@ -3072,7 +3096,9 @@ namespace PlantChillers {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+                if (this->EvapVolFlowRateWasAutoSized) {
+                    tmpEvapVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->EvapVolFlowRateWasAutoSized) {
@@ -3134,7 +3160,9 @@ namespace PlantChillers {
                 Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondIn, RoutineName);
                 tmpCondVolFlowRate = tmpNomCap * (1.0 + 1.0 / this->COP) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
             } else {
-                if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+                if (this->CondVolFlowRateWasAutoSized) {
+                    tmpCondVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->CondVolFlowRateWasAutoSized) {
@@ -3254,7 +3282,9 @@ namespace PlantChillers {
                     }
                 }
             }
-            if (!this->DesignHeatRecVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            if (!this->DesignHeatRecVolFlowRateWasAutoSized) {
+                tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            }
             // save the reference heat recovery fluid volumetric flow rate
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->HeatRecInletNodeNum, tmpHeatRecVolFlowRate);
         }
@@ -3601,8 +3631,9 @@ namespace PlantChillers {
 
                 if (EvapDeltaTemp != 0.0) {
                     this->EvapMassFlowRate = std::abs(this->QEvaporator / Cp / EvapDeltaTemp);
-                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance)
+                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
                         this->PossibleSubcooling = true;
+                    }
                     // Check to see if the Maximum is exceeded, if so set to maximum
                     this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                     // Use SetComponentFlowRate to decide actual flow
@@ -3955,7 +3986,9 @@ namespace PlantChillers {
             Real64 MinHeatRecMdot(0.0);
             if (this->HeatRecMaxTemp != this->HeatRecInletTemp) {
                 MinHeatRecMdot = (EnergyRecovered) / (cp * (this->HeatRecMaxTemp - this->HeatRecInletTemp));
-                if (MinHeatRecMdot < 0.0) MinHeatRecMdot = 0.0;
+                if (MinHeatRecMdot < 0.0) {
+                    MinHeatRecMdot = 0.0;
+                }
             }
 
             // Recalculate Outlet Temperature, with adjusted flowrate
@@ -4182,7 +4215,9 @@ namespace PlantChillers {
             ErrorsFound = true;
         }
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataPlantChillers->GTChiller)) return;
+        if (allocated(state.dataPlantChillers->GTChiller)) {
+            return;
+        }
 
         // ALLOCATE ARRAYS
         state.dataPlantChillers->GTChiller.allocate(state.dataPlantChillers->NumGTChillers);
@@ -4531,7 +4566,9 @@ namespace PlantChillers {
 
             thisChiller.HeatRecMaxTemp = state.dataIPShortCut->rNumericArgs(46);
             thisChiller.SizFac = state.dataIPShortCut->rNumericArgs(47);
-            if (thisChiller.SizFac <= 0.0) thisChiller.SizFac = 1.0;
+            if (thisChiller.SizFac <= 0.0) {
+                thisChiller.SizFac = 1.0;
+            }
 
             //   Basin heater power as a function of temperature must be greater than or equal to 0
             thisChiller.BasinHeaterPowerFTempDiff = state.dataIPShortCut->rNumericArgs(48);
@@ -4954,7 +4991,9 @@ namespace PlantChillers {
                 tmpNomCap =
                     Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+                if (this->NomCapWasAutoSized) {
+                    tmpNomCap = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->NomCapWasAutoSized) {
@@ -5006,7 +5045,9 @@ namespace PlantChillers {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+                if (this->EvapVolFlowRateWasAutoSized) {
+                    tmpEvapVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->EvapVolFlowRateWasAutoSized) {
@@ -5070,7 +5111,9 @@ namespace PlantChillers {
                 Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondIn, RoutineName);
                 tmpCondVolFlowRate = tmpNomCap * (1.0 + 1.0 / this->COP) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
             } else {
-                if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+                if (this->CondVolFlowRateWasAutoSized) {
+                    tmpCondVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->CondVolFlowRateWasAutoSized) {
@@ -5130,8 +5173,9 @@ namespace PlantChillers {
             }
         }
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
-        if (this->CondenserType == DataPlant::CondenserType::WaterCooled)
+        if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        }
 
         Real64 GTEngineCapacityDes = this->NomCap / (this->engineCapacityScalar * this->COP);
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -5229,7 +5273,9 @@ namespace PlantChillers {
                     }
                 }
             }
-            if (!this->DesignHeatRecVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            if (!this->DesignHeatRecVolFlowRateWasAutoSized) {
+                tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+            }
             // save the reference heat recovery fluid volumetric flow rate
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->HeatRecInletNodeNum, tmpHeatRecVolFlowRate);
         }
@@ -5553,8 +5599,9 @@ namespace PlantChillers {
                 if (EvapDeltaTemp != 0.0) {
                     // Calculate desired flow to request based on load
                     this->EvapMassFlowRate = std::abs(this->QEvaporator / Cp / EvapDeltaTemp);
-                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance)
+                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
                         this->PossibleSubcooling = true;
+                    }
                     // Check to see if the Maximum is exceeded, if so set to maximum
                     this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                     // Use SetComponentFlowRate to decide actual flow
@@ -6108,7 +6155,9 @@ namespace PlantChillers {
         }
 
         // See if load distribution manager has already gotten the input
-        if (allocated(state.dataPlantChillers->ConstCOPChiller)) return;
+        if (allocated(state.dataPlantChillers->ConstCOPChiller)) {
+            return;
+        }
 
         state.dataPlantChillers->ConstCOPChiller.allocate(state.dataPlantChillers->NumConstCOPChillers);
 
@@ -6684,7 +6733,9 @@ namespace PlantChillers {
                 tmpNomCap =
                     Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+                if (this->NomCapWasAutoSized) {
+                    tmpNomCap = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->NomCapWasAutoSized) {
@@ -6736,7 +6787,9 @@ namespace PlantChillers {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
                 tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
             } else {
-                if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+                if (this->EvapVolFlowRateWasAutoSized) {
+                    tmpEvapVolFlowRate = 0.0;
+                }
             }
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 if (this->EvapVolFlowRateWasAutoSized) {
@@ -6803,7 +6856,9 @@ namespace PlantChillers {
                     Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, 29.44, RoutineName);
                     tmpCondVolFlowRate = tmpNomCap * (1.0 + 1.0 / this->COP) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
                 } else {
-                    if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+                    if (this->CondVolFlowRateWasAutoSized) {
+                        tmpCondVolFlowRate = 0.0;
+                    }
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     if (this->CondVolFlowRateWasAutoSized) {
@@ -6865,8 +6920,9 @@ namespace PlantChillers {
         }
 
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
-        if (this->CondenserType == DataPlant::CondenserType::WaterCooled)
+        if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        }
 
         if (ErrorsFound) {
             ShowFatalError(state, "Preceding sizing errors cause program termination");
@@ -7157,8 +7213,9 @@ namespace PlantChillers {
 
                 if (EvapDeltaTemp > DataPlant::DeltaTempTol) {
                     this->EvapMassFlowRate = std::abs(this->QEvaporator / Cp / EvapDeltaTemp);
-                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance)
+                    if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
                         this->PossibleSubcooling = true;
+                    }
                     // Check to see if the Maximum is exceeded, if so set to maximum
                     this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                     // Use SetComponentFlowRate to decide actual flow

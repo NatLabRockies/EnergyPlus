@@ -103,7 +103,7 @@ There is a logical flag \emph{SysSizingCalc} corresponding to \emph{ZoneSizingCa
   Loop over the zones heated by this air loop: 
 \end{enumerate}
 
-{\setlength\parindent{25pt} NonCoinCoolMassFlow\(_{sys}\) = $\Sigma$ {DesHeatMassFlow\(_{zone}\)} }
+{\setlength\parindent{25pt} NonCoinHeatMassFlow\(_{sys}\) = $\Sigma$ {DesHeatMassFlow\(_{zone}\)} }
 
 \subsubsection{DuringDay}\label{duringday}
 
@@ -342,7 +342,7 @@ Then (for noncoincident sizing) the variables calculated in section (ii) are mov
 \setcounter{enumi}{1}
 \tightlist
 \item
-  We now have the calculated system sizing data. This data needs to be altered to take into account the user input system design flow rates (if any), or the fact that the user may have requested that the system flow rate be sized on the ventilation requirement. Note that user specified sizing ratios have already been applied to the zone sizing data which have been used in out preceding system sizing calculation. Thus the user specified sizing ratios do not have to be explicitly taken into account at the system level.
+  We now have the calculated system sizing data. This data needs to be altered to take into account the user input system design flow rates (if any), or the fact that the user may have requested that the system flow rate be sized on the ventilation requirement. Note that user specified sizing ratios have already been applied to the zone sizing data which have been used in our preceding system sizing calculation. Thus the user specified sizing ratios do not have to be explicitly taken into account at the system level.
 \end{enumerate}
 
 First we move the calculated system sizing data from \emph{CalcSysSizing} array into the \emph{FinalSysSizing} array. \emph{FinalSysSizing} will contain the user modified system design data when we are all done.

@@ -1077,7 +1077,9 @@ struct UnitarySystemsData : BaseGlobalStruct
         getInputOnceFlag = true;
         setupOutputOnce = true;
         unitarySys.clear();
-        if (designSpecMSHP.size() > 0) designSpecMSHP.clear();
+        if (designSpecMSHP.size() > 0) {
+            designSpecMSHP.clear();
+        }
         getInputFlag = true;
     }
 

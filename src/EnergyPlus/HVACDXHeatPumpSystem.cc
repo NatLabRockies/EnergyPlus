@@ -591,8 +591,9 @@ namespace HVACDXHeatPumpSystem {
             // Determine if there is a sensible load on this system
             if ((state.dataLoopNodes->Node(InletNode).Temp < state.dataLoopNodes->Node(ControlNode).TempSetPoint) &&
                 (state.dataLoopNodes->Node(InletNode).Temp < DesOutTemp) &&
-                (std::abs(state.dataLoopNodes->Node(InletNode).Temp - DesOutTemp) > TempControlTol))
+                (std::abs(state.dataLoopNodes->Node(InletNode).Temp - DesOutTemp) > TempControlTol)) {
                 SensibleLoad = true;
+            }
 
             // If DXHeatingSystem runs with a heating load then set PartLoadFrac on Heating System
             if (SensibleLoad) {
@@ -1003,7 +1004,7 @@ namespace HVACDXHeatPumpSystem {
                     }
                 }
             } // End of cooling load type (sensible or latent) if block
-        }     // End of If DXheatingSystem is scheduled on and there is flow
+        } // End of If DXheatingSystem is scheduled on and there is flow
 
         // Set the final results
         dxhp.PartLoadFrac = PartLoadFrac;
@@ -1099,7 +1100,9 @@ namespace HVACDXHeatPumpSystem {
                 NodeNum = state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(DXHeatSysNum).DXCoilInNodeNum;
             }
         }
-        if (NodeNum == 0) InletNodeErrFlag = true;
+        if (NodeNum == 0) {
+            InletNodeErrFlag = true;
+        }
 
         return NodeNum;
     }
@@ -1124,7 +1127,9 @@ namespace HVACDXHeatPumpSystem {
                 NodeNum = state.dataHVACDXHeatPumpSys->DXHeatPumpSystem(DXHeatSysNum).DXCoilOutNodeNum;
             }
         }
-        if (NodeNum == 0) OutletNodeErrFlag = true;
+        if (NodeNum == 0) {
+            OutletNodeErrFlag = true;
+        }
 
         return NodeNum;
     }

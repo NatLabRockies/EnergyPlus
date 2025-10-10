@@ -779,13 +779,19 @@ state.dataStrGlobals->inputFilePath='{:g}',
             ConvertCaseToLower(readResult.data, LINEOut); // Turn line into lower case
             //        LINE=LINEOut
 
-            if (!has(LINEOut, Heading)) continue;
+            if (!has(LINEOut, Heading)) {
+                continue;
+            }
 
             //                                  See if [ and ] are on line
             ILB = index(LINEOut, '[');
             IRB = index(LINEOut, ']');
-            if (ILB == std::string::npos && IRB == std::string::npos) continue;
-            if (!has(LINEOut, '[' + Heading + ']')) continue; // Must be really correct heading line
+            if (ILB == std::string::npos && IRB == std::string::npos) {
+                continue;
+            }
+            if (!has(LINEOut, '[' + Heading + ']')) {
+                continue; // Must be really correct heading line
+            }
 
             //                                  Heading line found, now looking for Kind
             while (inputFile.good() && !NewHeading) {
@@ -797,7 +803,9 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 std::string line = innerReadResult.data;
                 strip(line);
 
-                if (line.empty()) continue; // Ignore Blank Lines
+                if (line.empty()) {
+                    continue; // Ignore Blank Lines
+                }
 
                 ConvertCaseToLower(line, LINEOut); // Turn line into lower case
                 //         LINE=LINEOut
@@ -810,13 +818,23 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 //                                  KindofParameter = string
                 IEQ = index(LINEOut, '=');
                 IPAR = index(LINEOut, Param);
-                if (IEQ == std::string::npos) continue;
-                if (IPAR == std::string::npos) continue;
-                if (IPAR != 0) continue;
-                if (!has(LINEOut, Param + '=')) continue; // needs to be param=
+                if (IEQ == std::string::npos) {
+                    continue;
+                }
+                if (IPAR == std::string::npos) {
+                    continue;
+                }
+                if (IPAR != 0) {
+                    continue;
+                }
+                if (!has(LINEOut, Param + '=')) {
+                    continue; // needs to be param=
+                }
 
                 //                                  = found and parameter found.
-                if (IPAR > IEQ) continue;
+                if (IPAR > IEQ) {
+                    continue;
+                }
 
                 //                                  parameter = found
                 //                                  Set output string to start with non-blank character

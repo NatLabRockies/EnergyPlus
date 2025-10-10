@@ -203,7 +203,9 @@ namespace RoomAir {
             // WALL Hc, HA and HAT calculation
             for (int Ctd = state.dataRoomAir->PosZ_Wall(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Wall(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Wall(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -256,7 +258,9 @@ namespace RoomAir {
             // WINDOW Hc, HA and HAT CALCULATION
             for (int Ctd = state.dataRoomAir->PosZ_Window(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Window(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Window(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -324,7 +328,9 @@ namespace RoomAir {
             // DOOR Hc, HA and HAT CALCULATION
             for (int Ctd = state.dataRoomAir->PosZ_Door(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Door(ZoneNum).end; ++Ctd) { // DOOR
                 int SurfNum = state.dataRoomAir->APos_Door(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -395,7 +401,9 @@ namespace RoomAir {
                     (state.dataRoomAir->ZoneCeilingHeight2(ZoneNum) - state.dataRoomAir->ZoneCeilingHeight1(ZoneNum)));
             for (int Ctd = state.dataRoomAir->PosZ_Internal(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Internal(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Internal(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -434,7 +442,9 @@ namespace RoomAir {
             // CEILING Hc, HA and HAT CALCULATION
             for (int Ctd = state.dataRoomAir->PosZ_Ceiling(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Ceiling(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Ceiling(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -450,7 +460,9 @@ namespace RoomAir {
             // FLOOR Hc, HA and HAT CALCULATION
             for (int Ctd = state.dataRoomAir->PosZ_Floor(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Floor(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Floor(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
 
                 auto const &surf = state.dataSurface->Surface(SurfNum);
                 state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;

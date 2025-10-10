@@ -199,7 +199,9 @@ namespace PlantPipingSystemsManager {
         for (auto &thisDomain : state.dataPlantPipingSysMgr->domains) {
 
             // if the domain contains a pipe circuit, it shouldn't be initialized here, it has its own entry point
-            if (thisDomain.HasAPipeCircuit) continue;
+            if (thisDomain.HasAPipeCircuit) {
+                continue;
+            }
 
             if (thisDomain.DomainNeedsToBeMeshed) {
                 thisDomain.developMesh(state);
@@ -233,8 +235,12 @@ namespace PlantPipingSystemsManager {
                 thisDomain.BeginSimInit = false;
                 thisDomain.BeginSimEnvironment = false;
             }
-            if (!state.dataGlobal->BeginSimFlag) thisDomain.BeginSimInit = true;
-            if (!state.dataGlobal->BeginEnvrnFlag) thisDomain.BeginSimEnvironment = true;
+            if (!state.dataGlobal->BeginSimFlag) {
+                thisDomain.BeginSimInit = true;
+            }
+            if (!state.dataGlobal->BeginEnvrnFlag) {
+                thisDomain.BeginSimEnvironment = true;
+            }
 
             // Reset the heat fluxes if domain update has been completed
             if (thisDomain.ResetHeatFluxFlag) {
@@ -374,7 +380,7 @@ namespace PlantPipingSystemsManager {
 
             // Write eio data
             for (auto &thisDomain : state.dataPlantPipingSysMgr->domains) {
-                static constexpr std::string_view DomainCellsToEIO("{},{:5},{:5},{:5}\n");
+                static constexpr std::string_view DomainCellsToEIO("Domain Name,{},{:5},{:5},{:5}\n");
                 print(state.files.eio,
                       DomainCellsToEIO,
                       thisDomain.Name,
@@ -423,7 +429,9 @@ namespace PlantPipingSystemsManager {
         ReadBasementInputs(state, NumGeneralizedDomains + NumHorizontalTrenches + NumZoneCoupledDomains + 1, NumBasements, ErrorsFound);
 
         // Report errors that are purely input problems
-        if (ErrorsFound) ShowFatalError(state, format("{}: Preceding input errors cause program termination.", RoutineName));
+        if (ErrorsFound) {
+            ShowFatalError(state, format("{}: Preceding input errors cause program termination.", RoutineName));
+        }
 
         // Setup output variables
         SetupPipingSystemOutputVariables(state);
@@ -472,7 +480,7 @@ namespace PlantPipingSystemsManager {
                             format("Corrected pipe location: ( x,y )=( {:.2T},{:.2T} )", thisSegment->PipeLocation.X, thisSegment->PipeLocation.Y));
                     }
                 } // segment loop
-            }     // circuit loop
+            } // circuit loop
 
         } // domain loop
 
@@ -1069,13 +1077,17 @@ namespace PlantPipingSystemsManager {
             thisDomain.Mesh.Z.thisMeshDistribution = MeshDistribution::SymmetricGeometric;
 
             Real64 MeshCoefficient = s_ipsc->rNumericArgs(12);
-            if (MeshCoefficient == 0.0) MeshCoefficient = 1.6;
+            if (MeshCoefficient == 0.0) {
+                MeshCoefficient = 1.6;
+            }
             thisDomain.Mesh.X.GeometricSeriesCoefficient = MeshCoefficient;
             thisDomain.Mesh.Y.GeometricSeriesCoefficient = MeshCoefficient;
             thisDomain.Mesh.Z.GeometricSeriesCoefficient = MeshCoefficient;
 
             int MeshCount = static_cast<int>(s_ipsc->rNumericArgs(13));
-            if (MeshCount == 0.0) MeshCount = 6;
+            if (MeshCount == 0.0) {
+                MeshCount = 6;
+            }
             thisDomain.Mesh.X.RegionMeshCount = MeshCount;
             thisDomain.Mesh.Y.RegionMeshCount = MeshCount;
             thisDomain.Mesh.Z.RegionMeshCount = MeshCount;
@@ -2176,8 +2188,12 @@ namespace PlantPipingSystemsManager {
             this->BeginSimInit = false;
             this->BeginSimEnvironment = false;
         }
-        if (!state.dataGlobal->BeginSimFlag) this->BeginSimInit = true;
-        if (!state.dataGlobal->BeginEnvrnFlag) this->BeginSimEnvironment = true;
+        if (!state.dataGlobal->BeginSimFlag) {
+            this->BeginSimInit = true;
+        }
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->BeginSimEnvironment = true;
+        }
 
         // Shift history arrays only if necessary
         if (std::abs(this->Cur.CurSimTimeSeconds - this->Cur.PrevSimTimeSeconds) > 1.0e-6) {
@@ -2264,7 +2280,9 @@ namespace PlantPipingSystemsManager {
 
         int RetVal = 0;
         for (int SurfCtr = 1; SurfCtr <= isize(state.dataSurface->Surface); ++SurfCtr) {
-            if (state.dataSurface->Surface(SurfCtr).OSCMPtr == OSCMIndex) ++RetVal;
+            if (state.dataSurface->Surface(SurfCtr).OSCMPtr == OSCMIndex) {
+                ++RetVal;
+            }
         }
         return RetVal;
     }
@@ -2505,7 +2523,9 @@ namespace PlantPipingSystemsManager {
 
         for (std::size_t i = 0, e = this->Cells.size(); i < e; ++i) {
             double const Temperature(this->Cells[i].Temperature);
-            if ((Temperature > MaxLimit) || (Temperature < MinLimit)) return true;
+            if ((Temperature > MaxLimit) || (Temperature < MinLimit)) {
+                return true;
+            }
         }
         return false;
     }
@@ -3194,35 +3214,57 @@ namespace PlantPipingSystemsManager {
                 }
 
                 if (thisPartition.thisRegionType == RegionType::BasementWall) {
-                    if (present(BasementWallXIndex)) BasementWallXIndex = cellCountUpToNow;
+                    if (present(BasementWallXIndex)) {
+                        BasementWallXIndex = cellCountUpToNow;
+                    }
                 } else if (thisPartition.thisRegionType == RegionType::BasementFloor) {
-                    if (present(BasementFloorYIndex)) BasementFloorYIndex = cellCountUpToNow;
+                    if (present(BasementFloorYIndex)) {
+                        BasementFloorYIndex = cellCountUpToNow;
+                    }
                 } else if (thisPartition.thisRegionType == RegionType::XSide) {
-                    if (present(XIndex)) XIndex = cellCountUpToNow;
+                    if (present(XIndex)) {
+                        XIndex = cellCountUpToNow;
+                    }
                     this->XIndex = XIndex;
                 } else if (thisPartition.thisRegionType == RegionType::XSideWall) {
-                    if (present(XWallIndex)) XWallIndex = cellCountUpToNow;
+                    if (present(XWallIndex)) {
+                        XWallIndex = cellCountUpToNow;
+                    }
                     this->XWallIndex = XWallIndex;
                 } else if (thisPartition.thisRegionType == RegionType::ZSide) {
-                    if (present(ZIndex)) ZIndex = cellCountUpToNow;
+                    if (present(ZIndex)) {
+                        ZIndex = cellCountUpToNow;
+                    }
                     this->ZIndex = ZIndex;
                 } else if (thisPartition.thisRegionType == RegionType::ZSideWall) {
-                    if (present(ZWallIndex)) ZWallIndex = cellCountUpToNow;
+                    if (present(ZWallIndex)) {
+                        ZWallIndex = cellCountUpToNow;
+                    }
                     this->ZWallIndex = ZWallIndex;
                 } else if (thisPartition.thisRegionType == RegionType::HorizInsXSide) {
-                    if (present(InsulationXIndex)) InsulationXIndex = cellCountUpToNow;
+                    if (present(InsulationXIndex)) {
+                        InsulationXIndex = cellCountUpToNow;
+                    }
                     this->InsulationXIndex = InsulationXIndex;
                 } else if (thisPartition.thisRegionType == RegionType::HorizInsZSide) {
-                    if (present(InsulationZIndex)) InsulationZIndex = cellCountUpToNow;
+                    if (present(InsulationZIndex)) {
+                        InsulationZIndex = cellCountUpToNow;
+                    }
                     this->InsulationZIndex = InsulationZIndex;
                 } else if (thisPartition.thisRegionType == RegionType::FloorInside) {
-                    if (present(YFloorIndex)) YFloorIndex = cellCountUpToNow;
+                    if (present(YFloorIndex)) {
+                        YFloorIndex = cellCountUpToNow;
+                    }
                     this->YFloorIndex = YFloorIndex;
                 } else if (thisPartition.thisRegionType == RegionType::UnderFloor) {
-                    if (present(YIndex)) YIndex = cellCountUpToNow;
+                    if (present(YIndex)) {
+                        YIndex = cellCountUpToNow;
+                    }
                     this->YIndex = YIndex;
                 } else if (thisPartition.thisRegionType == RegionType::VertInsLowerEdge) {
-                    if (present(InsulationYIndex)) InsulationYIndex = cellCountUpToNow;
+                    if (present(InsulationYIndex)) {
+                        InsulationYIndex = cellCountUpToNow;
+                    }
                     this->InsulationYIndex = InsulationYIndex;
                 }
 
@@ -3580,8 +3622,8 @@ namespace PlantPipingSystemsManager {
                     }
 
                 } //'z
-            }     //'y
-        }         //'x
+            } //'y
+        } //'x
 
         this->NumDomainCells = TotNumCells;
         this->NumGroundSurfCells = NumGroundSurfaceCells;
@@ -4055,10 +4097,14 @@ namespace PlantPipingSystemsManager {
         // Begin iterating for this time step
         for (int IterationIndex = 1; IterationIndex <= this->SimControls.MaxIterationsPerTS; ++IterationIndex) {
             this->ShiftTemperaturesForNewIteration();
-            if (this->DomainNeedsSimulation) this->PerformTemperatureFieldUpdate(state);
+            if (this->DomainNeedsSimulation) {
+                this->PerformTemperatureFieldUpdate(state);
+            }
             bool FinishedIterationLoop = false;
             this->DoEndOfIterationOperations(state, FinishedIterationLoop);
-            if (FinishedIterationLoop) break;
+            if (FinishedIterationLoop) {
+                break;
+            }
         }
 
         // Update the basement surface temperatures, if any
@@ -4098,11 +4144,15 @@ namespace PlantPipingSystemsManager {
                 this->PerformPipeCircuitSimulation(state, thisCircuit);
             }
 
-            if (this->DomainNeedsSimulation) this->PerformTemperatureFieldUpdate(state);
+            if (this->DomainNeedsSimulation) {
+                this->PerformTemperatureFieldUpdate(state);
+            }
             bool FinishedIterationLoop = false;
             this->DoEndOfIterationOperations(state, FinishedIterationLoop);
 
-            if (FinishedIterationLoop) break;
+            if (FinishedIterationLoop) {
+                break;
+            }
         }
 
         // Update the basement surface temperatures, if any
@@ -4396,11 +4446,21 @@ namespace PlantPipingSystemsManager {
         Solar_Angle_2 = Hour_Angle + Constant::Pi / 24.0;
 
         // Constrain solar angles
-        if (Solar_Angle_1 < -Sunset_Angle) Solar_Angle_1 = -Sunset_Angle;
-        if (Solar_Angle_2 < -Sunset_Angle) Solar_Angle_2 = -Sunset_Angle;
-        if (Solar_Angle_1 > Sunset_Angle) Solar_Angle_1 = Sunset_Angle;
-        if (Solar_Angle_2 > Sunset_Angle) Solar_Angle_2 = Sunset_Angle;
-        if (Solar_Angle_1 > Solar_Angle_2) Solar_Angle_1 = Solar_Angle_2;
+        if (Solar_Angle_1 < -Sunset_Angle) {
+            Solar_Angle_1 = -Sunset_Angle;
+        }
+        if (Solar_Angle_2 < -Sunset_Angle) {
+            Solar_Angle_2 = -Sunset_Angle;
+        }
+        if (Solar_Angle_1 > Sunset_Angle) {
+            Solar_Angle_1 = Sunset_Angle;
+        }
+        if (Solar_Angle_2 > Sunset_Angle) {
+            Solar_Angle_2 = Sunset_Angle;
+        }
+        if (Solar_Angle_1 > Solar_Angle_2) {
+            Solar_Angle_1 = Solar_Angle_2;
+        }
 
         // Convert input solar radiation [w/m2] into units for ET model, [MJ/hr-min]
         IncidentSolar_MJhrmin = this->Cur.CurIncidentSolar * Convert_Wm2_To_MJhrmin;
@@ -5099,7 +5159,9 @@ namespace PlantPipingSystemsManager {
             SimulateFluidCell(thisCircuit, ThisCell, FlowRate, EnteringTemp);
 
             //'check convergence
-            if (IsConverged_PipeCurrentToPrevIteration(thisCircuit, ThisCell)) break; // potential diff source
+            if (IsConverged_PipeCurrentToPrevIteration(thisCircuit, ThisCell)) {
+                break; // potential diff source
+            }
         }
     }
 
@@ -5928,10 +5990,14 @@ namespace PlantPipingSystemsManager {
         Real64 ThisCellLength;
         Real64 NeighborCellLength;
         Real64 ThisCellConductivity = 10000.0;
-        if (ThisCell.Properties.Conductivity > 0.0) ThisCellConductivity = ThisCell.Properties.Conductivity;
+        if (ThisCell.Properties.Conductivity > 0.0) {
+            ThisCellConductivity = ThisCell.Properties.Conductivity;
+        }
         Real64 NeighborConductivity = 10000.0;
         auto const &cell = this->Cells(NX, NY, NZ);
-        if (cell.Properties.Conductivity > 0.0) NeighborConductivity = cell.Properties.Conductivity;
+        if (cell.Properties.Conductivity > 0.0) {
+            NeighborConductivity = cell.Properties.Conductivity;
+        }
 
         //'calculate normal surface area
         Real64 const ThisNormalArea = ThisCell.normalArea(CurDirection);

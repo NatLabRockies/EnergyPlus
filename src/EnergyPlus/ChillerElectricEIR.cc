@@ -122,7 +122,9 @@ ElectricEIRChillerSpecs *ElectricEIRChillerSpecs::factory(EnergyPlusData &state,
     auto thisObj = std::find_if(state.dataChillerElectricEIR->ElectricEIRChiller.begin(),
                                 state.dataChillerElectricEIR->ElectricEIRChiller.end(),
                                 [&objectName](const ElectricEIRChillerSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataChillerElectricEIR->ElectricEIRChiller.end()) return thisObj;
+    if (thisObj != state.dataChillerElectricEIR->ElectricEIRChiller.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("LocalElectEIRChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -473,7 +475,9 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         thisChiller.OptPartLoadRat = s_ipsc->rNumericArgs(9);
         thisChiller.MinUnloadRat = s_ipsc->rNumericArgs(10);
         thisChiller.SizFac = s_ipsc->rNumericArgs(15);
-        if (thisChiller.SizFac <= 0.0) thisChiller.SizFac = 1.0;
+        if (thisChiller.SizFac <= 0.0) {
+            thisChiller.SizFac = 1.0;
+        }
 
         if (thisChiller.MinPartLoadRat > thisChiller.MaxPartLoadRat) {
             ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
@@ -684,7 +688,9 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
             Array1D<Real64> CurveValArray(11); // Used to evaluate PLFFPLR curve objects
             for (int CurveCheck = 0; CurveCheck <= 10; ++CurveCheck) {
                 Real64 CurveValTmp = Curve::CurveValue(state, thisChiller.ChillerEIRFPLRIndex, double(CurveCheck / 10.0));
-                if (CurveValTmp < 0.0) FoundNegValue = true;
+                if (CurveValTmp < 0.0) {
+                    FoundNegValue = true;
+                }
                 CurveValArray(CurveCheck + 1) = int(CurveValTmp * 100.0) / 100.0;
             }
             if (FoundNegValue) {
@@ -1231,9 +1237,9 @@ void ElectricEIRChillerSpecs::initEachEnvironment(EnergyPlusData &state)
                         }
                     }
                 } // IF (.NOT. AnyEnergyManagementSystemInModel) THEN
-            }     // IF(THeatRecSetPoint == SensedNodeFlagValue)THEN
-        }         // IF(ElectricEIRChiller(EIRChillNum)%HeatRecSetPointNodeNum > 0)THEN
-    }             // IF (ElectricEIRChiller(EIRChillNum)%HeatRecActive) THEN
+            } // IF(THeatRecSetPoint == SensedNodeFlagValue)THEN
+        } // IF(ElectricEIRChiller(EIRChillNum)%HeatRecSetPointNodeNum > 0)THEN
+    } // IF (ElectricEIRChiller(EIRChillNum)%HeatRecActive) THEN
 }
 
 void ElectricEIRChillerSpecs::initialize(EnergyPlusData &state, bool const RunFlag, Real64 const MyLoad)
@@ -1336,7 +1342,9 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
         if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
         } else {
-            if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+            if (this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->EvapVolFlowRateWasAutoSized) {
@@ -1457,7 +1465,9 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                                  (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
 
         } else {
-            if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+            if (this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->CondVolFlowRateWasAutoSized) {
@@ -1527,7 +1537,9 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                 bool bPRINT = true; // TRUE if sizing is reported to output (eio)
                 AutoCalculateSizer sizerCondAirFlow;
                 std::string stringOverride = "Reference Condenser Fluid Flow Rate  [m3/s]";
-                if (state.dataGlobal->isEpJSON) stringOverride = "reference_condenser_fluid_flow_rate [m3/s]";
+                if (state.dataGlobal->isEpJSON) {
+                    stringOverride = "reference_condenser_fluid_flow_rate [m3/s]";
+                }
                 sizerCondAirFlow.overrideSizingString(stringOverride);
                 sizerCondAirFlow.initializeWithinEP(state, CompType, this->Name, bPRINT, RoutineName);
                 this->CondVolFlowRate = sizerCondAirFlow.size(state, TempSize, ErrorsFound);
@@ -1603,7 +1615,9 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                 tempHeatRecVolFlowRate = nomHeatRecVolFlowRateUser;
             }
         }
-        if (!this->DesignHeatRecVolFlowRateWasAutoSized) tempHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+        if (!this->DesignHeatRecVolFlowRateWasAutoSized) {
+            tempHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+        }
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->HeatRecInletNodeNum, tempHeatRecVolFlowRate);
     } // Heat recovery active
 
@@ -2031,7 +2045,9 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
         if (EvapDeltaTemp != 0) {
             // Calculate desired flow to request based on load
             this->EvapMassFlowRate = std::abs(this->QEvaporator / Cp / EvapDeltaTemp);
-            if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+            if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
+                this->PossibleSubcooling = true;
+            }
             // Check to see if the Maximum is exceeded, if so set to maximum
             this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
             // Use PlantUtilities::SetComponentFlowRate to decide actual flow
@@ -2171,7 +2187,9 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
     }
 
     // Chiller cycles below minimum part load ratio, FRAC = amount of time chiller is ON during this time step
-    if (PartLoadRat < this->MinPartLoadRat) FRAC = min(1.0, (PartLoadRat / this->MinPartLoadRat));
+    if (PartLoadRat < this->MinPartLoadRat) {
+        FRAC = min(1.0, (PartLoadRat / this->MinPartLoadRat));
+    }
 
     // set the module level variable used for reporting FRAC
     this->ChillerCyclingRatio = FRAC;
@@ -2302,7 +2320,9 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
     if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
         if (this->CondMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
             // If Heat Recovery specified for this vapor compression chiller, then Qcondenser will be adjusted by this subroutine
-            if (this->HeatRecActive) this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+            if (this->HeatRecActive) {
+                this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+            }
             Real64 CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, condInletTemp, RoutineName);
 
             this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + condInletTemp;
@@ -2322,7 +2342,9 @@ void ElectricEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, b
         }
 
         // If Heat Recovery specified for this vapor compression chiller, then Qcondenser will be adjusted by this subroutine
-        if (this->HeatRecActive) this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+        if (this->HeatRecActive) {
+            this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovered);
+        }
 
         if (CondMassFlowRate > 0.0) {
             Real64 CpCond = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(this->CondInletNodeNum).HumRat);

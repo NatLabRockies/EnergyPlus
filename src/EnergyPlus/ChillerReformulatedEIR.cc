@@ -122,7 +122,9 @@ ReformulatedEIRChillerSpecs *ReformulatedEIRChillerSpecs::factory(EnergyPlusData
     auto thisObj = std::find_if(state.dataChillerReformulatedEIR->ElecReformEIRChiller.begin(),
                                 state.dataChillerReformulatedEIR->ElecReformEIRChiller.end(),
                                 [&objectName](const ReformulatedEIRChillerSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataChillerReformulatedEIR->ElecReformEIRChiller.end()) return thisObj;
+    if (thisObj != state.dataChillerReformulatedEIR->ElecReformEIRChiller.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("LocalReformulatedElectEIRChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -439,7 +441,9 @@ void GetElecReformEIRChillerInput(EnergyPlusData &state)
         thisChiller.OptPartLoadRat = s_ipsc->rNumericArgs(9);
         thisChiller.MinUnloadRat = s_ipsc->rNumericArgs(10);
         thisChiller.SizFac = s_ipsc->rNumericArgs(14);
-        if (thisChiller.SizFac <= 0.0) thisChiller.SizFac = 1.0;
+        if (thisChiller.SizFac <= 0.0) {
+            thisChiller.SizFac = 1.0;
+        }
 
         if (thisChiller.MinPartLoadRat > thisChiller.MaxPartLoadRat) {
             ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
@@ -1119,7 +1123,9 @@ void ReformulatedEIRChillerSpecs::size(EnergyPlusData &state)
         if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
         } else {
-            if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+            if (this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->EvapVolFlowRateWasAutoSized) {
@@ -1198,7 +1204,9 @@ void ReformulatedEIRChillerSpecs::size(EnergyPlusData &state)
             Real64 RefCapFT = Curve::CurveValue(state, this->ChillerCapFTIndex, SizingEvapOutletTemp, SizingCondOutletTemp);
             tmpNomCap = (Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * tmpEvapVolFlowRate) / RefCapFT;
         } else {
-            if (this->RefCapWasAutoSized) tmpNomCap = 0.0;
+            if (this->RefCapWasAutoSized) {
+                tmpNomCap = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->RefCapWasAutoSized) {
@@ -1257,7 +1265,9 @@ void ReformulatedEIRChillerSpecs::size(EnergyPlusData &state)
                                  (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
             // IF (DataPlant::PlantFirstSizesOkayToFinalize) ElecReformEIRChiller(EIRChillNum)%CondVolFlowRate = tmpCondVolFlowRate
         } else {
-            if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+            if (this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = 0.0;
+            }
             // IF (DataPlant::PlantFirstSizesOkayToFinalize) ElecReformEIRChiller(EIRChillNum)%CondVolFlowRate = tmpCondVolFlowRate
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1348,7 +1358,9 @@ void ReformulatedEIRChillerSpecs::size(EnergyPlusData &state)
             }
             tmpHeatRecVolFlowRate *= (1.0 + (1.0 / this->RefCOP)) * this->CompPowerToCondenserFrac * this->HeatRecCapacityFraction;
         }
-        if (!this->DesignHeatRecVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+        if (!this->DesignHeatRecVolFlowRateWasAutoSized) {
+            tmpHeatRecVolFlowRate = this->DesignHeatRecVolFlowRate;
+        }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->DesignHeatRecVolFlowRateWasAutoSized) {
                 this->DesignHeatRecVolFlowRate = tmpHeatRecVolFlowRate;
@@ -1606,7 +1618,9 @@ void ReformulatedEIRChillerSpecs::size(EnergyPlusData &state)
                     } else {
                         CurveValTmp = Curve::CurveValue(state, this->ChillerEIRFPLRIndex, CondTemp, PLRTemp);
                     }
-                    if (CurveValTmp < 0.0) FoundNegValue = true;
+                    if (CurveValTmp < 0.0) {
+                        FoundNegValue = true;
+                    }
                     CurveValArray(CurveCheck + 1) = int(CurveValTmp * 100.0) / 100.0;
                     CondTempArray(CurveCheck + 1) = int(CondTemp * 100.0) / 100.0;
                 }
@@ -2176,7 +2190,9 @@ void ReformulatedEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoa
 
             if (EvapDeltaTemp != 0) {
                 this->EvapMassFlowRate = max(0.0, (this->QEvaporator / Cp / EvapDeltaTemp));
-                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
+                    this->PossibleSubcooling = true;
+                }
                 // Check to see if the Maximum is exceeded, if so set to maximum
                 this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                 // Use PlantUtilities::SetComponentFlowRate to decide actual flow
@@ -2333,7 +2349,9 @@ void ReformulatedEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoa
         }
 
         // Chiller cycles below minimum part load ratio, FRAC = amount of time chiller is ON during this time step
-        if (PartLoadRat < this->MinPartLoadRat) FRAC = min(1.0, (PartLoadRat / this->MinPartLoadRat));
+        if (PartLoadRat < this->MinPartLoadRat) {
+            FRAC = min(1.0, (PartLoadRat / this->MinPartLoadRat));
+        }
 
         // Chiller is false loading below PLR = minimum unloading ratio, find PLR used for energy calculation
         if (AvailChillerCap > 0.0) {
@@ -2372,7 +2390,9 @@ void ReformulatedEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoa
         // Chiller lift under the reference condition
         Real64 ChillerLiftRef = this->TempRefCondOut - this->TempRefEvapOut;
 
-        if (ChillerLiftRef <= 0) ChillerLiftRef = 35 - 6.67;
+        if (ChillerLiftRef <= 0) {
+            ChillerLiftRef = 35 - 6.67;
+        }
 
         // Normalized chiller lift
         Real64 ChillerLiftNom = ChillerLift / ChillerLiftRef;
@@ -2383,7 +2403,9 @@ void ReformulatedEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoa
         this->ChillerEIRFPLR = max(0.0, Curve::CurveValue(state, this->ChillerEIRFPLRIndex, ChillerLiftNom, PartLoadRat, ChillerTdevNom));
     }
 
-    if (ReferenceCOP <= 0) ReferenceCOP = 5.5;
+    if (ReferenceCOP <= 0) {
+        ReferenceCOP = 5.5;
+    }
     if (this->thermosiphonDisabled(state)) {
         this->Power = (AvailChillerCap / ReferenceCOP) * this->ChillerEIRFPLR * this->ChillerEIRFT * FRAC;
     }
@@ -2447,7 +2469,9 @@ void ReformulatedEIRChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoa
     //  Currently only water cooled chillers are allowed for the reformulated EIR chiller model
     if (this->CondMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
         // If Heat Recovery specified for this vapor compression chiller, then Qcondenser will be adjusted by this subroutine
-        if (this->HeatRecActive) this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovery);
+        if (this->HeatRecActive) {
+            this->calcHeatRecovery(state, this->QCondenser, this->CondMassFlowRate, condInletTemp, this->QHeatRecovery);
+        }
         Real64 CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, condInletTemp, RoutineName);
         this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + condInletTemp;
     } else {
@@ -2466,7 +2490,9 @@ void ReformulatedEIRChillerSpecs::checkMinMaxCurveBoundaries(EnergyPlusData &sta
     //  To compare the evaporator/condenser outlet temperatures to curve object min/max values
 
     // Do not print out warnings if chiller not operating or FirstIteration/WarmupFlag/FlowLock
-    if (FirstIteration || state.dataGlobal->WarmupFlag || this->CWPlantLoc.side->FlowLock == DataPlant::FlowLock::Unlocked) return;
+    if (FirstIteration || state.dataGlobal->WarmupFlag || this->CWPlantLoc.side->FlowLock == DataPlant::FlowLock::Unlocked) {
+        return;
+    }
 
     // Minimum evaporator leaving temperature allowed by CAPFT curve [C]
     Real64 CAPFTXTmin = this->ChillerCAPFTXTempMin;
@@ -2772,7 +2798,9 @@ void ReformulatedEIRChillerSpecs::checkMinMaxCurveBoundaries(EnergyPlusData &sta
         // Chiller lift under the reference condition  [C]
         Real64 ChillerLiftRef = this->TempRefCondOut - this->TempRefEvapOut;
 
-        if (ChillerLiftRef <= 0) ChillerLiftRef = 35 - 6.67;
+        if (ChillerLiftRef <= 0) {
+            ChillerLiftRef = 35 - 6.67;
+        }
 
         // Normalized chiller lift
         Real64 ChillerLiftNom = ChillerLift / ChillerLiftRef;

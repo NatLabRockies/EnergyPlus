@@ -237,7 +237,9 @@ namespace Dayltg {
                     // For computational efficiency, search stored pipes to see if an identical pipe has already been calculated
                     bool Found = false;
                     for (StoredNum = 1; StoredNum <= NumStored; ++StoredNum) {
-                        if (TDDPipeStored(StoredNum).AspectRatio != state.dataDaylightingDevicesData->TDDPipe(PipeNum).AspectRatio) continue;
+                        if (TDDPipeStored(StoredNum).AspectRatio != state.dataDaylightingDevicesData->TDDPipe(PipeNum).AspectRatio) {
+                            continue;
+                        }
                         if (TDDPipeStored(StoredNum).Reflectance == Reflectance) {
                             Found = true; // StoredNum points to the matching TDDPipeStored
                             break;
@@ -364,7 +366,9 @@ namespace Dayltg {
         // Initialize daylighting shelves
         GetShelfInput(state);
 
-        if ((int)state.dataDaylightingDevicesData->Shelf.size() > 0) DisplayString(state, "Initializing Light Shelf Daylighting Devices");
+        if ((int)state.dataDaylightingDevicesData->Shelf.size() > 0) {
+            DisplayString(state, "Initializing Light Shelf Daylighting Devices");
+        }
 
         for (int ShelfNum = 1; ShelfNum <= (int)state.dataDaylightingDevicesData->Shelf.size(); ++ShelfNum) {
             int WinSurf = state.dataDaylightingDevicesData->Shelf(ShelfNum).Window;
@@ -382,7 +386,9 @@ namespace Dayltg {
                 state.dataDaylightingDevicesData->Shelf(ShelfNum).OutReflectSol =
                     1.0 - state.dataConstruction->Construct(state.dataDaylightingDevicesData->Shelf(ShelfNum).Construction).OutsideAbsorpSolar;
 
-                if (state.dataDaylightingDevicesData->Shelf(ShelfNum).ViewFactor < 0) CalcViewFactorToShelf(state, ShelfNum);
+                if (state.dataDaylightingDevicesData->Shelf(ShelfNum).ViewFactor < 0) {
+                    CalcViewFactorToShelf(state, ShelfNum);
+                }
 
                 adjustViewFactorsWithShelf(state,
                                            state.dataDaylightingDevicesData->Shelf(ShelfNum).ViewFactor,
@@ -398,13 +404,13 @@ namespace Dayltg {
                     state.dataDaylightingDevices->ShelfReported = true;
                 }
                 print(state.files.eio,
-                      "{},{:.2R},{},{:.2R},{:.2R}\n",
+                      "Shelf Details,{},{:.2R},{},{:.2R},{:.2R}\n",
                       state.dataDaylightingDevicesData->Shelf(ShelfNum).Name,
                       state.dataDaylightingDevicesData->Shelf(ShelfNum).ViewFactor,
                       state.dataSurface->Surface(WinSurf).Name,
                       state.dataSurface->Surface(WinSurf).ViewFactorSky,
                       state.dataSurface->Surface(WinSurf).ViewFactorGround);
-                //      CALL SetupOutputVariable(state, 'View Factor To Outside Shelf []', &
+                //      CALL Setup Output Variable(state, 'View Factor To Outside Shelf []', &
                 //        Shelf(ShelfNum)%ViewFactor,'Zone','Average',Shelf(ShelfNum)%Name)
             }
         }
@@ -751,7 +757,9 @@ namespace Dayltg {
 
             } // PipeNum
 
-            if (state.dataDaylightingDevices->GetTDDInputErrorsFound) ShowFatalError(state, "Errors in DaylightingDevice:Tubular input.");
+            if (state.dataDaylightingDevices->GetTDDInputErrorsFound) {
+                ShowFatalError(state, "Errors in DaylightingDevice:Tubular input.");
+            }
             state.dataDayltg->TDDTransVisBeam.allocate(Constant::iHoursInDay, NumOfTDDPipes);
             state.dataDayltg->TDDFluxInc.allocate(Constant::iHoursInDay, NumOfTDDPipes);
             state.dataDayltg->TDDFluxTrans.allocate(Constant::iHoursInDay, NumOfTDDPipes);
@@ -761,7 +769,7 @@ namespace Dayltg {
                     state.dataDayltg->TDDFluxInc(hr, tddNum) = Illums();
                     state.dataDayltg->TDDFluxTrans(hr, tddNum) = Illums();
                 } // for (tddNum)
-            }     // for (hr)
+            } // for (hr)
         }
     }
 
@@ -996,13 +1004,16 @@ namespace Dayltg {
                     }
                 }
 
-                if (state.dataDaylightingDevicesData->Shelf(ShelfNum).InSurf == 0 && state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf == 0)
+                if (state.dataDaylightingDevicesData->Shelf(ShelfNum).InSurf == 0 && state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf == 0) {
                     ShowWarningError(state,
                                      format("{} = {}:  No inside shelf or outside shelf was specified.", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
+                }
 
             } // ShelfNum
 
-            if (state.dataDaylightingDevices->GetShelfInputErrorsFound) ShowFatalError(state, "Errors in DaylightingDevice:Shelf input.");
+            if (state.dataDaylightingDevices->GetShelfInputErrorsFound) {
+                ShowFatalError(state, "Errors in DaylightingDevice:Shelf input.");
+            }
         }
     }
 
@@ -1146,7 +1157,7 @@ namespace Dayltg {
             FluxTrans += trans * P * SINI * dPH;
 
             PH += dPH; // Increment the altitude angle
-        }              // N
+        } // N
 
         CalcTDDTransSolIso = FluxTrans / FluxInc;
 
@@ -1215,7 +1226,7 @@ namespace Dayltg {
                 FluxTrans += trans * COSI * dTH;
 
                 TH += dTH; // Increment the azimuth angle
-            }              // N
+            } // N
 
             CalcTDDTransSolHorizon = FluxTrans / FluxInc;
 
@@ -1584,8 +1595,9 @@ namespace Dayltg {
         for (VWin = 1; VWin <= 4; ++VWin) {
             for (VShelf = 1; VShelf <= 4; ++VShelf) {
                 if (distance(state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).Window).Vertex(VWin),
-                             state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf).Vertex(VShelf)) == 0.0)
+                             state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf).Vertex(VShelf)) == 0.0) {
                     ++NumMatch;
+                }
             }
         }
 
@@ -1618,8 +1630,12 @@ namespace Dayltg {
         // First, make sure none of the view factors are less than zero and return if there isn't a problem or if
         // view factor to shelf greater than one.  Both cases together would also eliminate if other views are zero
         // which means nothing would need to be done.
-        if (viewFactorToSky <= 0.0) viewFactorToSky = 0.0;
-        if (viewFactorToGround <= 0.0) viewFactorToGround = 0.0;
+        if (viewFactorToSky <= 0.0) {
+            viewFactorToSky = 0.0;
+        }
+        if (viewFactorToGround <= 0.0) {
+            viewFactorToGround = 0.0;
+        }
         if (viewFactorToShelf <= 0.0) { // No shelf impact for which to account
             ShowWarningError(state,
                              format("DaylightingDevice:Shelf = {}:  Window view factor to shelf was less than 0.  This should not happen.",
@@ -1638,7 +1654,9 @@ namespace Dayltg {
             }
             return;
         }
-        if (viewFactorToShelf + viewFactorToSky + viewFactorToGround <= 1.0) return; // nothing wrong here
+        if (viewFactorToShelf + viewFactorToSky + viewFactorToGround <= 1.0) {
+            return; // nothing wrong here
+        }
         if (viewFactorToShelf >= 1.0) { // Don't allow shelf view of greater than 1 (zero out other views)
             ShowWarningError(state,
                              format("DaylightingDevice:Shelf = {}:  Window view factor to shelf was greater than 1.  This should not happen.",
@@ -1655,16 +1673,22 @@ namespace Dayltg {
         Real64 zShelfMax = state.dataSurface->Surface(ShelfSurf).Vertex(1).z;
         Real64 zShelfMin = zShelfMax;
         for (int vertex = 2; vertex <= state.dataSurface->Surface(ShelfSurf).Sides; ++vertex) {
-            if (state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z > zShelfMax)
+            if (state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z > zShelfMax) {
                 zShelfMax = state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z;
-            if (state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z < zShelfMin)
+            }
+            if (state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z < zShelfMin) {
                 zShelfMin = state.dataSurface->Surface(ShelfSurf).Vertex(vertex).z;
+            }
         }
         Real64 zWinMax = state.dataSurface->Surface(WinSurf).Vertex(1).z;
         Real64 zWinMin = zWinMax;
         for (int vertex = 2; vertex <= state.dataSurface->Surface(WinSurf).Sides; ++vertex) {
-            if (state.dataSurface->Surface(WinSurf).Vertex(vertex).z > zWinMax) zWinMax = state.dataSurface->Surface(WinSurf).Vertex(vertex).z;
-            if (state.dataSurface->Surface(WinSurf).Vertex(vertex).z < zWinMin) zWinMin = state.dataSurface->Surface(WinSurf).Vertex(vertex).z;
+            if (state.dataSurface->Surface(WinSurf).Vertex(vertex).z > zWinMax) {
+                zWinMax = state.dataSurface->Surface(WinSurf).Vertex(vertex).z;
+            }
+            if (state.dataSurface->Surface(WinSurf).Vertex(vertex).z < zWinMin) {
+                zWinMin = state.dataSurface->Surface(WinSurf).Vertex(vertex).z;
+            }
         }
 
         Real64 leftoverViewFactor;
@@ -1724,7 +1748,9 @@ namespace Dayltg {
                 Real64 fracAbove = 0.0;
                 if (zShelfMax > zShelfMin) {
                     fracAbove = (zShelfMax - zWinMin) / (zShelfMax - zShelfMin);
-                    if (fracAbove > 1.0) fracAbove = 1.0;
+                    if (fracAbove > 1.0) {
+                        fracAbove = 1.0;
+                    }
                 }
                 zShelfAvg = zWinMin + fracAbove * (zShelfMax - zWinMin);
             } else { // (zShelfMax > zWinMax): Shelf goes partially above window
@@ -1790,7 +1816,9 @@ namespace Dayltg {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
 
-        if ((int)state.dataDaylightingDevicesData->TDDPipe.size() == 0) return;
+        if ((int)state.dataDaylightingDevicesData->TDDPipe.size() == 0) {
+            return;
+        }
 
         if (state.dataGlobal->BeginEnvrnFlag && state.dataDaylightingDevices->MyEnvrnFlag) {
             for (int Loop = 1; Loop <= (int)state.dataDaylightingDevicesData->TDDPipe.size(); ++Loop) {
@@ -1798,7 +1826,9 @@ namespace Dayltg {
             }
             state.dataDaylightingDevices->MyEnvrnFlag = false;
         }
-        if (!state.dataGlobal->BeginEnvrnFlag) state.dataDaylightingDevices->MyEnvrnFlag = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            state.dataDaylightingDevices->MyEnvrnFlag = true;
+        }
     }
 
 } // namespace Dayltg

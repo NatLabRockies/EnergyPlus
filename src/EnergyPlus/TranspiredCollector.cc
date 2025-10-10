@@ -192,15 +192,19 @@ namespace TranspiredCollector {
             assert(equal_dimensions(InletNode, ControlNode));
             assert(equal_dimensions(InletNode, UTSC_CI.ZoneNode));
             for (int i = InletNode.l(), e = InletNode.u(); i <= e; ++i) {
-                if (state.dataLoopNodes->Node(InletNode(i)).Temp + TempControlTol < state.dataLoopNodes->Node(ControlNode(i)).TempSetPoint)
+                if (state.dataLoopNodes->Node(InletNode(i)).Temp + TempControlTol < state.dataLoopNodes->Node(ControlNode(i)).TempSetPoint) {
                     ControlLTSet = true;
-                if (state.dataLoopNodes->Node(InletNode(i)).Temp + TempControlTol < UTSC_CI.freeHeatSetPointSched->getCurrentVal())
+                }
+                if (state.dataLoopNodes->Node(InletNode(i)).Temp + TempControlTol < UTSC_CI.freeHeatSetPointSched->getCurrentVal()) {
                     ControlLTSchedule = true;
-                if (state.dataLoopNodes->Node(UTSC_CI.ZoneNode(i)).Temp + TempControlTol < UTSC_CI.freeHeatSetPointSched->getCurrentVal())
+                }
+                if (state.dataLoopNodes->Node(UTSC_CI.ZoneNode(i)).Temp + TempControlTol < UTSC_CI.freeHeatSetPointSched->getCurrentVal()) {
                     ZoneLTSchedule = true;
+                }
             }
-            if (ControlLTSet || (ControlLTSchedule && ZoneLTSchedule))
+            if (ControlLTSet || (ControlLTSchedule && ZoneLTSchedule)) {
                 UTSC_CI.IsOn = true; // heating required | free heating helpful | free heating helpful
+            }
         }
 
         if (state.dataTranspiredCollector->UTSC(UTSCNum).IsOn) {
@@ -328,13 +332,17 @@ namespace TranspiredCollector {
                                            MaxNumNumbersSplit));
                     ErrorsFound = true;
                 }
-                if (!allocated(AlphasSplit)) AlphasSplit.allocate(MaxNumAlphasSplit);
+                if (!allocated(AlphasSplit)) {
+                    AlphasSplit.allocate(MaxNumAlphasSplit);
+                }
                 NumbersSplit = 0.0;
                 AlphasSplit = "";
                 for (ItemSplit = 1; ItemSplit <= NumUTSCSplitter; ++ItemSplit) {
                     state.dataInputProcessing->inputProcessor->getObjectItem(
                         state, CurrentModuleMultiObject, ItemSplit, AlphasSplit, NumAlphasSplit, NumbersSplit, NumNumbersSplit, IOStatusSplit);
-                    if (!(Util::SameString(AlphasSplit(1), Alphas(1)))) continue;
+                    if (!(Util::SameString(AlphasSplit(1), Alphas(1)))) {
+                        continue;
+                    }
                     SplitterNameOK(ItemSplit) = true;
                     state.dataTranspiredCollector->UTSC(Item).NumOASysAttached = std::floor(NumAlphasSplit / 4.0);
                     if (mod((NumAlphasSplit), 4) != 1) {
@@ -405,8 +413,8 @@ namespace TranspiredCollector {
 
                     } // Each OA System in a Multisystem
                       // DEALLOCATE(AlphasSplit)
-                }     // each Multisystem present
-            }         // any UTSC Multisystem present
+                } // each Multisystem present
+            } // any UTSC Multisystem present
 
             state.dataTranspiredCollector->UTSC(Item).OSCMName = Alphas(2);
             Found = Util::FindItemInList(state.dataTranspiredCollector->UTSC(Item).OSCMName, state.dataSurface->OSCM);
@@ -525,16 +533,24 @@ namespace TranspiredCollector {
 
             Roughness = Alphas(11);
             // Select the correct Number for the associated ascii name for the roughness type
-            if (Util::SameString(Roughness, "VeryRough"))
+            if (Util::SameString(Roughness, "VeryRough")) {
                 state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::VeryRough;
-            if (Util::SameString(Roughness, "Rough")) state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::Rough;
-            if (Util::SameString(Roughness, "MediumRough"))
+            }
+            if (Util::SameString(Roughness, "Rough")) {
+                state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::Rough;
+            }
+            if (Util::SameString(Roughness, "MediumRough")) {
                 state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::MediumRough;
-            if (Util::SameString(Roughness, "MediumSmooth"))
+            }
+            if (Util::SameString(Roughness, "MediumSmooth")) {
                 state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::MediumSmooth;
-            if (Util::SameString(Roughness, "Smooth")) state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::Smooth;
-            if (Util::SameString(Roughness, "VerySmooth"))
+            }
+            if (Util::SameString(Roughness, "Smooth")) {
+                state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::Smooth;
+            }
+            if (Util::SameString(Roughness, "VerySmooth")) {
                 state.dataTranspiredCollector->UTSC(Item).CollRoughness = Material::SurfaceRoughness::VerySmooth;
+            }
 
             // Was it set?
             if (state.dataTranspiredCollector->UTSC(Item).CollRoughness == Material::SurfaceRoughness::Invalid) {
@@ -619,7 +635,9 @@ namespace TranspiredCollector {
                 state.dataTranspiredCollector->UTSC(Item).SurfPtrs(ThisSurf) = Found;
             }
 
-            if (ErrorsFound) continue; // previous inner do loop may have detected problems that need to be cycle'd again to avoid crash
+            if (ErrorsFound) {
+                continue; // previous inner do loop may have detected problems that need to be cycle'd again to avoid crash
+            }
 
             // now that we should have all the surfaces, do some preparations and checks.
 
@@ -1230,7 +1248,9 @@ namespace TranspiredCollector {
             HcWind = 0.0;
         }
 
-        if (state.dataEnvrn->IsRain) HcWind = 1000.0;
+        if (state.dataEnvrn->IsRain) {
+            HcWind = 1000.0;
+        }
 
         HXeff = 0.0; // init
 
@@ -1844,7 +1864,9 @@ namespace TranspiredCollector {
         HExtARR.deallocate();
         HSrdSurfARR.deallocate();
 
-        if (state.dataEnvrn->IsRain) HExt = 1000.0;
+        if (state.dataEnvrn->IsRain) {
+            HExt = 1000.0;
+        }
 
         // temperature of underlying surface, area-weighted average
         Real64 Tso =
@@ -1892,12 +1914,24 @@ namespace TranspiredCollector {
 
         TaGap = (HcPlen * A * Tso + MdotVent * CpAir * Tamb + HcPlen * A * TsBaffle) / (HcPlen * A + MdotVent * CpAir + HcPlen * A);
 
-        if (present(HcGapRpt)) HcGapRpt = HcPlen;
-        if (present(HrGapRpt)) HrGapRpt = HrPlen;
-        if (present(IscRpt)) IscRpt = Isc;
-        if (present(MdotVentRpt)) MdotVentRpt = MdotVent;
-        if (present(VdotWindRpt)) VdotWindRpt = VdotWind;
-        if (present(VdotBuoyRpt)) VdotBuoyRpt = VdotThermal;
+        if (present(HcGapRpt)) {
+            HcGapRpt = HcPlen;
+        }
+        if (present(HrGapRpt)) {
+            HrGapRpt = HrPlen;
+        }
+        if (present(IscRpt)) {
+            IscRpt = Isc;
+        }
+        if (present(MdotVentRpt)) {
+            MdotVentRpt = MdotVent;
+        }
+        if (present(VdotWindRpt)) {
+            VdotWindRpt = VdotWind;
+        }
+        if (present(VdotBuoyRpt)) {
+            VdotBuoyRpt = VdotThermal;
+        }
     }
 
     //****************************************************************************
@@ -1938,8 +1972,12 @@ namespace TranspiredCollector {
         if (Ra <= 1.0e4) {
             gnu901 = 1.0 + 1.7596678e-10 * std::pow(Ra, 2.2984755); // eq. 51
         }
-        if (Ra > 1.0e4 && Ra <= 5.0e4) gnu901 = 0.028154 * std::pow(Ra, 0.4134); // eq. 50
-        if (Ra > 5.0e4) gnu901 = 0.0673838 * std::pow(Ra, 1.0 / 3.0);            // eq. 49
+        if (Ra > 1.0e4 && Ra <= 5.0e4) {
+            gnu901 = 0.028154 * std::pow(Ra, 0.4134); // eq. 50
+        }
+        if (Ra > 5.0e4) {
+            gnu901 = 0.0673838 * std::pow(Ra, 1.0 / 3.0); // eq. 49
+        }
 
         Real64 gnu902 = 0.242 * std::pow(Ra / AspRat, 0.272); // eq. 52
         Real64 gnu90 = max(gnu901, gnu902);

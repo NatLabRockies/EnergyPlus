@@ -119,7 +119,9 @@ GasAbsorberSpecs *GasAbsorberSpecs::factory(EnergyPlusData &state, std::string c
     auto thisObj = std::find_if(state.dataChillerGasAbsorption->GasAbsorber.begin(),
                                 state.dataChillerGasAbsorption->GasAbsorber.end(),
                                 [&objectName](const GasAbsorberSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataChillerGasAbsorption->GasAbsorber.end()) return thisObj;
+    if (thisObj != state.dataChillerGasAbsorption->GasAbsorber.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("LocalGasAbsorberFactory: Error getting inputs for comp named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -287,7 +289,9 @@ void GetGasAbsorberInput(EnergyPlusData &state)
         Get_ErrorsFound = true;
     }
 
-    if (allocated(state.dataChillerGasAbsorption->GasAbsorber)) return;
+    if (allocated(state.dataChillerGasAbsorption->GasAbsorber)) {
+        return;
+    }
 
     // ALLOCATE ARRAYS
     state.dataChillerGasAbsorption->GasAbsorber.allocate(NumGasAbsorbers);
@@ -1067,7 +1071,9 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
     Real64 tmpHeatRecVolFlowRate = this->HeatVolFlowRate;
 
     int PltSizCondNum = 0; // Plant Sizing index for condenser loop
-    if (this->isWaterCooled) PltSizCondNum = this->CDplantLoc.loop->PlantSizNum;
+    if (this->isWaterCooled) {
+        PltSizCondNum = this->CDplantLoc.loop->PlantSizNum;
+    }
     int PltSizHeatNum = this->HWplantLoc.loop->PlantSizNum;
     int PltSizCoolNum = this->CWplantLoc.loop->PlantSizNum;
 
@@ -1077,9 +1083,13 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
             rho = this->CWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
             tmpNomCap = Cp * rho * state.dataSize->PlantSizData(PltSizCoolNum).DeltaT * state.dataSize->PlantSizData(PltSizCoolNum).DesVolFlowRate *
                         this->SizFac;
-            if (!this->NomCoolingCapWasAutoSized) tmpNomCap = this->NomCoolingCap;
+            if (!this->NomCoolingCapWasAutoSized) {
+                tmpNomCap = this->NomCoolingCap;
+            }
         } else {
-            if (this->NomCoolingCapWasAutoSized) tmpNomCap = 0.0;
+            if (this->NomCoolingCapWasAutoSized) {
+                tmpNomCap = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->NomCoolingCapWasAutoSized) {
@@ -1140,9 +1150,13 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
     if (PltSizCoolNum > 0) {
         if (state.dataSize->PlantSizData(PltSizCoolNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizCoolNum).DesVolFlowRate * this->SizFac;
-            if (!this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = this->EvapVolFlowRate;
+            if (!this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = this->EvapVolFlowRate;
+            }
         } else {
-            if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+            if (this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->EvapVolFlowRateWasAutoSized) {
@@ -1216,10 +1230,14 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
     if (PltSizHeatNum > 0) {
         if (state.dataSize->PlantSizData(PltSizHeatNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpHeatRecVolFlowRate = state.dataSize->PlantSizData(PltSizHeatNum).DesVolFlowRate * this->SizFac;
-            if (!this->HeatVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = this->HeatVolFlowRate;
+            if (!this->HeatVolFlowRateWasAutoSized) {
+                tmpHeatRecVolFlowRate = this->HeatVolFlowRate;
+            }
 
         } else {
-            if (this->HeatVolFlowRateWasAutoSized) tmpHeatRecVolFlowRate = 0.0;
+            if (this->HeatVolFlowRateWasAutoSized) {
+                tmpHeatRecVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->HeatVolFlowRateWasAutoSized) {
@@ -1297,10 +1315,14 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
             Cp = this->CDplantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondReturn, RoutineName);
             rho = this->CDplantLoc.loop->glycol->getDensity(state, this->TempDesCondReturn, RoutineName);
             tmpCondVolFlowRate = tmpNomCap * (1.0 + this->FuelCoolRatio) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
-            if (!this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = this->CondVolFlowRate;
+            if (!this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = this->CondVolFlowRate;
+            }
             // IF (PlantFirstSizesOkayToFinalize) GasAbsorber(ChillNum)%CondVolFlowRate = tmpCondVolFlowRate
         } else {
-            if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+            if (this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = 0.0;
+            }
             // IF (PlantFirstSizesOkayToFinalize) GasAbsorber(ChillNum)%CondVolFlowRate = tmpCondVolFlowRate
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1371,7 +1393,9 @@ void GasAbsorberSpecs::size(EnergyPlusData &state)
     }
 
     // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
-    if (this->isWaterCooled) PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondReturnNodeNum, tmpCondVolFlowRate);
+    if (this->isWaterCooled) {
+        PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondReturnNodeNum, tmpCondVolFlowRate);
+    }
 
     if (ErrorsFound) {
         ShowFatalError(state, "Preceding sizing errors cause program termination");
@@ -1589,7 +1613,9 @@ void GasAbsorberSpecs::calculateChiller(EnergyPlusData &state, Real64 &MyLoad)
             lCoolingLoad = std::abs(MyLoad);
             if (ChillDeltaTemp != 0.0) {
                 lChillWaterMassFlowRate = std::abs(lCoolingLoad / (Cp_CW * ChillDeltaTemp));
-                if (lChillWaterMassFlowRate - lChillWaterMassflowratemax > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+                if (lChillWaterMassFlowRate - lChillWaterMassflowratemax > DataBranchAirLoopPlant::MassFlowTolerance) {
+                    this->PossibleSubcooling = true;
+                }
 
                 PlantUtilities::SetComponentFlowRate(
                     state, lChillWaterMassFlowRate, this->ChillReturnNodeNum, this->ChillSupplyNodeNum, this->CWplantLoc);

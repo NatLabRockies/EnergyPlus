@@ -442,8 +442,9 @@ namespace Material {
 
         void interpSlatAng(BlindBmDf const &t1, BlindBmDf const &t2, Real64 interpFac)
         {
-            for (int i = 0; i < ProfAngs; ++i)
+            for (int i = 0; i < ProfAngs; ++i) {
                 Bm[i].interpSlatAng(t1.Bm[i], t2.Bm[i], interpFac);
+            }
             Df.interpSlatAng(t1.Df, t2.Df, interpFac);
         }
     };

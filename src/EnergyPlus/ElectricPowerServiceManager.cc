@@ -82,6 +82,14 @@
 #include <EnergyPlus/WindTurbine.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
+#ifdef DEBUG_ARITHM_GCC_OR_CLANG
+#    include <EnergyPlus/fenv_missing.h>
+#endif
+
+#ifdef DEBUG_ARITHM_MSVC
+#    include <cfloat>
+#endif
+
 namespace EnergyPlus {
 
 void createFacilityElectricPowerServiceObject(const EnergyPlusData &state)
@@ -122,7 +130,9 @@ void ElectricPowerServiceManager::manageElectricPowerService(
         reinitAtBeginEnvironment();
         newEnvironmentFlag_ = false;
     }
-    if (!state.dataGlobal->BeginEnvrnFlag) newEnvironmentFlag_ = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        newEnvironmentFlag_ = true;
+    }
 
     // retrieve data from meters for demand and production
     totalBldgElecDemand_ =
@@ -493,16 +503,24 @@ void ElectricPowerServiceManager::updateWholeBuildingRecords(EnergyPlusData &sta
     // Report the Total Electric Power Purchased [W], If negative then there is extra power to be sold or stored.
     electPurchRate_ = totalElectricDemand_ - electProdRate_;
     // Check this value against a tolerance to aid in reporting.
-    if (std::abs(electPurchRate_) < 0.0001) electPurchRate_ = 0.0;
-    if (electPurchRate_ < 0.0) electPurchRate_ = 0.0; // don't want negative purchased...
+    if (std::abs(electPurchRate_) < 0.0001) {
+        electPurchRate_ = 0.0;
+    }
+    if (electPurchRate_ < 0.0) {
+        electPurchRate_ = 0.0; // don't want negative purchased...
+    }
 
     // Report the Total Electric Energy Purchased [J]
     electricityPurch_ = electPurchRate_ * state.dataHVACGlobal->TimeStepSysSec;
 
     // report the total electric surplus....
     electSurplusRate_ = electProdRate_ - totalElectricDemand_;
-    if (std::abs(electSurplusRate_) < 0.0001) electSurplusRate_ = 0.0;
-    if (electSurplusRate_ < 0.0) electSurplusRate_ = 0.0; // don't want negative surplus
+    if (std::abs(electSurplusRate_) < 0.0001) {
+        electSurplusRate_ = 0.0;
+    }
+    if (electSurplusRate_ < 0.0) {
+        electSurplusRate_ = 0.0; // don't want negative surplus
+    }
 
     electricitySurplus_ = electSurplusRate_ * state.dataHVACGlobal->TimeStepSysSec;
 
@@ -898,7 +916,9 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
 
         // Calculate the number of generators in list
         numGenerators = numNums / 2; // note IDD needs Min Fields = 6
-        if (mod((numAlphas - 1 + numNums), 5) != 0) ++numGenerators;
+        if (mod((numAlphas - 1 + numNums), 5) != 0) {
+            ++numGenerators;
+        }
         int alphaCount = 2;
         for (int genCount = 1; genCount <= numGenerators; ++genCount) {
             // call constructor in place
@@ -1384,7 +1404,7 @@ void ElectPowerLoadCenter::dispatchGenerators(EnergyPlusData &state,
             }
             remainingLoad -= g->electProdRate;             // Update remaining load to be met by this load center
             remainingWholePowerDemand -= g->electProdRate; // Update whole building remaining load
-        }                                                  // end for
+        } // end for
         break;
     }
     case GeneratorOpScheme::ThermalFollow: {
@@ -1428,8 +1448,8 @@ void ElectPowerLoadCenter::dispatchGenerators(EnergyPlusData &state,
                 state, g->onThisTimestep, g->powerRequestThisTimestep, firstHVACIteration, g->electProdRate, g->thermProdRate);
 
             if (g->eMSRequestOn) {
-                totalThermalPowerRequest_ += (max(g->eMSPowerRequest, 0.0)) * g->nominalThermElectRatio;
-                totalPowerRequest_ += (max(g->eMSPowerRequest, 0.0));
+                totalThermalPowerRequest_ += max(g->eMSPowerRequest, 0.0) * g->nominalThermElectRatio;
+                totalPowerRequest_ += max(g->eMSPowerRequest, 0.0);
             } else {
                 if (totalThermalPowerRequest_ < loadCenterThermalLoad && g->powerRequestThisTimestep > 0.0) {
                     Real64 excessThermalPowerRequest = totalThermalPowerRequest_ + g->maxPowerOut * g->nominalThermElectRatio - loadCenterThermalLoad;
@@ -1492,7 +1512,7 @@ void ElectPowerLoadCenter::dispatchGenerators(EnergyPlusData &state,
                 state, g->onThisTimestep, g->powerRequestThisTimestep, firstHVACIteration, g->electProdRate, g->thermProdRate);
 
             if (g->eMSRequestOn) {
-                totalThermalPowerRequest_ += (max(g->eMSPowerRequest, 0.0)) * g->nominalThermElectRatio;
+                totalThermalPowerRequest_ += max(g->eMSPowerRequest, 0.0) * g->nominalThermElectRatio;
                 totalPowerRequest_ += (max(g->eMSPowerRequest, 0.0));
             } else {
                 if (totalThermalPowerRequest_ < loadCenterThermalLoad && g->powerRequestThisTimestep > 0.0) {
@@ -2015,7 +2035,9 @@ Real64 ElectPowerLoadCenter::calcLoadCenterThermalLoad(EnergyPlusData &state)
         for (auto &g : elecGenCntrlObj) {
             bool plantNotFound = false;
             PlantUtilities::ScanPlantLoopsForObject(state, g->compPlantName, g->compPlantType, g->cogenLocation, plantNotFound, _, _, _, _, _);
-            if (!plantNotFound) g->plantInfoFound = true;
+            if (!plantNotFound) {
+                g->plantInfoFound = true;
+            }
         }
         myCoGenSetupFlag_ = false;
     } // cogen setup
@@ -2247,7 +2269,9 @@ void GeneratorController::simGeneratorGetPowerOutput(EnergyPlusData &state,
         // simulate
         dynamic_cast<MicroCHPElectricGenerator::MicroCHPDataStruct *>(thisMCHP)->InitMicroCHPNoNormalizeGenerators(state);
 
-        if (!state.dataPlnt->PlantFirstSizeCompleted) break;
+        if (!state.dataPlnt->PlantFirstSizeCompleted) {
+            break;
+        }
 
         dynamic_cast<MicroCHPElectricGenerator::MicroCHPDataStruct *>(thisMCHP)->CalcMicroCHPNoNormalizeGeneratorModel(
             state, runFlag, false, myElecLoadRequest, DataPrecisionGlobals::constant_zero);
@@ -2741,7 +2765,9 @@ void DCtoACInverter::calcEfficiency(EnergyPlusData &state)
                 ac = ratedPower_;
             }
             // make sure no negative AC values (no parasitic nighttime losses calculated)
-            if (ac < 0) ac = 0;
+            if (ac < 0) {
+                ac = 0;
+            }
             efficiency_ = ac / dCPowerIn_;
         } else {
             efficiency_ = 1.0; // Set to a non-zero reasonable value (to avoid divide by zero error)
@@ -3254,8 +3280,9 @@ ElectricStorage::ElectricStorage( // main constructor
             maxChargeRate_ = state.dataIPShortCut->rNumericArgs(13);
 
             // Check charging and discharging curves to make sure charging curve always gives a higher voltage (#8817)
-            if (!errorsFound && chargeCurve_ != nullptr && dischargeCurve_ != nullptr)
+            if (!errorsFound && chargeCurve_ != nullptr && dischargeCurve_ != nullptr) {
                 checkChargeDischargeVoltageCurves(state, name_, chargedOCV_, dischargedOCV_, chargeCurve_, dischargeCurve_);
+            }
 
             break;
         }
@@ -4101,6 +4128,22 @@ void ElectricStorage::simulateLiIonNmcBatteryModel(EnergyPlusData &state,
                                                    Real64 const controlSOCMinFracLimit)
 {
 
+// Disable floating point exceptions around SSC battery calculations, which uses quiet_NaN in particular
+#ifdef DEBUG_ARITHM_GCC_OR_CLANG
+    int old_excepts = fegetexcept();
+    fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
+
+#ifdef DEBUG_ARITHM_MSVC
+    unsigned int ori_fpcntrl = 0;
+    _controlfp_s(&ori_fpcntrl, 0, 0);
+
+    // Temporarily disable traps, as MSVC does it reversed compared to GCC,
+    // you need to turn ON the bits for the exceptions you want to mask
+    unsigned int fpcntrl = ori_fpcntrl | (_EM_ZERODIVIDE | _EM_INVALID | _EM_OVERFLOW);
+    _controlfp_s(&fpcntrl, fpcntrl, _MCW_EM);
+#endif
+
     // Copy the battery state from the end of last timestep
     battery_state battState = *ssc_lastBatteryState_;
     ssc_battery_->set_state(battState, ssc_lastBatteryTimeStep_);
@@ -4174,6 +4217,14 @@ void ElectricStorage::simulateLiIonNmcBatteryModel(EnergyPlusData &state,
         qdotConvZone_ = (1.0 - zoneRadFract_) * thermLossRate_;
         qdotRadZone_ = (zoneRadFract_)*thermLossRate_;
     }
+
+#ifdef DEBUG_ARITHM_GCC_OR_CLANG
+    feenableexcept(old_excepts);
+#endif
+
+#ifdef DEBUG_ARITHM_MSVC
+    _controlfp_s(nullptr, ori_fpcntrl, _MCW_EM);
+#endif
 }
 
 Real64 ElectricStorage::drawnPower() const
@@ -4338,7 +4389,7 @@ void ElectricStorage::rainflow(int const numbin,           // numbin = constant 
             shift(B1, count - 1, count, B1); // Get rid of (count-1) row in B1
             shift(X, count, count, X);
             --count; // If the value keep increasing or decreasing, get rid of the middle point.
-        }            // Only valley and peak will be stored in the matrix, B1
+        } // Only valley and peak will be stored in the matrix, B1
 
         if ((count == 3) && (std::abs(X[2]) <= std::abs(X[3]))) {
             //  This means the starting point is included in X(2), a half cycle is counted according to the rain flow
@@ -4372,8 +4423,10 @@ void ElectricStorage::rainflow(int const numbin,           // numbin = constant 
             shift(X, count, count, X);     // Get rid of two data points one by one
             shift(X, count - 1, count, X); // Delete one point
 
-            count -= 2;           // If one cycle is counted, two data points are deleted.
-            if (count < 4) break; // When only three data points exists, one cycle cannot be counted.
+            count -= 2; // If one cycle is counted, two data points are deleted.
+            if (count < 4) {
+                break; // When only three data points exists, one cycle cannot be counted.
+            }
         }
     }
 
@@ -4741,7 +4794,9 @@ void ElectricTransformer::manageTransformers(EnergyPlusData &state, Real64 const
             if (specialMeter_[meterNum]) {
                 elecLoad = elecLoad - loadLossRate_ - noLoadLossRate_;
 
-                if (elecLoad < 0) elecLoad = 0.0; // Essential check.
+                if (elecLoad < 0) {
+                    elecLoad = 0.0; // Essential check.
+                }
             }
         }
 
@@ -4835,7 +4890,9 @@ void ElectricTransformer::manageTransformers(EnergyPlusData &state, Real64 const
     case TransformerUse::PowerBetweenLoadCenterAndBldg: {
         powerOut_ = elecLoad - totalLossRate_;
 
-        if (powerOut_ < 0) powerOut_ = 0.0;
+        if (powerOut_ < 0) {
+            powerOut_ = 0.0;
+        }
 
         powerConversionMeteredLosses_ = -1.0 * totalLossRate_ * state.dataHVACGlobal->TimeStepSysSec;
 

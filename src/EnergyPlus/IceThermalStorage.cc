@@ -178,7 +178,9 @@ namespace IceThermalStorage {
         // charge, for hot storage, this means the storage should discharge.
         if (thisComp.CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
             Real64 localCurLoad = thisComp.EquipDemand;
-            if (localCurLoad != 0) RunFlag = true;
+            if (localCurLoad != 0) {
+                RunFlag = true;
+            }
         }
 
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag) {
@@ -439,7 +441,9 @@ namespace IceThermalStorage {
                 // Updated outlet temperature from the tank [C]
                 Real64 ToutNew = TempIn + (ActualLoad / (this->MassFlowRate * Cp));
                 // Again, the outlet temperature cannot be above the freezing temperature (factoring in the tolerance)
-                if (ToutNew > (this->FreezingTemp - DeltaTofMin)) ToutNew = this->FreezingTemp - DeltaTofMin;
+                if (ToutNew > (this->FreezingTemp - DeltaTofMin)) {
+                    ToutNew = this->FreezingTemp - DeltaTofMin;
+                }
 
                 if (ActualLoad > std::abs(LocalLoad)) {
                     // We have more than enough capacity to meet the load so no need to iterate to find a solution
@@ -477,7 +481,9 @@ namespace IceThermalStorage {
                             ActualLoad = Qstar * this->NomCapacity / this->CurveFitTimeStep;
                             ToutNew = TempIn + (ActualLoad / (this->MassFlowRate * Cp));
                             // Again, the outlet temperature cannot be above the freezing temperature (factoring in the tolerance)
-                            if (ToutNew < (this->FreezingTemp - DeltaTofMin)) ToutNew = this->FreezingTemp - DeltaTofMin;
+                            if (ToutNew < (this->FreezingTemp - DeltaTofMin)) {
+                                ToutNew = this->FreezingTemp - DeltaTofMin;
+                            }
                             ++IterNum;
 
                         } else {
@@ -558,7 +564,9 @@ namespace IceThermalStorage {
 
                 // Find initial guess at average fraction charged during time step
                 Real64 ChargeFrac = LocalLoad * state.dataHVACGlobal->TimeStepSys / this->NomCapacity;
-                if ((this->IceFracRemaining - ChargeFrac) < 0.0) ChargeFrac = this->IceFracRemaining;
+                if ((this->IceFracRemaining - ChargeFrac) < 0.0) {
+                    ChargeFrac = this->IceFracRemaining;
+                }
                 Real64 AvgFracCharged = this->IceFracRemaining - (ChargeFrac / 2.0);
 
                 // Current load on the ice storage unit [non-dimensional]
@@ -571,7 +579,9 @@ namespace IceThermalStorage {
                 // Updated outlet temperature from the tank [C]
                 Real64 ToutNew = TempIn - (ActualLoad / (this->MassFlowRate * Cp));
                 // Again, the outlet temperature cannot be below the freezing temperature (factoring in the tolerance)
-                if (ToutNew < (this->FreezingTemp + DeltaTofMin)) ToutNew = this->FreezingTemp + DeltaTofMin;
+                if (ToutNew < (this->FreezingTemp + DeltaTofMin)) {
+                    ToutNew = this->FreezingTemp + DeltaTofMin;
+                }
 
                 if (ActualLoad > LocalLoad) {
                     // We have more than enough storage to meet the load so no need to iterate to find a solution
@@ -605,7 +615,9 @@ namespace IceThermalStorage {
                             ActualLoad = Qstar * this->NomCapacity / this->CurveFitTimeStep;
                             ToutNew = TempIn - (ActualLoad / (this->MassFlowRate * Cp));
                             // Again, the outlet temperature cannot be below the freezing temperature (factoring in the tolerance)
-                            if (ToutNew < (this->FreezingTemp + DeltaTofMin)) ToutNew = this->FreezingTemp + DeltaTofMin;
+                            if (ToutNew < (this->FreezingTemp + DeltaTofMin)) {
+                                ToutNew = this->FreezingTemp + DeltaTofMin;
+                            }
                             ++IterNum;
 
                         } else {
@@ -1337,7 +1349,9 @@ namespace IceThermalStorage {
 
             this->MyEnvrnFlag2 = false;
         }
-        if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlag2 = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->MyEnvrnFlag2 = true;
+        }
 
         // Initializations that are done every iteration
         // Make sure all of the reporting variables are always reset at the start of any iteration
@@ -1403,7 +1417,9 @@ namespace IceThermalStorage {
             this->MyEnvrnFlag2 = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlag2 = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->MyEnvrnFlag2 = true;
+        }
     }
 
     //******************************************************************************
@@ -1823,8 +1839,12 @@ namespace IceThermalStorage {
         Real64 DeltaTif = std::abs(Tin - Tfr);  // Inlet to freezing temperature difference
         Real64 DeltaTof = std::abs(Tout - Tfr); // Outlet to freezing temperature difference
 
-        if (DeltaTif < DeltaTifMin) DeltaTif = DeltaTifMin;
-        if (DeltaTof < DeltaTofMin) DeltaTof = DeltaTofMin;
+        if (DeltaTif < DeltaTifMin) {
+            DeltaTif = DeltaTifMin;
+        }
+        if (DeltaTof < DeltaTofMin) {
+            DeltaTof = DeltaTofMin;
+        }
 
         CalcDetIceStorLMTDstar = (DeltaTio / std::log(DeltaTif / DeltaTof)) / Tnom;
 
@@ -1928,14 +1948,22 @@ namespace IceThermalStorage {
 
         for (auto &thisITS : state.dataIceThermalStorage->SimpleIceStorage) {
             thisITS.IceFracRemain += thisITS.Urate * state.dataHVACGlobal->TimeStepSys;
-            if (thisITS.IceFracRemain <= 0.001) thisITS.IceFracRemain = 0.0;
-            if (thisITS.IceFracRemain > 1.0) thisITS.IceFracRemain = 1.0;
+            if (thisITS.IceFracRemain <= 0.001) {
+                thisITS.IceFracRemain = 0.0;
+            }
+            if (thisITS.IceFracRemain > 1.0) {
+                thisITS.IceFracRemain = 1.0;
+            }
         }
 
         for (auto &thisITS : state.dataIceThermalStorage->DetailedIceStorage) {
             thisITS.IceFracRemaining += thisITS.IceFracChange - (thisITS.TankLossCoeff * state.dataHVACGlobal->TimeStepSys);
-            if (thisITS.IceFracRemaining < 0.001) thisITS.IceFracRemaining = 0.0;
-            if (thisITS.IceFracRemaining > 1.000) thisITS.IceFracRemaining = 1.0;
+            if (thisITS.IceFracRemaining < 0.001) {
+                thisITS.IceFracRemaining = 0.0;
+            }
+            if (thisITS.IceFracRemaining > 1.000) {
+                thisITS.IceFracRemaining = 1.0;
+            }
             // Reset the ice on the coil to zero for inside melt whenever discharging takes place.
             // This assumes that any remaining ice floats away from the coil and resettles perfectly.
             // While this is not exactly what happens and it is possible theoretically to have multiple
@@ -1947,7 +1975,9 @@ namespace IceThermalStorage {
                     // Assume loss term does not impact ice on the coil but what is remaining
                     thisITS.IceFracOnCoil += thisITS.IceFracChange;
                     // If the ice remaining has run out because of tank losses, reset ice fraction on coil so that it keeps track of losses
-                    if (thisITS.IceFracOnCoil > thisITS.IceFracRemaining) thisITS.IceFracOnCoil = thisITS.IceFracRemaining;
+                    if (thisITS.IceFracOnCoil > thisITS.IceFracRemaining) {
+                        thisITS.IceFracOnCoil = thisITS.IceFracRemaining;
+                    }
                 }
             } else { // Outside melt system so IceFracOnCoil is always the same as IceFracRemaining (needs to be done for reporting only)
                 thisITS.IceFracOnCoil = thisITS.IceFracRemaining;

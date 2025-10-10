@@ -192,7 +192,9 @@ namespace RoomAir {
         NumShadesDown = 0.0;
         for (int Ctd = state.dataRoomAir->PosZ_Window(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Window(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Window(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
             auto const &surf = state.dataSurface->Surface(SurfNum);
             if (surf.ExtBoundCond == ExternalEnvironment || surf.ExtBoundCond == OtherSideCoefNoCalcExt ||
                 surf.ExtBoundCond == OtherSideCoefCalcExt || surf.ExtBoundCond == OtherSideCondModeledExt) {
@@ -233,14 +235,18 @@ namespace RoomAir {
 
         Real64 NumberOfOccupants = 0.0;
         for (auto const &people : state.dataHeatBal->People) {
-            if (people.ZonePtr == ZoneNum) NumberOfOccupants += people.NumberOfPeople;
+            if (people.ZonePtr == ZoneNum) {
+                NumberOfOccupants += people.NumberOfPeople;
+            }
         }
 
         if (model == RoomAirModel::UFADExt) {
             // calculate total window width in zone
             for (int Ctd = state.dataRoomAir->PosZ_Window(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Window(ZoneNum).end; ++Ctd) {
                 int SurfNum = state.dataRoomAir->APos_Window(Ctd);
-                if (SurfNum == 0) continue;
+                if (SurfNum == 0) {
+                    continue;
+                }
                 auto &surf = state.dataSurface->Surface(SurfNum);
                 if (surf.ExtBoundCond == ExternalEnvironment || surf.ExtBoundCond == OtherSideCoefNoCalcExt ||
                     surf.ExtBoundCond == OtherSideCoefCalcExt || surf.ExtBoundCond == OtherSideCondModeledExt) {
@@ -400,7 +406,9 @@ namespace RoomAir {
         using namespace DataHeatBalance;
 
         // Is the air flow model for this zone set to UCSDDV Displacement Ventilation?
-        if (!state.dataRoomAir->IsZoneUFAD(ZoneNum)) return;
+        if (!state.dataRoomAir->IsZoneUFAD(ZoneNum)) {
+            return;
+        }
 
         ufadCC.HAT_MX = 0.0;    // HAT_MX Convection Coefficient times Area times Temperature for the upper subzone
         ufadCC.HAT_MXWin = 0.0; // HAT_MX Convection Coefficient times Area times Temperature for the upper subzone (windows only)
@@ -421,7 +429,9 @@ namespace RoomAir {
         // WALL Hc, HA and HAT calculation
         for (int Ctd = state.dataRoomAir->PosZ_Wall(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Wall(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Wall(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
 
             auto &surf = state.dataSurface->Surface(SurfNum);
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -480,7 +490,9 @@ namespace RoomAir {
         // WINDOW Hc, HA and HAT CALCULATION
         for (int Ctd = state.dataRoomAir->PosZ_Window(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Window(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Window(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
 
             auto &surf = state.dataSurface->Surface(SurfNum);
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -554,7 +566,9 @@ namespace RoomAir {
         // DOOR Hc, HA and HAT CALCULATION
         for (int Ctd = state.dataRoomAir->PosZ_Door(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Door(ZoneNum).end; ++Ctd) { // DOOR
             int SurfNum = state.dataRoomAir->APos_Door(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
             auto &surf = state.dataSurface->Surface(SurfNum);
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
             state.dataSurface->SurfTAirRefRpt(SurfNum) = DataSurfaces::SurfTAirRefReportVals[state.dataSurface->SurfTAirRef(SurfNum)];
@@ -603,7 +617,9 @@ namespace RoomAir {
         state.dataUFADManager->HeightIntMass = min(state.dataUFADManager->HeightIntMassDefault, (zoneCeilingHeight2 - zoneCeilingHeight1));
         for (int Ctd = state.dataRoomAir->PosZ_Internal(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Internal(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Internal(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
 
             auto const &surf = state.dataSurface->Surface(SurfNum);
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -642,7 +658,9 @@ namespace RoomAir {
         // CEILING Hc, HA and HAT CALCULATION
         for (int Ctd = state.dataRoomAir->PosZ_Ceiling(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Ceiling(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Ceiling(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
             auto const &surf = state.dataSurface->Surface(SurfNum);
 
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -658,7 +676,9 @@ namespace RoomAir {
         // FLOOR Hc, HA and HAT CALCULATION
         for (int Ctd = state.dataRoomAir->PosZ_Floor(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Floor(ZoneNum).end; ++Ctd) {
             int SurfNum = state.dataRoomAir->APos_Floor(Ctd);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
             auto const &surf = state.dataSurface->Surface(SurfNum);
 
             state.dataSurface->SurfTAirRef(SurfNum) = DataSurfaces::RefAirTemp::AdjacentAirTemp;
@@ -894,7 +914,9 @@ namespace RoomAir {
                     NumberOfPlumes = 1.0;
                     NumDiffusersPerPlume = 1.0;
                 }
-                if (PowerInPlumes <= 0.0) break;
+                if (PowerInPlumes <= 0.0) {
+                    break;
+                }
                 Gamma = std::pow(TotSysFlow * std::cos(ThrowAngle), 1.5) /
                         (NumberOfPlumes * std::pow(NumDiffusersPerPlume * DiffArea, 1.25) * std::sqrt(0.0281 * 0.001 * PowerInPlumes));
                 if (zoneU.CalcTransHeight) {
@@ -1339,7 +1361,9 @@ namespace RoomAir {
                                 ufadCC.HA_MX * state.dataRoomAir->ZTMX(ZoneNum);
                 // NumberOfPlumes = PowerInPlumes / PowerPerPlume
                 NumberOfPlumes = 1.0;
-                if (PowerInPlumes <= 0.0) break;
+                if (PowerInPlumes <= 0.0) {
+                    break;
+                }
                 if (zoneU.WinWidth > 0.0) { // use exterior zone formula
                     PowerInPlumesPerMeter = PowerInPlumes / zoneU.WinWidth;
                     Gamma =

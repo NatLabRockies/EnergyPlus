@@ -85,6 +85,9 @@ namespace GroundTemp {
         std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
         const int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
+        thisModel->modelType = modelType;
+        thisModel->Name = objectName;
+
         for (int modelNum = 1; modelNum <= numCurrModels; ++modelNum) {
 
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
@@ -96,11 +99,8 @@ namespace GroundTemp {
                                                                      NumNums,
                                                                      IOStat);
 
-            if (objectName == state.dataIPShortCut->cAlphaArgs(1)) {
-                // Read input into object here
-
-                thisModel->Name = state.dataIPShortCut->cAlphaArgs(1);
-                thisModel->modelType = modelType;
+            if (thisModel->Name == state.dataIPShortCut->cAlphaArgs(1)) {
+                // Read remaining input into object here
                 thisModel->groundThermalDiffusivity = state.dataIPShortCut->rNumericArgs(1) /
                                                       (state.dataIPShortCut->rNumericArgs(2) * state.dataIPShortCut->rNumericArgs(3)) *
                                                       Constant::rSecsInDay;

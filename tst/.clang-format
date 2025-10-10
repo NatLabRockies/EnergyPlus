@@ -1,40 +1,42 @@
-# Commented out lines are those which are not yet valid
-# in clang-3.8 which ships with Ubuntu
-
-IndentWidth: 4
+---
+Standard: c++17
 AccessModifierOffset: -4
-ColumnLimit: 150
-CommentPragmas: '^ IWYU pragma:'
-UseTab: Never
-SpacesInParentheses: false
-# SpaceBeforeParens: 'Control'
-SpaceInEmptyParentheses: false
-SpacesInAngles: false
-# CompactNamespaces: false
-NamespaceIndentation: 'Inner'
-# FixNamespaceComments: true
-BreakBeforeBraces: 'Custom'
-# BreakConstructorInitializers: 'AfterColon'
-AllowShortFunctionsOnASingleLine: 'None'
+AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: true
-AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
 BinPackArguments: false
 BinPackParameters: false
-Standard: Cpp11
 BraceWrapping:
+  AfterCaseLabel: false
   AfterClass: true
-  AfterControlStatement: false
+  AfterControlStatement: Never
   AfterEnum: true
+  AfterExternBlock: false  # Original config wanted to use "true"
   AfterFunction: true
   AfterNamespace: false
   AfterStruct: true
   AfterUnion: true
-#  AfterExternBlock: true
   BeforeCatch: false
   BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
   IndentBraces: false
-#  SplitEmptyFunction: true
-#  SplitEmptyRecord: true
-#  SplitEmptyNamespace: true
-
+  SplitEmptyFunction: true
+  SplitEmptyNamespace: true
+  SplitEmptyRecord: true
+BreakBeforeBraces: Custom
+BreakConstructorInitializers: BeforeColon  # Original config wanted to use "AfterColon"
+ColumnLimit: 150
+CommentPragmas: '^ IWYU pragma:'
+CompactNamespaces: false
+FixNamespaceComments: true
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+InsertBraces: true
+NamespaceIndentation: Inner
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInAngles: Never
+SpacesInParentheses: false
+UseTab: Never

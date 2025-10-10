@@ -166,7 +166,9 @@ namespace HeatBalanceManager {
         // Get the heat balance input at the beginning of the simulation only
         if (state.dataHeatBalMgr->ManageHeatBalanceGetInputFlag) {
             GetHeatBalanceInput(state); // Obtains heat balance related parameters from input file
-            if (state.dataGlobal->DoingSizing) state.dataHeatBal->doSpaceHeatBalance = state.dataHeatBal->doSpaceHeatBalanceSizing;
+            if (state.dataGlobal->DoingSizing) {
+                state.dataHeatBal->doSpaceHeatBalance = state.dataHeatBal->doSpaceHeatBalanceSizing;
+            }
 
             // Surface octree setup
             //  The surface octree holds live references to surfaces so it must be updated
@@ -177,8 +179,9 @@ namespace HeatBalanceManager {
                 }
             }
 
-            for (auto &surface : state.dataSurface->Surface)
+            for (auto &surface : state.dataSurface->Surface) {
                 surface.set_computed_geometry(); // Set up extra surface geometry info for PierceSurface
+            }
 
             state.dataHeatBalMgr->ManageHeatBalanceGetInputFlag = false;
         }
@@ -366,7 +369,9 @@ namespace HeatBalanceManager {
                 } else {
                     CNum = Util::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataConstruction->Construct);
                 }
-                if (CNum == 0) continue;
+                if (CNum == 0) {
+                    continue;
+                }
                 state.dataConstruction->Construct(CNum).IsUsed = true;
                 if (ONum == 4 || ONum == 6) {
                     // GroundHeatExchanger:Surface or EnergyManagementSystem:ConstructionIndexVariable
@@ -388,7 +393,9 @@ namespace HeatBalanceManager {
                 ShowWarningError(state, format("CheckUsedConstructions: There are {} nominally unused constructions in input.", Unused));
                 ShowContinueError(state, "Each Unused construction is shown.");
                 for (int Loop = 1; Loop <= state.dataHeatBal->TotConstructs; ++Loop) {
-                    if (state.dataConstruction->Construct(Loop).IsUsed) continue;
+                    if (state.dataConstruction->Construct(Loop).IsUsed) {
+                        continue;
+                    }
                     ShowMessage(state, format("Construction={}", state.dataConstruction->Construct(Loop).Name));
                 }
             }
@@ -1030,8 +1037,9 @@ namespace HeatBalanceManager {
                     std::string const &SELECT_CASE_var = AlphaName(3);
                     if (SELECT_CASE_var == "YES") {
                         state.dataContaminantBalance->Contaminant.GenericContamSimulation = true;
-                        if (!state.dataContaminantBalance->Contaminant.CO2Simulation)
+                        if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
                             state.dataContaminantBalance->Contaminant.SimulateContaminants = true;
+                        }
                     } else if (SELECT_CASE_var == "NO") {
                         state.dataContaminantBalance->Contaminant.GenericContamSimulation = false;
                     } else {
@@ -1129,8 +1137,9 @@ namespace HeatBalanceManager {
                                                 state.dataIPShortCut->cAlphaFieldNames(1)));
                     }
                 }
-                if (state.dataHeatBal->ZoneAirMassFlow.ZoneFlowAdjustment != DataHeatBalance::AdjustmentType::NoAdjustReturnAndMixing)
+                if (state.dataHeatBal->ZoneAirMassFlow.ZoneFlowAdjustment != DataHeatBalance::AdjustmentType::NoAdjustReturnAndMixing) {
                     state.dataHeatBal->ZoneAirMassFlow.AdjustZoneMixingFlow = true;
+                }
             }
             if (NumAlpha > 1) {
                 {
@@ -1180,8 +1189,9 @@ namespace HeatBalanceManager {
         } else {
             state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance = false;
         }
-        if (state.dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment != DataHeatBalance::InfiltrationFlow::No)
+        if (state.dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment != DataHeatBalance::InfiltrationFlow::No) {
             state.dataHeatBal->ZoneAirMassFlow.AdjustZoneInfiltrationFlow = true;
+        }
 
         constexpr const char *Format_732(
             "! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing and Return {{AdjustMixingOnly | AdjustReturnOnly | "
@@ -1278,9 +1288,15 @@ namespace HeatBalanceManager {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            if (NumNums > 0) state.dataEnvrn->SiteWindExp = NumArray(1);
-            if (NumNums > 1) state.dataEnvrn->SiteWindBLHeight = NumArray(2);
-            if (NumNums > 2) state.dataEnvrn->SiteTempGradient = NumArray(3);
+            if (NumNums > 0) {
+                state.dataEnvrn->SiteWindExp = NumArray(1);
+            }
+            if (NumNums > 1) {
+                state.dataEnvrn->SiteWindBLHeight = NumArray(2);
+            }
+            if (NumNums > 2) {
+                state.dataEnvrn->SiteTempGradient = NumArray(3);
+            }
 
         } else if (NumObjects > 1) {
             ShowSevereError(state, format("Too many {} objects, only 1 allowed.", state.dataHeatBalMgr->CurrentModuleObject));
@@ -1325,7 +1341,9 @@ namespace HeatBalanceManager {
         static constexpr std::string_view routineName = "GetConstructData";
 
         // If UniqueConstructionNames size, then input has already been gotten
-        if (state.dataHeatBalMgr->UniqueConstructNames.size()) return;
+        if (state.dataHeatBalMgr->UniqueConstructNames.size()) {
+            return;
+        }
 
         int ConstructNumAlpha;                                                   // Number of construction alpha names being passed
         int DummyNumProp;                                                        // dummy variable for properties being passed
@@ -1760,7 +1778,9 @@ namespace HeatBalanceManager {
 
             auto &thisConstruct = state.dataConstruction->Construct(ConstrNum);
             // For air boundaries, skip TypeIsAirBoundary
-            if (thisConstruct.TypeIsAirBoundary) continue;
+            if (thisConstruct.TypeIsAirBoundary) {
+                continue;
+            }
             if (state.dataHeatBal->NominalRforNominalUCalculation(ConstrNum) != 0.0) {
                 state.dataHeatBal->NominalU(ConstrNum) = 1.0 / state.dataHeatBal->NominalRforNominalUCalculation(ConstrNum);
             } else {
@@ -1861,7 +1881,9 @@ namespace HeatBalanceManager {
                 TMP = index(state.dataIPShortCut->cAlphaArgs(1), char(2));
             }
 
-            if (Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataHeatBalMgr->CurrentModuleObject, ErrorsFound)) continue;
+            if (Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataHeatBalMgr->CurrentModuleObject, ErrorsFound)) {
+                continue;
+            }
 
             ++ZoneLoop;
             ProcessZoneData(state,
@@ -1961,7 +1983,7 @@ namespace HeatBalanceManager {
                                 ErrorsFound = true;
                             }
                         } // Loop
-                    }     // ZoneNum
+                    } // ZoneNum
                 }
 
             } // ListNum
@@ -2070,7 +2092,9 @@ namespace HeatBalanceManager {
 
         state.dataSurface->TotSurfIncSolMultiplier = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
-        if (state.dataSurface->TotSurfIncSolMultiplier <= 0) return;
+        if (state.dataSurface->TotSurfIncSolMultiplier <= 0) {
+            return;
+        }
 
         if (!allocated(state.dataSurface->SurfIncSolMultiplier)) {
             // could be extended to interior surfaces later
@@ -2149,7 +2173,7 @@ namespace HeatBalanceManager {
                 ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2));
             }
         } // for (Loop)
-    }     // GetIncidentSolarMultiplier()
+    } // GetIncidentSolarMultiplier()
 
     void GetZoneLocalEnvData(EnergyPlusData &state, bool &ErrorsFound) // Error flag indicator (true if errors found)
     {
@@ -2286,16 +2310,34 @@ namespace HeatBalanceManager {
         constexpr const char *RoutineName("ProcessZoneData: ");
 
         state.dataHeatBal->Zone(ZoneLoop).Name = cAlphaArgs(1);
-        if (NumNumbers >= 1) state.dataHeatBal->Zone(ZoneLoop).RelNorth = rNumericArgs(1);
-        if (NumNumbers >= 2) state.dataHeatBal->Zone(ZoneLoop).OriginX = rNumericArgs(2);
-        if (NumNumbers >= 3) state.dataHeatBal->Zone(ZoneLoop).OriginY = rNumericArgs(3);
-        if (NumNumbers >= 4) state.dataHeatBal->Zone(ZoneLoop).OriginZ = rNumericArgs(4);
-        if (NumNumbers >= 5) state.dataHeatBal->Zone(ZoneLoop).OfType = rNumericArgs(5);
+        if (NumNumbers >= 1) {
+            state.dataHeatBal->Zone(ZoneLoop).RelNorth = rNumericArgs(1);
+        }
+        if (NumNumbers >= 2) {
+            state.dataHeatBal->Zone(ZoneLoop).OriginX = rNumericArgs(2);
+        }
+        if (NumNumbers >= 3) {
+            state.dataHeatBal->Zone(ZoneLoop).OriginY = rNumericArgs(3);
+        }
+        if (NumNumbers >= 4) {
+            state.dataHeatBal->Zone(ZoneLoop).OriginZ = rNumericArgs(4);
+        }
+        if (NumNumbers >= 5) {
+            state.dataHeatBal->Zone(ZoneLoop).OfType = rNumericArgs(5);
+        }
         state.dataHeatBal->Zone(ZoneLoop).OfType = DataHeatBalance::StandardZone;
-        if (NumNumbers >= 6) state.dataHeatBal->Zone(ZoneLoop).Multiplier = rNumericArgs(6);
-        if (NumNumbers >= 7) state.dataHeatBal->Zone(ZoneLoop).CeilingHeight = rNumericArgs(7);
-        if (NumNumbers >= 8) state.dataHeatBal->Zone(ZoneLoop).Volume = rNumericArgs(8);
-        if (NumNumbers >= 9) state.dataHeatBal->Zone(ZoneLoop).UserEnteredFloorArea = rNumericArgs(9);
+        if (NumNumbers >= 6) {
+            state.dataHeatBal->Zone(ZoneLoop).Multiplier = rNumericArgs(6);
+        }
+        if (NumNumbers >= 7) {
+            state.dataHeatBal->Zone(ZoneLoop).CeilingHeight = rNumericArgs(7);
+        }
+        if (NumNumbers >= 8) {
+            state.dataHeatBal->Zone(ZoneLoop).Volume = rNumericArgs(8);
+        }
+        if (NumNumbers >= 9) {
+            state.dataHeatBal->Zone(ZoneLoop).UserEnteredFloorArea = rNumericArgs(9);
+        }
 
         if (NumAlphas > 1 && !state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             Convect::HcInt hcIn = static_cast<Convect::HcInt>(getEnumValue(Convect::HcIntNamesUC, cAlphaArgs(2)));
@@ -2968,7 +3010,9 @@ namespace HeatBalanceManager {
                     std::abs(state.dataHeatBalMgr->TempZoneSecPrevDay(ZoneNum) - state.dataHeatBalMgr->TempZonePrevDay(ZoneNum));
                 state.dataHeatBalMgr->WarmupLoadDiff(ZoneNum) =
                     std::abs(state.dataHeatBalMgr->LoadZoneSecPrevDay(ZoneNum) - state.dataHeatBalMgr->LoadZonePrevDay(ZoneNum));
-                if (ZoneNum == 1) ++state.dataHeatBalMgr->CountWarmupDayPoints;
+                if (ZoneNum == 1) {
+                    ++state.dataHeatBalMgr->CountWarmupDayPoints;
+                }
                 state.dataHeatBalMgr->TempZoneRpt(ZoneNum, state.dataHeatBalMgr->CountWarmupDayPoints) =
                     state.dataHeatBalMgr->WarmupTempDiff(ZoneNum);
                 state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, state.dataHeatBalMgr->CountWarmupDayPoints) =
@@ -2978,12 +3022,13 @@ namespace HeatBalanceManager {
                 if (state.dataSysVars->ReportDetailedWarmupConvergence) { // only do this detailed thing when requested by user is on
                     // Write Warmup Convergence Information to the initialization output file
                     if (state.dataHeatBalMgr->FirstWarmupWrite) {
-                        constexpr const char *Format_732{"! <Warmup Convergence Information>,Zone Name,Time Step,Hour of Day,Warmup Temperature "
-                                                         "Difference {{deltaC}},Warmup Load Difference {{W}}\n"};
+                        constexpr const char *Format_732{
+                            "! <Warmup Convergence Information - Detailed>,Zone Name,Time Step,Hour of Day,Warmup Temperature "
+                            "Difference {{deltaC}},Warmup Load Difference {{W}}\n"};
                         print(state.files.eio, Format_732);
                         state.dataHeatBalMgr->FirstWarmupWrite = false;
                     }
-                    constexpr const char *Format_731{" Warmup Convergence Information, {},{},{},{:.10R},{:.10R}\n"};
+                    constexpr const char *Format_731{" Warmup Convergence Information - Detailed, {},{},{},{:.10R},{:.10R}\n"};
                     print(state.files.eio,
                           Format_731,
                           state.dataHeatBal->Zone(ZoneNum).Name,
@@ -3251,7 +3296,9 @@ namespace HeatBalanceManager {
     {
         for (int SurfNum : state.dataSurface->AllHTWindowSurfaceList) {
             auto &thisConstruction = state.dataConstruction->Construct(state.dataSurface->Surface(SurfNum).Construction);
-            if (thisConstruction.WindowTypeBSDF) continue;
+            if (thisConstruction.WindowTypeBSDF) {
+                continue;
+            }
             state.dataHeatBal->SurfWinFenLaySurfTempFront(SurfNum, 1) = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfNum);
             state.dataHeatBal->SurfWinFenLaySurfTempBack(SurfNum, thisConstruction.TotLayers) = state.dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum);
         }
@@ -3291,8 +3338,9 @@ namespace HeatBalanceManager {
             UpdateDataandReport(state, OutputProcessor::TimeStepType::Zone);
             if (state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeDesignDay ||
                 state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeRunPeriodDesign) {
-                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager)
+                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager) {
                     state.dataHVACSizingSimMgr->hvacSizingSimulationManager->UpdateSizingLogsZoneStep(state);
+                }
             }
 
             UpdateTabularReports(state, OutputProcessor::TimeStepType::Zone);
@@ -3302,7 +3350,9 @@ namespace HeatBalanceManager {
                 state.dataEnvrn->PrintEnvrnStampWarmup = true;
                 state.dataEnvrn->PrintEnvrnStampWarmupPrinted = true;
             }
-            if (!state.dataGlobal->BeginDayFlag) state.dataEnvrn->PrintEnvrnStampWarmupPrinted = false;
+            if (!state.dataGlobal->BeginDayFlag) {
+                state.dataEnvrn->PrintEnvrnStampWarmupPrinted = false;
+            }
             if (state.dataEnvrn->PrintEnvrnStampWarmup) {
                 if (state.dataReportFlag->PrintEndDataDictionary && state.dataGlobal->DoOutputReporting) {
                     constexpr const char *EndOfHeaderString("End of Data Dictionary"); // End of data dictionary marker
@@ -3338,16 +3388,18 @@ namespace HeatBalanceManager {
             UpdateDataandReport(state, OutputProcessor::TimeStepType::Zone);
             if (state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeDesignDay ||
                 state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeRunPeriodDesign) {
-                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager)
+                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager) {
                     state.dataHVACSizingSimMgr->hvacSizingSimulationManager->UpdateSizingLogsZoneStep(state);
+                }
             }
 
         } else if (state.dataSysVars->UpdateDataDuringWarmupExternalInterface) { // added for FMI
             UpdateDataandReport(state, OutputProcessor::TimeStepType::Zone);
             if (state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeDesignDay ||
                 state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeRunPeriodDesign) {
-                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager)
+                if (state.dataHVACSizingSimMgr->hvacSizingSimulationManager) {
                     state.dataHVACSizingSimMgr->hvacSizingSimulationManager->UpdateSizingLogsZoneStep(state);
+                }
             }
         }
         // There is no hourly reporting in the heat balance.
@@ -3416,7 +3468,9 @@ namespace HeatBalanceManager {
         state.dataHeatBal->TotFrameDivider =
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataHeatBalMgr->CurrentModuleObject);
         state.dataSurface->FrameDivider.allocate(state.dataHeatBal->TotFrameDivider);
-        if (state.dataHeatBal->TotFrameDivider == 0) return;
+        if (state.dataHeatBal->TotFrameDivider == 0) {
+            return;
+        }
 
         FrameDividerNum = 0;
 
@@ -3691,7 +3745,9 @@ namespace HeatBalanceManager {
         FileLineCount = 0;
 
         NextLine = W5DataFile.readLine();
-        if (NextLine.eof) goto Label1000;
+        if (NextLine.eof) {
+            goto Label1000;
+        }
         ++FileLineCount;
         if (!has_prefixi(NextLine.data, "WINDOW5")) {
             ShowSevereError(state, format("HeatBalanceManager: SearchWindow5DataFile: Error in Data File={}", DesiredFilePath));
@@ -3703,7 +3759,9 @@ namespace HeatBalanceManager {
     Label10:;
         for (LineNum = 2; LineNum <= 5; ++LineNum) {
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             DataLine(LineNum) = NextLine.data;
             ++FileLineCount;
         }
@@ -3715,9 +3773,13 @@ namespace HeatBalanceManager {
             // Doesn't match; read through file until next window entry is found
         Label20:;
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
-            if (!has_prefixi(NextLine.data, "WINDOW5")) goto Label20;
+            if (!has_prefixi(NextLine.data, "WINDOW5")) {
+                goto Label20;
+            }
             // Beginning of next window entry found
             goto Label10;
         } else {
@@ -3728,7 +3790,9 @@ namespace HeatBalanceManager {
             // and WindowFrameAndDividerObjects for this window
 
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
             bool error = false;
             NGlSys = static_cast<int>(Util::ProcessNumber(NextLine.data.substr(19), error));
@@ -3740,11 +3804,15 @@ namespace HeatBalanceManager {
                            NGlSys));
             }
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 NextLine = W5DataFile.readLine();
-                if (NextLine.eof) goto Label1000;
+                if (NextLine.eof) {
+                    goto Label1000;
+                }
                 ++FileLineCount;
 
                 const bool succeeded = readList(NextLine.data.substr(19),
@@ -3807,7 +3875,9 @@ namespace HeatBalanceManager {
             }
             for (LineNum = 1; LineNum <= 11; ++LineNum) {
                 NextLine = W5DataFile.readLine();
-                if (NextLine.eof) goto Label1000;
+                if (NextLine.eof) {
+                    goto Label1000;
+                }
                 DataLine(LineNum) = NextLine.data;
             }
 
@@ -3892,13 +3962,17 @@ namespace HeatBalanceManager {
             FileLineCount += 11;
 
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
 
             // Divider data for each glazing system
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 NextLine = W5DataFile.readLine();
-                if (NextLine.eof) goto Label1000;
+                if (NextLine.eof) {
+                    goto Label1000;
+                }
                 ++FileLineCount;
 
                 const bool dividerReadSucceeded = readList(NextLine.data.substr(19),
@@ -3985,11 +4059,12 @@ namespace HeatBalanceManager {
                 }
             }
 
-            if (ErrorsFound)
+            if (ErrorsFound) {
                 ShowFatalError(state,
                                format("HeatBalanceManager: SearchWindow5DataFile: Construction={} from the Window5 data file cannot be used because "
                                       "of above errors",
                                       DesiredConstructionName));
+            }
 
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 NGaps(IGlSys) = NGlass(IGlSys) - 1;
@@ -3997,7 +4072,9 @@ namespace HeatBalanceManager {
 
             // Glass objects
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
@@ -4048,7 +4125,9 @@ namespace HeatBalanceManager {
 
             // Gap objects
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 for (IGap = 1; IGap <= NGaps(IGlSys); ++IGap) {
@@ -4070,7 +4149,9 @@ namespace HeatBalanceManager {
 
             // Gap/gas materials are read in multiple passes
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000; // Exsqueeze me?
+            if (NextLine.eof) {
+                goto Label1000; // Exsqueeze me?
+            }
             ++FileLineCount;
             for (IGlSys = 1; IGlSys <= NGlSys; ++IGlSys) {
                 for (IGap = 1; IGap <= NGaps(IGlSys); ++IGap) {
@@ -4119,7 +4200,9 @@ namespace HeatBalanceManager {
             }
 
             NextLine = W5DataFile.readLine();
-            if (NextLine.eof) goto Label1000;
+            if (NextLine.eof) {
+                goto Label1000;
+            }
             ++FileLineCount;
 
             // When pulling in develop, the following two blocks appear to have been modified in develop,
@@ -4201,7 +4284,9 @@ namespace HeatBalanceManager {
 
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
                     thisConstruct.LayerPoint(2 * IGlass - 1) = MaterNumSysGlass(IGlass, IGlSys);
-                    if (IGlass < NGlass(IGlSys)) thisConstruct.LayerPoint(2 * IGlass) = MaterNumSysGap(IGlass, IGlSys);
+                    if (IGlass < NGlass(IGlSys)) {
+                        thisConstruct.LayerPoint(2 * IGlass) = MaterNumSysGap(IGlass, IGlSys);
+                    }
                 }
 
                 thisConstruct.OutsideRoughness = Material::SurfaceRoughness::VerySmooth;
@@ -4220,15 +4305,21 @@ namespace HeatBalanceManager {
                 // Fill Construct with system transmission, reflection and absorption properties
 
                 NextLine = W5DataFile.readLine();
-                if (NextLine.eof) goto Label1000;
+                if (NextLine.eof) {
+                    goto Label1000;
+                }
                 ++FileLineCount;
                 if (IGlSys == 1) {
                     NextLine = W5DataFile.readLine();
-                    if (NextLine.eof) goto Label1000;
+                    if (NextLine.eof) {
+                        goto Label1000;
+                    }
                     ++FileLineCount;
                 }
                 NextLine = W5DataFile.readLine();
-                if (NextLine.eof) goto Label1000;
+                if (NextLine.eof) {
+                    goto Label1000;
+                }
                 ++FileLineCount;
                 if (!readItem(NextLine.data.substr(5), TsolTemp)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of TSol values.");
@@ -4312,12 +4403,13 @@ namespace HeatBalanceManager {
                 }
                 FileLineCount += 5;
 
-                if (ErrorsFound)
+                if (ErrorsFound) {
                     ShowFatalError(
                         state,
                         format("HeatBalanceManager: SearchWindow5DataFile: Construction={} from the Window5 data file cannot be used because "
                                "of above errors",
                                DesiredConstructionName));
+                }
 
                 for (int iPhi = 0; iPhi < Window::numPhis; ++iPhi) {
                     Tsol[iPhi] = TsolTemp(iPhi + 1);
@@ -4487,16 +4579,21 @@ namespace HeatBalanceManager {
             state.dataSurface->SurfWinStormWinFlagPrevDay(SurfNum) = state.dataSurface->SurfWinStormWinFlag(SurfNum);
             int DateOff = state.dataSurface->StormWindow(StormWinNum).DateOff - 1;
             // Note: Dateon = Dateoff is not allowed and will have produced an error in getinput.
-            if (DateOff == 0) DateOff = 366;
+            if (DateOff == 0) {
+                DateOff = 366;
+            }
             if (General::BetweenDates(state.dataEnvrn->DayOfYear_Schedule, state.dataSurface->StormWindow(StormWinNum).DateOn, DateOff)) {
                 StormWinFlag = 1;
             } else {
                 StormWinFlag = 0;
             }
             state.dataSurface->SurfWinStormWinFlag(SurfNum) = StormWinFlag;
-            if (state.dataGlobal->BeginSimFlag) state.dataSurface->SurfWinStormWinFlagPrevDay(SurfNum) = StormWinFlag;
-            if (state.dataSurface->SurfWinStormWinFlag(SurfNum) != state.dataSurface->SurfWinStormWinFlagPrevDay(SurfNum))
+            if (state.dataGlobal->BeginSimFlag) {
+                state.dataSurface->SurfWinStormWinFlagPrevDay(SurfNum) = StormWinFlag;
+            }
+            if (state.dataSurface->SurfWinStormWinFlag(SurfNum) != state.dataSurface->SurfWinStormWinFlagPrevDay(SurfNum)) {
                 state.dataHeatBal->StormWinChangeThisDay = true;
+            }
         }
     }
 
@@ -5125,14 +5222,18 @@ namespace HeatBalanceManager {
         for (int Loop = 1; Loop <= state.dataHeatBal->TotConstructs; ++Loop) {
             auto &constr = state.dataConstruction->Construct(Loop);
 
-            if (!constr.isTCMaster) continue;
+            if (!constr.isTCMaster) {
+                continue;
+            }
 
             auto const *matGlassTC = dynamic_cast<Material::MaterialGlassTC const *>(s_mat->materials(constr.TCMasterMatNum));
             assert(matGlassTC != nullptr);
             NumNewConst += matGlassTC->numMatRefs;
         }
 
-        if (NumNewConst == 0) return; // no need to go further
+        if (NumNewConst == 0) {
+            return; // no need to go further
+        }
 
         // Increase Construct() and copy the extra constructions
         state.dataConstruction->Construct.redimension(state.dataHeatBal->TotConstructs + NumNewConst);
@@ -5144,7 +5245,9 @@ namespace HeatBalanceManager {
         NumNewConst = state.dataHeatBal->TotConstructs;
         for (int Loop = 1; Loop <= state.dataHeatBal->TotConstructs; ++Loop) {
             auto &constr = state.dataConstruction->Construct(Loop);
-            if (!constr.isTCMaster) continue;
+            if (!constr.isTCMaster) {
+                continue;
+            }
 
             auto const *matGlassTC = dynamic_cast<Material::MaterialGlassTC *>(s_mat->materials(constr.TCMasterMatNum));
             assert(matGlassTC != nullptr);
@@ -5294,12 +5397,24 @@ namespace HeatBalanceManager {
         state.dataBSDFWindow->TotComplexFenStates = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, locCurrentModuleObject);
 
         state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, locCurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
-        if (!allocated(locAlphaFieldNames)) locAlphaFieldNames.allocate(NumAlphas);
-        if (!allocated(locNumericFieldNames)) locNumericFieldNames.allocate(NumNumbers);
-        if (!allocated(locNumericFieldBlanks)) locNumericFieldBlanks.allocate(NumNumbers);
-        if (!allocated(locAlphaFieldBlanks)) locAlphaFieldBlanks.allocate(NumAlphas);
-        if (!allocated(locAlphaArgs)) locAlphaArgs.allocate(NumAlphas);
-        if (!allocated(locNumericArgs)) locNumericArgs.allocate(NumNumbers);
+        if (!allocated(locAlphaFieldNames)) {
+            locAlphaFieldNames.allocate(NumAlphas);
+        }
+        if (!allocated(locNumericFieldNames)) {
+            locNumericFieldNames.allocate(NumNumbers);
+        }
+        if (!allocated(locNumericFieldBlanks)) {
+            locNumericFieldBlanks.allocate(NumNumbers);
+        }
+        if (!allocated(locAlphaFieldBlanks)) {
+            locAlphaFieldBlanks.allocate(NumAlphas);
+        }
+        if (!allocated(locAlphaArgs)) {
+            locAlphaArgs.allocate(NumAlphas);
+        }
+        if (!allocated(locNumericArgs)) {
+            locNumericArgs.allocate(NumNumbers);
+        }
 
         state.dataBSDFWindow->FirstBSDF = ConstrNum + 1; // Location of first BSDF construction input (They will be consecutive)
         for (int Loop = 1; Loop <= state.dataBSDFWindow->TotComplexFenStates; ++Loop) {
@@ -5370,8 +5485,9 @@ namespace HeatBalanceManager {
             }
             thisConstruct.BSDFInput.BasisMat.allocate(NumCols, NumRows);
             MatrixDataManager::Get2DMatrix(state, thisConstruct.BSDFInput.BasisMatIndex, thisConstruct.BSDFInput.BasisMat);
-            if (thisConstruct.BSDFInput.BasisType == DataBSDFWindow::Basis::WINDOW)
+            if (thisConstruct.BSDFInput.BasisType == DataBSDFWindow::Basis::WINDOW) {
                 WindowComplexManager::CalculateBasisLength(state, thisConstruct.BSDFInput, ConstrNum, thisConstruct.BSDFInput.NBasis);
+            }
 
             // determine number of layers and optical layers
             NumOfTotalLayers = (NumAlphas - 9) / 3;
@@ -5933,14 +6049,28 @@ namespace HeatBalanceManager {
         }
 
         // Do not forget to deallocate localy allocated variables
-        if (allocated(locAlphaFieldNames)) locAlphaFieldNames.deallocate();
-        if (allocated(locNumericFieldNames)) locNumericFieldNames.deallocate();
-        if (allocated(locNumericFieldBlanks)) locNumericFieldBlanks.deallocate();
-        if (allocated(locAlphaFieldBlanks)) locAlphaFieldBlanks.deallocate();
-        if (allocated(locAlphaArgs)) locAlphaArgs.deallocate();
-        if (allocated(locNumericArgs)) locNumericArgs.deallocate();
+        if (allocated(locAlphaFieldNames)) {
+            locAlphaFieldNames.deallocate();
+        }
+        if (allocated(locNumericFieldNames)) {
+            locNumericFieldNames.deallocate();
+        }
+        if (allocated(locNumericFieldBlanks)) {
+            locNumericFieldBlanks.deallocate();
+        }
+        if (allocated(locAlphaFieldBlanks)) {
+            locAlphaFieldBlanks.deallocate();
+        }
+        if (allocated(locAlphaArgs)) {
+            locAlphaArgs.deallocate();
+        }
+        if (allocated(locNumericArgs)) {
+            locNumericArgs.deallocate();
+        }
 
-        if (ErrorsFound) ShowFatalError(state, "Error in complex fenestration input.");
+        if (ErrorsFound) {
+            ShowFatalError(state, "Error in complex fenestration input.");
+        }
     }
 
     void InitConductionTransferFunctions(EnergyPlusData &state)
@@ -5961,7 +6091,9 @@ namespace HeatBalanceManager {
         }
 
         for (auto &construction : state.dataConstruction->Construct) {
-            if (!construction.IsUsedCTF) continue;
+            if (!construction.IsUsedCTF) {
+                continue;
+            }
             construction.reportLayers(state);
         }
 
@@ -5974,13 +6106,15 @@ namespace HeatBalanceManager {
             print(state.files.eio,
                   "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{w/m-K}},Density {{kg/m3}},Specific Heat "
                   "{{J/kg-K}},ThermalResistance {{m2-K/w}}\n");
-            print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/w}}\n");
+            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/w}}\n");
             print(state.files.eio, "! <CTF>,Time,Outside,Cross,Inside,Flux (except final one)\n");
 
             int cCounter = 0; // just used to keep construction index in output report
             for (auto &construction : state.dataConstruction->Construct) {
                 cCounter++;
-                if (!construction.IsUsedCTF) continue;
+                if (!construction.IsUsedCTF) {
+                    continue;
+                }
                 construction.reportTransferFunction(state, cCounter);
             }
         }

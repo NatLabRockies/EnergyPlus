@@ -118,8 +118,9 @@ bool Validation::validate(json const &parsed_input)
             if (error.context.size() >= max_context) {
                 max_context = error.context.size();
                 std::string context;
-                for (auto it = error.context.begin(); it != error.context.end(); it++)
+                for (auto it = error.context.begin(); it != error.context.end(); it++) {
                     context += *it;
+                }
 
                 errors_.emplace_back(context + " - " + error.description);
                 if (max_context == 2) {

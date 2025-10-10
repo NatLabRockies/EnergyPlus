@@ -100,7 +100,9 @@ GshpPeCoolingSpecs *GshpPeCoolingSpecs::factory(EnergyPlusData &state, const std
     auto thisObj = std::find_if(state.dataHPWaterToWaterClg->GSHP.begin(),
                                 state.dataHPWaterToWaterClg->GSHP.end(),
                                 [&objectName](const GshpPeCoolingSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataHPWaterToWaterClg->GSHP.end()) return thisObj;
+    if (thisObj != state.dataHPWaterToWaterClg->GSHP.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("WWHPCoolingFactory: Error getting inputs for heat pump named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -504,7 +506,9 @@ void GshpPeCoolingSpecs::initialize(EnergyPlusData &state)
         state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp = 35.0;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->beginEnvironFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->beginEnvironFlag = true;
+    }
 
     // Init more variables
 

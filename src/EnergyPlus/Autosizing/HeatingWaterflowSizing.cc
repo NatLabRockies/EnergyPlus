@@ -139,7 +139,9 @@ Real64 HeatingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "maximum_water_flow_rate [m3/s]";
+        if (this->isEpJSON) {
+            this->sizingString = "maximum_water_flow_rate [m3/s]";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {

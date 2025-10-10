@@ -85,7 +85,7 @@ namespace ResultsFramework {
     class BaseResultObject
     {
     public:
-        BaseResultObject(){};
+        BaseResultObject() = default;
     };
 
     class SimInfo : public BaseResultObject
@@ -249,7 +249,9 @@ namespace ResultsFramework {
     class MeterDataFrame : public DataFrame
     {
     public:
-        explicit MeterDataFrame(const std::string &ReportFreq) : DataFrame(ReportFreq){};
+        // clang-format off
+        explicit MeterDataFrame(const std::string &ReportFreq) : DataFrame(ReportFreq) {};
+        // clang-format on
         virtual ~MeterDataFrame() = default;
 
         void addVariable(MeterVariable const &var);
@@ -554,10 +556,16 @@ namespace ResultsFramework {
 
         inline bool hasAnyTSData() const
         {
-            for (int iTimeStep = 0; iTimeStep < (int)TimeStepType::Num; ++iTimeStep)
-                if (detailedTSData[iTimeStep].dataFrameEnabled()) return true;
-            for (int iFreq = (int)ReportFreq::TimeStep; iFreq < (int)ReportFreq::Num; ++iFreq)
-                if (freqTSData[iFreq].dataFrameEnabled()) return true;
+            for (int iTimeStep = 0; iTimeStep < (int)TimeStepType::Num; ++iTimeStep) {
+                if (detailedTSData[iTimeStep].dataFrameEnabled()) {
+                    return true;
+                }
+            }
+            for (int iFreq = (int)ReportFreq::TimeStep; iFreq < (int)ReportFreq::Num; ++iFreq) {
+                if (freqTSData[iFreq].dataFrameEnabled()) {
+                    return true;
+                }
+            }
             return false;
         };
 

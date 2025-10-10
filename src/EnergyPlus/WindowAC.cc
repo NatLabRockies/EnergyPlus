@@ -457,7 +457,9 @@ namespace WindowAC {
                 // check that Window AC air inlet node is the same as a zone exhaust node.
                 ZoneNodeNotFound = true;
                 for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                        continue;
+                    }
                     for (NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumExhaustNodes; ++NodeNum) {
                         if (windAC.AirInNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ExhaustNode(NodeNum)) {
                             ZoneNodeNotFound = false;
@@ -479,7 +481,9 @@ namespace WindowAC {
                 // check that Window AC air outlet node is a zone inlet node.
                 ZoneNodeNotFound = true;
                 for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                        continue;
+                    }
                     for (NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++NodeNum) {
                         if (windAC.AirOutNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum)) {
                             windAC.ZonePtr = CtrlZone;
@@ -507,7 +511,9 @@ namespace WindowAC {
                 // check that Window AC air inlet node is the same as a zone exhaust node.
                 ZoneNodeNotFound = true;
                 for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                        continue;
+                    }
                     for (NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumExhaustNodes; ++NodeNum) {
                         if (windAC.AirInNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).ExhaustNode(NodeNum)) {
                             ZoneNodeNotFound = false;
@@ -529,7 +535,9 @@ namespace WindowAC {
                 // check that Window AC air outlet node is the same as a zone inlet node.
                 ZoneNodeNotFound = true;
                 for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                    if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                        continue;
+                    }
                     for (NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++NodeNum) {
                         if (windAC.AirOutNode == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum)) {
                             windAC.ZonePtr = CtrlZone;
@@ -745,8 +753,9 @@ namespace WindowAC {
             for (int Loop = 1; Loop <= state.dataWindowAC->NumWindAC; ++Loop) {
                 if (DataZoneEquipment::CheckZoneEquipmentList(state,
                                                               state.dataWindowAC->cWindowAC_UnitTypes(state.dataWindowAC->WindAC(Loop).UnitType),
-                                                              state.dataWindowAC->WindAC(Loop).Name))
+                                                              state.dataWindowAC->WindAC(Loop).Name)) {
                     continue;
+                }
                 ShowSevereError(state,
                                 format("InitWindowAC: Window AC Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
                                        state.dataWindowAC->cWindowAC_UnitTypes(state.dataWindowAC->WindAC(Loop).UnitType),

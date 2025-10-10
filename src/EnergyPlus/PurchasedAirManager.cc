@@ -295,7 +295,9 @@ void GetPurchasedAir(EnergyPlusData &state)
                                                                            ObjectIsNotParent);
             bool UniqueNodeError = false;
             CheckUniqueNodeNames(state, s_ipsc->cAlphaFieldNames(3), UniqueNodeError, s_ipsc->cAlphaArgs(3), s_ipsc->cAlphaArgs(1));
-            if (UniqueNodeError) ErrorsFound = true;
+            if (UniqueNodeError) {
+                ErrorsFound = true;
+            }
             // If new (optional) exhaust air node name is present, then register it as inlet
             if (!s_ipsc->lAlphaFieldBlanks(4)) {
                 if (s_ipsc->lAlphaFieldBlanks(5)) {
@@ -321,7 +323,9 @@ void GetPurchasedAir(EnergyPlusData &state)
                 }
                 UniqueNodeError = false;
                 CheckUniqueNodeNames(state, s_ipsc->cAlphaFieldNames(4), UniqueNodeError, s_ipsc->cAlphaArgs(4), s_ipsc->cAlphaArgs(1));
-                if (UniqueNodeError) ErrorsFound = true;
+                if (UniqueNodeError) {
+                    ErrorsFound = true;
+                }
             }
             if (!s_ipsc->lAlphaFieldBlanks(5)) {
                 PurchAir(PurchAirNum).PlenumExhaustAirNodeNum = GetOnlySingleNode(state,
@@ -502,7 +506,9 @@ void GetPurchasedAir(EnergyPlusData &state)
                 }
                 UniqueNodeError = false;
                 CheckUniqueNodeNames(state, s_ipsc->cAlphaFieldNames(13), UniqueNodeError, s_ipsc->cAlphaArgs(13), s_ipsc->cAlphaArgs(1));
-                if (UniqueNodeError) ErrorsFound = true;
+                if (UniqueNodeError) {
+                    ErrorsFound = true;
+                }
 
                 // get Demand controlled ventilation type
                 PurchAir(PurchAirNum).DCVType = static_cast<DCV>(getEnumValue(dcvNamesUC, s_ipsc->cAlphaArgs(14)));
@@ -552,7 +558,9 @@ void GetPurchasedAir(EnergyPlusData &state)
             PurchAir(PurchAirNum).HtRecLatEff = s_ipsc->rNumericArgs(11);
 
             for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) continue;
+                if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
+                    continue;
+                }
                 for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(CtrlZone).NumInletNodes; ++NodeNum) {
                     if (PurchAir(PurchAirNum).ZoneSupplyAirNodeNum == state.dataZoneEquip->ZoneEquipConfig(CtrlZone).InletNode(NodeNum)) {
                         PurchAir(PurchAirNum).ZonePtr = CtrlZone;
@@ -1153,7 +1161,9 @@ void InitPurchasedAir(EnergyPlusData &state, int const PurchAirNum, int const Co
                 }
             }
 
-            if (CheckZoneEquipmentList(state, PurchAirLoop.cObjectName, PurchAirLoop.Name)) continue;
+            if (CheckZoneEquipmentList(state, PurchAirLoop.cObjectName, PurchAirLoop.Name)) {
+                continue;
+            }
             ShowSevereError(state,
                             format("InitPurchasedAir: {} = {} is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
                                    PurchAirLoop.cObjectName,
@@ -1617,7 +1627,9 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         state.dataSize->DataScalableSizingON = true;
                         CoolingAirFlowSizer sizingCoolingAirFlow;
                         std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                        if (state.dataGlobal->isEpJSON) stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                        if (state.dataGlobal->isEpJSON) {
+                            stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                        }
                         sizingCoolingAirFlow.overrideSizingString(stringOverride);
                         // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                         sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1631,7 +1643,9 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                             state.dataSize->DataScalableSizingON = true;
                             CoolingAirFlowSizer sizingCoolingAirFlow;
                             std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                            if (state.dataGlobal->isEpJSON) stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                            if (state.dataGlobal->isEpJSON) {
+                                stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                            }
                             sizingCoolingAirFlow.overrideSizingString(stringOverride);
                             // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                             sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1657,7 +1671,9 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         state.dataSize->DataScalableSizingON = true;
                         CoolingAirFlowSizer sizingCoolingAirFlow;
                         std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                        if (state.dataGlobal->isEpJSON) stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                        if (state.dataGlobal->isEpJSON) {
+                            stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                        }
                         sizingCoolingAirFlow.overrideSizingString(stringOverride);
                         // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                         sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1839,7 +1855,9 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 if (PurchAir.MaxCoolVolFlowRate > 0.0) {
                     CoolingAirFlowSizer sizingCoolingAirFlow;
                     std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                    if (state.dataGlobal->isEpJSON) stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                    if (state.dataGlobal->isEpJSON) {
+                        stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                    }
                     sizingCoolingAirFlow.overrideSizingString(stringOverride);
                     // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -1850,7 +1868,9 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 TempSize = PurchAir.MaxCoolVolFlowRate;
                 CoolingAirFlowSizer sizingCoolingAirFlow;
                 std::string stringOverride = "Maximum Cooling Air Flow Rate [m3/s]";
-                if (state.dataGlobal->isEpJSON) stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                if (state.dataGlobal->isEpJSON) {
+                    stringOverride = "maximum_cooling_air_flow_rate [m3/s]";
+                }
                 sizingCoolingAirFlow.overrideSizingString(stringOverride);
                 // sizingCoolingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
                 sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
@@ -2188,7 +2208,9 @@ void CalcPurchAirLoads(EnergyPlusData &state,
                 SupplyMassFlowRate = min(SupplyMassFlowRate, PurchAir.MaxCoolMassFlowRate);
             }
 
-            if (SupplyMassFlowRate <= HVAC::VerySmallMassFlow) SupplyMassFlowRate = 0.0;
+            if (SupplyMassFlowRate <= HVAC::VerySmallMassFlow) {
+                SupplyMassFlowRate = 0.0;
+            }
 
             // Calculate mixed air conditions
             CalcPurchAirMixedAir(state,
@@ -2346,7 +2368,7 @@ void CalcPurchAirLoads(EnergyPlusData &state,
                                 // CoolSensOutput = SupplyMassFlowRate * CpAir * (MixedAirTemp - SupplyTemp)
                                 // CoolTotOutput = SupplyMassFlowRate * (MixedAirEnthalpy - SupplyEnthalpy)
                             }
-                        }    // Capacity limit exceeded
+                        } // Capacity limit exceeded
                     } else { // Not dehumidifying
                         // If not dehumidifying, compare sensible cooling to the limit
                         // This section will only increase supply temp, so no need to recheck for super-saturation
@@ -2356,8 +2378,8 @@ void CalcPurchAirLoads(EnergyPlusData &state,
                             CoolSensOutput = PurchAir.MaxCoolTotCap;
                             PurchAir.SupplyTemp = PurchAir.MixedAirTemp - CoolSensOutput / (SupplyMassFlowRate * CpAir);
                         } // Capacity limit exceeded
-                    }     // Dehumidifying or not
-                }         // Capacity limit active
+                    } // Dehumidifying or not
+                } // Capacity limit active
 
             } else { // SupplyMassFlowRate is zero
                 SupplyEnthalpy = MixedAirEnthalpy;
@@ -2468,7 +2490,9 @@ void CalcPurchAirLoads(EnergyPlusData &state,
                 SupplyMassFlowRate = min(SupplyMassFlowRate, PurchAir.MaxHeatMassFlowRate);
             }
 
-            if (SupplyMassFlowRate <= HVAC::VerySmallMassFlow) SupplyMassFlowRate = 0.0;
+            if (SupplyMassFlowRate <= HVAC::VerySmallMassFlow) {
+                SupplyMassFlowRate = 0.0;
+            }
 
             // Calculate mixed air conditions
             CalcPurchAirMixedAir(state,
@@ -2727,7 +2751,9 @@ void CalcPurchAirLoads(EnergyPlusData &state,
         state.dataLoopNodes->Node(InNodeNum).HumRat = PurchAir.SupplyHumRat;
         state.dataLoopNodes->Node(InNodeNum).Enthalpy = SupplyEnthalpy;
         state.dataLoopNodes->Node(InNodeNum).MassFlowRate = SupplyMassFlowRate;
-        if (PurchAir.OutdoorAir) state.dataLoopNodes->Node(OANodeNum).MassFlowRate = OAMassFlowRate;
+        if (PurchAir.OutdoorAir) {
+            state.dataLoopNodes->Node(OANodeNum).MassFlowRate = OAMassFlowRate;
+        }
 
     } else { // purchased air OFF
 
@@ -2746,7 +2772,9 @@ void CalcPurchAirLoads(EnergyPlusData &state,
         }
 
         state.dataLoopNodes->Node(InNodeNum).MassFlowRate = 0.0;
-        if (PurchAir.OutdoorAir) state.dataLoopNodes->Node(OANodeNum).MassFlowRate = 0.0;
+        if (PurchAir.OutdoorAir) {
+            state.dataLoopNodes->Node(OANodeNum).MassFlowRate = 0.0;
+        }
         PurchAir.SenHeatRate = 0.0;
         PurchAir.SenCoolRate = 0.0;
         PurchAir.TotCoolRate = 0.0;
@@ -2815,7 +2843,9 @@ void CalcPurchAirMinOAMassFlow(EnergyPlusData &state,
             OAMassFlowRate = max(OAMassFlowRate, state.dataContaminantBalance->ZoneSysContDemand(ZoneNum).OutputRequiredToCO2SP);
         }
 
-        if (OAMassFlowRate <= HVAC::VerySmallMassFlow) OAMassFlowRate = 0.0;
+        if (OAMassFlowRate <= HVAC::VerySmallMassFlow) {
+            OAMassFlowRate = 0.0;
+        }
 
     } else { // No outdoor air
         OAMassFlowRate = 0.0;
@@ -2892,19 +2922,28 @@ void CalcPurchAirMixedAir(EnergyPlusData &state,
     if (PurchAir.OutdoorAir && (OAMassFlowRate > 0.0)) {
         // Determine if heat recovery is beneficial
         if (PurchAir.HtRecType == HeatRecovery::Sensible) {
-            if ((OperatingMode == OpMode::Heat) && (RecircTemp > OAInletTemp)) HeatRecOn = true;
-            if ((OperatingMode == OpMode::Cool) && (RecircTemp < OAInletTemp)) HeatRecOn = true;
+            if ((OperatingMode == OpMode::Heat) && (RecircTemp > OAInletTemp)) {
+                HeatRecOn = true;
+            }
+            if ((OperatingMode == OpMode::Cool) && (RecircTemp < OAInletTemp)) {
+                HeatRecOn = true;
+            }
         }
         if (PurchAir.HtRecType == HeatRecovery::Enthalpy) {
-            if ((OperatingMode == OpMode::Heat) && (RecircEnthalpy > OAInletEnthalpy)) HeatRecOn = true;
-            if ((OperatingMode == OpMode::Cool) && (RecircEnthalpy < OAInletEnthalpy)) HeatRecOn = true;
+            if ((OperatingMode == OpMode::Heat) && (RecircEnthalpy > OAInletEnthalpy)) {
+                HeatRecOn = true;
+            }
+            if ((OperatingMode == OpMode::Cool) && (RecircEnthalpy < OAInletEnthalpy)) {
+                HeatRecOn = true;
+            }
         }
         // Calculate heat recovery if active
         if (HeatRecOn) {
             PurchAir.TimeHtRecActive = state.dataHVACGlobal->TimeStepSys;
             OAAfterHtRecTemp = OAInletTemp + PurchAir.HtRecSenEff * (RecircTemp - OAInletTemp);
-            if (PurchAir.HtRecType == HeatRecovery::Enthalpy)
+            if (PurchAir.HtRecType == HeatRecovery::Enthalpy) {
                 OAAfterHtRecHumRat = OAInletHumRat + PurchAir.HtRecLatEff * (RecircHumRat - OAInletHumRat);
+            }
             OAAfterHtRecEnthalpy = PsyHFnTdbW(OAAfterHtRecTemp, OAAfterHtRecHumRat);
             //   Check for saturation in supply outlet and reset temp, then humidity ratio at constant enthalpy
             if (PsyTsatFnHPb(state, OAAfterHtRecEnthalpy, state.dataEnvrn->OutBaroPress, RoutineName) > OAAfterHtRecTemp) {
@@ -3243,7 +3282,9 @@ bool CheckPurchasedAirForReturnPlenum(EnergyPlusData &state, int const ReturnPle
 
     CheckPurchasedAirForReturnPlenum = false;
     for (PurchAirNum = 1; PurchAirNum <= state.dataPurchasedAirMgr->NumPurchAir; ++PurchAirNum) {
-        if (ReturnPlenumIndex != state.dataPurchasedAirMgr->PurchAir(PurchAirNum).ReturnPlenumIndex) continue;
+        if (ReturnPlenumIndex != state.dataPurchasedAirMgr->PurchAir(PurchAirNum).ReturnPlenumIndex) {
+            continue;
+        }
         CheckPurchasedAirForReturnPlenum = true;
     }
 
@@ -3356,7 +3397,9 @@ void InitializePlenumArrays(EnergyPlusData &state, int const PurchAirNum)
 
         // find the correct index to PurchAirPlenumArrays
         for (int ReturnPlenumNum = 1; ReturnPlenumNum <= state.dataPurchasedAirMgr->NumPlenumArrays; ++ReturnPlenumNum) {
-            if (ReturnPlenumIndex != state.dataPurchasedAirMgr->PurchAirPlenumArrays(ReturnPlenumNum).ReturnPlenumIndex) continue;
+            if (ReturnPlenumIndex != state.dataPurchasedAirMgr->PurchAirPlenumArrays(ReturnPlenumNum).ReturnPlenumIndex) {
+                continue;
+            }
 
             // allocate temporary arrays and save existing data
             TempPurchArray.allocate(state.dataPurchasedAirMgr->PurchAirPlenumArrays(ReturnPlenumNum).NumPurchAir);

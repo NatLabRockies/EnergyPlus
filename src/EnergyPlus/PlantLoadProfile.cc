@@ -99,7 +99,9 @@ PlantComponent *PlantProfileData::factory(EnergyPlusData &state, std::string con
     auto thisObj = std::find_if(state.dataPlantLoadProfile->PlantProfile.begin(),
                                 state.dataPlantLoadProfile->PlantProfile.end(),
                                 [&objectName](const PlantProfileData &plp) { return plp.Name == objectName; });
-    if (thisObj != state.dataPlantLoadProfile->PlantProfile.end()) return thisObj;
+    if (thisObj != state.dataPlantLoadProfile->PlantProfile.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("PlantLoadProfile::factory: Error getting inputs for pipe named: {}", objectName));
     // Shut up the compiler
@@ -227,12 +229,16 @@ void PlantProfileData::InitPlantProfile(EnergyPlusData &state)
         this->Init = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->Init = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->Init = true;
+    }
 
     this->InletTemp = state.dataLoopNodes->Node(InletNode).Temp;
     this->Power = this->loadSched->getCurrentVal();
 
-    if (this->EMSOverridePower) this->Power = this->EMSPowerValue;
+    if (this->EMSOverridePower) {
+        this->Power = this->EMSPowerValue;
+    }
 
     if (this->FluidType == PlantLoopFluidType::Water) {
         FluidDensityInit = this->plantLoc.loop->glycol->getDensity(state, this->InletTemp, RoutineName);
@@ -245,7 +251,9 @@ void PlantProfileData::InitPlantProfile(EnergyPlusData &state)
 
     this->MassFlowRate = this->VolFlowRate * FluidDensityInit;
 
-    if (this->EMSOverrideMassFlow) this->MassFlowRate = this->EMSMassFlowValue;
+    if (this->EMSOverrideMassFlow) {
+        this->MassFlowRate = this->EMSMassFlowValue;
+    }
 
     // Request the mass flow rate from the plant component flow utility routine
     PlantUtilities::SetComponentFlowRate(state, this->MassFlowRate, InletNode, OutletNode, this->plantLoc);
@@ -531,7 +539,9 @@ void GetPlantProfileInput(EnergyPlusData &state)
                                     state.dataPlantLoadProfile->PlantProfile(ProfileNum).Name);
             }
 
-            if (ErrorsFound) ShowFatalError(state, format("Errors in {} input.", cCurrentModuleObject));
+            if (ErrorsFound) {
+                ShowFatalError(state, format("Errors in {} input.", cCurrentModuleObject));
+            }
 
         } // ProfileNum
     }

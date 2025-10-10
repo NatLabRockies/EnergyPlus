@@ -294,8 +294,9 @@ TEST_F(EnergyPlusFixture, Composite)
     state->dataSurface->Surface(10).Vertex = {Vertex(1, 0, 0), Vertex(1, 1, 0), Vertex(1, 1, 1), Vertex(1, 0, 1)};
     state->dataSurface->Surface(11).Vertex = {Vertex(0, 0, 0), Vertex(1, 0, 0), Vertex(1, 1, 0), Vertex(0, 1, 0)};
     state->dataSurface->Surface(12).Vertex = {Vertex(0, 0, 1), Vertex(1, 0, 1), Vertex(1, 1, 1), Vertex(0, 1, 1)};
-    for (int i = 1; i <= state->dataSurface->TotSurfaces; ++i)
+    for (int i = 1; i <= state->dataSurface->TotSurfaces; ++i) {
         state->dataSurface->Surface(i).Shape = SurfaceShape::Rectangle;
+    }
 
     // SurfaceOctreeCube
     SurfaceOctreeCube const cube(state->dataSurface->Surface);

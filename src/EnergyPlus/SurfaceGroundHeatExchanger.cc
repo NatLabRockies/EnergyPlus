@@ -198,7 +198,9 @@ namespace SurfaceGroundHeatExchanger {
         cCurrentModuleObject = "GroundHeatExchanger:Surface";
         int NumOfSurfaceGHEs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
         // allocate data structures
-        if (allocated(state.dataSurfaceGroundHeatExchangers->SurfaceGHE)) state.dataSurfaceGroundHeatExchangers->SurfaceGHE.deallocate();
+        if (allocated(state.dataSurfaceGroundHeatExchangers->SurfaceGHE)) {
+            state.dataSurfaceGroundHeatExchangers->SurfaceGHE.deallocate();
+        }
 
         state.dataSurfaceGroundHeatExchangers->SurfaceGHE.allocate(NumOfSurfaceGHEs);
         state.dataSurfaceGroundHeatExchangers->CheckEquipName.dimension(NumOfSurfaceGHEs, true);
@@ -545,7 +547,9 @@ namespace SurfaceGroundHeatExchanger {
             this->MyEnvrnFlag = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) this->MyEnvrnFlag = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->MyEnvrnFlag = true;
+        }
 
         // always initialize - module variables
         this->SurfaceArea = this->SurfaceLength * this->SurfaceWidth;
@@ -671,8 +675,9 @@ namespace SurfaceGroundHeatExchanger {
                 PastFluxBtm = this->QbtmConstCoef + this->QbtmVarCoef * state.dataSurfaceGroundHeatExchangers->SourceFlux;
 
                 if (std::abs((OldPastFluxTop - PastFluxTop) / OldPastFluxTop) <= SurfFluxTol &&
-                    std::abs((OldPastFluxBtm - PastFluxBtm) / OldPastFluxBtm) <= SurfFluxTol)
+                    std::abs((OldPastFluxBtm - PastFluxBtm) / OldPastFluxBtm) <= SurfFluxTol) {
                     break;
+                }
 
                 // calc new surface temps
                 CalcBottomSurfTemp(PastFluxBtm,
@@ -770,8 +775,10 @@ namespace SurfaceGroundHeatExchanger {
                     CalcBottomFluxCoefficents(TempBtm, TempTop);
                     FluxBtm = this->QbtmConstCoef + this->QbtmVarCoef * state.dataSurfaceGroundHeatExchangers->SourceFlux;
                     // convergence test on surface fluxes
-                    if (std::abs((OldFluxTop - FluxTop) / OldFluxTop) <= SurfFluxTol && std::abs((OldFluxBtm - FluxBtm) / OldFluxBtm) <= SurfFluxTol)
+                    if (std::abs((OldFluxTop - FluxTop) / OldFluxTop) <= SurfFluxTol &&
+                        std::abs((OldFluxBtm - FluxBtm) / OldFluxBtm) <= SurfFluxTol) {
                         break;
+                    }
 
                     // calc new surface temps
                     CalcBottomSurfTemp(FluxBtm,
@@ -802,7 +809,9 @@ namespace SurfaceGroundHeatExchanger {
                 CalcSourceTempCoefficents(TempBtm, TempTop);
                 state.dataSurfaceGroundHeatExchangers->SourceFlux = CalcSourceFlux(state);
                 // check source flux convergence
-                if (std::abs((OldSourceFlux - state.dataSurfaceGroundHeatExchangers->SourceFlux) / (1.0e-20 + OldSourceFlux)) <= SrcFluxTol) break;
+                if (std::abs((OldSourceFlux - state.dataSurfaceGroundHeatExchangers->SourceFlux) / (1.0e-20 + OldSourceFlux)) <= SrcFluxTol) {
+                    break;
+                }
                 OldSourceFlux = state.dataSurfaceGroundHeatExchangers->SourceFlux;
 
                 // Check for non-convergence
@@ -1115,7 +1124,9 @@ namespace SurfaceGroundHeatExchanger {
         // First find out where we are in the range of temperatures
         Index = 0;
         while (Index < NumOfPropDivisions) {
-            if (Temperature < Temps[Index]) break; // DO loop
+            if (Temperature < Temps[Index]) {
+                break; // DO loop
+            }
             ++Index;
         }
 

@@ -133,7 +133,9 @@ PlantComponent *PipeHTData::factory(EnergyPlusData &state, DataPlant::PlantEquip
     auto thisObj = std::find_if(state.dataPipeHT->PipeHT.begin(),
                                 state.dataPipeHT->PipeHT.end(),
                                 [&objectType, &objectName](const PipeHTData &myObj) { return myObj.Type == objectType && myObj.Name == objectName; });
-    if (thisObj != state.dataPipeHT->PipeHT.end()) return thisObj;
+    if (thisObj != state.dataPipeHT->PipeHT.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
     // Shut up the compiler
@@ -233,7 +235,9 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
     state.dataPipeHT->nsvNumOfPipeHT = NumOfPipeHTInt + NumOfPipeHTExt + NumOfPipeHTUG;
     // allocate data structures
-    if (allocated(state.dataPipeHT->PipeHT)) state.dataPipeHT->PipeHT.deallocate();
+    if (allocated(state.dataPipeHT->PipeHT)) {
+        state.dataPipeHT->PipeHT.deallocate();
+    }
 
     state.dataPipeHT->PipeHT.allocate(state.dataPipeHT->nsvNumOfPipeHT);
     state.dataPipeHT->PipeHTUniqueNames.reserve(static_cast<unsigned>(state.dataPipeHT->nsvNumOfPipeHT));
@@ -313,7 +317,9 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         // get environmental boundary condition type
 
-        if (s_ipsc->lAlphaFieldBlanks(5)) s_ipsc->cAlphaArgs(5) = "ZONE";
+        if (s_ipsc->lAlphaFieldBlanks(5)) {
+            s_ipsc->cAlphaArgs(5) = "ZONE";
+        }
 
         PipeIndoorBoundaryType indoorType = static_cast<PipeIndoorBoundaryType>(getEnumValue(pipeIndoorBoundaryTypeNamesUC, s_ipsc->cAlphaArgs(5)));
         switch (indoorType) {
@@ -970,8 +976,12 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
         this->BeginSimEnvrn = false;
     }
 
-    if (!state.dataGlobal->BeginSimFlag) this->BeginSimInit = true;
-    if (!state.dataGlobal->BeginEnvrnFlag) this->BeginSimEnvrn = true;
+    if (!state.dataGlobal->BeginSimFlag) {
+        this->BeginSimInit = true;
+    }
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->BeginSimEnvrn = true;
+    }
 
     // time step in seconds
     state.dataPipeHT->nsvDeltaTime = TimeStepSysSec;
@@ -1027,8 +1037,12 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
         this->FirstHVACupdateFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->BeginEnvrnupdateFlag = true;
-    if (!FirstHVACIteration) this->FirstHVACupdateFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->BeginEnvrnupdateFlag = true;
+    }
+    if (!FirstHVACIteration) {
+        this->FirstHVACupdateFlag = true;
+    }
 
     // Calculate the current sim time for this pipe (not necessarily structure variable, but it is ok for consistency)
     this->CurrentSimTime = (state.dataGlobal->DayOfSim - 1) * 24 + state.dataGlobal->HourOfDay - 1 +
@@ -1472,7 +1486,9 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
             for (DepthIndex = 1; DepthIndex <= this->NumDepthNodes - 1; ++DepthIndex) {
                 for (WidthIndex = 2; WidthIndex <= this->PipeNodeWidth; ++WidthIndex) {
                     Ttemp = this->T(WidthIndex, DepthIndex, LengthIndex, TimeIndex::Tentative);
-                    if (std::abs(T_O(WidthIndex, DepthIndex, LengthIndex) - Ttemp) > ConvCrit) goto IterationLoop_loop;
+                    if (std::abs(T_O(WidthIndex, DepthIndex, LengthIndex) - Ttemp) > ConvCrit) {
+                        goto IterationLoop_loop;
+                    }
                 }
             }
         }
@@ -1625,15 +1641,20 @@ void PipeHTData::CalcZonePipesHeatGain(EnergyPlusData &state)
     // Sums the heat losses from all of the water heaters in the zone to add as a gain to the zone.
 
     // Using/Aliasing
-    if (state.dataPipeHT->nsvNumOfPipeHT == 0) return;
+    if (state.dataPipeHT->nsvNumOfPipeHT == 0) {
+        return;
+    }
 
     if (state.dataGlobal->BeginEnvrnFlag && state.dataPipeHT->MyEnvrnFlag) {
-        for (auto &e : state.dataPipeHT->PipeHT)
+        for (auto &e : state.dataPipeHT->PipeHT) {
             e.ZoneHeatGainRate = 0.0;
+        }
         state.dataPipeHT->MyEnvrnFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) state.dataPipeHT->MyEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        state.dataPipeHT->MyEnvrnFlag = true;
+    }
 }
 
 //==============================================================================

@@ -126,7 +126,9 @@ namespace RoomAir {
             // setup Mundt model
             bool ErrorsFound = false;
             SetupDispVent1Node(state, ZoneNum, ErrorsFound);
-            if (ErrorsFound) ShowFatalError(state, "ManageMundtModel: Errors in setting up Mundt Model. Preceding condition(s) cause termination.");
+            if (ErrorsFound) {
+                ShowFatalError(state, "ManageMundtModel: Errors in setting up Mundt Model. Preceding condition(s) cause termination.");
+            }
 
             // perform Mundt model calculations
             CalcDispVent1Node(state, ZoneNum);
@@ -210,8 +212,9 @@ namespace RoomAir {
         state.dataMundtSimMgr->TheseSurfIDs.allocate(MaxNumOfSurfs);
         state.dataMundtSimMgr->MundtAirSurf.allocate(MaxNumOfSurfs, NumOfMundtZones);
         state.dataMundtSimMgr->LineNode.allocate(MaxNumOfAirNodes, NumOfMundtZones);
-        for (int SurfNum = 1; SurfNum <= MaxNumOfSurfs; ++SurfNum)
+        for (int SurfNum = 1; SurfNum <= MaxNumOfSurfs; ++SurfNum) {
             state.dataMundtSimMgr->ID1dSurf(SurfNum) = SurfNum;
+        }
         for (auto &e : state.dataMundtSimMgr->MundtAirSurf) {
             e.Area = 0.0;
             e.Temp = 25.0;
@@ -293,7 +296,9 @@ namespace RoomAir {
                         }
                     }
                     // got data for this zone so exit the zone loop
-                    if (AirNodeFoundFlag) break;
+                    if (AirNodeFoundFlag) {
+                        break;
+                    }
                 }
             }
 
@@ -301,7 +306,9 @@ namespace RoomAir {
             MaxNumOfFloorSurfs = max(MaxNumOfFloorSurfs, FloorSurfCount);
         }
 
-        if (ErrorsFound) ShowFatalError(state, "InitMundtModel: Preceding condition(s) cause termination.");
+        if (ErrorsFound) {
+            ShowFatalError(state, "InitMundtModel: Preceding condition(s) cause termination.");
+        }
 
         // allocate arrays
         state.dataMundtSimMgr->RoomNodeIDs.allocate(MaxNumOfRoomNodes);

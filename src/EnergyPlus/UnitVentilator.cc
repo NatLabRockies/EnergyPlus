@@ -602,7 +602,7 @@ namespace UnitVentilator {
                     ShowContinueError(state, format("a heating coil is required for {}=\"{}\".", cAlphaFields(13), Alphas(13)));
                     ErrorsFound = true;
                 } // IF (.NOT. lAlphaBlanks(15)) THEN - from the start of heating coil information
-            }     // is option both or heating only
+            } // is option both or heating only
 
             if (unitVent.CoilOption == CoilsUsed::Both || unitVent.CoilOption == CoilsUsed::Cooling) {
                 if (!lAlphaBlanks(18)) {
@@ -857,7 +857,9 @@ namespace UnitVentilator {
         lAlphaBlanks.deallocate();
         lNumericBlanks.deallocate();
 
-        if (ErrorsFound) ShowFatalError(state, format("{}Errors found in input.", RoutineName));
+        if (ErrorsFound) {
+            ShowFatalError(state, format("{}Errors found in input.", RoutineName));
+        }
 
         // Setup Report variables for the Unit Ventilators, CurrentModuleObject='ZoneHVAC:UnitVentilator'
         for (int UnitVentNum = 1; UnitVentNum <= state.dataUnitVentilators->NumOfUnitVents; ++UnitVentNum) {
@@ -1024,9 +1026,8 @@ namespace UnitVentilator {
                 }
 
                 unitVent.CoolCoilWaterOutNodeNum = DataPlant::CompData::getPlantComponent(state, unitVent.CWPlantLoc).NodeNumOut;
-            } else {
-                if (unitVent.CoolCoilPresent)
-                    ShowFatalError(state, format("InitUnitVentilator: Unit={}, invalid cooling coil type. Program terminated.", unitVent.Name));
+            } else if (unitVent.CoolCoilPresent) {
+                ShowFatalError(state, format("InitUnitVentilator: Unit={}, invalid cooling coil type. Program terminated.", unitVent.Name));
             }
             state.dataUnitVentilators->MyPlantScanFlag(UnitVentNum) = false;
         } else if (state.dataUnitVentilators->MyPlantScanFlag(UnitVentNum) && !state.dataGlobal->AnyPlantInModel) {
@@ -1036,8 +1037,9 @@ namespace UnitVentilator {
         if (!state.dataUnitVentilators->ZoneEquipmentListChecked && state.dataZoneEquip->ZoneEquipInputsFilled) {
             state.dataUnitVentilators->ZoneEquipmentListChecked = true;
             for (int Loop = 1; Loop <= state.dataUnitVentilators->NumOfUnitVents; ++Loop) {
-                if (DataZoneEquipment::CheckZoneEquipmentList(state, "ZoneHVAC:UnitVentilator", state.dataUnitVentilators->UnitVent(Loop).Name))
+                if (DataZoneEquipment::CheckZoneEquipmentList(state, "ZoneHVAC:UnitVentilator", state.dataUnitVentilators->UnitVent(Loop).Name)) {
                     continue;
+                }
                 ShowSevereError(
                     state,
                     format("InitUnitVentilator: Unit=[UNIT VENTILATOR,{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
@@ -1119,7 +1121,9 @@ namespace UnitVentilator {
             state.dataUnitVentilators->MyEnvrnFlag(UnitVentNum) = false;
         } // ...end start of environment inits
 
-        if (!state.dataGlobal->BeginEnvrnFlag) state.dataUnitVentilators->MyEnvrnFlag(UnitVentNum) = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            state.dataUnitVentilators->MyEnvrnFlag(UnitVentNum) = true;
+        }
 
         // These initializations are done every iteration...
 
@@ -2540,8 +2544,9 @@ namespace UnitVentilator {
                                     CalcUnitVentilatorComponents(state, UnitVentNum, FirstHVACIteration, QUnitOut, fanOp, PartLoadRatio);
                                     if (state.dataUnitVentilators->QZnReq) {
                                         return (QUnitOut - state.dataUnitVentilators->QZnReq) / state.dataUnitVentilators->QZnReq;
-                                    } else
+                                    } else {
                                         return 0.0;
+                                    }
                                 };
                                 General::SolveRoot(state, 0.001, MaxIter, SolFlag, PartLoadFrac, f, 0.0, 1.0);
                             }

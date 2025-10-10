@@ -121,7 +121,7 @@ protected:                                               // Data
     int ctrlZoneInNodeIndex = 0;                         // which controlled zone inlet node number corresponds with this unit
     int airLoopNum = 0;                                  // index to airloop that this terminal unit is connected to
     int termUnitSizingNum = 0;                           // index to TermUnitSizing, TermUnitFinalZoneSizing, and more for this air distribution unit
-};                                                       // AirTerminalUnit
+}; // AirTerminalUnit
 
 } // namespace EnergyPlus
 

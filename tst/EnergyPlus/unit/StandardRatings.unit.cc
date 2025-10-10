@@ -55,6 +55,7 @@
 #include <EnergyPlus/ChillerElectricEIR.hh>
 #include <EnergyPlus/ChillerReformulatedEIR.hh>
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DXCoils.hh>
 // #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -11667,21 +11668,22 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_15000W_alternateMode_SEER2_2023_Valu
     auto &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     // size it
     thisCoil.size(*state);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(thisCoil.performance.get())};
 
     ASSERT_EQ("DX COOLING COIL", thisCoil.name);
-    ASSERT_EQ("DX COOL COOLING COIL PERFORMANCE", thisCoil.performance.name);
-    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE", thisCoil.performance.normalMode.name);
-    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE2", thisCoil.performance.alternateMode.name);
-    int nsp = (int)thisCoil.performance.normalMode.speeds.size();
+    ASSERT_EQ("DX COOL COOLING COIL PERFORMANCE", performance->name);
+    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE", performance->normalMode.name);
+    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE2", performance->alternateMode.name);
+    int nsp = performance->numSpeeds();
     ASSERT_EQ(2, nsp);
-    auto speed1 = thisCoil.performance.normalMode.speeds[0];
+    auto speed1 = performance->normalMode.speeds[0];
     ASSERT_EQ("DX COOL COOLING COIL SPEED 1 PERFORMANCE", speed1.name);
-    auto speed2 = thisCoil.performance.normalMode.speeds[1];
+    auto speed2 = performance->normalMode.speeds[1];
     ASSERT_EQ("DX COOL COOLING COIL SPEED 2 PERFORMANCE", speed2.name);
 
-    auto coilMode = thisCoil.performance.maxAvailCoilMode;
-    auto normalMode = thisCoil.performance.normalMode.speeds;
-    auto alternateMode1 = thisCoil.performance.alternateMode;
+    auto coilMode = performance->maxAvailCoilMode;
+    auto normalMode = performance->normalMode.speeds;
+    auto alternateMode1 = performance->alternateMode;
     EXPECT_EQ((int)HVAC::CoilMode::Enhanced, (int)coilMode);
     EXPECT_TRUE(2 == normalMode.size());
     auto speedA1 = alternateMode1.speeds[0];
@@ -11705,10 +11707,10 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_15000W_alternateMode_SEER2_2023_Valu
     EXPECT_EQ(0.3, maxEIRfLowPLRXInput);
 
     // Rated Total Capacity
-    EXPECT_NEAR(15000, thisCoil.performance.normalMode.ratedGrossTotalCap, 0.01);
+    EXPECT_NEAR(15000, performance->ratedGrossTotalCap(), 0.01);
 
     // Reated Air Vol Flow Rate | evap air flow rate and condenser air flow rate ??
-    EXPECT_NEAR(0.80, thisCoil.performance.normalMode.ratedEvapAirFlowRate, 0.01);
+    EXPECT_NEAR(0.80, performance->ratedEvapAirFlowRate(*state), 0.01);
 
     EXPECT_NEAR(7500, speed1.rated_total_capacity, 0.01);
     EXPECT_NEAR(15000, speed2.rated_total_capacity, 0.01);
@@ -11725,8 +11727,8 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_15000W_alternateMode_SEER2_2023_Valu
     EXPECT_NEAR(631.3, speed2.rated_evap_fan_power_per_volume_flow_rate_2023, 0.01);
 
     // CondenserType is a different enum that is being used in case of CurveFit in comparison to other Cooling DX Coils
-    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == thisCoil.performance.normalMode.condenserType);
-    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == thisCoil.performance.normalMode.condenserType);
+    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == performance->normalMode.condenserType);
+    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == performance->normalMode.condenserType);
 
     // Check user curve coefficients
 
@@ -11750,39 +11752,39 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_15000W_alternateMode_SEER2_2023_Valu
     EXPECT_EQ(1, thisEIRFFlowHs->coeff[0]);
     EXPECT_EQ(0, thisEIRFFlowHs->coeff[1]);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity == 0);
+    ASSERT_TRUE(performance->standardRatingEER == 0);
+    ASSERT_TRUE(performance->standardRatingSEER == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 == 0);
 
-    thisCoil.performance.calcStandardRatings210240(*state);
+    performance->calcStandardRatings210240(*state);
     // 2017 TBD
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity > 0);
-    EXPECT_NEAR(3.39, thisCoil.performance.standardRatingEER, 0.01);
-    EXPECT_NEAR(3.93, thisCoil.performance.standardRatingSEER, 0.01);
-    EXPECT_NEAR(14399.91, thisCoil.performance.standardRatingCoolingCapacity, 0.01);
-    EXPECT_NEAR(13.42, thisCoil.performance.standardRatingSEER * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER > 0);
+    ASSERT_TRUE(performance->standardRatingSEER > 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity > 0);
+    EXPECT_NEAR(3.39, performance->standardRatingEER, 0.01);
+    EXPECT_NEAR(3.93, performance->standardRatingSEER, 0.01);
+    EXPECT_NEAR(14399.91, performance->standardRatingCoolingCapacity, 0.01);
+    EXPECT_NEAR(13.42, performance->standardRatingSEER * StandardRatings::ConvFromSIToIP, 0.01);
     // 2023
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User > 0.0);
-    EXPECT_TRUE(thisCoil.performance.standardRatingSEER2_Standard > 0.0);
-    EXPECT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 > 0.0);
-    EXPECT_NEAR(3.51, thisCoil.performance.standardRatingEER2, 0.01);
-    EXPECT_NEAR(4.18, thisCoil.performance.standardRatingSEER2_User, 0.01);
-    EXPECT_NEAR(4.12, thisCoil.performance.standardRatingSEER2_Standard, 0.01);
-    EXPECT_NEAR(14513.51, thisCoil.performance.standardRatingCoolingCapacity2023, 0.01);
-    EXPECT_NEAR(14.26, thisCoil.performance.standardRatingSEER2_User * StandardRatings::ConvFromSIToIP, 0.01);
-    EXPECT_NEAR(14.07, thisCoil.performance.standardRatingSEER2_Standard * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User > 0.0);
+    EXPECT_TRUE(performance->standardRatingSEER2_Standard > 0.0);
+    EXPECT_TRUE(performance->standardRatingCoolingCapacity2023 > 0.0);
+    EXPECT_NEAR(3.51, performance->standardRatingEER2, 0.01);
+    EXPECT_NEAR(4.18, performance->standardRatingSEER2_User, 0.01);
+    EXPECT_NEAR(4.12, performance->standardRatingSEER2_Standard, 0.01);
+    EXPECT_NEAR(14513.51, performance->standardRatingCoolingCapacity2023, 0.01);
+    EXPECT_NEAR(14.26, performance->standardRatingSEER2_User * StandardRatings::ConvFromSIToIP, 0.01);
+    EXPECT_NEAR(14.07, performance->standardRatingSEER2_Standard * StandardRatings::ConvFromSIToIP, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER > 0);
-    EXPECT_NEAR(3.42, thisCoil.performance.standardRatingIEER, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 > 0);
-    EXPECT_NEAR(3.97, thisCoil.performance.standardRatingIEER2, 0.01);
+    ASSERT_TRUE(performance->standardRatingIEER > 0);
+    EXPECT_NEAR(3.42, performance->standardRatingIEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingIEER2 > 0);
+    EXPECT_NEAR(3.97, performance->standardRatingIEER2, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, CurveFit_03_Speed_5000W_SEER2_2023_ValueTest)
@@ -11991,21 +11993,23 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_5000W_SEER2_2023_ValueTest)
     // size it
     thisCoil.size(*state);
 
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(thisCoil.performance.get())};
+
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL", thisCoil.name);
-    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL PERFORMANCE", thisCoil.performance.name);
-    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL OPERATING MODE", thisCoil.performance.normalMode.name);
-    int nsp = (int)thisCoil.performance.normalMode.speeds.size();
+    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL PERFORMANCE", performance->name);
+    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL OPERATING MODE", performance->normalMode.name);
+    int nsp = performance->numSpeeds();
     ASSERT_EQ(3, nsp);
-    auto speed1 = thisCoil.performance.normalMode.speeds[0];
+    auto speed1 = performance->normalMode.speeds[0];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 1 PERFORMANCE", speed1.name);
-    auto speed2 = thisCoil.performance.normalMode.speeds[1];
+    auto speed2 = performance->normalMode.speeds[1];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 2 PERFORMANCE", speed2.name);
-    auto speed3 = thisCoil.performance.normalMode.speeds[2];
+    auto speed3 = performance->normalMode.speeds[2];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 3 PERFORMANCE", speed3.name);
 
-    HVAC::CoilMode coilMode = thisCoil.performance.maxAvailCoilMode;
-    auto alternateMode1 = thisCoil.performance.alternateMode.speeds; // Do you know what auto types to here?
-    auto alternateMode2 = thisCoil.performance.alternateMode2.speeds;
+    HVAC::CoilMode coilMode = performance->maxAvailCoilMode;
+    auto alternateMode1 = performance->alternateMode.speeds;
+    auto alternateMode2 = performance->alternateMode2.speeds;
     EXPECT_EQ((int)HVAC::CoilMode::Normal, (int)coilMode);
     EXPECT_TRUE(alternateMode1.empty());
     EXPECT_TRUE(alternateMode2.empty());
@@ -12025,10 +12029,10 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_5000W_SEER2_2023_ValueTest)
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
     // Rated Total Capacity
-    EXPECT_NEAR(5000, thisCoil.performance.normalMode.ratedGrossTotalCap, 0.01);
+    EXPECT_NEAR(5000, performance->ratedGrossTotalCap(), 0.01);
 
     // Reated Air Vol Flow Rate | evap air flow rate and condenser air flow rate ??
-    EXPECT_NEAR(0.25, thisCoil.performance.normalMode.ratedEvapAirFlowRate, 0.01);
+    EXPECT_NEAR(0.25, performance->ratedEvapAirFlowRate(*state), 0.01);
 
     EXPECT_NEAR(1666.5, speed1.rated_total_capacity, 0.01);
     EXPECT_NEAR(3333.5, speed2.rated_total_capacity, 0.01);
@@ -12049,8 +12053,8 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_5000W_SEER2_2023_ValueTest)
     EXPECT_NEAR(812.9, speed3.rated_evap_fan_power_per_volume_flow_rate_2023, 0.01);
 
     // CondenserType is a different enum that is being used in case of CurveFit in comparison to other Cooling DX Coils
-    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == thisCoil.performance.normalMode.condenserType);
-    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == thisCoil.performance.normalMode.condenserType);
+    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == performance->normalMode.condenserType);
+    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == performance->normalMode.condenserType);
 
     // Check user curve coefficients
 
@@ -12074,39 +12078,39 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_5000W_SEER2_2023_ValueTest)
     EXPECT_EQ(.47278589, thisEIRFFlowHs->coeff[0]);
     EXPECT_EQ(1.2433415, thisEIRFFlowHs->coeff[1]);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity == 0);
+    ASSERT_TRUE(performance->standardRatingEER == 0);
+    ASSERT_TRUE(performance->standardRatingSEER == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 == 0);
 
-    thisCoil.performance.calcStandardRatings210240(*state);
+    performance->calcStandardRatings210240(*state);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity > 0);
-    EXPECT_NEAR(2.62, thisCoil.performance.standardRatingEER, 0.01);
-    EXPECT_NEAR(2.80, thisCoil.performance.standardRatingSEER, 0.01);
-    EXPECT_NEAR(4831.92, thisCoil.performance.standardRatingCoolingCapacity, 0.01);
-    EXPECT_NEAR(9.56, thisCoil.performance.standardRatingSEER * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER > 0);
+    ASSERT_TRUE(performance->standardRatingSEER > 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity > 0);
+    EXPECT_NEAR(2.62, performance->standardRatingEER, 0.01);
+    EXPECT_NEAR(2.80, performance->standardRatingSEER, 0.01);
+    EXPECT_NEAR(4831.92, performance->standardRatingCoolingCapacity, 0.01);
+    EXPECT_NEAR(9.56, performance->standardRatingSEER * StandardRatings::ConvFromSIToIP, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User > 0.0);
-    EXPECT_TRUE(thisCoil.performance.standardRatingSEER2_Standard > 0.0);
-    EXPECT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 > 0.0);
-    EXPECT_NEAR(2.55, thisCoil.performance.standardRatingEER2, 0.01);
-    EXPECT_NEAR(3.05, thisCoil.performance.standardRatingSEER2_User, 0.01);
-    EXPECT_NEAR(3.07, thisCoil.performance.standardRatingSEER2_Standard, 0.01);
-    EXPECT_NEAR(4798.04, thisCoil.performance.standardRatingCoolingCapacity2023, 0.01);
-    EXPECT_NEAR(10.41, thisCoil.performance.standardRatingSEER2_User * StandardRatings::ConvFromSIToIP, 0.01);
-    EXPECT_NEAR(10.47, thisCoil.performance.standardRatingSEER2_Standard * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User > 0.0);
+    EXPECT_TRUE(performance->standardRatingSEER2_Standard > 0.0);
+    EXPECT_TRUE(performance->standardRatingCoolingCapacity2023 > 0.0);
+    EXPECT_NEAR(2.55, performance->standardRatingEER2, 0.01);
+    EXPECT_NEAR(3.05, performance->standardRatingSEER2_User, 0.01);
+    EXPECT_NEAR(3.07, performance->standardRatingSEER2_Standard, 0.01);
+    EXPECT_NEAR(4798.04, performance->standardRatingCoolingCapacity2023, 0.01);
+    EXPECT_NEAR(10.41, performance->standardRatingSEER2_User * StandardRatings::ConvFromSIToIP, 0.01);
+    EXPECT_NEAR(10.47, performance->standardRatingSEER2_Standard * StandardRatings::ConvFromSIToIP, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER > 0);
-    EXPECT_NEAR(2.78, thisCoil.performance.standardRatingIEER, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 > 0);
-    EXPECT_NEAR(3.17, thisCoil.performance.standardRatingIEER2, 0.01);
+    ASSERT_TRUE(performance->standardRatingIEER > 0);
+    EXPECT_NEAR(2.78, performance->standardRatingIEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingIEER2 > 0);
+    EXPECT_NEAR(3.17, performance->standardRatingIEER2, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, CurveFit_02_Speed_30000W_alternateMode_IEER_2022_ValueTest)
@@ -12293,21 +12297,22 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_30000W_alternateMode_IEER_2022_Value
     auto &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     // size it
     thisCoil.size(*state);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(thisCoil.performance.get())};
 
     ASSERT_EQ("DX COOLING COIL", thisCoil.name);
-    ASSERT_EQ("DX COOL COOLING COIL PERFORMANCE", thisCoil.performance.name);
-    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE", thisCoil.performance.normalMode.name);
-    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE2", thisCoil.performance.alternateMode.name);
-    int nsp = (int)thisCoil.performance.normalMode.speeds.size();
+    ASSERT_EQ("DX COOL COOLING COIL PERFORMANCE", performance->name);
+    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE", performance->normalMode.name);
+    ASSERT_EQ("DX COOL COOLING COIL OPERATING MODE2", performance->alternateMode.name);
+    int nsp = (int)performance->normalMode.speeds.size();
     ASSERT_EQ(2, nsp);
-    auto speed1 = thisCoil.performance.normalMode.speeds[0];
+    auto speed1 = performance->normalMode.speeds[0];
     ASSERT_EQ("DX COOL COOLING COIL SPEED 1 PERFORMANCE", speed1.name);
-    auto speed2 = thisCoil.performance.normalMode.speeds[1];
+    auto speed2 = performance->normalMode.speeds[1];
     ASSERT_EQ("DX COOL COOLING COIL SPEED 2 PERFORMANCE", speed2.name);
 
-    // auto hasAlternateMode = thisCoil.performance.hasAlternateMode;
-    auto normalMode = thisCoil.performance.normalMode.speeds;
-    auto alternateMode1 = thisCoil.performance.alternateMode;
+    // auto hasAlternateMode = performance->hasAlternateMode;
+    auto normalMode = performance->normalMode.speeds;
+    auto alternateMode1 = performance->alternateMode;
     // EXPECT_EQ(1, hasAlternateMode);
     EXPECT_TRUE(2 == normalMode.size());
     auto speedA1 = alternateMode1.speeds[0];
@@ -12331,10 +12336,10 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_30000W_alternateMode_IEER_2022_Value
     EXPECT_EQ(0.3, maxEIRfLowPLRXInput);
 
     // Rated Total Capacity
-    EXPECT_NEAR(30000, thisCoil.performance.normalMode.ratedGrossTotalCap, 0.01);
+    EXPECT_NEAR(30000, performance->normalMode.ratedGrossTotalCap, 0.01);
 
     // Reated Air Vol Flow Rate | evap air flow rate and condenser air flow rate ??
-    EXPECT_NEAR(1.60, thisCoil.performance.normalMode.ratedEvapAirFlowRate, 0.01);
+    EXPECT_NEAR(1.60, performance->normalMode.ratedEvapAirFlowRate, 0.01);
 
     EXPECT_NEAR(15000, speed1.rated_total_capacity, 0.01);
     EXPECT_NEAR(30000, speed2.rated_total_capacity, 0.01);
@@ -12351,8 +12356,8 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_30000W_alternateMode_IEER_2022_Value
     EXPECT_NEAR(631.3, speed2.rated_evap_fan_power_per_volume_flow_rate_2023, 0.01);
 
     // CondenserType is a different enum that is being used in case of CurveFit in comparison to other Cooling DX Coils
-    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == thisCoil.performance.normalMode.condenserType);
-    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == thisCoil.performance.normalMode.condenserType);
+    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == performance->normalMode.condenserType);
+    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == performance->normalMode.condenserType);
 
     // Check user curve coefficients
 
@@ -12376,37 +12381,37 @@ TEST_F(EnergyPlusFixture, CurveFit_02_Speed_30000W_alternateMode_IEER_2022_Value
     EXPECT_EQ(1, thisEIRFFlowHs->coeff[0]);
     EXPECT_EQ(0, thisEIRFFlowHs->coeff[1]);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity == 0);
+    ASSERT_TRUE(performance->standardRatingEER == 0);
+    ASSERT_TRUE(performance->standardRatingSEER == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 == 0);
+    ASSERT_TRUE(performance->standardRatingIEER == 0);
+    ASSERT_TRUE(performance->standardRatingIEER2 == 0);
 
-    thisCoil.performance.calcStandardRatings210240(*state);
+    performance->calcStandardRatings210240(*state);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 > 0);
-    EXPECT_NEAR(3.51, thisCoil.performance.standardRatingEER2, 0.01);
-    EXPECT_NEAR(3.97, thisCoil.performance.standardRatingIEER2, 0.01);
-    EXPECT_NEAR(29027.03, thisCoil.performance.standardRatingCoolingCapacity2023, 0.01);
-    EXPECT_NEAR(13.56, thisCoil.performance.standardRatingIEER2 * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingIEER > 0);
+    ASSERT_TRUE(performance->standardRatingIEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 > 0);
+    EXPECT_NEAR(3.51, performance->standardRatingEER2, 0.01);
+    EXPECT_NEAR(3.97, performance->standardRatingIEER2, 0.01);
+    EXPECT_NEAR(29027.03, performance->standardRatingCoolingCapacity2023, 0.01);
+    EXPECT_NEAR(13.56, performance->standardRatingIEER2 * StandardRatings::ConvFromSIToIP, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER > 0);
-    EXPECT_NEAR(3.39, thisCoil.performance.standardRatingEER, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER > 0);
-    EXPECT_NEAR(3.93, thisCoil.performance.standardRatingSEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER > 0);
+    EXPECT_NEAR(3.39, performance->standardRatingEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER > 0);
+    EXPECT_NEAR(3.93, performance->standardRatingSEER, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User > 0);
-    EXPECT_NEAR(4.18, thisCoil.performance.standardRatingSEER2_User, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard > 0);
-    EXPECT_NEAR(4.12, thisCoil.performance.standardRatingSEER2_Standard, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER2_User > 0);
+    EXPECT_NEAR(4.18, performance->standardRatingSEER2_User, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard > 0);
+    EXPECT_NEAR(4.12, performance->standardRatingSEER2_Standard, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, CurveFit_03_Speed_20000W_IEER_2022_ValueTest)
@@ -12611,25 +12616,26 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_20000W_IEER_2022_ValueTest)
 
     int coilIndex = CoilCoolingDX::factory(*state, "Sys 2 Furnace DX Cool Cooling Coil");
     auto &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(thisCoil.performance.get())};
 
     // size it
     thisCoil.size(*state);
 
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL", thisCoil.name);
-    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL PERFORMANCE", thisCoil.performance.name);
-    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL OPERATING MODE", thisCoil.performance.normalMode.name);
-    int nsp = (int)thisCoil.performance.normalMode.speeds.size();
+    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL PERFORMANCE", performance->name);
+    ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL OPERATING MODE", performance->normalMode.name);
+    int nsp = (int)performance->normalMode.speeds.size();
     ASSERT_EQ(3, nsp);
-    auto speed1 = thisCoil.performance.normalMode.speeds[0];
+    auto speed1 = performance->normalMode.speeds[0];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 1 PERFORMANCE", speed1.name);
-    auto speed2 = thisCoil.performance.normalMode.speeds[1];
+    auto speed2 = performance->normalMode.speeds[1];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 2 PERFORMANCE", speed2.name);
-    auto speed3 = thisCoil.performance.normalMode.speeds[2];
+    auto speed3 = performance->normalMode.speeds[2];
     ASSERT_EQ("SYS 2 FURNACE DX COOL COOLING COIL SPEED 3 PERFORMANCE", speed3.name);
 
-    // auto hasAlternateMode = thisCoil.performance.hasAlternateMode;
-    auto alternateMode1 = thisCoil.performance.alternateMode.speeds;
-    auto alternateMode2 = thisCoil.performance.alternateMode2.speeds;
+    // auto hasAlternateMode = performance->hasAlternateMode;
+    auto alternateMode1 = performance->alternateMode.speeds;
+    auto alternateMode2 = performance->alternateMode2.speeds;
     // EXPECT_EQ(0, hasAlternateMode);
     EXPECT_TRUE(alternateMode1.empty());
     EXPECT_TRUE(alternateMode2.empty());
@@ -12649,10 +12655,10 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_20000W_IEER_2022_ValueTest)
     EXPECT_EQ(1.0, maxEIRfLowPLRXInput);
 
     // Rated Total Capacity
-    EXPECT_NEAR(20000, thisCoil.performance.normalMode.ratedGrossTotalCap, 0.01);
+    EXPECT_NEAR(20000, performance->normalMode.ratedGrossTotalCap, 0.01);
 
     // Reated Air Vol Flow Rate | evap air flow rate and condenser air flow rate ??
-    EXPECT_NEAR(1.0, thisCoil.performance.normalMode.ratedEvapAirFlowRate, 0.01);
+    EXPECT_NEAR(1.0, performance->normalMode.ratedEvapAirFlowRate, 0.01);
 
     EXPECT_NEAR(6666, speed1.rated_total_capacity, 0.01);
     EXPECT_NEAR(13334, speed2.rated_total_capacity, 0.01);
@@ -12673,8 +12679,8 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_20000W_IEER_2022_ValueTest)
     EXPECT_NEAR(812.9, speed3.rated_evap_fan_power_per_volume_flow_rate_2023, 0.01);
 
     // CondenserType is a different enum that is being used in case of CurveFit in comparison to other Cooling DX Coils
-    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == thisCoil.performance.normalMode.condenserType);
-    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == thisCoil.performance.normalMode.condenserType);
+    EXPECT_TRUE(CoilCoolingDXCurveFitOperatingMode::CondenserType::AIRCOOLED == performance->normalMode.condenserType);
+    EXPECT_FALSE(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED == performance->normalMode.condenserType);
 
     // Check user curve coefficients
 
@@ -12698,36 +12704,36 @@ TEST_F(EnergyPlusFixture, CurveFit_03_Speed_20000W_IEER_2022_ValueTest)
     EXPECT_EQ(.47278589, thisEIRFFlowHs->coeff[0]);
     EXPECT_EQ(1.2433415, thisEIRFFlowHs->coeff[1]);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity == 0);
+    ASSERT_TRUE(performance->standardRatingEER == 0);
+    ASSERT_TRUE(performance->standardRatingSEER == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_User == 0);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard == 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 == 0);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER == 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 == 0);
+    ASSERT_TRUE(performance->standardRatingIEER == 0);
+    ASSERT_TRUE(performance->standardRatingIEER2 == 0);
 
-    thisCoil.performance.calcStandardRatings210240(*state);
+    performance->calcStandardRatings210240(*state);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingIEER2 > 0);
-    ASSERT_TRUE(thisCoil.performance.standardRatingCoolingCapacity2023 > 0);
-    EXPECT_NEAR(2.55, thisCoil.performance.standardRatingEER2, 0.01);
-    EXPECT_NEAR(3.18, thisCoil.performance.standardRatingIEER2, 0.01);
-    EXPECT_NEAR(19192.186657893722, thisCoil.performance.standardRatingCoolingCapacity2023, 0.01);
-    EXPECT_NEAR(10.85, thisCoil.performance.standardRatingIEER2 * StandardRatings::ConvFromSIToIP, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingIEER > 0);
+    ASSERT_TRUE(performance->standardRatingIEER2 > 0);
+    ASSERT_TRUE(performance->standardRatingCoolingCapacity2023 > 0);
+    EXPECT_NEAR(2.55, performance->standardRatingEER2, 0.01);
+    EXPECT_NEAR(3.18, performance->standardRatingIEER2, 0.01);
+    EXPECT_NEAR(19192.186657893722, performance->standardRatingCoolingCapacity2023, 0.01);
+    EXPECT_NEAR(10.85, performance->standardRatingIEER2 * StandardRatings::ConvFromSIToIP, 0.01);
 
-    ASSERT_TRUE(thisCoil.performance.standardRatingEER > 0);
-    EXPECT_NEAR(2.62, thisCoil.performance.standardRatingEER, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER > 0);
-    EXPECT_NEAR(2.80, thisCoil.performance.standardRatingSEER, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_User > 0);
-    EXPECT_NEAR(3.05, thisCoil.performance.standardRatingSEER2_User, 0.01);
-    ASSERT_TRUE(thisCoil.performance.standardRatingSEER2_Standard > 0);
-    EXPECT_NEAR(3.07, thisCoil.performance.standardRatingSEER2_Standard, 0.01);
+    ASSERT_TRUE(performance->standardRatingEER > 0);
+    EXPECT_NEAR(2.62, performance->standardRatingEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER > 0);
+    EXPECT_NEAR(2.80, performance->standardRatingSEER, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER2_User > 0);
+    EXPECT_NEAR(3.05, performance->standardRatingSEER2_User, 0.01);
+    ASSERT_TRUE(performance->standardRatingSEER2_Standard > 0);
+    EXPECT_NEAR(3.07, performance->standardRatingSEER2_Standard, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, ChillerCondenserEnteringFluidTemp_AHRIIPTestConditions)

@@ -317,7 +317,9 @@ namespace OutAirNodeManager {
                 }
 
                 // Set additional node properties
-                if (NumNums > 0) state.dataLoopNodes->Node(NodeNums(1)).Height = Numbers(1);
+                if (NumNums > 0) {
+                    state.dataLoopNodes->Node(NodeNums(1)).Height = Numbers(1);
+                }
 
                 if (NumAlphas > 1) {
                     state.dataGlobal->AnyLocalEnvironmentsInModel = true;
@@ -553,14 +555,19 @@ namespace OutAirNodeManager {
             // Note -- this setting is different than the DataEnvironment "AT" settings.
             state.dataLoopNodes->Node(NodeNum).OutAirDryBulb = state.dataEnvrn->OutDryBulbTemp;
             state.dataLoopNodes->Node(NodeNum).OutAirWetBulb = state.dataEnvrn->OutWetBulbTemp;
-            if (InitCall) state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = state.dataEnvrn->WindSpeed;
+            if (InitCall) {
+                state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = state.dataEnvrn->WindSpeed;
+            }
         } else {
             state.dataLoopNodes->Node(NodeNum).OutAirDryBulb = OutDryBulbTempAt(state, state.dataLoopNodes->Node(NodeNum).Height);
             state.dataLoopNodes->Node(NodeNum).OutAirWetBulb = OutWetBulbTempAt(state, state.dataLoopNodes->Node(NodeNum).Height);
-            if (InitCall)
+            if (InitCall) {
                 state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = DataEnvironment::WindSpeedAt(state, state.dataLoopNodes->Node(NodeNum).Height);
+            }
         }
-        if (!InitCall) state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = state.dataEnvrn->WindSpeed;
+        if (!InitCall) {
+            state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = state.dataEnvrn->WindSpeed;
+        }
         state.dataLoopNodes->Node(NodeNum).OutAirWindDir = state.dataEnvrn->WindDir;
 
         if (InitCall) {
@@ -579,14 +586,18 @@ namespace OutAirNodeManager {
             }
 
             // Set node data to EMS overwritten values if defined
-            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirDryBulb)
+            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirDryBulb) {
                 state.dataLoopNodes->Node(NodeNum).OutAirDryBulb = state.dataLoopNodes->Node(NodeNum).EMSValueForOutAirDryBulb;
-            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWetBulb)
+            }
+            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWetBulb) {
                 state.dataLoopNodes->Node(NodeNum).OutAirWetBulb = state.dataLoopNodes->Node(NodeNum).EMSValueForOutAirWetBulb;
-            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWindSpeed)
+            }
+            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWindSpeed) {
                 state.dataLoopNodes->Node(NodeNum).OutAirWindSpeed = state.dataLoopNodes->Node(NodeNum).EMSValueForOutAirWindSpeed;
-            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWindDir)
+            }
+            if (state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWindDir) {
                 state.dataLoopNodes->Node(NodeNum).OutAirWindDir = state.dataLoopNodes->Node(NodeNum).EMSValueForOutAirWindDir;
+            }
         }
 
         state.dataLoopNodes->Node(NodeNum).Temp = state.dataLoopNodes->Node(NodeNum).OutAirDryBulb;
@@ -622,10 +633,12 @@ namespace OutAirNodeManager {
         state.dataLoopNodes->Node(NodeNum).Press = state.dataEnvrn->OutBaroPress;
         state.dataLoopNodes->Node(NodeNum).Quality = 0.0;
         // Add contaminants
-        if (state.dataContaminantBalance->Contaminant.CO2Simulation)
+        if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
             state.dataLoopNodes->Node(NodeNum).CO2 = state.dataContaminantBalance->OutdoorCO2;
-        if (state.dataContaminantBalance->Contaminant.GenericContamSimulation)
+        }
+        if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
             state.dataLoopNodes->Node(NodeNum).GenContam = state.dataContaminantBalance->OutdoorGC;
+        }
     }
 
 } // namespace OutAirNodeManager

@@ -263,7 +263,9 @@ void ManageControllers(EnergyPlusData &state,
     if (controllerProps.BypassControllerCalc && BypassOAController) {
         IsUpToDateFlag = true;
         IsConvergedFlag = true;
-        if (present(AllowWarmRestartFlag)) AllowWarmRestartFlag = true;
+        if (present(AllowWarmRestartFlag)) {
+            AllowWarmRestartFlag = true;
+        }
         return;
     }
 
@@ -442,7 +444,9 @@ void GetControllerInput(EnergyPlusData &state)
         }
     }
 
-    if (state.dataHVACControllers->NumControllers == 0) return;
+    if (state.dataHVACControllers->NumControllers == 0) {
+        return;
+    }
     // Condition of no controllers will be taken care of elsewhere, if necessary
 
     state.dataHVACControllers->ControllerProps.allocate(state.dataHVACControllers->NumControllers);
@@ -1895,9 +1899,13 @@ void TrackAirLoopControllers(EnergyPlusData &state,
     auto &airLoopStats = state.dataHVACControllers->AirLoopStats(AirLoopNum);
 
     // If no controllers on this air loop then we have nothing to do
-    if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumControllers == 0) return;
+    if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumControllers == 0) {
+        return;
+    }
     // To avoid tracking statistics in case of no air loop or no HVAC controllers are defined
-    if (state.dataHVACControllers->NumAirLoopStats == 0) return;
+    if (state.dataHVACControllers->NumAirLoopStats == 0) {
+        return;
+    }
 
     // Update performance statistics for air loop
     ++airLoopStats.NumCalls;
@@ -2182,9 +2190,13 @@ void TraceAirLoopControllers(EnergyPlusData &state,
     auto &airLoopStats = state.dataHVACControllers->AirLoopStats(AirLoopNum);
 
     // IF no controllers on this air loop then we have nothing to do
-    if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumControllers == 0) return;
+    if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumControllers == 0) {
+        return;
+    }
     // To avoid tracking statistics in case of no air loop or no HVAC controllers are defined
-    if (state.dataHVACControllers->NumAirLoopStats == 0) return;
+    if (state.dataHVACControllers->NumAirLoopStats == 0) {
+        return;
+    }
 
     // Setup trace file on first call only
     if (airLoopStats.FirstTraceFlag) {
@@ -2195,7 +2207,9 @@ void TraceAirLoopControllers(EnergyPlusData &state,
 
     auto &TraceFile = *airLoopStats.TraceFile;
 
-    if (!TraceFile.good()) return;
+    if (!TraceFile.good()) {
+        return;
+    }
 
     // Write iteration stamp first
     TraceIterationStamp(state, TraceFile, FirstHVACIteration, AirLoopPass, AirLoopConverged, AirLoopNumCalls);
@@ -2339,7 +2353,9 @@ void TraceIndividualController(EnergyPlusData &state,
     auto &TraceFile = *ControllerProps.TraceFile;
 
     // Nothing to do if trace file not registered
-    if (!TraceFile.good()) return;
+    if (!TraceFile.good()) {
+        return;
+    }
 
     // Skip a line before each new HVAC step
     if (SkipLineFlag) {
@@ -2597,7 +2613,9 @@ void CheckControllerListOrder(EnergyPlusData &state)
             // check if flow order doesn't agree with controller order
             if (allocated(ContrlSensedNodeNums)) {
                 for (int SensedNodeIndex = 1; SensedNodeIndex <= WaterCoilContrlCount; ++SensedNodeIndex) {
-                    if (SensedNodeIndex == 1) continue;
+                    if (SensedNodeIndex == 1) {
+                        continue;
+                    }
                     if (ContrlSensedNodeNums(2, SensedNodeIndex) < ContrlSensedNodeNums(2, SensedNodeIndex - 1)) {
                         // now see if on the same branch
                         if (ContrlSensedNodeNums(3, SensedNodeIndex) == ContrlSensedNodeNums(3, SensedNodeIndex - 1)) {
@@ -2618,7 +2636,9 @@ void CheckControllerListOrder(EnergyPlusData &state)
                 }
             }
 
-            if (allocated(ContrlSensedNodeNums)) ContrlSensedNodeNums.deallocate();
+            if (allocated(ContrlSensedNodeNums)) {
+                ContrlSensedNodeNums.deallocate();
+            }
 
         } // controllers > 1
     }

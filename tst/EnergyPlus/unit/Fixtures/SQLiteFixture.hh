@@ -175,7 +175,9 @@ protected:
         std::vector<std::vector<std::string>> queryVector;
 
         int rowCount = columnCount(tableName);
-        if (rowCount < 1) return queryVector;
+        if (rowCount < 1) {
+            return queryVector;
+        }
 
         sqlite3_stmt *sqlStmtPtr;
 

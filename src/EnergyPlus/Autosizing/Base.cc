@@ -236,9 +236,10 @@ void BaseSizer::preSize(EnergyPlusData &state, Real64 const _originalValue)
             this->sizingDesRunThisAirSys = std::any_of(
                 this->sysSizingInputData.begin(), this->sysSizingInputData.end(), [sysNum](auto const &ssid) { return ssid.AirLoopNum == sysNum; });
         }
-        if (allocated(this->unitarySysEqSizing))
+        if (allocated(this->unitarySysEqSizing)) {
             this->airLoopSysFlag =
                 this->unitarySysEqSizing(this->curSysNum).CoolingCapacity || this->unitarySysEqSizing(this->curSysNum).HeatingCapacity;
+        }
         if (this->curOASysNum > 0) {
             this->oaSysFlag = this->oaSysEqSizing(this->curOASysNum).CoolingCapacity || this->oaSysEqSizing(this->curOASysNum).HeatingCapacity;
         }
@@ -332,10 +333,13 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
     }
 
     // add to SQL output
-    if (state.dataSQLiteProcedures->sqlite) state.dataSQLiteProcedures->sqlite->addSQLiteComponentSizingRecord(CompType, CompName, VarDesc, VarValue);
+    if (state.dataSQLiteProcedures->sqlite) {
+        state.dataSQLiteProcedures->sqlite->addSQLiteComponentSizingRecord(CompType, CompName, VarDesc, VarValue);
+    }
     if (present(UsrDesc) && present(UsrValue)) {
-        if (state.dataSQLiteProcedures->sqlite)
+        if (state.dataSQLiteProcedures->sqlite) {
             state.dataSQLiteProcedures->sqlite->addSQLiteComponentSizingRecord(CompType, CompName, UsrDesc(), UsrValue);
+        }
     }
 }
 
@@ -374,7 +378,7 @@ void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
             }
         } else if (this->autoSizedValue >= 0.0 && this->originalValue > 0.0) {
             if ((std::abs(this->autoSizedValue - this->originalValue) / this->originalValue) > state.dataSize->AutoVsHardSizingThreshold) {
-                if (this->dataAutosizable)
+                if (this->dataAutosizable) {
                     this->reportSizerOutput(state,
                                             this->compType,
                                             this->compName,
@@ -382,13 +386,15 @@ void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
                                             this->autoSizedValue,
                                             "User-Specified " + this->sizingStringScalable + this->sizingString,
                                             this->originalValue);
+                }
             } else {
-                if (this->dataAutosizable)
+                if (this->dataAutosizable) {
                     this->reportSizerOutput(state,
                                             this->compType,
                                             this->compName,
                                             "User-Specified " + this->sizingStringScalable + this->sizingString,
                                             this->originalValue);
+                }
             }
             if (state.dataGlobal->DisplayExtraWarnings && this->dataAutosizable) {
                 if ((std::abs(this->autoSizedValue - this->originalValue) / this->originalValue) > state.dataSize->AutoVsHardSizingThreshold) {
@@ -409,7 +415,9 @@ void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
                     ShowContinueError(state, msg);
                 }
             }
-            if (!this->wasAutoSized) this->autoSizedValue = this->originalValue;
+            if (!this->wasAutoSized) {
+                this->autoSizedValue = this->originalValue;
+            }
         } else if (this->wasAutoSized && this->autoSizedValue != DataSizing::AutoSize) {
             this->reportSizerOutput(
                 state, this->compType, this->compName, "Design Size " + this->sizingStringScalable + this->sizingString, this->autoSizedValue);
@@ -543,7 +551,9 @@ void BaseSizer::select2StgDXHumCtrlSizerOutput(EnergyPlusData &state, bool &erro
                     ShowContinueError(state, msg);
                 }
             }
-            if (!this->wasAutoSized) this->autoSizedValue = this->originalValue;
+            if (!this->wasAutoSized) {
+                this->autoSizedValue = this->originalValue;
+            }
         } else if (this->wasAutoSized && this->autoSizedValue != DataSizing::AutoSize) {
             this->reportSizerOutput(
                 state, this->compType, this->compName, "Design Size " + this->sizingStringScalable + this->sizingString, this->autoSizedValue);

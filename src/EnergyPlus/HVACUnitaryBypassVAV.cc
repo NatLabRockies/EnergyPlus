@@ -1069,6 +1069,7 @@ namespace HVACUnitaryBypassVAV {
                         for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
                             if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != cbvav.ControlledZoneNum(AirLoopZoneNum))
                                 continue;
+                            
                             FoundTstatZone = true;
                         }
                         if (!FoundTstatZone) {
@@ -1438,7 +1439,7 @@ namespace HVACUnitaryBypassVAV {
                 PlantUtilities::InitComponentNodes(state, 0.0, cbvav.MaxHeatCoilFluidFlow, cbvav.HeatCoilControlNode, cbvav.HeatCoilFluidOutletNode);
 
             } // end of IF(cBVAV%CoilControlNode .GT. 0)THEN
-        }     // end one time inits
+        } // end one time inits
 
         if (!state.dataGlobal->BeginEnvrnFlag) {
             state.dataHVACUnitaryBypassVAV->MyEnvrnFlag(CBVAVNum) = true;
@@ -1746,7 +1747,7 @@ namespace HVACUnitaryBypassVAV {
                 cbvav.DesignSuppHeatingCapacity = QCoilActual;
 
             } // from IF(cBVAV%HeatCoilType == HVAC::Coil_HeatingSteam) THEN
-        }     // from IF( FirstHVACIteration ) THEN
+        } // from IF( FirstHVACIteration ) THEN
 
         if ((cbvav.HeatCoolMode == 0 && cbvav.fanOp == HVAC::FanOp::Cycling) || state.dataHVACUnitaryBypassVAV->CompOnMassFlow == 0.0) {
             state.dataHVACUnitaryBypassVAV->PartLoadFrac = 0.0;

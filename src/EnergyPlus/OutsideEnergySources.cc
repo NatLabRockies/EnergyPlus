@@ -154,7 +154,9 @@ void GetOutsideEnergySourcesInput(EnergyPlusData &state)
     int const NumDistrictUnitsHeatSteam = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "DistrictHeating:Steam");
     state.dataOutsideEnergySrcs->NumDistrictUnits = NumDistrictUnitsHeatWater + NumDistrictUnitsCool + NumDistrictUnitsHeatSteam;
 
-    if (allocated(state.dataOutsideEnergySrcs->EnergySource)) return;
+    if (allocated(state.dataOutsideEnergySrcs->EnergySource)) {
+        return;
+    }
 
     state.dataOutsideEnergySrcs->EnergySource.allocate(state.dataOutsideEnergySrcs->NumDistrictUnits);
     state.dataOutsideEnergySrcs->EnergySourceUniqueNames.reserve(static_cast<unsigned>(state.dataOutsideEnergySrcs->NumDistrictUnits));
@@ -327,7 +329,9 @@ void OutsideEnergySourceSpecs::initialize(EnergyPlusData &state, Real64 MyLoad)
         PlantUtilities::InitComponentNodes(state, loop.MinMassFlowRate, loop.MaxMassFlowRate, this->InletNodeNum, this->OutletNodeNum);
         this->BeginEnvrnInitFlag = false;
     }
-    if (!state.dataGlobal->BeginEnvrnFlag) this->BeginEnvrnInitFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->BeginEnvrnInitFlag = true;
+    }
 
     Real64 TempPlantMassFlow(0.0);
     if (std::abs(MyLoad) > 0.0) {
@@ -453,9 +457,13 @@ void OutsideEnergySourceSpecs::calculate(EnergyPlusData &state, bool runFlag, Re
     }
 
     if (this->EnergyType == DataPlant::PlantEquipmentType::PurchChilledWater) {
-        if (MyLoad > 0.0) MyLoad = 0.0;
+        if (MyLoad > 0.0) {
+            MyLoad = 0.0;
+        }
     } else if (this->EnergyType == DataPlant::PlantEquipmentType::PurchHotWater || this->EnergyType == DataPlant::PlantEquipmentType::PurchSteam) {
-        if (MyLoad < 0.0) MyLoad = 0.0;
+        if (MyLoad < 0.0) {
+            MyLoad = 0.0;
+        }
     }
 
     // determine outlet temp based on inlet temp, cp, and MyLoad

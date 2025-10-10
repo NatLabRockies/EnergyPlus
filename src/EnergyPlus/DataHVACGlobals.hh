@@ -120,7 +120,7 @@ namespace HVAC {
         Num
     };
 
-    static constexpr std::array<SetptType, (int)SetptType::Num> setptTypes = {
+    static constexpr std::array<SetptType, 4> controlledSetptTypes = {
         SetptType::SingleHeat, SetptType::SingleCool, SetptType::SingleHeatCool, SetptType::DualHeatCool};
 
     static constexpr std::array<std::string_view, (int)SetptType::Num> setptTypeNames = {
@@ -419,7 +419,7 @@ namespace HVAC {
     {
         Invalid = -1,
         AirToAir_FlatPlate,
-        AirToAir_Generic,
+        AirToAir_SensAndLatent,
         Desiccant_Balanced,
         Num
     };

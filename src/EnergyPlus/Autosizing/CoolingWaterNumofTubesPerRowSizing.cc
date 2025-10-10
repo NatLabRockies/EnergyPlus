@@ -68,7 +68,9 @@ Real64 CoolingWaterNumofTubesPerRowSizer::size(EnergyPlusData &state, Real64 _or
         this->errorType = AutoSizingResultType::ErrorType1;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "number_of_tubes_per_row";
+        if (this->isEpJSON) {
+            this->sizingString = "number_of_tubes_per_row";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

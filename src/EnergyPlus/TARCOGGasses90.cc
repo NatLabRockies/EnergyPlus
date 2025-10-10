@@ -194,7 +194,9 @@ void GASSES90(EnergyPlusData &state,
                     downer = two_sqrt_2 * std::sqrt(1.0 + (xwght_i / xwght_j));
 
                     // calculate the denominator of equation 60
-                    if (i != j) state.dataTARCOGGasses90->mukpdwn(i) += phimup / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->mukpdwn(i) += phimup / downer * frct(j) / frct(i);
+                    }
 
                     // numerator of equation 64, psiterm is the multiplied term in brackets
                     psiup = pow_2(1.0 + std::sqrt(kprime_i / state.dataTARCOGGasses90->kprime(j)) / x_pow);
@@ -202,13 +204,17 @@ void GASSES90(EnergyPlusData &state,
                     psiterm = 1.0 + 2.41 * (xwght_i - xwght_j) * (xwght_i - 0.142 * xwght_j) / pow_2(xwght_i + xwght_j);
 
                     // using the common denominator downer calculate the denominator for equation 63
-                    if (i != j) state.dataTARCOGGasses90->kpdown(i) += psiup * psiterm / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->kpdown(i) += psiup * psiterm / downer * frct(j) / frct(i);
+                    }
 
                     // calculate the numerator of equation 66
                     phikup = psiup; // Tuned Was pow_2( 1.0 + std::sqrt( kprime_i / kprime( j ) ) * std::pow( xwght_i / xwght_j, 0.25 ) );
 
                     // using the common denominator downer calculate the denominator for equation 65
-                    if (i != j) state.dataTARCOGGasses90->kdpdown(i) += phikup / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->kdpdown(i) += phikup / downer * frct(j) / frct(i);
+                    }
                 }
                 mumix += state.dataTARCOGGasses90->fvis(i) / state.dataTARCOGGasses90->mukpdwn(i);     // equation 60
                 kpmix += state.dataTARCOGGasses90->kprime(i) / state.dataTARCOGGasses90->kpdown(i);    // equation 63

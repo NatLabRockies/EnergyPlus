@@ -20,8 +20,8 @@ jobs:
           - os: ubuntu-24.04
             generator: "Unix Makefiles"
             pretty: 'Ubuntu 24.04'
-          - os: windows-2019
-            generator: "Visual Studio 16 2019"
+          - os: windows-2022
+            generator: "Visual Studio 17 2022"
             pretty: "Windows"
 
     runs-on: ${{ matrix.os }}

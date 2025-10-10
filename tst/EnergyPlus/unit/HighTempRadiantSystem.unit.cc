@@ -149,7 +149,9 @@ TEST_F(EnergyPlusFixture, HighTempRadiantSystemTest_SizeHighTempRadiantSystemSca
     state->dataHeatBal->Zone.allocate(1);
     state->dataHeatBal->Zone(1).FloorArea = 10.0;
     SizingTypesNum = HVAC::NumOfSizingTypes;
-    if (SizingTypesNum < 1) SizingTypesNum = 1;
+    if (SizingTypesNum < 1) {
+        SizingTypesNum = 1;
+    }
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(HVAC::NumOfSizingTypes);
 
     SizeHighTempRadiantSystem(*state, RadSysNum);

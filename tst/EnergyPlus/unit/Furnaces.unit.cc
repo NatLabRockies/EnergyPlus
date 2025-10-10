@@ -53,6 +53,7 @@
 // EnergyPlus Headers
 #include <AirflowNetwork/Solver.hpp>
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
@@ -1248,6 +1249,7 @@ TEST_F(EnergyPlusFixture, Furnaces_SetMinOATCompressor)
     state->dataCoilCoolingDX->coilCoolingDXGetInputFlag = false;
     CoilCoolingDX thisCoil;
     thisCoil.name = "Dummy_Name";
+    thisCoil.performance = std::make_shared<CoilCoolingDXCurveFitPerformance>();
     state->dataCoilCoolingDX->coilCoolingDXs.push_back(thisCoil);
 
     int FurnaceNum = 1;

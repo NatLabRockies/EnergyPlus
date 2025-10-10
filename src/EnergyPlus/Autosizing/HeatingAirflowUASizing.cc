@@ -205,7 +205,9 @@ Real64 HeatingAirflowUASizer::size(EnergyPlusData &state, Real64 _originalValue,
         this->autoSizedValue = 0.0;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "heating_coil_airflow_for_ua";
+        if (this->isEpJSON) {
+            this->sizingString = "heating_coil_airflow_for_ua";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

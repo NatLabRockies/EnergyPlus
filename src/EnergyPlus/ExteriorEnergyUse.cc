@@ -470,8 +470,9 @@ namespace ExteriorEnergyUse {
                     state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;
             }
             // EMS controls
-            if (state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn)
+            if (state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn) {
                 state.dataExteriorEnergyUse->ExteriorLights(Item).Power = state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorValue;
+            }
 
             state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse =
                 state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;

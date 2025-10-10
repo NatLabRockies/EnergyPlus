@@ -59,7 +59,7 @@ EnergyPlus provides algorithms of 3rd order backward difference and analytical s
 The sum of zone loads and the provided air system energy equals the change in energy stored in the zone. Typically the zone capacitance, $C_z$ includes the zone air only when formulating energy balances for the zone air. The internal thermal mass, including furniture, books, and changeable partitions, is assumed to be in thermal equilibrium with the zone air, thus it is added in the zone heat capacitance, $C_z$.  The infiltration airflow rate, $\dot{m}_{inf}$ changes for different conditions depending on outdoor temperature, wind speed, and HVAC system operations. The energy provided from systems to the zone is represented as $Q_{sys}$.
 
 \begin{equation}
-C_z \frac {dT_z} {dt} = \Sigma Q_i +\Sigma[h_i A_i (T_{si} - T_z)] + \Sigma [\dot{m}_i C_p (T_{zi}-T_z)] + \dot{m}_{inf} C_p (T_o - T_z) + Q_{sys}
+C_z \frac {dT_z} {dt} = \Sigma Q_{int} +\Sigma[h_i A_i (T_{si} - T_z)] + \Sigma [\dot{m}_i C_p (T_{zi}-T_z)] + \dot{m}_{inf} C_p (T_o - T_z) + Q_{sys}
 \end{equation}
 \begin{equation}
 C_z = V \rho_{air} C_p C_T
@@ -75,7 +75,7 @@ C_z = V \rho_{air} C_p C_T
   T_{o} &: \text{Outdoor air temperature at the current time step} ~[K],\\
   T_{sys} &: \text{System supply air temperature at the current time step} ~[K],\\
   t &: \text{Current time},\\
-  \Sigma{Q_{in}} &: \text{Sum of internal sensible heat gain} ~ ,\\
+  \Sigma{Q_{int}} &: \text{Sum of internal sensible heat gain} ~ ,\\
   \Sigma{h_i A_i (T_{si}-T_z)} &: \text{Convective heat transfer from the zone surfaces} ~ [kW],\\
   \Sigma{\dot{m}_{zi}C_p(T_{zi}-T_z)} &: \text{Heat transfer due to interzone air mixing} ~ [kW],\\
   \dot{m}_{inf} (T_o - T_z)&: \text{Heat transfer due to infiltration of outside air} ~ [kW],\\
@@ -147,7 +147,7 @@ There are two approaches to model internal thermal mass in EnergyPlus. One appro
 
 \subsubsection{Interior mass objects in EnergyPlus modeling}\label{interior-mass-objects-in-EnergyPlus-modeling}
 
-The EnergyPlus object, ``InternalMass'', is used to specify the construction materials and area of interior mass within the space, which are important to heat transfer calculations. Internal mass objects participate in the zone air heat balance and the longwave radiant exchange. The geometry of the internal mass construction is greatly simplified due to the difficulty of measurement. They do not directly interact with the solar heat gain because internal mass objects do not have a specific location in space. Internal mass objects can represent multiple pieces of interior mass (furniture, partitions) with different constructions. Internal mass exchanges energy through its both surfaces with the zone by convection. 
+The EnergyPlus object, ``InternalMass'', is used to specify the construction materials and area of interior mass within the space, which are important to heat transfer calculations. Internal mass objects participate in the zone air heat balance and the longwave radiant exchange. The geometry of the internal mass construction is greatly simplified due to the difficulty of measurement. They do not directly interact with the solar heat gain because internal mass objects do not have a specific location in space. Internal mass objects can represent multiple pieces of interior mass (furniture, partitions) with different constructions. Internal mass exchanges energy through both its surfaces with the zone by convection. 
 
 \subsubsection{Zone capacitance multiplier}\label{zone-capacitance-multiplier}
 
@@ -166,7 +166,7 @@ T_z^t = &\left[T_z^{t-\delta t} - \frac {\Sigma Q_i + \Sigma (h_i A_i T_{si}) + 
 \end{aligned}
 \end{equation}
 
-The hybrid modeling approach derives the internal mass by solving the heat capacity of zone air and internal thermal mass, $C_z$. The equation below shows the inverse heat balance algorithm that replacing the zone air temperature, $T_z$ with the measured zone air temperature. The current timestep measured temperature, $T_z^t$  and the previous timestep measured temperature, $T_z^{t-\delta t}$ are given from inputs, them the zone air heat capacity, $C_z^t$ for each timestep is expressed as following. 
+The hybrid modeling approach derives the internal mass by solving the heat capacity of zone air and internal thermal mass, $C_z$. The equation below shows the inverse heat balance algorithm that replacing the zone air temperature, $T_z$ with the measured zone air temperature. The current timestep measured temperature, $T_z^t$  and the previous timestep measured temperature, $T_z^{t-\delta t}$ are given from inputs, then the zone air heat capacity, $C_z^t$ for each timestep is expressed as following. 
 
 \begin{equation}
 C_z^t = - \frac {[\Sigma (h_i A_i) + \Sigma (\dot{m}_i C_p \dot{m}_{inf} C_p) + \dot{m}_{sys} C_p ] \delta t}{ ln⁡ \left[ \frac { T_z^t - \frac { \Sigma Q_i +\Sigma (h_i A_i T_{si}) + \Sigma (\dot{m}_i C_p T_{zi}) + \dot{m}_{inf} C_p T_o + \dot{m}_{sys} C_p T_{sup}^t} {\Sigma (h_i A_i)  + \Sigma (\dot{m}_i C_p)  + \dot{m}_{inf} C_p + \dot{m}_{sys} C_p}} {T_z^{t-\delta t} - \frac {\Sigma Q_i +\Sigma (h_i A_i T_si)  + \Sigma (\dot{m}_i C_p T_zi) + \dot{m}_{inf} C_p T_o + \dot{m}_{sys} C_p T_{sup}^t} {\Sigma (h_i A_i) + \Sigma (\dot{m}_i C_p)  + \dot{m}_{inf} C_p + \dot{m}_{sys} C_p}} \right]}

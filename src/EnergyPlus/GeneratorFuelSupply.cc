@@ -174,8 +174,9 @@ namespace GeneratorFuelSupply {
                     ErrorsFound = true;
                 }
 
-                for (auto &e : state.dataGenerator->FuelSupply)
+                for (auto &e : state.dataGenerator->FuelSupply) {
                     e.CompPowerLossFactor = NumArray(1);
+                }
 
                 if (Util::SameString(AlphArray(6), "GaseousConstituents")) {
                     state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode = DataGenerators::FuelMode::GaseousConstituents;
@@ -252,8 +253,10 @@ namespace GeneratorFuelSupply {
 
         int constexpr NumHardCodedConstituents = 14; // number of gases included in data
 
+        bool first_time = false;
         if (!allocated(state.dataGenerator->GasPhaseThermoChemistryData)) {
             state.dataGenerator->GasPhaseThermoChemistryData.allocate(NumHardCodedConstituents);
+            first_time = true;
         }
         // Carbon Dioxide (CO2) Temp K 298-1200 (Chase 1998)
         state.dataGenerator->GasPhaseThermoChemistryData(1).ConstituentName = "CarbonDioxide";
@@ -659,9 +662,11 @@ namespace GeneratorFuelSupply {
         }
 
         // report Heating Values in EIO.
-        print(state.files.eio,
-              "! <Fuel Supply>, Fuel Supply Name, Lower Heating Value [J/kmol], Lower Heating Value [kJ/kg], Higher "
-              "Heating Value [KJ/kg],  Molecular Weight [g/mol] \n");
+        if (first_time) {
+            print(state.files.eio,
+                  "! <Fuel Supply>, Fuel Supply Name, Lower Heating Value [J/kmol], Lower Heating Value [kJ/kg], Higher "
+                  "Heating Value [KJ/kg],  Molecular Weight [g/mol] \n");
+        }
         static constexpr std::string_view Format_501(" Fuel Supply, {},{:13.6N},{:13.6N},{:13.6N},{:13.6N}\n");
         print(state.files.eio,
               Format_501,

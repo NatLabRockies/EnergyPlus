@@ -272,7 +272,9 @@ void WriteInputArguments(EnergyPlusData &state,
     // bi...Create debug file w/ Tarcog's input arguments:
 
     // File is not open and nothing cannot be written
-    if (!InArgumentsFile.good()) return;
+    if (!InArgumentsFile.good()) {
+        return;
+    }
 
     date_and_time(real_CLOCK(1), real_CLOCK(2), real_CLOCK(3), DATE_TIME);
 
@@ -302,8 +304,12 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1015, tind, tind - Constant::Kelvin);
     print(InArgumentsFile, Format_1020, trmin, trmin - Constant::Kelvin);
     print(InArgumentsFile, Format_1030, wso);
-    if (iwd == 0) print(InArgumentsFile, Format_1032); // windward
-    if (iwd == 1) print(InArgumentsFile, Format_1033); // leeward
+    if (iwd == 0) {
+        print(InArgumentsFile, Format_1032); // windward
+    }
+    if (iwd == 1) {
+        print(InArgumentsFile, Format_1033); // leeward
+    }
     print(InArgumentsFile, Format_1035, wsi);
     print(InArgumentsFile, Format_1040, dir);
     print(InArgumentsFile, Format_1041, outir);
@@ -318,9 +324,15 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1066, ibc(2));
     print(InArgumentsFile, Format_1068, hin);
 
-    if (standard == TARCOGGassesParams::Stdrd::ISO15099) print(InArgumentsFile, Format_1070, standard);
-    if (standard == TARCOGGassesParams::Stdrd::EN673) print(InArgumentsFile, Format_1071, standard);
-    if (standard == TARCOGGassesParams::Stdrd::EN673Design) print(InArgumentsFile, Format_1072, standard);
+    if (standard == TARCOGGassesParams::Stdrd::ISO15099) {
+        print(InArgumentsFile, Format_1070, standard);
+    }
+    if (standard == TARCOGGassesParams::Stdrd::EN673) {
+        print(InArgumentsFile, Format_1071, standard);
+    }
+    if (standard == TARCOGGassesParams::Stdrd::EN673Design) {
+        print(InArgumentsFile, Format_1072, standard);
+    }
 
     if (ThermalMod == TARCOGThermalModel::ISO15099) {
         print(InArgumentsFile, Format_10731, ThermalMod);
@@ -410,10 +422,18 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1110);
 
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1111, i - 1);
-        if (i == 1) print(InArgumentsFile, Format_11110);
-        if (i == nlayer + 1) print(InArgumentsFile, Format_11111);
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1112, gap(i - 1));
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1111, i - 1);
+        }
+        if (i == 1) {
+            print(InArgumentsFile, Format_11110);
+        }
+        if (i == nlayer + 1) {
+            print(InArgumentsFile, Format_11111);
+        }
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1112, gap(i - 1));
+        }
         print(InArgumentsFile, Format_1113, presure(i));
         if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1120, vvent(i));
@@ -435,7 +455,7 @@ void WriteInputArguments(EnergyPlusData &state,
             print(InArgumentsFile, Format_1133, xgcp(1, iprop(j, i)), xgcp(2, iprop(j, i)), xgcp(3, iprop(j, i)));
             print(InArgumentsFile, Format_1134, xwght(iprop(j, i)));
         } // - j - one mix
-    }     // i - gas loop
+    } // i - gas loop
 
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1198);
@@ -528,10 +548,18 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
 
     print(InArgumentsFile, Format_1013);
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1111, i - 1);
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1112, gap(i - 1));
-        if (i == 1) print(InArgumentsFile, Format_11110);
-        if (i == nlayer + 1) print(InArgumentsFile, Format_11111);
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1111, i - 1);
+        }
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1112, gap(i - 1));
+        }
+        if (i == 1) {
+            print(InArgumentsFile, Format_11110);
+        }
+        if (i == nlayer + 1) {
+            print(InArgumentsFile, Format_11111);
+        }
         for (j = 1; j <= nmix(i); ++j) {
             print(InArgumentsFile, Format_1130, j, 100 * frct(j, i));
             print(InArgumentsFile, Format_1131, xgcon(1, j), xgcon(2, j), xgcon(3, j));
@@ -539,7 +567,7 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
             print(InArgumentsFile, Format_1133, xgcp(1, j), xgcp(2, j), xgcp(3, j));
             print(InArgumentsFile, Format_1134, xwght(j));
         } // j - gas mix
-    }     // i - gaps
+    } // i - gaps
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1198);
 }

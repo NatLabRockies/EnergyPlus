@@ -257,7 +257,9 @@ inline Real64 PsyCpAirFnWTdb(Real64 const dw, // humidity ratio {kgWater/kgDryAi
     static Real64 cpaSave(-100.0);
 
     // check if last call had the same input and if it did just use the saved output
-    if ((Tsave == T) && (dwSave == dw)) return cpaSave;
+    if ((Tsave == T) && (dwSave == dw)) {
+        return cpaSave;
+    }
 
     // compute heat capacity of air
     Real64 const w(max(dw, 1.0e-5));

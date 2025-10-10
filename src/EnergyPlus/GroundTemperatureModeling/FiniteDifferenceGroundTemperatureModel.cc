@@ -709,7 +709,9 @@ namespace GroundTemp {
         bool converged = true;
         Real64 constexpr finalTempConvergenceCriteria = 0.05;
 
-        if (state.dataGlobal->FDnumIterYears == maxYearsToIterate) return converged;
+        if (state.dataGlobal->FDnumIterYears == maxYearsToIterate) {
+            return converged;
+        }
 
         for (int cell = 1; cell <= totalNumCells; ++cell) {
 

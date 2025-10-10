@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 # Old enough to support Ubuntu Xenial.
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.5.1...4.0.3)  # bumped max support to hush a cmake deprecation warning
 
 project(RE2 CXX)
 include(CMakePackageConfigHelpers)

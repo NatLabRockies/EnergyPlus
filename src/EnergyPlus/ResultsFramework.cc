@@ -475,7 +475,9 @@ namespace ResultsFramework {
             }
         }
 
-        if (cols.empty()) return root;
+        if (cols.empty()) {
+            return root;
+        }
 
         json vals = json::array();
 
@@ -632,7 +634,9 @@ namespace ResultsFramework {
 
         root = {{"TableName", TableName}, {"Cols", cols}, {"Rows", rows}};
 
-        if (!FootnoteText.empty()) root["Footnote"] = FootnoteText;
+        if (!FootnoteText.empty()) {
+            root["Footnote"] = FootnoteText;
+        }
         return root;
     }
 
@@ -712,7 +716,9 @@ namespace ResultsFramework {
                                    std::vector<std::string> const &outputVariables,
                                    OutputProcessor::ReportFreq reportingFrequency)
     {
-        if (data.empty()) return;
+        if (data.empty()) {
+            return;
+        }
         updateReportFreq(reportingFrequency);
         std::vector<int> indices;
 
@@ -817,9 +823,13 @@ namespace ResultsFramework {
         print<FormatSyntax::FMT>(outputFile, "{}", "Date/Time,");
         std::string sep;
         for (auto it = outputVariables.begin(); it != outputVariables.end(); ++it) {
-            if (!outputVariableIndices[std::distance(outputVariables.begin(), it)]) continue;
+            if (!outputVariableIndices[std::distance(outputVariables.begin(), it)]) {
+                continue;
+            }
             print<FormatSyntax::FMT>(outputFile, "{}{}", sep, *it);
-            if (sep.empty()) sep = ",";
+            if (sep.empty()) {
+                sep = ",";
+            }
         }
         print<FormatSyntax::FMT>(outputFile, "{}", '\n');
 

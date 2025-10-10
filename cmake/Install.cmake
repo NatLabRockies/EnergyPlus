@@ -643,41 +643,35 @@ if(WIN32 AND NOT UNIX)
   endif()
 endif()
 
-if(APPLE)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
 
-  include(${CMAKE_CURRENT_LIST_DIR}/CodeSigning.cmake)
+  set(FILES_TO_SIGN
+    # Targets are signed already via register_install_codesign_target
+    #$<TARGET_FILE_NAME:ConvertInputFormat>
+    #$<TARGET_FILE_NAME:energyplus>
+    #$<TARGET_FILE_NAME:energyplusapi>
 
-  # Defines CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
-  setup_macos_codesigning_variables()
+    # Bash scripts, not sure if needed or not
+    "runenergyplus"
+    "runepmacro"
+    "runreadvars"
+    # Copied-verbatim apps: Already signed because just copied from bin to package
+    # "EPMacro"
+    # "PreProcess/EP-Launch-Lite.app"
+    # "PreProcess/IDFVersionUpdater/IDFVersionUpdater.app"
+  )
 
-  if(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
-    set(FILES_TO_SIGN
-      # Targets are signed already via register_install_codesign_target
-      #$<TARGET_FILE_NAME:ConvertInputFormat>
-      #$<TARGET_FILE_NAME:energyplus>
-      #$<TARGET_FILE_NAME:energyplusapi>
+  # Codesign inner binaries and libraries, in the CPack staging area for the EnergyPlus project, component Unspecified
+  # Define some required variables for the script in the scope of the install(SCRIPT) first
+  install(CODE "set(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\")" COMPONENT Unspecified)
+  install(CODE "set(CPACK_CODESIGNING_MACOS_IDENTIFIER \"${CPACK_CODESIGNING_MACOS_IDENTIFIER}\")" COMPONENT Unspecified)
+  install(CODE "set(FILES_TO_SIGN \"${FILES_TO_SIGN}\")" COMPONENT Unspecified)
+  # call the script
+  install(SCRIPT "${CMAKE_CURRENT_LIST_DIR}/install_codesign_script.cmake" COMPONENT Unspecified)
 
-      # Bash scripts, not sure if needed or not
-      "runenergyplus"
-      "runepmacro"
-      "runreadvars"
-      # Copied-verbatim apps: Already signed because just copied from bin to package
-      # "EPMacro"
-      # "PreProcess/EP-Launch-Lite.app"
-      # "PreProcess/IDFVersionUpdater/IDFVersionUpdater.app"
-    )
+  # Register the CPACK_POST_BUILD_SCRIPTS
+  set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_CURRENT_LIST_DIR}/CPackSignAndNotarizeDmg.cmake")
 
-    # Codesign inner binaries and libraries, in the CPack staging area for the EnergyPlus project, component Unspecified
-    # Define some required variables for the script in the scope of the install(SCRIPT) first
-    install(CODE "set(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\")" COMPONENT Unspecified)
-    install(CODE "set(FILES_TO_SIGN \"${FILES_TO_SIGN}\")" COMPONENT Unspecified)
-    # call the script
-    install(SCRIPT "${CMAKE_CURRENT_LIST_DIR}/install_codesign_script.cmake" COMPONENT Unspecified)
-
-    # Register the CPACK_POST_BUILD_SCRIPTS
-    set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_CURRENT_LIST_DIR}/CPackSignAndNotarizeDmg.cmake")
-
-  endif()
 endif()
 
 # TODO: Unused now

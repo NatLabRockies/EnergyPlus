@@ -178,10 +178,14 @@ namespace Window {
         // are calculated with new WCE optical engine (for both blinds and screens)
         auto &s_mat = state.dataMaterial;
 
-        if (s_mat->NumBlinds > 0) CalcWindowBlindProperties(state);
+        if (s_mat->NumBlinds > 0) {
+            CalcWindowBlindProperties(state);
+        }
 
         // Initialize SurfaceScreen structure
-        if (s_mat->NumScreens > 0) CalcWindowScreenProperties(state);
+        if (s_mat->NumScreens > 0) {
+            CalcWindowScreenProperties(state);
+        }
 
         auto &aWinConstSimp = CWindowConstructionsSimplified::instance(state);
         for (int ConstrNum = 1; ConstrNum <= state.dataHeatBal->TotConstructs; ++ConstrNum) {
@@ -216,12 +220,22 @@ namespace Window {
             auto &surf = state.dataSurface->Surface(SurfNum);
             auto &surfShade = state.dataSurface->surfShades(SurfNum);
 
-            if (!surf.HeatTransSurf) continue;
-            if (!state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
-            if (state.dataSurface->SurfWinWindowModelType(SurfNum) == WindowModel::BSDF) continue; // Irrelevant for Complex Fen
-            if (state.dataConstruction->Construct(surf.Construction).WindowTypeEQL) continue;      // not required
+            if (!surf.HeatTransSurf) {
+                continue;
+            }
+            if (!state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                continue;
+            }
+            if (state.dataSurface->SurfWinWindowModelType(SurfNum) == WindowModel::BSDF) {
+                continue; // Irrelevant for Complex Fen
+            }
+            if (state.dataConstruction->Construct(surf.Construction).WindowTypeEQL) {
+                continue; // not required
+            }
 
-            if (surf.activeShadedConstruction == 0) continue;
+            if (surf.activeShadedConstruction == 0) {
+                continue;
+            }
             auto &constrSh = state.dataConstruction->Construct(surf.activeShadedConstruction);
             int TotLay = constrSh.TotLayers;
             auto const *mat = s_mat->materials(constrSh.LayerPoint(TotLay));
@@ -260,8 +274,8 @@ namespace Window {
                 //                                constrSh.effGlassEmi[surfShade.blind.slatAngIdxHi],
                 //                                surfShade.blind.slatAngInterpFac);
             } // End of check if interior shade or interior blind
-        }     // End of surface loop
-    }         // InitWCE_SimplifiedOpticalData()
+        } // End of surface loop
+    } // InitWCE_SimplifiedOpticalData()
 
     Real64 GetSolarTransDirectHemispherical(EnergyPlusData &state, int ConstrNum)
     {

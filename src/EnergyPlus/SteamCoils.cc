@@ -206,7 +206,6 @@ namespace SteamCoils {
 
         CalcSteamAirCoil(state, coilNum, QCoilReqLocal, QCoilActualTemp, fanOp, PartLoadFrac);
 
-        // Autodesk:OPTIONAL QCoilReq used without PRESENT check
         if (present(QCoilActual)) QCoilActual = QCoilActualTemp;
 
         // Update the current SteamCoil to the outlet nodes

@@ -539,7 +539,9 @@ namespace Psychrometrics {
 
         Real64 const rhoair(pb / (287.0 * (tdb + Constant::Kelvin) * (1.0 + 1.6077687 * max(dw, 1.0e-5))));
 #ifdef EP_psych_errors
-        if (rhoair < 0.0) PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair, CalledFrom);
+        if (rhoair < 0.0) {
+            PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair, CalledFrom);
+        }
 #endif
         return rhoair;
     }
@@ -581,7 +583,9 @@ namespace Psychrometrics {
         assert(dw >= 1.0e-5);
         Real64 const rhoair(pb / (287.0 * (tdb + Constant::Kelvin) * (1.0 + 1.6077687 * dw)));
 #ifdef EP_psych_errors
-        if (rhoair < 0.0) PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair);
+        if (rhoair < 0.0) {
+            PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair);
+        }
 #endif
         return rhoair;
     }
@@ -696,7 +700,9 @@ namespace Psychrometrics {
         static Real64 cpaSave(-100.0);
 
         // check if last call had the same input and if it did just use the saved output
-        if (dwSave == dw) return cpaSave;
+        if (dwSave == dw) {
+            return cpaSave;
+        }
 
         // compute heat capacity of air
         Real64 const w(max(dw, 1.0e-5));
@@ -720,7 +726,9 @@ namespace Psychrometrics {
         static Real64 cpaSave(-100.0);
 
         // check if last call had the same input and if it did just use the saved output
-        if (dwSave == dw) return cpaSave;
+        if (dwSave == dw) {
+            return cpaSave;
+        }
 
         // compute heat capacity of air
         Real64 const cpa((1.00484e3 + dw * 1.85895e3)); // result => heat capacity of moist air {J/kg-C}
@@ -934,7 +942,9 @@ namespace Psychrometrics {
         // Validity test
         if (V < 0.0) {
 #ifdef EP_psych_errors
-            if (V <= -0.01) PsyVFnTdbWPb_error(state, TDB, w, PB, V, CalledFrom);
+            if (V <= -0.01) {
+                PsyVFnTdbWPb_error(state, TDB, w, PB, V, CalledFrom);
+            }
 #endif
             return 0.83; // Fix Was inside the ifdef
         } else {
@@ -980,7 +990,9 @@ namespace Psychrometrics {
         // Validity test
         if (W < 0.0) {
 #ifdef EP_psych_errors
-            if ((W <= -0.0001) && (!SuppressWarnings)) PsyWFnTdbH_error(state, TDB, H, W, CalledFrom);
+            if ((W <= -0.0001) && (!SuppressWarnings)) {
+                PsyWFnTdbH_error(state, TDB, H, W, CalledFrom);
+            }
 #endif
             return 1.0e-5;
         } else {
@@ -1371,7 +1383,9 @@ namespace Psychrometrics {
         // Validity test
         if (W < 1.0e-5) {
 #ifdef EP_psych_errors
-            if (W <= -0.0001) PsyWFnTdbRhPb_error(state, TDB, RH, PB, W, CalledFrom);
+            if (W <= -0.0001) {
+                PsyWFnTdbRhPb_error(state, TDB, RH, PB, W, CalledFrom);
+            }
 #endif
             return 1.0e-5;
         } else {
@@ -1427,7 +1441,9 @@ namespace Psychrometrics {
         // Validity check
         if (TWB > TDB) {
 #ifdef EP_psych_errors
-            if (TWB > TDB + 0.01) PsyWFnTdbTwbPb_temperature_error(state, TDB, TWB, PB, CalledFrom);
+            if (TWB > TDB + 0.01) {
+                PsyWFnTdbTwbPb_temperature_error(state, TDB, TWB, PB, CalledFrom);
+            }
 #endif
             TWB = TDB;
         }
@@ -1580,7 +1596,9 @@ namespace Psychrometrics {
 
         if (TDP > TWB) {
 #ifdef EP_psych_errors
-            if (TDP > TWB + 0.1) PsyTdpFnTdbTwbPb_error(state, TDB, TWB, PB, W, TDP, CalledFrom);
+            if (TDP > TWB + 0.1) {
+                PsyTdpFnTdbTwbPb_error(state, TDB, TWB, PB, W, TDP, CalledFrom);
+            }
 #endif
             return TWB;
         } else {

@@ -101,7 +101,9 @@ GshpPeHeatingSpecs *GshpPeHeatingSpecs::factory(EnergyPlusData &state, const std
     auto thisObj = std::find_if(state.dataHPWaterToWaterHtg->GSHP.begin(),
                                 state.dataHPWaterToWaterHtg->GSHP.end(),
                                 [&objectName](const GshpPeHeatingSpecs &myObj) { return myObj.Name == objectName; });
-    if (thisObj != state.dataHPWaterToWaterHtg->GSHP.end()) return thisObj;
+    if (thisObj != state.dataHPWaterToWaterHtg->GSHP.end()) {
+        return thisObj;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("WWHPHeatingFactory: Error getting inputs for heat pump named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -491,12 +493,15 @@ void GshpPeHeatingSpecs::initialize(EnergyPlusData &state)
         this->SourceSideDesignMassFlow = this->SourceSideVolFlowRate * rho;
 
         PlantUtilities::InitComponentNodes(state, 0.0, this->SourceSideDesignMassFlow, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum);
-        if (state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint == DataLoopNode::SensedNodeFlagValue)
+        if (state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint == DataLoopNode::SensedNodeFlagValue) {
             state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint = 0.0;
+        }
         state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp = state.dataLoopNodes->Node(this->SourceSideOutletNodeNum).TempSetPoint + 30.0;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->beginEnvironFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->beginEnvironFlag = true;
+    }
 
     // On every call
     this->Running = 0;

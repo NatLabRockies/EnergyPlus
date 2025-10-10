@@ -122,7 +122,9 @@ void ManageEarthTube(EnergyPlusData &state)
         state.dataEarthTube->GetInputFlag = false;
     }
 
-    if (state.dataEarthTube->EarthTubeSys.empty()) return;
+    if (state.dataEarthTube->EarthTubeSys.empty()) {
+        return;
+    }
 
     initEarthTubeVertical(state);
 
@@ -600,7 +602,9 @@ void initEarthTubeVertical(EnergyPlusData &state)
         state.dataEarthTube->initFirstTime = false;
         for (int etNum = 1; etNum <= totEarthTube; ++etNum) {
             auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(etNum);
-            if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) continue; // Skip earth tubes that do not use vertical solution
+            if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) {
+                continue; // Skip earth tubes that do not use vertical solution
+            }
             auto &thisEarthTubeParams = state.dataEarthTube->EarthTubePars(thisEarthTube.vertParametersPtr);
             thisEarthTube.totNodes = thisEarthTubeParams.numNodesAbove + thisEarthTubeParams.numNodesBelow + 1;
             thisEarthTube.aCoeff.resize(thisEarthTube.totNodes);
@@ -740,7 +744,9 @@ void initEarthTubeVertical(EnergyPlusData &state)
             // update all of the undisturbed temperatures (only need to do this once per day because the equation only changes as the day changes
             for (int etNum = 1; etNum <= totEarthTube; ++etNum) {
                 auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(etNum);
-                if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) continue; // Skip earth tubes that do not use vertical solution
+                if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) {
+                    continue; // Skip earth tubes that do not use vertical solution
+                }
                 thisEarthTube.tUpperBound = thisEarthTube.calcUndisturbedGroundTemperature(state, thisEarthTube.depthUpperBound);
                 thisEarthTube.tLowerBound = thisEarthTube.calcUndisturbedGroundTemperature(state, thisEarthTube.depthLowerBound);
                 for (int nodeNum = 0; nodeNum <= thisEarthTube.totNodes - 1; ++nodeNum) {
@@ -753,7 +759,9 @@ void initEarthTubeVertical(EnergyPlusData &state)
             (!state.dataGlobal->WarmupFlag && state.dataGlobal->BeginDayFlag && state.dataGlobal->DayOfSim == 1)) {
             for (int etNum = 1; etNum <= totEarthTube; ++etNum) {
                 auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(etNum);
-                if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) continue; // Skip earth tubes that do not use vertical solution
+                if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) {
+                    continue; // Skip earth tubes that do not use vertical solution
+                }
                 for (int nodeNum = 0; nodeNum <= thisEarthTube.totNodes - 1; ++nodeNum) {
                     thisEarthTube.tLast[nodeNum] = thisEarthTube.tUndist[nodeNum];
                     thisEarthTube.tCurrent[nodeNum] = thisEarthTube.tLast[nodeNum];
@@ -763,7 +771,9 @@ void initEarthTubeVertical(EnergyPlusData &state)
 
         for (int etNum = 1; etNum <= totEarthTube; ++etNum) {
             auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(etNum);
-            if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) continue; // Skip earth tubes that do not use vertical solution
+            if (thisEarthTube.ModelType != EarthTubeModelType::Vertical) {
+                continue; // Skip earth tubes that do not use vertical solution
+            }
             for (int nodeNum = 0; nodeNum <= thisEarthTube.totNodes - 1; ++nodeNum) {
                 thisEarthTube.tLast[nodeNum] = thisEarthTube.tCurrent[nodeNum];
             }
@@ -833,7 +843,9 @@ void CalcEarthTube(EnergyPlusData &state)
         bool tempShutDown = thisZoneHB.MAT < thisEarthTube.MinTemperature || thisZoneHB.MAT > thisEarthTube.MaxTemperature ||
                             std::abs(thisZoneHB.MAT - outTdb) < thisEarthTube.DelTemperature;
         // check for Basic model and some temperature limit preventing the earth tube from running
-        if ((thisEarthTube.ModelType == EarthTubeModelType::Basic) && (tempShutDown)) continue;
+        if ((thisEarthTube.ModelType == EarthTubeModelType::Basic) && (tempShutDown)) {
+            continue;
+        }
 
         AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->OutBaroPress, outTdb, state.dataEnvrn->OutHumRat);
         AirSpecHeat = Psychrometrics::PsyCpAirFnW(state.dataEnvrn->OutHumRat);
@@ -987,7 +999,9 @@ void EarthTubeData::calcVerticalEarthTube(EnergyPlusData &state, Real64 airFlowT
         this->cPrime[0] = this->cCoeff[0] / this->bCoeff[0];
         for (int nodeNum = 1; nodeNum <= nodeLast; ++nodeNum) {
             Real64 addTerm = 0.0;
-            if (nodeNum == nodeET) addTerm = airFlowTerm;
+            if (nodeNum == nodeET) {
+                addTerm = airFlowTerm;
+            }
             this->cPrime[nodeNum] = this->cCoeff[nodeNum] / (this->bCoeff[nodeNum] + addTerm - this->aCoeff[nodeNum] * this->cPrime[nodeNum - 1]);
         }
     }
@@ -1007,7 +1021,9 @@ void EarthTubeData::calcVerticalEarthTube(EnergyPlusData &state, Real64 airFlowT
     this->dPrime[0] = this->dCoeff[0] / this->bCoeff[0];
     for (int nodeNum = 1; nodeNum <= nodeLast; ++nodeNum) {
         Real64 addTerm = 0.0;
-        if (nodeNum == nodeET) addTerm = airFlowTerm;
+        if (nodeNum == nodeET) {
+            addTerm = airFlowTerm;
+        }
         this->dPrime[nodeNum] = (this->dCoeff[nodeNum] - this->aCoeff[nodeNum] * this->dPrime[nodeNum - 1]) /
                                 (this->bCoeff[nodeNum] + addTerm - this->aCoeff[nodeNum] * this->cPrime[nodeNum - 1]);
     }

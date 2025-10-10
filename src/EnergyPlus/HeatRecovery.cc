@@ -109,6 +109,10 @@ namespace HeatRecovery {
     constexpr std::array<std::string_view, static_cast<int>(FrostControlOption::Num)> frostControlNamesUC = {
         "NONE", "EXHAUSTONLY", "EXHAUSTAIRRECIRCULATION", "MINIMUMEXHAUSTTEMPERATURE"};
 
+    constexpr std::array<std::string_view, static_cast<int>(HXConfigurationType::Num)> hxConfigurationNames = {"Plate", "Rotary"};
+
+    constexpr std::array<std::string_view, static_cast<int>(HXConfigurationType::Num)> hxConfigurationNamesUC = {"PLATE", "ROTARY"};
+
     void SimHeatRecovery(EnergyPlusData &state,
                          std::string_view CompName,                          // name of the heat exchanger unit
                          bool const FirstHVACIteration,                      // TRUE if 1st HVAC simulation of system timestep
@@ -196,7 +200,7 @@ namespace HeatRecovery {
             thisExch.CalcAirToAirPlateHeatExch(state, HXUnitOn, EconomizerFlag, HighHumCtrlFlag);
         } break;
 
-        case HVAC::HXType::AirToAir_Generic: {
+        case HVAC::HXType::AirToAir_SensAndLatent: {
             thisExch.CalcAirToAirGenericHeatExch(state, HXUnitOn, FirstHVACIteration, fanOp, EconomizerFlag, HighHumCtrlFlag, HXPartLoadRatio);
         } break;
 
@@ -298,6 +302,7 @@ namespace HeatRecovery {
 
             thisExchanger.Name = state.dataIPShortCut->cAlphaArgs(1);
             thisExchanger.type = HVAC::HXType::AirToAir_FlatPlate;
+            thisExchanger.ExchConfig = HXConfigurationType::Plate;
             if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
                 thisExchanger.availSched = Sched::GetScheduleAlwaysOn(state);
             } else if ((thisExchanger.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -406,7 +411,7 @@ namespace HeatRecovery {
                                                      ErrorsFound);
 
             thisExchanger.Name = state.dataIPShortCut->cAlphaArgs(1);
-            thisExchanger.type = HVAC::HXType::AirToAir_Generic;
+            thisExchanger.type = HVAC::HXType::AirToAir_SensAndLatent;
             if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
                 thisExchanger.availSched = Sched::GetScheduleAlwaysOn(state);
             } else if ((thisExchanger.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -467,24 +472,12 @@ namespace HeatRecovery {
                 }
             }
 
-            if (Util::SameString(state.dataIPShortCut->cAlphaArgs(8), "Plate")) {
-                thisExchanger.ExchConfig = HXConfigurationType::Plate;
-            } else if (Util::SameString(state.dataIPShortCut->cAlphaArgs(8), "Rotary")) {
-                thisExchanger.ExchConfig = HXConfigurationType::Rotary;
-            } else {
-                ShowSevereError(state, format("{} configuration not found= {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(8)));
-                ShowContinueError(state, "HX configuration must be either Plate or Rotary");
-                ErrorsFound = true;
-            }
+            thisExchanger.ExchConfig = static_cast<HXConfigurationType>(getEnumValue(hxConfigurationNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
 
             // Added additional inputs for frost control
             thisExchanger.FrostControlType = static_cast<FrostControlOption>(getEnumValue(frostControlNamesUC, state.dataIPShortCut->cAlphaArgs(9)));
-            if (thisExchanger.FrostControlType == FrostControlOption::Invalid) {
-                ShowSevereError(state, format("Invalid Frost Control method for {} =  {}", thisExchanger.Name, state.dataIPShortCut->cAlphaArgs(9)));
-                ErrorsFound = true;
-            }
 
-            if (!Util::SameString(state.dataIPShortCut->cAlphaArgs(9), "None")) {
+            if (thisExchanger.FrostControlType != FrostControlOption::None) {
                 thisExchanger.ThresholdTemperature = state.dataIPShortCut->rNumericArgs(7);
                 thisExchanger.InitialDefrostTime = state.dataIPShortCut->rNumericArgs(8);
                 thisExchanger.RateofDefrostTimeIncrease = state.dataIPShortCut->rNumericArgs(9);
@@ -550,6 +543,7 @@ namespace HeatRecovery {
 
             thisExchanger.Name = state.dataIPShortCut->cAlphaArgs(1);
             thisExchanger.type = HVAC::HXType::Desiccant_Balanced;
+            thisExchanger.ExchConfig = HXConfigurationType::Rotary;
             if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
                 thisExchanger.availSched = Sched::GetScheduleAlwaysOn(state);
             } else if ((thisExchanger.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -675,8 +669,9 @@ namespace HeatRecovery {
             }
 
             // regen outlet temp variables
-            for (int i = 0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i) {
                 thisPerfData.B[i] = state.dataIPShortCut->rNumericArgs(i + 4);
+            }
 
             //     Check that the minimum is not greater than or equal to the maximum for each of the following model boundaries
             thisPerfData.T_MinRegenAirInHumRat = state.dataIPShortCut->rNumericArgs(12);
@@ -824,8 +819,9 @@ namespace HeatRecovery {
             }
 
             // regen outlet humidity ratio variables
-            for (int i = 0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i) {
                 thisPerfData.C[i] = state.dataIPShortCut->rNumericArgs(i + 28);
+            }
 
             //     Check that the minimum is not greater than or equal to the maximum for each of the following model boundaries
             thisPerfData.H_MinRegenAirInHumRat = state.dataIPShortCut->rNumericArgs(36);
@@ -1335,7 +1331,7 @@ namespace HeatRecovery {
                 }
                 break;
 
-            case HVAC::HXType::AirToAir_Generic:
+            case HVAC::HXType::AirToAir_SensAndLatent:
                 if (this->SupOutletNode > 0 && this->ControlToTemperatureSetPoint) {
                     if (state.dataLoopNodes->Node(this->SupOutletNode).TempSetPoint == DataLoopNode::SensedNodeFlagValue) {
                         if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -1412,7 +1408,7 @@ namespace HeatRecovery {
 
         switch (this->type) {
         case HVAC::HXType::AirToAir_FlatPlate:
-        case HVAC::HXType::AirToAir_Generic:
+        case HVAC::HXType::AirToAir_SensAndLatent:
             break;
 
         case HVAC::HXType::Desiccant_Balanced:
@@ -1531,7 +1527,7 @@ namespace HeatRecovery {
         case HVAC::HXType::Desiccant_Balanced:
             PrintFlag = false;
             break;
-        case HVAC::HXType::AirToAir_Generic:
+        case HVAC::HXType::AirToAir_SensAndLatent:
             FieldNum = 1;
             break;
         case HVAC::HXType::AirToAir_FlatPlate:
@@ -1582,7 +1578,13 @@ namespace HeatRecovery {
         this->NomSupAirVolFlow = sizerSystemAirFlow.size(state, TempSize, errorsFound);
         state.dataSize->DataConstantUsedForSizing = 0.0;
         state.dataSize->DataFractionUsedForSizing = 0.0;
-        if (this->type == HVAC::HXType::AirToAir_FlatPlate) {
+        switch (this->type) {
+        case HVAC::HXType::AirToAir_SensAndLatent: {
+            this->NomSecAirVolFlow = this->NomSupAirVolFlow;
+            state.dataSize->HRFlowSizingFlag = false;
+            break;
+        }
+        case HVAC::HXType::AirToAir_FlatPlate: {
             PrintFlag = true;
             FieldNum = 5;
             CompName = this->Name;
@@ -1606,63 +1608,70 @@ namespace HeatRecovery {
             this->NomSecAirVolFlow = sizerSystemAirFlow2.size(state, TempSize, errorsFound2);
             state.dataSize->DataConstantUsedForSizing = 0.0;
             state.dataSize->DataFractionUsedForSizing = 0.0;
-        }
-        state.dataSize->HRFlowSizingFlag = false;
-        if (this->type == HVAC::HXType::Desiccant_Balanced) {
+            state.dataSize->HRFlowSizingFlag = false;
 
+            // Calculate nominal effectiveness
+
+            break;
+        }
+        case HVAC::HXType::Desiccant_Balanced: {
+            state.dataSize->HRFlowSizingFlag = false;
             int const BalDesDehumPerfIndex = this->PerfDataIndex; // index of dehum performance data1 object
+            auto &thisBDDPerf = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex);
 
             FieldNum = 1;
             PrintFlag = true;
-            CompName = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).Name;
-            CompType = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).PerfType;
-            SizingString = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NumericFieldNames(FieldNum) + " [m3/s]";
-            TempSize = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NomSupAirVolFlow;
+            CompName = thisBDDPerf.Name;
+            CompType = thisBDDPerf.PerfType;
+            SizingString = thisBDDPerf.NumericFieldNames(FieldNum) + " [m3/s]";
+            TempSize = thisBDDPerf.NomSupAirVolFlow;
             bool errorsFound2 = false;
             SystemAirFlowSizer sizerSystemAirFlow3;
             sizerSystemAirFlow3.overrideSizingString(SizingString);
             // sizerSystemAirFlow3.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
             sizerSystemAirFlow3.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-            state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NomSupAirVolFlow =
-                sizerSystemAirFlow3.size(state, TempSize, errorsFound2);
+            thisBDDPerf.NomSupAirVolFlow = sizerSystemAirFlow3.size(state, TempSize, errorsFound2);
+            this->NomSupAirVolFlow = thisBDDPerf.NomSupAirVolFlow;
+            this->NomSecAirVolFlow = thisBDDPerf.NomSupAirVolFlow;
 
-            state.dataSize->DataAirFlowUsedForSizing = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NomSupAirVolFlow;
-            TempSize = state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NomProcAirFaceVel;
+            state.dataSize->DataAirFlowUsedForSizing = thisBDDPerf.NomSupAirVolFlow;
+            TempSize = thisBDDPerf.NomProcAirFaceVel;
             bool errorsFound3 = false;
             DesiccantDehumidifierBFPerfDataFaceVelocitySizer sizerDesDehumBFFaceVel;
             sizerDesDehumBFFaceVel.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-            state.dataHeatRecovery->BalDesDehumPerfData(BalDesDehumPerfIndex).NomProcAirFaceVel =
-                sizerDesDehumBFFaceVel.size(state, TempSize, errorsFound3);
+            thisBDDPerf.NomProcAirFaceVel = sizerDesDehumBFFaceVel.size(state, TempSize, errorsFound3);
 
             state.dataSize->DataAirFlowUsedForSizing = 0.0;
+            break;
+        }
+        default:
+            assert(0);
         }
 
         // std 229 new heat recovery table variables
-        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRInputObjName, this->Name, this->Name);
-        OutputReportPredefined::PreDefTableEntry(state,
-                                                 state.dataOutRptPredefined->pdchAirHRInputObjType,
-                                                 this->Name,
-                                                 this->type == HVAC::HXType::AirToAir_FlatPlate
-                                                     ? "Flat Plate"
-                                                     : (this->type == HVAC::HXType::Desiccant_Balanced ? "Desiccant Balanced" : "Generic"));
-        OutputReportPredefined::PreDefTableEntry(state,
-                                                 state.dataOutRptPredefined->pdchAirHRPlateOrRotary,
-                                                 this->Name,
-                                                 this->type == HVAC::HXType::AirToAir_FlatPlate ? "FlatPlate" : " Rotary");
+        assert((this->type != HVAC::HXType::Invalid) && (this->ExchConfig != HXConfigurationType::Invalid));
+        OutputReportPredefined::PreDefTableEntry(
+            state, state.dataOutRptPredefined->pdchAirHRInputObjType, this->Name, HVAC::hxTypeNames[(int)this->type]);
+        OutputReportPredefined::PreDefTableEntry(
+            state, state.dataOutRptPredefined->pdchAirHRPlateOrRotary, this->Name, hxConfigurationNames[(int)this->ExchConfig]);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRSupplyAirflow, this->Name, this->NomSupAirVolFlow);
+        OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRExhaustAirflow, this->Name, this->NomSecAirVolFlow);
 
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerHeatAirFlow, this->Name, this->HeatEffectSensible100);
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerCoolAirFlow, this->Name, this->CoolEffectSensible100);
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerHeatAirFlow, this->Name, this->HeatEffectLatent100);
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerCoolAirFlow, this->Name, this->CoolEffectLatent100);
-
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHRExhaustAirflow, this->Name, this->NomSecAirMassFlow); // ? Nomsec ==? exhaust?
-        OutputReportPredefined::PreDefTableEntry(
-            state, state.dataOutRptPredefined->pdchAirHROutdoorAirflow, this->Name, this->NomSupAirMassFlow); // ? NomSup ==? outdoor air?
+        if (this->type == HVAC::HXType::AirToAir_SensAndLatent) {
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerHeatAirFlow, this->Name, this->HeatEffectSensible100);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerCoolAirFlow, this->Name, this->CoolEffectSensible100);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerHeatAirFlow, this->Name, this->HeatEffectLatent100);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerCoolAirFlow, this->Name, this->CoolEffectLatent100);
+        } else {
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerHeatAirFlow, this->Name, "N/A");
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRSenEffAt100PerCoolAirFlow, this->Name, "N/A");
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerHeatAirFlow, this->Name, "N/A");
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerCoolAirFlow, this->Name, "N/A");
+        }
     }
 
     void
@@ -1723,10 +1732,18 @@ namespace HeatRecovery {
             UnitSecMassFlow = min(this->NomSecAirMassFlow, this->SecInMassFlow);
         }
 
-        if (this->availSched->getCurrentVal() <= 0.0) UnitOn = false;
-        if (this->SupInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (this->SecInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (!HXUnitOn) UnitOn = false;
+        if (this->availSched->getCurrentVal() <= 0.0) {
+            UnitOn = false;
+        }
+        if (this->SupInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (this->SecInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (!HXUnitOn) {
+            UnitOn = false;
+        }
 
         if (UnitOn) {
             // unit is on
@@ -1950,16 +1967,26 @@ namespace HeatRecovery {
             this->SecBypassMassFlow = 0.0;
         }
         // Unit is scheduled OFF, so bypass heat exchange calcs
-        if (this->availSched->getCurrentVal() <= 0.0) UnitOn = false;
+        if (this->availSched->getCurrentVal() <= 0.0) {
+            UnitOn = false;
+        }
         //! Economizer is active, so bypass heat exchange calcs. This applies to both flat plate and rotary HX's
         if ((EconomizerActiveFlag || HighHumCtrlActiveFlag) && this->EconoLockOut) {
             UnitOn = false;
         }
         // Determine if unit is ON or OFF based on air mass flow through the supply and secondary airstreams and operation flag
-        if (this->SupInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (this->SecInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (!HXUnitOn) UnitOn = false;
-        if (this->NomSupAirVolFlow == 0.0) UnitOn = false;
+        if (this->SupInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (this->SecInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (!HXUnitOn) {
+            UnitOn = false;
+        }
+        if (this->NomSupAirVolFlow == 0.0) {
+            UnitOn = false;
+        }
 
         if (UnitOn) {
             bool FrostControlFlag = false; // unit is in frost control mode when TRUE
@@ -2471,13 +2498,25 @@ namespace HeatRecovery {
         }
 
         // Unit is scheduled OFF, so bypass heat exchange calcs
-        if (this->availSched->getCurrentVal() <= 0.0) UnitOn = false;
+        if (this->availSched->getCurrentVal() <= 0.0) {
+            UnitOn = false;
+        }
         // Determine if unit is ON or OFF based on air mass flow through the supply and secondary airstreams and operation flag
-        if (this->SupInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (this->SecInMassFlow <= HVAC::SmallMassFlow) UnitOn = false;
-        if (HXPartLoadRatio == 0.0) UnitOn = false;
-        if (!HXUnitOn) UnitOn = false;
-        if ((EconomizerActiveFlag || HighHumCtrlActiveFlag) && this->EconoLockOut) UnitOn = false;
+        if (this->SupInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (this->SecInMassFlow <= HVAC::SmallMassFlow) {
+            UnitOn = false;
+        }
+        if (HXPartLoadRatio == 0.0) {
+            UnitOn = false;
+        }
+        if (!HXUnitOn) {
+            UnitOn = false;
+        }
+        if ((EconomizerActiveFlag || HighHumCtrlActiveFlag) && this->EconoLockOut) {
+            UnitOn = false;
+        }
 
         if (UnitOn) {
             constexpr std::string_view ThisSubTSat = "CalcDesiccantBalancedHeatExch:   TSat";
@@ -3526,8 +3565,9 @@ namespace HeatRecovery {
             if (!state.dataGlobal->WarmupFlag && !FirstHVACIteration) {
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInTempError.print = true;
                 //       Suppress warning message when process inlet temperature = 0 (DX coil is off)
-                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInTempError.last == 0.0)
+                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInTempError.last == 0.0) {
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInTempError.print = false;
+                }
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInTempError.buffer1 = format(
                     "{} \"{}\" - Process inlet air temperature used in regen outlet air temperature equation is outside model boundaries at {}.",
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).PerfType,
@@ -3565,8 +3605,9 @@ namespace HeatRecovery {
             if (!state.dataGlobal->WarmupFlag && !FirstHVACIteration) {
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.print = true;
                 //       Suppress warning message when process inlet humrat = 0 (DX coil is off)
-                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.last == 0.0)
+                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.last == 0.0) {
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.print = false;
+                }
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.buffer1 = format(
                     "{} \"{}\" - Process inlet air humidity ratio used in regen outlet air temperature equation is outside model boundaries at {}.",
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).PerfType,
@@ -3890,8 +3931,9 @@ namespace HeatRecovery {
             if (!state.dataGlobal->WarmupFlag && !FirstHVACIteration) {
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInTempError.print = true;
                 //       Suppress warning message when process inlet temperature = 0 (DX coil is off)
-                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInTempError.last == 0.0)
+                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInTempError.last == 0.0) {
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInTempError.print = false;
+                }
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInTempError.buffer1 = format(
                     "{} \"{}\" - Process inlet air temperature used in regen outlet air humidity ratio equation is outside model boundaries at {}.",
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).PerfType,
@@ -3930,8 +3972,9 @@ namespace HeatRecovery {
             if (!state.dataGlobal->WarmupFlag && !FirstHVACIteration) {
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.print = true;
                 //       Suppress warning message when process inlet humrat = 0 (DX coil is off)
-                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.last == 0.0)
+                if (state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.last == 0.0) {
                     state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.print = false;
+                }
                 state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.buffer1 =
                     format("{} \"{}\" - Process inlet air humidity ratio used in regen outlet air humidity ratio equation is outside model "
                            "boundaries at {}.",
@@ -4361,7 +4404,9 @@ namespace HeatRecovery {
         auto &thisError = state.dataHeatRecovery->error6;
         // current end time is compared with last to see if time step changed
 
-        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) return;
+        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) {
+            return;
+        }
 
         //   calculate end time of current time step
         thisError.CurrentEndTime = state.dataGlobal->CurrentTime + SysTimeElapsed;
@@ -4536,7 +4581,9 @@ namespace HeatRecovery {
         auto &thisError = state.dataHeatRecovery->error5;
         // current end time is compared with last to see if time step changed
 
-        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) return;
+        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) {
+            return;
+        }
 
         //   calculate end time of current time step
         thisError.CurrentEndTime = state.dataGlobal->CurrentTime + SysTimeElapsed;
@@ -4706,7 +4753,9 @@ namespace HeatRecovery {
         // current end time is compared with last to see if time step changed
         Real64 ABSImbalancedFlow; // absolute value of process and regeneration air flow imbalance fraction
 
-        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) return;
+        if (state.dataGlobal->WarmupFlag || FirstHVACIteration) {
+            return;
+        }
 
         //   calculate end time of current time step
         thisError.CurrentEndTime = state.dataGlobal->CurrentTime + SysTimeElapsed;

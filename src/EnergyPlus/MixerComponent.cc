@@ -187,7 +187,9 @@ void GetMixerInput(EnergyPlusData &state)
     CurrentModuleObject = "AirLoopHVAC:ZoneMixer";
     state.dataMixerComponent->NumMixers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
 
-    if (state.dataMixerComponent->NumMixers > 0) state.dataMixerComponent->MixerCond.allocate(state.dataMixerComponent->NumMixers);
+    if (state.dataMixerComponent->NumMixers > 0) {
+        state.dataMixerComponent->MixerCond.allocate(state.dataMixerComponent->NumMixers);
+    }
     state.dataMixerComponent->CheckEquipName.dimension(state.dataMixerComponent->NumMixers, true);
 
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumParams, NumAlphas, NumNums);
@@ -226,8 +228,9 @@ void GetMixerInput(EnergyPlusData &state)
                                                                                      ObjectIsNotParent);
         state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes = NumAlphas - 2;
 
-        for (auto &e : state.dataMixerComponent->MixerCond)
+        for (auto &e : state.dataMixerComponent->MixerCond) {
             e.InitFlag = true;
+        }
 
         state.dataMixerComponent->MixerCond(MixerNum).InletNode.allocate(state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes);
         state.dataMixerComponent->MixerCond(MixerNum).InletMassFlowRate.allocate(state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes);
@@ -278,7 +281,9 @@ void GetMixerInput(EnergyPlusData &state)
     for (MixerNum = 1; MixerNum <= state.dataMixerComponent->NumMixers; ++MixerNum) {
         NodeNum = state.dataMixerComponent->MixerCond(MixerNum).OutletNode;
         for (InNodeNum1 = 1; InNodeNum1 <= state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes; ++InNodeNum1) {
-            if (NodeNum != state.dataMixerComponent->MixerCond(MixerNum).InletNode(InNodeNum1)) continue;
+            if (NodeNum != state.dataMixerComponent->MixerCond(MixerNum).InletNode(InNodeNum1)) {
+                continue;
+            }
             ShowSevereError(state,
                             format("{} = {} specifies an inlet node name the same as the outlet node.",
                                    CurrentModuleObject,
@@ -290,8 +295,9 @@ void GetMixerInput(EnergyPlusData &state)
         for (InNodeNum1 = 1; InNodeNum1 <= state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes; ++InNodeNum1) {
             for (InNodeNum2 = InNodeNum1 + 1; InNodeNum2 <= state.dataMixerComponent->MixerCond(MixerNum).NumInletNodes; ++InNodeNum2) {
                 if (state.dataMixerComponent->MixerCond(MixerNum).InletNode(InNodeNum1) !=
-                    state.dataMixerComponent->MixerCond(MixerNum).InletNode(InNodeNum2))
+                    state.dataMixerComponent->MixerCond(MixerNum).InletNode(InNodeNum2)) {
                     continue;
+                }
                 ShowSevereError(state,
                                 format("{} = {} specifies duplicate inlet nodes in its inlet node list.",
                                        CurrentModuleObject,

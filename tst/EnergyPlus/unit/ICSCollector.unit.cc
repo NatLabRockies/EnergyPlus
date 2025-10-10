@@ -200,8 +200,9 @@ TEST_F(EnergyPlusFixture, ICSSolarCollectorTest_CalcPassiveExteriorBaffleGapTest
     state->dataConstruction->Construct(ConstrNum).LayerPoint.deallocate();
     state->dataConstruction->Construct.deallocate();
 
-    for (int i = 1; i <= state->dataMaterial->materials.isize(); ++i)
+    for (int i = 1; i <= state->dataMaterial->materials.isize(); ++i) {
         delete state->dataMaterial->materials(i);
+    }
 
     state->dataMaterial->materials.deallocate();
     state->dataHeatBal->ExtVentedCavity(NumOfSurf).SurfPtrs.deallocate();

@@ -91,9 +91,13 @@ public:
     template <typename T> T *objectFactory(std::string const &name)
     {
         auto const it = storage.find(T::objectTypeHash());
-        if (it == storage.end()) return nullptr;
+        if (it == storage.end()) {
+            return nullptr;
+        }
         auto const it2 = it->second.find(name);
-        if (it2 == it->second.end()) return nullptr;
+        if (it2 == it->second.end()) {
+            return nullptr;
+        }
         T *p = static_cast<T *>(it2->second.get());
         return p;
     }
@@ -102,9 +106,13 @@ public:
     {
         static const std::string blankString;
         auto const it = storage.find(T::objectTypeHash());
-        if (it == storage.end()) return nullptr;
+        if (it == storage.end()) {
+            return nullptr;
+        }
         auto const it2 = it->second.find(blankString);
-        if (it2 == it->second.end()) return nullptr;
+        if (it2 == it->second.end()) {
+            return nullptr;
+        }
         T *p = static_cast<T *>(it2->second.get());
         return p;
     }

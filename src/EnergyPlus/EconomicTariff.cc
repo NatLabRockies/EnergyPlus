@@ -232,8 +232,9 @@ void UpdateUtilityBills(EnergyPlusData &state)
         // do rest of GetInput only if at least one tariff is defined.
         GetInputEconomicsCurrencyType(state, ErrorsFound);
         if (s_econ->numTariff >= 1) {
-            if (!ErrorsFound && state.dataOutRptTab->displayEconomicResultSummary)
+            if (!ErrorsFound && state.dataOutRptTab->displayEconomicResultSummary) {
                 OutputReportTabular::AddTOCEntry(state, "Economics Results Summary Report", "Entire Facility");
+            }
             CreateCategoryNativeVariables(state);
             GetInputEconomicsQualify(state, ErrorsFound);
             GetInputEconomicsChargeSimple(state, ErrorsFound);
@@ -244,7 +245,9 @@ void UpdateUtilityBills(EnergyPlusData &state)
             CreateDefaultComputation(state);
         }
         s_econ->Update_GetInput = false;
-        if (ErrorsFound) ShowFatalError(state, "UpdateUtilityBills: Preceding errors cause termination.");
+        if (ErrorsFound) {
+            ShowFatalError(state, "UpdateUtilityBills: Preceding errors cause termination.");
+        }
     }
     if (state.dataGlobal->DoOutputReporting && (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather)) {
         GatherForEconomics(state);
@@ -1425,7 +1428,9 @@ void parseComputeLine(EnergyPlusData &state, std::string const &lineOfCompute, i
         GetLastWord(lineOfCompute, endOfWord, word);
         // first see if word is an operator
         Op op = static_cast<Op>(getEnumValue(opNamesUC, word));
-        if (op == Op::Invalid) static_cast<Op>(getEnumValue(opNames2UC, word));
+        if (op == Op::Invalid) {
+            static_cast<Op>(getEnumValue(opNames2UC, word));
+        }
 
         // if not an operator then look for
         if (op != Op::Invalid) {
@@ -1918,10 +1923,11 @@ void warnIfNativeVarname(
     auto &s_econ = state.dataEconTariff;
 
     bool throwError = false;
-    if (getEnumValue(nativeNamesUC, objName) != -1)
+    if (getEnumValue(nativeNamesUC, objName) != -1) {
         throwError = true;
-    else if (getEnumValue(catNamesUC, objName) != -1)
+    } else if (getEnumValue(catNamesUC, objName) != -1) {
         throwError = true;
+    }
 
     if (throwError) {
         ErrorsFound = true;
@@ -1971,7 +1977,9 @@ int AssignVariablePt(EnergyPlusData &state,
             AssignVariablePt = found;
             if (s_econ->econVar(found).kindOfObj == ObjType::Invalid) {
                 s_econ->econVar(found).kindOfObj = econObjKind;
-                if (s_econ->econVar(found).index == 0) s_econ->econVar(found).index = objIndex;
+                if (s_econ->econVar(found).index == 0) {
+                    s_econ->econVar(found).index = objIndex;
+                }
             }
         } else {
             incrementEconVar(state);
@@ -2671,7 +2679,9 @@ void ComputeTariff(EnergyPlusData &state)
         s_econ->econVar(nVar).isEvaluated = false;
     }
 
-    if (s_econ->numTariff == 0) return;
+    if (s_econ->numTariff == 0) {
+        return;
+    }
 
     state.dataOutRptTab->WriteTabularFiles = true;
     setNativeVariables(state);
@@ -3106,8 +3116,9 @@ void pushStack(EnergyPlusData &state, Array1A<Real64> const monthlyArray, int co
                                         tariff(econVar(variablePointer).tariffIndx).tariffName));
             }
             // if the serviceCharges are being evaluated add in the monthly charges
-            if (econVar(variablePointer).kindOfObj == ObjType::Category && econVar(variablePointer).specific == (int)Cat::ServiceCharges)
+            if (econVar(variablePointer).kindOfObj == ObjType::Category && econVar(variablePointer).specific == (int)Cat::ServiceCharges) {
                 addMonthlyCharge(state, variablePointer);
+            }
             // get the results of performing the evaluation - should have been
             // put into the econVar values
             curMonthlyArray = econVar(variablePointer).values;
@@ -3652,7 +3663,7 @@ void setNativeVariables(EnergyPlusData &state)
         // nativeTotalEnergy
         monthVal = 0.0;
         for (int kMonth = 1; kMonth <= NumMonths; ++kMonth) {
-            for (int jPeriod = 1; jPeriod <= (int)Period::Num; ++jPeriod) {
+            for (int jPeriod = 0; jPeriod < (int)Period::Num; ++jPeriod) {
                 monthVal(kMonth) += tariff.gatherEnergy(kMonth)[jPeriod];
             }
         }
@@ -3660,7 +3671,7 @@ void setNativeVariables(EnergyPlusData &state)
         // nativeTotalDemand
         monthVal = -bigNumber;
         for (int kMonth = 1; kMonth <= NumMonths; ++kMonth) {
-            for (int jPeriod = 1; jPeriod <= (int)Period::Num; ++jPeriod) {
+            for (int jPeriod = 0; jPeriod < (int)Period::Num; ++jPeriod) {
                 if (tariff.gatherDemand(kMonth)[jPeriod] > monthVal(kMonth)) {
                     monthVal(kMonth) = tariff.gatherDemand(kMonth)[jPeriod];
                 }
@@ -3895,36 +3906,48 @@ void LEEDtariffReporting(EnergyPlusData &state)
                 if (tariff.kindMtr == MeterType::ElecSimple || tariff.kindMtr == MeterType::ElecProduced ||
                     tariff.kindMtr == MeterType::ElecPurchased || tariff.kindMtr == MeterType::ElecSurplusSold ||
                     tariff.kindMtr == MeterType::ElecNet) {
-                    if (tariff.totalAnnualEnergy > elecTotalEne) elecTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > elecTotalEne) {
+                        elecTotalEne = tariff.totalAnnualEnergy;
+                    }
                     elecTotalCost += tariff.totalAnnualCost;
                     elecTariffNames += ' ' + tariff.tariffName;
                     elecUnits = tariff.convChoice;
                 } else if (tariff.kindMtr == MeterType::Gas) {
-                    if (tariff.totalAnnualEnergy > gasTotalEne) gasTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > gasTotalEne) {
+                        gasTotalEne = tariff.totalAnnualEnergy;
+                    }
                     gasTotalCost += tariff.totalAnnualCost;
                     gasTariffNames += ' ' + tariff.tariffName;
                     gasUnits = tariff.convChoice;
                     gasDemWindowUnits = tariff.demandWindow;
                 } else if (tariff.reportMeterIndx == distCoolFacilMeter) {
-                    if (tariff.totalAnnualEnergy > distCoolTotalEne) distCoolTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > distCoolTotalEne) {
+                        distCoolTotalEne = tariff.totalAnnualEnergy;
+                    }
                     distCoolTotalCost += tariff.totalAnnualCost;
                     distCoolTariffNames += ' ' + tariff.tariffName;
                     distCoolUnits = tariff.convChoice;
                     distCoolDemWindowUnits = tariff.demandWindow;
                 } else if (tariff.reportMeterIndx == distHeatWaterFacilMeter) {
-                    if (tariff.totalAnnualEnergy > distHeatWaterTotalEne) distHeatWaterTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > distHeatWaterTotalEne) {
+                        distHeatWaterTotalEne = tariff.totalAnnualEnergy;
+                    }
                     distHeatWaterTotalCost += tariff.totalAnnualCost;
                     distHeatWaterTariffNames += ' ' + tariff.tariffName;
                     distHeatWaterUnits = tariff.convChoice;
                     distHeatWaterDemWindowUnits = tariff.demandWindow;
                 } else if (tariff.reportMeterIndx == distHeatSteamFacilMeter) {
-                    if (tariff.totalAnnualEnergy > distHeatSteamTotalEne) distHeatSteamTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > distHeatSteamTotalEne) {
+                        distHeatSteamTotalEne = tariff.totalAnnualEnergy;
+                    }
                     distHeatSteamTotalCost += tariff.totalAnnualCost;
                     distHeatSteamTariffNames += ' ' + tariff.tariffName;
                     distHeatSteamUnits = tariff.convChoice;
                     distHeatSteamDemWindowUnits = tariff.demandWindow;
                 } else if (tariff.kindMtr != MeterType::Water) {
-                    if (tariff.totalAnnualEnergy > otherTotalEne) otherTotalEne = tariff.totalAnnualEnergy;
+                    if (tariff.totalAnnualEnergy > otherTotalEne) {
+                        otherTotalEne = tariff.totalAnnualEnergy;
+                    }
                     otherTotalCost += tariff.totalAnnualCost;
                     othrTariffNames += ' ' + tariff.tariffName;
                     othrUnits = tariff.convChoice;
@@ -3936,17 +3959,26 @@ void LEEDtariffReporting(EnergyPlusData &state)
         // names of the rates
         OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "Electricity", elecTariffNames);
         OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "Natural Gas", gasTariffNames);
-        if (distCoolTotalEne != 0) OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "District Cooling", distCoolTariffNames);
-        if (distHeatWaterTotalEne != 0)
+        if (distCoolTotalEne != 0) {
+            OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "District Cooling", distCoolTariffNames);
+        }
+        if (distHeatWaterTotalEne != 0) {
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "District Heating Water", distHeatWaterTariffNames);
-        if (distHeatSteamTotalEne != 0)
+        }
+        if (distHeatSteamTotalEne != 0) {
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "District Heating Steam", distHeatSteamTariffNames);
+        }
         OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsRtNm, "Other", othrTariffNames);
         // virtual rate
-        if (elecTotalEne != 0)
+        if (elecTotalEne != 0) {
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsVirt, "Electricity", elecTotalCost / elecTotalEne, 3);
-        if (gasTotalEne != 0) OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsVirt, "Natural Gas", gasTotalCost / gasTotalEne, 3);
-        if (otherTotalEne != 0) OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsVirt, "Other", otherTotalCost / otherTotalEne, 3);
+        }
+        if (gasTotalEne != 0) {
+            OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsVirt, "Natural Gas", gasTotalCost / gasTotalEne, 3);
+        }
+        if (otherTotalEne != 0) {
+            OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsVirt, "Other", otherTotalCost / otherTotalEne, 3);
+        }
         // units
         OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsEneUnt, "Electricity", format("{}", convEnergyStrings[(int)elecUnits]));
         OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEtsEneUnt, "Natural Gas", format("{}", convEnergyStrings[(int)gasUnits]));
@@ -3980,7 +4012,9 @@ void LEEDtariffReporting(EnergyPlusData &state)
                 state,
                 s_orp->pdchLeedEtsDemUnt,
                 "District Cooling",
-                format("{}{}", convDemandStrings[(int)distCoolUnits], demandWindowStrings[(int)distCoolDemWindowUnits]));
+                format("{}{}",
+                       convDemandStrings[(int)distCoolUnits],
+                       (distCoolDemWindowUnits == DemandWindow::Invalid) ? "" : demandWindowStrings[(int)distCoolDemWindowUnits]));
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEcsTotal, "District Cooling", distCoolTotalCost, 2);
         }
         if (distHeatWaterTotalEne != 0) {
@@ -3992,7 +4026,9 @@ void LEEDtariffReporting(EnergyPlusData &state)
                 state,
                 s_orp->pdchLeedEtsDemUnt,
                 "District Heating Water",
-                format("{}{}", convDemandStrings[(int)distHeatWaterUnits], demandWindowStrings[(int)distHeatWaterDemWindowUnits]));
+                format("{}{}",
+                       convDemandStrings[(int)distHeatWaterUnits],
+                       (distHeatWaterDemWindowUnits == DemandWindow::Invalid) ? "" : demandWindowStrings[(int)distHeatWaterDemWindowUnits]));
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEcsTotal, "District Heating Water", distHeatWaterTotalCost, 2);
         }
         if (distHeatSteamTotalEne != 0) {
@@ -4004,7 +4040,9 @@ void LEEDtariffReporting(EnergyPlusData &state)
                 state,
                 s_orp->pdchLeedEtsDemUnt,
                 "District Heating Steam",
-                format("{}{}", convDemandStrings[(int)distHeatSteamUnits], demandWindowStrings[(int)distHeatSteamDemWindowUnits]));
+                format("{}{}",
+                       convDemandStrings[(int)distHeatSteamUnits],
+                       (distHeatSteamDemWindowUnits == DemandWindow::Invalid) ? "" : demandWindowStrings[(int)distHeatSteamDemWindowUnits]));
             OutputReportPredefined::PreDefTableEntry(state, s_orp->pdchLeedEcsTotal, "District Heating Steam", distHeatSteamTotalCost, 2);
         }
         // save the total costs for later to compute process fraction
@@ -4058,8 +4096,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
 
         if (state.dataOutRptTab->displayEconomicResultSummary) {
             DisplayString(state, "Writing Tariff Reports");
-            for (auto &e : econVar)
+            for (auto &e : econVar) {
                 e.isReported = false;
+            }
             showWarningsBasedOnTotal(state);
             //---------------------------------
             // Economics Results Summary Report
@@ -4076,8 +4115,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                                           state.dataOutRptTab->unitsStyle_SQLite,
                                           unitsStyle_cur,
                                           produceTabular,
-                                          produceSQLite))
+                                          produceSQLite)) {
                     break;
+                }
 
                 // do unit conversions if necessary
                 std::string perAreaUnitName;
@@ -4313,8 +4353,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 columnWidth.deallocate();
                 tableBody.deallocate();
                 //---- Categories
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 econVar(tariff.cats[(int)Cat::EnergyCharges]).activeNow = true;
                 econVar(tariff.cats[(int)Cat::DemandCharges]).activeNow = true;
                 econVar(tariff.cats[(int)Cat::ServiceCharges]).activeNow = true;
@@ -4326,8 +4367,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 econVar(tariff.cats[(int)Cat::Total]).activeNow = true;
                 ReportEconomicVariable(state, "Categories", false, true, tariff.tariffName);
                 //---- Charges
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
                     if (econVar(kVar).tariffIndx == iTariff) {
                         if ((econVar(kVar).kindOfObj == ObjType::ChargeSimple) || (econVar(kVar).kindOfObj == ObjType::ChargeBlock)) {
@@ -4337,8 +4379,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 }
                 ReportEconomicVariable(state, "Charges", true, true, tariff.tariffName);
                 //---- Sources for Charges
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
                     if (econVar(kVar).tariffIndx == iTariff) {
                         int indexInChg = econVar(kVar).index;
@@ -4357,8 +4400,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 }
                 ReportEconomicVariable(state, "Corresponding Sources for Charges", false, false, tariff.tariffName);
                 //---- Rachets
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
                     if (econVar(kVar).tariffIndx == iTariff) {
                         if (econVar(kVar).kindOfObj == ObjType::Ratchet) {
@@ -4368,8 +4412,9 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 }
                 ReportEconomicVariable(state, "Ratchets", false, false, tariff.tariffName);
                 //---- Qualifies
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
                     if (econVar(kVar).tariffIndx == iTariff) {
                         if (econVar(kVar).kindOfObj == ObjType::Qualify) {
@@ -4379,15 +4424,17 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                 }
                 ReportEconomicVariable(state, "Qualifies", false, false, tariff.tariffName);
                 //---- Native Variables
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = tariff.firstNative; kVar <= tariff.lastNative; ++kVar) {
                     econVar(kVar).activeNow = true;
                 }
                 ReportEconomicVariable(state, "Native Variables", false, false, tariff.tariffName);
                 //---- Other Variables
-                for (auto &e : econVar)
+                for (auto &e : econVar) {
                     e.activeNow = false;
+                }
                 for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
                     if (econVar(kVar).tariffIndx == iTariff) {
                         if (!econVar(kVar).isReported) {

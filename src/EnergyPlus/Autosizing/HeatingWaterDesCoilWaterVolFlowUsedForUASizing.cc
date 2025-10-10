@@ -77,7 +77,9 @@ Real64 HeatingWaterDesCoilWaterVolFlowUsedForUASizer::size(EnergyPlusData &state
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "design_water_volume_flow_rate_used_for_ua_sizing";
+        if (this->isEpJSON) {
+            this->sizingString = "design_water_volume_flow_rate_used_for_ua_sizing";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {

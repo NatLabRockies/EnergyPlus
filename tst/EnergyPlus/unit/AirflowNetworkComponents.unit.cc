@@ -98,8 +98,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
     state->afn->MultizoneSurfaceData(i).OpenFactor = 1.0;
 
     state->afn->node_states.clear();
-    for (int it = 0; it < 2; ++it)
+    for (int it = 0; it < 2; ++it) {
         state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+    }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.18;
 
@@ -152,8 +153,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_Coil)
     state->afn->DisSysCompCoilData[0].L = 1.0;
 
     state->afn->node_states.clear();
-    for (int it = 0; it < 2; ++it)
+    for (int it = 0; it < 2; ++it) {
         state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+    }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.2;
 

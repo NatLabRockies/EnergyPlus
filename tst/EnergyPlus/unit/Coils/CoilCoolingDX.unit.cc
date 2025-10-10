@@ -75,7 +75,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXInput)
     int coilIndex = CoilCoolingDX::factory(*state, "coolingCoil");
     auto const &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     EXPECT_EQ("COOLINGCOIL", thisCoil.name);
-    EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance.name);
+    EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance->name);
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
@@ -165,13 +165,13 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
     thisCoil.size(*state);
 
     // for speed > 1 we use the mshp rated high speed flow...
-    state->dataHVACGlobal->MSHPMassFlowRateHigh = thisCoil.performance.normalMode.speeds.back().RatedAirMassFlowRate;
+    state->dataHVACGlobal->MSHPMassFlowRateHigh = thisCoil.performance->ratedAirMassFlowRateMaxSpeed(*state);
 
     // we'll use this later
     auto &evapOutletNode = state->dataLoopNodes->Node(thisCoil.evapOutletNodeIndex);
 
     // set some values to run at rated conditions and call to run normal mode speed 1
-    evapInletNode.MassFlowRate = thisCoil.performance.normalMode.speeds.front().RatedAirMassFlowRate;
+    evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMinSpeed(*state);
     HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
     Real64 PLR = 1.0;
     int speedNum = 1;
@@ -185,7 +185,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
     EXPECT_NEAR(0.0114, evapOutletNode.HumRat, 0.001);
 
     // alter values and run at rated conditions normal mode speed 2
-    evapInletNode.MassFlowRate = thisCoil.performance.normalMode.speeds.back().RatedAirMassFlowRate;
+    evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMaxSpeed(*state);
     speedNum = 2;
     thisCoil.simulate(*state, coilMode, speedNum, speedRatio, fanOp, singleMode);
     //    std::cout << thisCoil.totalCoolingEnergyRate << ',' << evapOutletNode.Temp << ',' << evapOutletNode.HumRat << std::endl;
@@ -302,7 +302,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
     thisCoil.size(*state);
 
     // for speed > 1 we use the mshp rated high speed flow...
-    state->dataHVACGlobal->MSHPMassFlowRateHigh = thisCoil.performance.normalMode.speeds.back().RatedAirMassFlowRate;
+    state->dataHVACGlobal->MSHPMassFlowRateHigh = thisCoil.performance->ratedAirMassFlowRateMaxSpeed(*state);
 
     // we'll use this later
     auto &evapOutletNode = state->dataLoopNodes->Node(thisCoil.evapOutletNodeIndex);
@@ -310,7 +310,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
     bool setExpectations = true;
 
     // set some values to run at rated conditions and call to run normal mode speed 1
-    evapInletNode.MassFlowRate = thisCoil.performance.normalMode.speeds.front().RatedAirMassFlowRate;
+    evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMinSpeed(*state);
     HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
     Real64 PLR = 1.0;
     int speedNum = 1;
@@ -326,7 +326,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
         EXPECT_NEAR(0.007748, evapOutletNode.HumRat, 0.0001);
     }
     // alter values and run at rated conditions normal mode speed 2
-    evapInletNode.MassFlowRate = thisCoil.performance.normalMode.speeds.back().RatedAirMassFlowRate;
+    evapInletNode.MassFlowRate = thisCoil.performance->ratedAirMassFlowRateMaxSpeed(*state);
     speedNum = 2;
     thisCoil.simulate(*state, coilMode, speedNum, speedRatio, fanOp, singleMode);
     if (!setExpectations) {
@@ -1853,16 +1853,18 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
     this_dx_clg_coil.size(*state);
 
     // check the normal operating mode names
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[0].name, "DX COOLING COIL SPEED 1 PERFORMANCE");
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[1].name, "DX COOLING COIL SPEED 2 PERFORMANCE");
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[2].name, "DX COOLING COIL SPEED 3 PERFORMANCE");
-    EXPECT_EQ(this_dx_clg_coil.performance.normalMode.speeds[3].name, "DX COOLING COIL SPEED 4 PERFORMANCE");
+    EXPECT_EQ(this_dx_clg_coil.performance->nameAtSpeed(0), "DX COOLING COIL SPEED 1 PERFORMANCE");
+    EXPECT_EQ(this_dx_clg_coil.performance->nameAtSpeed(1), "DX COOLING COIL SPEED 2 PERFORMANCE");
+    EXPECT_EQ(this_dx_clg_coil.performance->nameAtSpeed(2), "DX COOLING COIL SPEED 3 PERFORMANCE");
+    EXPECT_EQ(this_dx_clg_coil.performance->nameAtSpeed(3), "DX COOLING COIL SPEED 4 PERFORMANCE");
 
     struct TestQuery
     {
+        // clang-format off
         TestQuery(std::string t_description, std::string t_units, Real64 t_value)
             : description(t_description), units(t_units), expectedValue(t_value),
-              displayString("Description='" + description + "'; Units='" + units + "'"){};
+              displayString("Description='" + description + "'; Units='" + units + "'") {};
+        // clang-format on
 
         const std::string description;
         const std::string units;
@@ -1898,7 +1900,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
 
     // test 2: speed 2 cooling coil dx
     compType = "Coil:Cooling:DX:CurveFit:Speed";
-    compName = this_dx_clg_coil.performance.normalMode.speeds[1].name;
+    compName = this_dx_clg_coil.performance->nameAtSpeed(1);
     // expected results
     std::vector<TestQuery> speed2_testQueries(
         {TestQuery("Design Size Rated Air Flow Rate", "m3/s", 0.4000), TestQuery("Design Size Gross Cooling Capacity", "W", 6520.2056)});
@@ -1924,7 +1926,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
 
     // test 3: speed 3 cooling coil dx
     compType = "Coil:Cooling:DX:CurveFit:Speed";
-    compName = this_dx_clg_coil.performance.normalMode.speeds[2].name;
+    compName = this_dx_clg_coil.performance->nameAtSpeed(2);
     // expected results
     std::vector<TestQuery> speed3_testQueries(
         {TestQuery("Design Size Rated Air Flow Rate", "m3/s", 0.6000), TestQuery("Design Size Gross Cooling Capacity", "W", 9780.3084)});

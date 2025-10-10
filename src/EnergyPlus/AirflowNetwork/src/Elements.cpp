@@ -171,7 +171,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = FTT;
                 } else {
@@ -205,7 +207,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = -FTT;
                 } else {
@@ -306,7 +310,9 @@ namespace AirflowNetwork {
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                     // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = FTT;
             } else {
@@ -340,7 +346,9 @@ namespace AirflowNetwork {
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                     // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = -FTT;
             } else {
@@ -841,15 +849,21 @@ namespace AirflowNetwork {
             k = 5 * (j - 1) + 1;
             BX = Coeff(k);
             BY = Coeff(k + 1) + BX * (Coeff(k + 2) + BX * (Coeff(k + 3) + BX * Coeff(k + 4))) - PRISE;
-            if (BY < 0.0) ShowFatalError(state, "Out of range, too low in an AirflowNetwork detailed Fan");
+            if (BY < 0.0) {
+                ShowFatalError(state, "Out of range, too low in an AirflowNetwork detailed Fan");
+            }
 
             while (true) {
                 DX = Coeff(k + 5);
                 DY = Coeff(k + 1) + DX * (Coeff(k + 2) + DX * (Coeff(k + 3) + DX * Coeff(k + 5))) - PRISE;
                 // if (LIST >= 4) gio::write(Unit21, Format_901) << " fp0:" << j << BX << BY << DX << DY;
-                if (BY * DY <= 0.0) break;
+                if (BY * DY <= 0.0) {
+                    break;
+                }
                 ++j;
-                if (j > NumCur) ShowFatalError(state, "Out of range, too high (FAN) in ADS simulation");
+                if (j > NumCur) {
+                    ShowFatalError(state, "Out of range, too high (FAN) in ADS simulation");
+                }
                 k += 5;
                 BX = DX;
                 BY = DY;
@@ -859,24 +873,38 @@ namespace AirflowNetwork {
             CY = 0.0;
         Label40:;
             ++L;
-            if (L > 100) ShowFatalError(state, "Too many iterations (FAN) in AirflowNtework simulation");
+            if (L > 100) {
+                ShowFatalError(state, "Too many iterations (FAN) in AirflowNtework simulation");
+            }
             CCY = CY;
             CX = BX - BY * ((DX - BX) / (DY - BY));
             CY = Coeff(k + 1) + CX * (Coeff(k + 2) + CX * (Coeff(k + 3) + CX * Coeff(k + 4))) - PRISE;
-            if (BY * CY == 0.0) goto Label90;
-            if (BY * CY > 0.0) goto Label60;
+            if (BY * CY == 0.0) {
+                goto Label90;
+            }
+            if (BY * CY > 0.0) {
+                goto Label60;
+            }
             DX = CX;
             DY = CY;
-            if (CY * CCY > 0.0) BY *= 0.5;
+            if (CY * CCY > 0.0) {
+                BY *= 0.5;
+            }
             goto Label70;
         Label60:;
             BX = CX;
             BY = CY;
-            if (CY * CCY > 0.0) DY *= 0.5;
+            if (CY * CCY > 0.0) {
+                DY *= 0.5;
+            }
         Label70:;
             // if (LIST >= 4) gio::write(Unit21, Format_901) << " fpi:" << j << BX << CX << DX << BY << DY;
-            if (DX - BX < TOL * CX) goto Label80;
-            if (DX - BX < TOL) goto Label80;
+            if (DX - BX < TOL * CX) {
+                goto Label80;
+            }
+            if (DX - BX < TOL) {
+                goto Label80;
+            }
             goto Label40;
         Label80:;
             CX = 0.5 * (BX + DX);
@@ -964,15 +992,21 @@ namespace AirflowNetwork {
         k = 5 * (j - 1) + 1;
         BX = Coeff(k);
         BY = Coeff(k + 1) + BX * (Coeff(k + 2) + BX * (Coeff(k + 3) + BX * Coeff(k + 4))) - PRISE;
-        if (BY < 0.0) ShowFatalError(state, "Out of range, too low in an AirflowNetwork detailed Fan");
+        if (BY < 0.0) {
+            ShowFatalError(state, "Out of range, too low in an AirflowNetwork detailed Fan");
+        }
 
         while (true) {
             DX = Coeff(k + 5);
             DY = Coeff(k + 1) + DX * (Coeff(k + 2) + DX * (Coeff(k + 3) + DX * Coeff(k + 5))) - PRISE;
             // if (LIST >= 4) gio::write(Unit21, Format_901) << " fp0:" << j << BX << BY << DX << DY;
-            if (BY * DY <= 0.0) break;
+            if (BY * DY <= 0.0) {
+                break;
+            }
             ++j;
-            if (j > NumCur) ShowFatalError(state, "Out of range, too high (FAN) in ADS simulation");
+            if (j > NumCur) {
+                ShowFatalError(state, "Out of range, too high (FAN) in ADS simulation");
+            }
             k += 5;
             BX = DX;
             BY = DY;
@@ -982,24 +1016,38 @@ namespace AirflowNetwork {
         CY = 0.0;
     Label40:;
         ++L;
-        if (L > 100) ShowFatalError(state, "Too many iterations (FAN) in AirflowNtework simulation");
+        if (L > 100) {
+            ShowFatalError(state, "Too many iterations (FAN) in AirflowNtework simulation");
+        }
         CCY = CY;
         CX = BX - BY * ((DX - BX) / (DY - BY));
         CY = Coeff(k + 1) + CX * (Coeff(k + 2) + CX * (Coeff(k + 3) + CX * Coeff(k + 4))) - PRISE;
-        if (BY * CY == 0.0) goto Label90;
-        if (BY * CY > 0.0) goto Label60;
+        if (BY * CY == 0.0) {
+            goto Label90;
+        }
+        if (BY * CY > 0.0) {
+            goto Label60;
+        }
         DX = CX;
         DY = CY;
-        if (CY * CCY > 0.0) BY *= 0.5;
+        if (CY * CCY > 0.0) {
+            BY *= 0.5;
+        }
         goto Label70;
     Label60:;
         BX = CX;
         BY = CY;
-        if (CY * CCY > 0.0) DY *= 0.5;
+        if (CY * CCY > 0.0) {
+            DY *= 0.5;
+        }
     Label70:;
         // if (LIST >= 4) gio::write(Unit21, Format_901) << " fpi:" << j << BX << CX << DX << BY << DY;
-        if (DX - BX < TOL * CX) goto Label80;
-        if (DX - BX < TOL) goto Label80;
+        if (DX - BX < TOL * CX) {
+            goto Label80;
+        }
+        if (DX - BX < TOL) {
+            goto Label80;
+        }
         goto Label40;
     Label80:;
         CX = 0.5 * (BX + DX);
@@ -1049,8 +1097,12 @@ namespace AirflowNetwork {
         // static gio::Fmt Format_901("(A5,I3,6X,4E16.7)");
 
         C = control;
-        if (C < FlowMin) C = FlowMin;
-        if (C > FlowMax) C = FlowMax;
+        if (C < FlowMin) {
+            C = FlowMin;
+        }
+        if (C > FlowMax) {
+            C = FlowMax;
+        }
         C = A0 + C * (A1 + C * (A2 + C * A3));
         // if (LIST >= 4)
         //    gio::write(Unit21, Format_901) << " Dmp:" << i << AFECTL(i) << DisSysCompDamperData(CompNum).FlowMin
@@ -1104,8 +1156,12 @@ namespace AirflowNetwork {
         // static gio::Fmt Format_901("(A5,I3,6X,4E16.7)");
 
         C = control;
-        if (C < FlowMin) C = FlowMin;
-        if (C > FlowMax) C = FlowMax;
+        if (C < FlowMin) {
+            C = FlowMin;
+        }
+        if (C > FlowMax) {
+            C = FlowMax;
+        }
         C = A0 + C * (A1 + C * (A2 + C * A3));
         // if (LIST >= 4)
         //    gio::write(Unit21, Format_901) << " Dmp:" << i << AFECTL(i) << DisSysCompDamperData(CompNum).FlowMin
@@ -1479,10 +1535,14 @@ namespace AirflowNetwork {
         }
 
         // Add window multiplier with window close
-        if (state.afn->MultizoneSurfaceData(IL).Multiplier > 1.0) Cs *= state.afn->MultizoneSurfaceData(IL).Multiplier;
+        if (state.afn->MultizoneSurfaceData(IL).Multiplier > 1.0) {
+            Cs *= state.afn->MultizoneSurfaceData(IL).Multiplier;
+        }
         // Add window multiplier with window open
         if (Fact > 0.0) {
-            if (state.afn->MultizoneSurfaceData(IL).Multiplier > 1.0) ActLw *= state.afn->MultizoneSurfaceData(IL).Multiplier;
+            if (state.afn->MultizoneSurfaceData(IL).Multiplier > 1.0) {
+                ActLw *= state.afn->MultizoneSurfaceData(IL).Multiplier;
+            }
             // Add recurring warnings
             if (ActLw == 0.0) {
                 ++WidthErrCount;
@@ -1808,10 +1868,14 @@ namespace AirflowNetwork {
         }
 
         // Add window multiplier with window close
-        if (state.afn->MultizoneSurfaceData(i).Multiplier > 1.0) coeff *= state.afn->MultizoneSurfaceData(i).Multiplier;
+        if (state.afn->MultizoneSurfaceData(i).Multiplier > 1.0) {
+            coeff *= state.afn->MultizoneSurfaceData(i).Multiplier;
+        }
         // Add window multiplier with window open
         if (OpenFactor > 0.0) {
-            if (state.afn->MultizoneSurfaceData(i).Multiplier > 1.0) Width *= state.afn->MultizoneSurfaceData(i).Multiplier;
+            if (state.afn->MultizoneSurfaceData(i).Multiplier > 1.0) {
+                Width *= state.afn->MultizoneSurfaceData(i).Multiplier;
+            }
         }
 
         DRHO = propN.density - propM.density;
@@ -2192,7 +2256,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = FTT;
                 } else {
@@ -2226,7 +2292,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = -FTT;
                 } else {
@@ -2334,7 +2402,9 @@ namespace AirflowNetwork {
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                     // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = FTT;
             } else {
@@ -2368,7 +2438,9 @@ namespace AirflowNetwork {
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                     // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = -FTT;
             } else {
@@ -2486,7 +2558,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = FTT;
                 } else {
@@ -2520,7 +2594,9 @@ namespace AirflowNetwork {
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
                         // if (LIST >= 4) gio::write(Unit21, Format_901) << " dwt:" << i << B << FTT << g;
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = -FTT;
                 } else {
@@ -2640,7 +2716,9 @@ namespace AirflowNetwork {
                         D = 1.0 + g * B;
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = FTT;
                 } else {
@@ -2671,7 +2749,9 @@ namespace AirflowNetwork {
                         D = 1.0 + g * B;
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = -FTT;
                 } else {
@@ -2771,7 +2851,9 @@ namespace AirflowNetwork {
                     D = 1.0 + g * B;
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = FTT;
             } else {
@@ -2802,7 +2884,9 @@ namespace AirflowNetwork {
                     D = 1.0 + g * B;
                     g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                     FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                    if (std::abs(FTT - FT) / FTT < EPS) break;
+                    if (std::abs(FTT - FT) / FTT < EPS) {
+                        break;
+                    }
                 }
                 FT = -FTT;
             } else {
@@ -3637,7 +3721,9 @@ namespace AirflowNetwork {
                         D = 1.0 + g * B;
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = FTT;
                 } else {
@@ -3668,7 +3754,9 @@ namespace AirflowNetwork {
                         D = 1.0 + g * B;
                         g -= (g - AA1 + C * std::log(D)) / (1.0 + C * B / D);
                         FTT = S2 / std::sqrt(ld / pow_2(g) + TurDynCoef);
-                        if (std::abs(FTT - FT) / FTT < EPS) break;
+                        if (std::abs(FTT - FT) / FTT < EPS) {
+                            break;
+                        }
                     }
                     FT = -FTT;
                 } else {
@@ -3803,14 +3891,18 @@ namespace AirflowNetwork {
         if (AnzLayF > 0) {
             for (n = 1; n <= AnzLayF; ++n) {
                 zF(n) = 0.0;
-                if (hghtsF(1) < 0.0) zF(n) = hghtsF(1);
+                if (hghtsF(1) < 0.0) {
+                    zF(n) = hghtsF(1);
+                }
             }
         }
 
         if (AnzLayT > 0) {
             for (n = 1; n <= AnzLayT; ++n) {
                 zT(n) = 0.0;
-                if (hghtsT(1) < 0.0) zT(n) = hghtsT(1);
+                if (hghtsT(1) < 0.0) {
+                    zT(n) = hghtsT(1);
+                }
             }
         }
 
@@ -3819,12 +3911,16 @@ namespace AirflowNetwork {
         k = 1;
 
         while (k <= AnzLayF) {
-            if (zF(k) > zStF(1)) break;
+            if (zF(k) > zStF(1)) {
+                break;
+            }
             ++k;
         }
 
         while (k <= AnzLayF) {
-            if (zF(k) > hghtsF(NrInt)) break;
+            if (zF(k) > hghtsF(NrInt)) {
+                break;
+            }
             zStF(i) = zF(k); // Autodesk:BoundsViolation zStF(i) @ i>2 and zF(k) @ k>2
             ++i;
             ++k;
@@ -3836,13 +3932,17 @@ namespace AirflowNetwork {
         k = 1;
 
         while (k <= AnzLayT) {
-            if (zT(k) > zStT(1)) break;
+            if (zT(k) > zStT(1)) {
+                break;
+            }
             ++k;
         }
 
         while (k <= AnzLayT) {
-            if (zT(k) > hghtsT(NrInt)) break; // Autodesk:BoundsViolation zT(k) @ k>2
-            zStT(i) = zT(k);                  // Autodesk:BoundsViolation zStF(i) @ i>2 and zT(k) @ k>2
+            if (zT(k) > hghtsT(NrInt)) {
+                break; // Autodesk:BoundsViolation zT(k) @ k>2
+            }
+            zStT(i) = zT(k); // Autodesk:BoundsViolation zStF(i) @ i>2 and zT(k) @ k>2
             ++i;
             ++k;
         }
@@ -3856,17 +3956,23 @@ namespace AirflowNetwork {
 
             while (true) {
                 if (hghtsFR > zStF(lF + 1)) {
-                    if (lF > 2) break;
+                    if (lF > 2) {
+                        break;
+                    }
                     ++lF;
                 }
-                if (hghtsFR <= zStF(lF + 1)) break;
+                if (hghtsFR <= zStF(lF + 1)) {
+                    break;
+                }
             }
 
             while (true) {
                 if (hghtsTR > zStT(lT + 1)) {
                     ++lT;
                 }
-                if (hghtsTR <= zStT(lT + 1)) break;
+                if (hghtsTR <= zStT(lT + 1)) {
+                    break;
+                }
             }
 
             delzF = hghtsF(i) - zStF(lF);
@@ -4006,7 +4112,9 @@ namespace AirflowNetwork {
             }
 
             int ilayptr = 0;
-            if (From == 0) ilayptr = 1;
+            if (From == 0) {
+                ilayptr = 1;
+            }
             if (ilayptr == 0) {
                 Fromz = 0;
             } else {
@@ -4026,7 +4134,9 @@ namespace AirflowNetwork {
                 To = 0;
             }
             ilayptr = 0;
-            if (To == 0) ilayptr = 1;
+            if (To == 0) {
+                ilayptr = 1;
+            }
             if (ilayptr == 0) {
                 Toz = 0;
             } else {
@@ -4041,7 +4151,9 @@ namespace AirflowNetwork {
 
             // calculate DpF the difference between Pz and P at Node 1 height
             ilayptr = 0;
-            if (Fromz == 0) ilayptr = 1;
+            if (Fromz == 0) {
+                ilayptr = 1;
+            }
             int j = ilayptr;
             int k = 1;
             lclimb(state, G, RhoLd(1), state.afn->AirflowNetworkLinkageData(i).NodeHeights[0], TempL1, Xhl1, DpF(k), Toz, PzTo, Pbz, RhoDrL(i, 1));
@@ -4053,35 +4165,48 @@ namespace AirflowNetwork {
                 RhoStF(k) = RhoL1;
                 ++k;
                 HSt(k) = 0.0;
-                if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1);
+                if (HSt(k - 1) < 0.0) {
+                    HSt(k) = HSt(k - 1);
+                }
 
                 // Search for the first startheight of a layer which is within the top- and the
                 // bottom- height of the large opening.
                 while (true) {
                     ilayptr = 0;
-                    if (Fromz == 0) ilayptr = 9;
-                    if ((j > ilayptr) || (HSt(k) > state.afn->AirflowNetworkLinkageData(i).NodeHeights[0])) break;
+                    if (Fromz == 0) {
+                        ilayptr = 9;
+                    }
+                    if ((j > ilayptr) || (HSt(k) > state.afn->AirflowNetworkLinkageData(i).NodeHeights[0])) {
+                        break;
+                    }
                     j += 9;
                     HSt(k) = 0.0;
-                    if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1);
+                    if (HSt(k - 1) < 0.0) {
+                        HSt(k) = HSt(k - 1);
+                    }
                 }
 
                 // Calculate Rho and stack pressure for every StartHeight of a layer which is
                 // within the top- and the bottom-height of the  large opening.
                 while (true) {
                     ilayptr = 0;
-                    if (Fromz == 0) ilayptr = 9;
-                    if ((j > ilayptr) || (HSt(k) >= (state.afn->AirflowNetworkLinkageData(i).NodeHeights[0] + ActLOwnh)))
+                    if (Fromz == 0) {
+                        ilayptr = 9;
+                    }
+                    if ((j > ilayptr) || (HSt(k) >= (state.afn->AirflowNetworkLinkageData(i).NodeHeights[0] + ActLOwnh))) {
                         break; // Autodesk:BoundsViolation HSt(k) @ k>2
+                    }
                     T = TzFrom;
                     X = XhzFrom;
                     lclimb(
                         state, G, RhoStd, HSt(k), T, X, DpF(k), Fromz, PzFrom, Pbz, RhoDrDummi); // Autodesk:BoundsViolation HSt(k) and DpF(k) @ k>2
                     RhoStF(k) = RhoStd;                                                          // Autodesk:BoundsViolation RhoStF(k) @ k>2
                     j += 9;
-                    ++k;                                       // Autodesk:Note k>2 now
-                    HSt(k) = 0.0;                              // Autodesk:BoundsViolation @ k>2
-                    if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1); // Autodesk:BoundsViolation @ k>2
+                    ++k;          // Autodesk:Note k>2 now
+                    HSt(k) = 0.0; // Autodesk:BoundsViolation @ k>2
+                    if (HSt(k - 1) < 0.0) {
+                        HSt(k) = HSt(k - 1); // Autodesk:BoundsViolation @ k>2
+                    }
                 }
                 // Stack pressure difference and rho for top-height of the large opening
                 HSt(k) = state.afn->AirflowNetworkLinkageData(i).NodeHeights[0] + ActLOwnh; // Autodesk:BoundsViolation k>2 poss
@@ -4097,7 +4222,9 @@ namespace AirflowNetwork {
 
             // repeat procedure for the "To" node, DpT
             ilayptr = 0;
-            if (Toz == 0) ilayptr = 1;
+            if (Toz == 0) {
+                ilayptr = 1;
+            }
             j = ilayptr;
             // Calculate Rho at link height only if we have large openings or layered zones.
             k = 1;
@@ -4111,30 +4238,43 @@ namespace AirflowNetwork {
                 RhoStT(k) = RhoL2;
                 ++k;
                 HSt(k) = 0.0;
-                if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1);
+                if (HSt(k - 1) < 0.0) {
+                    HSt(k) = HSt(k - 1);
+                }
                 while (true) {
                     ilayptr = 0;
-                    if (Toz == 0) ilayptr = 9;
-                    if ((j > ilayptr) || (HSt(k) > state.afn->AirflowNetworkLinkageData(i).NodeHeights[1])) break;
+                    if (Toz == 0) {
+                        ilayptr = 9;
+                    }
+                    if ((j > ilayptr) || (HSt(k) > state.afn->AirflowNetworkLinkageData(i).NodeHeights[1])) {
+                        break;
+                    }
                     j += 9;
                     HSt(k) = 0.0;
-                    if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1);
+                    if (HSt(k - 1) < 0.0) {
+                        HSt(k) = HSt(k - 1);
+                    }
                 }
                 // Calculate Rho and stack pressure for every StartHeight of a layer which is
                 // within the top- and the bottom-height of the  large opening.
                 while (true) {
                     ilayptr = 0;
-                    if (Toz == 0) ilayptr = 9;
-                    if ((j > ilayptr) || (HSt(k) >= (state.afn->AirflowNetworkLinkageData(i).NodeHeights[1] + ActLOwnh)))
+                    if (Toz == 0) {
+                        ilayptr = 9;
+                    }
+                    if ((j > ilayptr) || (HSt(k) >= (state.afn->AirflowNetworkLinkageData(i).NodeHeights[1] + ActLOwnh))) {
                         break; // Autodesk:BoundsViolation Hst(k) @ k>2
+                    }
                     T = TzTo;
                     X = XhzTo;
                     lclimb(state, G, RhoStd, HSt(k), T, X, DpT(k), Toz, PzTo, Pbz, RhoDrDummi); // Autodesk:BoundsViolation HSt(k) and DpT(k) @ k>2
                     RhoStT(k) = RhoStd;                                                         // Autodesk:BoundsViolation RhoStT(k) @ k>2
                     j += 9;
-                    ++k;                                       // Autodesk:Note k>2 now
-                    HSt(k) = 0.0;                              // Autodesk:BoundsViolation @ k>2
-                    if (HSt(k - 1) < 0.0) HSt(k) = HSt(k - 1); // Autodesk:BoundsViolation @ k>2
+                    ++k;          // Autodesk:Note k>2 now
+                    HSt(k) = 0.0; // Autodesk:BoundsViolation @ k>2
+                    if (HSt(k - 1) < 0.0) {
+                        HSt(k) = HSt(k - 1); // Autodesk:BoundsViolation @ k>2
+                    }
                 }
                 // Stack pressure difference and rho for top-height of the large opening
                 HSt(k) = state.afn->AirflowNetworkLinkageData(i).NodeHeights[1] + ActLOwnh; // Autodesk:BoundsViolation k>2 poss
@@ -4259,7 +4399,9 @@ namespace AirflowNetwork {
                 BetaCfct = 0.0;
                 L += 9;
                 ilayptr = 0;
-                if (zone == 0) ilayptr = 9;
+                if (zone == 0) {
+                    ilayptr = 9;
+                }
                 if (L >= ilayptr) {
                     H = Z + 1.0;
                 } else {
@@ -4310,7 +4452,9 @@ namespace AirflowNetwork {
                     BetaCfct = 0.0;
                     L += 9;
                     ilayptr = 0;
-                    if (zone == 0) ilayptr = 9;
+                    if (zone == 0) {
+                        ilayptr = 9;
+                    }
                     if (L >= ilayptr) {
                         H = Z + 1.0;
                     } else {
@@ -4331,7 +4475,9 @@ namespace AirflowNetwork {
                 // loop until H<0 ; The start of the layer is below the zone refplane
                 L -= 9;
                 ilayptr = 0;
-                if (zone == 0) ilayptr = 1;
+                if (zone == 0) {
+                    ilayptr = 1;
+                }
                 if (L < ilayptr) {
                     // with H=Z (negative) this loop will exit, no data for interval Z-refplane
                     H = Z;
@@ -4383,7 +4529,9 @@ namespace AirflowNetwork {
                     Htop = H;
                     L -= 9;
                     ilayptr = 0;
-                    if (zone == 0) ilayptr = 1;
+                    if (zone == 0) {
+                        ilayptr = 1;
+                    }
                     if (L < ilayptr) {
                         H = Z - 1.0;
                         BetaT = 0.0;

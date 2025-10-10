@@ -70,8 +70,7 @@ public:
         }
 
         return ::testing::AssertionFailure() << "In comparing enums of type '" << ::testing::internal::GetTypeName<T1>()
-                                             << "', Expected equality of these values:"
-                                             << "\n  " << lhs_expression << "\n    Which is: "
+                                             << "', Expected equality of these values:" << "\n  " << lhs_expression << "\n    Which is: "
                                              << ::testing::internal::FormatForComparisonFailureMessage(underlying_lhs, underlying_rhs) << "\n  "
                                              << rhs_expression << "\n    Which is: "
                                              << ::testing::internal::FormatForComparisonFailureMessage(underlying_rhs, underlying_lhs);

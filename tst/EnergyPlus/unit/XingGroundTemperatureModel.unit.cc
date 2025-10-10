@@ -89,3 +89,45 @@ TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
 
     EXPECT_NEAR(11.1, thisModel->getGroundTempAtTimeInMonths(*state, 100.0, 1), 0.1); // January--deep
 }
+
+TEST_F(EnergyPlusFixture, XingGroundTempsGetInputTest)
+{
+    Real64 constexpr closeEnough = 0.00001;
+
+    std::string const idf_objects = delimited_string({
+        "Site:GroundTemperature:Undisturbed:Xing,",
+        "    Test1,   !- Name of object",
+        "    1.0,     !- Soil Thermal Conductivity {W/m-K}",
+        "    1000.0,  !- Soil Density {kg/m3}",
+        "    2500,    !- Soil Specific Heat {J/kg-K}",
+        "    10.0,    !- Average Soil Surface Temperature {C}",
+        "    12.0,    !- Soil Surface Temperature Amplitude 1 {deltaC}",
+        "    1.0,     !- Soil Surface Temperature Amplitude 2 {deltaC}",
+        "    25,      !- Phase Shift of Temperature Amplitude 1 {days}",
+        "    30;      !- Phase Shift of Temperature Amplitude 2 {days}",
+        "",
+        "Site:GroundTemperature:Undisturbed:Xing,",
+        "    Test2,   !- Name of object",
+        "    2.0,     !- Soil Thermal Conductivity {W/m-K}",
+        "    1200,    !- Soil Density {kg/m3}",
+        "    2400,    !- Soil Specific Heat {J/kg-K}",
+        "    11.1,    !- Average Soil Surface Temperature {C}",
+        "    22.2,    !- Soil Surface Temperature Amplitude 1 {deltaC}",
+        "    2.5,     !- Soil Surface Temperature Amplitude 2 {deltaC}",
+        "    20,      !- Phase Shift of Temperature Amplitude 1 {days}",
+        "    40;      !- Phase Shift of Temperature Amplitude 2 {days}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    // Tests to verify fix for Defect #10981 (overwrote the name of the object which resulted in a fatal error
+    // Test 1: First object instance--make sure name and model type are read in correctly
+    auto *thisModel1 = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::Xing, "TEST1");
+    EXPECT_EQ(thisModel1->Name, "TEST1");
+    EXPECT_EQ(thisModel1->modelType, GroundTemp::ModelType::Xing);
+
+    // Test 2: Second object instance--another test to make sure name and model type are read in correctly
+    auto *thisModel2 = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::Xing, "TEST2");
+    EXPECT_EQ(thisModel2->Name, "TEST2");
+    EXPECT_EQ(thisModel2->modelType, GroundTemp::ModelType::Xing);
+}

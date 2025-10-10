@@ -155,7 +155,9 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "design_outlet_air_humidity_ratio [kgWater/kgDryAir]";
+        if (this->isEpJSON) {
+            this->sizingString = "design_outlet_air_humidity_ratio [kgWater/kgDryAir]";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject)

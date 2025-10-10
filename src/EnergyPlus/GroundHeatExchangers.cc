@@ -547,7 +547,9 @@ std::shared_ptr<GLHEVertProps> GetVertProps(EnergyPlusData &state, std::string c
     auto thisObj = std::find_if(state.dataGroundHeatExchanger->vertPropsVector.begin(),
                                 state.dataGroundHeatExchanger->vertPropsVector.end(),
                                 [&objectName](const std::shared_ptr<GLHEVertProps> &myObj) { return myObj->name == objectName; });
-    if (thisObj != state.dataGroundHeatExchanger->vertPropsVector.end()) return *thisObj;
+    if (thisObj != state.dataGroundHeatExchanger->vertPropsVector.end()) {
+        return *thisObj;
+    }
 
     ShowSevereError(state, fmt::format("Object=GroundHeatExchanger:Vertical:Properties, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
@@ -564,7 +566,9 @@ std::shared_ptr<GLHEVertSingle> GetSingleBH(EnergyPlusData &state, std::string c
     auto thisObj = std::find_if(state.dataGroundHeatExchanger->singleBoreholesVector.begin(),
                                 state.dataGroundHeatExchanger->singleBoreholesVector.end(),
                                 [&objectName](const std::shared_ptr<GLHEVertSingle> &myObj) { return myObj->name == objectName; });
-    if (thisObj != state.dataGroundHeatExchanger->singleBoreholesVector.end()) return *thisObj;
+    if (thisObj != state.dataGroundHeatExchanger->singleBoreholesVector.end()) {
+        return *thisObj;
+    }
 
     ShowSevereError(state, fmt::format("Object=GroundHeatExchanger:Vertical:Single, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
@@ -581,7 +585,9 @@ std::shared_ptr<GLHEVertArray> GetVertArray(EnergyPlusData &state, std::string c
     auto thisObj = std::find_if(state.dataGroundHeatExchanger->vertArraysVector.begin(),
                                 state.dataGroundHeatExchanger->vertArraysVector.end(),
                                 [&objectName](const std::shared_ptr<GLHEVertArray> &myObj) { return myObj->name == objectName; });
-    if (thisObj != state.dataGroundHeatExchanger->vertArraysVector.end()) return *thisObj;
+    if (thisObj != state.dataGroundHeatExchanger->vertArraysVector.end()) {
+        return *thisObj;
+    }
 
     ShowSevereError(state, fmt::format("Object=GroundHeatExchanger:Vertical:Array, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
@@ -598,7 +604,9 @@ std::shared_ptr<GLHEResponseFactors> GetResponseFactor(EnergyPlusData &state, st
     auto thisObj = std::find_if(state.dataGroundHeatExchanger->responseFactorsVector.begin(),
                                 state.dataGroundHeatExchanger->responseFactorsVector.end(),
                                 [&objectName](const std::shared_ptr<GLHEResponseFactors> &myObj) { return myObj->name == objectName; });
-    if (thisObj != state.dataGroundHeatExchanger->responseFactorsVector.end()) return *thisObj;
+    if (thisObj != state.dataGroundHeatExchanger->responseFactorsVector.end()) {
+        return *thisObj;
+    }
 
     ShowSevereError(state, fmt::format("Object=GroundHeatExchanger:ResponseFactors, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
@@ -802,12 +810,16 @@ GLHEBase *GLHEBase::factory(EnergyPlusData &state, DataPlant::PlantEquipmentType
         auto thisObj = std::find_if(state.dataGroundHeatExchanger->verticalGLHE.begin(),
                                     state.dataGroundHeatExchanger->verticalGLHE.end(),
                                     [&objectName](const GLHEBase &myObj) { return myObj.name == objectName; });
-        if (thisObj != state.dataGroundHeatExchanger->verticalGLHE.end()) return &(*thisObj);
+        if (thisObj != state.dataGroundHeatExchanger->verticalGLHE.end()) {
+            return &(*thisObj);
+        }
     } else if (objectType == DataPlant::PlantEquipmentType::GrndHtExchgSlinky) {
         auto thisObj = std::find_if(state.dataGroundHeatExchanger->slinkyGLHE.begin(),
                                     state.dataGroundHeatExchanger->slinkyGLHE.end(),
                                     [&objectName](const GLHEBase &myObj) { return myObj.name == objectName; });
-        if (thisObj != state.dataGroundHeatExchanger->slinkyGLHE.end()) return &(*thisObj);
+        if (thisObj != state.dataGroundHeatExchanger->slinkyGLHE.end()) {
+            return &(*thisObj);
+        }
     }
 
     // If we didn't find it, fatal
@@ -1622,9 +1634,9 @@ void GLHESlinky::calcGFunctions(EnergyPlusData &state)
                         gFunc += gFuncin;
 
                     } // n
-                }     // m
-            }         // n1
-        }             // m1
+                } // m
+            } // n1
+        } // m1
 
         this->myRespFactors->GFNC[NT - 1] = (gFunc * (this->coilDiameter / 2.0)) / (4 * Constant::Pi * fraction * this->numTrenches * this->numCoils);
         this->myRespFactors->LNTTS[NT - 1] = tLg;
@@ -1976,7 +1988,9 @@ void GLHEBase::calcGroundHeatExchanger(EnergyPlusData &state)
     // Get time constants
     getAnnualTimeConstant();
 
-    if (triggerDesignDayReset && state.dataGlobal->WarmupFlag) updateCurSimTime = true;
+    if (triggerDesignDayReset && state.dataGlobal->WarmupFlag) {
+        updateCurSimTime = true;
+    }
     if (state.dataGlobal->DayOfSim == 1 && updateCurSimTime) {
         state.dataGroundHeatExchanger->currentSimTime = 0.0;
         state.dataGroundHeatExchanger->prevTimeSteps = 0.0;
@@ -2207,7 +2221,7 @@ void GLHEBase::calcGroundHeatExchanger(EnergyPlusData &state)
                 this->ToutNew = C1 + (C2 - C0 - this->HXResistance) * tmpQnSubHourly;
             }
         } //  end of AGG OR NO AGG
-    }     // end of N  = 1 branch
+    } // end of N  = 1 branch
     this->bhTemp = this->tempGround - sumTotal;
 
     // Load the QnSubHourly Array with a new value at end of every timestep
@@ -2276,7 +2290,9 @@ void GLHEBase::calcAggregateLoad(EnergyPlusData &state)
     // Yavuzturk, C., J.D. Spitler. 1999. 'A Short Time Step Response Factor Model
     //   for Vertical Ground Loop Heat Exchangers. ASHRAE Transactions. 105(2): 475-485.
 
-    if (state.dataGroundHeatExchanger->currentSimTime <= 0.0) return;
+    if (state.dataGroundHeatExchanger->currentSimTime <= 0.0) {
+        return;
+    }
 
     // FOR EVERY HOUR UPDATE THE HOURLY QN this->QnHr(J)
     // THIS IS DONE BY AGGREGATING THE sub-hourly QN FROM THE PREVIOUS HOUR TO UNTIL THE CURRENT HOUR
@@ -2862,7 +2878,9 @@ void GLHEVert::initGLHESimVars(EnergyPlusData &state)
     PlantUtilities::SetComponentFlowRate(state, this->massFlowRate, this->inletNodeNum, this->outletNodeNum, this->plantLoc);
 
     // Reset local environment init flag
-    if (!state.dataGlobal->BeginEnvrnFlag) this->myEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->myEnvrnFlag = true;
+    }
 }
 
 //******************************************************************************
@@ -2932,7 +2950,9 @@ void GLHESlinky::initGLHESimVars(EnergyPlusData &state)
     PlantUtilities::SetComponentFlowRate(state, this->massFlowRate, this->inletNodeNum, this->outletNodeNum, this->plantLoc);
 
     // Reset local environment init flag
-    if (!state.dataGlobal->BeginEnvrnFlag) this->myEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->myEnvrnFlag = true;
+    }
 }
 
 //******************************************************************************

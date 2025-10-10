@@ -673,7 +673,9 @@ void InitAirZoneReturnPlenum(EnergyPlusData &state, int const ZonePlenumNum)
                     InletNode = state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumLoop).InletNode(InletNodeLoop);
                     // Loop through ZoneEquipConfig's and look for return air node value = InletNode
                     for (int ZoneEquipConfigLoop = 1; ZoneEquipConfigLoop <= state.dataGlobal->NumOfZones; ++ZoneEquipConfigLoop) {
-                        if (!state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigLoop).IsControlled) continue;
+                        if (!state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigLoop).IsControlled) {
+                            continue;
+                        }
                         for (int retNode = 1; retNode <= state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigLoop).NumReturnNodes; ++retNode) {
                             if (state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigLoop).ReturnNode(retNode) == InletNode) {
                                 state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigLoop).ReturnNodePlenumNum = ZonePlenumLoop;
@@ -1223,18 +1225,24 @@ int GetReturnPlenumIndex(EnergyPlusData &state, int const ExNodeNum)
     WhichPlenum = 0;
     if (state.dataZonePlenum->NumZoneReturnPlenums > 0) {
         for (int PlenumNum = 1; PlenumNum <= state.dataZonePlenum->NumZoneReturnPlenums; ++PlenumNum) {
-            if (ExNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).OutletNode) continue;
+            if (ExNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).OutletNode) {
+                continue;
+            }
             WhichPlenum = PlenumNum;
             break;
         }
         if (WhichPlenum == 0) {
             for (int PlenumNum = 1; PlenumNum <= state.dataZonePlenum->NumZoneReturnPlenums; ++PlenumNum) {
                 for (int InducedNodeNum = 1; InducedNodeNum <= state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).NumInducedNodes; ++InducedNodeNum) {
-                    if (ExNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InducedNode(InducedNodeNum)) continue;
+                    if (ExNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InducedNode(InducedNodeNum)) {
+                        continue;
+                    }
                     WhichPlenum = PlenumNum;
                     break;
                 }
-                if (WhichPlenum > 0) break;
+                if (WhichPlenum > 0) {
+                    break;
+                }
             }
         }
     }
@@ -1270,11 +1278,15 @@ int getReturnPlenumIndexFromInletNode(EnergyPlusData &state, int const InNodeNum
     if (state.dataZonePlenum->NumZoneReturnPlenums > 0) {
         for (int PlenumNum = 1; PlenumNum <= state.dataZonePlenum->NumZoneReturnPlenums; ++PlenumNum) {
             for (int InNodeCtr = 1; InNodeCtr <= state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).NumInletNodes; ++InNodeCtr) {
-                if (InNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InletNode(InNodeCtr)) continue;
+                if (InNodeNum != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InletNode(InNodeCtr)) {
+                    continue;
+                }
                 thisPlenum = PlenumNum;
                 break;
             }
-            if (thisPlenum > 0) break;
+            if (thisPlenum > 0) {
+                break;
+            }
         }
     }
 
@@ -1298,16 +1310,24 @@ bool ValidateInducedNode(EnergyPlusData &state, int const InduceNodeNum, int con
                 if (InduceNodeNum == state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InducedNode(InduceNodeCtr)) {
                     for (int InNodeCtr = 1; InNodeCtr <= state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).NumInletNodes; ++InNodeCtr) {
                         for (int ReturnNodeNum = 1; ReturnNodeNum <= NumReturnNodes; ++ReturnNodeNum) {
-                            if (ReturnNode(ReturnNodeNum) != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InletNode(InNodeCtr)) continue;
+                            if (ReturnNode(ReturnNodeNum) != state.dataZonePlenum->ZoneRetPlenCond(PlenumNum).InletNode(InNodeCtr)) {
+                                continue;
+                            }
                             Nodefound = true;
                             break;
                         }
-                        if (Nodefound) break;
+                        if (Nodefound) {
+                            break;
+                        }
                     }
                 }
-                if (Nodefound) break;
+                if (Nodefound) {
+                    break;
+                }
             }
-            if (Nodefound) break;
+            if (Nodefound) {
+                break;
+            }
         }
     }
 

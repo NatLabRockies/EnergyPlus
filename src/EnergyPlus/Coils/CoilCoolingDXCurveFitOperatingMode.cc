@@ -69,9 +69,13 @@ void CoilCoolingDXCurveFitOperatingMode::instantiateFromInputSpec(EnergyPlus::En
     this->original_input_specs = input_data;
     this->name = input_data.name;
     this->ratedGrossTotalCap = input_data.gross_rated_total_cooling_capacity;
-    if (this->ratedGrossTotalCap == DataSizing::AutoSize) this->ratedGrossTotalCapIsAutosized = true;
+    if (this->ratedGrossTotalCap == DataSizing::AutoSize) {
+        this->ratedGrossTotalCapIsAutosized = true;
+    }
     this->ratedEvapAirFlowRate = input_data.rated_evaporator_air_flow_rate;
-    if (this->ratedEvapAirFlowRate == DataSizing::AutoSize) this->ratedEvapAirFlowRateIsAutosized = true;
+    if (this->ratedEvapAirFlowRate == DataSizing::AutoSize) {
+        this->ratedEvapAirFlowRateIsAutosized = true;
+    }
     this->ratedCondAirFlowRate = input_data.rated_condenser_air_flow_rate;
     this->timeForCondensateRemoval = input_data.nominal_time_for_condensate_removal_to_begin;
     this->evapRateRatio = input_data.ratio_of_initial_moisture_evaporation_rate_and_steady_state_latent_capacity;
@@ -205,7 +209,9 @@ void CoilCoolingDXCurveFitOperatingMode::size(EnergyPlus::EnergyPlusData &state)
     Real64 TempSize = this->original_input_specs.rated_evaporator_air_flow_rate;
     CoolingAirFlowSizer sizingCoolingAirFlow;
     std::string stringOverride = "Rated Evaporator Air Flow Rate [m3/s]";
-    if (state.dataGlobal->isEpJSON) stringOverride = "rated_evaporator_air_flow_rate";
+    if (state.dataGlobal->isEpJSON) {
+        stringOverride = "rated_evaporator_air_flow_rate";
+    }
     sizingCoolingAirFlow.overrideSizingString(stringOverride);
     sizingCoolingAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
     this->ratedEvapAirFlowRate = sizingCoolingAirFlow.size(state, TempSize, errorsFound);
@@ -232,7 +238,9 @@ void CoilCoolingDXCurveFitOperatingMode::size(EnergyPlus::EnergyPlusData &state)
 
     AutoCalculateSizer sizerCondAirFlow;
     stringOverride = "Rated Condenser Air Flow Rate [m3/s]";
-    if (state.dataGlobal->isEpJSON) stringOverride = "rated_condenser_air_flow_rate";
+    if (state.dataGlobal->isEpJSON) {
+        stringOverride = "rated_condenser_air_flow_rate";
+    }
     sizerCondAirFlow.overrideSizingString(stringOverride);
     sizerCondAirFlow.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
     this->ratedCondAirFlowRate = sizerCondAirFlow.size(state, TempSize, errorsFound);

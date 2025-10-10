@@ -534,11 +534,17 @@ namespace SteamBaseboardRadiator {
             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType =
                 DataPlant::PlantEquipmentType::Baseboard_Rad_Conv_Steam; //'ZoneHVAC:Baseboard:RadiantConvective:Steam'
 
-            state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName =
-                state.dataIPShortCut->cAlphaArgs(2); // Name of the design object for this baseboard
-            state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).DesignObjectPtr =
-                Util::FindItemInList(state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName,
-                                     state.dataSteamBaseboardRadiator->SteamBaseboardDesignNames);
+            Util::setDesignObjectNameAndPointer(state,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).designObjectName,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).DesignObjectPtr,
+                                                state.dataIPShortCut->cAlphaArgs(2),
+                                                state.dataSteamBaseboardRadiator->SteamBaseboardDesignNames,
+                                                state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                ErrorsFound);
+            if (ErrorsFound) {
+                break;
+            }
             SteamBaseboardDesignData SteamBaseboardDesignDataObject{
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum)
                                                                            .DesignObjectPtr)}; // Contains the design data for steam baseboard object
@@ -772,7 +778,9 @@ namespace SteamBaseboardRadiator {
             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).steam = Fluid::GetSteam(state);
             if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).steam == nullptr && BaseboardNum == 1) {
                 ShowSevereError(state, format("{}Steam Properties for {} not found.", RoutineName, state.dataIPShortCut->cAlphaArgs(1)));
-                if (SteamMessageNeeded) ShowContinueError(state, "Steam Fluid Properties should have been included in the input file.");
+                if (SteamMessageNeeded) {
+                    ShowContinueError(state, "Steam Fluid Properties should have been included in the input file.");
+                }
                 ErrorsFound = true;
                 SteamMessageNeeded = false;
             }
@@ -923,9 +931,11 @@ namespace SteamBaseboardRadiator {
         if (!state.dataSteamBaseboardRadiator->ZoneEquipmentListChecked && state.dataZoneEquip->ZoneEquipInputsFilled) {
             state.dataSteamBaseboardRadiator->ZoneEquipmentListChecked = true;
             for (Loop = 1; Loop <= state.dataSteamBaseboardRadiator->NumSteamBaseboards; ++Loop) {
-                if (CheckZoneEquipmentList(
-                        state, state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam, state.dataSteamBaseboardRadiator->SteamBaseboard(Loop).Name))
+                if (CheckZoneEquipmentList(state,
+                                           state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
+                                           state.dataSteamBaseboardRadiator->SteamBaseboard(Loop).Name)) {
                     continue;
+                }
                 ShowSevereError(state,
                                 format("InitBaseboard: Unit=[{},{}] is not on any ZoneHVAC:EquipmentList.  It will not be simulated.",
                                        state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
@@ -1421,11 +1431,15 @@ namespace SteamBaseboardRadiator {
         SteamBaseboardSysOn = false;
 
         // If this was never allocated, then there are no radiant systems in this input file (just RETURN)
-        if (state.dataSteamBaseboardRadiator->NumSteamBaseboards == 0) return;
+        if (state.dataSteamBaseboardRadiator->NumSteamBaseboards == 0) {
+            return;
+        }
 
         // If it was allocated, then we have to check to see if this was running at all...
         for (BaseboardNum = 1; BaseboardNum <= state.dataSteamBaseboardRadiator->NumSteamBaseboards; ++BaseboardNum) {
-            if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).QBBSteamRadSrcAvg != 0.0) SteamBaseboardSysOn = true;
+            if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).QBBSteamRadSrcAvg != 0.0) {
+                SteamBaseboardSysOn = true;
+            }
             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).QBBSteamRadSource =
                 state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).QBBSteamRadSrcAvg;
         }

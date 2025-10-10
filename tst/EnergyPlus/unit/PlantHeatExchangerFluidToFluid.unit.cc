@@ -1091,8 +1091,12 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
 
         Weather::GetNextEnvironment(*state, Available, ErrorsFound);
 
-        if (!Available) break;
-        if (ErrorsFound) break;
+        if (!Available) {
+            break;
+        }
+        if (ErrorsFound) {
+            break;
+        }
 
         ++EnvCount;
 
@@ -2183,8 +2187,12 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
 
         Weather::GetNextEnvironment(*state, Available, ErrorsFound);
 
-        if (!Available) break;
-        if (ErrorsFound) break;
+        if (!Available) {
+            break;
+        }
+        if (ErrorsFound) {
+            break;
+        }
 
         ++EnvCount;
 

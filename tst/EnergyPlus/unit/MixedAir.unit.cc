@@ -574,8 +574,9 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
             Psychrometrics::PsyHFnTdbW(state->dataMixedAir->OAController(OAControllerNum).RetTemp, 0.0); // Return air nodes, dry air
         state->dataLoopNodes->Node(OAControllerNum * 4 - 3).TempSetPoint =
             state->dataMixedAir->OAController(OAControllerNum).MixSetTemp; // Mixed air nodes
-        if (OAControllerNum == 5)
+        if (OAControllerNum == 5) {
             state->dataLoopNodes->Node(18).TempSetPoint = state->dataMixedAir->OAController(OAControllerNum).MixSetTemp + 1.0; // Mixed air nodes
+        }
         state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Temp =
             state->dataMixedAir->OAController(OAControllerNum).OATemp; // OA inlet (actuated) air nodes, dry air
         state->dataLoopNodes->Node(OAControllerNum * 4 - 2).Enthalpy =

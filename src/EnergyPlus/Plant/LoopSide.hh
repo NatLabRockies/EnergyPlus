@@ -154,8 +154,8 @@ namespace DataPlant {
               LoopSideInlet_CapExcessStorageTimeReport(0.0), LoopSideInlet_TotalTime(0.0), InletNode(0.0, 0.0), OutletNode(0.0, 0.0),
               flowRequestNeedIfOn(0.0), flowRequestNeedAndTurnOn(0.0), flowRequestFinal(0.0), hasConstSpeedBranchPumps(false),
               InitialDemandToLoopSetPoint(0.0), CurrentAlterationsToDemand(0.0), UpdatedDemandToLoopSetPoint(0.0),
-              LoadToLoopSetPointThatWasntMet(0.0), InitialDemandToLoopSetPointSAVED(0.0), LoopSetPtDemandAtInlet(0.0),
-              ThisSideLoadAlterations(0.0), plantLoc{}
+              LoadToLoopSetPointThatWasntMet(0.0), InitialDemandToLoopSetPointSAVED(0.0), LoopSetPtDemandAtInlet(0.0), ThisSideLoadAlterations(0.0),
+              plantLoc{}
         {
         }
 

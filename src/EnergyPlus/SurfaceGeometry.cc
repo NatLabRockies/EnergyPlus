@@ -301,7 +301,9 @@ namespace SurfaceGeometry {
 
         GetStormWindowData(state, ErrorsFound);
 
-        if (!ErrorsFound && state.dataSurface->TotStormWin > 0) CreateStormWindowConstructions(state);
+        if (!ErrorsFound && state.dataSurface->TotStormWin > 0) {
+            CreateStormWindowConstructions(state);
+        }
 
         DataHeatBalance::SetFlagForWindowConstructionWithShadeOrBlindLayer(state);
 
@@ -329,18 +331,28 @@ namespace SurfaceGeometry {
             if (thisSurface.Class == SurfaceClass::Shading || thisSurface.Class == SurfaceClass::Detached_F ||
                 thisSurface.Class == SurfaceClass::Detached_B) {
                 thisSurface.IsShadowing = true;
-                if (state.dataSurface->ShadingSurfaceFirst == 0) state.dataSurface->ShadingSurfaceFirst = SurfNum;
+                if (state.dataSurface->ShadingSurfaceFirst == 0) {
+                    state.dataSurface->ShadingSurfaceFirst = SurfNum;
+                }
                 state.dataSurface->ShadingSurfaceLast = SurfNum;
             }
             if ((thisSurface.HeatTransSurf && thisSurface.ExtSolar) || thisSurface.IsShadowing) {
                 // Some attached shading surfaces may be true for both
                 state.dataSurface->AllExtSolAndShadingSurfaceList.push_back(SurfNum);
             }
-            if (thisSurface.Class == SurfaceClass::Shading) ++state.dataSurface->AttachedShadingCount;
-            if (thisSurface.Class == SurfaceClass::Detached_F) ++state.dataSurface->FixedShadingCount;
-            if (thisSurface.Class == SurfaceClass::Detached_B) ++state.dataSurface->BuildingShadingCount;
+            if (thisSurface.Class == SurfaceClass::Shading) {
+                ++state.dataSurface->AttachedShadingCount;
+            }
+            if (thisSurface.Class == SurfaceClass::Detached_F) {
+                ++state.dataSurface->FixedShadingCount;
+            }
+            if (thisSurface.Class == SurfaceClass::Detached_B) {
+                ++state.dataSurface->BuildingShadingCount;
+            }
 
-            if (thisSurface.Class != SurfaceClass::IntMass) ProcessSurfaceVertices(state, SurfNum, ErrorsFound);
+            if (thisSurface.Class != SurfaceClass::IntMass) {
+                ProcessSurfaceVertices(state, SurfNum, ErrorsFound);
+            }
         }
 
         for (auto &e : state.dataHeatBal->Zone) {
@@ -364,7 +376,9 @@ namespace SurfaceGeometry {
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) { // Loop through all surfaces to find windows...
             auto &thisSurface = state.dataSurface->Surface(SurfNum);
 
-            if (!thisSurface.HeatTransSurf && !thisSurface.IsAirBoundarySurf) continue; // Skip shadowing (sub)surfaces
+            if (!thisSurface.HeatTransSurf && !thisSurface.IsAirBoundarySurf) {
+                continue; // Skip shadowing (sub)surfaces
+            }
             auto &thisZone = state.dataHeatBal->Zone(thisSurface.Zone);
             auto &thisSpace = state.dataHeatBal->space(thisSurface.spaceNum);
 
@@ -523,7 +537,9 @@ namespace SurfaceGeometry {
                     }
                 }
             }
-            if ((thisZone.CeilingHeight <= 0.0) && (AverageHeight > 0.0)) thisZone.CeilingHeight = AverageHeight;
+            if ((thisZone.CeilingHeight <= 0.0) && (AverageHeight > 0.0)) {
+                thisZone.CeilingHeight = AverageHeight;
+            }
             // Need to add check here - don't touch if already user-specified
         }
 
@@ -554,7 +570,9 @@ namespace SurfaceGeometry {
                         internalMassSurfacesPresent = true;
                         continue;
                     }
-                    if (!thisSurface.IsAirBoundarySurf) nonInternalMassSurfacesPresent = true;
+                    if (!thisSurface.IsAirBoundarySurf) {
+                        nonInternalMassSurfacesPresent = true;
+                    }
                     if (thisSurface.Class == SurfaceClass::Wall || (thisSurface.Class == SurfaceClass::Roof) ||
                         (thisSurface.Class == SurfaceClass::Floor)) {
 
@@ -586,29 +604,36 @@ namespace SurfaceGeometry {
         state.dataSurface->SurfAdjacentZone.dimension(state.dataSurface->TotSurfaces, 0);
         // note -- adiabatic surfaces will show same zone as surface
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            if (state.dataSurface->Surface(SurfNum).ExtBoundCond <= 0) continue;
+            if (state.dataSurface->Surface(SurfNum).ExtBoundCond <= 0) {
+                continue;
+            }
             state.dataSurface->SurfAdjacentZone(SurfNum) = state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).ExtBoundCond).Zone;
         }
 
         for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
             for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                 auto const &thisSurface = state.dataSurface->Surface(SurfNum);
-                if (!thisSurface.HeatTransSurf && thisSurface.ZoneName == state.dataHeatBal->Zone(ZoneNum).Name)
+                if (!thisSurface.HeatTransSurf && thisSurface.ZoneName == state.dataHeatBal->Zone(ZoneNum).Name) {
                     ++state.dataHeatBal->Zone(ZoneNum).NumShadingSurfaces;
+                }
 
-                if (thisSurface.Zone != ZoneNum) continue;
+                if (thisSurface.Zone != ZoneNum) {
+                    continue;
+                }
 
-                if (thisSurface.HeatTransSurf &&
-                    (thisSurface.Class == SurfaceClass::Wall || thisSurface.Class == SurfaceClass::Roof || thisSurface.Class == SurfaceClass::Floor))
+                if (thisSurface.HeatTransSurf && (thisSurface.Class == SurfaceClass::Wall || thisSurface.Class == SurfaceClass::Roof ||
+                                                  thisSurface.Class == SurfaceClass::Floor)) {
                     ++state.dataHeatBal->Zone(ZoneNum).NumSurfaces;
+                }
 
                 if (thisSurface.HeatTransSurf && (thisSurface.Class == SurfaceClass::Window || thisSurface.Class == SurfaceClass::GlassDoor ||
                                                   thisSurface.Class == SurfaceClass::Door || thisSurface.Class == SurfaceClass::TDD_Dome ||
-                                                  thisSurface.Class == SurfaceClass::TDD_Diffuser))
+                                                  thisSurface.Class == SurfaceClass::TDD_Diffuser)) {
                     ++state.dataHeatBal->Zone(ZoneNum).NumSubSurfaces;
+                }
 
             } // surfaces
-        }     // zones
+        } // zones
 
         for (int const SurfNum : state.dataSurface->AllSurfaceListReportOrder) {
             auto const &thisSurface = state.dataSurface->Surface(SurfNum);
@@ -787,8 +812,9 @@ namespace SurfaceGeometry {
         // Allocation is dependent on the user input file.
 
         state.dataSurface->ShadeV.allocate(state.dataSurface->TotSurfaces);
-        for (auto &e : state.dataSurface->ShadeV)
+        for (auto &e : state.dataSurface->ShadeV) {
             e.NVert = 0;
+        }
         // Individual components (XV,YV,ZV) allocated in routine ProcessSurfaceVertices
         state.dataSurface->X0.dimension(state.dataSurface->TotSurfaces, 0.0);
         state.dataSurface->Y0.dimension(state.dataSurface->TotSurfaces, 0.0);
@@ -1032,9 +1058,13 @@ namespace SurfaceGeometry {
 
         if (state.dataSurface->WorldCoordSystem) {
             bool RelWarning = false;
-            if (state.dataHeatBal->BuildingAzimuth != 0.0) RelWarning = true;
+            if (state.dataHeatBal->BuildingAzimuth != 0.0) {
+                RelWarning = true;
+            }
             for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                if (state.dataHeatBal->Zone(ZoneNum).RelNorth != 0.0) RelWarning = true;
+                if (state.dataHeatBal->Zone(ZoneNum).RelNorth != 0.0) {
+                    RelWarning = true;
+                }
             }
             if (RelWarning && !state.dataSurfaceGeometry->WarningDisplayed) {
                 ShowWarningError(
@@ -1047,9 +1077,15 @@ namespace SurfaceGeometry {
             }
             RelWarning = false;
             for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                if (state.dataHeatBal->Zone(ZoneNum).OriginX != 0.0) RelWarning = true;
-                if (state.dataHeatBal->Zone(ZoneNum).OriginY != 0.0) RelWarning = true;
-                if (state.dataHeatBal->Zone(ZoneNum).OriginZ != 0.0) RelWarning = true;
+                if (state.dataHeatBal->Zone(ZoneNum).OriginX != 0.0) {
+                    RelWarning = true;
+                }
+                if (state.dataHeatBal->Zone(ZoneNum).OriginY != 0.0) {
+                    RelWarning = true;
+                }
+                if (state.dataHeatBal->Zone(ZoneNum).OriginZ != 0.0) {
+                    RelWarning = true;
+                }
             }
             if (RelWarning && !state.dataSurfaceGeometry->WarningDisplayed) {
                 ShowWarningError(
@@ -1194,7 +1230,9 @@ namespace SurfaceGeometry {
         // Debug    write(outputfiledebug,*) ' need to add ',NeedtoAddSurfaces+NeedToAddSubSurfaces
         for (int SurfNum = 1; SurfNum <= FirstTotalSurfaces; ++SurfNum) {
             auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-            if ((surfTemp.ExtBoundCond != unenteredAdjacentZoneSurface) && (surfTemp.ExtBoundCond != unenteredAdjacentSpaceSurface)) continue;
+            if ((surfTemp.ExtBoundCond != unenteredAdjacentZoneSurface) && (surfTemp.ExtBoundCond != unenteredAdjacentSpaceSurface)) {
+                continue;
+            }
             // Need to add surface
             ++CurNewSurf;
             // Debug    write(outputfiledebug,*) ' adding surface=',curnewsurf
@@ -1203,7 +1241,9 @@ namespace SurfaceGeometry {
             //  Basic parameters are the same for both surfaces.
             if (surfTemp.ExtBoundCond == unenteredAdjacentZoneSurface) {
                 int Found = Util::FindItemInList(surfTemp.ExtBoundCondName, state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
-                if (Found == 0) continue;
+                if (Found == 0) {
+                    continue;
+                }
                 newSurf.Zone = Found;
                 auto &newZone = state.dataHeatBal->Zone(Found);
                 newSurf.ZoneName = newZone.Name;
@@ -1211,7 +1251,9 @@ namespace SurfaceGeometry {
                 newSurf.spaceNum = 0; // clear this here and set later
             } else if (surfTemp.ExtBoundCond == unenteredAdjacentSpaceSurface) {
                 int Found = Util::FindItemInList(surfTemp.ExtBoundCondName, state.dataHeatBal->space, state.dataGlobal->numSpaces);
-                if (Found == 0) continue;
+                if (Found == 0) {
+                    continue;
+                }
                 newSurf.spaceNum = Found;
                 int zoneNum = state.dataHeatBal->space(Found).zoneNum;
                 newSurf.Zone = zoneNum;
@@ -1246,9 +1288,15 @@ namespace SurfaceGeometry {
                 // Outward normal unit vector (pointing away from room)
                 newSurf.OutNormVec = newSurf.NewellSurfaceNormalVector;
                 for (int n = 1; n <= 3; ++n) {
-                    if (std::abs(newSurf.OutNormVec(n) - 1.0) < 1.e-06) newSurf.OutNormVec(n) = +1.0;
-                    if (std::abs(newSurf.OutNormVec(n) + 1.0) < 1.e-06) newSurf.OutNormVec(n) = -1.0;
-                    if (std::abs(newSurf.OutNormVec(n)) < 1.e-06) newSurf.OutNormVec(n) = 0.0;
+                    if (std::abs(newSurf.OutNormVec(n) - 1.0) < 1.e-06) {
+                        newSurf.OutNormVec(n) = +1.0;
+                    }
+                    if (std::abs(newSurf.OutNormVec(n) + 1.0) < 1.e-06) {
+                        newSurf.OutNormVec(n) = -1.0;
+                    }
+                    if (std::abs(newSurf.OutNormVec(n)) < 1.e-06) {
+                        newSurf.OutNormVec(n) = 0.0;
+                    }
                 }
 
                 // Can perform tests on this surface here
@@ -1318,7 +1366,9 @@ namespace SurfaceGeometry {
         // names.
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-            if (!surfTemp.HeatTransSurf) continue;
+            if (!surfTemp.HeatTransSurf) {
+                continue;
+            }
 
             int Found = 0;
             // why are we doing this again?  this should have already been done.
@@ -1330,7 +1380,9 @@ namespace SurfaceGeometry {
             if (Found > 0) {
                 surfTemp.BaseSurf = Found;
                 if (SurfNum != Found) { // for subsurfaces
-                    if (surfTemp.HeatTransSurf) ++state.dataSurfaceGeometry->SurfaceTmp(Found).NumSubSurfaces;
+                    if (surfTemp.HeatTransSurf) {
+                        ++state.dataSurfaceGeometry->SurfaceTmp(Found).NumSubSurfaces;
+                    }
                     if (surfTemp.Class < SurfaceClass::Window || surfTemp.Class > SurfaceClass::TDD_Diffuser) {
                         if (surfTemp.Class == SurfaceClass::None) {
                             ShowSevereError(state, format("{}Invalid SubSurface detected, Surface={}", RoutineName, surfTemp.Name));
@@ -1395,8 +1447,9 @@ namespace SurfaceGeometry {
         // Move all shading Surfaces to Front
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-            if (surfTemp.Class != SurfaceClass::Detached_F && surfTemp.Class != SurfaceClass::Detached_B && surfTemp.Class != SurfaceClass::Shading)
+            if (surfTemp.Class != SurfaceClass::Detached_F && surfTemp.Class != SurfaceClass::Detached_B && surfTemp.Class != SurfaceClass::Shading) {
                 continue;
+            }
 
             //  A shading surface
             ++MovedSurfs;
@@ -1414,11 +1467,19 @@ namespace SurfaceGeometry {
                 // Group air boundary surfaces first within each space
                 for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                     auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-                    if (SurfaceTmpClassMoved(SurfNum)) continue;
-                    if (surfTemp.spaceNum != spaceNum) continue;
+                    if (SurfaceTmpClassMoved(SurfNum)) {
+                        continue;
+                    }
+                    if (surfTemp.spaceNum != spaceNum) {
+                        continue;
+                    }
                     int constNum = surfTemp.Construction;
-                    if (constNum == 0) continue;
-                    if (!state.dataConstruction->Construct(constNum).TypeIsAirBoundary) continue;
+                    if (constNum == 0) {
+                        continue;
+                    }
+                    if (!state.dataConstruction->Construct(constNum).TypeIsAirBoundary) {
+                        continue;
+                    }
 
                     //  An air boundary surface
                     surfTemp.IsAirBoundarySurf = true;
@@ -1443,11 +1504,19 @@ namespace SurfaceGeometry {
                     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
 
-                        if (SurfaceTmpClassMoved(SurfNum)) continue;
-                        if (surfTemp.Zone == 0) continue;
+                        if (SurfaceTmpClassMoved(SurfNum)) {
+                            continue;
+                        }
+                        if (surfTemp.Zone == 0) {
+                            continue;
+                        }
 
-                        if (surfTemp.spaceNum != spaceNum) continue;
-                        if (surfTemp.Class != Loop) continue;
+                        if (surfTemp.spaceNum != spaceNum) {
+                            continue;
+                        }
+                        if (surfTemp.Class != Loop) {
+                            continue;
+                        }
 
                         ++MovedSurfs;
                         state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
@@ -1459,10 +1528,16 @@ namespace SurfaceGeometry {
                         //  Find all subsurfaces to this surface - just to update Report them in order
                         for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
                             // Gotta avoid pushing myself again!
-                            if (SubSurfNum == SurfNum) continue;
+                            if (SubSurfNum == SurfNum) {
+                                continue;
+                            }
                             // We don't check if already moved, because we didn't add them to AllSurfaceListReportOrder above!
-                            if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Zone == 0) continue;
-                            if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).BaseSurf != SurfNum) continue;
+                            if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Zone == 0) {
+                                continue;
+                            }
+                            if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).BaseSurf != SurfNum) {
+                                continue;
+                            }
                             // Add original sub-surface numbers as placeholders in surface list for reporting
                             state.dataSurface->AllSurfaceListReportOrder.push_back(SubSurfNum);
                         }
@@ -1471,11 +1546,17 @@ namespace SurfaceGeometry {
 
                 // Internal mass goes next
                 for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-                    if (SurfaceTmpClassMoved(SurfNum)) continue;
+                    if (SurfaceTmpClassMoved(SurfNum)) {
+                        continue;
+                    }
 
                     auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-                    if (surfTemp.spaceNum != spaceNum) continue;
-                    if (surfTemp.Class != SurfaceClass::IntMass) continue;
+                    if (surfTemp.spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (surfTemp.Class != SurfaceClass::IntMass) {
+                        continue;
+                    }
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
                     oldToNewSurfNums(SurfNum) = MovedSurfs;
@@ -1487,9 +1568,15 @@ namespace SurfaceGeometry {
                 // Opaque door goes next
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Door) continue;
+                    if (SurfaceTmpClassMoved(SubSurfNum)) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Door) {
+                        continue;
+                    }
 
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
@@ -1500,12 +1587,19 @@ namespace SurfaceGeometry {
                 // The exterior window subsurfaces (includes SurfaceClass::Window and SurfaceClass::GlassDoor) goes next
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond > 0) continue; // Exterior window
-                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
-                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor))
+                    if (SurfaceTmpClassMoved(SubSurfNum)) {
                         continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond > 0) {
+                        continue; // Exterior window
+                    }
+                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
+                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor)) {
+                        continue;
+                    }
 
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
@@ -1516,12 +1610,19 @@ namespace SurfaceGeometry {
                 // The interior window subsurfaces (includes SurfaceClass::Window and SurfaceClass::GlassDoor) goes next
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond <= 0) continue;
-                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
-                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor))
+                    if (SurfaceTmpClassMoved(SubSurfNum)) {
                         continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).ExtBoundCond <= 0) {
+                        continue;
+                    }
+                    if ((state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::Window) &&
+                        (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::GlassDoor)) {
+                        continue;
+                    }
 
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
@@ -1532,9 +1633,15 @@ namespace SurfaceGeometry {
                 // The SurfaceClass::TDD_Diffuser (OriginalClass = Window) goes next
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Diffuser) continue;
+                    if (SurfaceTmpClassMoved(SubSurfNum)) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Diffuser) {
+                        continue;
+                    }
 
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
@@ -1545,9 +1652,15 @@ namespace SurfaceGeometry {
                 // Last but not least, SurfaceClass::TDD_Dome
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfaceTmpClassMoved(SubSurfNum)) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) continue;
-                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Dome) continue;
+                    if (SurfaceTmpClassMoved(SubSurfNum)) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).spaceNum != spaceNum) {
+                        continue;
+                    }
+                    if (state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum).Class != SurfaceClass::TDD_Dome) {
+                        continue;
+                    }
 
                     ++MovedSurfs;
                     state.dataSurface->Surface(MovedSurfs) = state.dataSurfaceGeometry->SurfaceTmp(SubSurfNum);
@@ -1620,20 +1733,32 @@ namespace SurfaceGeometry {
         for (const DataSurfaces::SurfaceClass Loop : state.dataSurfaceGeometry->BaseSurfIDs) {
             for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
 
-                if (state.dataSurface->Surface(SurfNum).Zone == 0) continue;
+                if (state.dataSurface->Surface(SurfNum).Zone == 0) {
+                    continue;
+                }
 
-                if (state.dataSurface->Surface(SurfNum).Class != Loop) continue;
+                if (state.dataSurface->Surface(SurfNum).Class != Loop) {
+                    continue;
+                }
 
                 //  Find all subsurfaces to this surface
                 for (int SubSurfNum = 1; SubSurfNum <= state.dataSurface->TotSurfaces; ++SubSurfNum) {
 
-                    if (SurfNum == SubSurfNum) continue;
-                    if (state.dataSurface->Surface(SubSurfNum).Zone == 0) continue;
-                    if (state.dataSurface->Surface(SubSurfNum).BaseSurf != SurfNum) continue;
+                    if (SurfNum == SubSurfNum) {
+                        continue;
+                    }
+                    if (state.dataSurface->Surface(SubSurfNum).Zone == 0) {
+                        continue;
+                    }
+                    if (state.dataSurface->Surface(SubSurfNum).BaseSurf != SurfNum) {
+                        continue;
+                    }
 
                     // Check facing angle of Sub compared to base
                     checkSubSurfAzTiltNorm(state, state.dataSurface->Surface(SurfNum), state.dataSurface->Surface(SubSurfNum), subSurfaceError);
-                    if (subSurfaceError) SurfError = true;
+                    if (subSurfaceError) {
+                        SurfError = true;
+                    }
                 }
             }
         }
@@ -1644,7 +1769,9 @@ namespace SurfaceGeometry {
         izConstDiffMsg = false;
         for (int SurfNum = 1; SurfNum <= MovedSurfs; ++SurfNum) { // TotSurfaces
             //  Clean up Shading Surfaces, make sure they don't go through here.
-            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) continue;
+            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) {
+                continue;
+            }
             //   If other surface, match it up
             //  Both interzone and "internal" surfaces have this pointer set
             //  Internal surfaces point to themselves, Interzone to another
@@ -1700,13 +1827,17 @@ namespace SurfaceGeometry {
                             }
                             int ConstrNum = state.dataSurface->Surface(SurfNum).Construction;
                             int ConstrNumFound = state.dataSurface->Surface(Found).Construction;
-                            if (ConstrNum <= 0 || ConstrNumFound <= 0) continue;
+                            if (ConstrNum <= 0 || ConstrNumFound <= 0) {
+                                continue;
+                            }
                             if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionNumLayersWarning &&
-                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning)
+                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionNumLayersWarning) {
                                 continue;
+                            }
                             if (state.dataConstruction->Construct(ConstrNum).ReverseConstructionLayersOrderWarning &&
-                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning)
+                                state.dataConstruction->Construct(ConstrNumFound).ReverseConstructionLayersOrderWarning) {
                                 continue;
+                            }
                             TotLay = state.dataConstruction->Construct(ConstrNum).TotLayers;
                             TotLayFound = state.dataConstruction->Construct(ConstrNumFound).TotLayers;
                             if (TotLay != TotLayFound) { // Different number of layers
@@ -1891,10 +2022,13 @@ namespace SurfaceGeometry {
                                 // Walls, Windows, Doors, Glass Doors
                                 if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall) {
                                     // Surface is a Door, Window or Glass Door
-                                    if (state.dataSurface->Surface(SurfNum).BaseSurf == 0) continue; // error detected elsewhere
+                                    if (state.dataSurface->Surface(SurfNum).BaseSurf == 0) {
+                                        continue; // error detected elsewhere
+                                    }
                                     if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Roof ||
-                                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Floor)
+                                        state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).Class == SurfaceClass::Floor) {
                                         continue;
+                                    }
                                 }
                                 if (std::abs(std::abs(state.dataSurface->Surface(SurfNum).Azimuth - state.dataSurface->Surface(Found).Azimuth) -
                                              180.0) > 1.0) {
@@ -2040,8 +2174,12 @@ namespace SurfaceGeometry {
         // Warn about interzone surfaces that have adiabatic windows/vice versa
         SubSurfaceSevereDisplayed = false;
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) continue;
-            if (state.dataSurface->Surface(SurfNum).BaseSurf == SurfNum) continue; // base surface
+            if (!state.dataSurface->Surface(SurfNum).HeatTransSurf) {
+                continue;
+            }
+            if (state.dataSurface->Surface(SurfNum).BaseSurf == SurfNum) {
+                continue; // base surface
+            }
             // not base surface.  Check it.
             if (state.dataSurface->Surface(state.dataSurface->Surface(SurfNum).BaseSurf).ExtBoundCond <= 0) { // exterior or other base surface
                 if (state.dataSurface->Surface(SurfNum).ExtBoundCond !=
@@ -2267,7 +2405,9 @@ namespace SurfaceGeometry {
                             }
                         }
                     } else {
-                        if (zoneCalcFloorArea > 0.0) thisZone.FloorArea = zoneCalcFloorArea;
+                        if (zoneCalcFloorArea > 0.0) {
+                            thisZone.FloorArea = zoneCalcFloorArea;
+                        }
                     }
                 } else {
                     thisZone.FloorArea = zoneCalcFloorArea;
@@ -2309,7 +2449,9 @@ namespace SurfaceGeometry {
 
             surf.OriginalClass = surf.Class;
 
-            if (surf.Class == SurfaceClass::GlassDoor || surf.Class == SurfaceClass::TDD_Diffuser) surf.Class = SurfaceClass::Window;
+            if (surf.Class == SurfaceClass::GlassDoor || surf.Class == SurfaceClass::TDD_Diffuser) {
+                surf.Class = SurfaceClass::Window;
+            }
 
             if (surf.Class == SurfaceClass::TDD_Dome) {
                 // Reset the TDD:DOME subsurface to act as a base surface that can shade and be shaded
@@ -2325,13 +2467,19 @@ namespace SurfaceGeometry {
         if (!SurfError) {
             for (int SurfNum = 1; SurfNum <= MovedSurfs; ++SurfNum) { // TotSurfaces
                 auto &surf = state.dataSurface->Surface(SurfNum);
-                if (!surf.HasShadeControl) continue;
+                if (!surf.HasShadeControl) {
+                    continue;
+                }
 
                 int ConstrNumSh = surf.activeShadedConstruction;
-                if (ConstrNumSh <= 0) continue;
+                if (ConstrNumSh <= 0) {
+                    continue;
+                }
 
                 auto &winShadeCtrl = state.dataSurface->WindowShadingControl(surf.activeWindowShadingControl);
-                if (!ANY_BLIND(winShadeCtrl.ShadingType)) continue;
+                if (!ANY_BLIND(winShadeCtrl.ShadingType)) {
+                    continue;
+                }
                 // use first item since others should be identical
 
                 auto &surfShade = state.dataSurface->surfShades(SurfNum);
@@ -2341,7 +2489,9 @@ namespace SurfaceGeometry {
                 for (int iMatNum = 1; iMatNum <= state.dataConstruction->Construct(ConstrNumSh).TotLayers; ++iMatNum) {
                     auto *mat = s_mat->materials(state.dataConstruction->Construct(ConstrNumSh).LayerPoint(iMatNum));
 
-                    if (mat->group != Material::Group::Blind) continue;
+                    if (mat->group != Material::Group::Blind) {
+                        continue;
+                    }
 
                     auto *matBlind = dynamic_cast<Material::MaterialBlind *>(mat);
                     assert(matBlind != nullptr);
@@ -2376,12 +2526,17 @@ namespace SurfaceGeometry {
 
             for (int spaceNum : thisZone.spaceIndexes) {
                 auto const &thisSpace = state.dataHeatBal->space(spaceNum);
-                if (thisSpace.HTSurfaceFirst == 0) continue; // Zone with no surfaces
+                if (thisSpace.HTSurfaceFirst == 0) {
+                    continue; // Zone with no surfaces
+                }
                 for (int SurfNum = thisSpace.HTSurfaceFirst; SurfNum <= thisSpace.HTSurfaceLast; ++SurfNum) {
                     auto const &thisSurf = state.dataSurface->Surface(SurfNum);
-                    if (thisSurf.Class == SurfaceClass::Floor || thisSurf.Class == SurfaceClass::Wall || thisSurf.Class == SurfaceClass::Roof)
+                    if (thisSurf.Class == SurfaceClass::Floor || thisSurf.Class == SurfaceClass::Wall || thisSurf.Class == SurfaceClass::Roof) {
                         ++OpaqueHTSurfs;
-                    if (thisSurf.Class == SurfaceClass::IntMass) ++InternalMassSurfs;
+                    }
+                    if (thisSurf.Class == SurfaceClass::IntMass) {
+                        ++InternalMassSurfs;
+                    }
                     if (thisSurf.Class == SurfaceClass::Window) {
                         // Count base surface only once for multiple windows on a wall
                         int thisBaseSurfNum = thisSurf.BaseSurf;
@@ -2407,16 +2562,21 @@ namespace SurfaceGeometry {
 
         GetMovableInsulationData(state, ErrorsFound);
 
-        if (state.dataSurface->CalcSolRefl) GetShadingSurfReflectanceData(state, ErrorsFound);
+        if (state.dataSurface->CalcSolRefl) {
+            GetShadingSurfReflectanceData(state, ErrorsFound);
+        }
 
         LayNumOutside = 0;
 
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto &surf = state.dataSurface->Surface(SurfNum);
             // Check for EcoRoof and only 1 allowed to be used.
-            if (surf.Construction > 0)
+            if (surf.Construction > 0) {
                 state.dataSurface->SurfExtEcoRoof(SurfNum) = state.dataConstruction->Construct(surf.Construction).TypeIsEcoRoof;
-            if (!state.dataSurface->SurfExtEcoRoof(SurfNum)) continue;
+            }
+            if (!state.dataSurface->SurfExtEcoRoof(SurfNum)) {
+                continue;
+            }
             if (LayNumOutside == 0) {
                 LayNumOutside = state.dataConstruction->Construct(surf.Construction).LayerPoint(1);
                 continue;
@@ -2490,21 +2650,37 @@ namespace SurfaceGeometry {
             }
 
             // Exclude non-exterior heat transfer surfaces (but not OtherSideCondModeledExt = -4 CR7640)
-            if (surf.HeatTransSurf && surf.ExtBoundCond > 0) continue;
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::Ground) continue;
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::KivaFoundation) {
-                state.dataSurface->AllHTKivaSurfaceList.push_back(SurfNum);
-                if (!ErrorsFound) state.dataSurfaceGeometry->kivaManager.foundationInputs[surf.OSCPtr].surfaces.push_back(SurfNum);
+            if (surf.HeatTransSurf && surf.ExtBoundCond > 0) {
                 continue;
             }
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefNoCalcExt) continue;
-            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefCalcExt) continue;
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::Ground) {
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::KivaFoundation) {
+                state.dataSurface->AllHTKivaSurfaceList.push_back(SurfNum);
+                if (!ErrorsFound) {
+                    state.dataSurfaceGeometry->kivaManager.foundationInputs[surf.OSCPtr].surfaces.push_back(SurfNum);
+                }
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefNoCalcExt) {
+                continue;
+            }
+            if (surf.HeatTransSurf && surf.ExtBoundCond == DataSurfaces::OtherSideCoefCalcExt) {
+                continue;
+            }
             // Exclude windows and doors, i.e., consider only their base surfaces as possible obstructions
-            if (surf.Class == SurfaceClass::Window || surf.Class == SurfaceClass::Door) continue;
+            if (surf.Class == SurfaceClass::Window || surf.Class == SurfaceClass::Door) {
+                continue;
+            }
             // Exclude duplicate shading surfaces
-            if (surf.MirroredSurf) continue;
+            if (surf.MirroredSurf) {
+                continue;
+            }
             // Exclude air boundary surfaces
-            if (surf.IsAirBoundarySurf) continue;
+            if (surf.IsAirBoundarySurf) {
+                continue;
+            }
 
             surf.IsShadowPossibleObstruction = true;
             state.dataSurface->AllShadowPossObstrSurfaceList.push_back(SurfNum);
@@ -2517,8 +2693,12 @@ namespace SurfaceGeometry {
             int iTmp1 = 0;
             for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                 auto &surf = state.dataSurface->Surface(SurfNum);
-                if (!surf.HeatTransSurf) continue;                                   // ignore shading surfaces
-                if (surf.ExtBoundCond > 0 && surf.ExtBoundCond != SurfNum) continue; // interzone, not adiabatic surface
+                if (!surf.HeatTransSurf) {
+                    continue; // ignore shading surfaces
+                }
+                if (surf.ExtBoundCond > 0 && surf.ExtBoundCond != SurfNum) {
+                    continue; // interzone, not adiabatic surface
+                }
                 if (!state.dataConstruction->Construct(surf.Construction).TypeIsIRT) {
                     continue;
                 }
@@ -2540,12 +2720,15 @@ namespace SurfaceGeometry {
         }
 
         // Populate SurfaceFilter lists
-        for (int iSurfaceFilter = 1; iSurfaceFilter < static_cast<int>(DataSurfaces::SurfaceFilter::Num); ++iSurfaceFilter)
+        for (int iSurfaceFilter = 1; iSurfaceFilter < static_cast<int>(DataSurfaces::SurfaceFilter::Num); ++iSurfaceFilter) {
             state.dataSurface->SurfaceFilterLists[iSurfaceFilter].reserve(state.dataSurface->TotSurfaces);
+        }
 
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto const &surf = state.dataSurface->Surface(SurfNum);
-            if (!surf.HeatTransSurf) continue;
+            if (!surf.HeatTransSurf) {
+                continue;
+            }
             if (surf.ExtBoundCond > 0) {
                 state.dataSurface->SurfaceFilterLists[static_cast<int>(DataSurfaces::SurfaceFilter::AllInteriorSurfaces)].push_back(SurfNum);
                 if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
@@ -2705,8 +2888,12 @@ namespace SurfaceGeometry {
 
         for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
             auto &thisSurf = Surfaces(surfNum);
-            if (!thisSurf.HeatTransSurf) continue;                               // ignore shading surfaces
-            if (thisSurf.Class == DataSurfaces::SurfaceClass::IntMass) continue; // skip internal mass surfaces for this check
+            if (!thisSurf.HeatTransSurf) {
+                continue; // ignore shading surfaces
+            }
+            if (thisSurf.Class == DataSurfaces::SurfaceClass::IntMass) {
+                continue; // skip internal mass surfaces for this check
+            }
             if (thisSurf.BaseSurf != surfNum) {
                 // Set space for subsurfaces
                 thisSurf.spaceNum = Surfaces(thisSurf.BaseSurf).spaceNum;
@@ -2752,7 +2939,9 @@ namespace SurfaceGeometry {
         // Assign Spaces to surfaces without one
         for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
             auto &thisSurf = Surfaces(surfNum);
-            if (!thisSurf.HeatTransSurf) continue; // ignore shading surfaces
+            if (!thisSurf.HeatTransSurf) {
+                continue; // ignore shading surfaces
+            }
             if (thisSurf.spaceNum == 0) {
                 int const numSpaces = state.dataHeatBal->Zone(thisSurf.Zone).numSpaces;
                 int const lastSpaceForZone = state.dataHeatBal->Zone(thisSurf.Zone).spaceIndexes(numSpaces);
@@ -2782,7 +2971,9 @@ namespace SurfaceGeometry {
         // Build Space surface lists now that all of the surface sorting is complete
         for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
             auto &thisSurf = state.dataSurface->Surface(surfNum);
-            if (!thisSurf.HeatTransSurf) continue; // ignore shading surfaces
+            if (!thisSurf.HeatTransSurf) {
+                continue; // ignore shading surfaces
+            }
             // Add to Space's list of surfaces
             state.dataHeatBal->space(thisSurf.spaceNum).surfaces.emplace_back(surfNum);
         }
@@ -2880,7 +3071,9 @@ namespace SurfaceGeometry {
             // }
 
             // Is base surface horizontal? If so, ignore azimuth differences
-            if (std::abs(baseSurface.Tilt) <= 1.0e-5 || std::abs(baseSurface.Tilt - 180.0) <= 1.0e-5) baseSurfHoriz = true;
+            if (std::abs(baseSurface.Tilt) <= 1.0e-5 || std::abs(baseSurface.Tilt - 180.0) <= 1.0e-5) {
+                baseSurfHoriz = true;
+            }
 
             if (((General::rotAzmDiffDeg(baseSurface.Azimuth, subSurface.Azimuth) > errorTolerance) && !baseSurfHoriz) ||
                 (std::abs(baseSurface.Tilt - subSurface.Tilt) > errorTolerance)) {
@@ -3124,9 +3317,15 @@ namespace SurfaceGeometry {
         } else {
             bool RelWarning = false;
             for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                if (state.dataHeatBal->Zone(ZoneNum).OriginX != 0.0) RelWarning = true;
-                if (state.dataHeatBal->Zone(ZoneNum).OriginY != 0.0) RelWarning = true;
-                if (state.dataHeatBal->Zone(ZoneNum).OriginZ != 0.0) RelWarning = true;
+                if (state.dataHeatBal->Zone(ZoneNum).OriginX != 0.0) {
+                    RelWarning = true;
+                }
+                if (state.dataHeatBal->Zone(ZoneNum).OriginY != 0.0) {
+                    RelWarning = true;
+                }
+                if (state.dataHeatBal->Zone(ZoneNum).OriginZ != 0.0) {
+                    RelWarning = true;
+                }
             }
             if (RelWarning && !state.dataSurfaceGeometry->RectSurfRefWorldCoordSystem) {
                 ShowWarningError(state,
@@ -3184,7 +3383,9 @@ namespace SurfaceGeometry {
             ShowWarningError(state, "Detached shading effects are ignored when Solar Distribution = MinimalShadowing");
         }
 
-        if ((TotDetachedFixed + TotDetachedBldg) == 0) return;
+        if ((TotDetachedFixed + TotDetachedBldg) == 0) {
+            return;
+        }
 
         for (int Item = 1; Item <= 2; ++Item) {
 
@@ -3358,7 +3559,9 @@ namespace SurfaceGeometry {
             ShowWarningError(state, "Detached shading effects are ignored when Solar Distribution = MinimalShadowing");
         }
 
-        if (TotRectDetachedFixed + TotRectDetachedBldg == 0) return;
+        if (TotRectDetachedFixed + TotRectDetachedBldg == 0) {
+            return;
+        }
         for (int Item = 1; Item <= 2; ++Item) {
 
             s_ipsc->cCurrentModuleObject = cModuleObjects(Item);
@@ -3655,7 +3858,9 @@ namespace SurfaceGeometry {
                 surfTemp.Name = s_ipsc->cAlphaArgs(1); // Set the Surface Name in the Derived Type
                 ArgPointer = 2;
                 if (Item == 1) {
-                    if (s_ipsc->cAlphaArgs(2) == "CEILING") s_ipsc->cAlphaArgs(2) = "ROOF";
+                    if (s_ipsc->cAlphaArgs(2) == "CEILING") {
+                        s_ipsc->cAlphaArgs(2) = "ROOF";
+                    }
                     ClassItem = Util::FindItemInList(s_ipsc->cAlphaArgs(2), BaseSurfCls, 3);
                     if (ClassItem == 0) {
                         ShowSevereError(state,
@@ -4026,7 +4231,9 @@ namespace SurfaceGeometry {
                 //                        state.dataConstruction->Construct(surfTemp.Construction).TypeIsEcoRoof;
 
                 surfTemp.ViewFactorGround = s_ipsc->rNumericArgs(1);
-                if (s_ipsc->lNumericFieldBlanks(1)) surfTemp.ViewFactorGround = Constant::AutoCalculate;
+                if (s_ipsc->lNumericFieldBlanks(1)) {
+                    surfTemp.ViewFactorGround = Constant::AutoCalculate;
+                }
                 if (s_ipsc->lNumericFieldBlanks(2) || s_ipsc->rNumericArgs(2) == Constant::AutoCalculate) {
                     numSides = (SurfaceNumProp - 2) / 3;
                     surfTemp.Sides = numSides;
@@ -4535,7 +4742,9 @@ namespace SurfaceGeometry {
 
         auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
 
-        if (surfTemp.Zone == 0 && (surfTemp.Class != SurfaceClass::Detached_F && surfTemp.Class != SurfaceClass::Detached_B)) return;
+        if (surfTemp.Zone == 0 && (surfTemp.Class != SurfaceClass::Detached_F && surfTemp.Class != SurfaceClass::Detached_B)) {
+            return;
+        }
 
         surfTemp.Height = Height;
         surfTemp.Width = Length;
@@ -4619,9 +4828,15 @@ namespace SurfaceGeometry {
 
         surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
         for (int n = 1; n <= 3; ++n) {
-            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) surfTemp.OutNormVec(n) = +1.0;
-            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) surfTemp.OutNormVec(n) = -1.0;
-            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) surfTemp.OutNormVec(n) = 0.0;
+            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
+                surfTemp.OutNormVec(n) = +1.0;
+            }
+            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
+                surfTemp.OutNormVec(n) = -1.0;
+            }
+            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
+                surfTemp.OutNormVec(n) = 0.0;
+            }
         }
 
         // Can perform tests on this surface here
@@ -4966,7 +5181,9 @@ namespace SurfaceGeometry {
                 surfTemp.ExtBoundCondName = surfTemp.Name;
             }
             surfTemp.ViewFactorGround = s_ipsc->rNumericArgs(1);
-            if (s_ipsc->lNumericFieldBlanks(1)) surfTemp.ViewFactorGround = Constant::AutoCalculate;
+            if (s_ipsc->lNumericFieldBlanks(1)) {
+                surfTemp.ViewFactorGround = Constant::AutoCalculate;
+            }
 
             if (s_ipsc->lNumericFieldBlanks(3) || s_ipsc->rNumericArgs(3) == Constant::AutoCalculate) {
                 s_ipsc->rNumericArgs(3) = (SurfaceNumProp - 3) / 3;
@@ -5003,8 +5220,9 @@ namespace SurfaceGeometry {
                 }
             }
             surfTemp.Vertex.allocate(surfTemp.Sides);
-            if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::Door)
+            if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::Door) {
                 surfTemp.Multiplier = int(s_ipsc->rNumericArgs(2));
+            }
             // Only windows, glass doors and doors can have Multiplier > 1:
             if ((surfTemp.Class != SurfaceClass::Window && surfTemp.Class != SurfaceClass::GlassDoor && surfTemp.Class != SurfaceClass::Door) &&
                 s_ipsc->rNumericArgs(2) > 1.0) {
@@ -5312,7 +5530,9 @@ namespace SurfaceGeometry {
                     if (GettingIZSurfaces) {
                         surfTemp.ExtBoundCondName = s_ipsc->cAlphaArgs(OtherSurfaceField);
                         IZFound = Util::FindItemInList(surfTemp.ExtBoundCondName, state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
-                        if (IZFound > 0) surfTemp.ExtBoundCond = unenteredAdjacentZoneSurface;
+                        if (IZFound > 0) {
+                            surfTemp.ExtBoundCond = unenteredAdjacentZoneSurface;
+                        }
                     } else { // Interior Window
                         surfTemp.ExtBoundCondName = surfTemp.Name;
                     }
@@ -5729,11 +5949,11 @@ namespace SurfaceGeometry {
                                         state.dataSurface->FrameDivider(surfTemp.FrameDivider).DividerWidth = 0.0;
                                     }
                                 } // End of check if window has divider
-                            }     // End of check if window has a between-glass shade or blind
-                        }         // End of check if window has a shaded construction
-                    }             // end of looping through window shading controls of window
-                }                 // End of check if window has an associated FrameAndDivider
-            }                     // End of check if window has a construction
+                            } // End of check if window has a between-glass shade or blind
+                        } // End of check if window has a shaded construction
+                    } // end of looping through window shading controls of window
+                } // End of check if window has an associated FrameAndDivider
+            } // End of check if window has a construction
         }
 
         if (state.dataConstruction->Construct(surfTemp.Construction).WindowTypeEQL) {
@@ -5791,10 +6011,13 @@ namespace SurfaceGeometry {
             int NumShades = 0;
             for (int Lay = 1; Lay <= state.dataConstruction->Construct(ConstrNum).TotLayers; ++Lay) {
                 int LayerPtr = state.dataConstruction->Construct(ConstrNum).LayerPoint(Lay);
-                if (LayerPtr == 0) continue; // Error is caught already, will terminate later
+                if (LayerPtr == 0) {
+                    continue; // Error is caught already, will terminate later
+                }
                 if (s_mat->materials(LayerPtr)->group == Material::Group::Shade || s_mat->materials(LayerPtr)->group == Material::Group::Blind ||
-                    s_mat->materials(LayerPtr)->group == Material::Group::Screen)
+                    s_mat->materials(LayerPtr)->group == Material::Group::Screen) {
                     ++NumShades;
+                }
             }
             if (NumShades != 0) {
                 ShowSevereError(state, format("{}: Window \"{}\" must not directly reference", cRoutineName, SubSurfaceName));
@@ -5813,7 +6036,9 @@ namespace SurfaceGeometry {
                 for (int Lay = 1; Lay <= state.dataConstruction->Construct(ConstrNum).TotLayers; ++Lay) {
                     int LayerPtr = state.dataConstruction->Construct(ConstrNum).LayerPoint(Lay);
                     auto const *mat = s_mat->materials(LayerPtr);
-                    if (mat->group != Material::Group::Glass) continue;
+                    if (mat->group != Material::Group::Glass) {
+                        continue;
+                    }
 
                     if (dynamic_cast<Material::MaterialGlass const *>(mat)->GlassTransDirtFactor < 1.0) {
                         ShowSevereError(state, format("{}: Interior Window or GlassDoor {} has a glass layer with", cRoutineName, SubSurfaceName));
@@ -5853,7 +6078,9 @@ namespace SurfaceGeometry {
                         int Found = Util::FindItemInList(state.dataSurfaceGeometry->SurfaceTmp(surfTemp.BaseSurf).ExtBoundCondName,
                                                          state.dataSurfaceGeometry->SurfaceTmp,
                                                          SurfNum);
-                        if (Found != 0) state.dataSurfaceGeometry->SurfaceTmp(Found).Area -= surfTemp.Area;
+                        if (Found != 0) {
+                            state.dataSurfaceGeometry->SurfaceTmp(Found).Area -= surfTemp.Area;
+                        }
                     }
                     if (state.dataSurfaceGeometry->SurfaceTmp(surfTemp.BaseSurf).Area <= 0.0) {
                         ShowSevereError(state,
@@ -5900,7 +6127,9 @@ namespace SurfaceGeometry {
         Real64 Perimeter;
         int Vrt;
 
-        if (BaseSurfNum == 0) return; // invalid base surface, don't bother
+        if (BaseSurfNum == 0) {
+            return; // invalid base surface, don't bother
+        }
 
         // Tilt and Facing (Azimuth) will be same as the Base Surface
 
@@ -5956,14 +6185,21 @@ namespace SurfaceGeometry {
         surfTemp.CosAzim = CosSurfAzimuth;
         surfTemp.SinTilt = SinSurfTilt;
         surfTemp.CosTilt = CosSurfTilt;
-        if (surfTemp.Class != SurfaceClass::Window && surfTemp.Class != SurfaceClass::GlassDoor && surfTemp.Class != SurfaceClass::Door)
+        if (surfTemp.Class != SurfaceClass::Window && surfTemp.Class != SurfaceClass::GlassDoor && surfTemp.Class != SurfaceClass::Door) {
             surfTemp.ViewFactorGround = 0.5 * (1.0 - surfTemp.CosTilt);
+        }
         // Outward normal unit vector (pointing away from room)
         surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
         for (int n = 1; n <= 3; ++n) {
-            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) surfTemp.OutNormVec(n) = +1.0;
-            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) surfTemp.OutNormVec(n) = -1.0;
-            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) surfTemp.OutNormVec(n) = 0.0;
+            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
+                surfTemp.OutNormVec(n) = +1.0;
+            }
+            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
+                surfTemp.OutNormVec(n) = -1.0;
+            }
+            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
+                surfTemp.OutNormVec(n) = 0.0;
+            }
         }
 
         //  IF (SurfaceTmp(SurfNum)%Class == SurfaceClass::Roof .and. SurfTilt > 80.) THEN
@@ -6637,7 +6873,9 @@ namespace SurfaceGeometry {
         auto &s_ipsc = state.dataIPShortCut;
         s_ipsc->cCurrentModuleObject = "InternalMass";
         int TotIntMass = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-        if (TotIntMass == 0) return;
+        if (TotIntMass == 0) {
+            return;
+        }
 
         state.dataSurface->IntMassObjects.allocate(TotIntMass);
 
@@ -6674,8 +6912,9 @@ namespace SurfaceGeometry {
             state.dataSurface->IntMassObjects(Item).ZoneOrZoneListName = s_ipsc->cAlphaArgs(3);
             int Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
             int ZLItem = 0;
-            if (Item1 == 0 && state.dataHeatBal->NumOfZoneLists > 0)
+            if (Item1 == 0 && state.dataHeatBal->NumOfZoneLists > 0) {
                 ZLItem = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->ZoneList);
+            }
             if (Item1 > 0) {
                 if (s_ipsc->lAlphaFieldBlanks(4)) {
                     ++NumIntMassSurfaces;
@@ -6708,8 +6947,9 @@ namespace SurfaceGeometry {
                 state.dataSurface->IntMassObjects(Item).spaceOrSpaceListName = s_ipsc->cAlphaArgs(4);
                 Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->space);
                 int SLItem = 0;
-                if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0)
+                if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0) {
                     SLItem = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->spaceList);
+                }
                 if (Item1 > 0) {
                     ++NumIntMassSurfaces;
                     state.dataSurface->IntMassObjects(Item).numOfSpaces = 1;
@@ -6817,7 +7057,9 @@ namespace SurfaceGeometry {
                         surfTemp.Class = SurfaceClass::IntMass;
                         surfTemp.ZoneName = state.dataHeatBal->Zone(ZoneNum).Name;
                         surfTemp.HeatTransSurf = true;
-                        if (errFlag) ErrorsFound = true;
+                        if (errFlag) {
+                            ErrorsFound = true;
+                        }
                     }
 
                     if (state.dataSurface->IntMassObjects(Loop).Construction > 0) {
@@ -6866,7 +7108,9 @@ namespace SurfaceGeometry {
         int NumIntMassSurf = 0;
         int TotIntMass = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "InternalMass");
 
-        if (TotIntMass == 0) return NumIntMassSurf;
+        if (TotIntMass == 0) {
+            return NumIntMassSurf;
+        }
         // scan for zones and zone lists in InternalMass objects
         for (int Item = 1; Item <= TotIntMass; ++Item) {
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
@@ -6884,8 +7128,9 @@ namespace SurfaceGeometry {
 
             int Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
             int ZLItem = 0;
-            if (Item1 == 0 && state.dataHeatBal->NumOfZoneLists > 0)
+            if (Item1 == 0 && state.dataHeatBal->NumOfZoneLists > 0) {
                 ZLItem = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->ZoneList);
+            }
             if (Item1 > 0) {
                 if (s_ipsc->lAlphaFieldBlanks(4)) {
                     ++NumIntMassSurf;
@@ -6897,8 +7142,9 @@ namespace SurfaceGeometry {
             if (!s_ipsc->lAlphaFieldBlanks(4)) {
                 Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->space);
                 int SLItem = 0;
-                if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0)
+                if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0) {
                     SLItem = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->spaceList);
+                }
                 if (Item1 > 0) {
                     ++NumIntMassSurf;
                 } else if (SLItem > 0) {
@@ -6938,8 +7184,9 @@ namespace SurfaceGeometry {
         for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto const &surf = state.dataSurface->Surface(SurfNum);
             if (!(surf.Class == SurfaceClass::Shading || surf.Class == SurfaceClass::Detached_F || surf.Class == SurfaceClass::Detached_B ||
-                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin))
+                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin)) {
                 continue;
+            }
             state.dataSurface->SurfShadowDiffuseSolRefl(SurfNum) = 0.2;
             state.dataSurface->SurfShadowDiffuseVisRefl(SurfNum) = 0.2;
             state.dataSurface->SurfShadowGlazingFrac(SurfNum) = 0.0;
@@ -6977,8 +7224,9 @@ namespace SurfaceGeometry {
             WrongSurfaceType = false;
             auto const &surf = state.dataSurface->Surface(SurfNum);
             if (!(surf.Class == SurfaceClass::Shading || surf.Class == SurfaceClass::Detached_F || surf.Class == SurfaceClass::Detached_B ||
-                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin))
+                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin)) {
                 WrongSurfaceType = true;
+            }
             if (WrongSurfaceType) {
                 ShowSevereError(
                     state,
@@ -7007,7 +7255,9 @@ namespace SurfaceGeometry {
                 state.dataSurface->SurfShadowGlazingConstruct(SurfNum) = GlConstrNum;
             }
             SurfNum = Util::FindItemInList("Mir-" + s_ipsc->cAlphaArgs(1), state.dataSurface->Surface, state.dataSurface->TotSurfaces);
-            if (SurfNum == 0) continue;
+            if (SurfNum == 0) {
+                continue;
+            }
             state.dataSurface->SurfShadowGlazingFrac(SurfNum) = s_ipsc->rNumericArgs(3);
             state.dataSurface->SurfShadowDiffuseSolRefl(SurfNum) = (1.0 - s_ipsc->rNumericArgs(3)) * s_ipsc->rNumericArgs(1);
             state.dataSurface->SurfShadowDiffuseVisRefl(SurfNum) = (1.0 - s_ipsc->rNumericArgs(3)) * s_ipsc->rNumericArgs(2);
@@ -7029,8 +7279,9 @@ namespace SurfaceGeometry {
         for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             auto const &surf = state.dataSurface->Surface(SurfNum);
             if (!(surf.Class == SurfaceClass::Shading || surf.Class == SurfaceClass::Detached_F || surf.Class == SurfaceClass::Detached_B ||
-                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin))
+                  surf.Class == SurfaceClass::Overhang || surf.Class == SurfaceClass::Fin)) {
                 continue;
+            }
 
             constexpr std::string_view fmt = "ShadingProperty Reflectance,{},{},{:.2R},{:.2R},{:.2R}, {}\n";
             if (state.dataSurface->SurfShadowGlazingConstruct(SurfNum) != 0) {
@@ -7261,7 +7512,9 @@ namespace SurfaceGeometry {
                 state.dataSurface->SurfExtCavityPresent(Found) = true;
             }
 
-            if (ErrorsFound) continue; // previous inner do loop may have detected problems that need to be cycle'd again to avoid crash
+            if (ErrorsFound) {
+                continue; // previous inner do loop may have detected problems that need to be cycle'd again to avoid crash
+            }
 
             // now that we should have all the surfaces, do some preparations and checks.
 
@@ -7889,7 +8142,9 @@ namespace SurfaceGeometry {
         state.dataSurface->TotSurfPropGndSurfs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(s_ipsc->cCurrentModuleObject);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            if (state.dataSurface->TotSurfPropGndSurfs > 0) ErrorsFound = true;
+            if (state.dataSurface->TotSurfPropGndSurfs > 0) {
+                ErrorsFound = true;
+            }
             return;
         }
 
@@ -8079,8 +8334,9 @@ namespace SurfaceGeometry {
         }
 
         // first initialize each heat transfer surface with the overall model type, array assignment
-        for (auto &e : state.dataSurface->Surface)
+        for (auto &e : state.dataSurface->Surface) {
             e.HeatTransferAlgorithm = state.dataHeatBal->OverallHeatTransferSolutionAlgo;
+        }
 
         s_ipsc->cCurrentModuleObject = "SurfaceProperty:HeatTransferAlgorithm";
         CountHTAlgoObjectsSingleSurf = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
@@ -8190,9 +8446,15 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond > 0) continue; // Interior surfaces
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond > 0) {
+                            continue; // Interior surfaces
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8201,11 +8463,19 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond > 0) continue; // Interior surfaces
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond > 0) {
+                            continue; // Interior surfaces
+                        }
 
-                        if (surf.Class != SurfaceClass::Wall) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (surf.Class != SurfaceClass::Wall) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8214,10 +8484,18 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond > 0) continue; // Interior surfaces
-                        if (surf.Class != SurfaceClass::Roof) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond > 0) {
+                            continue; // Interior surfaces
+                        }
+                        if (surf.Class != SurfaceClass::Roof) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8226,10 +8504,18 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond > 0) continue; // Interior surfaces
-                        if (surf.Class != SurfaceClass::Floor) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond > 0) {
+                            continue; // Interior surfaces
+                        }
+                        if (surf.Class != SurfaceClass::Floor) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8238,9 +8524,15 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond != DataSurfaces::Ground) continue; // ground BC
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond != DataSurfaces::Ground) {
+                            continue; // ground BC
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8248,9 +8540,15 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond <= 0) continue; // Exterior surfaces
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond <= 0) {
+                            continue; // Exterior surfaces
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8259,10 +8557,18 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond <= 0) continue; // Exterior surfaces
-                        if (surf.Class != SurfaceClass::Wall) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond <= 0) {
+                            continue; // Exterior surfaces
+                        }
+                        if (surf.Class != SurfaceClass::Wall) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8271,10 +8577,18 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond <= 0) continue; // Exterior surfaces
-                        if (surf.Class != SurfaceClass::Roof) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond <= 0) {
+                            continue; // Exterior surfaces
+                        }
+                        if (surf.Class != SurfaceClass::Roof) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8283,10 +8597,18 @@ namespace SurfaceGeometry {
                     SurfacesOfType = false;
                     for (SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
                         auto &surf = state.dataSurface->Surface(SurfNum);
-                        if (!surf.HeatTransSurf) continue;
-                        if (surf.ExtBoundCond <= 0) continue; // Exterior surfaces
-                        if (surf.Class != SurfaceClass::Floor) continue;
-                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) continue;
+                        if (!surf.HeatTransSurf) {
+                            continue;
+                        }
+                        if (surf.ExtBoundCond <= 0) {
+                            continue; // Exterior surfaces
+                        }
+                        if (surf.Class != SurfaceClass::Floor) {
+                            continue;
+                        }
+                        if (state.dataConstruction->Construct(surf.Construction).TypeIsWindow) {
+                            continue;
+                        }
                         SurfacesOfType = true;
                         surf.HeatTransferAlgorithm = tmpAlgoInput;
                     }
@@ -8310,7 +8632,9 @@ namespace SurfaceGeometry {
                            s_ipsc->cAlphaArgs(1),
                            s_ipsc->cAlphaArgs(2)));
             }
-            if (ErrorsFoundMultiSurf) ErrorsFound = true;
+            if (ErrorsFoundMultiSurf) {
+                ErrorsFound = true;
+            }
 
         } // multi surface heat transfer algo override
 
@@ -8593,8 +8917,9 @@ namespace SurfaceGeometry {
                 auto &surf = state.dataSurface->Surface(Item);
                 if (surf.ExtBoundCond > 0) {
                     if ((surf.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::Invalid) ||
-                        (surf.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::None))
+                        (surf.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::None)) {
                         continue;
+                    }
                     ExtSurfNum = surf.ExtBoundCond;
                     auto &extSurf = state.dataSurface->Surface(ExtSurfNum);
                     if (surf.HeatTransferAlgorithm != extSurf.HeatTransferAlgorithm) {
@@ -8760,7 +9085,9 @@ namespace SurfaceGeometry {
 
         auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
 
-        if (NSides > state.dataSurface->MaxVerticesPerSurface) state.dataSurface->MaxVerticesPerSurface = NSides;
+        if (NSides > state.dataSurface->MaxVerticesPerSurface) {
+            state.dataSurface->MaxVerticesPerSurface = NSides;
+        }
         int Ptr = 1;
         for (n = 1; n <= NSides; ++n) {
             surfTemp.Vertex(n).x = Vertices(Ptr);
@@ -8798,18 +9125,26 @@ namespace SurfaceGeometry {
             }
             NTar = ThisCorner;
             NSrc = ThisCorner + 1;
-            if (NSrc > NSides) NSrc = 1;
+            if (NSrc > NSides) {
+                NSrc = 1;
+            }
             for (n = 1; n <= NSides - 1; ++n) {
                 temp = surfTemp.Vertex(NTar);
                 surfTemp.Vertex(NTar) = surfTemp.Vertex(NSrc);
                 surfTemp.Vertex(NSrc) = temp;
                 ++NTar;
                 ++NSrc;
-                if (NTar > NSides) NTar = 1;
-                if (NSrc > NSides) NSrc = 1;
+                if (NTar > NSides) {
+                    NTar = 1;
+                }
+                if (NSrc > NSides) {
+                    NSrc = 1;
+                }
             }
             ++ThisCorner;
-            if (ThisCorner > NSides) ThisCorner = 1;
+            if (ThisCorner > NSides) {
+                ThisCorner = 1;
+            }
         } // Corners
         if (!state.dataSurface->WorldCoordSystem) {
             // Input in "relative" coordinates, use Building and Zone North Axes and Origins
@@ -8982,13 +9317,20 @@ namespace SurfaceGeometry {
             // Outward normal unit vector (pointing away from room)
             surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
             for (n = 1; n <= 3; ++n) {
-                if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) surfTemp.OutNormVec(n) = +1.0;
-                if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) surfTemp.OutNormVec(n) = -1.0;
-                if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) surfTemp.OutNormVec(n) = 0.0;
+                if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
+                    surfTemp.OutNormVec(n) = +1.0;
+                }
+                if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
+                    surfTemp.OutNormVec(n) = -1.0;
+                }
+                if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
+                    surfTemp.OutNormVec(n) = 0.0;
+                }
             }
 
-            if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::Door)
+            if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::Door) {
                 surfTemp.Area *= surfTemp.Multiplier;
+            }
             // Can perform tests on this surface here
             surfTemp.ViewFactorSky = 0.5 * (1.0 + surfTemp.CosTilt);
             // The following IR view factors are modified in subr. SkyDifSolarShading if there are shadowing
@@ -9126,9 +9468,15 @@ namespace SurfaceGeometry {
             // Outward normal unit vector (pointing away from room)
             newSurface.OutNormVec = newSurface.NewellSurfaceNormalVector;
             for (int n = 1; n <= 3; ++n) {
-                if (std::abs(newSurface.OutNormVec(n) - 1.0) < 1.e-06) newSurface.OutNormVec(n) = +1.0;
-                if (std::abs(newSurface.OutNormVec(n) + 1.0) < 1.e-06) newSurface.OutNormVec(n) = -1.0;
-                if (std::abs(newSurface.OutNormVec(n)) < 1.e-06) newSurface.OutNormVec(n) = 0.0;
+                if (std::abs(newSurface.OutNormVec(n) - 1.0) < 1.e-06) {
+                    newSurface.OutNormVec(n) = +1.0;
+                }
+                if (std::abs(newSurface.OutNormVec(n) + 1.0) < 1.e-06) {
+                    newSurface.OutNormVec(n) = -1.0;
+                }
+                if (std::abs(newSurface.OutNormVec(n)) < 1.e-06) {
+                    newSurface.OutNormVec(n) = 0.0;
+                }
             }
 
             // Can perform tests on this surface here
@@ -9227,7 +9575,9 @@ namespace SurfaceGeometry {
         // Get the total number of window shading control blocks
         s_ipsc->cCurrentModuleObject = "WindowShadingControl";
         state.dataSurface->TotWinShadingControl = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-        if (state.dataSurface->TotWinShadingControl == 0) return;
+        if (state.dataSurface->TotWinShadingControl == 0) {
+            return;
+        }
 
         state.dataSurface->WindowShadingControl.allocate(state.dataSurface->TotWinShadingControl);
 
@@ -9638,14 +9988,18 @@ namespace SurfaceGeometry {
                                                      s_ipsc->cAlphaArgs(3)));
                         }
                     } else if (windowShadingControl.ShadingType == DataSurfaces::WinShadingType::BGShade) {
-                        if (NLayers != 5 && NLayers != 7) BGShadeBlindError = true;
+                        if (NLayers != 5 && NLayers != 7) {
+                            BGShadeBlindError = true;
+                        }
                         if (NLayers == 5) {
-                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(3))->group != Material::Group::Shade)
+                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(3))->group != Material::Group::Shade) {
                                 BGShadeBlindError = true;
+                            }
                         }
                         if (NLayers == 7) {
-                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(5))->group != Material::Group::Shade)
+                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(5))->group != Material::Group::Shade) {
                                 BGShadeBlindError = true;
+                            }
                         }
                         if (BGShadeBlindError) {
                             ErrorsFound = true;
@@ -9662,14 +10016,18 @@ namespace SurfaceGeometry {
                             ShowContinueError(state, "between-glass shade layer with a gas layer on each side.");
                         }
                     } else if (windowShadingControl.ShadingType == DataSurfaces::WinShadingType::BGBlind) {
-                        if (NLayers != 5 && NLayers != 7) BGShadeBlindError = true;
+                        if (NLayers != 5 && NLayers != 7) {
+                            BGShadeBlindError = true;
+                        }
                         if (NLayers == 5) {
-                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(3))->group != Material::Group::Blind)
+                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(3))->group != Material::Group::Blind) {
                                 BGShadeBlindError = true;
+                            }
                         }
                         if (NLayers == 7) {
-                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(5))->group != Material::Group::Blind)
+                            if (s_mat->materials(state.dataConstruction->Construct(IShadedConst).LayerPoint(5))->group != Material::Group::Blind) {
                                 BGShadeBlindError = true;
+                            }
                         }
                         if (BGShadeBlindError) {
                             ErrorsFound = true;
@@ -9857,7 +10215,9 @@ namespace SurfaceGeometry {
         // Get the total number of storm window input objects
         s_ipsc->cCurrentModuleObject = "WindowProperty:StormWindow";
         state.dataSurface->TotStormWin = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-        if (state.dataSurface->TotStormWin == 0) return;
+        if (state.dataSurface->TotStormWin == 0) {
+            return;
+        }
 
         state.dataSurface->StormWindow.allocate(state.dataSurface->TotStormWin);
 
@@ -10062,7 +10422,9 @@ namespace SurfaceGeometry {
         // Get the total number of window airflow control statements
         s_ipsc->cCurrentModuleObject = "WindowProperty:AirflowControl";
         TotWinAirflowControl = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
-        if (TotWinAirflowControl == 0) return;
+        if (TotWinAirflowControl == 0) {
+            return;
+        }
 
         for (Loop = 1; Loop <= TotWinAirflowControl; ++Loop) { // Loop through all surfaces in the input...
 
@@ -10090,13 +10452,18 @@ namespace SurfaceGeometry {
             if (SurfNum != 0) {
                 bool WrongSurfaceType = false;
                 auto const &surf = state.dataSurface->Surface(SurfNum);
-                if (surf.Class != SurfaceClass::Window) WrongSurfaceType = true;
+                if (surf.Class != SurfaceClass::Window) {
+                    WrongSurfaceType = true;
+                }
                 if (surf.Class == SurfaceClass::Window) {
                     ConstrNum = surf.Construction;
                     if (state.dataConstruction->Construct(ConstrNum).TotGlassLayers != 2 &&
-                        state.dataConstruction->Construct(ConstrNum).TotGlassLayers != 3)
+                        state.dataConstruction->Construct(ConstrNum).TotGlassLayers != 3) {
                         WrongSurfaceType = true;
-                    if (surf.ExtBoundCond != DataSurfaces::ExternalEnvironment) WrongSurfaceType = true;
+                    }
+                    if (surf.ExtBoundCond != DataSurfaces::ExternalEnvironment) {
+                        WrongSurfaceType = true;
+                    }
                 }
                 if (WrongSurfaceType) {
                     ShowSevereError(
@@ -10237,10 +10604,11 @@ namespace SurfaceGeometry {
                                                surf.Name,
                                                s_ipsc->cAlphaFieldNames(3),
                                                s_ipsc->cAlphaArgs(3)));
-                        if (!s_ipsc->lAlphaFieldBlanks(7))
+                        if (!s_ipsc->lAlphaFieldBlanks(7)) {
                             ShowContinueError(
                                 state,
                                 format("{}=\"{}\" did not find a matching return air node.", s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7)));
+                        }
                         ShowContinueError(state,
                                           "..Airflow windows with Airflow Destination = ReturnAir must reference a controlled Zone (appear in a "
                                           "ZoneHVAC:EquipmentConnections object) with at least one return air node.");
@@ -10282,16 +10650,18 @@ namespace SurfaceGeometry {
                     }
                 }
                 // Warning if associated window is an interior window
-                if (surf.ExtBoundCond != DataSurfaces::ExternalEnvironment && !ErrorsFound)
+                if (surf.ExtBoundCond != DataSurfaces::ExternalEnvironment && !ErrorsFound) {
                     ShowWarningError(state,
                                      format("{}=\"{}\", is an Interior window; cannot be an airflow window.",
                                             s_ipsc->cCurrentModuleObject,
                                             s_ipsc->cAlphaArgs(1)));
+                }
                 if (!ErrorsFound) {
                     // Require that gas in airflow gap has type = air
                     MatGapFlow = state.dataConstruction->Construct(ConstrNum).LayerPoint(2);
-                    if (state.dataConstruction->Construct(ConstrNum).TotGlassLayers == 3)
+                    if (state.dataConstruction->Construct(ConstrNum).TotGlassLayers == 3) {
                         MatGapFlow = state.dataConstruction->Construct(ConstrNum).LayerPoint(4);
+                    }
                     if (dynamic_cast<Material::MaterialGasMix const *>(s_mat->materials(MatGapFlow))->gases[0].type != Material::GasType::Air) {
                         ErrorsFound = true;
                         ShowSevereError(state,
@@ -11500,7 +11870,7 @@ namespace SurfaceGeometry {
                 ErrorsFound = true;
             }
         } // for (Loop)
-    }     // GetMovableInsulationData()
+    } // GetMovableInsulationData()
 
     // Calculates the volume (m3) of a zone using the surfaces as possible.
     void CalculateZoneVolume(EnergyPlusData &state)
@@ -11733,7 +12103,9 @@ namespace SurfaceGeometry {
             for (int spaceNum : thisZone.spaceIndexes) {
                 auto &thisSpace = state.dataHeatBal->space(spaceNum);
                 // don't touch if already user-specified
-                if (thisSpace.Volume > 0.0) continue;
+                if (thisSpace.Volume > 0.0) {
+                    continue;
+                }
                 if (thisZone.numSpaces == 1) {
                     thisSpace.Volume = thisZone.Volume;
                 } else if (thisZone.geometricFloorArea > 0.0) {
@@ -12233,7 +12605,9 @@ namespace SurfaceGeometry {
         } else {
             allAreEquidistant = false;
         }
-        if (allAreEquidistant) distanceBetween = firstDistance;
+        if (allAreEquidistant) {
+            distanceBetween = firstDistance;
+        }
         return allAreEquidistant;
     }
 
@@ -12502,7 +12876,9 @@ namespace SurfaceGeometry {
 
                 if (std::abs(state.dataSurface->Surface(surf.BaseSurf).Tilt - ThisSurfTilt) <= 0.01) {
                     // left or right fin
-                    if (ThisSurfAz < 0.0) ThisSurfAz += 360.0;
+                    if (ThisSurfAz < 0.0) {
+                        ThisSurfAz += 360.0;
+                    }
                     if (ThisSurfAz > state.dataSurface->Surface(surf.BaseSurf).Azimuth) {
                         ThisShape = DataSurfaces::SurfaceShape::RectangularLeftFin;
                     } else {
@@ -12524,7 +12900,9 @@ namespace SurfaceGeometry {
                     ErrorInSurface = true;
                 }
                 ThisReveal = -Vectors::Pt2Plane(surf.Vertex(2), BasePlane);
-                if (std::abs(ThisReveal) < 0.0002) ThisReveal = 0.0;
+                if (std::abs(ThisReveal) < 0.0002) {
+                    ThisReveal = 0.0;
+                }
                 surf.Reveal = ThisReveal;
                 Xp = surf.Vertex(2).x - BaseXLLC;
                 Yp = surf.Vertex(2).y - BaseYLLC;
@@ -12574,8 +12952,9 @@ namespace SurfaceGeometry {
                         (state.dataSurface->FrameDivider(FrDivNum).InsideSillDepth > 0.0 &&
                          state.dataSurface->FrameDivider(FrDivNum).InsideSillSolAbs > 0.0) ||
                         (state.dataSurface->FrameDivider(FrDivNum).InsideReveal > 0.0 &&
-                         state.dataSurface->FrameDivider(FrDivNum).InsideRevealSolAbs > 0.0))
+                         state.dataSurface->FrameDivider(FrDivNum).InsideRevealSolAbs > 0.0)) {
                         state.dataHeatBal->CalcWindowRevealReflection = true;
+                    }
 
                     // For exterior window with frame, subtract frame area from base surface
                     // (only rectangular windows are allowed to have a frame and/or divider;
@@ -12661,7 +13040,9 @@ namespace SurfaceGeometry {
                     ErrorInSurface = true;
                 }
                 ThisReveal = -Vectors::Pt2Plane(surf.Vertex(2), BasePlane);
-                if (std::abs(ThisReveal) < 0.0002) ThisReveal = 0.0;
+                if (std::abs(ThisReveal) < 0.0002) {
+                    ThisReveal = 0.0;
+                }
                 surf.Reveal = ThisReveal;
                 Xp = surf.Vertex(2).x - BaseXLLC;
                 Yp = surf.Vertex(2).y - BaseYLLC;
@@ -12782,11 +13163,17 @@ namespace SurfaceGeometry {
             for (n = 1; n <= surf.Sides; ++n) {
                 // if less than 1/10 inch
                 state.dataSurfaceGeometry->Xpsv(n) = nint64(10000.0 * state.dataSurfaceGeometry->Xpsv(n)) / 10000.0;
-                if (std::abs(state.dataSurfaceGeometry->Xpsv(n)) < 0.0025) state.dataSurfaceGeometry->Xpsv(n) = 0.0;
+                if (std::abs(state.dataSurfaceGeometry->Xpsv(n)) < 0.0025) {
+                    state.dataSurfaceGeometry->Xpsv(n) = 0.0;
+                }
                 state.dataSurfaceGeometry->Ypsv(n) = nint64(10000.0 * state.dataSurfaceGeometry->Ypsv(n)) / 10000.0;
-                if (std::abs(state.dataSurfaceGeometry->Ypsv(n)) < 0.0025) state.dataSurfaceGeometry->Ypsv(n) = 0.0;
+                if (std::abs(state.dataSurfaceGeometry->Ypsv(n)) < 0.0025) {
+                    state.dataSurfaceGeometry->Ypsv(n) = 0.0;
+                }
                 state.dataSurfaceGeometry->Zpsv(n) = nint64(10000.0 * state.dataSurfaceGeometry->Zpsv(n)) / 10000.0;
-                if (std::abs(state.dataSurfaceGeometry->Zpsv(n)) < 0.0025) state.dataSurfaceGeometry->Zpsv(n) = 0.0;
+                if (std::abs(state.dataSurfaceGeometry->Zpsv(n)) < 0.0025) {
+                    state.dataSurfaceGeometry->Zpsv(n) = 0.0;
+                }
             }
 
             surf.Shape = ThisShape;
@@ -13107,10 +13494,13 @@ namespace SurfaceGeometry {
                 int TotLayers = state.dataConstruction->Construct(curConstruction).TotLayers;            // Total layers in a construction
                 int MatIntSh = state.dataConstruction->Construct(curConstruction).LayerPoint(TotLayers); // Material number of interior shade or blind
                 int MatBetweenGlassSh = 0; // Material number of between-glass shade or blind
-                if (TotLayers == 5) MatBetweenGlassSh = state.dataConstruction->Construct(curConstruction).LayerPoint(3);
+                if (TotLayers == 5) {
+                    MatBetweenGlassSh = state.dataConstruction->Construct(curConstruction).LayerPoint(3);
+                }
                 if (state.dataConstruction->Construct(curConstruction).TotGlassLayers <= 3 &&
-                    (s_mat->materials(MatIntSh)->group == Material::Group::Shade || s_mat->materials(MatIntSh)->group == Material::Group::Blind))
+                    (s_mat->materials(MatIntSh)->group == Material::Group::Shade || s_mat->materials(MatIntSh)->group == Material::Group::Blind)) {
                     ShAndSt = true;
+                }
                 if (MatBetweenGlassSh > 0) {
                     if (s_mat->materials(MatBetweenGlassSh)->group == Material::Group::Shade ||
                         s_mat->materials(MatBetweenGlassSh)->group == Material::Group::Blind) {
@@ -13131,7 +13521,7 @@ namespace SurfaceGeometry {
                     surf.shadedStormWinConstructionList[iConstruction] = ConstrNewStSh; // put in same index as the shaded construction
                 }
             } // end of loop for shaded constructions
-        }     // end of loop over storm window objects
+        } // end of loop over storm window objects
     }
 
     int createAirMaterialFromDistance(EnergyPlusData &state, Real64 distance, std::string_view namePrefix)
@@ -13141,7 +13531,9 @@ namespace SurfaceGeometry {
         int mmDistance = int(1000 * distance); // Thickness of air gap in mm (usually between storm window and rest of window)
         std::string MatNameStAir = format("{}{}MM", namePrefix, mmDistance); // Name of created air layer material
         int matNum = Material::GetMaterialNum(state, MatNameStAir);
-        if (matNum != 0) return matNum;
+        if (matNum != 0) {
+            return matNum;
+        }
 
         // Create new material
         auto *mat = new Material::MaterialGasMix;
@@ -13929,12 +14321,16 @@ namespace SurfaceGeometry {
                 state.dataSurfaceGeometry->firstTime = false;
             }
         }
-        if (state.dataSurfaceGeometry->noTransform) return;
+        if (state.dataSurfaceGeometry->noTransform) {
+            return;
+        }
 
         // check surface type.
         if (!surfTemp.HeatTransSurf) {
             // Site Shading do not get transformed.
-            if (surfTemp.Class == SurfaceClass::Detached_F) return;
+            if (surfTemp.Class == SurfaceClass::Detached_F) {
+                return;
+            }
         }
 
         // testing method of transforming  x and y coordinates as follows
@@ -13987,7 +14383,9 @@ namespace SurfaceGeometry {
         for (int ThisSurf = 1; ThisSurf <= state.dataSurface->TotSurfaces; ++ThisSurf) {
             auto &surface = state.dataSurface->Surface(ThisSurf);
 
-            if (surface.Class == SurfaceClass::IntMass) continue;
+            if (surface.Class == SurfaceClass::IntMass) {
+                continue;
+            }
 
             auto const &vertex = surface.Vertex;
 
@@ -14089,7 +14487,9 @@ namespace SurfaceGeometry {
             surface.Centroid = centroid;
 
             if (centroid.z < 0.0) {
-                if (surface.ExtWind || surface.ExtBoundCond == DataSurfaces::ExternalEnvironment) ++negZcount;
+                if (surface.ExtWind || surface.ExtBoundCond == DataSurfaces::ExternalEnvironment) {
+                    ++negZcount;
+                }
             }
 
         } // loop through surfaces
@@ -14247,9 +14647,13 @@ namespace SurfaceGeometry {
             int errorCount = 0;
             for (int surfNum = 1; surfNum <= state.dataSurface->TotSurfaces; ++surfNum) {
                 auto &surf = state.dataSurface->Surface(surfNum);
-                if (surf.Construction == 0) continue;
+                if (surf.Construction == 0) {
+                    continue;
+                }
                 auto &constr = state.dataConstruction->Construct(surf.Construction);
-                if (!constr.TypeIsAirBoundary) continue;
+                if (!constr.TypeIsAirBoundary) {
+                    continue;
+                }
                 surf.IsAirBoundarySurf = true;
 
                 // Check for invalid air boundary surfaces - valid only on non-adiabatic interzone surfaces
@@ -14430,7 +14834,9 @@ namespace SurfaceGeometry {
                 if (spaceEnclosureNum == 0) {
                     spaceHasOnlyFloors = true;
                     for (int const surfNum : state.dataHeatBal->space(spaceNum).surfaces) {
-                        if (state.dataSurface->Surface(surfNum).Class == SurfaceClass::IntMass) continue;
+                        if (state.dataSurface->Surface(surfNum).Class == SurfaceClass::IntMass) {
+                            continue;
+                        }
                         if (state.dataSurface->Surface(surfNum).Class != SurfaceClass::Floor) {
                             spaceHasOnlyFloors = false;
                             break;
@@ -14900,8 +15306,12 @@ namespace SurfaceGeometry {
                 YLLC = -Xp * BaseSinAzimuth * BaseCosTilt - Yp * BaseCosAzimuth * BaseCosTilt + Zp * BaseSinTilt;
                 ZLLC = Xp * BaseSinAzimuth * BaseSinTilt + Yp * BaseCosAzimuth * BaseSinTilt + Zp * BaseCosTilt;
 
-                if (std::abs(XLLC) > WidthMax) WidthMax = std::abs(XLLC);
-                if (std::abs(YLLC) > WidthMax) HeightMax = std::abs(YLLC);
+                if (std::abs(XLLC) > WidthMax) {
+                    WidthMax = std::abs(XLLC);
+                }
+                if (std::abs(YLLC) > WidthMax) {
+                    HeightMax = std::abs(YLLC);
+                }
             }
         }
 
@@ -14933,7 +15343,9 @@ namespace SurfaceGeometry {
 
             int thisConstLayer = state.dataConstruction->Construct(ConstrNum).LayerPoint(LayerNo);
             int revConstLayer = state.dataConstruction->Construct(ConstrNumRev).LayerPoint(TotalLayers - LayerNo + 1);
-            if (thisConstLayer == revConstLayer) continue;
+            if (thisConstLayer == revConstLayer) {
+                continue;
+            }
 
             auto const *mat = s_mat->materials(thisConstLayer);
             auto const *matRev = s_mat->materials(revConstLayer);
@@ -14964,7 +15376,7 @@ namespace SurfaceGeometry {
                     (abs(matGlass->PoissonsRatio - matGlassRev->PoissonsRatio) > SmallDiff)) {
                     RevLayerDiffs = true;
                     break; // exit when diff
-                }          // If none of the above conditions is met, then these should be the same layers in reverse (RevLayersDiffs = false)
+                } // If none of the above conditions is met, then these should be the same layers in reverse (RevLayersDiffs = false)
             } else if ((mat->group == Material::Group::GlassEQL) && (matRev->group == Material::Group::GlassEQL)) {
                 auto const *matGlass = dynamic_cast<Material::MaterialGlassEQL const *>(mat);
                 auto const *matGlassRev = dynamic_cast<Material::MaterialGlassEQL const *>(matRev);
@@ -14997,14 +15409,14 @@ namespace SurfaceGeometry {
                     (abs(matGlass->Resistance - matGlassRev->Resistance) > SmallDiff)) {
                     RevLayerDiffs = true;
                     break; // exit when diff
-                }          // If none of the above conditions is met, then these should be the same layers in reverse (RevLayersDiffs = false)
+                } // If none of the above conditions is met, then these should be the same layers in reverse (RevLayersDiffs = false)
 
             } else {
                 // Other material types do not have reversed constructions so if they are not the same layer there is a problem
                 // (RevLayersDiffs = true)
                 RevLayerDiffs = true;
                 break; // exit when diff
-            }          // End check of whether or not these are WindowGlass
+            } // End check of whether or not these are WindowGlass
         }
     }
 

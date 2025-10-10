@@ -264,7 +264,9 @@ void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
     az /= Constant::DegToRad;
     az = mod(450.0 - az, 360.0);
     az += 90.0;
-    if (az < 0.0) az += 360.0;
+    if (az < 0.0) {
+        az += 360.0;
+    }
     az = mod(az, 360.0);
 
     // Clean up angle precision
@@ -400,7 +402,9 @@ void CreateNewellSurfaceNormalVector(Array1D<Vector> const &VList, int const NSi
     for (int Side = 1; Side <= NSides; ++Side) {
         int curVert = Side;
         int nextVert = Side + 1;
-        if (nextVert > NSides) nextVert = 1;
+        if (nextVert > NSides) {
+            nextVert = 1;
+        }
         xvalue += (VList(curVert).y - VList(nextVert).y) * (VList(curVert).z + VList(nextVert).z);
         yvalue += (VList(curVert).z - VList(nextVert).z) * (VList(curVert).x + VList(nextVert).x);
         zvalue += (VList(curVert).x - VList(nextVert).x) * (VList(curVert).y + VList(nextVert).y);
@@ -430,9 +434,15 @@ void CompareTwoVectors(Vector const &vector1, // standard vector
     // compare each element (x,y,z)
 
     areSame = true;
-    if (std::abs(vector1.x - vector2.x) > tolerance) areSame = false;
-    if (std::abs(vector1.y - vector2.y) > tolerance) areSame = false;
-    if (std::abs(vector1.z - vector2.z) > tolerance) areSame = false;
+    if (std::abs(vector1.x - vector2.x) > tolerance) {
+        areSame = false;
+    }
+    if (std::abs(vector1.y - vector2.y) > tolerance) {
+        areSame = false;
+    }
+    if (std::abs(vector1.z - vector2.z) > tolerance) {
+        areSame = false;
+    }
 }
 
 void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar, Real64 &MaxDist, int &ErrorVertex)
@@ -470,7 +480,9 @@ void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar,
         }
     }
 
-    if (std::abs(MaxDist) > Constant::SmallDistance) IsCoPlanar = false;
+    if (std::abs(MaxDist) > Constant::SmallDistance) {
+        IsCoPlanar = false;
+    }
 }
 
 std::vector<int>

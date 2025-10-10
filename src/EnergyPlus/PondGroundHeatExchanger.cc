@@ -185,7 +185,9 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
     state.dataPondGHE->NumOfPondGHEs =
         state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
     // allocate data structures
-    if (allocated(state.dataPondGHE->PondGHE)) state.dataPondGHE->PondGHE.deallocate();
+    if (allocated(state.dataPondGHE->PondGHE)) {
+        state.dataPondGHE->PondGHE.deallocate();
+    }
 
     state.dataPondGHE->PondGHE.allocate(state.dataPondGHE->NumOfPondGHEs);
 

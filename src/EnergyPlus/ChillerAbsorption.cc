@@ -113,7 +113,9 @@ BLASTAbsorberSpecs *BLASTAbsorberSpecs::factory(EnergyPlusData &state, std::stri
     auto thisAbs = std::find_if(state.dataChillerAbsorber->absorptionChillers.begin(),
                                 state.dataChillerAbsorber->absorptionChillers.end(),
                                 [&objectName](const BLASTAbsorberSpecs &myAbs) { return myAbs.Name == objectName; });
-    if (thisAbs != state.dataChillerAbsorber->absorptionChillers.end()) return thisAbs;
+    if (thisAbs != state.dataChillerAbsorber->absorptionChillers.end()) {
+        return thisAbs;
+    }
     // If we didn't find it, fatal
     ShowFatalError(state, format("LocalBlastAbsorberFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
@@ -245,7 +247,9 @@ void GetBLASTAbsorberInput(EnergyPlusData &state)
         ErrorsFound = true;
     }
 
-    if (allocated(state.dataChillerAbsorber->absorptionChillers)) return;
+    if (allocated(state.dataChillerAbsorber->absorptionChillers)) {
+        return;
+    }
 
     state.dataChillerAbsorber->absorptionChillers.allocate(numAbsorbers);
 
@@ -930,9 +934,13 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
             Real64 rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
             tmpNomCap =
                 Cp * rho * state.dataSize->PlantSizData(PltSizNum).DeltaT * state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
-            if (!this->NomCapWasAutoSized) tmpNomCap = this->NomCap;
+            if (!this->NomCapWasAutoSized) {
+                tmpNomCap = this->NomCap;
+            }
         } else {
-            if (this->NomCapWasAutoSized) tmpNomCap = 0.0;
+            if (this->NomCapWasAutoSized) {
+                tmpNomCap = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->NomCapWasAutoSized) {
@@ -1023,9 +1031,13 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
     if (PltSizNum > 0) {
         if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow) {
             tmpEvapVolFlowRate = state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate * this->SizFac;
-            if (!this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = this->EvapVolFlowRate;
+            if (!this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = this->EvapVolFlowRate;
+            }
         } else {
-            if (this->EvapVolFlowRateWasAutoSized) tmpEvapVolFlowRate = 0.0;
+            if (this->EvapVolFlowRateWasAutoSized) {
+                tmpEvapVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->EvapVolFlowRateWasAutoSized) {
@@ -1090,10 +1102,14 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
             Real64 rho = state.dataPlnt->PlantLoop(this->CDPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
             tmpCondVolFlowRate =
                 tmpNomCap * (1.0 + SteamInputRatNom + tmpNomPumpPower / tmpNomCap) / (state.dataSize->PlantSizData(PltSizCondNum).DeltaT * Cp * rho);
-            if (!this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = this->CondVolFlowRate;
+            if (!this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = this->CondVolFlowRate;
+            }
 
         } else {
-            if (this->CondVolFlowRateWasAutoSized) tmpCondVolFlowRate = 0.0;
+            if (this->CondVolFlowRateWasAutoSized) {
+                tmpCondVolFlowRate = 0.0;
+            }
         }
         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             if (this->CondVolFlowRateWasAutoSized) {
@@ -1162,7 +1178,9 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                     state.dataPlnt->PlantLoop(this->GenPlantLoc.loopNum)
                         .glycol->getDensity(state, (state.dataSize->PlantSizData(PltSizHeatingNum).ExitTemp - SteamDeltaT), RoutineName);
                 tmpGeneratorVolFlowRate = (this->NomCap * SteamInputRatNom) / (CpWater * SteamDeltaT * RhoWater);
-                if (!this->GeneratorVolFlowRateWasAutoSized) tmpGeneratorVolFlowRate = this->GeneratorVolFlowRate;
+                if (!this->GeneratorVolFlowRateWasAutoSized) {
+                    tmpGeneratorVolFlowRate = this->GeneratorVolFlowRate;
+                }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     if (this->GeneratorVolFlowRateWasAutoSized) {
                         this->GeneratorVolFlowRate = tmpGeneratorVolFlowRate;
@@ -1224,7 +1242,9 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                 this->SteamMassFlowRate = (this->NomCap * SteamInputRatNom) / ((HfgSteam) + (SteamDeltaT * CpWater));
                 tmpGeneratorVolFlowRate = this->SteamMassFlowRate / SteamDensity;
 
-                if (!this->GeneratorVolFlowRateWasAutoSized) tmpGeneratorVolFlowRate = this->GeneratorVolFlowRate;
+                if (!this->GeneratorVolFlowRateWasAutoSized) {
+                    tmpGeneratorVolFlowRate = this->GeneratorVolFlowRate;
+                }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
 
                     if (this->GeneratorVolFlowRateWasAutoSized) {
@@ -1410,8 +1430,9 @@ void BLASTAbsorberSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, bool R
 
     // If no loop demand or Absorber OFF, return
     if (MyLoad >= 0.0 || !RunFlag) { // off or heating
-        if (this->EquipFlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive)
+        if (this->EquipFlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive) {
             this->EvapMassFlowRate = state.dataLoopNodes->Node(this->EvapInletNodeNum).MassFlowRate;
+        }
         return;
     }
 
@@ -1473,7 +1494,9 @@ void BLASTAbsorberSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, bool R
             if (EvapDeltaTemp != 0) {
 
                 this->EvapMassFlowRate = std::abs(this->QEvaporator / CpFluid / EvapDeltaTemp);
-                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) this->PossibleSubcooling = true;
+                if ((this->EvapMassFlowRate - this->EvapMassFlowRateMax) > DataBranchAirLoopPlant::MassFlowTolerance) {
+                    this->PossibleSubcooling = true;
+                }
                 // Check to see if the Maximum is exceeded, if so set to maximum
                 this->EvapMassFlowRate = min(this->EvapMassFlowRateMax, this->EvapMassFlowRate);
                 PlantUtilities::SetComponentFlowRate(

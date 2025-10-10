@@ -779,7 +779,7 @@ This field is used to alter the effective generic contaminant capacitance of the
 
 \subsection{SimulationControl}\label{simulationcontrol}
 
-The input for SimulationControl allows the user to specify what kind of calculations a given EnergyPlus simulation will perform. For instance the user may want to perform one or more of the sizing calculations but not proceed to an annual weather file simulation. Or the user might have all flow rates and equipment sizes already specified and desire an annual weather without any preceding sizing calculations. Sizing runs, even for large projects, are quickly run -- they do not add much to the overall simulation time. The SimulationControl input allows all permutations of run selection by means of 5 yes/no inputs.
+The input for SimulationControl allows the user to specify what kind of calculations a given EnergyPlus simulation will perform. For instance, the user may want to perform one or more of the sizing calculations but not proceed to an annual weather file simulation. Another example is that the user might have all flow rates and equipment sizes already specified and desire an annual weather simulation without any preceding sizing calculations. Sizing runs, even for large projects, generally run quickly -- they do not add much to the overall simulation time. The SimulationControl input allows all permutations of run selection by means of 5 yes/no inputs.
 
 \begin{callout}
     Only one SimulationControl object is permitted for each EnergyPlus input file. While a SimulationControl is needed to trigger sizing calculations, it is optional for other runs (design days, run periods). The actions will still be shown in the eplusout.eio file (see Output Details and Examples Document).
@@ -801,11 +801,11 @@ Input is Yes or No. The default is No. Unlike Zone and System Sizing, Plant Sizi
 
 \paragraph{Field: Run Simulation for Sizing Periods}\label{field-run-simulation-for-sizing-periods}
 
-Input is Yes or No. The default is Yes. Yes implies that the simulation will be run on all the included SizingPeriod objects (i.e., Sizing\-Period:\-Design\-Day, Sizing\-Period:\-Weather\-File\-Days, and Sizing\-Period:\-Weather\-File\-Condition\-Type). Note that each Sizing\-Period object constitutes an ``environment'' and warmup convergence (see earlier topic under the Building object) will occur for each.
+Input is Yes or No. The default is Yes. Yes implies that the simulation will be run on all the included SizingPeriod objects (i.e., \hyperref[sizingperioddesignday]{Sizing\-Period:\-Design\-Day}, \hyperref[sizingperiodweatherfiledays]{Sizing\-Period:\-Weather\-File\-Days}, and \hyperref[sizingperiodweatherfileconditiontype]{Sizing\-Period:\-Weather\-File\-Condition\-Type}). Note that each Sizing\-Period object constitutes an ``environment'' and warmup convergence (see earlier topic under the \hyperref[building]{Building} object) will occur for each.
 
 \paragraph{Field: Run Simulation for Weather File Run Periods}\label{field-run-simulation-for-weather-file-run-periods}
 
-Input is Yes or No. The default is Yes. Yes implies the simulation will be run on all the included \hyperref[runperiod]{RunPeriod} objects. Note that each \hyperref[runperiod]{RunPeriod} object constitutes an ``environment'' and warmup convergence (see earlier topic under the Building object) will occur for each.
+Input is Yes or No. The default is Yes. Yes implies the simulation will be run on all the included \hyperref[runperiod]{RunPeriod} objects. Note that each \hyperref[runperiod]{RunPeriod} object constitutes an ``environment'' and warmup convergence (see earlier topic under the \hyperref[building]{Building} object) will occur for each.
 
 \paragraph{Field: Do HVAC Sizing Simulation for Sizing Periods}\label{field-do-hvac-sizing-simulation-for-sizing-periods}
 

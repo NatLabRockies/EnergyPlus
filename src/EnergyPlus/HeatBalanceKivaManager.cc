@@ -492,7 +492,9 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         }
         std::string::size_type Pos = FindNonSpace(LineResult.data);
         std::string::size_type const HdPos = index(LineResult.data, Header(HdLine));
-        if (Pos != HdPos) continue;
+        if (Pos != HdPos) {
+            continue;
+        }
         Pos = index(LineResult.data, ',');
 
         // Below borrowed from ProcessEPWHeader
@@ -502,7 +504,9 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
             ShowContinueError(state, format("Line={}", LineResult.data));
             ShowFatalError(state, "Previous conditions cause termination.");
         }
-        if (Pos != std::string::npos) LineResult.data.erase(0, Pos + 1);
+        if (Pos != std::string::npos) {
+            LineResult.data.erase(0, Pos + 1);
+        }
 
         if (Util::makeUPPER(Header(HdLine)) == "DATA PERIODS") {
             bool IOStatus;
@@ -542,7 +546,9 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         }
 
         ++HdLine;
-        if (HdLine == 9) StillLooking = false;
+        if (HdLine == 9) {
+            StillLooking = false;
+        }
     }
 
     bool ErrorFound = false;
@@ -841,7 +847,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
                     Real64 surfHeight = Surfaces(wl).get_average_height(state);
                     // round to avoid numerical precision differences
-                    surfHeight = std::round((surfHeight)*1000.0) / 1000.0;
+                    surfHeight = std::round((surfHeight) * 1000.0) / 1000.0;
 
                     if (combinationMap.count({Surfaces(wl).Construction, surfHeight}) == 0) {
                         // create new combination

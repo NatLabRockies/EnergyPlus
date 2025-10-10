@@ -596,29 +596,40 @@ namespace HVACMultiSpeedHeatPump {
                                                       thisMSHP.Name) ||
                                     !Util::SameString(
                                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).Comp(CompNum).TypeOf,
-                                        state.dataHVACMultiSpdHP->CurrentModuleObject))
+                                        state.dataHVACMultiSpdHP->CurrentModuleObject)) {
                                     continue;
+                                }
                                 AirLoopFound = true;
                                 thisMSHP.AirLoopNumber = AirLoopNumber;
                                 break;
                             }
                             thisMSHP.ZoneInletNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode(zoneInNode);
-                            if (AirLoopFound) break;
+                            if (AirLoopFound) {
+                                break;
+                            }
                         }
                         for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) continue;
+                            if (state.dataZoneCtrls->TempControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) {
+                                continue;
+                            }
                             AirNodeFound = true;
                         }
                         for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) continue;
+                            if (state.dataZoneCtrls->ComfortControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) {
+                                continue;
+                            }
                             AirNodeFound = true;
                         }
                         for (int TstatZoneNum = 1; TstatZoneNum <= state.dataZoneTempPredictorCorrector->NumStageCtrZone; ++TstatZoneNum) {
-                            if (state.dataZoneCtrls->StageControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) continue;
+                            if (state.dataZoneCtrls->StageControlledZone(TstatZoneNum).ActualZoneNum != thisMSHP.ControlZoneNum) {
+                                continue;
+                            }
                             AirNodeFound = true;
                         }
                     }
-                    if (AirLoopFound) break;
+                    if (AirLoopFound) {
+                        break;
+                    }
                 }
                 if (!AirNodeFound) {
                     ShowSevereError(state,
@@ -1036,7 +1047,9 @@ namespace HVACMultiSpeedHeatPump {
                 }
                 // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
                 for (i = 2; i <= thisMSHP.NumOfSpeedHeating; ++i) {
-                    if (thisMSHP.HeatVolumeFlowRate(i) == DataSizing::AutoSize) continue;
+                    if (thisMSHP.HeatVolumeFlowRate(i) == DataSizing::AutoSize) {
+                        continue;
+                    }
                     Found = false;
                     for (j = i - 1; j >= 1; --j) {
                         if (thisMSHP.HeatVolumeFlowRate(i) != DataSizing::AutoSize) {
@@ -1080,7 +1093,9 @@ namespace HVACMultiSpeedHeatPump {
                 }
                 // Ensure flow rate at high speed should be greater or equal to the flow rate at low speed
                 for (i = 2; i <= thisMSHP.NumOfSpeedCooling; ++i) {
-                    if (thisMSHP.CoolVolumeFlowRate(i) == DataSizing::AutoSize) continue;
+                    if (thisMSHP.CoolVolumeFlowRate(i) == DataSizing::AutoSize) {
+                        continue;
+                    }
                     Found = false;
                     for (j = i - 1; j >= 1; --j) {
                         if (thisMSHP.CoolVolumeFlowRate(i) != DataSizing::AutoSize) {
@@ -1450,7 +1465,9 @@ namespace HVACMultiSpeedHeatPump {
         auto &mshp = state.dataHVACMultiSpdHP->MSHeatPump(MSHeatPumpNum);
 
         ++state.dataHVACMultiSpdHP->AirLoopPass;
-        if (state.dataHVACMultiSpdHP->AirLoopPass > 2) state.dataHVACMultiSpdHP->AirLoopPass = 1;
+        if (state.dataHVACMultiSpdHP->AirLoopPass > 2) {
+            state.dataHVACMultiSpdHP->AirLoopPass = 1;
+        }
 
         if (mshp.MyPlantScantFlag && allocated(state.dataPlnt->PlantLoop)) {
             bool errFlag;
@@ -1952,7 +1969,9 @@ namespace HVACMultiSpeedHeatPump {
         } else {
             QZnReq = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputRequired / mshp.FlowFraction;
         }
-        if (state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum)) QZnReq = 0.0;
+        if (state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum)) {
+            QZnReq = 0.0;
+        }
 
         if (QZnReq > HVAC::SmallLoad) {
             mshp.HeatCoolMode = ModeOfOperation::HeatingMode;
@@ -2215,7 +2234,7 @@ namespace HVACMultiSpeedHeatPump {
                 mshp.DesignSuppHeatingCapacity = SteamCoils::GetCoilCapacity(state, mshp.SuppHeatCoilNum);
 
             } // from IF(MSHeatPump(MSHeatPumpNum)%SuppHeatCoilType == Coil_HeatingSteam) THEN
-        }     // from IF( FirstHVACIteration ) THEN
+        } // from IF( FirstHVACIteration ) THEN
     }
 
     //******************************************************************************
@@ -2627,8 +2646,7 @@ namespace HVACMultiSpeedHeatPump {
                 SpeedNum = std::abs(mshp.StageNum);
                 if (SpeedNum == 1) SpeedRatio = 0.0;
             }
-        }
-        if (mshp.HeatCoolMode == ModeOfOperation::CoolingMode) {
+        } else if (mshp.HeatCoolMode == ModeOfOperation::CoolingMode) {
             SpeedNum = mshp.NumOfSpeedCooling;
             if (mshp.Staged && std::abs(mshp.StageNum) < SpeedNum) {
                 SpeedNum = std::abs(mshp.StageNum);

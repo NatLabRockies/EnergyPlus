@@ -7126,10 +7126,7 @@ TEST_F(SQLiteFixture, OutputReportTabular_WriteLoadComponentSummaryTables_AirLoo
     state->dataSize->SysSizInput.allocate(state->dataSize->NumSysSizInput);
     state->dataSize->SysSizInput(1).AirLoopNum = 1;
     state->dataSize->SysSizInput(1).SizingOption = DataSizing::SizingConcurrence::NonCoincident;
-    auto degC_to_F = [](Real64 celsius) constexpr
-    {
-        return celsius * (9.0 / 5.0) + 32.0;
-    };
+    auto degC_to_F = [](Real64 celsius) constexpr { return celsius * (9.0 / 5.0) + 32.0; };
     constexpr Real64 coolMixTempSys = 26.2;
     constexpr Real64 coolMixTempSysIP = degC_to_F(coolMixTempSys);
     constexpr Real64 heatMixTempSys = -1.7;

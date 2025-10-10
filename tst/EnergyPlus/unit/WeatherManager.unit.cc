@@ -185,6 +185,8 @@ TEST_F(EnergyPlusFixture, WaterMainsCorrelationTest)
     state->dataWeather->WaterMainsTempsMethod = Weather::WaterMainsTempCalcMethod::Correlation;
     state->dataWeather->WaterMainsTempsAnnualAvgAirTemp = 9.69;
     state->dataWeather->WaterMainsTempsMaxDiffAirTemp = 28.1;
+    state->dataWeather->WaterMainsTempsMultiplier = 1.0;
+    state->dataWeather->WaterMainsTempsOffset = 0.0;
     state->dataEnvrn->DayOfYear = 50;
 
     state->dataEnvrn->Latitude = 40.0;
@@ -194,6 +196,25 @@ TEST_F(EnergyPlusFixture, WaterMainsCorrelationTest)
     state->dataEnvrn->Latitude = -40.0;
     Weather::CalcWaterMainsTemp(*state);
     EXPECT_NEAR(state->dataEnvrn->WaterMainsTemp, 19.3799, 0.0001);
+}
+
+TEST_F(EnergyPlusFixture, WaterMainsCorrelationTestWithMultiplierAndOffset)
+{
+
+    state->dataWeather->WaterMainsTempsMethod = Weather::WaterMainsTempCalcMethod::Correlation;
+    state->dataWeather->WaterMainsTempsAnnualAvgAirTemp = 9.69;
+    state->dataWeather->WaterMainsTempsMaxDiffAirTemp = 28.1;
+    state->dataWeather->WaterMainsTempsMultiplier = 1.1;
+    state->dataWeather->WaterMainsTempsOffset = 5.0;
+    state->dataEnvrn->DayOfYear = 50;
+
+    state->dataEnvrn->Latitude = 40.0;
+    Weather::CalcWaterMainsTemp(*state);
+    EXPECT_NEAR(state->dataEnvrn->WaterMainsTemp, 12.3334, 0.0001);
+
+    state->dataEnvrn->Latitude = -40.0;
+    Weather::CalcWaterMainsTemp(*state);
+    EXPECT_NEAR(state->dataEnvrn->WaterMainsTemp, 26.3179, 0.0001);
 }
 
 TEST_F(EnergyPlusFixture, JGDate_Test)

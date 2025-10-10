@@ -308,7 +308,9 @@ namespace PlantValves {
                                     (thisComp.Name == this->Name)) { // we found it.
 
                                     // is branch control type 'Active'
-                                    if (thisBranch.controlType == DataBranchAirLoopPlant::ControlType::Active) IsBranchActive = true;
+                                    if (thisBranch.controlType == DataBranchAirLoopPlant::ControlType::Active) {
+                                        IsBranchActive = true;
+                                    }
 
                                     // is Valve inlet node an outlet node of a splitter
                                     if (thisLoopSide.Splitter.Exists) {
@@ -330,7 +332,9 @@ namespace PlantValves {
                                             int thisInnerBranchCtr = 0;
                                             for (auto const &thisInnerBranch : thisLoopSide.Branch) {
                                                 thisInnerBranchCtr++;
-                                                if (branchCtr == thisInnerBranchCtr) continue; // already looped into this one
+                                                if (branchCtr == thisInnerBranchCtr) {
+                                                    continue; // already looped into this one
+                                                }
                                                 for (auto const &thisInnerComp : thisInnerBranch.Comp) {
                                                     if (thisInnerComp.NodeNumOut == this->PltStream2NodeNum) {
                                                         Stream2NodeOkay = true;
@@ -359,9 +363,9 @@ namespace PlantValves {
                                 } // found item
 
                             } // comps
-                        }     // Branches
-                    }         // Loop Sides
-                }             // Plant loops
+                        } // Branches
+                    } // Loop Sides
+                } // Plant loops
 
                 if (!IsBranchActive) {
                     ShowSevereError(state, "TemperingValve object needs to be on an ACTIVE branch");
@@ -417,7 +421,9 @@ namespace PlantValves {
             this->environmentInit = false;
         }
 
-        if (!state.dataGlobal->BeginEnvrnFlag) this->environmentInit = true;
+        if (!state.dataGlobal->BeginEnvrnFlag) {
+            this->environmentInit = true;
+        }
 
         if (InletNode > 0) {
             this->InletTemp = state.dataLoopNodes->Node(InletNode).Temp;
@@ -455,7 +461,9 @@ namespace PlantValves {
         Real64 Tset; // local working variable for Setpoint Temperature (C)
         Real64 Ts2;  // local Working Variable for Stream 2 outlet Temperature (C)
 
-        if (state.dataGlobal->KickOffSimulation) return;
+        if (state.dataGlobal->KickOffSimulation) {
+            return;
+        }
 
         if (state.dataPlnt->PlantLoop(this->plantLoc.loopNum).LoopSide(this->plantLoc.loopSideNum).FlowLock == DataPlant::FlowLock::Unlocked) {
             Tin = this->InletTemp;
@@ -480,8 +488,12 @@ namespace PlantValves {
             }
         }
 
-        if (this->FlowDivFract < 0.0) this->FlowDivFract = 0.0;
-        if (this->FlowDivFract > 1.0) this->FlowDivFract = 1.0;
+        if (this->FlowDivFract < 0.0) {
+            this->FlowDivFract = 0.0;
+        }
+        if (this->FlowDivFract > 1.0) {
+            this->FlowDivFract = 1.0;
+        }
     }
     void TemperValveData::oneTimeInit([[maybe_unused]] EnergyPlusData &state)
     {

@@ -70,7 +70,9 @@ namespace DataPlant {
 
     void ChillerHeaterSupervisoryOperationData::OneTimeInitChillerHeaterChangeoverOpScheme(EnergyPlusData &state)
     {
-        if (this->oneTimeSetupComplete) return;
+        if (this->oneTimeSetupComplete) {
+            return;
+        }
 
         SetupOutputVariable(state,
                             "Supervisory Plant Heat Pump Operation Mode",
@@ -1541,7 +1543,9 @@ namespace DataPlant {
         // Check for boiler used as auxiliary or supplemental
         // Assume boilers are in-line on supply side outlet branch, typically on secondary loop but may be on primary loop
         this->Report.BoilerAux_OpMode = 0;
-        if (this->PlantOps.numBoilers <= 0) return;
+        if (this->PlantOps.numBoilers <= 0) {
+            return;
+        }
 
         // first initialize them to be off
         if (this->PlantOps.numBoilers > 0) {

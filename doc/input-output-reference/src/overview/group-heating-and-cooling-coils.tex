@@ -2201,6 +2201,11 @@ The rated power of the evaporative condenser water pump in Watts. This value is 
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitaryheatpumpairtoair]{AirLoopHVAC:UnitaryHeatPump:AirToAir} or PackageTerminal: HeatPump:AirToAir), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation}
 
 This numeric field defines the outdoor air dry-bulb temperature above which the compressor's crankcase heater is disabled. The value for this input field must be greater than or equal to 0.0$^\circ$C, and the default value is 10$^\circ$C.
@@ -2237,15 +2242,6 @@ The name of a quadratic or cubic normalized curve (Ref: Performance Curves) that
 
 This input field is name of a conditioned or unconditioned zone where the secondary coil (condenser) of DX system or a heat pump is to be placed. This is an optional input field specified only when user desires to reject the condenser heat into a zone. The heat rejected is modeled as sensible internal gain of a secondary zone.
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for a Coil:Cooling:DX:SingleSpeed coil.
 
 \begin{lstlisting}
@@ -2276,6 +2272,7 @@ Coil:Cooling:DX:SingleSpeed,
   ,                         !- Evaporative Condenser Air Volume Flow Rate {m3/s}
   ,                         !- Evaporative Condenser Pump Rated Power Consumption {W}
   30.,                      !- Crankcase Heater Capacity {W}
+  ,                         !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.;                      !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
 \end{lstlisting}
 
@@ -2658,6 +2655,11 @@ The name of the HVAC system node to which the DX cooling coil sends its outlet a
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} and \hyperref[airloophvacunitaryheatcoolvavchangeoverbypass]{AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass}), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-1}
 
 This numeric field defines the outdoor air dry-bulb temperature above which the compressor's crankcase heater is disabled. The value for this input field must be greater than or equal to 0.0$^\circ$C, and the default value is 10$^\circ$C.
@@ -2718,15 +2720,6 @@ This numeric field contains the set point temperature ($^\circ$C) for the basin 
 
 This alpha field contains the name of the basin heater operating schedule. This field only applies for Condenser Type = EvaporativelyCooled. The basin heater operating schedule is assumed to be an on/off schedule and the heater is available to operate any time the schedule value is greater than 0. The basin heater operates when scheduled on and the outdoor air dry-bulb temperature is below the set point temperature described in the previous field. If this field is left blank, the basin heater is available to operate throughout the simulation. Regardless of this schedule, the basin heater may only operate when the DX coil is off.
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-1}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example IDF use of the object:
 
 \begin{lstlisting}
@@ -2737,6 +2730,7 @@ Coil:Cooling:DX:TwoStageWithHumidityControlMode,
   DOAS Supply Fan Outlet,                     !- Air Inlet Node Name
   DOAS Cooling Coil Outlet,                   !- Air Outlet Node Name
   ,                                           !- Crankcase Heater Capacity
+  ,                                           !- Crankcase Heater Capacity Function of Temperature Curve Name
   ,                                           !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater
   2,                                          !- Number of Capacity Stages
   1,                                          !- Number of Enhanced Dehumidification Modes
@@ -2807,6 +2801,11 @@ The latent capacity degradation model only applies when the ContinuousFanWithCyc
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-2}
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
+
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
 
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-2}
 
@@ -2972,15 +2971,6 @@ The rated power of the evaporative condenser water pump in Watts at Speed \textl
 
 This input field is name of a conditioned or unconditioned zone where the secondary coil (condenser) of DX system or a heat pump is to be placed. This is an optional input field specified only when user desires to reject the condenser heat into a zone. The heat rejected is modeled as sensible internal gain of a secondary zone.
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-2}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for this multispeed DX cooling coil.
 
 \begin{lstlisting}
@@ -2997,6 +2987,7 @@ Coil:Cooling:DX:MultiSpeed,
   No,                              !- Apply Part Load Fraction to Speeds greater than 1
   No,                              !- Apply latent degradation to Speeds greater than 1
   200.0,                           !- Crankcase Heater Capacity {W}
+  ,                                !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                            !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation
   ,                                !- Basin Heater Capacity {W/K}
   ,                                !- Basin Heater Setpoint Temperature {C}
@@ -3383,6 +3374,11 @@ The rated power of the evaporative condenser water pump in Watts. This value is 
 \paragraph{Field: Crankcase Heater Capacity}\label{field-crankcase-heater-capacity-3}
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air drybulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump, the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
 
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-3}
 
@@ -3954,22 +3950,23 @@ Following is an example input for a \hyperref[coilcoolingdxtwostagewithhumidityc
 \begin{lstlisting}
 
 Coil:Cooling:DX:TwoStageWithHumidityControlMode,
-  DXSystem 1 Cooling Coil, !- Coil Name
-  OfficeHeatCoolAvail,         !- Availability Schedule
-  DXSystem 1 Mixed Air Node,   !- Coil Air Inlet Node
-  DXSystem 1 Fan Air Inlet Node,   !- Coil Air Outlet Node
-  ,                                               !- Crankcase Heater Capacity {W}
-  ,                                               !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
-  2,                                             !- Number of Capacity Stages
-  1,                                             !- Number of Enhanced Dehumidification Modes
-  CoilPerformance:DX:Cooling,   !- Normal Mode Stage 1 Coil Performance Object Type
-  DXSystem 1 DX Coil Standard Mode-Stage 1,   !- Normal Mode Stage 1 Coil Performance Object Name
-  CoilPerformance:DX:Cooling,   !- Normal Mode Stage 1+2 Coil Perf Object Type
-  DXSystem 1 DX Coil Standard Mode-Stage 1&2,   !- Normal Mode Stage 1+2 Coil Perf Object Name
-  CoilPerformance:DX:Cooling,   !- Dehumid Mode 1 Stage 1 Coil Perf Object Type
+  DXSystem 1 Cooling Coil,       !- Coil Name
+  OfficeHeatCoolAvail,           !- Availability Schedule
+  DXSystem 1 Mixed Air Node,     !- Coil Air Inlet Node
+  DXSystem 1 Fan Air Inlet Node, !- Coil Air Outlet Node
+  ,                              !- Crankcase Heater Capacity {W}
+  ,                              !- Crankcase Heater Capacity Function of Temperature Curve Name
+  ,                              !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
+  2,                             !- Number of Capacity Stages
+  1,                             !- Number of Enhanced Dehumidification Modes
+  CoilPerformance:DX:Cooling,    !- Normal Mode Stage 1 Coil Performance Object Type
+  DXSystem 1 DX Coil Standard Mode-Stage 1,        !- Normal Mode Stage 1 Coil Performance Object Name
+  CoilPerformance:DX:Cooling,                      !- Normal Mode Stage 1+2 Coil Perf Object Type
+  DXSystem 1 DX Coil Standard Mode-Stage 1&2,      !- Normal Mode Stage 1+2 Coil Perf Object Name
+  CoilPerformance:DX:Cooling,                      !- Dehumid Mode 1 Stage 1 Coil Perf Object Type
   DXSystem 1 DX Coil SubCoolReheat Mode-Stage 1,   !- Dehumid Mode 1 Stage 1 Coil Perf Object Name
-  CoilPerformance:DX:Cooling,   !- Dehumid Mode 1 Stage 1+2 Coil Perf Object Type
-  DXSystem 1 DX Coil SubCoolReheat Mode-Stage 1&2;   !- Dehumid Mode 1 Stage 1+2 Coil Perf Object Name
+  CoilPerformance:DX:Cooling,                      !- Dehumid Mode 1 Stage 1+2 Coil Perf Object Type
+  DXSystem 1 DX Coil SubCoolReheat Mode-Stage 1&2; !- Dehumid Mode 1 Stage 1+2 Coil Perf Object Name
 
 
   CoilPerformance:DX:Cooling,
@@ -4202,6 +4199,11 @@ This numeric field defines the outdoor air dry-bulb temperature above which outd
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this heating coil is used as part of an air-to-air heat pump (Ref. \hyperref[airloophvacunitaryheatpumpairtoair]{AirLoopHVAC:UnitaryHeatPump:AirToAir} or \hyperref[zonehvacpackagedterminalheatpump]{ZoneHVAC:PackagedTerminalHeatPump}), the crankcase heater defined for this DX heating coil is enabled during the time that the compressor is not running for either heating or cooling (and the crankcase heater power defined in the DX cooling coil object is disregarded in this case). The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-4}
 
 This numeric field defines the outdoor air dry-bulb temperature above which the compressor's crankcase heater is disabled. The value for this input field must be greater than or equal to 0.0$^\circ$C. If this input field is left blank, the default value is 10$^\circ$C.
@@ -4253,15 +4255,6 @@ This input field is name of sensible heat ratio modifier biquadratic curve. The 
 \paragraph{Field: Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name}\label{field-sensible-heat-ratio-modifier-function-of-flow-fraction-curve-name}
 
 This input field is name of sensible heat ratio modifier curve as function of secondary air flow fraction. The value of this curve modifies the nominal sensible heat ratio for current time step depending on the secondary coil air flow fraction. This is an optional input field. If this input field is left blank, then the sensible heat ratio modifier curve value for flow fraction is set to 1.0.
-
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-4}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
 
 Following is an example input for the object.
 
@@ -4413,6 +4406,11 @@ This numeric field defines the minimum outdoor air dry-bulb temperature where th
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-5}
 
 This numeric field defines the outdoor air dry-bulb temperature above which the compressor's crankcase heater is disabled. The value for this input field must be greater than or equal to 0.0$^\circ$C. If this input field is left blank, the default value is 10$^\circ$C.
@@ -4551,15 +4549,6 @@ This input field is name of sensible heat ratio modifier biquadratic curve. The 
 
 This input field is name of sensible heat ratio modifier curve as function of secondary air flow fraction. The value of this curve modifies the nominal sensible heat ratio for current time step depending on the secondary coil air flow fraction. This is an optional input field. If this input field is left blank, then the sensible heat ratio modifier curve value for flow fraction is set to 1.0.
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-5}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for a multi-speed heating DX coil.
 
 \begin{lstlisting}
@@ -4571,6 +4560,7 @@ COIL:Heating:DX:MultiSpeed,
   SuppHeating Coil Air Inlet Node, !- Coil Air Outlet Node
   -8.0,                            !- Minimum Outdoor Dry-bulb Temperature for Compressor Operation {C}
   200.0,                           !- Crankcase Heater Capacity {W}
+    ,                              !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                            !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
   HPACDefrostCAPFT,                !- Defrost energy input ratio modifier curve (temperature)
   7.22,                            !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation
@@ -4808,6 +4798,11 @@ This numeric field defines the outdoor air dry-bulb temperature above which outd
 
 This numeric field defines the crankcase heater capacity in Watts. When the outdoor air drybulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. The value for this input field must be greater than or equal to 0. If this input field is left blank, the default value is 0. To simulate a unit without a crankcase heater, enter a value of 0.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation}\label{field-maximum-outdoor-dry-bulb-temperature-for-crankcase-heater-operation-6}
 
 This numeric field defines the outdoor air dry-bulb temperature above which the compressor's crankcase heater is disabled. The value for this input field must be greater than or equal to 0.0$^\circ$C. If this input field is left blank, the default value is 10$^\circ$C.
@@ -4888,6 +4883,7 @@ Coil:Heating:DX:VariableSpeed,
   ,                                               !- Outdoor Dry-Bulb Temperature to Turn Back On Compressor{C}
   5.0,                                         !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
   200.0,                                     !- Crankcase Heater Capacity {W}
+  ,                                          !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                                       !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   Resistive,                             !- Defrost Strategy
   TIMED,                                     !- Defrost Control
@@ -5555,6 +5551,7 @@ CoilSystem:Heating:DX,
   -8.0,                                       !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
   5.0,                                         !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
   200.0,                                     !- Crankcase Heater Capacity {W}
+  ,                                          !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                                       !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   Resistive,                             !- Defrost Strategy
   TIMED,                                     !- Defrost Control
@@ -6024,6 +6021,11 @@ This alpha field defines the name of the node to which the heat pump condenser s
 
 This numeric field defines the compressor's crankcase heater capacity in Watts. The crankcase heater only operates when the compressor is off and the air surrounding the compressor is below the Maximum Ambient Temperature for Crankcase Heater Operation specified below.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Ambient Temperature for Crankcase Heater Operation}\label{field-maximum-ambient-temperature-for-crankcase-heater-operation}
 
 This numeric field defines the maximum ambient temperature for crankcase heater operation in degree Celsius. The crankcase heater only operates when the air surrounding the compressor is below this maximum temperature value and the compressor is off. The ambient temperature surrounding the compressor is set by the Heat Pump:Water Heater parent object (field Compressor Location).
@@ -6078,15 +6080,6 @@ If the user wishes to model no efficiency degradation due to compressor cycling,
        PLF = 1.0 + 0.0(PLR)
 \end{lstlisting}
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-7}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for the \lstinline!Coil:WaterHeating:AirToWaterHeatPump:Pumped! object:
 
 \begin{lstlisting}
@@ -6111,6 +6104,7 @@ Coil:WaterHeating:AirToWaterHeatPump:Pumped,
   Zone4WaterInletNode,       !- Condenser Water Inlet Node Name
   Zone4WaterOutletNode,      !- Condenser Water Outlet Node Name
   100.0,                     !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   5.0,                       !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
   wet-bulb temperature,      !- Evaporator Air Temperature Type for Curve Objects
   HPWHHeatingCapFTemp,       !- Heating Capacity Modifier Curve Name (function of temperature)
@@ -6251,6 +6245,11 @@ This alpha field defines the name of the air node to which the evaporator coil s
 
 This numeric field defines the compressor's crankcase heater capacity in Watts. The crankcase heater only operates when the compressor is off and the air surrounding the compressor is below the Maximum Ambient Temperature for Crankcase Heater Operation specified below.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
+
 \paragraph{Field: Maximum Ambient Temperature for Crankcase Heater Operation}\label{field-maximum-ambient-temperature-for-crankcase-heater-operation-1}
 
 This numeric field defines the maximum ambient temperature for crankcase heater operation in degree Celsius. The crankcase heater only operates when the air surrounding the compressor is below this maximum temperature value and the compressor is off. The ambient temperature surrounding the compressor is set by the Heat Pump:Water Heater parent object (field Compressor Location).
@@ -6297,15 +6296,6 @@ If the user wishes to model no efficiency degradation due to compressor cycling,
        PLF = 1.0 + 0.0(PLR)
 \end{lstlisting}
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{outdoor-temperature-dependent-crankcase-heater-capacity-curve-name-8}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for the \lstinline!Coil:WaterHeating:AirToWaterHeatPump:Wrapped! object:
 
 \begin{lstlisting}
@@ -6323,6 +6313,7 @@ Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
   HPWH Air Inlet,          !- Evaporator Air Inlet Node Name
   HPWH Coil Outlet Fan Inlet,  !- Evaporator Air Outlet Node Name
   0,                       !- Crankcase Heater Capacity {W}
+    ,                      !- Crankcase Heater Capacity Function of Temperature Curve Name
   10,                      !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
   WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
   HPWH-Htg-Cap-fT,         !- Heating Capacity Function of Temperature Curve Name
@@ -6558,6 +6549,10 @@ This alpha field defines the name of the node to which the heat pump condenser s
 This numeric field defines the compressor's crankcase heater capacity in Watts.
 The crankcase heater only operates when the compressor is off and the air surrounding the compressor is below the Maximum Ambient Temperature for Crankcase Heater Operation specified below.
 
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+
+The name of a normalized Curve:* or Table:Lookup object encoding the relationship between the crankcase heater capacity and the outdoor air temperature. This curve can be any uni-variate curve or table. The output of this curve is multiplied by the value in the field ``Crankcase Heater Capacity'. If this field is missing or empty, constant crankcase heater capacity will be
+assumed.
 
 \paragraph{Field: Maximum Ambient Temperature for Crankcase Heater Operation}\label{vshpwhheating-maximum-ambient-temperature-for-crankcase-heater-operation}
 
@@ -6666,15 +6661,6 @@ The output of this curve is multiplied by the rated COP at this specific speed a
 This alpha field specifies the name of a \textbf{quadratic} or \textbf{cubic} performance curve object (ref: Performance Curves) that defines the variation in DX coil heating COP as a function of the ratio of actual water flow rate through the condenser to the rated condenser water flow rate.
 The output of this curve is multiplied by the rated COP at this specific speed and the output from the two other heating COP modifier curves (function of temperature and function of air flow fraction) to give the DX coil heating COP at the specific inlet fluid temperatures and flow rates at which the coil is operating. The curve should be normalized to have the value of 1.0 at the rated condenser water flow rate (water flow fraction of 1.0). If this field is left blank, the heating COP remains constant (curve value assumed to be 1.0 for all water flow rates).
 
-\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}\label{vshpwhheating-outdoor-temperature-dependent-crankcase-heater-capacity-curve-name}
-
-The name of a normalized Curve:* or Table:Lookup object encoding the
-relationship between the crankcase heater capacity and the outdoor air
-temperature. This curve can be any uni-variate curve or table. The output of
-this curve is multiplied by the value in the field ``Crankcase Heater Capacity'.
-If this field is missing or empty, constant crankcase heater capacity will be
-assumed.
-
 Following is an example input for the \lstinline!Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed! object:
 
 \begin{lstlisting}
@@ -6698,6 +6684,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
   HPPlantWaterInletNode,   !- Condenser Water Inlet Node Name
   HPPlantWaterOutletNode,  !- Condenser Water Outlet Node Name
   100.0,                   !- Crankcase Heater Capacity {W}
+  ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
   WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
   HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
@@ -9570,6 +9557,7 @@ Coil:Cooling:DX:SingleSpeed,
   ,                        !- Evaporative Condenser Air Flow Rate {m3/s}
   ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
   ,                        !- Crankcase Heater Capacity {W}
+  ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   ,                        !- Supply Water Storage Tank Name
   ,                        !- Condensate Collection Water Storage Tank Name
@@ -9642,6 +9630,7 @@ Coil:Cooling:DX:MultiSpeed,
   No,                      !- Apply Part Load Fraction to Speeds Greater than 1
   No,                      !- Apply Latent Degradation to Speeds Greater than 1
   200.0,                   !- Crankcase Heater Capacity {W}
+  ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   ,                        !- Basin Heater Capacity {W/K}
   ,                        !- Basin Heater Setpoint Temperature {C}
@@ -9781,6 +9770,7 @@ Coil:Heating:DX:SingleSpeed,
   ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
   5.0,                     !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
   200.0,                   !- Crankcase Heater Capacity {W}
+  ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   Resistive,               !- Defrost Strategy
   TIMED,                   !- Defrost Control
@@ -9808,6 +9798,7 @@ Coil:Heating:DX:MultiSpeed,
   -8.0,                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
   -5.0,                    !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
   200.0,                   !- Crankcase Heater Capacity {W}
+  ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
   10.0,              !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
   HPACDefrostCAPFT,        !- Defrost Energy Input Ratio Function of Temperature Curve Name
   7.22,                    !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}

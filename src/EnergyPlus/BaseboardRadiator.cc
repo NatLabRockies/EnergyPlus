@@ -958,8 +958,9 @@ namespace BaseboardRadiator {
 
         ZoneNum = baseboard.ZonePtr;
         QZnReq = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP;
-        if (baseboard.MySizeFlag)
+        if (baseboard.MySizeFlag) {
             QZnReq = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).NonAirSysDesHeatLoad; // If in sizing, assign design condition
+        }
 
         WaterInletTemp = baseboard.WaterInletTemp;
         AirInletTemp = baseboard.AirInletTemp;
@@ -972,7 +973,9 @@ namespace BaseboardRadiator {
         } else {
             AirMassFlowRate = baseboard.AirMassFlowRate;
             // pick a mass flow rate that depends on the max water mass flow rate. CR 8842 changed to factor of 2.0
-            if (AirMassFlowRate <= 0.0) AirMassFlowRate = 2.0 * baseboard.WaterMassFlowRateMax;
+            if (AirMassFlowRate <= 0.0) {
+                AirMassFlowRate = 2.0 * baseboard.WaterMassFlowRateMax;
+            }
         }
 
         WaterMassFlowRate = state.dataLoopNodes->Node(baseboard.WaterInletNode).MassFlowRate;

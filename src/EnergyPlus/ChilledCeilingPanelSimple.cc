@@ -782,7 +782,9 @@ void InitCoolingPanel(EnergyPlusData &state, int const CoolingPanelNum, int cons
     auto &thisCP = state.dataChilledCeilingPanelSimple->CoolingPanel(CoolingPanelNum);
     auto &ThisInNode = state.dataLoopNodes->Node(thisCP.WaterInletNode);
 
-    if (thisCP.ZonePtr <= 0) thisCP.ZonePtr = ControlledZoneNum;
+    if (thisCP.ZonePtr <= 0) {
+        thisCP.ZonePtr = ControlledZoneNum;
+    }
 
     // Need to check all units to see if they are on ZoneHVAC:EquipmentList or issue warning
     if (!thisCP.ZoneEquipmentListChecked && state.dataZoneEquip->ZoneEquipInputsFilled) {
@@ -1185,7 +1187,9 @@ void CoolingPanelParams::CalcCoolingPanel(EnergyPlusData &state, int const Cooli
     Real64 Tzone = Xr * thisZoneHB.MRT + ((1.0 - Xr) * thisZoneHB.MAT);
 
     // Logical controls: if the WaterInletTemperature is higher than Tzone, do not run the panel
-    if (waterInletTemp >= Tzone) CoolingPanelOn = false;
+    if (waterInletTemp >= Tzone) {
+        CoolingPanelOn = false;
+    }
 
     // Condensation Controls based on dewpoint temperature of the zone.
     // The assumption here is that condensation might take place if the inlet water temperature
@@ -1318,7 +1322,9 @@ void CoolingPanelParams::CalcCoolingPanel(EnergyPlusData &state, int const Cooli
                 MassFlowFrac = 1.0;
             } else {
                 MassFlowFrac = (ControlTemp - OffTempCool) / this->ColdThrottlRange;
-                if (MassFlowFrac < MinFrac) MassFlowFrac = MinFrac;
+                if (MassFlowFrac < MinFrac) {
+                    MassFlowFrac = MinFrac;
+                }
             }
 
             waterMassFlowRate = MassFlowFrac * waterMassFlowRateMax;
@@ -1327,7 +1333,9 @@ void CoolingPanelParams::CalcCoolingPanel(EnergyPlusData &state, int const Cooli
 
     if (CoolingPanelOn) {
         PlantUtilities::SetComponentFlowRate(state, waterMassFlowRate, this->WaterInletNode, this->WaterOutletNode, this->plantLoc);
-        if (waterMassFlowRate <= 0.0) CoolingPanelOn = false;
+        if (waterMassFlowRate <= 0.0) {
+            CoolingPanelOn = false;
+        }
     }
 
     if (CoolingPanelOn) {
@@ -1496,7 +1504,9 @@ void UpdateCoolingPanelSourceValAvg(EnergyPlusData &state,
     CoolingPanelSysOn = false;
 
     // If this was never allocated, then there are no radiant systems in this input file (just RETURN)
-    if (!allocated(state.dataChilledCeilingPanelSimple->CoolingPanel)) return;
+    if (!allocated(state.dataChilledCeilingPanelSimple->CoolingPanel)) {
+        return;
+    }
 
     // If it was allocated, then we have to check to see if this was running at all...
     for (int CoolingPanelNum = 1; CoolingPanelNum <= (int)state.dataChilledCeilingPanelSimple->CoolingPanel.size(); ++CoolingPanelNum) {
@@ -1548,7 +1558,9 @@ void DistributeCoolingPanelRadGains(EnergyPlusData &state)
 
     for (auto &thisCP : state.dataChilledCeilingPanelSimple->CoolingPanel) {
         int ZoneNum = thisCP.ZonePtr;
-        if (ZoneNum <= 0) continue;
+        if (ZoneNum <= 0) {
+            continue;
+        }
         state.dataHeatBalFanSys->ZoneQCoolingPanelToPerson(ZoneNum) += thisCP.CoolingPanelSource * thisCP.FracDistribPerson;
 
         for (int RadSurfNum = 1; RadSurfNum <= thisCP.TotSurfToDistrib; ++RadSurfNum) {

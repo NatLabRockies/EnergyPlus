@@ -572,15 +572,14 @@ namespace OutputReportPredefined {
         // Std 229 Air Heat Recovery
         s->pdstAirHR = newPreDefSubTable(state, s->pdrEquip, "Air Heat Recovery");
 
-        s->pdchAirHRInputObjName = newPreDefColumn(state, s->pdstAirHR, "Name");
-        s->pdchAirHRInputObjType = newPreDefColumn(state, s->pdstAirHR, "Input object type");
+        s->pdchAirHRInputObjType = newPreDefColumn(state, s->pdstAirHR, "Type");
         s->pdchAirHRPlateOrRotary = newPreDefColumn(state, s->pdstAirHR, "Plate/Rotary");
         s->pdchAirHRSenEffAt100PerHeatAirFlow = newPreDefColumn(state, s->pdstAirHR, "Sensible Effectiveness at 100% Heating Air Flow");
         s->pdchAirHRSenEffAt100PerCoolAirFlow = newPreDefColumn(state, s->pdstAirHR, "Sensible Effectiveness at 100% Cooling Air Flow");
         s->pdchAirHRLatEffAt100PerHeatAirFlow = newPreDefColumn(state, s->pdstAirHR, "Latent Effectiveness at 100% Heating Air Flow");
         s->pdchAirHRLatEffAt100PerCoolAirFlow = newPreDefColumn(state, s->pdstAirHR, "Latent Effectiveness at 100% Cooling Air Flow");
-        s->pdchAirHRExhaustAirflow = newPreDefColumn(state, s->pdstAirHR, "Exhaust Airflow [kg/s]");
-        s->pdchAirHROutdoorAirflow = newPreDefColumn(state, s->pdstAirHR, "Outdoor Airflow [kg/s]");
+        s->pdchAirHRSupplyAirflow = newPreDefColumn(state, s->pdstAirHR, "Supply Air Flow Rate [m3/s]");
+        s->pdchAirHRExhaustAirflow = newPreDefColumn(state, s->pdstAirHR, "Exhaust Air Flow Rate [m3/s]");
 
         // Sizing Report
 

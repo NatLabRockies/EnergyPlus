@@ -496,7 +496,9 @@ int InputProcessor::getNumSectionsFound(std::string const &SectionWord)
     // number of sections of that kind found in the current input.  If not, return -1.
 
     auto const SectionWord_iter = epJSON.find(SectionWord);
-    if (SectionWord_iter == epJSON.end()) return -1;
+    if (SectionWord_iter == epJSON.end()) {
+        return -1;
+    }
     return static_cast<int>(SectionWord_iter.value().size());
 }
 
@@ -630,7 +632,9 @@ std::string InputProcessor::getAlphaFieldValue(json const &ep_object, json const
     if (it != ep_object.end()) {
         auto const &val = it.value();
         assert(val.is_string());
-        if (!val.empty()) return uc ? Util::makeUPPER(val.get<std::string>()) : val.get<std::string>();
+        if (!val.empty()) {
+            return uc ? Util::makeUPPER(val.get<std::string>()) : val.get<std::string>();
+        }
     }
 
     auto const it2 = fprops.find("default");
@@ -763,7 +767,9 @@ InputProcessor::MaxFields InputProcessor::findMaxFields(
         maxFields.max_fields = min_fields;
         for (auto const &field : ep_object.items()) {
             auto const &field_key = field.key();
-            if (field_key == extension_key) continue;
+            if (field_key == extension_key) {
+                continue;
+            }
             for (std::size_t i = maxFields.max_fields; i < legacy_idd_fields.size(); ++i) {
                 if (field_key == legacy_idd_fields[i]) {
                     maxFields.max_fields = (i + 1);
@@ -829,7 +835,9 @@ void InputProcessor::setObjectItemValue(EnergyPlusData &state,
                 auto const value = getObjectItemValue(field_value.get<std::string>(), schema_field_obj); // (AUTO_OK_OBJ)
 
                 Alphas(alpha_index) = value.first;
-                if (is_AlphaBlank) AlphaBlank()(alpha_index) = value.second;
+                if (is_AlphaBlank) {
+                    AlphaBlank()(alpha_index) = value.second;
+                }
 
             } else {
                 if (field_value.is_number_integer()) {
@@ -838,7 +846,9 @@ void InputProcessor::setObjectItemValue(EnergyPlusData &state,
                     dtoa(field_value.get<double>(), s);
                 }
                 Alphas(alpha_index) = s;
-                if (is_AlphaBlank) AlphaBlank()(alpha_index) = false;
+                if (is_AlphaBlank) {
+                    AlphaBlank()(alpha_index) = false;
+                }
             }
         } else if (field_type == "n") {
             // process numeric value
@@ -848,7 +858,9 @@ void InputProcessor::setObjectItemValue(EnergyPlusData &state,
                 } else {
                     Numbers(numeric_index) = field_value.get<double>();
                 }
-                if (is_NumBlank) NumBlank()(numeric_index) = false;
+                if (is_NumBlank) {
+                    NumBlank()(numeric_index) = false;
+                }
             } else {
                 bool is_empty = field_value.get<std::string>().empty();
                 if (is_empty) {
@@ -856,7 +868,9 @@ void InputProcessor::setObjectItemValue(EnergyPlusData &state,
                 } else {
                     Numbers(numeric_index) = Constant::AutoCalculate; // autosize and autocalculate
                 }
-                if (is_NumBlank) NumBlank()(numeric_index) = is_empty;
+                if (is_NumBlank) {
+                    NumBlank()(numeric_index) = is_empty;
+                }
             }
         }
     } else {
@@ -864,20 +878,28 @@ void InputProcessor::setObjectItemValue(EnergyPlusData &state,
             if (!(findDefault(Alphas(alpha_index), schema_field_obj))) {
                 Alphas(alpha_index) = "";
             }
-            if (is_AlphaBlank) AlphaBlank()(alpha_index) = true;
+            if (is_AlphaBlank) {
+                AlphaBlank()(alpha_index) = true;
+            }
         } else if (field_type == "n") {
             findDefault(Numbers(numeric_index), schema_field_obj);
-            if (is_NumBlank) NumBlank()(numeric_index) = true;
+            if (is_NumBlank) {
+                NumBlank()(numeric_index) = true;
+            }
         }
     }
     if (field_type == "a") {
-        if (within_max_fields) NumAlphas = alpha_index;
+        if (within_max_fields) {
+            NumAlphas = alpha_index;
+        }
         if (is_AlphaFieldNames) {
             AlphaFieldNames()(alpha_index) = (state.dataGlobal->isEpJSON) ? field : legacy_field_info.at("field_name").get<std::string>();
         }
         alpha_index++;
     } else if (field_type == "n") {
-        if (within_max_fields) NumNumbers = numeric_index;
+        if (within_max_fields) {
+            NumNumbers = numeric_index;
+        }
         if (is_NumericFieldNames) {
             NumericFieldNames()(numeric_index) = (state.dataGlobal->isEpJSON) ? field : legacy_field_info.at("field_name").get<std::string>();
         }
@@ -1037,7 +1059,9 @@ void InputProcessor::getObjectItem(EnergyPlusData &state,
             } else {
                 Alphas(alpha_index) = Util::makeUPPER(objectInfo.objectName);
             }
-            if (is_AlphaBlank) AlphaBlank()(alpha_index) = objectInfo.objectName.empty();
+            if (is_AlphaBlank) {
+                AlphaBlank()(alpha_index) = objectInfo.objectName.empty();
+            }
             if (is_AlphaFieldNames) {
                 AlphaFieldNames()(alpha_index) = (state.dataGlobal->isEpJSON) ? field : field_info_val.at("field_name").get<std::string>();
             }
@@ -1116,7 +1140,9 @@ int InputProcessor::getIDFObjNum(EnergyPlusData &state, std::string_view Object,
 
     // Only applicable if the incoming file was idf
     int idfOrderNumber = Number;
-    if (state.dataGlobal->isEpJSON || !state.dataGlobal->preserveIDFOrder) return idfOrderNumber;
+    if (state.dataGlobal->isEpJSON || !state.dataGlobal->preserveIDFOrder) {
+        return idfOrderNumber;
+    }
 
     json *obj;
     auto obj_iter = epJSON.find(std::string(Object));
@@ -1173,21 +1199,24 @@ std::vector<std::string> InputProcessor::getIDFOrderedKeys(EnergyPlusData &state
 
     // Return names in JSON order
     if (state.dataGlobal->isEpJSON || !state.dataGlobal->preserveIDFOrder) {
-        for (auto it = obj->begin(); it != obj->end(); ++it)
+        for (auto it = obj->begin(); it != obj->end(); ++it) {
             keys.emplace_back(it.key());
+        }
 
         return keys;
     }
 
     // Now, the real work begins
 
-    for (auto it = obj->begin(); it != obj->end(); ++it)
+    for (auto it = obj->begin(); it != obj->end(); ++it) {
         nums.push_back(it.value()["idf_order"].get<int>());
+    }
     std::sort(nums.begin(), nums.end());
 
     // Reserve doesn't seem to work :(
-    for (int i = 0; i < (int)nums.size(); ++i)
+    for (int i = 0; i < (int)nums.size(); ++i) {
         keys.push_back("");
+    }
 
     // get list of saved object numbers from idf processing
     for (auto it = obj->begin(); it != obj->end(); ++it) {
@@ -1205,7 +1234,9 @@ int InputProcessor::getJSONObjNum(EnergyPlusData &state, std::string const &Obje
 
     // Only applicable if the incoming file was idf
     int jSONOrderNumber = Number;
-    if (state.dataGlobal->isEpJSON || !state.dataGlobal->preserveIDFOrder) return jSONOrderNumber;
+    if (state.dataGlobal->isEpJSON || !state.dataGlobal->preserveIDFOrder) {
+        return jSONOrderNumber;
+    }
 
     json *obj;
     auto obj_iter = epJSON.find(Object);
@@ -1342,7 +1373,9 @@ void InputProcessor::getMaxSchemaArgs(int &NumArgs, int &NumAlpha, int &NumNumer
             auto const find_extensions = obj.find(extension_key);
             if (find_extensions != obj.end()) {
                 size_t const size = find_extensions.value().size();
-                if (size > max_size) max_size = size;
+                if (size > max_size) {
+                    max_size = size;
+                }
             }
         }
 
@@ -1366,8 +1399,12 @@ void InputProcessor::getMaxSchemaArgs(int &NumArgs, int &NumAlpha, int &NumNumer
                 num_numeric += numerics["extensions"].size() * max_size;
             }
         }
-        if (num_alpha > NumAlpha) NumAlpha = num_alpha;
-        if (num_numeric > NumNumeric) NumNumeric = num_numeric;
+        if (num_alpha > NumAlpha) {
+            NumAlpha = num_alpha;
+        }
+        if (num_numeric > NumNumeric) {
+            NumNumeric = num_numeric;
+        }
     }
 
     NumArgs = NumAlpha + NumNumeric;
@@ -1427,7 +1464,9 @@ void InputProcessor::getObjectDefMaxArgs(EnergyPlusData &state,
     for (auto const &obj : *objects) {
         if (auto found = obj.find(extension_key); found != obj.end()) {
             size_t const size = found.value().size();
-            if (size > max_size) max_size = size;
+            if (size > max_size) {
+                max_size = size;
+            }
         }
     }
 
@@ -1621,7 +1660,7 @@ void InputProcessor::reportIDFRecordsStats(EnergyPlusData &state)
             } // End extensible fields
 
         } // End loop on each object of a given objectType
-    }     // End loop on all objectTypes
+    } // End loop on all objectTypes
 }
 
 void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
@@ -1665,7 +1704,9 @@ void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
             ShowContinueError(state, " -- Object name: " + name);
         }
 
-        if (!state.dataGlobal->DisplayUnusedObjects) continue;
+        if (!state.dataGlobal->DisplayUnusedObjects) {
+            continue;
+        }
 
         if (!state.dataGlobal->DisplayAllWarnings) {
             auto found_type = unused_object_types.find(object_type);
@@ -1762,13 +1803,17 @@ void InputProcessor::preProcessorCheck(EnergyPlusData &state, bool &PreP_Fatal) 
                           state.dataIPShortCut->lAlphaFieldBlanks,
                           state.dataIPShortCut->cAlphaFieldNames,
                           state.dataIPShortCut->cNumericFieldNames);
-            if (state.dataIPShortCut->cAlphaArgs(1).empty()) state.dataIPShortCut->cAlphaArgs(1) = "Unknown";
+            if (state.dataIPShortCut->cAlphaArgs(1).empty()) {
+                state.dataIPShortCut->cAlphaArgs(1) = "Unknown";
+            }
             if (NumAlphas > 3) {
                 Multiples = "s";
             } else {
                 Multiples = BlankString;
             }
-            if (state.dataIPShortCut->cAlphaArgs(2).empty()) state.dataIPShortCut->cAlphaArgs(2) = "Unknown";
+            if (state.dataIPShortCut->cAlphaArgs(2).empty()) {
+                state.dataIPShortCut->cAlphaArgs(2) = "Unknown";
+            }
             {
                 std::string const errorType = uppercased(state.dataIPShortCut->cAlphaArgs(2));
                 if (errorType == "INFORMATION") {

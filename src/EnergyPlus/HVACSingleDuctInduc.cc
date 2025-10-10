@@ -405,7 +405,9 @@ namespace HVACSingleDuctInduc {
                 for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                     auto &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZone);
 
-                    if (!zoneEquipConfig.IsControlled) continue;
+                    if (!zoneEquipConfig.IsControlled) {
+                        continue;
+                    }
                     for (int SupAirIn = 1; SupAirIn <= zoneEquipConfig.NumInletNodes; ++SupAirIn) {
                         if (indUnit.OutAirNode == zoneEquipConfig.InletNode(SupAirIn)) {
                             if (zoneEquipConfig.AirDistUnitCool(SupAirIn).OutNode > 0) {
@@ -571,12 +573,15 @@ namespace HVACSingleDuctInduc {
             ZoneEquipmentListChecked = true;
             // Check to see if there is a Air Distribution Unit on the Zone Equipment List
             for (int Loop = 1; Loop <= state.dataHVACSingleDuctInduc->NumIndUnits; ++Loop) {
-                if (state.dataHVACSingleDuctInduc->IndUnit(Loop).ADUNum == 0) continue;
+                if (state.dataHVACSingleDuctInduc->IndUnit(Loop).ADUNum == 0) {
+                    continue;
+                }
                 if (DataZoneEquipment::CheckZoneEquipmentList(
                         state,
                         "ZONEHVAC:AIRDISTRIBUTIONUNIT",
-                        state.dataDefineEquipment->AirDistUnit(state.dataHVACSingleDuctInduc->IndUnit(Loop).ADUNum).Name))
+                        state.dataDefineEquipment->AirDistUnit(state.dataHVACSingleDuctInduc->IndUnit(Loop).ADUNum).Name)) {
                     continue;
+                }
                 ShowSevereError(state,
                                 format("InitIndUnit: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
                                        state.dataDefineEquipment->AirDistUnit(state.dataHVACSingleDuctInduc->IndUnit(Loop).ADUNum).Name));
@@ -1326,7 +1331,9 @@ namespace HVACSingleDuctInduc {
 
         if (state.dataHVACSingleDuctInduc->NumIndUnits > 0) {
             int ItemNum = Util::FindItemInList(CompName, state.dataHVACSingleDuctInduc->IndUnit, &IndUnitData::MixerName);
-            if (ItemNum > 0) return true;
+            if (ItemNum > 0) {
+                return true;
+            }
         }
 
         return false;

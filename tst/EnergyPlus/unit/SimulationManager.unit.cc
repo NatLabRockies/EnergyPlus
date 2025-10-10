@@ -50,6 +50,7 @@
 
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+#include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataReportingFlags.hh>
@@ -547,6 +548,37 @@ TEST_F(EnergyPlusFixture, Test_SimulationControl_PureLoadCalc)
     std::string const error_string = delimited_string({
         "   ** Warning ** \"Run Simulation for Sizing Periods\" and \"Run Simulation for Weather File Run Periods\" are both set to \"No\". "
         "No simulations will be performed, and most input will not be read.",
+    });
+
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, SimulationManager_ReportLoopConnectionsTest)
+{
+    // Unit Test for Defect #11061: Test Error Message (modified level of message)
+    state->dataBranchNodeConnections->NumCompSets = 1;
+    state->dataBranchNodeConnections->CompSets.allocate(1);
+    state->dataBranchNodeConnections->CompSets(1).ParentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
+    state->dataBranchNodeConnections->CompSets(1).ComponentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
+    state->dataBranchNodeConnections->CompSets(1).CName = "WaterHeaterMixed1";
+    state->dataBranchNodeConnections->CompSets(1).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined;
+    state->dataBranchNodeConnections->CompSets(1).InletNodeName = "MixedWaterHeater1Inlet";
+    state->dataBranchNodeConnections->CompSets(1).OutletNodeName = "MixedWaterHeater1Outlet";
+    state->dataSimulationManager->WarningOut = false;
+    state->dataBranchNodeConnections->CompSets(1).Description = "UNDEFINED";
+
+    EXPECT_THROW(EnergyPlus::SimulationManager::ReportLoopConnections(*state), std::runtime_error);
+
+    std::string const error_string = delimited_string({
+        "   ** Severe  ** Potential Node Connection Error for object WATERHEATER:MIXED, name=WaterHeaterMixed1",
+        "   **   ~~~   **   Node Types are still UNDEFINED -- See Branch/Node Details file for further information",
+        "   **   ~~~   **   Inlet Node : MixedWaterHeater1Inlet",
+        "   **   ~~~   **   Outlet Node: MixedWaterHeater1Outlet",
+        "   ************* There was 1 node connection error noted.",
+        "   **  Fatal  ** Please see severe error(s) and correct either the branch nodes or the component nodes so that they match.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=1",
+        "   ..... Last severe error=Potential Node Connection Error for object WATERHEATER:MIXED, name=WaterHeaterMixed1",
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));

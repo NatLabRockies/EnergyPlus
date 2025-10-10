@@ -546,7 +546,7 @@ private: // data
     // Negative values
     Real64 qdotConvZone_; // [W]
     Real64 qdotRadZone_;  // [W]
-};                        // ElectricTransformer
+}; // ElectricTransformer
 
 class GeneratorController
 // this class is used as part of the supervisory control and calling of electric power generators.  Each instances is for one generator

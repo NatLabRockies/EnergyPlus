@@ -385,9 +385,13 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
             }
         }
     }
-    if (this->dataErrorsFound) state.dataSize->DataErrorsFound = true;
+    if (this->dataErrorsFound) {
+        state.dataSize->DataErrorsFound = true;
+    }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "u-factor_times_area_value [W/K]";
+        if (this->isEpJSON) {
+            this->sizingString = "u-factor_times_area_value [W/K]";
+        }
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject && this->curSysNum <= state.dataHVACGlobal->NumPrimaryAirSys) {

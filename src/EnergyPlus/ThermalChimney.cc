@@ -124,7 +124,9 @@ namespace ThermalChimney {
             state.dataThermalChimneys->ThermalChimneyGetInputFlag = false;
         }
 
-        if (state.dataThermalChimneys->TotThermalChimney == 0) return;
+        if (state.dataThermalChimneys->TotThermalChimney == 0) {
+            return;
+        }
 
         CalcThermalChimney(state);
 
@@ -282,8 +284,9 @@ namespace ThermalChimney {
                     state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 1);
                 state.dataThermalChimneys->ThermalChimneySys(Loop).RatioThermChimAirFlow(TCZoneNum) =
                     state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 2);
-                if (state.dataIPShortCut->lNumericFieldBlanks(3 * TCZoneNum + 2))
+                if (state.dataIPShortCut->lNumericFieldBlanks(3 * TCZoneNum + 2)) {
                     state.dataThermalChimneys->ThermalChimneySys(Loop).RatioThermChimAirFlow(TCZoneNum) = 1.0;
+                }
                 state.dataThermalChimneys->ThermalChimneySys(Loop).EachAirInletCrossArea(TCZoneNum) =
                     state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 3);
 
@@ -572,7 +575,7 @@ namespace ThermalChimney {
                     RepVarSet(state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum)) = false;
                 }
             } // DO TCZoneNum = 1, ThermalChimneySys(Loop)%TotZoneToDistrib
-        }     // DO Loop=1, TotThermalChimney
+        } // DO Loop=1, TotThermalChimney
 
         //! LKL-more renaming effort and code review might be possible here
         // Check to make sure there is only one thermal chimney statement per zone
@@ -616,8 +619,8 @@ namespace ThermalChimney {
                     } // IF ( ThermalChimneySys(Loop)%TotZoneToDistrib >= (TCZoneNum+1) ) THEN
 
                 } // DO TCZoneNum = 1, ThermalChimneySys(Loop)%TotZoneToDistrib
-            }     // IF (ThermalChimneySys(Loop)%TotZoneToDistrib > 1) THEN
-        }         // DO Loop = 1, TotThermalChimney
+            } // IF (ThermalChimneySys(Loop)%TotZoneToDistrib > 1) THEN
+        } // DO Loop = 1, TotThermalChimney
 
         // Check to make sure there is only one thermal chimney statement per zone
         if (state.dataThermalChimneys->TotThermalChimney > 1) {
@@ -670,7 +673,7 @@ namespace ThermalChimney {
                 } // IF ( TotThermalChimney >= (Loop+1) ) THEN
 
             } // DO Loop = 1, TotThermalChimney
-        }     // IF (TotThermalChimney > 1) THEN
+        } // IF (TotThermalChimney > 1) THEN
 
         if (ErrorsFound) {
             ShowFatalError(state, format("{} Errors found in input.  Preceding condition(s) cause termination.", cCurrentModuleObject));
@@ -749,7 +752,9 @@ namespace ThermalChimney {
             for (int spaceNum : state.dataHeatBal->Zone(ZoneNum).spaceIndexes) {
                 auto const &thisSpace = state.dataHeatBal->space(spaceNum);
                 for (int SurfNum = thisSpace.HTSurfaceFirst; SurfNum <= thisSpace.HTSurfaceLast; ++SurfNum) {
-                    if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall) continue;
+                    if (state.dataSurface->Surface(SurfNum).Class != SurfaceClass::Wall) {
+                        continue;
+                    }
 
                     if (state.dataSurface->Surface(SurfNum).Width > majorW) {
                         majorW = state.dataSurface->Surface(SurfNum).Width;

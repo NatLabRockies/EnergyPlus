@@ -452,7 +452,9 @@ void GetInputLifeCycleCostRecurringCosts(EnergyPlusData &state)
 
     auto &elcc(state.dataEconLifeCycleCost);
 
-    if (!elcc->LCCparamPresent) return;
+    if (!elcc->LCCparamPresent) {
+        return;
+    }
     CurrentModuleObject = "LifeCycleCost:RecurringCosts";
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumFields, NumAlphas, NumNums);
     NumArray.allocate(NumNums);
@@ -660,7 +662,9 @@ void GetInputLifeCycleCostNonrecurringCost(EnergyPlusData &state)
 
     auto &elcc(state.dataEconLifeCycleCost);
 
-    if (!elcc->LCCparamPresent) return;
+    if (!elcc->LCCparamPresent) {
+        return;
+    }
     CurrentModuleObject = "LifeCycleCost:NonrecurringCost";
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumFields, NumAlphas, NumNums);
     NumArray.allocate(NumNums);
@@ -799,7 +803,9 @@ void GetInputLifeCycleCostUsePriceEscalation(EnergyPlusData &state)
 
     auto &elcc(state.dataEconLifeCycleCost);
 
-    if (!elcc->LCCparamPresent) return;
+    if (!elcc->LCCparamPresent) {
+        return;
+    }
     CurrentModuleObject = "LifeCycleCost:UsePriceEscalation";
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumFields, NumAlphas, NumNums);
     NumArray.allocate(NumNums);
@@ -948,7 +954,9 @@ void GetInputLifeCycleCostUseAdjustment(EnergyPlusData &state)
 
     auto &elcc(state.dataEconLifeCycleCost);
 
-    if (!elcc->LCCparamPresent) return;
+    if (!elcc->LCCparamPresent) {
+        return;
+    }
     CurrentModuleObject = "LifeCycleCost:UseAdjustment";
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, NumFields, NumAlphas, NumNums);
     NumArray.allocate(NumNums);
@@ -1186,7 +1194,9 @@ void ExpressAsCashFlows(EnergyPlusData &state)
                 for (iLoop = 0; iLoop < 10000; ++iLoop) { // add a limit to the loop to prevent runaway condition
                     elcc->CashFlow[offset + jCost].mnAmount(month) = elcc->RecurringCosts[jCost].cost * monthlyInflationFactor(month);
                     month += elcc->RecurringCosts[jCost].totalRepeatPeriodMonths;
-                    if (month > elcc->lengthStudyTotalMonths) break;
+                    if (month > elcc->lengthStudyTotalMonths) {
+                        break;
+                    }
                 }
             }
         } else {
@@ -1269,7 +1279,9 @@ void ExpressAsCashFlows(EnergyPlusData &state)
                          ++kYear) { // if service period is later than base period then this will go too far
                         for (int jMonth = 1; jMonth <= 12; ++jMonth) {
                             month = (kYear - 1) * 12 + jMonth;
-                            if (month > elcc->lengthStudyTotalMonths) break;
+                            if (month > elcc->lengthStudyTotalMonths) {
+                                break;
+                            }
                             elcc->CashFlow[cashFlowCounter].mnAmount(month) *= elcc->UseAdjustment(found).Adjustment(kYear);
                         }
                     }

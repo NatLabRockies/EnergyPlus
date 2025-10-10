@@ -616,10 +616,12 @@ struct FluidData : BaseGlobalStruct
             refrigs(i)->RhoshValues.deallocate();
             delete refrigs(i);
         }
-        for (int i = 1; i <= glycolsRaw.isize(); ++i)
+        for (int i = 1; i <= glycolsRaw.isize(); ++i) {
             delete glycolsRaw(i);
-        for (int i = 1; i <= glycols.isize(); ++i)
+        }
+        for (int i = 1; i <= glycols.isize(); ++i) {
             delete glycols(i);
+        }
 
         new (this) FluidData();
     }

@@ -129,7 +129,9 @@ void TermUnitZoneSizingData::scaleZoneHeating(Real64 const ratio)
 
 void ZoneSizingData::zeroMemberData()
 {
-    if (!allocated(this->DOASSupMassFlowSeq)) return;
+    if (!allocated(this->DOASSupMassFlowSeq)) {
+        return;
+    }
     std::fill(this->DOASSupMassFlowSeq.begin(), this->DOASSupMassFlowSeq.end(), 0.0);
     std::fill(this->DOASHeatLoadSeq.begin(), this->DOASHeatLoadSeq.end(), 0.0);
     std::fill(this->DOASCoolLoadSeq.begin(), this->DOASCoolLoadSeq.end(), 0.0);
@@ -548,7 +550,9 @@ void GetCoilDesFlowT(EnergyPlusData &state,
     auto &calcSysSizing = state.dataSize->CalcSysSizing(SysNum);
 
     int sysSizIndex = Util::FindItemInList(finalSysSizing.AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
-    if (sysSizIndex == 0) sysSizIndex = 1;
+    if (sysSizIndex == 0) {
+        sysSizIndex = 1;
+    }
     auto &sysSizInput = state.dataSize->SysSizInput(sysSizIndex);
 
     if (sysSizPeakDDNum.SensCoolPeakDD > 0) {
@@ -609,10 +613,14 @@ Real64 ZoneAirDistributionData::calculateEz(EnergyPlusData &state, int const Zon
         Real64 zoneLoad = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).TotalOutputRequired;
 
         // Zone in cooling mode
-        if (zoneLoad < 0.0) zoneEz = this->ZoneADEffCooling;
+        if (zoneLoad < 0.0) {
+            zoneEz = this->ZoneADEffCooling;
+        }
 
         // Zone in heating mode
-        if (zoneLoad > 0.0) zoneEz = this->ZoneADEffHeating;
+        if (zoneLoad > 0.0) {
+            zoneEz = this->ZoneADEffHeating;
+        }
     }
     if (zoneEz <= 0.0) {
         // Enforce defaults
@@ -631,7 +639,9 @@ Real64 calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
                                          int const spaceNum)
 {
     Real64 totOAFlowRate = 0.0;
-    if (DSOAPtr == 0) return totOAFlowRate;
+    if (DSOAPtr == 0) {
+        return totOAFlowRate;
+    }
 
     auto &thisDSOA = state.dataSize->OARequirements(DSOAPtr);
 
@@ -844,7 +854,9 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                 DSOAFlowPeople = nomTotOccupants * this->OAFlowPerPerson;
             }
         }
-        if (PerPersonNotSet) DSOAFlowPeople = 0.0; // for Dual Duct if Per Person Ventilation Rate Mode is not entered
+        if (PerPersonNotSet) {
+            DSOAFlowPeople = 0.0; // for Dual Duct if Per Person Ventilation Rate Mode is not entered
+        }
     } break;
     default: {
         DSOAFlowPeople = 0.0;
@@ -904,9 +916,13 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                 // Accumulate CO2 generation from people at design occupancy and current activity level
                 for (int PeopleNum = 1; PeopleNum <= state.dataHeatBal->TotPeople; ++PeopleNum) {
                     if (spaceNum > 0) {
-                        if (state.dataHeatBal->People(PeopleNum).spaceIndex != spaceNum) continue;
+                        if (state.dataHeatBal->People(PeopleNum).spaceIndex != spaceNum) {
+                            continue;
+                        }
                     } else {
-                        if (state.dataHeatBal->People(PeopleNum).ZonePtr != ActualZoneNum) continue;
+                        if (state.dataHeatBal->People(PeopleNum).ZonePtr != ActualZoneNum) {
+                            continue;
+                        }
                     }
                     CO2PeopleGeneration += state.dataHeatBal->People(PeopleNum).NumberOfPeople * state.dataHeatBal->People(PeopleNum).CO2RateFactor *
                                            state.dataHeatBal->People(PeopleNum).activityLevelSched->getCurrentVal();

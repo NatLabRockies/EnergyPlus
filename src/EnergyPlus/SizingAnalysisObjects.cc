@@ -105,7 +105,9 @@ ZoneTimestepObject::ZoneTimestepObject(
                         ((hourOfDay - 1) * numOfTimeStepsPerHour) +                     // so far this day's hours
                         round((stepStartMinute / minutesPerHour) / (timeStepDuration)); // into current hour
 
-    if (ztStepsIntoPeriod < 0) ztStepsIntoPeriod = 0;
+    if (ztStepsIntoPeriod < 0) {
+        ztStepsIntoPeriod = 0;
+    }
 
     // We only expect this feature to be used with systems, so there will always be a system timestep update, at least one.
     hasSystemSubSteps = true;
@@ -166,8 +168,12 @@ int SizingLog::GetSysStepZtStepIndex(ZoneTimestepObject tmpztStepStamp)
     int znStepIndex = GetZtStepIndex(tmpztStepStamp);
 
     // safety checks for range
-    if (znStepIndex >= NumOfStepsInLogSet) znStepIndex = NumOfStepsInLogSet - 1;
-    if (znStepIndex < 0) znStepIndex = 0;
+    if (znStepIndex >= NumOfStepsInLogSet) {
+        znStepIndex = NumOfStepsInLogSet - 1;
+    }
+    if (znStepIndex < 0) {
+        znStepIndex = 0;
+    }
 
     return znStepIndex;
 }

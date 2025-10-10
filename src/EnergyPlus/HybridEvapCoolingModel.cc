@@ -190,10 +190,11 @@ namespace HybridEvapCoolingModel {
     }
     bool CMode::ValidPointer(int curve_pointer)
     {
-        if (curve_pointer >= 0)
+        if (curve_pointer >= 0) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
     Real64 CMode::CalculateCurveVal(EnergyPlusData &state, Real64 Tosa, Real64 Wosa, Real64 Tra, Real64 Wra, Real64 Msa, Real64 OSAF, int curveType)
     {
@@ -740,7 +741,9 @@ namespace HybridEvapCoolingModel {
         if (TsaMaxSched != nullptr) {
             MaxSAT = TsaMaxSched->getCurrentVal();
         }
-        if (Tsupplyair < MinSAT || Tsupplyair > MaxSAT) return false;
+        if (Tsupplyair < MinSAT || Tsupplyair > MaxSAT) {
+            return false;
+        }
         return true;
     }
 
@@ -771,7 +774,9 @@ namespace HybridEvapCoolingModel {
         if (RHsaMaxSched != nullptr) {
             MaxRH = RHsaMaxSched->getCurrentVal();
         }
-        if (SupplyW < MinRH || SupplyW > MaxRH) return false;
+        if (SupplyW < MinRH || SupplyW > MaxRH) {
+            return false;
+        }
         return true;
     }
 
@@ -1622,14 +1627,15 @@ namespace HybridEvapCoolingModel {
         // temperature constraints were not met for a given day. ideally there would be a clear flag that indicates "this is the last timestep of the
         // day, so report", but that doesn't seem to exist.
         if ((TimeElapsed > 24) && WarnOnceFlag && !state.dataGlobal->WarmupFlag) {
-            if (count_EnvironmentConditionsNotMet > 0)
+            if (count_EnvironmentConditionsNotMet > 0) {
                 ShowWarningError(state,
                                  format("In day {:.1R} was unable to operate for  of simulation, {}{:.1R} timesteps because environment conditions "
                                         "were beyond the allowable operating range for any mode.",
                                         (Real64)state.dataGlobal->DayOfSim,
                                         Name,
                                         (Real64)count_EnvironmentConditionsNotMet));
-            if (count_SAHR_OC_MetOnce > 0)
+            }
+            if (count_SAHR_OC_MetOnce > 0) {
                 ShowWarningError(state,
                                  format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} time steps. For these "
                                         "time steps For these time steps was set to mode 0{}",
@@ -1637,7 +1643,8 @@ namespace HybridEvapCoolingModel {
                                         Name,
                                         Real64(count_SAHR_OC_MetOnce),
                                         Name));
-            if (count_SAT_OC_MetOnce > 0)
+            }
+            if (count_SAT_OC_MetOnce > 0) {
                 ShowWarningError(state,
                                  format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} time steps. "
                                         "For these time steps For these time steps{} was set to mode 0",
@@ -1645,6 +1652,7 @@ namespace HybridEvapCoolingModel {
                                         Name,
                                         Real64(count_SAT_OC_MetOnce),
                                         Name));
+            }
 
             ShowWarningError(state,
                              format("In day {:.1R} of simulation, {} failed to  satisfy sensible load for {:.1R} time steps. For these time steps "
@@ -1687,8 +1695,9 @@ namespace HybridEvapCoolingModel {
 
         if (CurrentOperatingSettings.size() > 0) {
             return CurrentOperatingSettings[0].Mode;
-        } else
+        } else {
             return -1;
+        }
     }
     Real64 Model::CurrentPrimaryRuntimeFraction()
     {
@@ -1710,8 +1719,9 @@ namespace HybridEvapCoolingModel {
         // Using/Aliasing
         if (CurrentOperatingSettings.size() > 0) {
             return CurrentOperatingSettings[0].Runtime_Fraction;
-        } else
+        } else {
             return -1;
+        }
     }
     void Model::DetermineCoolingVentilationOrHumidificationNeeds(CStepInputs &StepIns)
     {
@@ -1746,7 +1756,9 @@ namespace HybridEvapCoolingModel {
             StepIns.RequestedCoolingLoad = 0;
         }
         // establish if ventilation needed
-        if (StepIns.MinimumOA > 0) VentilationRequested = true;
+        if (StepIns.MinimumOA > 0) {
+            VentilationRequested = true;
+        }
         // Load required to meet dehumidifying setpoint (<0 = a dehumidify load)  [kgWater/s]
         if (StepIns.ZoneDehumidificationLoad < 0) {
             DehumidificationRequested = true;

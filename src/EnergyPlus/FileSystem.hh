@@ -222,8 +222,8 @@ namespace FileSystem {
         is_any<T, std::unique_ptr<fs::path>, std::unique_ptr<fmt::ostream>, std::unique_ptr<std::ostream>, std::unique_ptr<FILE *>>::value;
 
     template <class T, FileTypes fileType>
-    inline constexpr bool enable_json_v = is_all_json_type(fileType) && is_any<T, nlohmann::json>::value &&
-                                          !is_any<T, std::string_view, std::string, char *>::value;
+    inline constexpr bool enable_json_v =
+        is_all_json_type(fileType) && is_any<T, nlohmann::json>::value && !is_any<T, std::string_view, std::string, char *>::value;
 
     template <FileTypes fileType> void writeFile(fs::path const &filePath, const std::string_view data)
     {

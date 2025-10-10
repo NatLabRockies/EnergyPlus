@@ -91,13 +91,11 @@ namespace OutputReportTabularAnnual {
     {
     public:
         // Default Constructor
-        AnnualTable() : m_name(""), m_filter(""){};
+        AnnualTable() = default;
 
         // Member Constructor
-        AnnualTable(EnergyPlusData &state, std::string name, std::string filter, std::string schedName)
+        AnnualTable(EnergyPlusData &state, std::string name, std::string filter, std::string schedName) : m_name(name), m_filter(filter)
         {
-            m_name = name;
-            m_filter = filter;
             if (!schedName.empty()) {
                 m_sched = Sched::GetSchedule(state, schedName); // index to the period schedule
             } else {
