@@ -12,6 +12,8 @@ repos:
   hooks:
   - id: trailing-whitespace
   - id: end-of-file-fixer
+    # We exclude these because ddy/epw are treated as immutable, and the idf/imf etc are formatted by Transition tool probably
+    exclude: '.*\.(idf|imf|rvi|mvi|epw|ddy)$'
   - id: check-merge-conflict
   - id: check-yaml
 
