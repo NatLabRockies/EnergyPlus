@@ -50,3 +50,12 @@ repos:
       files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
       pass_filenames: true
       require_serial: true
+
+    - id: validate-idd-units
+      name: validate_idd_units
+      entry: python3 scripts/dev/validate_idd_units.py
+      args: ['--verbose']
+      language: system
+      files: '.*\.idd.in$'  # The old IDDs will not issue a ton of warnings
+      pass_filenames: true
+      require_serial: true
