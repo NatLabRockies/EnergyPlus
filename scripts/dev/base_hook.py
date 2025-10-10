@@ -378,7 +378,9 @@ def argparse_type_valid_absolute_file(path_str: str) -> Path:
     return path
 
 
-def get_base_parser(description: str, include_files_arg: bool = True, files_arg_help: str | None = None) -> argparse.ArgumentParser:
+def get_base_parser(
+    description: str, include_files_arg: bool = True, files_arg_help: str | None = None
+) -> argparse.ArgumentParser:
     """Get the base parser for all scripts.
 
     This parser includes common arguments like `verbose` and `filenames` (nargs)

@@ -27,35 +27,34 @@ repos:
   hooks:
   - id: isort
 
-repos:
-  - repo: local
-    hooks:
-    - id: test-hook
-      name:  test-hook
-      entry: python3 scripts/dev/test_hook.py
-      args: ['--verbose'] #, '--gha']
-      language: system
-      files: '.*\.cc'
-      pass_filenames: true
-      # I am handling concurrency in the script. Note that if you run with --all-files and do not add a filter, it might run twice or more, because of limitation in SC_ARG_MAX
-      # (The maximum length of all arguments and environment strings to exec())
-      # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
-      require_serial: true
+- repo: local
+  hooks:
+  - id: test-hook
+    name:  test-hook
+    entry: python3 scripts/dev/test_hook.py
+    args: ['--verbose'] #, '--gha']
+    language: system
+    files: '.*\.cc'
+    pass_filenames: true
+    # I am handling concurrency in the script. Note that if you run with --all-files and do not add a filter, it might run twice or more, because of limitation in SC_ARG_MAX
+    # (The maximum length of all arguments and environment strings to exec())
+    # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
+    require_serial: true
 
-    - id: check-constexpr
-      name: check_constexpr
-      entry: python3 scripts/dev/check_constexpr.py
-      args: ['--verbose']
-      language: system
-      files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
-      pass_filenames: true
-      require_serial: true
+  - id: check-constexpr
+    name: check_constexpr
+    entry: python3 scripts/dev/check_constexpr.py
+    args: ['--verbose']
+    language: system
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
-    - id: validate-idd-units
-      name: validate_idd_units
-      entry: python3 scripts/dev/validate_idd_units.py
-      args: ['--verbose']
-      language: system
-      files: '.*\.idd.in$'  # The old IDDs will not issue a ton of warnings
-      pass_filenames: true
-      require_serial: true
+  - id: validate-idd-units
+    name: validate_idd_units
+    entry: python3 scripts/dev/validate_idd_units.py
+    args: ['--verbose']
+    language: system
+    files: '.*\.idd.in$'  # The old IDDs will not issue a ton of warnings
+    pass_filenames: true
+    require_serial: true

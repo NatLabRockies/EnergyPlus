@@ -59,6 +59,7 @@ if __name__ == "__main__":
     if args.gha:
         import os
         import tempfile
+
         os.environ["GITHUB_ACTIONS"] = "true"
         step_summary = Path(tempfile.mkdtemp()) / "step_summary.md"
         os.environ["GITHUB_STEP_SUMMARY"] = str(step_summary)
