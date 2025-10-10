@@ -7,10 +7,17 @@ extend-ignore = [
 [tool.black]
 line-length = 120
 target-version = ['py312']
+exclude = '''
+(
+  ^/bin/.*                    # bin/ at repo root
+  | ^/third_party/.*          # third_party/ at repo root
+)
+'''
 
 [tool.isort]
 line_length = 120
 profile = "black"
+skip = ["bin", "third_party"]
 
 [tool.nbqa.addopts]
 flake8 = [
