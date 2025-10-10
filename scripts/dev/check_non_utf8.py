@@ -54,12 +54,23 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import io  # For Python 2 compat
-import json
-import os
-import sys
+from pathlib import Path
 
-DIRS_TO_SKIP = [
+from base_hook import (
+    ROOT_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    WarningMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+DIRS_TO_SKIP: list[Path] = [
     ".git",
     "build",
     "builds",
@@ -67,6 +78,9 @@ DIRS_TO_SKIP = [
     "cmake-build-release",
     "design",
     "release",
+    "__pycache__",
+    ".mypy_cache",
+    "_build",
 ]
 
 # these CC files purposefully have bad characters
@@ -78,69 +92,89 @@ FILE_NAMES_TO_SKIP = [
 
 # tex files are included here, but the docs folder is ignored,
 # so it has no effect right now
-FILE_PATTERNS = [".cc", ".hh", ".tex", ".cpp", ".hpp", ".idd"]
+FILE_PATTERNS = {".cc", ".hh", ".tex", ".cpp", ".hpp", ".idd", ".idf", ".imf"}
 
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-repo_root = os.path.abspath(os.path.join(current_script_dir, "..", ".."))
-full_path_dirs_to_skip = [os.path.join(repo_root, d) for d in DIRS_TO_SKIP]
 
-num_warnings = 0
-num_errors = 0
+def is_file_kept(filepath: Path) -> bool:
+    if filepath.suffix not in FILE_PATTERNS:
+        return False
+    if filepath.name in FILE_NAMES_TO_SKIP:
+        return False
 
-for root, dirs, filenames in os.walk(repo_root):
-    if any(root.startswith(f) for f in full_path_dirs_to_skip):
-        continue
-    for filename in filenames:
-        if not any(filename.endswith(f) for f in FILE_PATTERNS):
-            continue
-        if any(f in filename for f in FILE_NAMES_TO_SKIP):
-            continue
-        file_path = os.path.join(root, filename)
-        relative_file_path = os.path.relpath(file_path, repo_root)
+    if any(filepath.is_relative_to(ROOT_DIR / d) for d in DIRS_TO_SKIP):
+        return False
 
-        # High level check: try to open the file as utf-8 in full
-        try:
-            with io.open(file_path, encoding="utf-8", errors="strict") as f_idf:
-                idf_text = f_idf.read()
-        except UnicodeDecodeError:
-            ci_msg = {
-                "tool": "verify_file_encodings",
-                "filename": filename,
-                "file": relative_file_path,
-                "messagetype": "error",
-                "message": ("{} isn't UTF-8 encoded" "".format(relative_file_path)),
-            }
-            print(json.dumps(ci_msg))
-            num_errors += 1
+    return True
 
-            # Now you try to give a better error message by pointing at the
-            # lines that are guilty. To do so, you open as binary, and try to
-            # decode each line as utf-8
-            with io.open(file_path, "rb") as f_idf:
-                binary_lines = f_idf.readlines()
 
-            for line_num, line in enumerate(binary_lines):
-                try:
-                    line.decode(encoding="utf-8", errors="strict")
-                    # codecs.decode(line, encoding='utf-8', errors='strict')
-                except (UnicodeDecodeError, UnicodeEncodeError):
-                    _l = line.decode(encoding="utf-8", errors="replace")
+def check_is_utf8(filepath: Path, do_fix: bool = False) -> list[LogMessage]:
+    log_messages: list[LogMessage] = []
 
-                    # line contains non-utf8 character
-                    print(
-                        json.dumps(
-                            {
-                                "tool": "check_non_utf8",
-                                "filename": relative_file_path,
-                                "file": relative_file_path,
-                                "line": line_num,
-                                "messagetype": "warning",
-                                # " {}".format(_l)) # only works python3
-                                "message": ("Line has invalid characters/encoding: " + _l),
-                            }
-                        )
+    try:
+        filepath.read_text(encoding="utf-8", errors="strict")
+    except UnicodeDecodeError:
+        log_messages.append(
+            ErrorMessage(
+                tool="check_non_utf8",
+                filepath=filepath,
+                message="File isn't UTF-8 encoded",
+            )
+        )
+        # Now you try to give a better error message by pointing at the
+        # lines that are guilty. To do so, you open as binary, and try to
+        # decode each line as utf-8
+        binary_lines = filepath.read_bytes().splitlines()
+
+        for line_num, line in enumerate(binary_lines):
+            try:
+                line.decode(encoding="utf-8", errors="strict")
+                # codecs.decode(line, encoding='utf-8', errors='strict')
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                replaced_line = line.decode(encoding="utf-8", errors="replace")
+
+                log_messages.append(
+                    WarningMessage(
+                        tool="check_non_utf8",
+                        filepath=filepath,
+                        line_number=line_num,
+                        line=line,
+                        message=f"Line has invalid characters/encoding: {replaced_line}",
                     )
-                    num_warnings += 1
+                )
 
-if num_errors + num_warnings > 0:
-    sys.exit(1)
+        if do_fix:
+            fix_encoding(filepath=filepath)
+
+    return log_messages
+
+
+def fix_encoding(filepath: Path) -> None:
+    try:
+        idf_text = filepath.read_text(encoding="latin-1", errors="strict")
+        filepath.write_text(idf_text, encoding="utf-8")
+
+    except ValueError:
+        print(f"Cannot fix encoding for {filepath.relative_to(ROOT_DIR)}")
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Check files are UTF-8")
+    parser.add_argument(
+        "--fix", dest="do_fix", action="store_true", default=False, help="fix files with latin-1 encoding"
+    )
+
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if is_file_kept(f)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = collect_files(base_dir=ROOT_DIR, extensions=FILE_PATTERNS, recursive=True, dirs_to_skip=DIRS_TO_SKIP)
+        if args.verbose:
+            print(f"Found {len(files)} files to check")
+
+    errors_list_of_lists = parallel_apply(func=check_is_utf8, filepaths=files, do_fix=args.do_fix)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)
