@@ -41,3 +41,12 @@ repos:
       # (The maximum length of all arguments and environment strings to exec())
       # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
       require_serial: true
+
+    - id: check-constexpr
+      name: check_constexpr
+      entry: python3 scripts/dev/check_constexpr.py
+      args: ['--verbose']
+      language: system
+      files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+      pass_filenames: true
+      require_serial: true
