@@ -56,7 +56,17 @@ repos:
     entry: python3 scripts/dev/validate_idd_units.py
     args: ['--verbose']
     language: system
-    files: '.*\.idd.in$'  # The old IDDs will not issue a ton of warnings
+    # files: '.*\.(idd.in|idd)'
+    files: '.*\.idd.in$'  # The old IDDs will issue a ton of warnings
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-stray-fields-in-idd
+    name: Check Stray Fields in IDD
+    entry: python3 scripts/dev/check_stray_fields_in_idd.py
+    args: ['--verbose']
+    language: system
+    files: '.*\.idd.in$'  # The old IDDs will issue a ton of warnings
     pass_filenames: true
     require_serial: true
 
