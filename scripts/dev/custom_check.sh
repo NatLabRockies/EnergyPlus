@@ -21,7 +21,6 @@ echo "Running Custom-Check: license-check"; python3 "$REPO_ROOT"/scripts/dev/lic
 echo "Running Custom-Check: check_stray_fields_in_idd"; python3 "$REPO_ROOT"/scripts/dev/check_stray_fields_in_idd.py || EXIT_STATUS=$?
 echo "Running Custom-Check: verify_idfs_in_cmake"; python3 "$REPO_ROOT"/scripts/dev/verify_idfs_in_cmake.py || EXIT_STATUS=$?
 echo "Running Custom-Check: check_non_utf8"; python3 "$REPO_ROOT"/scripts/dev/check_non_utf8.py || EXIT_STATUS=$?
-echo "Running Custom-Check: verify_file_encodings"; python3 "$REPO_ROOT"/scripts/dev/verify_file_encodings.py || EXIT_STATUS=$?
 echo "Running Custom-Check: validate_idd_units"; python3 "$REPO_ROOT"/scripts/dev/validate_idd_units.py || EXIT_STATUS=$?
 echo "Running Custom-Check: find_byref_bool_override"; python3 "$REPO_ROOT"/scripts/dev/find_byref_bool_override.py || EXIT_STATUS=$?
 echo "Running Custom-Check: check_for_tabs"; python3 "$REPO_ROOT"/scripts/dev/check_for_tabs.py || EXIT_STATUS=$?

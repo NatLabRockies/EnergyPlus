@@ -111,3 +111,52 @@ repos:
     files: '^src/EnergyPlus/.*\.cc$'
     pass_filenames: true
     require_serial: true
+
+  # TODO: modernize these
+  - id: check-for-tabs
+    name: check_for_tabs
+    entry: python3 scripts/dev/check_for_tabs.py
+    language: system
+    pass_filenames: false
+
+  - id: find-included-cc-files
+    name: find_included_cc_files
+    entry: python3 scripts/dev/find_included_cc_files.py
+    language: system
+    pass_filenames: false
+
+  - id: analyze-state
+    name: analyze_state
+    entry: python3 scripts/dev/analyze_state.py
+    language: system
+    pass_filenames: false
+
+  - id: check-for-c-style-comments
+    name: check_for_c_style_comments
+    entry: python3 scripts/dev/check_for_c_style_comments.py
+    language: system
+    pass_filenames: false
+
+  - id: check-for-switch-case-parentheses
+    name: check_for_switch_case_parentheses
+    entry: python3 scripts/dev/check_for_switch_case_parentheses.py
+    language: system
+    pass_filenames: false
+
+  - id: check-for-malformed-enums
+    name: check_for_malformed_enums
+    entry: python3 scripts/dev/check_for_malformed_enums.py
+    language: system
+    pass_filenames: false
+
+  - id: check-format-strings
+    name: check_format_strings
+    entry: python3 scripts/dev/check_format_strings.py
+    language: system
+    pass_filenames: false
+
+  - id: check-for-enum-scope-usage
+    name: check_for_enum_scope_usage
+    entry: python3 scripts/dev/check_for_enum_scope_usage.py
+    language: system
+    pass_filenames: false
