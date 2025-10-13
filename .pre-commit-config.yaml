@@ -51,6 +51,14 @@ repos:
     pass_filenames: true
     require_serial: true
 
+  - id: license-check
+    name: license-check
+    entry: python3 scripts/dev/license-check.py
+    language: system
+    types_or: [python, c, c++]
+    pass_filenames: true
+    require_serial: true
+
   - id: validate-idd-units
     name: Validate IDD units
     entry: python3 scripts/dev/validate_idd_units.py
