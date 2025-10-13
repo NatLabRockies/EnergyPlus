@@ -54,65 +54,64 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import io
-import json
-import os
-import sys
+from collections import Counter
+from pathlib import Path
+
+from base_hook import (
+    IDD_PATH,
+    ROOT_DIR,
+    TESTFILES_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    WarningMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+DIRS_TO_SEARCH = [ROOT_DIR / "datasets", TESTFILES_DIR]
+EXTENSIONS = {".idf", ".imf"}
 
 
-def usage():
-    print("""This script verifies that the idf files in the testfiles directory don't have tab characters.""")
+def check_for_tabs(filepath: Path) -> list[LogMessage]:
+    lines = filepath.read_text(encoding="utf-8", errors="strict").splitlines()
 
-
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-dirs_to_search = ["datasets", "testfiles"]
-
-num_issues_found = 0
-for dir_name in dirs_to_search:
-    test_files_dir = os.path.join(current_script_dir, "..", "..", dir_name)
-    for root, dirs, files in os.walk(test_files_dir):
-        for sfile in files:
-            if sfile.endswith(".idf") or sfile.endswith(".imf"):
-                if root == test_files_dir:
-                    relative_path = sfile
-                else:
-                    folder = os.path.basename(os.path.normpath(root))
-                    relative_path = os.path.join(folder, sfile)
-                abs_path = os.path.join(test_files_dir, relative_path)
-                with io.open(abs_path, "r", encoding="utf-8", errors="strict") as fd:
-                    for i, line in enumerate(fd):
-                        if "\t" in line:
-                            print(
-                                json.dumps(
-                                    {
-                                        "tool": "check_for_tabs",
-                                        "filename": os.path.join(dir_name, relative_path),
-                                        "file": os.path.join(dir_name, relative_path),
-                                        "line": i + 1,
-                                        "messagetype": "error",
-                                        "message": "Tab character found; use spaces for indentation",
-                                    }
-                                )
-                            )
-                            num_issues_found += 1
-
-idd_path = os.path.join(current_script_dir, "..", "..", "idd", "Energy+.idd.in")
-with io.open(idd_path, "r", encoding="utf-8", errors="strict") as fd:
-    for i, line in enumerate(fd):
+    log_messages: list[LogMessage] = []
+    for line_num, line in enumerate(lines, start=1):
         if "\t" in line:
-            print(
-                json.dumps(
-                    {
-                        "tool": "check_for_tabs",
-                        "filename": "Energy+.idd.in",
-                        "file": os.path.join("idd", "Energy+.idd.in"),
-                        "line": i + 1,
-                        "messagetype": "error",
-                        "message": "Tab character found in IDD, use spaces for indentation",
-                    }
+            log_messages.append(
+                ErrorMessage(
+                    filepath=filepath,
+                    line=line_num,
+                    message="Tab character found; use spaces for indentation",
+                    tool="check_for_tabs",
                 )
             )
-            num_issues_found += 1
 
-if num_issues_found > 0:
-    sys.exit(1)
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Verify that the IDFs don't have tabs")
+
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and any(f.is_relative_to(d) for d in DIRS_TO_SEARCH)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        for d in DIRS_TO_SEARCH:
+            files += collect_files(base_dir=d, extensions=EXTENSIONS)
+        files.append(IDD_PATH)
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    errors_list_of_lists = parallel_apply(func=check_for_tabs, filepaths=files)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

@@ -43,7 +43,7 @@ repos:
 #    require_serial: true
 
   - id: check-constexpr
-    name: Check Constexpr Usage
+    name: check constexpr usage
     entry: python3 scripts/dev/check_constexpr.py
     args: ['--verbose']
     language: system
@@ -52,7 +52,7 @@ repos:
     require_serial: true
 
   - id: license-check
-    name: license-check
+    name: license check
     entry: python3 scripts/dev/license-check.py
     language: system
     types_or: [python, c, c++]
@@ -60,7 +60,7 @@ repos:
     require_serial: true
 
   - id: validate-idd-units
-    name: Validate IDD units
+    name: validate IDD units
     entry: python3 scripts/dev/validate_idd_units.py
     args: ['--verbose']
     language: system
@@ -70,7 +70,7 @@ repos:
     require_serial: true
 
   - id: check-stray-fields-in-idd
-    name: Check Stray Fields in IDD
+    name: check stray fields in IDD
     entry: python3 scripts/dev/check_stray_fields_in_idd.py
     args: ['--verbose']
     language: system
@@ -79,7 +79,7 @@ repos:
     require_serial: true
 
   - id: verify-idfs-in-cmake
-    name: Verify IDFs in testfiles CMake
+    name: verify IDFs in testfiles CMake
     entry: python3 scripts/dev/verify_idfs_in_cmake.py
     args: ['--verbose']
     language: system
@@ -88,7 +88,7 @@ repos:
     require_serial: true
 
   - id: check-non-utf8
-    name: Check files are UTF-8
+    name: check files are UTF-8
     entry: python3 scripts/dev/check_non_utf8.py
     language: system
     args: ['--fix', '--verbose']
@@ -96,7 +96,7 @@ repos:
     require_serial: true
 
   - id: verify-cmake-dirs
-    name: verify_cmake_dirs
+    name: verify cmake dirs
     entry: python3 scripts/dev/verify_cmake_dirs.py
     args: ['--verbose']
     language: system
@@ -104,7 +104,7 @@ repos:
     pass_filenames: false
 
   - id: find-byref-bool-override
-    name: Find ByRef bool override
+    name: find byref bool override
     entry: python3 scripts/dev/find_byref_bool_override.py
     args: ['--verbose']
     language: system
@@ -112,13 +112,16 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # TODO: modernize these
   - id: check-for-tabs
-    name: check_for_tabs
+    name: check for tabs in IDFs
     entry: python3 scripts/dev/check_for_tabs.py
     language: system
-    pass_filenames: false
+    args: ['--verbose']
+    files: '^testfiles/.*\.(idf|imf)$|^datasets/.*\.(idf|imf)$|.*\.idd.in$'
+    pass_filenames: true
+    require_serial: true
 
+  # TODO: modernize these
   - id: find-included-cc-files
     name: find_included_cc_files
     entry: python3 scripts/dev/find_included_cc_files.py
