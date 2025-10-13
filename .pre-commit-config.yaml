@@ -94,3 +94,12 @@ repos:
     language: system
     files: "^testfiles/.*"
     pass_filenames: false
+
+  - id: find-byref-bool-override
+    name: Find ByRef bool override
+    entry: python3 scripts/dev/find_byref_bool_override.py
+    args: ['--verbose']
+    language: system
+    files: '^src/EnergyPlus/.*\.cc$'
+    pass_filenames: true
+    require_serial: true
