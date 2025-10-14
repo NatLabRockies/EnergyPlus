@@ -166,6 +166,7 @@ jobs:
           ./scripts/dev/custom_check.sh .
 
       - name: Run pre-commit on changed files
+        if: always()
         run: |
           # Detect base and head SHAs depending on event type
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
