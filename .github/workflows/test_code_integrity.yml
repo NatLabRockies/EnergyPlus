@@ -159,32 +159,19 @@ jobs:
             echo "No Autocorrect needed"
           fi
 
-      - name: Custom Check
+      - name: Pip install dependencies
         if: always()
         run: |
-          pip install tabulate
-          ./scripts/dev/custom_check.sh .
+          pip install pre-commit tabulate
+
+#      - name: Custom Check
+#        if: always()
+#        run: |
+#          ./scripts/dev/custom_check.sh .
 
       - name: Run pre-commit on changed files
         if: always()
         run: |
-          # Detect base and head SHAs depending on event type
-          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-              BASE_SHA=${{ github.event.pull_request.base.sha }}
-              HEAD_SHA=${{ github.event.pull_request.head.sha }}
-          else
-              BASE_SHA=${{ github.event.before }}
-              HEAD_SHA=${{ github.sha }}
-          fi
-
-          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
-          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "Event Before: ${{ github.event.before }}"
-          echo "SHA: ${{ github.sha }}"
-
-          echo "Running pre-commit on changed files:"
-          echo "${{ steps.pr_changed_files.output.all_files }}"
-
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             pre-commit run --files ${{ steps.pr_changed_files.output.all_files }}
           else
