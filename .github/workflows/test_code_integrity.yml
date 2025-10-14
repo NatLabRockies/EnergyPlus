@@ -16,6 +16,12 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Pip install dependencies
+        if: always()
+        run: |
+          pip install pre-commit tabulate
+
+      # This can take up to 2min30 (between 14 and 30s usually)
       - name: Install clang-format-19
         shell: bash
         run: |
@@ -87,6 +93,8 @@ jobs:
               echo -e "\nPlease correct these files by running clang-format-19 locally, or download the artifact "
               echo 'and run `patch -p1 < /path/to/clang_format.patch`'
               {
+                echo "## Clang Format Check Summary"
+                echo ""
                 echo "| Item                                  | Value     |"
                 echo "|---------------------------------------|-----------|"
                 echo "| Number of Files Analyzed              | $file_count |"
@@ -124,6 +132,8 @@ jobs:
               echo "::endgroup::"
               echo "::error title=Clang Format Check Failed::Formatting issues detected in $incorrect_count files"
               {
+                echo "## Clang Format Check Summary"
+                echo ""
                 echo "| Item                                  | Value     |"
                 echo "|---------------------------------------|-----------|"
                 echo "| Number of Files Analyzed              | $file_count |"
@@ -159,23 +169,17 @@ jobs:
             echo "No Autocorrect needed"
           fi
 
-      - name: Pip install dependencies
+      - name: Run pre-commit
         if: always()
         run: |
-          pip install pre-commit tabulate
-
-#      - name: Custom Check
-#        if: always()
-#        run: |
-#          ./scripts/dev/custom_check.sh .
-
-      - name: Run pre-commit on changed files
-        if: always()
-        run: |
+          # Skip clang-format since we run it separately
+          export SKIP='clang-format'
+          # check_for_enum_scope_usage.py is slow so it's added as a "manual" hook stage, so it doesn't run on each pre-commit
+          # Here we pass --hook-stage manual so it's run also
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-            pre-commit run --files ${{ steps.pr_changed_files.output.all_files }}
+            pre-commit run --verbose --hook-stage manual --files ${{ steps.pr_changed_files.output.all_files }}
           else
-            pre-commit run --all-files
+            pre-commit run --verbose --hook-stage manual --all-files
           fi
 
       - name: Install cppcheck
