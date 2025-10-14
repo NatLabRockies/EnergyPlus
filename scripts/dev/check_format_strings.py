@@ -53,17 +53,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import sys
 import unittest
+from collections import Counter
 from pathlib import Path
-from typing import List
 
-verbose = True
+from base_hook import (
+    SRC_DIR,
+    TST_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+DIRS_TO_SEARCH = [SRC_DIR, TST_DIR]
+EXTENSIONS = {".hh", ".cc"}
 
 
-def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> int:
-    num_errors = 0
+def process_all_format_lines(filepath: Path, lines: list) -> list[LogMessage]:
+
+    fmt_line_nos = get_format_line_numbers_from_lines(lines)
+
+    log_messages: list[LogMessage] = []
 
     # process format lines
     for line_no in fmt_line_nos:
@@ -163,41 +180,44 @@ def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> i
         # Finally, we can do some error checking.
         # check for unbalanced curly braces
         if fmt_str.count("{") != fmt_str.count("}"):
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' has unbalanced curly braces.")
-            num_errors += 1
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_format_strings",
+                    filepath=filepath,
+                    line_number=line_no + 1,
+                    line=line,
+                    message=f"Format '{fmt_str}' has unbalanced curly braces.",
+                )
+            )
 
         # check for unbalanced curly braces placeholders and arguments
         if fmt_str.count("{") != len(args):
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' arg count {args} is not matched.")
-            num_errors += 1
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_format_strings",
+                    filepath=filepath,
+                    line_number=line_no + 1,
+                    line=line,
+                    message=f"Format '{fmt_str}' arg count {len(args)} is not matched.",
+                )
+            )
 
         # check for when no args are parsed
         if len(args) == 0:
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' has no arguments. Remove format.")
-            num_errors += 1
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_format_strings",
+                    filepath=filepath,
+                    line_number=line_no + 1,
+                    line=line,
+                    message=f"Format '{fmt_str}' has no arguments. Remove format.",
+                )
+            )
 
-    return num_errors
-
-
-def get_sorted_file_list(search_path: Path) -> List[Path]:
-    files_to_search = []
-    for p in [search_path]:
-        for root, _, files in os.walk(p):
-            for file in files:
-                f_path = Path(root) / Path(file)
-                f_extension = f_path.suffix
-                if f_extension == ".hh":
-                    files_to_search.append(f_path)
-                elif f_extension == ".cc":
-                    files_to_search.append(f_path)
-    files_to_search.sort()
-    return files_to_search
+    return log_messages
 
 
-def get_format_line_numbers_from_lines(lines: List[str]) -> List[int]:
+def get_format_line_numbers_from_lines(lines: list[str]) -> list[int]:
     format_line_nos = []
     for idx, line in enumerate(lines):
         # skip blank lines
@@ -216,49 +236,49 @@ def get_format_line_numbers_from_lines(lines: List[str]) -> List[int]:
     return format_line_nos
 
 
-def check_format_strings(search_path: Path) -> int:
-    num_errors = 0
-    files_to_search = get_sorted_file_list(search_path)
-    for f_path in files_to_search:
-        with open(f_path, "r") as f:
-            lines = f.readlines()
-            lines = [x.strip() for x in lines]
-        format_line_nos = get_format_line_numbers_from_lines(lines)
-        num_errors += process_all_format_lines(f_path, lines, format_line_nos)
-    return num_errors
+def check_format_strings(filepath: Path) -> list[LogMessage]:
+    lines = [line.strip() for line in filepath.read_text().splitlines()]
+    return process_all_format_lines(filepath=filepath, lines=lines)
 
 
 class TestFormatCheck(unittest.TestCase):
     def test_valid_format_chunk(self):
-        self.assertEqual(
-            0,  # number of errors encountered
-            process_all_format_lines(
-                Path("/dummy/path"),
-                ["line 1", "line 2", 'format("hi{}", varName);'],  # actual file content lines
-                [2],  # lines containing actual format statements
-            ),
+        log_messages = process_all_format_lines(
+            SRC_DIR / "Dummyfile.cc",
+            lines=["line 1", "line 2", 'format("hi{}", varName);'],  # actual file content lines
         )
+        self.assertEqual(len(log_messages), 0)
 
     def test_invalid_format_chunk(self):
-        self.assertEqual(
-            1,  # number of errors encountered
-            process_all_format_lines(
-                Path("/dummy/path"),
-                ["line 1", "line 2", 'format("hi{", varName);'],  # actual file content lines
-                [2],  # lines containing actual format statements
-            ),
+        log_messages = process_all_format_lines(
+            filepath=SRC_DIR / "Dummyfile.cc",
+            lines=["line 1", "line 2", 'format("hi{", varName);'],  # actual file content lines
         )
+        self.assertEqual(len(log_messages), 1)
+        self.assertEqual(log_messages[0].message, "Format 'hi{' has unbalanced curly braces.")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
-        unittest.main(exit=False, verbosity=0)
+        unittest.main(exit=True, verbosity=0)
 
-    root_path = Path(__file__).parent.parent.parent
-    src_path = root_path / "src" / "EnergyPlus"
-    errors_found = check_format_strings(src_path)
-    tst_path = root_path / "tst" / "EnergyPlus"
-    errors_found += check_format_strings(tst_path)
-    if errors_found > 0:
-        sys.exit(1)
+    parser = get_base_parser(description="Find Included CC files")
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and any(f.is_relative_to(d) for d in DIRS_TO_SEARCH)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        for d in DIRS_TO_SEARCH:
+            files += collect_files(base_dir=d, extensions=EXTENSIONS, recursive=True, dirs_to_skip=[])
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    errors_list_of_lists = parallel_apply(func=check_format_strings, filepaths=files)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

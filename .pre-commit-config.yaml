@@ -166,12 +166,14 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # TODO: modernize these
   - id: check-format-strings
     name: check format strings
     entry: python3 scripts/dev/check_format_strings.py
+    args: ['--verbose']
     language: system
-    pass_filenames: false
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
   # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook
   #  - id: check-for-enum-scope-usage
