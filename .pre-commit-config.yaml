@@ -28,6 +28,13 @@ repos:
   hooks:
   - id: isort
 
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: 'v19.1.1'
+  hooks:
+  - id: clang-format
+    files: '^(src|tst)/.*\.(cpp|cc|c|hpp|hh|h)$'
+    args: ["-style=file", "--verbose"]
+
 - repo: local
   hooks:
 #  - id: test-hook
@@ -175,10 +182,12 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook
-  #  - id: check-for-enum-scope-usage
-  #    name: check_for_enum_scope_usage
-  #    entry: python3 scripts/dev/check_for_enum_scope_usage.py
-  #    args: ['--verbose']
-  #    language: system
-  #    pass_filenames: false
+  # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook, so manual only
+  # Run it with: pre-commit run --hook-stage manual check-for-enum-scope-usage --verbose --all-files
+  - id: check-for-enum-scope-usage
+    stages: [manual]
+    name: check_for_enum_scope_usage
+    entry: python3 scripts/dev/check_for_enum_scope_usage.py
+    args: ['--verbose']
+    language: system
+    pass_filenames: false
