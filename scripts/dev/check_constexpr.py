@@ -63,9 +63,9 @@ from base_hook import (
     SRC_DIR,
     TST_DIR,
     ErrorMessage,
+    InfoMessage,
     LogLevel,
     LogMessage,
-    WarningMessage,
     exit_hook,
     flatten_list_of_lists,
     get_base_parser,
@@ -458,7 +458,7 @@ def constexpr_check(filepath: Path) -> list[LogMessage]:
 
     if bracket_count != 0:
         errors.append(
-            WarningMessage(
+            InfoMessage(
                 tool="check_constexpr",
                 filepath=filepath,
                 message=f"{bracket_count} unmatched parentheses",

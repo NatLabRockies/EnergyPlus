@@ -124,6 +124,15 @@ class LogLevel(StrEnum):
         # If need this one because I overrode __eq__
         return hash(self.value)
 
+    def to_icon(self):
+        """Get a simple icon for the log level."""
+        if self == LogLevel.ERROR:
+            return "❌"
+        elif self == LogLevel.WARNING:
+            return "⚠️ "
+        elif self == LogLevel.INFO:
+            return "ℹ️ "
+
 
 class ErrorDictionary(TypedDict, total=False):
     """Type hint for error dictionaries."""
@@ -269,15 +278,15 @@ def _make_github_step_summary_str(error_dict: dict[LogLevel, list[LogMessage]]) 
     table_md = tabulate.tabulate(table_data, headers="keys", tablefmt="github")
     checks = ", ".join(set([log_msg.tool for log_msg in sorted_log_messages]))
 
-    summary_parts = [f"{len(msgs)} {lvl.value}(s)" for lvl, msgs in error_dict.items()]
+    summary_parts = [f"{lvl.to_icon()} {len(msgs)} {lvl.value}(s)" for lvl, msgs in error_dict.items()]
     summary = f"We found {', '.join(summary_parts)}."
 
     table_str = f"""
-## Check: {checks}
+## {checks}
 
 **{summary}**
 
-<detail>
+<details>
 
 <summary>Check failures</summary>
 
