@@ -2,9 +2,10 @@ name: Code Integrity
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, 11252_precommit ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   code_integrity_checks:
@@ -26,6 +27,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -q clang-format-19
           clang-format-19 --version
+
+      - name: Get files touched by the PR
+        if: ${{ github.event_name == 'pull_request' }}
+        id: pr_changed_files
+        shell: bash
+        run: |
+          readarray -t all_files < <(git diff --name-only --diff-filter=AM HEAD^ HEAD)
+          echo "all_files='${all_files[*]}'" >> $GITHUB_OUTPUT
 
       - name: Run clang-format against C++ files touched by the PR
         if: ${{ github.event_name == 'pull_request' }}
@@ -152,7 +161,35 @@ jobs:
 
       - name: Custom Check
         if: always()
-        run: ./scripts/dev/custom_check.sh .
+        run: |
+          pip install tabulate
+          ./scripts/dev/custom_check.sh .
+
+      - name: Run pre-commit on changed files
+        run: |
+          # Detect base and head SHAs depending on event type
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+              BASE_SHA=${{ github.event.pull_request.base.sha }}
+              HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+              BASE_SHA=${{ github.event.before }}
+              HEAD_SHA=${{ github.sha }}
+          fi
+
+          echo "Base SHA: $BASE_SHA"
+          echo "Head SHA: $HEAD_SHA"
+
+          # Get changed files
+          files=$(git diff --name-only $BASE_SHA $HEAD_SHA)
+
+          echo "Running pre-commit on changed files:"
+          echo "$files"
+
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            pre-commit run --files ${{ steps.pr_changed_files.output.all_files }}
+          else
+            pre-commit run --all-files
+          fi
 
       - name: Install cppcheck
         if: always()
