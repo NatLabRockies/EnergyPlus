@@ -54,6 +54,7 @@ repos:
   - id: license-check
     name: license check
     entry: python3 scripts/dev/license-check.py
+    args: ['--verbose']
     language: system
     types_or: [python, c, c++]
     pass_filenames: true
@@ -158,8 +159,10 @@ repos:
     language: system
     pass_filenames: false
 
-  - id: check-for-enum-scope-usage
-    name: check_for_enum_scope_usage
-    entry: python3 scripts/dev/check_for_enum_scope_usage.py
-    language: system
-    pass_filenames: false
+  # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook
+  #  - id: check-for-enum-scope-usage
+  #    name: check_for_enum_scope_usage
+  #    entry: python3 scripts/dev/check_for_enum_scope_usage.py
+  #    args: ['--verbose']
+  #    language: system
+  #    pass_filenames: false
