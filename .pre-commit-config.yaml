@@ -139,13 +139,16 @@ repos:
     files: '^src/EnergyPlus/Data/EnergyPlusData\.(cc|hh)$'
     pass_filenames: false
 
-  # TODO: modernize these
   - id: check-for-c-style-comments
-    name: check_for_c_style_comments
+    name: check for C style comments
     entry: python3 scripts/dev/check_for_c_style_comments.py
+    args: ['--verbose']
     language: system
-    pass_filenames: false
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
+  # TODO: modernize these
   - id: check-for-switch-case-parentheses
     name: check_for_switch_case_parentheses
     entry: python3 scripts/dev/check_for_switch_case_parentheses.py
