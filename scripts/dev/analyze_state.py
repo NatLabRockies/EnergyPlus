@@ -53,9 +53,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import re
 from pathlib import Path
-from re import compile
-from typing import List, Set
+
+from base_hook import (
+    ROOT_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+STATE_HEADER_PATH = ROOT_DIR / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.hh"
+STATE_SOURCE_PATH = ROOT_DIR / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.cc"
 
 
 class StateClass:
@@ -66,38 +81,51 @@ class StateClass:
         self.construction_call_matches_struct = False
         self.clear_state_executed = False
 
-    def validate(self) -> bool:
+    def validate(self) -> list[LogMessage]:
         """
         Checks all the identified conditions are met and if not issues warnings.
 
         :return: Returns True if the state class is validated or False if not
         """
-        valid = True
+        log_messages: list[LogMessage] = []
         if not self.constructed:
-            print("::warning file=EnergyPlusData.cc::State not constructed: " + self.instance_name)
-            valid = False
+            log_messages.append(
+                ErrorMessage(
+                    tool="analyze_state",
+                    filepath=STATE_SOURCE_PATH,
+                    message=f"State member variable not constructed '{self.instance_name}'",
+                )
+            )
 
         if not self.construction_call_matches_struct:
-            print("::warning file=EnergyPlusData.cc::State constructed with different type: " + self.instance_name)
-            valid = False
+            log_messages.append(
+                ErrorMessage(
+                    tool="analyze_state",
+                    filepath=STATE_SOURCE_PATH,
+                    message=f"State member variable constructed with different type '{self.instance_name}'",
+                )
+            )
 
         if not self.clear_state_executed:
-            print("::warning file=EnergyPlusData.cc::State clear_state() call missing: " + self.instance_name)
-            valid = False
-        return valid
+            log_messages.append(
+                ErrorMessage(
+                    tool="analyze_state",
+                    filepath=STATE_SOURCE_PATH,
+                    message=f"State clear_state() call missing '{self.instance_name}'",
+                )
+            )
+
+        return log_messages
 
 
 class StateChecker:
 
-    def __init__(self, repo_root_path: Path):
-        self.repo_root = repo_root_path
-        self.member_variables: Set[StateClass] = set()
+    def __init__(self):
+        self.member_variables: set[StateClass] = set()
 
         # read the state file contents -- if we ever split the data into files this will require modification
-        header_file_path = self.repo_root / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.hh"
-        self.header_file_lines: List[str] = header_file_path.open().readlines()
-        source_file_path = self.repo_root / "src" / "EnergyPlus" / "Data" / "EnergyPlusData.cc"
-        self.source_file_lines: List[str] = source_file_path.open().readlines()
+        self.header_file_lines: list[str] = STATE_HEADER_PATH.read_text().splitlines()
+        self.source_file_lines: list[str] = STATE_SOURCE_PATH.read_text().splitlines()
 
     def determine_member_variables(self) -> None:
         """
@@ -106,7 +134,7 @@ class StateChecker:
         Currently it looks for lines of the form:
              std::unique_ptr<AirflowNetworkBalanceManagerData> dataAirflowNetworkBalanceManager;
         """
-        pattern = compile(r"\s*std::unique_ptr<(\w+)> (\w+);")
+        pattern = re.compile(r"\s*std::unique_ptr<(\w+)> (\w+);")
         for li in self.header_file_lines:
             m = pattern.match(li)
             if m:
@@ -118,7 +146,7 @@ class StateChecker:
         """
         Validates that the state member variables are constructed using a clue of the `make_unique` function.
         """
-        pattern = compile(r"\s*this->(\w+) = std::make_unique<(\w+)>\(\);")
+        pattern = re.compile(r"\s*this->(\w+) = std::make_unique<(\w+)>\(\);")
         for li in self.source_file_lines:
             if li.strip().startswith("#"):
                 continue
@@ -136,7 +164,7 @@ class StateChecker:
         """
         Validates the member's clear_state call is made in an uncommented line
         """
-        pattern = compile(r"\s*this->(\w+)->clear_state\(\);")
+        pattern = re.compile(r"\s*this->(\w+)->clear_state\(\);")
         for li in self.source_file_lines:
             if li.strip().startswith("#"):
                 continue
@@ -149,15 +177,17 @@ class StateChecker:
 
 
 if __name__ == "__main__":
-    this_file_path = Path(__file__).resolve()  # should be in scripts/dev
-    repo_root = this_file_path.parent.parent.parent  # dev, scripts, repo_root
-    sc = StateChecker(repo_root)
+    parser = get_base_parser(description="Analyze State Variables", include_files_arg=False)
+    args = parser.parse_args()
+
+    sc = StateChecker()
     sc.determine_member_variables()
     sc.validate_member_variable_construction()
     sc.validate_member_variable_clear_state()
     all_good = True
+    log_messages: list[LogMessage] = []
     for mv in sc.member_variables:
-        if not mv.validate():
-            all_good = False
-    if not all_good:
-        print("::error file=EnergyPlusData.cc::Problems with State Variables!")
+        log_messages += mv.validate()
+
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

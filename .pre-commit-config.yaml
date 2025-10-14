@@ -131,13 +131,15 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # TODO: modernize these
   - id: analyze-state
-    name: analyze_state
+    name: analyze state
     entry: python3 scripts/dev/analyze_state.py
+    args: ['--verbose']
     language: system
+    files: '^src/EnergyPlus/Data/EnergyPlusData\.(cc|hh)$'
     pass_filenames: false
 
+  # TODO: modernize these
   - id: check-for-c-style-comments
     name: check_for_c_style_comments
     entry: python3 scripts/dev/check_for_c_style_comments.py
