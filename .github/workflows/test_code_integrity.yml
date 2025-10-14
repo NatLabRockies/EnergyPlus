@@ -176,14 +176,13 @@ jobs:
               HEAD_SHA=${{ github.sha }}
           fi
 
-          echo "Base SHA: $BASE_SHA"
-          echo "Head SHA: $HEAD_SHA"
-
-          # Get changed files
-          files=$(git diff --name-only $BASE_SHA $HEAD_SHA)
+          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo "Event Before: ${{ github.event.before }}"
+          echo "SHA: ${{ github.sha }}"
 
           echo "Running pre-commit on changed files:"
-          echo "$files"
+          echo "${{ steps.pr_changed_files.output.all_files }}"
 
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             pre-commit run --files ${{ steps.pr_changed_files.output.all_files }}
