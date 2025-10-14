@@ -148,21 +148,27 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # TODO: modernize these
   - id: check-for-switch-case-parentheses
-    name: check_for_switch_case_parentheses
+    name: check for switch case parentheses
     entry: python3 scripts/dev/check_for_switch_case_parentheses.py
+    args: ['--verbose']
     language: system
-    pass_filenames: false
+    files: '^src/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
   - id: check-for-malformed-enums
-    name: check_for_malformed_enums
+    name: check for malformed enums
     entry: python3 scripts/dev/check_for_malformed_enums.py
+    args: ['--verbose']
     language: system
-    pass_filenames: false
+    files: '^src/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
+  # TODO: modernize these
   - id: check-format-strings
-    name: check_format_strings
+    name: check format strings
     entry: python3 scripts/dev/check_format_strings.py
     language: system
     pass_filenames: false
