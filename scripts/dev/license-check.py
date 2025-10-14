@@ -130,9 +130,7 @@ def check_files(filepaths: list[Path]) -> bool:
             continue
 
         ext = path.suffix.lower()
-        is_python = ext == ".py"
-        checker = PYTHON_CHECKER if is_python else CPP_CHECKER
-        if ext in {".cpp", ".hpp", ".h", ".c", ".cc", ".cxx"}:
+        if ext in {".cc", ".cpp", ".c", ".hh", ".hpp", ".h"}:
             checker = CPP_CHECKER
         elif ext == ".py":
             checker = PYTHON_CHECKER
