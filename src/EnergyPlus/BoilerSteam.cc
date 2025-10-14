@@ -63,6 +63,7 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
+#include <EnergyPlus/EMSManager.cc>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/GlobalNames.hh>
@@ -384,7 +385,7 @@ namespace BoilerSteam {
             int BoilerOutletNode = this->BoilerOutletNodeNum;
             switch (this->plantLoc.loop->LoopDemandCalcScheme) {
 
-            case DataPlant::LoopDemandCalcScheme::SingleSetPoint:
+            case (DataPlant::LoopDemandCalcScheme::SingleSetPoint):
                 state.dataLoopNodes->Node(BoilerOutletNode).TempSetPoint =
                     state.dataLoopNodes->Node(this->plantLoc.loop->TempSetPointNodeNum).TempSetPoint;
                 break;
@@ -420,7 +421,7 @@ namespace BoilerSteam {
                             OutputProcessor::Group::Plant,
                             OutputProcessor::EndUseCat::Boilers);
         SetupOutputVariable(state,
-                            format("Boiler {} Rate", sFuelType),
+                            format("Boiler Rate"),
                             Constant::Units::W,
                             this->FuelUsed,
                             OutputProcessor::TimeStepType::System,

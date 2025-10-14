@@ -188,7 +188,7 @@ namespace DataAirLoop {
         Invalid = -1,
         WaterCoil,  // Controller:WaterCoil
         OutdoorAir, // Controller:OutdoorAir
-        Num
+        Nums
     };
 
     struct OutsideAirSysProps

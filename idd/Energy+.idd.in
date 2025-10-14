@@ -397,6 +397,7 @@ Version,
       \format singleLine
   A1 ; \field Version Identifier
       \default ${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}
+        \blabla
 
 SimulationControl,
       \unique-object

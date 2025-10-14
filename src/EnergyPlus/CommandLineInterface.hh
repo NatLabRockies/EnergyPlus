@@ -58,15 +58,14 @@
 namespace EnergyPlus {
 
 // Forward declarations
-class InputFile;
+  class InputFile;
 struct EnergyPlusData;
 
 namespace CommandLineInterface {
 
     enum class ReturnCodes
     {
-        Invalid = -1,
-        Success,
+        Invalid = -1, Success,
         Failure,
         SuccessButHelper,
         Num
