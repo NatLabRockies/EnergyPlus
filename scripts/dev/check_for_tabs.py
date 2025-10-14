@@ -86,7 +86,8 @@ def check_for_tabs(filepath: Path) -> list[LogMessage]:
             log_messages.append(
                 ErrorMessage(
                     filepath=filepath,
-                    line=line_num,
+                    line_number=line_num,
+                    line=line,
                     message="Tab character found; use spaces for indentation",
                     tool="check_for_tabs",
                 )

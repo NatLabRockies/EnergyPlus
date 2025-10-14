@@ -69,16 +69,11 @@ from typing import List, Set
 from base_hook import (
     SRC_DIR,
     TST_DIR,
-    ErrorMessage,
-    LogLevel,
-    LogMessage,
-    WarningMessage,
     collect_files,
     exit_hook,
     flatten_list_of_lists,
     get_base_parser,
     parallel_apply,
-    report_log_messages,
 )
 
 DIRS_TO_SEARCH = [SRC_DIR, TST_DIR / "unit"]
@@ -433,5 +428,4 @@ if __name__ == "__main__":
         evaluator.reconcile_usages(usages=usages)
 
     evaluator.find_problems_and_report()
-    if evaluator.error_count > 0:
-        raise exit(1)
+    exit_hook(evaluator.error_count == 0)

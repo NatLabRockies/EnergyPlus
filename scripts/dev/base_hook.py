@@ -217,6 +217,11 @@ class LogMessage:
         return msg
 
 
+ErrorMessage = partial(LogMessage, loglevel=LogLevel.ERROR)
+WarningMessage = partial(LogMessage, loglevel=LogLevel.WARNING)
+InfoMessage = partial(LogMessage, loglevel=LogLevel.INFO)
+
+
 def flatten_list_of_lists(list_of_lists: list[list[Any] | None]) -> list[Any]:
     """Flatten a list of lists into a single list."""
     return [item for sublist in list_of_lists if sublist for item in sublist]
@@ -357,14 +362,6 @@ def report_log_messages(
 def exit_hook(success: bool) -> None:
     """Exit the script with appropriate status code."""
     raise SystemExit(0 if success else 1)
-
-
-ErrorMessage = partial(LogMessage, loglevel=LogLevel.ERROR)
-WarningMessage = partial(LogMessage, loglevel=LogLevel.WARNING)
-InfoMessage = partial(LogMessage, loglevel=LogLevel.INFO)
-
-# Type alias for a callback function that takes an ErrorDictionary and returns None
-CallBackErrorFunc = Callable[[ErrorDictionary], None]
 
 
 def relative_path_from_root(path: Path, root=ROOT_DIR) -> Path:

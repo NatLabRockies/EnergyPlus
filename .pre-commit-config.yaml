@@ -122,13 +122,16 @@ repos:
     pass_filenames: true
     require_serial: true
 
-  # TODO: modernize these
   - id: find-included-cc-files
-    name: find_included_cc_files
+    name: find included cc files
     entry: python3 scripts/dev/find_included_cc_files.py
+    args: ['--verbose']
     language: system
-    pass_filenames: false
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
 
+  # TODO: modernize these
   - id: analyze-state
     name: analyze_state
     entry: python3 scripts/dev/analyze_state.py
