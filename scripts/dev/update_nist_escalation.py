@@ -66,7 +66,7 @@ https://www.energy.gov/eere/femp/building-life-cycle-cost-programs
 """
 
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 ROOT_DIR = Path(__file__).resolve().parent
 DATASETS_DIR = ROOT_DIR / "datasets"
@@ -104,7 +104,7 @@ HEADER_FMT = """! The source of the values for the following objects is:
 """
 
 
-def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
+def parse_encost(fpath: Path) -> Tuple[List[dict[str, Any]], int]:
     """
     Processed the encost file into a python structure which is a list of dicts
 
@@ -123,11 +123,11 @@ def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
     lines = [x.strip() for x in content.splitlines()]
 
     region = None
-    years = None
-    escalation_start_year = None
+    years: list[int] | None = None
+    escalation_start_year: int | None = None
     fuel = None
     prices = None
-    results = []
+    results: list[dict[str, Any]] = []
 
     for i, line in enumerate(lines):
         if not line:
@@ -176,6 +176,8 @@ def parse_encost(fpath: Path) -> Tuple[List[dict], int]:
             results.append(this_dict)
             fuel = None
 
+    assert escalation_start_year is not None, "Escalation start year not found"
+
     return results, escalation_start_year
 
 
@@ -196,7 +198,7 @@ def plot_escalations(results: List[dict], escalation_start_year: Optional[int] =
 
     df = pd.DataFrame(pandas_results).set_index(["region", "fuel"]).T
 
-    grouped = df.groupby("region", axis=1)
+    grouped = df.groupby("region", axis=1)  # type: ignore[call-overload]
 
     ncols = 2
     nrows = int(np.ceil(grouped.ngroups / ncols))
@@ -246,7 +248,7 @@ def produce_idf(results: List[dict], escalation_start_year: int):
 
         content.append(format_field(lcc_name, "Name"))
         content.append(format_field(fuel, "Resource"))
-        content.append(format_field(escalation_start_year, "Escalation Start Year"))
+        content.append(format_field(str(escalation_start_year), "Escalation Start Year"))
         content.append(format_field("January", "Escalation Start Month"))
 
         escalations = lcc["escalations"]

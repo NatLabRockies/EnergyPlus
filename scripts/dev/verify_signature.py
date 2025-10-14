@@ -79,8 +79,7 @@ BUNDLED_APPS = [
 def get_cmake_install_prefix_for_generator(build_dir: Path, generator: Generator) -> Path:
     cpack_dir = build_dir / f"_CPack_Packages/Darwin/{generator.name}"
     if not cpack_dir.exists():
-        print(f"Could not find a _CPack_Packages directory for {generator.name}")
-        return None
+        raise ValueError(f"Could not find a _CPack_Packages directory for {generator.name}")
     cmake_install_root = next(x for x in cpack_dir.glob("*") if x.is_dir() and x.suffix != ".app")
 
     cmake_install_prefix = next(cmake_install_root.glob("**/energyplus")).parent
@@ -186,7 +185,7 @@ def get_rpath(p):
     return rpaths
 
 
-def otool(p, verify_resolve=False, verbose=False):
+def otool(p: Path, verify_resolve=False, verbose=False):
     linked_libs = get_linked_libraries(p)
     if linked_libs is None:
         return None
@@ -338,7 +337,7 @@ if __name__ == "__main__":
             print("=" * 80)
 
     if args.otool:
-        short_otool_infos = {}
+        short_otool_infos = {}  # type: ignore
         for k, otool_infos in top_level_otool_infos.items():
             short_otool_infos[k] = {}
             for libpath, otool_info in otool_infos.items():

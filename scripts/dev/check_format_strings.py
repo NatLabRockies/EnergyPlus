@@ -111,7 +111,7 @@ def process_all_format_lines(filepath: Path, lines: list) -> list[LogMessage]:
         start_fmt = 0
         end_fmt = 0
         fmt_str = ""
-        args = ""
+        args: list[str] = []
         for idx_fmt, c in enumerate(line):
 
             # get fmt string
@@ -140,7 +140,6 @@ def process_all_format_lines(filepath: Path, lines: list) -> list[LogMessage]:
                 args_str = line[end_fmt + 2 : idx_fmt]
                 args_str = args_str.strip()
                 num_quote = 0
-                args = []
                 args_idx = 0
 
                 # partial process args

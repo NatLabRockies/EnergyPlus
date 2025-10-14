@@ -118,7 +118,7 @@ if __name__ == "__main__":
         step_summary = Path(tempfile.mkdtemp()) / "step_summary.md"
         os.environ["GITHUB_STEP_SUMMARY"] = str(step_summary)
 
-    exts = {".cc", ".hh"}
+    # exts = {".cc", ".hh"}
     exts = None
     if len(args.files) > 0:
         n_ori = len(args.files)

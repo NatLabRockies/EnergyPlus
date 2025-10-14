@@ -292,7 +292,8 @@ def check_license(
 
 
 class FileVisitor(ABC):
-    def __init__(self, extensions: list[str] | None = None):
+    def __init__(self, toolname: str, extensions: list[str] | None = None):
+        self.toolname = toolname
         self.visited_files: list[Path] = []
         if extensions is None:
             self.extensions = ["cc", "cpp", "c", "hh", "hpp", "h"]
@@ -337,7 +338,7 @@ class FileVisitor(ABC):
         try:
             txt = filepath.read_text(encoding="utf-8")
         except UnicodeDecodeError as exc:
-            self.error(filepath=filepath, message=f"UnicodeDecodeError: {exc}")
+            self.error(filepath=filepath, line_number=0, message=f"UnicodeDecodeError: {exc}")
             txt = None
         except Exception as exc:
             self.error(filepath=filepath, line_number=0, message=f"Exception: {exc}")
@@ -355,11 +356,10 @@ class Checker(FileVisitor):
         shebang: bool = False,
         empty_passes: bool = False,
     ):
-        super().__init__(extensions=extensions)
+        super().__init__(toolname=toolname, extensions=extensions)
         lines = boilerplate.splitlines()
         self.n = len(lines)
         self.text = boilerplate
-        self.toolname = toolname
         self.offset = offset
         self.shebang = shebang
         self.empty_passes = empty_passes
@@ -391,7 +391,7 @@ class Checker(FileVisitor):
             return True
         else:
             if n > 1:
-                self.error(filepath=filepath, line_number=1, msg="Multiple instances of license text")
+                self.error(filepath=filepath, line_number=1, message="Multiple instances of license text")
                 return False
             if not txt.startswith(self.text):
                 if self.shebang:
@@ -405,19 +405,18 @@ class Checker(FileVisitor):
                         txt = "\n".join(lines[count:])
                         if txt.startswith(self.text):
                             return True
-                self.error(filepath=filepath, line_number=1, msg="License text is not at top of file")
+                self.error(filepath=filepath, line_number=1, message="License text is not at top of file")
                 return False
         return True
 
 
 class Replacer(FileVisitor):
     def __init__(self, oldtext, newtext, extensions=None, dryrun=True):
-        super().__init__(extensions=extensions)
+        super().__init__(toolname="license-updater", extensions=extensions)
         self.oldtxt = oldtext
         self.newtxt = newtext
         self.dryrun = dryrun
         self.replaced = []
-        self.toolname = "license-updater"
 
     def writetext(self, filepath: Path, txt: str):
         filepath.write_text(txt, encoding="utf-8")

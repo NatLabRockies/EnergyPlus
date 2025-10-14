@@ -70,7 +70,7 @@ from base_hook import (
     report_log_messages,
 )
 
-DIRS_TO_SKIP: list[Path] = [
+DIRS_TO_SKIP: list[str] = [
     ".git",
     "build",
     "builds",
@@ -85,14 +85,14 @@ DIRS_TO_SKIP: list[Path] = [
 
 # these CC files purposefully have bad characters
 # not sure what to do besides ignore them
-FILE_NAMES_TO_SKIP = [
+FILE_NAMES_TO_SKIP: list[str] = [
     # 'InputProcessor.unit.cc', 'EconomicTariff.cc',
     # 'OutputReportTabular.cc'
 ]
 
 # tex files are included here, but the docs folder is ignored,
 # so it has no effect right now
-FILE_PATTERNS = {".cc", ".hh", ".tex", ".cpp", ".hpp", ".idd", ".idf", ".imf"}
+FILE_PATTERNS: set[str] = {".cc", ".hh", ".tex", ".cpp", ".hpp", ".idd", ".idf", ".imf"}
 
 
 def is_file_kept(filepath: Path) -> bool:
@@ -137,7 +137,6 @@ def check_is_utf8(filepath: Path, do_fix: bool = False) -> list[LogMessage]:
                         tool="check_non_utf8",
                         filepath=filepath,
                         line_number=line_num,
-                        line=line,
                         message=f"Line has invalid characters/encoding: {replaced_line}",
                     )
                 )
@@ -170,7 +169,9 @@ if __name__ == "__main__":
         if args.verbose:
             print(f"Checking {len(files)} of {n_ori} specified files")
     else:
-        files = collect_files(base_dir=ROOT_DIR, extensions=FILE_PATTERNS, recursive=True, dirs_to_skip=DIRS_TO_SKIP)
+        files = list(
+            collect_files(base_dir=ROOT_DIR, extensions=FILE_PATTERNS, recursive=True, dirs_to_skip=DIRS_TO_SKIP)
+        )
         if args.verbose:
             print(f"Found {len(files)} files to check")
 

@@ -98,7 +98,7 @@ INCLUDE_WARNINGS = True
 IS_CI = True
 
 # Files for which to ignore missing header warning
-EXPECT_MISSING_HEADER = [
+EXPECT_MISSING_HEADER: list[Path] = [
     SRC_DIR / x
     for x in [
         "main.cc",
@@ -108,7 +108,7 @@ EXPECT_MISSING_HEADER = [
     ]
 ]
 
-EXPECT_MISSING_NAMESPACE = []
+EXPECT_MISSING_NAMESPACE: list[Path] = []
 
 # Finds a boolean argument passed by reference
 # Optional_bool acts like one, Array_XD_bool is another possibility
@@ -471,8 +471,8 @@ def lookup_errors_in_source_file(source_file: Path, found_functions: list[dict[s
                         message=f"Cannot find function {fname}: {d}",
                     )
                 )
-                # Skip iteration
-                continue
+            # Skip iteration
+            continue
 
         args = m.groupdict()["args"]
         bools = [_m.groupdict() for _m in RE_BOOL.finditer(args)]
@@ -545,7 +545,7 @@ def find_byref_bool_override(source_file: Path) -> list[LogMessage]:
 
     # No point continuing if we can't find the header, or there is no namespace
     if source_file in EXPECT_MISSING_HEADER or source_file in EXPECT_MISSING_NAMESPACE:
-        return None
+        return log_messages
 
     try:
         header_file = infer_header_from_source(source_file=source_file)
@@ -599,8 +599,7 @@ if __name__ == "__main__":
     else:
         # Glob all .cc files
         # TODO: this should be changed to rglob to grab files in subdirs
-        source_files = SRC_DIR.glob("*.cc")
-        source_files = [f for f in source_files if f.parent.name != "api"]
+        source_files = [f for f in SRC_DIR.glob("*.cc") if f.parent.name != "api"]
         if args.verbose:
             print(f"Checking all {len(source_files)} .cc files in {SRC_DIR}")
 

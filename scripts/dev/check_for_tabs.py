@@ -92,6 +92,7 @@ def check_for_tabs(filepath: Path) -> list[LogMessage]:
                     tool="check_for_tabs",
                 )
             )
+    return log_messages
 
 
 if __name__ == "__main__":

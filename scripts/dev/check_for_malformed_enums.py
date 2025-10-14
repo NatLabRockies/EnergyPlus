@@ -106,7 +106,7 @@ def process_enum_str(input_str: str, filepath: Path, line_no: int) -> list[LogMe
     # split into names and integer values, in present
     keys = []
     keys_uc = []
-    values = []
+    values: list[str | int] = []
     for e in tokens:
         if "=" in e:
             tokens = e.replace(" ", "").split("=")
@@ -321,7 +321,7 @@ def check_for_malformed_enums(filepath: Path) -> list[LogMessage]:
 
 
 class TestProcessEnums(unittest.TestCase):
-    def test_process_enum_str(self):
+    def test_process_enum_str(self) -> None:
 
         dummy_file = Path("DummyFile")
 

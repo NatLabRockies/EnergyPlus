@@ -120,7 +120,7 @@ class StateClass:
 
 class StateChecker:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.member_variables: set[StateClass] = set()
 
         # read the state file contents -- if we ever split the data into files this will require modification

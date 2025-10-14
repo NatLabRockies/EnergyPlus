@@ -60,7 +60,7 @@ from concurrent.futures import Executor, ProcessPoolExecutor, as_completed
 from enum import StrEnum
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Iterator, Sequence, TypedDict
+from typing import Any, Callable, Iterable, Iterator, Sequence, TypedDict
 
 ROOT_DIR = Path(__file__).parent.parent.parent
 TESTFILES_DIR = ROOT_DIR / "testfiles"
@@ -222,7 +222,7 @@ WarningMessage = partial(LogMessage, loglevel=LogLevel.WARNING)
 InfoMessage = partial(LogMessage, loglevel=LogLevel.INFO)
 
 
-def flatten_list_of_lists(list_of_lists: list[list[Any] | None]) -> list[Any]:
+def flatten_list_of_lists(list_of_lists: Sequence[Sequence[Any] | None]) -> list[Any]:
     """Flatten a list of lists into a single list."""
     return [item for sublist in list_of_lists if sublist for item in sublist]
 
@@ -232,7 +232,7 @@ def is_github_actions() -> bool:
     return "GITHUB_ACTIONS" in os.environ
 
 
-def groupby_log_level(log_messages: list[LogMessage]) -> dict[LogLevel, list[LogMessage]]:
+def groupby_log_level(log_messages: Sequence[LogMessage | None]) -> dict[LogLevel, list[LogMessage]]:
     """Convert a LogMessage to an ErrorDictionary.
 
     Args:
@@ -262,7 +262,7 @@ def _make_github_step_summary_str(error_dict: dict[LogLevel, list[LogMessage]]) 
         import tabulate
     except ImportError:
         print("tabulate not installed, cannot create GitHub step summary")
-        return
+        return ""
 
     sorted_log_messages = [log_msg for log_msgs in error_dict.values() for log_msg in log_msgs]
     table_data = [log_msg.to_dict(include_file_name=False) for log_msg in sorted_log_messages]
@@ -307,7 +307,7 @@ def add_github_step_summary_str(error_dict: dict[LogLevel, list[LogMessage]]) ->
 
 
 def report_log_messages(
-    log_messages: list[LogMessage], fail_threshold: LogLevel = LogLevel.ERROR, verbose: bool = False
+    log_messages: Sequence[LogMessage | None], fail_threshold: LogLevel = LogLevel.ERROR, verbose: bool = False
 ) -> bool:
     """Report log messages
 
@@ -374,7 +374,7 @@ def relative_path_from_root(path: Path, root=ROOT_DIR) -> Path:
 
 
 def _walk_with_exclusion(
-    base_dir: Path, dirs_to_skip: Sequence[str], extensions: Sequence[str] | None = None
+    base_dir: Path, dirs_to_skip: Sequence[str], extensions: Iterable[str] | None = None
 ) -> Iterator[Path]:
     """Walk a directory tree, yielding files with given extensions, skipping specified directory names.
 
@@ -396,7 +396,7 @@ def _walk_with_exclusion(
                 yield filepath
 
 
-def glob_with_extension(base_dir: Path, extensions: Sequence[str]) -> Iterator[Path]:
+def glob_with_extension(base_dir: Path, extensions: Iterable[str]) -> Iterator[Path]:
     """Yield files in base_dir matching the given extensions."""
     for ext in extensions:
         if not ext.startswith("."):
@@ -406,7 +406,7 @@ def glob_with_extension(base_dir: Path, extensions: Sequence[str]) -> Iterator[P
 
 def collect_files(
     base_dir: Path,
-    extensions: Sequence[str] | None = None,
+    extensions: Iterable[str] | None = None,
     recursive: bool = True,
     dirs_to_skip: Sequence[str] | None = None,
 ) -> Iterator[Path]:
@@ -476,7 +476,7 @@ def parallel_apply(
         A list of results, preserving the order of `paths`.
     """
     results: list[Any] = [None] * len(filepaths)
-    with pool_executor(max_workers=max_workers) as executor:
+    with pool_executor(max_workers=max_workers) as executor:  # type: ignore[call-arg]
         future_to_index = {executor.submit(func, filepath, *args, **kwargs): i for i, filepath in enumerate(filepaths)}
         for future in as_completed(future_to_index):
             i = future_to_index[future]

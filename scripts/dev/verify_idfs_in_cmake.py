@@ -147,8 +147,11 @@ if __name__ == "__main__":
         if args.verbose:
             print(f"Checking {len(files)} of {n_ori} specified files")
     else:
-        files = collect_files(base_dir=TESTFILES_DIR, extensions=exts, recursive=True)
-        files = {f for f in files if f.name not in FILES_TO_SKIP}
+        files = {
+            f
+            for f in collect_files(base_dir=TESTFILES_DIR, extensions=exts, recursive=True)
+            if f.name not in FILES_TO_SKIP
+        }
         if args.verbose:
             print(f"Found {len(files)} IDF files in testfiles/")
 

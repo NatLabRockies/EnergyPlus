@@ -166,7 +166,7 @@ class EnumScopeEvaluator:
         self.all_enum_declarations: list[EnumDeclaration] = []
         self.all_source_file_contents: dict[Path, list[str]] = dict()
 
-    def process_enum_declarations(self):
+    def process_enum_declarations(self) -> None:
         if self.verbose:
             print("Processing header file data")
         start = time.time()
@@ -178,7 +178,7 @@ class EnumScopeEvaluator:
             print(f"Found {len(self.all_enum_declarations)} enum declarations")
             print(f"Processing header files took {time.time()-start:.2f} seconds")
 
-    def process_source_file_contents(self):
+    def process_source_file_contents(self) -> None:
         if self.verbose:
             print("Processing source file into lists of lines")
             start = time.time()
@@ -197,7 +197,7 @@ class EnumScopeEvaluator:
         if self.verbose:
             print(f"Processing source files took {time.time()-start:.2f} seconds")
 
-    def run(self):
+    def run(self) -> None:
 
         if self.verbose:
             print("Checking source file lines for usages")
@@ -208,7 +208,7 @@ class EnumScopeEvaluator:
         if self.verbose:
             print(f"Checking source files took {time.time()-start:.2f} seconds")
 
-    def check_single_line_for_usage(self, filepath: Path, line_num: int, line: str):
+    def check_single_line_for_usage(self, filepath: Path, line_num: int, line: str) -> None:
         # search for usages of Enum:: first
         for match in RE_ENUM_USAGE_ORI.finditer(line):
             g = match.group(1)
@@ -232,7 +232,7 @@ class EnumScopeEvaluator:
                         PotentialUsage(scope=e.enum_name, filepath=filepath, line_number=line_num, line=line)
                     )
 
-    def reconcile_usages(self, usages: list[PotentialUsage]):
+    def reconcile_usages(self, usages: list[PotentialUsage]) -> None:
         if self.verbose:
             print("Reconciling usages")
             start = time.time()
@@ -242,9 +242,8 @@ class EnumScopeEvaluator:
                     e.usages.append(u)
         if self.verbose:
             print(f"Reconciling usages took {time.time()-start:.2f} seconds")
-        return
 
-    def find_problems_and_report(self):
+    def find_problems_and_report(self) -> None:
         if self.verbose:
             print("Reconciling usages")
         apparent_enums_in_only_one_source_file: List[str] = list()
@@ -267,12 +266,12 @@ class EnumScopeEvaluator:
             print("Reporting results")
         if len(apparent_enums_in_zero_source_files) > 0:
             print(f"Detected {len(apparent_enums_in_zero_source_files)} enums in ZERO source files:")
-            for e in apparent_enums_in_zero_source_files:
-                print(f" - {e}")
+            for enum_name in apparent_enums_in_zero_source_files:
+                print(f" - {enum_name}")
         if len(apparent_enums_in_only_one_source_file) > 0:
             print(f"\nDetected {len(apparent_enums_in_only_one_source_file)} enums in ONE source file:")
-            for e in apparent_enums_in_only_one_source_file:
-                print(f" - {e}")
+            for enum_name in apparent_enums_in_only_one_source_file:
+                print(f" - {enum_name}")
         if self.verbose:
             total_usages = sum([len(e.usages) for e in self.all_enum_declarations])
             print(f"\nTotal enum usages found: {total_usages} in {len(self.all_enum_declarations)} enum declarations")
@@ -406,7 +405,7 @@ if __name__ == "__main__":
                     if e.enum_name == scope:
                         print(f"    - {e.describe()}")
 
-    known_enum_names = set(known_enum_names)
+    known_enum_names_set = set(known_enum_names)
 
     run_synchronously = False
     if run_synchronously:
@@ -417,7 +416,7 @@ if __name__ == "__main__":
         usage_list_of_lists = parallel_apply(
             func=EnumScopeEvaluator.collect_enum_usages_for_file,
             filepaths=source_files_to_search + header_files_to_search,
-            known_enum_names=known_enum_names,
+            known_enum_names=known_enum_names_set,
         )
         usages = flatten_list_of_lists(list_of_lists=usage_list_of_lists)
         if args.verbose:
