@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
@@ -53,16 +52,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
-import re
 from pathlib import Path
 
 from base_hook import (
-    IDD_PATH,
+    SRC_DIR,
     ErrorMessage,
     LogLevel,
     LogMessage,
-    WarningMessage,
     exit_hook,
     flatten_list_of_lists,
     get_base_parser,
@@ -70,73 +66,104 @@ from base_hook import (
     report_log_messages,
 )
 
-RE_FIELD = re.compile(r"\s*\\(\w+)\s*$")
+
+def function_that_issues_several_errors(filepath: Path, is_error: bool = False) -> list[LogMessage]:
+    errors: list[LogMessage] = []
+    if is_error:
+        errors.append(
+            ErrorMessage(
+                tool="test_hook",
+                filepath=filepath,
+                line_number=10,
+                line="This is a dummy line content",
+                message="I'm issuing an error",
+            )
+        )
+        errors.append(
+            ErrorMessage(
+                tool="test_hook",
+                filepath=filepath,
+                line_number=250,
+                line="This is another dummy line content",
+                message="I'm issuing a second error",
+            )
+        )
+    return errors
 
 
-def check_for_stray_fields(idd_path: Path = IDD_PATH) -> list[LogMessage]:
-    """
-    Verifies that there aren't any stray fields in IDD that could cause
-    parsing problems
-
-    Args:
-    -----
-    idd_path (str): path to the idd file to check
-
-    Returns:
-    --------
-    offending_lines (list of dict): one entry per offending line,
-    each entry is a dict that can be consumed by decent_ci
-    """
-    assert idd_path.is_file(), f"Couldn't find IDD at '{idd_path}'"
-
-    LogMessageClass = ErrorMessage if idd_path == IDD_PATH else WarningMessage
-
-    lines = idd_path.read_text().splitlines()
-
-    exclude = ["autosizable", "autocalculatable", "retaincase"]
-
-    log_messages: list[LogMessage] = []
-
-    for line_num, line in enumerate(lines, start=1):
-        m = RE_FIELD.match(line)
-        if m:
-            field = m.groups()[0]
-            if field not in exclude:
-                log_messages.append(
-                    LogMessageClass(
-                        tool="check_stray_fields_in_idd",
-                        filepath=idd_path,
-                        line_number=line_num,
-                        line=line,
-                        message=rf"Stray field \{field}",
-                    )
-                )
-
-    return log_messages
+def function_that_issues_one_error(filepath: Path, is_error: bool = False) -> LogMessage | None:
+    if is_error:
+        return ErrorMessage(
+            tool="test_hook",
+            filepath=filepath,
+            line_number=10,
+            line="This is a dummy line content",
+            message="I'm issuing a unique error",
+        )
+    return None
 
 
 if __name__ == "__main__":
-    parser = get_base_parser(
-        description="Check Stray Fields in IDD", files_arg_help=f"Files to check (if omitted, checks '{IDD_PATH}')"
-    )
-
+    parser = get_base_parser(description="Test Hooks")
+    parser.add_argument("--single-error", action="store_true", help="Issue a single error")
+    parser.add_argument("--gha", action="store_true", help="Fake Being on Github Actions")
+    parser.add_argument("--debug", action="store_true", help="Print files and exit")
     args = parser.parse_args()
-    files = args.files
-    if not files:
-        files = [IDD_PATH]
 
-    if args.verbose:
-        print(f"Checking {len(files)} files")
+    if args.gha:
+        import os
+        import tempfile
 
+        os.environ["GITHUB_ACTIONS"] = "true"
+        step_summary = Path(tempfile.mkdtemp()) / "step_summary.md"
+        os.environ["GITHUB_STEP_SUMMARY"] = str(step_summary)
+
+    # exts = {".cc", ".hh"}
+    exts = None
+    if len(args.files) > 0:
+        n_ori = len(args.files)
+        if exts is None:
+            files = args.files
+        else:
+            files = [f for f in args.files if f.suffix in exts]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        if exts is None:
+            exts = {".*"}
+        for e in exts:
+            files += list(SRC_DIR.glob(f"**/*{e}"))
+        if args.verbose:
+            print(f"Checking {len(files)} files")
     if len(files) == 0:
         print("No files to check")
-        raise SystemExit(0)
+        exit(0)
 
-    if len(files) == 1:
-        log_messages = check_for_stray_fields(idd_path=files[0])
+    if args.debug:
+        print(files)
+        exit(0)
+
+    if args.single_error:
+        log_messages = [function_that_issues_one_error(filepath=files[0], is_error=True)]
+        log_messages += parallel_apply(func=function_that_issues_one_error, filepaths=files[1:], is_error=False)
+        success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+        if args.gha:
+            print("\n====== content of GITHUB_STEP_SUMMARY ======")
+            print(step_summary.read_text())
+            print("============================================")
+        exit_hook(success=success)
     else:
-        errors_list_of_lists = parallel_apply(func=check_for_stray_fields, filepaths=files)
+        errors_list_of_lists = [function_that_issues_several_errors(filepath=files[0], is_error=True)]
+        errors_list_of_lists += parallel_apply(
+            func=function_that_issues_several_errors, filepaths=files[1:], is_error=False
+        )
         log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+        success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
 
-    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
-    exit_hook(success=success)
+        if args.gha:
+            print("\n====== content of GITHUB_STEP_SUMMARY ======")
+            print(step_summary.read_text())
+            print("============================================")
+
+        exit_hook(success=success)

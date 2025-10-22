@@ -54,55 +54,70 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import re
 import sys
-from pathlib import Path
 import unittest
+from pathlib import Path
 
-sci_notation_str = r"[+-]?\d+\.?(\d+)?e[+-]?\d+"
-sci_notation_pattern = re.compile(sci_notation_str)
+from base_hook import (
+    SRC_DIR,
+    TST_DIR,
+    ErrorMessage,
+    InfoMessage,
+    LogLevel,
+    LogMessage,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
 
-int_real_str = r"[+-]?\d+\.?(\d+)?"
-int_real_pattern = re.compile(int_real_str)
+SCI_NOTATION_STR = r"[+-]?\d+\.?(\d+)?e[+-]?\d+"
+SCI_NOTATION_PATTERN = re.compile(SCI_NOTATION_STR)
 
-const_type_str = r"(const int|int const|const bool|bool const|const Real64|Real64 const|const double|double const)(?!(expr))"
-const_type_pattern = re.compile(const_type_str)
+INT_REAL_STR = r"[+-]?\d+\.?(\d+)?"
+INT_REAL_PATTERN = re.compile(INT_REAL_STR)
 
-var_name_str = r"[_a-zA-Z][_a-zA-Z0-9]*"
-var_name_pattern = re.compile(var_name_str)
+CONST_TYPE_STR = (
+    r"(const int|int const|const bool|bool const|const Real64|Real64 const|const double|double const)(?!(expr))"
+)
+CONST_TYPE_PATTERN = re.compile(CONST_TYPE_STR)
 
-const_num_paren_str = r"CONSTTYPE VARNAME\((INTREAL|SCI)\);"
-const_num_paren_str = const_num_paren_str.replace("CONSTTYPE", const_type_str)
-const_num_paren_str = const_num_paren_str.replace("VARNAME", var_name_str)
-const_num_paren_str = const_num_paren_str.replace("INTREAL", int_real_str)
-const_num_paren_str = const_num_paren_str.replace("SCI", sci_notation_str)
-const_num_paren_pattern = re.compile(const_num_paren_str)
+VAR_NAME_STR = r"[_a-zA-Z][_a-zA-Z0-9]*"
+VAR_NAME_PATTERN = re.compile(VAR_NAME_STR)
 
-const_num_equal_str = r"CONSTTYPE VARNAME = (INTREAL|SCI);"
-const_num_equal_str = const_num_equal_str.replace("CONSTTYPE", const_type_str)
-const_num_equal_str = const_num_equal_str.replace("VARNAME", var_name_str)
-const_num_equal_str = const_num_equal_str.replace("INTREAL", int_real_str)
-const_num_equal_str = const_num_equal_str.replace("SCI", sci_notation_str)
-const_num_equal_pattern = re.compile(const_num_equal_str)
+CONST_NUM_PAREN_STR = (
+    r"CONSTTYPE VARNAME\((INTREAL|SCI)\);".replace("CONSTTYPE", CONST_TYPE_STR)
+    .replace("VARNAME", VAR_NAME_STR)
+    .replace("INTREAL", INT_REAL_STR)
+    .replace("SCI", SCI_NOTATION_STR)
+)
+CONST_NUM_PAREN_PATTERN = re.compile(CONST_NUM_PAREN_STR)
 
-const_num_str = r"(PAREN|EQUAL)"
-const_num_str = const_num_str.replace("PAREN", const_num_paren_str)
-const_num_str = const_num_str.replace("EQUAL", const_num_equal_str)
-const_num_pattern = re.compile(const_num_str)
+CONST_NUM_EQUAL_STR = (
+    r"CONSTTYPE VARNAME = (INTREAL|SCI);".replace("CONSTTYPE", CONST_TYPE_STR)
+    .replace("VARNAME", VAR_NAME_STR)
+    .replace("INTREAL", INT_REAL_STR)
+    .replace("SCI", SCI_NOTATION_STR)
+)
+CONST_NUM_EQUAL_PATTERN = re.compile(CONST_NUM_EQUAL_STR)
 
-# const_num_wrapped_str = r"CONSTTYPE VARNAME\((?!.)"
-# const_num_wrapped_str = const_num_wrapped_str.replace("CONSTTYPE", const_type_str)
-# const_num_wrapped_str = const_num_wrapped_str.replace("VARNAME", var_name_str)
-# const_num_wrapped_pattern = re.compile(const_num_wrapped_str)
+CONST_NUM_STR = r"(PAREN|EQUAL)".replace("PAREN", CONST_NUM_PAREN_STR).replace("EQUAL", CONST_NUM_EQUAL_STR)
+CONST_NUM_PATTERN = re.compile(CONST_NUM_STR)
 
-array_const_str = r"(static )?Array[12345]D<(int|bool|double|Real64)> const VARNAME\("
-array_const_str = array_const_str.replace("VARNAME", var_name_str)
-array_const_pattern = re.compile(array_const_str)
+# CONST_NUM_WRAPPED_STR = (
+#     r"CONSTTYPE VARNAME\((?!.)"
+#     .replace("CONSTTYPE", CONST_TYPE_STR)
+#     .replace("VARNAME", VAR_NAME_STR)
+# )
+# CONST_NUM_WRAPPED_PATTERN = re.compile(CONST_NUM_WRAPPED_STR)
 
-array_us_const_str = r"(static )?Array[12345]D_(int|bool|double) const VARNAME\("
-array_us_const_str = array_us_const_str.replace("VARNAME", var_name_str)
-array_us_const_pattern = re.compile(array_us_const_str)
+ARRAY_CONST_STR = r"(static )?Array[12345]D<(int|bool|double|Real64)> const VARNAME\(".replace("VARNAME", VAR_NAME_STR)
+ARRAY_CONST_PATTERN = re.compile(ARRAY_CONST_STR)
+
+ARRAY_US_CONST_STR = r"(static )?Array[12345]D_(int|bool|double) const VARNAME\(".replace("VARNAME", VAR_NAME_STR)
+ARRAY_US_CONST_PATTERN = re.compile(ARRAY_US_CONST_STR)
 
 
 class TestMatching(unittest.TestCase):
@@ -133,10 +148,10 @@ class TestMatching(unittest.TestCase):
             "static Array2D_bool const A(",
             "static Array2D_bool const Abc(",
             "static Array2D_double const A(",
-            "static Array2D_double const Abc("
+            "static Array2D_double const Abc(",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(array_us_const_pattern, y))
+            self.assertTrue(re.match(ARRAY_US_CONST_PATTERN, y))
         # don't match these
         no_match = [
             "Array1D_int A(",
@@ -150,10 +165,10 @@ class TestMatching(unittest.TestCase):
             "static Array2D_bool A(",
             "static Array2D_bool Abc(",
             "static Array2D_double A(",
-            "static Array2D_double Abc("
+            "static Array2D_double Abc(",
         ]
         for n in no_match:
-            self.assertFalse(re.match(array_us_const_pattern, n))
+            self.assertFalse(re.match(ARRAY_US_CONST_PATTERN, n))
 
     def test_array_const(self):
         # match these
@@ -181,10 +196,10 @@ class TestMatching(unittest.TestCase):
             "static Array2D<bool> const A(",
             "static Array2D<bool> const Abc(",
             "static Array2D<double> const A(",
-            "static Array2D<double> const Abc("
+            "static Array2D<double> const Abc(",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(array_const_pattern, y))
+            self.assertTrue(re.match(ARRAY_CONST_PATTERN, y))
         # don't match these
         no_match = [
             "Array1D<int> A(",
@@ -198,10 +213,10 @@ class TestMatching(unittest.TestCase):
             "static Array2D<bool> A(",
             "static Array2D<bool> Abc(",
             "static Array2D<double> A(",
-            "static Array2D<double> Abc("
+            "static Array2D<double> Abc(",
         ]
         for n in no_match:
-            self.assertFalse(re.match(array_const_pattern, n))
+            self.assertFalse(re.match(ARRAY_CONST_PATTERN, n))
 
     # def test_const_num_wrapped(self):
     #     # match these
@@ -215,22 +230,18 @@ class TestMatching(unittest.TestCase):
 
     def test_const_num(self):
         # match these
-        yes_match = [
-            "const int VarName = 1;",
-            "const int VarName(1);",
-            "const int A(1);"
-        ]
+        yes_match = ["const int VarName = 1;", "const int VarName(1);", "const int A(1);"]
         for y in yes_match:
-            self.assertTrue(re.match(const_num_pattern, y))
+            self.assertTrue(re.match(CONST_NUM_PATTERN, y))
         # don't match these
         no_match = [
             "Real64 constexpr VarName = 1.e1;",
             "constexpr int VarName = 1;",
             "Real64 constexpr VarName(1.e1);",
-            "constexpr int VarName(1);"
+            "constexpr int VarName(1);",
         ]
         for n in no_match:
-            self.assertFalse(re.match(const_num_pattern, n))
+            self.assertFalse(re.match(CONST_NUM_PATTERN, n))
 
     def test_const_num_equal(self):
         # match these
@@ -266,17 +277,14 @@ class TestMatching(unittest.TestCase):
             "Real64 const VarName = 1;",
             "Real64 const VarName = 1.0;",
             "Real64 const VarName = 1.0e1;",
-            "Real64 const VarName = 1.e1;"
+            "Real64 const VarName = 1.e1;",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(const_num_equal_pattern, y))
+            self.assertTrue(re.match(CONST_NUM_EQUAL_PATTERN, y))
         # don't match these
-        no_match = [
-            "Real64 constexpr VarName = 1.e1;",
-            "constexpr int VarName = 1;"
-        ]
+        no_match = ["Real64 constexpr VarName = 1.e1;", "constexpr int VarName = 1;"]
         for n in no_match:
-            self.assertFalse(re.match(const_num_equal_pattern, n))
+            self.assertFalse(re.match(CONST_NUM_EQUAL_PATTERN, n))
 
     def test_const_num_paren(self):
         # match these
@@ -312,17 +320,14 @@ class TestMatching(unittest.TestCase):
             "Real64 const VarName(1);",
             "Real64 const VarName(1.0);",
             "Real64 const VarName(1.0e1);",
-            "Real64 const VarName(1.e1);"
+            "Real64 const VarName(1.e1);",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(const_num_paren_pattern, y))
+            self.assertTrue(re.match(CONST_NUM_PAREN_PATTERN, y))
         # don't match these
-        no_match = [
-            "Real64 constexpr VarName(1.e1);",
-            "constexpr int VarName(1);"
-        ]
+        no_match = ["Real64 constexpr VarName(1.e1);", "constexpr int VarName(1);"]
         for n in no_match:
-            self.assertFalse(re.match(const_num_paren_pattern, n))
+            self.assertFalse(re.match(CONST_NUM_PAREN_PATTERN, n))
 
     def test_var_name(self):
         # match these
@@ -334,18 +339,14 @@ class TestMatching(unittest.TestCase):
             "_VarName123",
             "VarName123",
             "VarName123_",
-            "_VarName123_"
+            "_VarName123_",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(var_name_pattern, y))
+            self.assertTrue(re.match(VAR_NAME_PATTERN, y))
         # don't match these
-        no_match = [
-            "123",
-            "9.81",
-            "9.81e0"
-        ]
+        no_match = ["123", "9.81", "9.81e0"]
         for n in no_match:
-            self.assertFalse(re.match(var_name_pattern, n))
+            self.assertFalse(re.match(VAR_NAME_PATTERN, n))
 
     def test_const_type(self):
         # match these
@@ -357,10 +358,10 @@ class TestMatching(unittest.TestCase):
             "int const",
             "bool const",
             "double const",
-            "Real64 const"
+            "Real64 const",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(const_type_pattern, y))
+            self.assertTrue(re.match(CONST_TYPE_PATTERN, y))
             # don't match these
         no_match = [
             "constexpr int",
@@ -370,30 +371,20 @@ class TestMatching(unittest.TestCase):
             "int constexpr",
             "bool constexpr",
             "double constexpr",
-            "Real64 constexpr"
+            "Real64 constexpr",
         ]
         for n in no_match:
-            self.assertFalse(re.match(const_type_pattern, n))
+            self.assertFalse(re.match(CONST_TYPE_PATTERN, n))
 
     def test_int_real(self):
         # match these
-        yes_match = [
-            "1",
-            "+1",
-            "-1",
-            "1.0",
-            "+1.0",
-            "-1.0"
-        ]
+        yes_match = ["1", "+1", "-1", "1.0", "+1.0", "-1.0"]
         for y in yes_match:
-            self.assertTrue(re.match(int_real_pattern, y))
+            self.assertTrue(re.match(INT_REAL_PATTERN, y))
             # don't match these
-        no_match = [
-            "Var",
-            "Var123"
-        ]
+        no_match = ["Var", "Var123"]
         for n in no_match:
-            self.assertFalse(re.match(int_real_pattern, n))
+            self.assertFalse(re.match(INT_REAL_PATTERN, n))
 
     def test_sci_notation(self):
         # match these
@@ -415,81 +406,90 @@ class TestMatching(unittest.TestCase):
             "+9.e+0",
             "-9.e0",
             "-9.e-0",
-            "-9.e+0"
+            "-9.e+0",
         ]
         for y in yes_match:
-            self.assertTrue(re.match(sci_notation_pattern, y))
+            self.assertTrue(re.match(SCI_NOTATION_PATTERN, y))
             # don't match these
-        no_match = [
-            "VarName"
-        ]
+        no_match = ["VarName"]
         for n in no_match:
-            self.assertFalse(re.match(sci_notation_pattern, n))
+            self.assertFalse(re.match(SCI_NOTATION_PATTERN, n))
 
 
-def constexpr_check(search_path: Path) -> int:
-    """Checks for missing constexpr tags, returns the number of tags found that should be changed"""
-    num_errors = 0
+def constexpr_check(filepath: Path) -> list[LogMessage]:
+    lines = [x.strip() for x in filepath.read_text().splitlines()]
 
-    files_to_search = []
-    for p in [search_path]:
-        for root, dirs, files in os.walk(p):
-            for file in files:
-                f_path = Path(root) / Path(file)
-                f_extension = f_path.suffix
-                if f_extension == ".hh":
-                    files_to_search.append(f_path)
-                elif f_extension == ".cc":
-                    files_to_search.append(f_path)
+    bracket_count = 0
+    errors: list[LogMessage] = []
 
-    files_to_search.sort()
+    for idx, line in enumerate(lines, start=1):
 
-    for file in files_to_search:
-        with open(file, "r") as f:
-            lines = f.readlines()
+        # skip blank lines
+        if line == "":
+            continue
 
-        lines = [x.strip() for x in lines]
+        # skip comment lines
+        if line[0:2] == "//":
+            continue
 
-        bracket_count = 0
+        # strip trailing comments
+        if "//" in line:
+            tokens = line.split("//")
+            line = tokens[0].strip()
 
-        for idx, line in enumerate(lines):
+        re_match_1 = re.match(CONST_NUM_PATTERN, line)
+        re_match_2 = re.match(ARRAY_CONST_PATTERN, line)
+        re_match_3 = re.match(ARRAY_US_CONST_PATTERN, line)
+        if (re_match_1 or re_match_2 or re_match_3) and bracket_count == 0:
 
-            # skip blank lines
-            if line == "":
-                continue
+            errors.append(
+                ErrorMessage(
+                    tool="check_constexpr",
+                    filepath=filepath,
+                    line_number=idx,
+                    line=line,
+                    message="Use 'constexpr' instead of 'const' for variable declaration",
+                )
+            )
 
-            # skip comment lines
-            if line[0:2] == "//":
-                continue
+        # count brackets in line
+        bracket_count += line.count("(")
+        bracket_count -= line.count(")")
 
-            # strip trailing comments
-            if "//" in line:
-                tokens = line.split("//")
-                line = tokens[0].strip()
+    if bracket_count != 0:
+        errors.append(
+            InfoMessage(
+                tool="check_constexpr",
+                filepath=filepath,
+                message=f"{bracket_count} unmatched parentheses",
+            )
+        )
 
-            re_match_1 = re.match(const_num_pattern, line)
-            re_match_2 = re.match(array_const_pattern, line)
-            re_match_3 = re.match(array_us_const_pattern, line)
-            if (re_match_1 or re_match_2 or re_match_3) and bracket_count == 0:
-                print("ERROR: 'const' found, convert to 'constexpr'")
-                s = f"{file.name}: {idx + 1} - {line}"
-                print(s)
-                num_errors += 1
-
-            # count brackets in line
-            bracket_count += line.count("(")
-            bracket_count -= line.count(")")
-
-    return num_errors
+    return errors
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
         unittest.main(exit=False, verbosity=0)
-    root_path = Path(__file__).parent.parent.parent
-    src_path = root_path / "src" / "EnergyPlus"
-    tst_path = root_path / "tst" / "EnergyPlus" / "unit"
-    errors_found = constexpr_check(src_path) + constexpr_check(tst_path)
-    if errors_found > 0:
-        raise sys.exit(1)
+
+    parser = get_base_parser(description="Check Constexpr Usage")
+    args = parser.parse_args()
+
+    exts = {".cc", ".hh"}
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in exts]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        for d in [SRC_DIR, TST_DIR]:
+            for e in exts:
+                files += list(d.glob(f"**/*{e}"))
+        if args.verbose:
+            print(f"Checking {len(files)} files")
+
+    log_messages = flatten_list_of_lists(list_of_lists=parallel_apply(func=constexpr_check, filepaths=files))
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

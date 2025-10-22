@@ -5,6 +5,7 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   code_integrity_checks:
@@ -15,6 +16,26 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Pip install dependencies
+        if: always()
+        run: |
+          pip install pre-commit tabulate
+
+      - name: Run pre-commit
+        id: pre_commit
+        if: always()
+        run: |
+          # Skip clang-format since we run it separately. The only reason is that I'm not yet willing to remove the step summary table
+          export SKIP='clang-format'
+          # check_for_enum_scope_usage.py is slow so it's added as a "manual" hook stage, so it doesn't run on each pre-commit
+          # Here we pass --hook-stage manual so it's run also
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            pre-commit run --verbose --hook-stage manual --from-ref HEAD^ --to-ref HEAD
+          else
+            pre-commit run --verbose --hook-stage manual --all-files
+          fi
+
+      # This can take up to 2min30 (between 14 and 30s usually)
       - name: Install clang-format-19
         shell: bash
         run: |
@@ -78,6 +99,8 @@ jobs:
               echo -e "\nPlease correct these files by running clang-format-19 locally, or download the artifact "
               echo 'and run `patch -p1 < /path/to/clang_format.patch`'
               {
+                echo "## Clang Format Check Summary"
+                echo ""
                 echo "| Item                                  | Value     |"
                 echo "|---------------------------------------|-----------|"
                 echo "| Number of Files Analyzed              | $file_count |"
@@ -88,6 +111,7 @@ jobs:
             fi
 
       - name: Run clang-format for entire codebase
+        id: clang_format_on_push
         if: ${{ github.event_name == 'push' }}
         shell: bash
         run: |
@@ -115,6 +139,8 @@ jobs:
               echo "::endgroup::"
               echo "::error title=Clang Format Check Failed::Formatting issues detected in $incorrect_count files"
               {
+                echo "## Clang Format Check Summary"
+                echo ""
                 echo "| Item                                  | Value     |"
                 echo "|---------------------------------------|-----------|"
                 echo "| Number of Files Analyzed              | $file_count |"
@@ -140,19 +166,28 @@ jobs:
             echo "Commiting Lint Autocorrects"
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git config --global user.name 'github-actions[bot]'
-            git commit -m "[chore] Commit clang-format autocorrects"
+
+            msg=""
+            # Construct something like "clang format and pre-commit", "clang-format" or "pre-commit"
+            if [[ "${{ steps.clang_format_on_push.outcome }}" == "failure" ]]; then
+              msg="clang-format"
+            fi
+            if [[ "${{ steps.pre_commit.outcome }}" == "failure" ]]; then
+              if [[ -n "$msg" ]]; then
+                msg="$msg and pre-commit"
+              else
+                msg="pre-commit"
+              fi
+            fi
+            git commit -m "[chore] Commit $msg autocorrects"
             echo '' >> .git-blame-ignore-revs
             git log -n1 --pretty='format:# %C(auto)%s [%an, %as]%n%H%n' >> .git-blame-ignore-revs
             git add .git-blame-ignore-revs
-            git commit -m "Add clang-format autocorrects to git-blame-ignore-revs"
+            git commit -m "Add $msg autocorrects to git-blame-ignore-revs"
             git push
           else
             echo "No Autocorrect needed"
           fi
-
-      - name: Custom Check
-        if: always()
-        run: ./scripts/dev/custom_check.sh .
 
       - name: Install cppcheck
         if: always()

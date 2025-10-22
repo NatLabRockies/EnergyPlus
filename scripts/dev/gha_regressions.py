@@ -54,20 +54,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import json
-import os
+import multiprocessing
 import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy, rmtree
 from traceback import print_exc
 from zoneinfo import ZoneInfo
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from energyplus_regressions.builds.base import BuildTree
-from energyplus_regressions.runtests import SuiteRunner
-from energyplus_regressions.structures import EndErrSummary, TestEntry, TextDifferences
+from energyplus_regressions.builds.base import BuildTree  # type: ignore[import]
+from energyplus_regressions.runtests import SuiteRunner  # type: ignore[import]
+from energyplus_regressions.structures import EndErrSummary, TestEntry, TextDifferences  # type: ignore[import]
 
 
 def run_single_entry(
@@ -101,11 +100,11 @@ class RegressionManager:
         self.summary_results = {}
         self.num_idf_inspected = 0
         # self.all_files_compared = []  TODO: need to get this from regression runner
-        import energyplus_regressions
+        import energyplus_regressions  # type: ignore[import]
 
         self.threshold_file = str(Path(energyplus_regressions.__file__).parent / "diffs" / "math_diff.config")
 
-    def process_single_file_regressions(self, idf_name: str, entry: TestEntry) -> [TestEntry, bool]:
+    def process_single_file_regressions(self, idf_name: str, entry: TestEntry) -> tuple[TestEntry, bool]:
 
         self.num_idf_inspected += 1
         this_file_diffs = []

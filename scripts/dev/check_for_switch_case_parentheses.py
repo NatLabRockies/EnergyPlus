@@ -53,27 +53,64 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from collections import Counter
 from json import dumps
 from pathlib import Path
 from sys import exit
 
-d = Path(__file__).resolve().parent.parent.parent / 'src' / 'EnergyPlus'
-total_case_parentheses = 0
-for p in d.glob("**/*"):
-    if p.is_file() and str(p.name).endswith('.cc') or str(p.name).endswith('.hh'):
-        file_lines = p.open(encoding='utf-8', errors='ignore').readlines()
-        for line_number, li in enumerate(file_lines, start=1):
-            remaining_line = li.strip()
-            if '//' in li:
-                index = li.index('//')
-                remaining_line = li[:index]
-            if 'case (' in remaining_line and '):' in remaining_line:
-                total_case_parentheses += 1
-                print(dumps({
-                    "tool": "check_for_switch_case_parentheses",
-                    "filename": str(p.relative_to(d)), "file": str(p.relative_to(d)),
-                    "line": line_number, "messagetype": "error", "message": "Found Parenthesized Switch Case Label"
-                }))
+from base_hook import (
+    SRC_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
 
-if total_case_parentheses > 0:
-    exit(1)
+EXTENSIONS = {".hh", ".cc"}
+
+
+def check_for_switch_case_parentheses(filepath: Path) -> list[LogMessage]:
+    """Check a single file for switch case parentheses."""
+    lines = filepath.read_text(encoding="utf-8", errors="strict").splitlines()
+
+    log_messages: list[LogMessage] = []
+
+    for line_num, line in enumerate(lines, start=1):
+        line = line.strip().split("//")[0]
+        if "case (" in line and "):" in line:
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_switch_case_parentheses",
+                    filepath=filepath,
+                    line_number=line_num,
+                    line=line,
+                    message="Found Parenthesized Switch Case Label",
+                )
+            )
+
+    return log_messages
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Check for Switch Case Parentheses")
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and f.is_relative_to(SRC_DIR)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = list(collect_files(base_dir=SRC_DIR, extensions=EXTENSIONS, recursive=True, dirs_to_skip=[]))
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    errors_list_of_lists = parallel_apply(func=check_for_switch_case_parentheses, filepaths=files)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)
