@@ -2,7 +2,7 @@
 
 The Photovoltaics module includes three different models referred to as ``Simple'', ``Equivalent One-Diode'' and ``Sandia'' and the choice will determine the mathematical models (and input data) used to determine the energy produced by solar/electric conversion panels. There is also a PVWatts generator which abstracts away specifying PV modules and array properties for a simpler input structure. The EnergyPlus photovoltaic array models are called one at a time at the HVAC system timestep along with other electrical generation components such as gas turbines and diesel engines.
 
-All of the photovoltaic models with the exception of the PVWatts model share the same models for predicting incident solar radiation that are also used for the solar thermal calculations and are described in the section Climate, Sky and Solar/Shading Calculations. The PVWatts generator uses the same solar calculations as the SAM software or PVWatts web API. 
+All of the photovoltaic models with the exception of the PVWatts model share the same models for predicting incident solar radiation that are also used for the solar thermal calculations and are described in the section Climate, Sky and Solar/Shading Calculations. The PVWatts generator uses the same solar calculations as the SAM software or PVWatts web API.
 
 Note that some of the terminology used to discussed photovoltaics overlaps with terminology in software development and both may apply in these descriptions. The word \emph{module} may refer to a PV panel or to a C++ programming entity. \emph{Model} may refer to a manufacturers production model for a specific type of PV module or to a mathematical model used for engineering analysis. \emph{Array} may refer to a collection of PV modules wired together or to a mathematical variable with multiple elements.
 
@@ -19,13 +19,13 @@ The Generator:PV:Simple object describes about the simplest model for predicting
 % table 89
 \begin{longtable}[l]{p{1.2in}p{4.8in}}
 \caption{Nomenclature for Simple Photovoltaic model \label{table:nomenclature-for-simple-photovoltaic-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical Variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature for Simple Photovoltaic model} \tabularnewline
-\toprule 
+\toprule
 Mathematical Variable & Description \tabularnewline
 \midrule
 \endhead
@@ -62,13 +62,13 @@ The module determines PV current as a function of load voltage. Other OUTPUTS in
 % table 90
 \begin{longtable}[l]{p{1.2in}p{4.8in}}
 \caption{General Nomenclature for the PV model \label{table:general-nomenclature-for-the-pv-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{General Nomenclature for the PV model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endhead
@@ -273,13 +273,13 @@ This section presents the mathematical description of the Sandia model from a dr
 % table 91
 \begin{longtable}[c]{p{1.2in}p{4.8in}}
 \caption{Nomenclature for Sandia PV model \label{table:nomenclature-for-sandia-pv-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature for Sandia PV model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endhead

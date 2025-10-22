@@ -6,19 +6,19 @@ Condenser hot gas reheat model for DX Cooling Coil System
 **Florida Solar Energy Center**
 
  - Nineth edition
- - Revised design document based on the comments from Mike 
+ - Revised design document based on the comments from Mike
  - Revision Date: 12/11/19
  - Eighth edition
- - Revised design document based on the conference call and discussion with Rich on 12/11/19 
+ - Revised design document based on the conference call and discussion with Rich on 12/11/19
  - Revision Date: 12/11/19
  - Seventh edition
- - Revised design document based on the conference call on 12/4/19 
+ - Revised design document based on the conference call on 12/4/19
  - Revision Date: 12/5/19
  - Sixth edition
- - Revised design document based on new coil model 
+ - Revised design document based on new coil model
  - Revision Date: 12/2/19
  - Fifth edition
- - Add idd change and design document based on new coil model 
+ - Add idd change and design document based on new coil model
  - Revision Date: 11/27/19
  - Foruth Edition
  - Add design document
@@ -29,9 +29,9 @@ Condenser hot gas reheat model for DX Cooling Coil System
  - Second Draft
  - Add Conference call discussion and E-mail communications from Brent. Also add simulation logic for multispeed coils
  - Revision Date: 10/14/19
- - First Draft 
+ - First Draft
  - Original Date: 9/24/19
- 
+
 
 ## Justification for New Feature ##
 
@@ -39,7 +39,7 @@ Many equipment manufacturers offer dehumidification reheat using condenser hot g
 
 In applications where active humidity control is used to control either discharge air or space air relative humidity, dehumidification reheat is required to prevent sensible overcooling. Dehumidification by conventional means such as electric resistance or fossil fuel combustion heaters is costly and energy-inefficient. To confront this challenge manufacturers have developed schemes to take heat from the DX refrigeration system condenser and use it to provide what is "free" reheat. These schemes are typically referred to as "hot gas reheat". Beyond simply using hot gas for reheat, some manufacturers have devised controls to allow dehumidification and hot gas reheat at times of high sensible load, low sensible load, or no sensible load.
 
-Currently EnergyPlus does not provide modeling capabilities for hot gas reheat. Addition of this feature to EnergyPlus would allow engineers to evaluate the energy-efficient humidity control options. An EnergyPlus model for this feature would need to model not just the use of hot gas for free reheat, but also controls for these  dehumidification modes. 
+Currently EnergyPlus does not provide modeling capabilities for hot gas reheat. Addition of this feature to EnergyPlus would allow engineers to evaluate the energy-efficient humidity control options. An EnergyPlus model for this feature would need to model not just the use of hot gas for free reheat, but also controls for these  dehumidification modes.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -51,7 +51,7 @@ Thanks for your comments. I am going to incorporate your suggestions. For Commen
 
 Gu
 
-From: Michael J Witte <mjwitte@gard.com> 
+From: Michael J Witte <mjwitte@gard.com>
 Sent: Friday, December 13, 2019 11:04 AM
 To: Lixing Gu <gu@fsec.ucf.edu>; 'Lawrence Scheier' <lscheier@sei-associates.com>; 'Brent Griffith' <brent.griffith@energyarchmage.com>; 'Richard Raustad' <rraustad@fsec.ucf.edu>; 'Edwin Lee' <leeed2001@gmail.com>; 'Spielbauer, Jim' <jspielbauer@trane.com>; 'Chidambaram, Nagappan' <nagappan.chidambaram@trane.com>; 'Tianzhen Hong' <thong@lbl.gov>; 'Roth, Amir' <amir.roth@ee.doe.gov>; 'Jason Turner' <jason@emptycrate.com>; 'jason.degraw' <jason.degraw@gmail.com>
 Subject: Re: Sizing, etc. call this Wednesday
@@ -71,13 +71,13 @@ Tianzhen rasied an issue to report waste heat receovery when the Reheat mode is 
 
 Answer:
 
-I will add two new report variables to catch waster heat recovery in the struct CoilCoolingDX as 
+I will add two new report variables to catch waster heat recovery in the struct CoilCoolingDX as
 
     Real64 recoeredHeatEnergy = 0.0;
     Real64 recoeredHeatEnergyRate = 0.0;
 
 The receovered waste heat energy is estimated in the equation below after discussion with Carrier:
- 
+
 recoeredHeatEnergy = (SensibleEnergy_NormalOperation - SensibleEnergy_ReheatMode) * ModeRatio
 
 In addition, I will add two more output variables to catch operation mode and mode raio:
@@ -91,13 +91,13 @@ We had discussion this morning regarding autosize of SHR.
 
 Although different SHRs in different operation modes are expected, the same sizing code will be used to autosize the same SHR will be used, until we find a better algorithm to autosie SHR in different operation modes.
 
-In addition, an optional aurgument will be added as LoadSHR  
+In addition, an optional aurgument will be added as LoadSHR
 
     CoilCoolingDX::simulate(int useAlternateMode, Real64 PLR, int speedNum, Real64 speedRatio, int fanOpMode, Real64 LoadSHR = 1.0);
 
 The loadSHR is provided from the parent object, such as unitary system, because the coil model does not know the required loadSHR, whihc is used to determine the coil operation mode.
 
-	LoadSHR = ZoneLoad / (ZoneLoad + MoistureLoad * hg) 
+	LoadSHR = ZoneLoad / (ZoneLoad + MoistureLoad * hg)
 
 When LoadSHR is passed to CoilCoolingDX, the coil model can perform ModeStage determination and ModeRatio calculcation internally, so that external call will be perfromaed as a single function call. In addition, a global variable will not be used instead.
 
@@ -127,7 +127,7 @@ Lawrence Scheier; Michael Witte; Ricahrd Raustad; Edwind Lee; Jim Spielbauer; Na
 
 The proposed simulation logic covers a single speed coil only. The logic should also cover multispeed coils.
 
-The existing coil object may be revised to accomodate 3 operation modes by adding new fields or modifying existing fields, when the new coil object is available. 
+The existing coil object may be revised to accomodate 3 operation modes by adding new fields or modifying existing fields, when the new coil object is available.
 
 ###E-mail communication between Brent and me
 
@@ -160,18 +160,18 @@ Gu
 
 ####Brent's comments
 
-From: Brent Griffith <Brent.Griffith@EnergyArchmage.com> 
+From: Brent Griffith <Brent.Griffith@EnergyArchmage.com>
 Sent: Monday, October 14, 2019 11:33 AM
 To: 'Lixing Gu' <gu@fsec.ucf.edu>; 'Lawrence Scheier' <lscheier@sei-associates.com>; 'Michael J Witte' <mjwitte@gard.com>; 'Richard Raustad' <rraustad@fsec.ucf.edu>; 'Edwin Lee' <leeed2001@gmail.com>; 'Spielbauer, Jim' <JSPIELBAUER@trane.com>; 'Chidambaram, Nagappan' <Nagappan.Chidambaram@trane.com>
 Subject: RE: Sizing, etc. call this Wednesday
 
 Sorry I missed the call last week.
 
-Gu, I was surprised the NFP makes no mention of the existing Coil:Heating:Desuperheater model and its approach.  I guess it is too simplified but I would think the NFP should discuss its shortcomings and why a new object is needed. 
+Gu, I was surprised the NFP makes no mention of the existing Coil:Heating:Desuperheater model and its approach.  I guess it is too simplified but I would think the NFP should discuss its shortcomings and why a new object is needed.
 
 What about the new generation DX coil model, shouldn’t this build off of that work?
 
-As an aside, I think next generation humidity control systems will also need improved humidity setpoint managers based on zone moisture loads.  The current ones are accurate only when there is a one air system inlet node into the zone and 100% of the air entering the zone is from the central air handler.  For more complex zone configurations, such as PIU air terminals, combined Zone HVAC and DOAS, more than one air system, etc., the central air humidity setpoints are not being calculated correctly because the primary air flow rate is much lower than the total air system inlet flows into a zone. 
+As an aside, I think next generation humidity control systems will also need improved humidity setpoint managers based on zone moisture loads.  The current ones are accurate only when there is a one air system inlet node into the zone and 100% of the air entering the zone is from the central air handler.  For more complex zone configurations, such as PIU air terminals, combined Zone HVAC and DOAS, more than one air system, etc., the central air humidity setpoints are not being calculated correctly because the primary air flow rate is much lower than the total air system inlet flows into a zone.
 
 Was there any discussion of water coil controller?
 
@@ -181,7 +181,7 @@ Brent
 ## Overview ##
 
 The goal of this new feature is to provide a DX cooling coil capability to meet all possible demand with different sensible and latent loads by using different mode opeation in a single cooling coil. In  other words, the coil itself can meet sensible and latent loads simultaneously wihtout any additional help.
- 
+
 Using a simple space thermostat and humidistat input, the Humidi-MiZer Adaptive Dehumidification system (shown in Figure 1) changes the refrigerant flow by adjusting the position of the refrigerant solenoid valves. There are three modes of operation: Normal, Sub-Cooling and Hot Gas ReHeat.
 
 ### Operation modes ###
@@ -198,12 +198,12 @@ the sub-cooling mode of operation; a call for cooling and dehumidification. The 
 that is cooled and significantly more dehumidified, but not over-cooled. This also helps eliminate short cycling
 of the rooftop unit and improves space temperature and humidity control.
 
-Hot Gas ReHeat Mode 
+Hot Gas ReHeat Mode
 (HGSV open, LLSV closed)
 
 When there is a call for dehumidification without a call for cooling, a portion of the hot gas from the compressor
 bypasses the condenser coil and is fed into the liquid line. The air is cooled and dehumidified as it flows across the evaporator and is then reheated to neutral conditions by the Humidi-MiZer coil. When used on an Applied Rooftop
-unit the Humidi-MiZer® System becomes modulating. 
+unit the Humidi-MiZer® System becomes modulating.
 
 ![Figure 1 Schematic of dehumidimizer operation modes](HumidiMizer.PNG)
 
@@ -215,7 +215,7 @@ We will create 3 sets of performance curves. The first set repesents normal oper
 
 #### Subcooling operation
 
-When requested system load SHR is between normal operation SHR and subcooling operation SHR, the coil will operate a portion of the time at two modes to meet the request. The linear iterperation of opening ratio between two modes is applied, so that coil will act as an ideal coil to provide exactly requested sensible and latent outputs to ensure zone is controlled at given thermal and humidity setpoints. The opening ratio is equivalent to openess of liquid line solenoid valve.   
+When requested system load SHR is between normal operation SHR and subcooling operation SHR, the coil will operate a portion of the time at two modes to meet the request. The linear iterperation of opening ratio between two modes is applied, so that coil will act as an ideal coil to provide exactly requested sensible and latent outputs to ensure zone is controlled at given thermal and humidity setpoints. The opening ratio is equivalent to openess of liquid line solenoid valve.
 
 #### Reheat operation
 
@@ -227,9 +227,9 @@ When requested system load SHR is between normal operation SHR and reheat mode o
 
 Coil:Cooling:DX:AdaptiveDehumidifcation
 
-The new object is close to Coil:Cooling:DX:TwoStageWithHumidityControlMode. It requires 3 sets of performance curves corresponding to 3 operation modes, respectively. Since Reheat Mode works in a narrow operation range, it has a field with maximum outdoor dry-bulb temperature to restrict the reheat mode operation. The minimum outdoor air dry-bulb temperature should be the thermal setpoint. Since this value is available, there is no need to be as input. 
+The new object is close to Coil:Cooling:DX:TwoStageWithHumidityControlMode. It requires 3 sets of performance curves corresponding to 3 operation modes, respectively. Since Reheat Mode works in a narrow operation range, it has a field with maximum outdoor dry-bulb temperature to restrict the reheat mode operation. The minimum outdoor air dry-bulb temperature should be the thermal setpoint. Since this value is available, there is no need to be as input.
 
-This new object will be called by two parent objects: CoilSystem:Cooling:DX and AirLoopHVAC:UnitarySystem. 
+This new object will be called by two parent objects: CoilSystem:Cooling:DX and AirLoopHVAC:UnitarySystem.
 
 ### Pseudocode
 
@@ -241,7 +241,7 @@ Note: There are 3 objects of CoilPerformance:DX:Cooling to provide coil performa
 
 This operation does not require special inputs. Operation SHR is calculated based on rated SHR and ADT method. There is no need to input SHR function names.
 
-2. Subcooling operation at LLSV fully closed 
+2. Subcooling operation at LLSV fully closed
 
 This operation requires inputs of SHR functions of temperature and flow fraction with Fields A9 and A10.
 
@@ -325,7 +325,7 @@ Calculate coil load SHR_{load} = Sensible load / (Sensible load + Latent load)
 		Perform subcooling operation
 
 		SenLoad = SenOut_{Sub} * PLR
-   
+
         If SenLoad > SenOut_{Sub}, go to "Multispeed reheat operation"
 
 	End IF
@@ -420,8 +420,8 @@ Gross Rated Total Cooling Capacity: Use existing method
 Gross Rated Sensible Heat Ratio: Use existing method
 
 Rated Air Flow Rate: Use existing method
- 
-####Subcooling operation at LLSV fully closed 
+
+####Subcooling operation at LLSV fully closed
 
 Gross Rated Total Cooling Capacity: Use existing method
 
@@ -547,7 +547,7 @@ Coil:Cooling:DX:AdaptiveDehumidifcation,
 
 ## Input Description ##
 
-The secition includes a new object and modified 2 objects shown in the idd, and input samples shown in the idf. 
+The secition includes a new object and modified 2 objects shown in the idd, and input samples shown in the idf.
 
 ### Coil:Cooling:DX:AdaptiveDehumidifcation in the idd
 
@@ -611,7 +611,7 @@ The secition includes a new object and modified 2 objects shown in the idd, and 
   	N3,  \field Maximum Outdoor Dry-Bulb Temperature for Reheat Mode Operation
        \type real
        \default 25.0
-       \units C 
+       \units C
   	A11, \field Supply Water Storage Tank Name
        \type object-list
        \object-list WaterStorageTankNames
@@ -767,10 +767,10 @@ An addiitonal option field is proposed as A7 to provide 3 operation modes. The e
 	   A7; \field Alternative Operating Mode 2
        \note The alternative operating mode is used for enhanced dehumidification.
        \note If this is blank, the coil will always operate in the base operating mode.
-       \note If both Alternative Operating Mode 1 and Alternative Operating Mode 2 are defined here, 
+       \note If both Alternative Operating Mode 1 and Alternative Operating Mode 2 are defined here,
        \note the coil will perform both Subcool and Reheat modes for enhance dehumidification.
-       \note Alternative Operating Mode 1 is used as Subcool mode, and Alternative Operating Mode 2 
-       \note is used as Reheat mode. 
+       \note Alternative Operating Mode 1 is used as Subcool mode, and Alternative Operating Mode 2
+       \note is used as Reheat mode.
        \type object-list
        \object-list DXCoolingOperatingModeNames
 </span>
@@ -799,7 +799,7 @@ No transition is needed.
 
 ## Design Document ##
 
-The new feature will revise several modules, listed below: 
+The new feature will revise several modules, listed below:
 
 HVACDXSystem
 
@@ -811,13 +811,13 @@ DXCoils
 
 ### HVACDXSystem ###
 
-The modifiacation is to add a new coil type as a choice. 
+The modifiacation is to add a new coil type as a choice.
 
 ####A new parameter will be created to represent a new coil type
 
     int const DehumidControl_SubCoolReheat(3);
 
-####Modify GetDXCoolingSystemInput 
+####Modify GetDXCoolingSystemInput
 
 The function of GetDXCoolingSystemInput will be modified to read a new coil type
 
@@ -827,7 +827,7 @@ Call a new function GetSenCapacityfromHumidimizer to get full sensible capacity
 
 If (CoilSenCap > SensibleLoad) Then
 
-	Call a new function CalcHumidimizerDXCoilCooling in DXCoils to get system outputs based on given PartLoadFrac for a single speed coil via iteration 
+	Call a new function CalcHumidimizerDXCoilCooling in DXCoils to get system outputs based on given PartLoadFrac for a single speed coil via iteration
 
 Else
 
@@ -842,22 +842,22 @@ Add a new parameter to represent a new coil type
 
     int const CoilDX_SubcoolReheat(33);
 
-Note: This new coil type will be used in UnitarySystem. Although the new parameter can be used in HVACDXSystem, it is better for HVACDXSystem to use its own coil type, to be consistent with others.  
+Note: This new coil type will be used in UnitarySystem. Although the new parameter can be used in HVACDXSystem, it is better for HVACDXSystem to use its own coil type, to be consistent with others.
 
 ### UnitarySystem ###
 
 The modification consists of reading inputs and calling a new coil type for coil simulations.
 
-####Modify GetDXCoolingSystemInput 
+####Modify GetDXCoolingSystemInput
 
 The function of GetDXCoolingSystemInput will be modified to read a new coil type
 
-Asign a new coil type as 
+Asign a new coil type as
 thisSys.m_CoolingCoilType_Num = CoilDX_SubcoolReheat
 
 #### controlUnitarySystemOutput
 
-Modify the code to call a new coil function in DXCoils. 
+Modify the code to call a new coil function in DXCoils.
 
 ### DXCoils ###
 
@@ -882,7 +882,7 @@ CoilPerfType_Reheat: Hold performance object type at Rehat operation
 
 CoilPerfNum_Reheat: Performance object number at Reheat operation
 
-MaxReheatOBD: Maximum Outdoor Dry-Bulb Temperature for Reheat Mode Operation 
+MaxReheatOBD: Maximum Outdoor Dry-Bulb Temperature for Reheat Mode Operation
 
 The existing variables can be used to cover other inputs.
 
@@ -892,7 +892,7 @@ Modify the function to read a new coil object and assign inputs to existing and 
 
 ####Create a new function CalcHumidimizerDXCoilCooling
 
-A new function will be created to perform coil simulations with possible arguments. 
+A new function will be created to perform coil simulations with possible arguments.
 
     void CalcHumidimizerDXCoilCooling(int const DXCoilNum,     // the number of the DX heating coil to be simulated
                                      Real64 const SpeedRatio, // = (CompressorSpeed - CompressorSpeedMin) / (CompressorSpeedMax - CompressorSpeedMin)
@@ -907,7 +907,7 @@ It should be pointed out that this function will handle both single speed and mu
 ####Create a new function GetCapacityfromHumidimizer
 
     void GetSenCapacityfromHumidimizer(int const DXCoilNum,     // the number of the DX heating coil to be simulated
-                                     Real64 const SensibleLoad, 
+                                     Real64 const SensibleLoad,
                                      Real64 const LatentLoad,   // cycling part load ratio
                                      int const SpeedNum,      // Speed number
                                      int const FanOpMode,     // Sets fan control to CycFanCycCoil or ContFanCycCoil
@@ -919,7 +919,7 @@ The function outputs coil capacity based on sensible and latent loads, and Speed
 1. Determines operation mode with given load ratio as SHR
 2. Calculate either subcooling ratio or reheat ratio (mode ratio) based on operation mode
 3. Calculate coil capacity with the mode ratio
-4. Output sensible capacity 
+4. Output sensible capacity
 
 ### <span style="color:red">CoilCoolingDX (New coil model) </span>###
 
@@ -932,12 +932,12 @@ The argument type of useAlternateMode is changed from bool to int to represent 3
 useAlternateMode
 
 =0 Normal
- 
+
 =1 Enhanced
 
 <span style="color:red">=2 SubcoolReheat mode (new)</span>
 
-#### Add one more optional arguments in simulate() 
+#### Add one more optional arguments in simulate()
 
 The new optional argument will be used to represent Mode ratio either between Normal and Subcool or between Normal and Reheat.
 
@@ -950,14 +950,14 @@ Proposed:
 Two additional option argument are added to allow SubcoolReheatCoil cooling
 
     void simulate(
-<span style="color:red">int useAlternateMode</span>, Real64 PLR, int speedNum, Real64 speedRatio, int fanOpMode, 
+<span style="color:red">int useAlternateMode</span>, Real64 PLR, int speedNum, Real64 speedRatio, int fanOpMode,
 <span style="color:red">Real64 LoadSHR</span>);
 
-ModeRatio: A mode ratio with the same SHR between subcooling or reheat and normal operation. The SHR is determined by the system sensible and latent loads. 
+ModeRatio: A mode ratio with the same SHR between subcooling or reheat and normal operation. The SHR is determined by the system sensible and latent loads.
 
 ### CoilCoolingDXCurveFitOperatingMode ###
 
-The modification is made to GetInput(). 
+The modification is made to GetInput().
 
 #### CoilCoolingDXCurveFitOperatingMode ####
 
@@ -965,7 +965,7 @@ Read a new fields as cAlphaArgs(7)
 
 ### CoilCoolingDXCurveFitPerformance ###
 
-The modifications are made to struct CoilCoolingDXCurveFitPerformance and simulate() and calculate() by adding one more optional argument for each function. 
+The modifications are made to struct CoilCoolingDXCurveFitPerformance and simulate() and calculate() by adding one more optional argument for each function.
 
 #### struct CoilCoolingDXCurveFitPerformance
 
@@ -1040,7 +1040,7 @@ void CoilCoolingDXCurveFitPerformance::simulate(const DataLoopNode::NodeData &in
 				Combine node outputs with mode ratio
 			}
 
-        	this->calculate(this->alternateMode2, inletNode, outletNode, PLR, speedNum, speedRatio, fanOpMode, condInletNode, condOutletNode); 
+        	this->calculate(this->alternateMode2, inletNode, outletNode, PLR, speedNum, speedRatio, fanOpMode, condInletNode, condOutletNode);
 </span>
 	} else  if (useAlternateMode == 1) {
         	this->calculate(this->alternateMode, inletNode, outletNode, PLR, speedNum, speedRatio, fanOpMode, condInletNode, condOutletNode);
@@ -1058,7 +1058,7 @@ void CoilCoolingDXCurveFitPerformance::simulate(const DataLoopNode::NodeData &in
     Real64 recoeredHeatEnergyRate = 0.0;
 
 The receovered waste heat energy is estimated in the equation below after discussion with Carrier:
- 
+
 recoeredHeatEnergy = (SensibleEnergy_NormalOperation - SensibleEnergy_ReheatMode) * ModeRatio
 
 ##### Report SubcoolReheat coil performance
@@ -1077,11 +1077,11 @@ OperatingMode is a stage to show which mode is operated at the current time
                             "System",
                             "Average",
                             this->name);
-        SetupOutputVariable("SubcooReheat Cooling Coil Operation Mode Ratio", 
-                            OutputProcessor::Unit::None, 
-                            this->performance.ModeRatio, 
-                            "System", 
-                            "Average", 
+        SetupOutputVariable("SubcooReheat Cooling Coil Operation Mode Ratio",
+                            OutputProcessor::Unit::None,
+                            this->performance.ModeRatio,
+                            "System",
+                            "Average",
                             this->name);
 
 
@@ -1095,12 +1095,10 @@ In order to make UnitarySystem recognize that the cooling coil type is SubcoolRe
 
 If 3 fields are not empty(), the coil type is SubcoolReheatCoil as
 
-NotEmpty(base_operating_mode_name && alternate_operating_mode_name && alternate_operating_mode2_name)  
+NotEmpty(base_operating_mode_name && alternate_operating_mode_name && alternate_operating_mode2_name)
 
-#####Calculate LoadSHR 
+#####Calculate LoadSHR
 
 The loadSHR is provided from the parent object, such as unitary system, because the coil model does not know the required loadSHR, whihc is used to determine the coil operation mode.
 
-	LoadSHR = ZoneLoad / (ZoneLoad + MoistureLoad * hg) 
- 
-
+	LoadSHR = ZoneLoad / (ZoneLoad + MoistureLoad * hg)

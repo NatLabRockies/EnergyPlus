@@ -11,11 +11,11 @@ Enhancement of Handling of Rainfall
 ## Justification for New Feature ##
 
 There are three modules that currently allow rainfall/liquid precipitation and water collection inputs in EnergyPlus:
-1. Rainfall flag and liquid precipitation amounts on the EPW files 
+1. Rainfall flag and liquid precipitation amounts on the EPW files
 1. *Site:Precipitation* object
 1. *RoofIrrigation* object
 
-Among them, rainfall flags in the weather file are used for the outside surface heat balance; *Site:Precipitation* is used for rainwater harvesting (in the *WaterUse:RainCollector* object) and the green roof; RoofIrrigation is used for the green roof; and precipitation amounts in the weather file are not used at all. 
+Among them, rainfall flags in the weather file are used for the outside surface heat balance; *Site:Precipitation* is used for rainwater harvesting (in the *WaterUse:RainCollector* object) and the green roof; RoofIrrigation is used for the green roof; and precipitation amounts in the weather file are not used at all.
 We propose the enhancement to integrate the use of weather file hourly precipitation amounts along with two existing input objects (*Site:Precipitation* and RoofIrrigation) to model rainwater harvesting and green roof runoff. If the *Site:Precipitation* values are presented, the values should be used. Otherwise, if there is no *Site:Precipitation* object, then values from the weather file should feed the *WaterUse:RainCollector* object and the green roof object.
 
 ## Overview ##

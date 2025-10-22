@@ -34436,7 +34436,7 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \required-field
         \type choice
         \key Fan:SystemModel
-        \key Fan:ComponentModel        
+        \key Fan:ComponentModel
         \key Fan:ConstantVolume
         \key Fan:OnOff
         \key Fan:VariableVolume
@@ -42371,7 +42371,7 @@ Fan:SystemModel,
        \type real
        \units W
        \autosizable
-       \note Fan power consumption at maximum air flow rate.  
+       \note Fan power consumption at maximum air flow rate.
        \note If autosized the method used to scale power is chosen in the following field
   A6 , \field Design Power Sizing Method
        \type choice
@@ -42414,7 +42414,7 @@ Fan:SystemModel,
         \note optional, if used fan motor heat losses that not added to air stream are transferred to zone as internal gains
         \type object-list
         \object-list ZoneNames
-  N12, \field Motor Loss Radiative Fraction 
+  N12, \field Motor Loss Radiative Fraction
         \note optional. If zone identified in previous field then this determines
         \note the split between convection and radiation for the fan motor's skin losses
         \type real

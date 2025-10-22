@@ -1495,4 +1495,3 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
   RETURN
 
 END SUBROUTINE CreateNewIDFUsingRules
-

@@ -612,14 +612,14 @@ End
 		  dim mviOrigDate As Date
 		  dim shortVersion as String =  ""
 		  dim origShortVersion as String =""
-		  
+
 		  const notFound = -1 'special meaning because used with IndexOf
-		  
+
 		  s = new Shell
 		  s.TimeOut = -1  'number of millisecond until shell is automatically terminated - a negative one indicates never to time out
 		  inFileNoExt = fileNameWithoutExtension(inFile)
 		  inFileExt = ExtensionOnly(inFile)
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origVerIndx = AllOldVersions.IndexOf(inOrigVersion)
@@ -685,7 +685,7 @@ End
 		        lblProcessing.Text = "Processing: " + origFile.Name +  "  Into: " + AllNewVersions(iVer)
 		        Window1.Refresh
 		        'msgbox dirOfTransApp.AbsolutePath + EndOfLine + TransitionApps(iVer).AbsolutePath + EndOfLine + origFile.AbsolutePath
-		        
+
 		        'for windows and linux
 		        #if TargetWindows or TargetLinux
 		          cmdLine = TransitionApps(iVer).NativePath + " " + chr(34) + origFile.NativePath + chr(34)
@@ -698,20 +698,20 @@ End
 		          cmdLine = cmdLine + " " ' leave a space before the argument
 		          cmdLine = cmdLine +  origFile.ShellPath  'pass the name of the file to be transitioned as an argument
 		        #endif
-		        
-		        
+
+
 		        ' for debugging
 		        'msgbox cmdLine
 		        'dim clip as new Clipboard
 		        'clip.Text = cmdLine
-		        
+
 		        s.Execute cmdLine
 		        'MsgBox "transition" + EndOfLine + s.ReadAll
-		        
+
 		        if s.ErrorCode <>0 then
 		          MsgBox "Error starting Transition-Vx-x-x Program: " + str(s.ErrorCode) + EndOfLine + EndOfLine + s.Result
 		        end if
-		        
+
 		        'collect audit text
 		        if auditSource.Exists then
 		          SourceStream = TextInputStream.Open(auditSource)
@@ -719,7 +719,7 @@ End
 		          SourceStream.Close
 		          auditSource.Delete 'delete the audit file
 		        end if
-		        
+
 		        'save intermediate file names
 		        if chkIntermediate.Value and iVer<finalVerIndx then
 		          origFileWithNewName = inFileNoExt +shortVersion + "." + inFileExt
@@ -731,7 +731,7 @@ End
 		          origFile.CopyFileTo(origFileInter)
 		        end if
 		      next iVer
-		      
+
 		      'delete .idfnew  .idfold  .imfnew .imfold .VCpErr
 		      call DeleteFileByName(inFileNoExt + "." + inFileExt + "new")
 		      call DeleteFileByName(inFileNoExt + "." + inFileExt + "old")
@@ -740,7 +740,7 @@ End
 		      call DeleteFileByName(inFileNoExt + ".rviold")
 		      call DeleteFileByName(inFileNoExt + ".mvinew")
 		      call DeleteFileByName(inFileNoExt + ".mviold")
-		      
+
 		      'if RVI or MVI file was not touched delete _original version
 		      if rviOrigFile.ModificationDate.TotalSeconds = rviOrigDate.TotalSeconds then
 		        call DeleteFileByName(inFileNoExt + origShortVersion + ".rvi")
@@ -748,8 +748,8 @@ End
 		      if mviOrigFile.ModificationDate.TotalSeconds = mviOrigDate.TotalSeconds then
 		        call DeleteFileByName(inFileNoExt + origShortVersion + ".mvi")
 		      end if
-		      
-		      
+
+
 		      'create audit file
 		      auditOutput = new FolderItem(inFileNoExt + "_transition.audit")
 		      if auditOutput.Exists then
@@ -758,12 +758,12 @@ End
 		      OutStream = TextOutputStream.Create(auditOutput)
 		      OutStream.Write(auditText)
 		      OutStream.Close
-		      
+
 		      'dialog done waiting
 		      lblProcessing.Text = "Processing: "
 		      lblProcessing.Visible = False
 		      cmdConvert.Enabled = False
-		      
+
 		      'show summary message
 		      if showSummary then
 		        MsgBox "Completed transition of:" + EndOfLine + EndOfLine + origFile.NativePath + EndOfLine + EndOfLine + "From " + inOrigVersion + " to " + inFinalVersion
@@ -782,7 +782,7 @@ End
 		    end if
 		  end if
 		  s.Close
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -803,13 +803,13 @@ End
 		  dim repcsvName as String
 		  dim repcsvFileInTrans as FolderItem
 		  dim repcsvFileInOrig as FolderItem
-		  
+
 		  origVerIndx = AllNewVersions.IndexOf(inOrigVersion)
 		  if origVerIndx = -1 then origVerIndx = AllNewVersions.FirstIndex 'if not found just start at the beginning
-		  
+
 		  finalVerIndx = AllNewVersions.IndexOf(inFinalVersion)
 		  if finalVerIndx = -1 then finalVerIndx = AllNewVersions.LastIndex 'if not found go until the last
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origFileDirectory = origFile.Parent
@@ -844,7 +844,7 @@ End
 		      end if
 		    next iVer
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -863,13 +863,13 @@ End
 		  dim repcsvName as String
 		  dim repcsvFileInOrig as FolderItem
 		  dim dirOfTransApp as FolderItem
-		  
+
 		  origVerIndx = AllNewVersions.IndexOf(inOrigVersion)
 		  if origVerIndx = -1 then origVerIndx = AllNewVersions.FirstIndex 'if not found just start at the beginning
-		  
+
 		  finalVerIndx = AllNewVersions.IndexOf(inFinalVersion)
 		  if finalVerIndx = -1 then finalVerIndx = AllNewVersions.LastIndex 'if not found go until the last
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origFileDirectory = origFile.Parent
@@ -904,7 +904,7 @@ End
 		      end if
 		    next iVer
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -959,7 +959,7 @@ End
 		  dim foundOld as Integer
 		  dim foundNew as Integer
 		  const notFound = -1 'special meaning because used with IndexOf
-		  
+
 		  'clear the list
 		  pmnuNewVersion.DeleteAllRows
 		  'first find the version in the list
@@ -994,7 +994,7 @@ End
 		    cmdConvert.Enabled = False
 		    MsgBox "Cannot determine if the file needs to be updated."
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -1014,7 +1014,7 @@ End
 		  Var strParts() as String
 		  dim sortVersion as String
 		  Var allSortVersions() as String
-		  
+
 		  #if TargetMacOS
 		    transFolder = app.ExecutableFile.Parent.Parent.Parent.Parent
 		  #else
@@ -1035,10 +1035,10 @@ End
 		      '1234567890123456789012345678901
 		      ' this is the original line that did not work well with Linux because of use of the extension
 		      'if fileName.Left(12).Lowercase = "transition-v" and filename.right(4).Lowercase = ".exe" then
-		      
+
 		      ' to fix #9193 which is the lack of support for version numbers in the form 22.1.0
 		      'Transition-V9-6-0-to-V22-1-0.exe
-		      
+
 		      if fileName.Left(12).Lowercase = "transition-v" then
 		        strParts = fileName.Split("V")
 		        oldVersionWithDashes = strParts(1)
@@ -1064,7 +1064,7 @@ End
 		  'sort the arrays (usually sorted already but just in case)
 		  'AllNewVersions.SortWith(TransitionApps,AllOldVersions)
 		  allSortVersions.SortWith(AllNewVersions,TransitionApps,AllOldVersions)
-		  
+
 		  ' THE FOLLOWING IS TO HELP DEBUG THE LIST OF TRANSITION EXE FILES
 		  'display the list
 		  'for i = 0 to AllNewVersions.Ubound
@@ -1078,13 +1078,13 @@ End
 		  'next i
 		  'MsgBox "Application program location:" + EndOfLine + "  " + transFolder.NativePath + EndOfLine + EndOfLine + "Number of files: "  _
 		  '+ str(numFiles) + EndOfLine + EndOfLine + "Versions found: " + EndOfLine + s +  EndOfLine + "Transition Programs:" _
-		  '+ EndOfLine + "AllSortVersions" + EndOfLine + v + EndOfLine 
+		  '+ EndOfLine + "AllSortVersions" + EndOfLine + v + EndOfLine
 		  '+ EndOfLine + t + EndOfline + "All files: " + EndOfLine + u + EndOfLine _
-		  
-		  
-		  
-		  
-		  
+
+
+
+
+
 		End Sub
 	#tag EndMethod
 
@@ -1138,7 +1138,7 @@ End
 		    end if
 		  end if
 		  return returnVersion
-		  
+
 		End Function
 	#tag EndMethod
 
@@ -1234,7 +1234,7 @@ End
 		      cmdConvert.Enabled =True
 		    end if
 		  end if
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1247,7 +1247,7 @@ End
 		  dim curVersion as String =""
 		  dim activeFile as FolderItem
 		  dim activeFileName as String = ""
-		  
+
 		  'Called when the CONVERT button is pressed
 		  me.MouseCursor = system.Cursors.Wait
 		  me.Refresh
@@ -1255,7 +1255,7 @@ End
 		  #if TargetWindows or TargetLinux then
 		    call CopyIDDandCSV(txtFileName.Text, txtCurrentVersion.Text, pmnuNewVersion.Text)
 		  #EndIf
-		  
+
 		  activeFileName = txtFileName.Text
 		  activeFile = new FolderItem(activeFileName)
 		  'on MacOS the file name sometime has an extra extension of .txt
@@ -1266,7 +1266,7 @@ End
 		    end if
 		  #endif
 		  'MsgBox "cmdConvert-Action-2: " + activeFileName + " extension " + ExtensionOnly(activeFileName)
-		  
+
 		  if ExtensionOnly(txtFileName.Text) = "lst" then
 		    IF activeFile.Exists then
 		      SourceStream = TextInputStream.Open(activeFile)
@@ -1300,11 +1300,11 @@ End
 		  #if TargetWindows or TargetLinux then
 		    call DeleteCopiedIDDandCSV(txtFileName.Text, txtCurrentVersion.Text, pmnuNewVersion.Text)
 		  #EndIf
-		  
-		  
-		  
+
+
+
 		  me.MouseCursor = system.Cursors.StandardPointer
-		  
+
 		  Exception
 		    MsgBox "File not found (c): " + curLine
 		End Sub
@@ -1314,7 +1314,7 @@ End
 	#tag Event
 		Sub Action()
 		  close()
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1323,7 +1323,7 @@ End
 		Sub Action()
 		  dim SourceStream as TextInputStream
 		  dim curFile as FolderItem
-		  
+
 		  curFile = new FolderItem(fileNameWithoutExtension(txtFileName.Text) + "_transition.audit" )
 		  if curFile.Exists then
 		    SourceStream = TextInputStream.Open(curFile)
@@ -1332,9 +1332,9 @@ End
 		    displaytext.Title = "Audit File"
 		    DisplayText.ShowModal
 		  end if
-		  
-		  
-		  
+
+
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1354,7 +1354,7 @@ End
 		  DisplayText.TextArea1.Text = t
 		  displaytext.Title = "About.."
 		  DisplayText.ShowModal
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents

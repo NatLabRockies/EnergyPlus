@@ -14,7 +14,7 @@ After checking the results matched the Python version, it was considered ready f
 
 The next step is preparing the EnergyPlus code to accept the component model.
 One major clean up I'm wanting to do is break the large ground heat exchanger source, header, and test files into a set of smaller files, each with a dedicated model.
-Right now, the file contains a base class, a vertical model class, and a slinky heat exchanger class.  
+Right now, the file contains a base class, a vertical model class, and a slinky heat exchanger class.
 I will be making a new directory in the src/ folder called GroundHeatExchangers, where I will put Base.hh, Vertical.hh, and Slinky.hh files, along with accompanying source files.
 I will also update the unit tests to match this structure.
 Eventually it would be cool to bring in any other specific ground heat exchanger objects, but it's not necessary here.
@@ -133,14 +133,14 @@ Defining a GLHE simulation now involves the following inputs:
   - physical borehole field properties
   - response factor terms
   - references a properties object for borehole specific properties
-- The `GroundHeatExchanger:Vertical:Properties` object allows specifying borehole geometry, and grout and pipe properties 
+- The `GroundHeatExchanger:Vertical:Properties` object allows specifying borehole geometry, and grout and pipe properties
 - The borehole specifications may be done in two ways:
   - A `GroundHeatExchanger:Vertical:Array` object allows quickly specifying a rectangular borehole field of N x M boreholes with spacing B.
   - The user may provide individual `GroundHeatExchanger:Vertical:Single` objects that each define their own X, Y positions to allow flexible borehole field arrangement.
 
 In order to complete these GLHE enhancements, the following modifications are anticipated:
 
-- Add `ghedesigner` to the Python ecosystem in the EnergyPlus package 
+- Add `ghedesigner` to the Python ecosystem in the EnergyPlus package
 - Convert the call to `cpgfunction` into a call to GHEDesigner, validating the results along the way.
 - Eliminate the `cpgfunction` package from the repository
 - Add IDD elements

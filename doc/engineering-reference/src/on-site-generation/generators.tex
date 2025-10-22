@@ -563,7 +563,7 @@ The Micro CHP model is a straightforward empirical model with the exception that
 \dot m_{fuel}^{t+\Delta t} = \left\{
     \begin{array}{cl}
       \dot m_{fuel,demand}^{t+\Delta t}       &\; if~d\dot m_{fuel} / dt \le (d\dot m_{fuel}/dt)_{max} \\
-      \dot m_{fuel,demand}^t \pm (d\dot m_{fuel}/dt)_{max}      &\; if~d\dot m_{fuel} / dt > (d\dot m_{fuel}/dt)_{max} 
+      \dot m_{fuel,demand}^t \pm (d\dot m_{fuel}/dt)_{max}      &\; if~d\dot m_{fuel} / dt > (d\dot m_{fuel}/dt)_{max}
     \end{array}
   \right.
 \end{equation}
@@ -576,7 +576,7 @@ The Micro CHP model is a straightforward empirical model with the exception that
 P_{net}^{t+\Delta t} = \left\{
     \begin{array}{cl}
       P_{net,ss}^{t+\Delta t}                   & \text{if}~dP_{net} / dt \le (dP_{net}/dt)_{max} \\
-      P_{net,ss}^t \pm (dP_{net}/dt)_{max}      & \text{if}~dP_{net} / dt > (dP_{net}/dt)_{max} 
+      P_{net,ss}^t \pm (dP_{net}/dt)_{max}      & \text{if}~dP_{net} / dt > (dP_{net}/dt)_{max}
     \end{array}
   \right.
 \end{equation}
@@ -676,12 +676,12 @@ The interrelation of these two is handled by sequential substitution using an it
 The Micro CHP model has a number of different operating modes.~ The operating mode for a given system timestep is determined from the mode during the previous timestep, user inputs, and high-level controls from elsewhere in EnergyPlus.~ The operating mode is reported for the state at the end of each timestep.~ The following table summarizes the various operating modes and the criteria for switching to a new mode for any given timestep.~ The EnergyPlus implementation adds the ``Off'' mode to the modes specified by Annex 42 which corresponds to the unit being scheduled to be unavailable.~ The difference between OFF and Standby modes determines whether or not standby power is consumed.
 
 \begin{longtable}[c]{p{1.5in}p{2.05in}p{2.44in}}
-\toprule 
+\toprule
 Operating mode & Main Criteria & Notes \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Operating mode & Main Criteria & Notes \tabularnewline
 \midrule
 \endhead
@@ -891,12 +891,12 @@ The Shomate coefficients used in EnergyPlus are listed in Table~\ref{table:shoma
 {\scriptsize
 \begin{longtable}[c]{p{0.6in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}p{0.6in}}
 \caption{Shomate Coefficients used in EnergyPlus \label{table:shomate-coefficients}} \tabularnewline
-\toprule 
+\toprule
 Constituent & A & B & C & D & E & F & H & Source \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Constituent & A & B & C & D & E & F & H & Source \tabularnewline
 \midrule
 \endhead
@@ -1128,13 +1128,13 @@ P = \eta {P_W}
 % table 92
 \begin{longtable}[c]{p{1.2in}p{3.3in}p{1.5in}}
 \caption{Nomenclature for Wind Turbine model \label{table:nomenclature-for-wind-turbine-model}} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature for Wind Turbine model} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units \tabularnewline
 \midrule
 \endhead

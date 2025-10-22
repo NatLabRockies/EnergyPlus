@@ -126,4 +126,3 @@ INTEGER :: NumRenamedObjects=0
 
 
 end module VCompareGlobals
-

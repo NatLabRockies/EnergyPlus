@@ -69,16 +69,11 @@ class RH_OpeningController(EnergyPlusPlugin):
         # get handles if needed
         if self.need_to_get_handles:
             self.ZoneRH_handle = self.api.exchange.get_variable_handle(
-                state,
-                "System Node Relative Humidity",
-                "Zone 1 Node"
+                state, "System Node Relative Humidity", "Zone 1 Node"
             )
 
             self.MyOpenFactor_handle = self.api.exchange.get_actuator_handle(
-                state,
-                "AirFlow Network Window/Door Opening",
-                "Venting Opening Factor",
-                "Zn001:Wall001:Win001"
+                state, "AirFlow Network Window/Door Opening", "Venting Opening Factor", "Zn001:Wall001:Win001"
             )
 
             self.need_to_get_handles = False

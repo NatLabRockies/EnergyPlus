@@ -8899,7 +8899,7 @@ ConstructionProperty:InternalHeatSource,
        \type real
        \units m
        \minimum 0.01
-       \maximum 1.0 
+       \maximum 1.0
        \note uniform spacing between tubes or resistance wires in direction
        \note perpendicular to main intended direction of heat transfer
   N5;  \field Two-Dimensional Temperature Calculation Position
@@ -26767,9 +26767,9 @@ AirflowNetwork:Distribution:DuctSizing,
       \maximum 25.0
       \default 5.0
       \note Used only if Duct Sizing Type = MaximumVelocity or PressureLossWithMaximumVelocity.
-      \note When MaximumVelocity is entered, duct diameter is calculated at D = flow rate / 
+      \note When MaximumVelocity is entered, duct diameter is calculated at D = flow rate /
       \note cross section area.
-      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on 
+      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
       \note PressureLoss. The value is used to check to ensure the final velocity is less than
       \note the maximum value. If greater, final value will be obtained from MaximumVelocity.
       \note This field is apply for trunk size, while branch size is based on total pressure drop.
@@ -26778,8 +26778,8 @@ AirflowNetwork:Distribution:DuctSizing,
       \units Pa
       \minimum >0.0
       \note Used only if Duct Sizing Type = PressureLoss or PressureLossWithMaximumVelocity.
-      \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation  
-      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on 
+      \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation
+      \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
       \note PressureLoss. The value is used to check to ensure the final velocity is less than
       \note the maximum value. If greater, final value will be obtained from MaximumVelocity.
       \note This field is apply for trunk size, while branch size is based on total pressure drop.
@@ -26787,20 +26787,20 @@ AirflowNetwork:Distribution:DuctSizing,
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrook's equation. When there is no solution, 
-      \note velocity = 5 m/s is used to calculate duct diameter.  
+      \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
+      \note velocity = 5 m/s is used to calculate duct diameter.
  N5 , \field Total Pressure Loss Across Return Trunk
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrook's equation. When there is no solution, 
-      \note velocity = 5 m/s is used to calculate duct diameter.  
+      \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
+      \note velocity = 5 m/s is used to calculate duct diameter.
  N6 ; \field Total Pressure Loss Across Return Branch
       \type real
       \units Pa
       \minimum >0.0
-      \note Duct diameter is calculated using Colebrook's equation. When there is no solution, 
-      \note velocity = 5 m/s is used to calculate duct diameter.  
+      \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
+      \note velocity = 5 m/s is used to calculate duct diameter.
 
 AirflowNetwork:OccupantVentilationControl,
       \memo This object is used to provide advanced thermal comfort control of window opening and closing
@@ -34158,7 +34158,7 @@ Sizing:Zone,
       \note Use SupplyAirHumidityRatio to enter the humidity ratio when zone dehumidification
       \note is required. The supply air humidity ratio should be less than the zone humidity
       \note ratio at the zone thermostat and humidistat set point condition.
-      \note Use HumidityRatioDifference to enter the difference in humidity ratio from the 
+      \note Use HumidityRatioDifference to enter the difference in humidity ratio from the
       \note zone thermostat and humidistat set point condition.
       \type choice
       \key SupplyAirHumidityRatio
@@ -34177,7 +34177,7 @@ Sizing:Zone,
       \note Zone Latent Cooling Design Supply Air Humidity Ratio Input Method = HumidityRatioDifference.
       \note This input is a positive value and defines the difference between the zone humidity
       \note ratio at the thermostat and humidistat set point condition and the supply air
-      \note humidity ratio entering the zone. 
+      \note humidity ratio entering the zone.
       \minimum> 0.0
       \type real
       \default 0.005
@@ -34186,7 +34186,7 @@ Sizing:Zone,
       \note Use SupplyAirHumidityRatio to enter the humidity ratio when zone humidification
       \note is required. The supply air humidity ratio should be greater than the zone humidity
       \note ratio at the zone thermostat and humidistat set point condition.
-      \note Use HumidityRatioDifference to enter the difference in humidity ratio from the 
+      \note Use HumidityRatioDifference to enter the difference in humidity ratio from the
       \note zone thermostat and humidistat set point condition.
       \type choice
       \key SupplyAirHumidityRatio
@@ -34205,7 +34205,7 @@ Sizing:Zone,
       \note Heating Design Supply Air Humidity Ratio Input Method = HumidityRatioDifference.
       \note This input is a positive value and defines the difference between the zone humidity
       \note ratio at the thermostat and humidistat set point condition and the supply air
-      \note humidity ratio entering the zone. 
+      \note humidity ratio entering the zone.
       \minimum 0.0
       \type real
       \default 0.005
@@ -49025,13 +49025,13 @@ ZoneHVAC:AirDistributionUnit,
        \object-list DesignSpecificationAirTerminalSizingName
 
 ZoneHVAC:ExhaustControl,
-       \memo Defines a controlled exhaust flow from a zone which finally feeds into 
+       \memo Defines a controlled exhaust flow from a zone which finally feeds into
        \memo one of AirLoopHVAC:ZoneMixer's inlets, which are part of an AirLoopHVAC:ExhaustSystem.
   A1 , \field Name
        \required-field
   A2 , \field Availability Schedule Name
        \note Availability schedule name for this exhaust system. Schedule value > 0 means it is available.
-       \note If this field is blank, the exhaust system is always available. If the attached 
+       \note If this field is blank, the exhaust system is always available. If the attached
        \note AirLoopHVAC:ExhaustSystem is off, then the flow will be zero.
        \type object-list
        \object-list ScheduleNames
@@ -51659,7 +51659,7 @@ Coil:Cooling:DX:SingleSpeed,
        \note should be between 0.00004027 m3/s and .00006041 m3/s per watt of rated total cooling capacity
   N5 , \field 2017 Rated Evaporator Fan Power Per Volume Flow Rate
        \note Enter the evaporator fan power per air volume flow rate at the rated test conditions
-       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240. 
+       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240.
        \note The test conditions vary external static pressure based on total cooling capacity.
        \note This value is only used to calculate Seasonal Energy Efficiency Ratio (SEER), Energy
        \note Efficiency Ratio (EER), Integrated Energy Efficiency Ratio (IEER), and the Standard Rating
@@ -54535,7 +54535,7 @@ Coil:Heating:DX:SingleSpeed,
        \note should be between 0.00004027 m3/s and .00006041 m3/s per watt of rated heating capacity
   N4 , \field 2017 Rated Supply Fan Power Per Volume Flow Rate
        \note Enter the supply fan power per air volume flow rate at the rated test conditions.
-       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240. 
+       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240.
        \note The test conditions vary external static pressure based on heating capacity.
        \note This value is only used to calculate Heating Seasonal Performance Factor(HSPF).
        \note This value is not used for modeling the supply (condenser) fan during simulations.
@@ -54546,7 +54546,7 @@ Coil:Heating:DX:SingleSpeed,
        \default 773.3
   N5 , \field 2023 Rated Supply Fan Power Per Volume Flow Rate
        \note Enter the supply fan power per air volume flow rate at the rated test conditions.
-       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240. 
+       \note as defined in the 2017 version of ANSI/AHRI Standard 210/240.
        \note The test conditions vary external static pressure based on heating capacity.
        \note This value is only used to calculate Heating Seasonal Performance Factor(HSPF).
        \note This value is not used for modeling the supply (condenser) fan during simulations.
@@ -57282,7 +57282,7 @@ Coil:Heating:WaterToAirHeatPump:EquationFit,
    N7,  \field Ratio of Rated Heating Capacity to Rated Cooling Capacity
         \note Ratio of rated heating capacity to rated cooling capacity. This
         \note input is used to calculate the heating or cooling capacity when autosizing.
-        \note This input is only used if a companion cooling coil of the same type 
+        \note This input is only used if a companion cooling coil of the same type
         \note (Coil:Cooling:WaterToAirHeatPump:EquationFit) is used. This input is only
         \note used when a sizing run for the system which uses this object is requested
         \note and when the coil capacity is autosized.

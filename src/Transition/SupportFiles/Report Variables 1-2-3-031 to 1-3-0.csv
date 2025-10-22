@@ -24,7 +24,7 @@ ADS MultiZone Flow Sensible Loss,AirflowNetwork Mixing Sensible Loss
 ADS MultiZone Flow Latent Gain Rate,AirflowNetwork Infiltration Latent Gain Rate
 ADS MultiZone Flow Latent Gain Rate,AirflowNetwork Mixing Latent Gain Rate
 ADS MultiZone Flow Latent Gain,AirflowNetwork Infiltration Latent Gain
-ADS MultiZone Flow Latent Gain,AirflowNetwork Mixing Latent Gain 
+ADS MultiZone Flow Latent Gain,AirflowNetwork Mixing Latent Gain
 ADS MultiZone Flow Latent Loss Rate,AirflowNetwork Infiltration Latent Loss Rate
 ADS MultiZone Flow Latent Loss Rate,AirflowNetwork Mixing Latent Loss Rate
 ADS MultiZone Flow Latent Loss,AirflowNetwork Infiltration Latent Loss

@@ -17,14 +17,14 @@ The sensible and latent air-to-air heat exchanger is typically used for exhaust 
 % table 74
 \begin{longtable}[c]{p{3.0in}p{1.5in}p{1.5in}}
 \caption{Operating Conditions for Defining Heat Exchanger Performance \label{table:operating-conditions-for-defining-heat}} \tabularnewline
-\toprule 
+\toprule
 Parameter & Conditions \tabularnewline
  & Heating & Cooling \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Operating Conditions for Defining Heat Exchanger Performance} \tabularnewline
-\toprule 
+\toprule
 Parameter & Conditions \tabularnewline
  & Heating & Cooling \tabularnewline
 \midrule
@@ -221,7 +221,7 @@ At the end of each HVAC simulation time step, this object reports the sensible, 
 {E_{HXUnit}} = {P_{HXUnit}} * TimeStepSys * 3600
 \end{equation}
 
-where: 
+where:
 
 \(Q_{SensibleCooling}\) is the output variable `Heat Exchanger Sensible Cooling Energy, J'
 
@@ -799,7 +799,7 @@ Otherwise:
 \begin{equation}
   \begin{array}{rl}
     T_{Reg,out} &= T_{Reg,in} + T_{diff} \cdot HXPartLoadRatio \\
-    w_{Reg,out} &= w_{Reg,in} + w_{diff} \cdot HXPartLoadRatio 
+    w_{Reg,out} &= w_{Reg,in} + w_{diff} \cdot HXPartLoadRatio
   \end{array}
 \end{equation}
 
@@ -878,7 +878,7 @@ If $T_{sat}>T_{Proc,out}$, then:
     T_{Proc,out} &= T_{sat} \\
     w_{Proc,out} &= PsyWFnTdbH \PB{T_{Proc,out},h_{Proc,out}}
   \end{array}
-\end{equation}  
+\end{equation}
 
 Heat recovery electric power is the electric consumption rate of the unit in watts. The nominal electric power for the heat exchanger is specified in the input data file, and can be used to model controls (transformers, relays, etc.) and/or a motor for a rotary heat exchanger. The model assumes that this electric power is consumed whenever the heat exchanger operates. The electric power is assumed to be zero for all other times. None of this electric power is assumed to contribute thermal load to either of the heat exchanger air streams. As with the thermal performance of the heat exchanger, the power used by the heat exchanger is also proportional to the heat exchanger part load ratio.
 
@@ -959,9 +959,9 @@ where:
 
 For the UBHWTcalc model, EnergyPlus builds on the model developed by Cimmino (2018a, 2018b, 2019), with improvements (Cook and Spitler 2021) to reduce memory consumption and increase speed. The general approach is similar to that of the UHFcalc model, but the heat flux is adjusted for each segment to enforce the uniform borehole wall temperature model. Additionally, the methodology of Cimmino (UBHWTcalc) is a semi-analytical solution, so the solution is dependent on the number of segments used. The number of segments are adaptively discretized to approximate a uniform inlet fluid temperature (UIFT) \emph{g}-function.  Beginning with EnergyPlus 25.2, EnergyPlus also included the GHEDesigner Python package, not just for g-function calculation, but also entire borefield design.
 
-Cimmino (2015) introduced a UIFT \emph{g}-function calculation that most closely matches physical reality. As boreholes are usually plumbed in parallel, the entering fluid temperatures are approximately uniform, and the actual distribution of heat within the field then depends on both the heat transfer outside the borehole and the heat transfer within the borehole. Thus, the g-function calculated with the UIFT boundary conditions depends on the flow rate and borehole thermal resistance in addition to the geometric configuration of the boreholes. Like, the UBHWT \emph{g}-function calculation, the UIFT calculation also depends on the number of segments used – as the number of segments used increases, the solution converges. 
+Cimmino (2015) introduced a UIFT \emph{g}-function calculation that most closely matches physical reality. As boreholes are usually plumbed in parallel, the entering fluid temperatures are approximately uniform, and the actual distribution of heat within the field then depends on both the heat transfer outside the borehole and the heat transfer within the borehole. Thus, the g-function calculated with the UIFT boundary conditions depends on the flow rate and borehole thermal resistance in addition to the geometric configuration of the boreholes. Like, the UBHWT \emph{g}-function calculation, the UIFT calculation also depends on the number of segments used – as the number of segments used increases, the solution converges.
 
-So, though it’s possible to find a converged solution for the UIFT \emph{g}-function, it strictly speaking only applies when the borehole thermal resistance and flow rate remain fixed. Both commonly change during the system operation, as changing fluid temperatures affect the fluid properties. Therefore, the UIFT solution might be thought of as having a range of g-functions that change slightly with time. Therefore, in much the same way that radiation heat transfer within a zone is modeled with simplified methods because the occupants are likely to move the furniture, the UBHWT calculation can be used as a reasonable approximation to the UIFT calculation. As shown by Spitler, et al. (2020) the UIFT \emph{g}-function can closely match the UIFT \emph{g}-function, with considerably fewer segments. The number of segments required to closely approximate the UIFT \emph{g}-function varies with the number of boreholes and the borehole depth. Therefore, the UBHWT model uses an adaptive discretization algorithm that uses a smaller number of segments than the UIFT calculation. This provides excellent accuracy while requiring less computational time and memory. 
+So, though it’s possible to find a converged solution for the UIFT \emph{g}-function, it strictly speaking only applies when the borehole thermal resistance and flow rate remain fixed. Both commonly change during the system operation, as changing fluid temperatures affect the fluid properties. Therefore, the UIFT solution might be thought of as having a range of g-functions that change slightly with time. Therefore, in much the same way that radiation heat transfer within a zone is modeled with simplified methods because the occupants are likely to move the furniture, the UBHWT calculation can be used as a reasonable approximation to the UIFT calculation. As shown by Spitler, et al. (2020) the UIFT \emph{g}-function can closely match the UIFT \emph{g}-function, with considerably fewer segments. The number of segments required to closely approximate the UIFT \emph{g}-function varies with the number of boreholes and the borehole depth. Therefore, the UBHWT model uses an adaptive discretization algorithm that uses a smaller number of segments than the UIFT calculation. This provides excellent accuracy while requiring less computational time and memory.
 
 \subsubsection{Short Time-Step Response Factors}\label{short-time-step-response-factors}
 
@@ -1172,7 +1172,7 @@ Compute the hourly loads as each hour and monthly loads as each month passes. Ca
 
 \hangindent=2em
 \hangafter=1
-\noindent Spitler, J. D., J. C. Cook and X. Liu. 2020. A Preliminary Investigation on the Cost Reduction Potential of Optimizing Bore Fields for Commercial Ground Source Heat Pump Systems. Proceedings, 45th Workshop on Geothermal Reservoir Engineering. Stanford, California, Stanford University. 
+\noindent Spitler, J. D., J. C. Cook and X. Liu. 2020. A Preliminary Investigation on the Cost Reduction Potential of Optimizing Bore Fields for Commercial Ground Source Heat Pump Systems. Proceedings, 45th Workshop on Geothermal Reservoir Engineering. Stanford, California, Stanford University.
 
 \hangindent=2em
 \hangafter=1
@@ -1200,9 +1200,9 @@ Equation used for calculating the g-function temperature response factors for th
 
 {\scriptsize
 \begin{equation}
-g_s\left(t\right) = \sum_{i = 1}^{N_{ring}} \sum_{j = 1}^{N_{ring}} \frac{R}{4\pi N_{ring}} \int_0^{2\pi} \int_0^{2\pi} 
-            \left[ 
-                \frac{erfc\left(d\left(P_j,P_i\right)/2\sqrt{\alpha t}\right)}{d\left(P_j,P_i\right)} - 
+g_s\left(t\right) = \sum_{i = 1}^{N_{ring}} \sum_{j = 1}^{N_{ring}} \frac{R}{4\pi N_{ring}} \int_0^{2\pi} \int_0^{2\pi}
+            \left[
+                \frac{erfc\left(d\left(P_j,P_i\right)/2\sqrt{\alpha t}\right)}{d\left(P_j,P_i\right)} -
                 \frac{erfc\left(\sqrt{d\left(P_j,P_i\right)^2+4h^2/\left(2\sqrt{\alpha t}\right)}\right)}{\sqrt{d\left(P_j,P_i\right)^2+4h^2} }
             \right]d\omega d\varphi
 \end{equation}}
@@ -1226,9 +1226,9 @@ d\left(P_{io},P_j\right) = \sqrt{\left[x_{0i} + \left(R-r\right)\cos \varphi - x
 Equations used for calculating the g-function temperature response factors for the vertical Slinky HX are seen below.
 
 \begin{equation}
-g_s\left(t\right) = \sum_{i = 1}^{N_{ring}} \sum_{j = 1}^{N_{ring}} \frac{R}{4\pi N_{ring}} \int_0^{2\pi} \int_0^{2\pi} 
-            \left[ 
-                \frac{erfc\left(d\left(P_j,P_i\right)/2\sqrt{\alpha t}\right)}{d\left(P_j,P_i\right)} - 
+g_s\left(t\right) = \sum_{i = 1}^{N_{ring}} \sum_{j = 1}^{N_{ring}} \frac{R}{4\pi N_{ring}} \int_0^{2\pi} \int_0^{2\pi}
+            \left[
+                \frac{erfc\left(d\left(P_j,P_i\right)/2\sqrt{\alpha t}\right)}{d\left(P_j,P_i\right)} -
                 \frac{erfc\left(d\left(P_{j'},P_i\right)/2\sqrt{\alpha t}\right)}{d\left(P_{j'},P_i\right)}
             \right]d\omega d\varphi
 \end{equation}

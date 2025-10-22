@@ -174,13 +174,13 @@ class EnergyPlusPluginTesting(object):
             print("ERROR : File path does not exist!  Path: " + file_path)
             return 1
 
-        if file_path.endswith('.py'):
+        if file_path.endswith(".py"):
             print("   OK : File ends with .py")
         else:
             print("ERROR : File path does NOT end with .py")
             return 1
 
-        module_spec = import_util.spec_from_file_location('eplus_plugin_module', file_path)
+        module_spec = import_util.spec_from_file_location("eplus_plugin_module", file_path)
         this_module = import_util.module_from_spec(module_spec)
         try:
             modules.append(this_module)
@@ -204,7 +204,7 @@ class EnergyPlusPluginTesting(object):
             class_members = inspect.getmembers(this_module, inspect.isclass)
             for this_class in class_members:
                 this_class_name, this_class_type = this_class
-                print(" INFO : Encountered class: \"" + this_class_name + "\", testing now...")
+                print(' INFO : Encountered class: "' + this_class_name + '", testing now...')
                 if this_class_type is EnergyPlusPlugin:
                     print(" INFO : Skipping the actual plugin base class: " + this_class_name)
                     continue
@@ -232,23 +232,23 @@ class EnergyPlusPluginTesting(object):
                     functions_overridden = plugin_instance._detect_overridden()
 
                     expected_overrides = [
-                        'on_begin_new_environment',
-                        'on_after_new_environment_warmup_is_complete',
-                        'on_begin_zone_timestep_before_init_heat_balance',
-                        'on_begin_zone_timestep_after_init_heat_balance',
-                        'on_begin_timestep_before_predictor',
-                        'on_after_predictor_before_hvac_managers',
-                        'on_after_predictor_after_hvac_managers',
-                        'on_inside_hvac_system_iteration_loop',
-                        'on_end_of_zone_timestep_before_zone_reporting',
-                        'on_end_of_zone_timestep_after_zone_reporting',
-                        'on_end_of_system_timestep_before_hvac_reporting',
-                        'on_end_of_system_timestep_after_hvac_reporting',
-                        'on_end_of_zone_sizing',
-                        'on_end_of_system_sizing',
-                        'on_end_of_component_input_read_in',
-                        'on_user_defined_component_model',
-                        'on_unitary_system_sizing',
+                        "on_begin_new_environment",
+                        "on_after_new_environment_warmup_is_complete",
+                        "on_begin_zone_timestep_before_init_heat_balance",
+                        "on_begin_zone_timestep_after_init_heat_balance",
+                        "on_begin_timestep_before_predictor",
+                        "on_after_predictor_before_hvac_managers",
+                        "on_after_predictor_after_hvac_managers",
+                        "on_inside_hvac_system_iteration_loop",
+                        "on_end_of_zone_timestep_before_zone_reporting",
+                        "on_end_of_zone_timestep_after_zone_reporting",
+                        "on_end_of_system_timestep_before_hvac_reporting",
+                        "on_end_of_system_timestep_after_hvac_reporting",
+                        "on_end_of_zone_sizing",
+                        "on_end_of_system_sizing",
+                        "on_end_of_component_input_read_in",
+                        "on_user_defined_component_model",
+                        "on_unitary_system_sizing",
                     ]
 
                     for func in functions_overridden:

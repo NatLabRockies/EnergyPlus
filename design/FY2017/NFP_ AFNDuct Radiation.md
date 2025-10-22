@@ -223,4 +223,3 @@ N/A
 [7]  H.C. Hottel, A.F. Sarofim, Radiative Transfer, McGraw Hill, New York NY (1967).
 
 [8]  A.D. Fontanini, J. Kosny, N. Shukla, A. Fallahi, B. Ganapathysubramanian, "Development and verification of the Fraunhofer attic thermal model, *Journal of Building Performance Simulation* (2016): 1-19."
-

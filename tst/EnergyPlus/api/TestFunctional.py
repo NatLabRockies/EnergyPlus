@@ -62,7 +62,7 @@ api = EnergyPlusAPI()
 state = api.state_manager.new_state()
 
 # GLYCOL TESTS
-glycol = api.functional.glycol(state, u"water")
+glycol = api.functional.glycol(state, "water")
 for t in [5.0, 15.0, 25.0]:
     cp = glycol.specific_heat(state, t)
     rho = glycol.density(state, t)

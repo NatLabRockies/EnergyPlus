@@ -28,7 +28,7 @@ Begin Menu MenuBar1
          MenuModifier = True
          AutoEnable = True
       End
-      Begin MenuItem 
+      Begin MenuItem
          SpecialMenu = 0
          Text = "-"
          Index = -2147483648
@@ -67,7 +67,7 @@ Begin Menu MenuBar1
          Index = -2147483648
          AutoEnable = True
       End
-      Begin MenuItem 
+      Begin MenuItem
          SpecialMenu = 0
          Text = "-"
          Index = -2147483648

@@ -154,7 +154,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
     INTEGER :: NumZones = 0 ! Number of zones for this old shade control name
     CHARACTER(len=MaxObjectNameLength), ALLOCATABLE, DIMENSION(:) :: ShadeControlZoneName ! New WindowShadingControl zone names
     INTEGER , ALLOCATABLE, DIMENSION(:) :: SequenceNum ! New WindowShadingControl sequence numbers
-  END TYPE    
+  END TYPE
   TYPE(ShadeControl), ALLOCATABLE, DIMENSION(:) :: ShadeControls
   INTEGER :: TotOldShadeControls = 0
   INTEGER :: shadeCtrlNum = 0
@@ -166,8 +166,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
   CHARACTER(len=MaxObjectNameLength) :: prevOldShadeName = ' '
   LOGICAL :: zoneFound = .false.
   INTEGER :: daylightNum = 0
-  ! end new variables for WINDOWPROPERTY:SHADINGCONTROL from 8.9 to 9.0 
-  
+  ! end new variables for WINDOWPROPERTY:SHADINGCONTROL from 8.9 to 9.0
+
 
   ! For run period transitions
   TYPE FieldFlagAndValue
@@ -333,7 +333,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
           TotBaseSurfObjs = TotBaseSurfObjs + GetNumObjectsFound('ROOF') + GetNumObjectsFound('CEILING:ADIABATIC') + GetNumObjectsFound('CEILING:INTERZONE')
           TotBaseSurfObjs = TotBaseSurfObjs + GetNumObjectsFound('FLOOR:GROUNDCONTACT') + GetNumObjectsFound('FLOOR:ADIABATIC') + GetNumObjectsFound('FLOOR:INTERZONE')
           ALLOCATE(FenSurf(TotWinObjs))
- 
+
           ! Loop through all objects that might have a window shading control assigned and make a list
           TotObjsWithShadeCtrl = 0
           CALL DisplayString('Processing IDF -- WindowShadingControl preprocessing . . .')
@@ -364,7 +364,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               FenSurf(TotObjsWithShadeCtrl)%FenShadeControlName = TRIM(Alphas(4))
             ENDIF
           ENDDO
-      
+
           ! Loop through all possible base surfaces then loop through all objects with a window shading control assigned and find out which zone they are in
           DO baseSurfNum=1,GetNumObjectsFound('BUILDINGSURFACE:DETAILED')
             CALL GetObjectItem('BUILDINGSURFACE:DETAILED',baseSurfNum,Alphas,NumAlphas,Numbers,NumNumbers,Status)
@@ -450,7 +450,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               IF (SameString(FenSurf(surfNum)%FenBaseSurfName,Alphas(1))) FenSurf(surfNum)%FenZoneName = TRIM(Alphas(3))
             ENDDO
           ENDDO
- 
+
           ! Now build list of new WindowShadingControl names for each old WindowProperty:ShadingControl
           TotOldShadeControls = GetNumObjectsFound('WINDOWPROPERTY:SHADINGCONTROL')
           NumZones = GetNumObjectsFound('ZONE')
@@ -716,7 +716,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 END IF
                 ! Now start writing some object data out
                 ! Name, BeginMonth and BeginDay are the same
-                OutArgs(1:3) = InArgs(1:3) 
+                OutArgs(1:3) = InArgs(1:3)
                 ! Start year is weird
                 IF (RunPeriodStartYear%wasSet) THEN
                   OutArgs(4) = RoundSigDigits(BeginYearNumber,0)
@@ -819,7 +819,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 IF (SameString(InArgs(2), "VENETIAN")) THEN
                   OutArgs(2) = "VenetianHorizontal"
                   nodiff = .FALSE.
-                END IF 
+                END IF
 
               CASE('WINDOW')
                 ! Delete field 4 (A4) Shading Control Name
@@ -883,7 +883,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                     Written=.true.
                   ENDIF
                   EXIT
-                ENDDO    
+                ENDDO
 
               ! If your original object starts with Z, insert the rules here
 

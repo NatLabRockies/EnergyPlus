@@ -85,36 +85,32 @@ class CoeffConvWorkflow(BaseEPLaunchWorkflow1):
         return []
 
     def main(self, run_directory, file_name, args):
-        if 'workflow location' in args:
-            energyplus_root_folder, _ = os.path.split(args['workflow location'])
-            preprocess_folder = os.path.join(energyplus_root_folder, 'PreProcess')
-            coeffconv_folder = os.path.join(preprocess_folder, 'CoeffConv')
-            if platform.system() == 'Windows':
-                coeffconv_binary = os.path.join(coeffconv_folder, 'CoeffConv.exe')
+        if "workflow location" in args:
+            energyplus_root_folder, _ = os.path.split(args["workflow location"])
+            preprocess_folder = os.path.join(energyplus_root_folder, "PreProcess")
+            coeffconv_folder = os.path.join(preprocess_folder, "CoeffConv")
+            if platform.system() == "Windows":
+                coeffconv_binary = os.path.join(coeffconv_folder, "CoeffConv.exe")
             else:
-                coeffconv_binary = os.path.join(coeffconv_folder, 'CoeffConv')
+                coeffconv_binary = os.path.join(coeffconv_folder, "CoeffConv")
             if not os.path.exists(coeffconv_binary):
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="CoeffConv binary not found: {}!".format(coeffconv_binary),
-                    column_data=[]
+                    success=False, message="CoeffConv binary not found: {}!".format(coeffconv_binary), column_data=[]
                 )
         else:
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="Workflow location missing: {}!".format(args['worflow location']),
-                column_data=[]
+                success=False, message="Workflow location missing: {}!".format(args["worflow location"]), column_data=[]
             )
 
         coi_file_with_path = os.path.join(run_directory, file_name)
         coi_file_no_ext, _ = os.path.splitext(coi_file_with_path)
-        coo_file_with_path = coi_file_no_ext + '.coo'
+        coo_file_with_path = coi_file_no_ext + ".coo"
 
         # clean up working directory
-        cc_input_txt_file = os.path.join(run_directory, 'CoeffConvInput.txt')
+        cc_input_txt_file = os.path.join(run_directory, "CoeffConvInput.txt")
         if os.path.exists(cc_input_txt_file):
             os.remove(cc_input_txt_file)
-        cc_output_txt_file = os.path.join(run_directory, 'CoeffConvOutput.txt')
+        cc_output_txt_file = os.path.join(run_directory, "CoeffConvOutput.txt")
         if os.path.exists(cc_output_txt_file):
             os.remove(cc_output_txt_file)
 
@@ -123,12 +119,10 @@ class CoeffConvWorkflow(BaseEPLaunchWorkflow1):
             shutil.copy2(coi_file_with_path, cc_input_txt_file)
 
             # execute utility
-            command_line_args = [coeffconv_binary, ]
-            process = subprocess.run(
-                command_line_args,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-                cwd=run_directory
-            )
+            command_line_args = [
+                coeffconv_binary,
+            ]
+            process = subprocess.run(command_line_args, creationflags=subprocess.CREATE_NEW_CONSOLE, cwd=run_directory)
             if process.returncode == 0:
                 # Remove old version of the output file
                 if os.path.exists(coo_file_with_path):
@@ -144,19 +138,13 @@ class CoeffConvWorkflow(BaseEPLaunchWorkflow1):
                     os.remove(cc_output_txt_file)
 
                 return EPLaunchWorkflowResponse1(
-                    success=True,
-                    message="Ran CoeffConv OK for file: {}!".format(coi_file_with_path),
-                    column_data=[]
+                    success=True, message="Ran CoeffConv OK for file: {}!".format(coi_file_with_path), column_data=[]
                 )
             else:
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="CoeffConv failed for file: {}!".format(coi_file_with_path),
-                    column_data=[]
+                    success=False, message="CoeffConv failed for file: {}!".format(coi_file_with_path), column_data=[]
                 )
         else:
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="CoeffConv file not found: {}!".format(coi_file_with_path),
-                column_data=[]
+                success=False, message="CoeffConv file not found: {}!".format(coi_file_with_path), column_data=[]
             )

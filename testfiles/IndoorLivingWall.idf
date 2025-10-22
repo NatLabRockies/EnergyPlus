@@ -16,7 +16,7 @@
 ! Simulation Location/Run: Phoenix Sky Harbor Intl Ap_AZ_USA, 1 run periods,
 !                          Run Control executes the run periods using the weather file
 !
-! Location:                Phoenix, Arizona 
+! Location:                Phoenix, Arizona
 !
 ! Design Days:             PHOENIX_AZ_USA Annual Heating 99.6% Design Conditions DB, MaxDB= 3.7°C
 !                          PHOENIX_AZ_USA Annual Cooling 1% Design Conditions, MaxDB=  42.3°C MWB=  21.0°C

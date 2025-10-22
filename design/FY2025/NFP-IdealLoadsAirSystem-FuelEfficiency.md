@@ -11,9 +11,9 @@ Heating and Cooling Fuel Efficiency for Ideal Loads Air System
 
 ## Justification for New Feature ##
 
-Ideal loads air systems are increasingly used for early-stage design analysis and in a building energy code compliance method. 
-However, currently this object has no built-in method for converting the loads to energy consumption. 
-As a result, users have to post-process simulation results to convert the loads to energy. 
+Ideal loads air systems are increasingly used for early-stage design analysis and in a building energy code compliance method.
+However, currently this object has no built-in method for converting the loads to energy consumption.
+As a result, users have to post-process simulation results to convert the loads to energy.
 
 **- This enhancement is intended to support loads conversion into energy consumption for ideal loads air system object **
 **- Also reduces the burden of simulation results post processing and increase the usability of the object **
@@ -25,7 +25,7 @@ NA
 ## Overview ##
 
 (1) ZoneHVAC:IdealLoadsAirSystem reports zone loads but not the equivalent energy consumption.
-(2) This object needs a method for converting loads into energy consumptions. 
+(2) This object needs a method for converting loads into energy consumptions.
 (3) It doesn't have input fields for specifying fuel efficiency values.
 
 
@@ -36,7 +36,7 @@ The following two alternative approaches have been proposed for consideration to
 These two options will be discussed and the full NFP will be drafted after the initial discussion.
 
 ** Option I: Adding EMS Actuators **
-Adds EMS actuator for heating and cooling fuel efficiencies to the ZoneHVAC:IdealLoadsAirSystem object. 
+Adds EMS actuator for heating and cooling fuel efficiencies to the ZoneHVAC:IdealLoadsAirSystem object.
 
  * - Requires adding two actuators: *
  * - (1) EMS actuator “Heating Fuel Efficiency” for heating *
@@ -45,7 +45,7 @@ Adds EMS actuator for heating and cooling fuel efficiencies to the ZoneHVAC:Idea
 These actuators pass the efficiency values and give access to the conversion method to calculate the energy consumption during runtime.
 
 ** Option II: Adding New INput Fields **
-Add optional heating and cooling fuel efficiency input fields to the ZoneHVAC:IdealLoadsAirSystem object. 
+Add optional heating and cooling fuel efficiency input fields to the ZoneHVAC:IdealLoadsAirSystem object.
 The cooling and heating efficiency values will be used to calculate the energy consumed from the zone's ideal loads.
 
  * - Requires adding two new input fields: *
@@ -56,25 +56,25 @@ For both options, the heating and cooling energy rate and energy consumption wil
 
 	 {E_dot_{heat}} = {Q_dot_{load,heat}} / {Fuel_Eff_{heat}}
 	 {E_dot_{cool}} = {Q_dot_{load,cool}} / {Fuel_Eff_{cool}}
-	 
+
 	 where,
 	 {Q_{dot,cool}}     = Zone Ideal Loads Zone Total Cooling Rate, [W]
 	 {Q_{dot,heat}}     = Zone Ideal Loads Zone Total Heating Rate, [W]
 	 {E_dot_{cool}}     = Zone Ideal Loads Zone Cooling Fuel Energy Rate, [W]
 	 {E_dot_{heat}}     = Zone Ideal Loads Zone Heating Fuel Energy Rate, [W]
 	 {E_{cool}}         = Zone Ideal Loads Zone Cooling Fuel Energy, [J]
-	 {E_{heat}}         = Zone Ideal Loads Zone Heating Fuel Energy, [J]	 
+	 {E_{heat}}         = Zone Ideal Loads Zone Heating Fuel Energy, [J]
 	 {Fuel_Eff_{cool}}  = Cooling Fuel Efficiency, [-]
 	 {Fuel_Eff_{heat}}  = Heating Fuel Efficiency, [-]
 
 ** Option II was implemented **
-	 
+
 ### Questions for Discussion:
 
 * (1) Which alternative approach is preferred? *
 
 *     - Option II requires transition while option I does not *
-*     - Option II does not require transition if the new fields are appended as an optional fields * 
+*     - Option II does not require transition if the new fields are appended as an optional fields *
 
 * (2) The efficiencies apply to the total (sensible and latent components) heating and cooling loads *
 
@@ -100,7 +100,7 @@ For both options, the heating and cooling energy rate and energy consumption wil
       * - Zone Ideal Loads Supply Air Total Cooling Rate [W] *
 
 * (6) What should be the maximum limit for the fuel efficiency value, or no maximum limit?
-	  
+
 ## Testing/Validation/Data Source(s): ##
 
 Demonstrate that the fuel efficiency input fields set to 1.0 duplicates the current results. Unit tests will be added to demonstrate the enhancement.
@@ -189,7 +189,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   A18, \field Heating Fuel Efficiency Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note Reference heating fuel efficiency value for converting heating 
+       \note Reference heating fuel efficiency value for converting heating
        \note ideal air loads into fuel energy consumption.
        \note The minimum schedule value must be greater than 0.0. The maximum value
        \note depends on the technology, and can exceed 1.0.
@@ -213,7 +213,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   A20, \field Cooling Fuel Efficiency Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note Reference cooling fuel efficiency value for converting cooling 
+       \note Reference cooling fuel efficiency value for converting cooling
        \note ideal air loads into fuel energy consumption.
        \note The minimum schedule value must be greater than 0.0. The maximum value
        \note depends on the technology, and can exceed 1.0.
@@ -235,7 +235,7 @@ ZoneHVAC:IdealLoadsAirSystem,
        \key DistrictHeatingSteam
 	   \Default DistrictCooling
 
-```   
+```
 
 ## Engineering Reference ##
 
@@ -261,15 +261,15 @@ N/A
 ### Get Input ###
 
 (1) * Modify the get input function *
-	
+
 ```
    GetPurchasedAir()
 ```
-    
-	(1.1) Convert getinput to JSON format IDD 
+
+	(1.1) Convert getinput to JSON format IDD
 	(1.2) Use Enum for all key choice fields
 	(1.3) Update the error report functions
-	
+
 
 (2) * Add new member and report variables
 
@@ -278,9 +278,9 @@ N/A
 ```
         Sched::Schedule *heatFuelEffSched = nullptr; // heating feul efficiency schedule
         Sched::Schedule *coolFuelEffSched = nullptr; // cooling feul efficiency schedule
-		
+
         Constant::eFuel heatingFuelType = Constant::eFuel::DistrictHeatingWater; // fuel resource type assignment
-        Constant::eFuel coolingFuelType = Constant::eFuel::DistrictCooling;      // fuel resource type assignment		
+        Constant::eFuel coolingFuelType = Constant::eFuel::DistrictCooling;      // fuel resource type assignment
 ```
 
     (2.2) Add eight new report variables
@@ -294,7 +294,7 @@ N/A
         Real64 TotCoolFuelRate;       // Total cooling fuel consumption rate [W]
         Real64 TotHeatFuelEnergy;     // Total heating fuel consumption [J]
         Real64 TotCoolFuelEnergy;     // Total cooling fuel consumption [J]
-``` 
+```
 
 ### IDD Change ###
 
@@ -305,14 +305,14 @@ N/A
 	*    - (1.3) Add cooling_fuel_efficiency_schedule_name new input field *
 	*    - (1.4) Add cooling_fuel_type new input field *
 
-    
+
 ### Modify Reporting Function ###
 
 (1) * Modify the ReportPurchasedAir() to support the energy consumption calculation
 
     *    - (1.1) Fuel Energy Consumption Rate Calculations
 
-```	
+```
     Real64 heatFuelEffValue = PurchAir.heatFuelEffSched->getCurrentVal();
     PurchAir.ZoneTotHeatFuelRate = PurchAir.TotHeatRate / heatFuelEffValue;
     PurchAir.TotHeatFuelRate = PurchAir.ZoneTotHeatRate / heatFuelEffValue;
@@ -322,7 +322,7 @@ N/A
 ```
 
     *    - (1.2) Fuel Energy Consumption Calculations
-    
+
 ```
     PurchAir.ZoneTotHeatFuelEnergy = PurchAir.ZoneTotHeatFuelRate * TimeStepSysSec;
     PurchAir.ZoneTotCoolFuelEnergy = PurchAir.ZoneTotCoolFuelRate * TimeStepSysSec;
@@ -334,7 +334,7 @@ N/A
 
 ```
    (1) * Zone Ideal Loads Zone Heating Fuel Energy Rate [W] *
-   (2) * Zone Ideal Loads Zone Cooling Fuel Energy Rate [W]            
+   (2) * Zone Ideal Loads Zone Cooling Fuel Energy Rate [W]
    (3) * Zone Ideal Loads Zone Heating Fuel Energy [J]
    (4) * Zone Ideal Loads Zone Cooling Fuel Energy [J]
    (5) * Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate [W] *

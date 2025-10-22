@@ -34,17 +34,17 @@ Results need to show agreement between U-value, SHGC and energy use.
 
 There will be change in input/output reference document related to WindowMaterial:ComplexShade where additional layer type will be supported.
 
-## WindowMaterial:ComplexShade 
+## WindowMaterial:ComplexShade
 
 This input object is used to define shade layers used in the [Construction:ComplexFenestrationState](https://bigladdersoftware.com/epx/docs/8-7/input-output-reference/group-surface-construction-elements.html#constructioncomplexfenestrationstate) object.
 
-### Inputs 
+### Inputs
 
-#### Field: Name 
+#### Field: Name
 
 Unique name of the shading layer.
 
-#### Field: Shading Layer Type 
+#### Field: Shading Layer Type
 
 The type of shading layer. The options are:
 
@@ -57,22 +57,22 @@ The type of shading layer. The options are:
 
 ## Updated IDD Object
 
-WindowMaterial:ComplexShade,  
-&nbsp;&nbsp;&nbsp;&nbsp;\memo Complex window shading layer thermal properties  
-&nbsp;&nbsp;&nbsp;&nbsp;\min-fields 12  
-&nbsp;&nbsp;A1 , \field Name  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\required-field  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\type alpha  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\reference WindowComplexShades  
-&nbsp;&nbsp;A2 , \field Layer Type  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\type choice  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key VenetianHorizontal  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key VenetianVertical  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key Woven  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key Perforated  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key BSDF  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key OtherShadingType  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\default OtherShadingType  
+WindowMaterial:ComplexShade,
+&nbsp;&nbsp;&nbsp;&nbsp;\memo Complex window shading layer thermal properties
+&nbsp;&nbsp;&nbsp;&nbsp;\min-fields 12
+&nbsp;&nbsp;A1 , \field Name
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\required-field
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\type alpha
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\reference WindowComplexShades
+&nbsp;&nbsp;A2 , \field Layer Type
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\type choice
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key VenetianHorizontal
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key VenetianVertical
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key Woven
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key Perforated
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key BSDF
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\key OtherShadingType
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\default OtherShadingType
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...Everything else stays the same
 
 ## Engineering Reference

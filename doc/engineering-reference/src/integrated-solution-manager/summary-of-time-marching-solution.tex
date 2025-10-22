@@ -78,7 +78,7 @@ When a SpaceHVAC:ZoneEquipmentSplitter is used, the zone loads may be saved and 
 \end{equation}
 
 \begin{equation}
-{\dot Q_{adjusted}} = {Ratio}{\dot Q_{zone}} 
+{\dot Q_{adjusted}} = {Ratio}{\dot Q_{zone}}
 \label{eq:SpaceHVACLoadAdjustment2}
 \end{equation}
 
@@ -88,7 +88,7 @@ ${\dot Q_{space}}$ is the remaining load (sensible or latent) for the control sp
 
 ${\dot Q_{zone}}$ is the remaining load (sensible or latent) for the zone
 
-$Ratio$ is the ratio applied to all load types for the zone (remaining, load to heating setpoint, load to cooling setpoint, and sequenced loads). 
+$Ratio$ is the ratio applied to all load types for the zone (remaining, load to heating setpoint, load to cooling setpoint, and sequenced loads).
 
 After the piece of zone equipment is simulated, any saved zone loads are restored, the equipment outlet node flow is distributed to the space outlet nodes, and any non-air system output is also distributed to the spaces. For the Ideal control option, the space fractions are recaculated every time step based on the current space load to zone load ratio.
 
@@ -98,7 +98,7 @@ When a SpaceHVAC:ZoneEquipmentMixer is used, before any zone HVAC equipment is s
 After all of the zone HVAC equipment is simulated, the flow rates on the space outlet nodes are set to the space fraction times the zone equipment inlet node flow rate.
 
 \subsubsection{SpaceHVAC:ZoneReturnMixer Adjustments}\label{space-hvac-zoneretmixer-adjustments}
-When a SpaceHVAC:ZoneReturnMixer is used, after zone-level return node flow rates are set, the space return node flow rates are set. The space flow rates are set based on the same method used for zones (sum of inlet flows minus sum of exhaust flows). Then the space flow rates are adjusted proportionately so the sum is equal to the previously determined zone-level return node flow rate. Then the conditions on the zone return nodes are set to the combined space outlet node conditions weighted by the space return node flow rates. 
+When a SpaceHVAC:ZoneReturnMixer is used, after zone-level return node flow rates are set, the space return node flow rates are set. The space flow rates are set based on the same method used for zones (sum of inlet flows minus sum of exhaust flows). Then the space flow rates are adjusted proportionately so the sum is equal to the previously determined zone-level return node flow rate. Then the conditions on the zone return nodes are set to the combined space outlet node conditions weighted by the space return node flow rates.
 
 \subsection{References}\label{references-043}
 

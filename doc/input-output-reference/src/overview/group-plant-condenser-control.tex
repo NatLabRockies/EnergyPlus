@@ -315,8 +315,8 @@ This alpha field contains the identifying name for the Equipment List (i.e., the
 
 In addition to load range based control on the plant loop, sequencing the plant components based on the outlet temperature of individual equipment is allowed. This scheme is common to many present-day Energy Management Systems sequencing. In this scheme, the sequencing is done based on the order specified in the control object described below.
 
-However, when sequencing a boiler and a cooling tower to control the heating and cooling set point temperatures of a condenser loop, it is recommended that the boiler and the cooling tower be placed in a parallel configuration. The series configuration of these two equipment, though possible to model them, may result in simultaneous heating and cooling operation when the boiler is ON and the cooling tower operates in free cooling mode, i.e., 
-the cooling tower may provide free cooling that could over cool the water below the boiler heating setpoint temperature.  
+However, when sequencing a boiler and a cooling tower to control the heating and cooling set point temperatures of a condenser loop, it is recommended that the boiler and the cooling tower be placed in a parallel configuration. The series configuration of these two equipment, though possible to model them, may result in simultaneous heating and cooling operation when the boiler is ON and the cooling tower operates in free cooling mode, i.e.,
+the cooling tower may provide free cooling that could over cool the water below the boiler heating setpoint temperature.
 
 
 \subsubsection{Inputs}\label{inputs-12-011}
@@ -463,7 +463,7 @@ PlantEquipmentOperationSchemes,
 
 Plant operation can difficult to control when air-to-water or water-to-water heat pumps are used as plant equipment.  Individual machines can be operated either as cooling or heat devices at any given time.  This object will poll the building to determine what type of loads are dominant and determine how the plant equipment should operate. Once the mode of operation is set the apparent plant loads are dispatched to equipment listed to meet those loads. For example, a heat pump capable of providing heating or cooling will be dispatched in heating mode. It is also possible to create a heat recovery heat pump connected between the heating and cooling plant loops where this heat pump can serve low loads on one plant while supplementing the operation of the other plant. Traditional plant controls cannot meet this type of equipment configuration. This object provides a supervisory controller can be used to control one heating and one cooling hydronic plant.
 
-This object is used as a special plant operation scheme intended for a specific type of plant with both heating and cooling plant loops served by heat pumps which can switch between heating and cooling.  EnergyPlus's usual plant operation schemes focus on one plant at a time, however the need to cleanly control heat pumps switching between heating and cooling modes requires an operation scheme that considers both the heating and cooling plant loops at the same time.  This object is intended to allow controlling both heating and cooling heating plants served by heat pumps that can changeover between heating and cooling.  The main focus is air source heat pumps serving separate cooling and heating plant loops.  The scheme is also able to control operation of secondary heating and cooling loops.  The fullest application of this scheme include boiler backup and control of a special water to water heat pump situated to exchange heat between the return hot water and return chilled water on the secondary loops. The following diagram shows the plant configuration supported by this supervisory controller. 
+This object is used as a special plant operation scheme intended for a specific type of plant with both heating and cooling plant loops served by heat pumps which can switch between heating and cooling.  EnergyPlus's usual plant operation schemes focus on one plant at a time, however the need to cleanly control heat pumps switching between heating and cooling modes requires an operation scheme that considers both the heating and cooling plant loops at the same time.  This object is intended to allow controlling both heating and cooling heating plants served by heat pumps that can changeover between heating and cooling.  The main focus is air source heat pumps serving separate cooling and heating plant loops.  The scheme is also able to control operation of secondary heating and cooling loops.  The fullest application of this scheme include boiler backup and control of a special water to water heat pump situated to exchange heat between the return hot water and return chilled water on the secondary loops. The following diagram shows the plant configuration supported by this supervisory controller.
 
 \begin{figure}[hbtp]
 \centering
@@ -471,7 +471,7 @@ This object is used as a special plant operation scheme intended for a specific 
 \caption{Plant Configuration for Air Source Heat Pump Supervisory Control} \protect \label{fig:IO-ref-ASHP-Plant-Diag}
 \end{figure}
 
-This operation scheme also acts like a setpoint manager.  It calculates and applies setpoints to the outlet nodes of managed equipment, heat exchangers used for primary/secondary connections, boilers, and supply loop outlet nodes.  Traditional setpoint managers may be needed to get input past certain checks, but those are overwritten when using this supervisory plant controller.  The heat pumps are controlled by setting a temperature setpoint on the system node for the load side outlet node.  The setpoints for heating plants are adjusted using an outdoor air reset and control scheme.  The PlantLoop's input for the field called Load Distribution Scheme is not applied because the plant loads are not distributed explicitly, rather machines are turned on and off and setpoints are applied at the outlet of the heat pumps. The heating hydronic plant setpoints use a complex outdoor air reset scheme intended to serve air source heat pumps in heating mode where the supply temperature that the heat pump can deliver is constrained by the outdoor air temperature.  Then at very cold outdoor air conditions, the loop setpoint can be increased using a second stage backup outdoor air reset scheme. 
+This operation scheme also acts like a setpoint manager.  It calculates and applies setpoints to the outlet nodes of managed equipment, heat exchangers used for primary/secondary connections, boilers, and supply loop outlet nodes.  Traditional setpoint managers may be needed to get input past certain checks, but those are overwritten when using this supervisory plant controller.  The heat pumps are controlled by setting a temperature setpoint on the system node for the load side outlet node.  The setpoints for heating plants are adjusted using an outdoor air reset and control scheme.  The PlantLoop's input for the field called Load Distribution Scheme is not applied because the plant loads are not distributed explicitly, rather machines are turned on and off and setpoints are applied at the outlet of the heat pumps. The heating hydronic plant setpoints use a complex outdoor air reset scheme intended to serve air source heat pumps in heating mode where the supply temperature that the heat pump can deliver is constrained by the outdoor air temperature.  Then at very cold outdoor air conditions, the loop setpoint can be increased using a second stage backup outdoor air reset scheme.
 
 \begin{figure}[hbtp]
 \centering
@@ -479,21 +479,21 @@ This operation scheme also acts like a setpoint manager.  It calculates and appl
 \caption{Hot Water Temperature Setpoint Vs Outdoor Air Temperature} \protect \label{fig:IO-ref-HW-reset-aux-backup-setpoint-reset}
 \end{figure}
 
-This plant operation scheme is unique in that the same instance of a PlantEquipmentOperation:ChillerHeaterChangeover is named in each of the plant loops being controlled.  So up to four plant loops will all use the same name of a PlantEquipmentOperation:ChillerHeaterChangeover as the scheme for that plant.  That is, each of the plant's PlantEquipmentOperationSchemes will list the same name for the PlantEquipmentOperation:ChillerHeaterChangeover.  It is expected there are two or four plant loops using the same operation scheme.  Two plants, one heating and cooling, are used if there is only simple primary loops and no secondary loops.  Four plants are expected for the most capabilities with both the heating system and the cooling system having primary/secondary loop arrangement (with a fluid to fluid heat exchanger connecting them).  For secondary loops, it is expected that a Sizing:Plant object is used and the input field called Loop Type is used to determine which loops are for heating and which are for cooling.  Even if the plant is hard sized, include a Sizing:Plant object so the routines can determine if a secondary loop is heating or cooling.  
+This plant operation scheme is unique in that the same instance of a PlantEquipmentOperation:ChillerHeaterChangeover is named in each of the plant loops being controlled.  So up to four plant loops will all use the same name of a PlantEquipmentOperation:ChillerHeaterChangeover as the scheme for that plant.  That is, each of the plant's PlantEquipmentOperationSchemes will list the same name for the PlantEquipmentOperation:ChillerHeaterChangeover.  It is expected there are two or four plant loops using the same operation scheme.  Two plants, one heating and cooling, are used if there is only simple primary loops and no secondary loops.  Four plants are expected for the most capabilities with both the heating system and the cooling system having primary/secondary loop arrangement (with a fluid to fluid heat exchanger connecting them).  For secondary loops, it is expected that a Sizing:Plant object is used and the input field called Loop Type is used to determine which loops are for heating and which are for cooling.  Even if the plant is hard sized, include a Sizing:Plant object so the routines can determine if a secondary loop is heating or cooling.
 
-This supervisory plant controller polls the building to see how the current loads favor operating the plants in either a cooling-only, heating-only, or simultaneous cooling and heating mode.  The building loads include the predicted sensible loads to setpoint for the listed zones, the ventilation loads on any central air handlers connected to those zones, and the loads from any process loads on plant (from a LoadProfile:Plant object).  The controller determines which of the three modes the plant should be in based on the polled building loads. 
+This supervisory plant controller polls the building to see how the current loads favor operating the plants in either a cooling-only, heating-only, or simultaneous cooling and heating mode.  The building loads include the predicted sensible loads to setpoint for the listed zones, the ventilation loads on any central air handlers connected to those zones, and the loads from any process loads on plant (from a LoadProfile:Plant object).  The controller determines which of the three modes the plant should be in based on the polled building loads.
 
-Once the mode of operation is determined, the controller dispatches the equipment based on the inputs for the operation scheme and equipment lists input for that mode using the current load on the primary plant side.  The heat pumps are modeled with companion objects, where a single machine has both cooling and heating input objects.  The PlantEquipmentOperation:CoolingLoad operating schemes should specify equipment lists with the cooling companion models (HeatPump:PlantLoop:EIR:Cooling) and the PlantEquipmentOperation:HeatingLoad operating schemes should point to the heating companion models (HeatPump:PlantLoop:EIR:Heating).  The heat pump model inputs need to set the Control Type to ``Setpoint'' control. 
+Once the mode of operation is determined, the controller dispatches the equipment based on the inputs for the operation scheme and equipment lists input for that mode using the current load on the primary plant side.  The heat pumps are modeled with companion objects, where a single machine has both cooling and heating input objects.  The PlantEquipmentOperation:CoolingLoad operating schemes should specify equipment lists with the cooling companion models (HeatPump:PlantLoop:EIR:Cooling) and the PlantEquipmentOperation:HeatingLoad operating schemes should point to the heating companion models (HeatPump:PlantLoop:EIR:Heating).  The heat pump model inputs need to set the Control Type to ``Setpoint'' control.
 
 This controller includes special handing of boiler backup.  Because air-source heat pumps can be limited in their ability to operate and cold outdoor air temperatures, in is necessary to coordinate boiler operation to provide heating during cold weather.  If a simple hot water boiler is present on the heating loops, it will be operated as a supplemental or auxiliary heater to be used when the heat pumps cannot deliver.  For example when the outdoor air is below the Low Outdoor Air Temperature limit the air source heat pumps cannot operate and a boiler is used to meeting the setpoint.  Boilers found on a primary hot water loop are considered auxiliary boilers while boilers found on a secondary hot water loop are considered supplemental boilers.  Auxiliary boilers, if present, are operated when the outdoor air temperature is below the Outdoor Low Temperature and use the setpoint temperature determined by outdoor air reset.  The usual location of an auxiliary boiler is in the branch serving as the outlet branch on the supply side of the primary hot water loop.  Supplemental boilers, if present, are operated when the inlet fluid temperature is below a setpoint.  The setpoint is determined by the lower of the secondary hot water setpoint and the outdoor air reset.  The usual location of a supplemental boiler is in the branch serving as the outlet branch on the supply side of the secondary hot water loop.
 
-This controller includes a special handling of a dedicated water to water heat pump used to recover heat directly between the return hot water and return chilled water.  The cooling and heating companions of this heat pump are named in the object.  These are used to efficiently exchange heat between the return flows on the secondary hot and chilled water returns.  This dedicated water to water heat pump will operate when there is sufficient flows in both returns and can be controlled to not operate when loads are high.  
+This controller includes a special handling of a dedicated water to water heat pump used to recover heat directly between the return hot water and return chilled water.  The cooling and heating companions of this heat pump are named in the object.  These are used to efficiently exchange heat between the return flows on the secondary hot and chilled water returns.  This dedicated water to water heat pump will operate when there is sufficient flows in both returns and can be controlled to not operate when loads are high.
 
 \subsubsection{Inputs}\label{inputs-plantequipmentoperationchillerheaterchangeover}
 
 \paragraph{Field: Name}\label{field-name-plantequipmentoperationchillerheaterchangeover}
 
-This required alpha field contains the identifying name given to the PlantEquipmentOperation:ChillerHeaterChangeover object. This name is placed in the PlantLoop objects to select this scheme.  It is expected that both the heating and cooling plants will all point to this same operation scheme so that they can be controlled together. 
+This required alpha field contains the identifying name given to the PlantEquipmentOperation:ChillerHeaterChangeover object. This name is placed in the PlantLoop objects to select this scheme.  It is expected that both the heating and cooling plants will all point to this same operation scheme so that they can be controlled together.
 
 \paragraph{Field: Primary Cooling Plant Setpoint Temperature}\label{field-primary-chilled-water-temp-setpoint-plantequipmentoperationchillerheaterchangeover}
 
@@ -501,7 +501,7 @@ This required numeric field specifies the cooling plant operating setpoint tempe
 
 \paragraph{Field: Secondary Distribution Cooling Plant Setpoint Temperature}\label{field-secondary-chilled-water-temp-setpoint-plantequipmentoperationchillerheaterchangeover}
 
-This numeric field specifies the cooling plant operating setpoint for a secondary chilled water loop.  Degrees C. 
+This numeric field specifies the cooling plant operating setpoint for a secondary chilled water loop.  Degrees C.
 
 \paragraph{Field: Primary Heating Plant Setpoint at Outdoor High Temperature}\label{field-primary-hot-water-temp-setpoint-High-OA-plantequipmentoperationchillerheaterchangeover}
 
@@ -521,19 +521,19 @@ This required numeric field specifies the low outdoor air temperature used for o
 
 \paragraph{Field: Secondary Distribution Heating Plant Setpoint Temperature}\label{secondary-distribution-heating-plant-setpoint-temperature}
 
-This numeric field specifies the heating plant operating setpoint for a secondary hot water loop.  Degrees C.  If the primary heating loop setpoint has been set below this as for outdoor air reset, then the secondary distribution loop may be set to the lower of this value and the outdoor air reset value. 
+This numeric field specifies the heating plant operating setpoint for a secondary hot water loop.  Degrees C.  If the primary heating loop setpoint has been set below this as for outdoor air reset, then the secondary distribution loop may be set to the lower of this value and the outdoor air reset value.
 
 \paragraph{Field: Zone Load Polling ZoneList Name}\label{field-zone-load-polling-zonelist-name-plantequipmentoperationchillerheaterchangeover}
 
-This alpha field specifies the ZoneList name that identifies each zone served by the hot and cold water plants. These zones are used to poll the current state of the building loads and are used to decide how the heat pump loops should be operated. 
+This alpha field specifies the ZoneList name that identifies each zone served by the hot and cold water plants. These zones are used to poll the current state of the building loads and are used to decide how the heat pump loops should be operated.
 
 \paragraph{Field: Cooling Only Load Plant Equipment Operation Cooling Load Name}\label{field-cool-only-load-equip-operation-name-plantequipmentoperationchillerheaterchangeover}
 
-This alpha field specifies the PlantEquipmentOperation:CoolingLoad name that identifies the plant equipment and load ranges to meet a plant cooling load. This operation scheme is used when the supervisory control determines that the plants should be operated in a cool-only mode. 
+This alpha field specifies the PlantEquipmentOperation:CoolingLoad name that identifies the plant equipment and load ranges to meet a plant cooling load. This operation scheme is used when the supervisory control determines that the plants should be operated in a cool-only mode.
 
 \paragraph{Field: Heating Only Load Plant Equipment Operation Heating Load Name}\label{field-heat-only-load-equip-operation-name-plantequipmentoperationchillerheaterchangeover}
 
-This alpha field specifies the PlantEquipmentOperation:HeatingLoad name that identifies the plant equipment and load ranges to meet a plant heating load. This operation scheme is used when the supervisory control determines that the plants should be operated in a heat-only mode. 
+This alpha field specifies the PlantEquipmentOperation:HeatingLoad name that identifies the plant equipment and load ranges to meet a plant heating load. This operation scheme is used when the supervisory control determines that the plants should be operated in a heat-only mode.
 
 \paragraph{Field: Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name}\label{field-simulataneous-cooling-and-heating-plant-equip-operation-cooling-name-plantequipmentoperationchillerheaterchangeover}
 
@@ -593,7 +593,7 @@ Examples of this object:
     HeatPump:PlantLoop:EIR:Cooling,   !- Equipment 1 Object Type
     AWHP_1 Cooling Side,                   !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Cooling,   !- Equipment 2 Object Type
-    AWHP_2 Cooling Side;                   !- Equipment 2 Name  
+    AWHP_2 Cooling Side;                   !- Equipment 2 Name
 \end{lstlisting}
 
 \paragraph{Output reporting available with the supervisory controller:}\label{operation-scheme-heating-outputs-description}
@@ -607,13 +607,13 @@ Examples of this object:
     HVAC,Average,Supervisory Plant Operation Polled Building Heating Load  {[}W{]}
     \item
     HVAC,Average,Supervisory Plant Operation Polled Building Cooling Load  {[}W{]}
-    \item 
+    \item
     HVAC,Average,Supervisory Plant Operation Primary Plant Heating Load  {[}W{]}
     \item
     HVAC,Average,Supervisory Plant Operation Primary Plant Cooling Load  {[}W{]}
     \item
     HVAC,Average,Supervisory Plant Heat Recovery Operation Mode  {[}{]}
-    \item 
+    \item
     HVAC,Average,Supervisory Plant Operation Secondary Plant Heating Load  {[}W{]}
     \item
     HVAC,Average,Supervisory Plant Operation Secondary Plant Cooling Load  {[}W{]}
@@ -631,7 +631,7 @@ This integer output represents the plant operating mode for the auxiliary and/or
 
 \paragraph{Supervisory Plant Operation Polled Building Heating Load}\label{operation-scheme-outputs-supervisory-plant-operation-sensed-heating-load}
 
-This numeric output represents the supervisory controller sensed building heating load in watts.  This is the sum of the predicted zone sensible loads for the zones listed in the node list for this object, the ventilation loads on any central air systems connected to those zones, and the loads from any LoadProfile:Plant objects on the plant loops being supervised. 
+This numeric output represents the supervisory controller sensed building heating load in watts.  This is the sum of the predicted zone sensible loads for the zones listed in the node list for this object, the ventilation loads on any central air systems connected to those zones, and the loads from any LoadProfile:Plant objects on the plant loops being supervised.
 
 \paragraph{Supervisory Plant Operation Polled Building Cooling Load}\label{operation-scheme-outputs-supervisory-plant-operation-sensed-cooling-load}
 
@@ -647,15 +647,15 @@ This numeric output represents the supervisory controller sensed loads on the pr
 
 \paragraph{Supervisory Plant Heat Recovery Operation Mode}\label{operation-scheme-outputs-hr-operation-mode}
 
-This integer output represents the plant operating mode for the dedicated heat recovery water to water heat pump.  Off = 0, Heating led = 1, Cooling led = 2.  This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object. 
+This integer output represents the plant operating mode for the dedicated heat recovery water to water heat pump.  Off = 0, Heating led = 1, Cooling led = 2.  This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object.
 
 \paragraph{Supervisory Plant Operation Secondary Plant Heating Load}\label{operation-scheme-outputs-supervisory-secondary-plant-heating-loads}
 
-This numeric output represents the supervisory controller sensed loads on the secondary plant heating loop in watts.  This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object. 
+This numeric output represents the supervisory controller sensed loads on the secondary plant heating loop in watts.  This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object.
 
 \paragraph{Supervisory Plant Operation Secondary Plant Cooling Load}\label{operation-scheme-outputs-supervisory-secondary-plant-cooling-loads}
 
-This numeric output represents the supervisory controller sensed loads on the secondary plant cooling loop in watts.  Cooling loads are negative values. This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object. 
+This numeric output represents the supervisory controller sensed loads on the secondary plant cooling loop in watts.  Cooling loads are negative values. This output is only generated when the dedicated heat recovery option is used by naming the heating and cooling companions in the input object.
 
 \subsection{PlantEquipmentList}\label{plantequipmentlist}
 

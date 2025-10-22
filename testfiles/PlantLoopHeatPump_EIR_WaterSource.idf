@@ -266,7 +266,7 @@
     Condenser Loop Demand Inlet Node,  !- Source Side Inlet Node Name
     Condenser Loop Demand Intermediate Node,  !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name      
+    ,                        !- Heat Recovery Outlet Node Name
     Cooling Coil,            !- Companion Heat Pump Name
     0.005,                   !- Load Side Reference Flow Rate {m3/s}
     0.002,                   !- Source Side Reference Flow Rate {m3/s}

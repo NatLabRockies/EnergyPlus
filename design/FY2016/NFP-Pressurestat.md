@@ -1,7 +1,7 @@
 Pressure Control Through Pressure Controller
 ================
 
-**Lixing Gu** 
+**Lixing Gu**
 
 **Florida Solar Energy Center**
 
@@ -28,7 +28,7 @@ Added a new object of AirflowNetwork:Distribution:Component:OutdoorAirFlow to ha
 
 **Initial draft**
  - 12/23/15
- 
+
 
 ## Justification for New Feature ##
 
@@ -49,17 +49,17 @@ Three quick questions:
 
 2. Would the naming ZoneControl:PressureStat make more sense? As this only applies to AFN.
 
-3. For leaky buildings, sometimes the only way to control pressure is to increase OA flow rate. 
+3. For leaky buildings, sometimes the only way to control pressure is to increase OA flow rate.
 
 Gu's reply on 12/28/15
 
-1A: The proposal proposes an exhaust fan in a controlled zone for pressure control in an AirLoop. It is similar to temperature control to use a thermostat in a controlled zone. The pressure control only happens in the controlled zone. 
+1A: The proposal proposes an exhaust fan in a controlled zone for pressure control in an AirLoop. It is similar to temperature control to use a thermostat in a controlled zone. The pressure control only happens in the controlled zone.
 
-It is true that a central relief fan is also used to control building pressure. The existing EnergyPlus does not have an object for a central relief fan. In turn, the AirflowNetwork model does not also have the same object. That is why an exhaust fan is proposed.   
+It is true that a central relief fan is also used to control building pressure. The existing EnergyPlus does not have an object for a central relief fan. In turn, the AirflowNetwork model does not also have the same object. That is why an exhaust fan is proposed.
 
 2A: The new object is applied to AFN only as proposed. I don’t have any strong opinions for the name of a new object. My intent is that the object may not be restricted to AFN. It is possible that E+ may also calculate zone pressure in other models in the future.  We can discuss it.
 
-3A: It is also true to adjust OA for zone pressure control. If we allow to adjust both OA and exhaust flow rates, there is no unique solution. Therefore, exhaust flow rate is proposed. If pressure control can not be reached in leaky buildings, users can increase OA. I will add it in a warning message.  
+3A: It is also true to adjust OA for zone pressure control. If we allow to adjust both OA and exhaust flow rates, there is no unique solution. Therefore, exhaust flow rate is proposed. If pressure control can not be reached in leaky buildings, users can increase OA. I will add it in a warning message.
 
 A new addition on 1/8/16
 
@@ -71,23 +71,23 @@ The first review meeting was held on 1/12/16. Michael Witte, Jason DeGraw, Tianz
 
 The main concern is the object name of the PressureStat. The consensus conclusion is a new object name: AirflowNetwork:ZoneControl:PressureController to replace ZoneControl:PressureStat.
 
-Another concern is to prevent circulation of OA flow and zone exhaust fan flow rate. The current practice is that when exhaust fan flow rate is greater than OA flow rate, the OA flow rate will increase to match exhaust fan flow rate. This concern will be considered during coding to avoid possible circulation of both airflow rates.  
+Another concern is to prevent circulation of OA flow and zone exhaust fan flow rate. The current practice is that when exhaust fan flow rate is greater than OA flow rate, the OA flow rate will increase to match exhaust fan flow rate. This concern will be considered during coding to avoid possible circulation of both airflow rates.
 
 ###E-mail communications after submission of design document
 
 Bereket on 1/21/16
 
 I read the design document.  The intent and implementation are well described.  I have one question that came to my mind.  Does the pressure controlled zone have to be the same zone controlled by thermostat, or it can be any of the zones served by the air loop?
- 
+
 Gu's reply on 1/22/16
 
 Since the zone name is a field of the AirflowNetwork:ZoneControl:PressureController object, one of any zones served by the same air loop is allowed, although I prefer to be the same zone with the thermostat.
 
 ## Overview ##
 
-The pressure control could be achieved by changing either exhaust fan flow rate in a controlled zone or relief node flow rate in an OA mixer, when an AirLoop has two required components: an outdoor air mixer and an exhaust fan in a controlled zone. Figure 1 shows schematic of an AirLoop with required components. The proposed pressure control will be accomplished in the AirLoop. 
+The pressure control could be achieved by changing either exhaust fan flow rate in a controlled zone or relief node flow rate in an OA mixer, when an AirLoop has two required components: an outdoor air mixer and an exhaust fan in a controlled zone. Figure 1 shows schematic of an AirLoop with required components. The proposed pressure control will be accomplished in the AirLoop.
 
-The outdoor flow rate is specified by the Controller:OutdoorAir object in the AirLoop. The first approach is to vary exhaust fan flow rate between zero and maximum flow rates to achieve pressure control in the controlled zone. The maximum flow rate of an exhaust fan is specified in the Fan:ZoneExhaust object. The relief node flow rate is zero. The second approach is to vary relief node flow rate in an OA mixer between zero flow rate and the OA flow rate specified by the Controller:OutdoorAir object. The exhaust fan flow rate will be fixed.   
+The outdoor flow rate is specified by the Controller:OutdoorAir object in the AirLoop. The first approach is to vary exhaust fan flow rate between zero and maximum flow rates to achieve pressure control in the controlled zone. The maximum flow rate of an exhaust fan is specified in the Fan:ZoneExhaust object. The relief node flow rate is zero. The second approach is to vary relief node flow rate in an OA mixer between zero flow rate and the OA flow rate specified by the Controller:OutdoorAir object. The exhaust fan flow rate will be fixed.
 
 
 ![](PressurestatFigure1.png)
@@ -103,7 +103,7 @@ The proposed approach adds three new objects and enhances outdoor air, relief ai
 
 A new object of AirflowNetwork:ZoneControl:PressureController will be proposed to allow a user to input pressure setpoint and a controlling component with adjustable airflow rate to meet the setpoint. The proposed component is either the Fan:ZoneExhaust object or the OutdoorAir:Mixer. A single choice is allowed. In other words, both Fan:ZoneExhaust and OutdoorAir:Mixer objects can not used together to perform pressure control.
 
-Since the Fan:ZoneExhaust has the maximum flow rate field, there is no need to revise the existing object. 
+Since the Fan:ZoneExhaust has the maximum flow rate field, there is no need to revise the existing object.
 
 Since the relief node flow rate change is based on the outdoor airflow rate specified by the Controller:OutdoorAir object, there is no need to have flow rate inputs.
 
@@ -111,23 +111,23 @@ Since the relief node flow rate change is based on the outdoor airflow rate spec
 
 A new object of AirflowNetwork:Distribution:Component:OutdoorAirFlow will be proposed to allow a user to adopt the outdoor air flow rate based on the Controller:OutdoorAir object. When the outdoor air flow rate is zero, the model treats this component as a crack using a power law to specify relationship between pressure difference and mass flow rate.
 
-It should be pointed out that the object does not have information on Controller:OutdoorAir object, because the AirflowNetwork model allows a single Controller:OutdoorAir object based on restriction of a single AirLoop. When multiple Airloops are allowed, the required optional inputs of Controller:OutdoorAir objects will be added.  
+It should be pointed out that the object does not have information on Controller:OutdoorAir object, because the AirflowNetwork model allows a single Controller:OutdoorAir object based on restriction of a single AirLoop. When multiple Airloops are allowed, the required optional inputs of Controller:OutdoorAir objects will be added.
 
 ###A new object of AirflowNetwork:Distribution:Component:ReliefAirFlow
 
 A new object of AirflowNetwork:Distribution:Component:ReliefAirFlow will be proposed to allow a user to set up the relief node flow in an OA mixer to perform pressure control. When the outdoor air flow rate is zero, the model treats this component as a crack using a power law to specify relationship between pressure difference and mass flow rate.
 
-It should be pointed out that the object does not have information on the OA mixer object. The choice is provided in the PressureController object. 
+It should be pointed out that the object does not have information on the OA mixer object. The choice is provided in the PressureController object.
 
 ### Outdoor air handling
 
-There are two ways to treat an OA mixer in the existing AirflowNetwork model. The first way is that there is no link between an outdoor air node and an OA mixer, so that returning airflow rate is equal to the one at OA mixer outlet node. This is the same way to treat airflow rate for an OA mixer without using the AirflowNetwork model. The mixer outlet node conditions are calculated using the current code in MixedAir module. The advantage is that no mass flow rate adjustment is needed and the mixer outlet calculation results are applied to the mixer outlet. The disadvantage is the return flow rate is not treated in reality.   
+There are two ways to treat an OA mixer in the existing AirflowNetwork model. The first way is that there is no link between an outdoor air node and an OA mixer, so that returning airflow rate is equal to the one at OA mixer outlet node. This is the same way to treat airflow rate for an OA mixer without using the AirflowNetwork model. The mixer outlet node conditions are calculated using the current code in MixedAir module. The advantage is that no mass flow rate adjustment is needed and the mixer outlet calculation results are applied to the mixer outlet. The disadvantage is the return flow rate is not treated in reality.
 
 The second way is to add a link between the outdoor air node and the OA mixer. However, the outdoor air flow rate is calculated based on linkage resistance and pressure difference across the link. In other words, the OA flow rate is not controlled precisely compared to the OA controller specification, and varies with time, since outdoor pressure changes with time.
 
 The proposed approach is to have a link between the outdoor air node and the OA mixer and an associated new flow component. The new component will be a constant fan when the outdoor air flow from the Controller:OutdoorAir object is greater than zero, and a crack with zero outdoor flow rate.
 
-In order to use a central relief airflow to preform pressure control, an additional link between the OA mixer and the outdoor air node is needed. The link is similar to the above link. The difference is that the orders of two distribution nodes are switched. The above link represent an OA fan, while the current link represents a central relief fan.      
+In order to use a central relief airflow to preform pressure control, an additional link between the OA mixer and the outdoor air node is needed. The link is similar to the above link. The difference is that the orders of two distribution nodes are switched. The above link represent an OA fan, while the current link represents a central relief fan.
 
 ### Exhaust fan handling
 
@@ -135,17 +135,17 @@ Since the new feature requires to vary exhaust fan flow rate to achieve the pres
 
 1. The AirflowNetwork model will run twice with zero and maximum flow rates for the controlled zone exhaust fan. The controlled zone pressures are the return values.
 
-	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief nodewill produce the minimum zone pressure. 
+	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief nodewill produce the minimum zone pressure.
 
-2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate, The AirflowNetwork model will use Regula Falsi to find a solution with calculated zone exhaust fan flow rate. Otherwise, the pressure setpoint will not be met. 
+2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate, The AirflowNetwork model will use Regula Falsi to find a solution with calculated zone exhaust fan flow rate. Otherwise, the pressure setpoint will not be met.
 
-3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust flow rate will be forced. 
+3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust flow rate will be forced.
 
 4. If both maximum and minimum pressures are lower than the setpoint, the zero exhaust flow rate will be forced.
 
 ### Relief air handling
 
-The relief air handling is similar to exhaust air handling. The logic is the same. The difference is that relief air handling is based on a system, while exhaust air handling occurs in a controlled zone. 
+The relief air handling is similar to exhaust air handling. The logic is the same. The difference is that relief air handling is based on a system, while exhaust air handling occurs in a controlled zone.
 
 ## Testing/Validation/Data Sources ##
 
@@ -153,7 +153,7 @@ The simulation results will be compared to spread sheet results.
 
 ## Input Output Reference Documentation ##
 
-This section describes inputs of three new object as AirflowNetwork:ZoneControl:PressureController, AirflowNetwork:Distribution:Component:OutdoorAirFlow and AirflowNetwork:Distribution:Component:ReliefAirFlow. 
+This section describes inputs of three new object as AirflowNetwork:ZoneControl:PressureController, AirflowNetwork:Distribution:Component:OutdoorAirFlow and AirflowNetwork:Distribution:Component:ReliefAirFlow.
 
 ### AirflowNetwork:ZoneControl:PressureController
 
@@ -176,7 +176,7 @@ Fan:ZoneExhaust and OutdoorAir:Mixer.
 
 #### Field: Control Name
 
-The corresponding control type name. 
+The corresponding control type name.
 
 #### Field:Pressure Control Availability Schedule Name
 
@@ -184,7 +184,7 @@ This field contains the name of a schedule that determines whether or not the Ai
 
 #### Field:Pressure Setpoint Schedule Name
 
-This field contains the name of a schedule that contains the zone air pressure setpoint as a function of time. The units for pressure setpoint are Pascal. The setpoint values in the schedule must be between -50 and 100 Pascal. 
+This field contains the name of a schedule that contains the zone air pressure setpoint as a function of time. The units for pressure setpoint are Pascal. The setpoint values in the schedule must be between -50 and 100 Pascal.
 
 An IDF example is provided below:
 
@@ -200,7 +200,7 @@ An IDF example is provided below:
 
 ###AirflowNetwork:Distribution:Component:OutdoorAirFlow
 
-The AirflowNetwork:Distribution:Component:OutdoorAirFlow object is used to allow the AirflowNetwork model to adopt the amount of outdoor air flow rate. When the outdoor air mass flow rate is greater than zero, the airflow network model treats this object as a constant volume fan and the flow rate is provided by the Controller:OutdoorAir object. When there is not outdoor air flow rate, the model treats this object as a crack and a power law is assumed. 
+The AirflowNetwork:Distribution:Component:OutdoorAirFlow object is used to allow the AirflowNetwork model to adopt the amount of outdoor air flow rate. When the outdoor air mass flow rate is greater than zero, the airflow network model treats this object as a constant volume fan and the flow rate is provided by the Controller:OutdoorAir object. When there is not outdoor air flow rate, the model treats this object as a crack and a power law is assumed.
 
 ####Field: Name
 
@@ -248,7 +248,7 @@ IDF examples are provided below:
 ```
 ###AirflowNetwork:Distribution:Component:ReliefAirFlow
 
-The AirflowNetwork:Distribution:Component:ReliefAirFlow object is used to allow the AirflowNetwork model to perform pressure control by varying the amount of relief air flow rate. When the outdoor air mass flow rate is greater than zero, the airflow network model treats this object as a constant volume fan and the flow rate is varied to reach pressure control. When there is not outdoor air flow rate, the model treats this object as a crack and a power law is assumed. 
+The AirflowNetwork:Distribution:Component:ReliefAirFlow object is used to allow the AirflowNetwork model to perform pressure control by varying the amount of relief air flow rate. When the outdoor air mass flow rate is greater than zero, the airflow network model treats this object as a constant volume fan and the flow rate is varied to reach pressure control. When there is not outdoor air flow rate, the model treats this object as a crack and a power law is assumed.
 
 ####Field: Name
 
@@ -304,7 +304,7 @@ IDF examples are provided below:
 
 ## Input Description ##
 
-This section describes inputs of three new object as AirflowNetwork:ZoneControl:PressureController,  AirflowNetwork:Distribution:Component:OutdoorAirFlow, and AirflowNetwork:Distribution:Component:ReliefAirFlow. 
+This section describes inputs of three new object as AirflowNetwork:ZoneControl:PressureController,  AirflowNetwork:Distribution:Component:OutdoorAirFlow, and AirflowNetwork:Distribution:Component:ReliefAirFlow.
 
 ### New objects
 
@@ -327,12 +327,12 @@ AirflowNetwork:ZoneControl:PressureController
        \key Fan:ZoneExhaust
 	   \note The current selection is Fan:ZoneExhaust only.
   	A4 , \field Control Name
-       \note Control names are names of individual control objects 
+       \note Control names are names of individual control objects
        \required-field
        \type object-list
        \object-list ControlTypeNames
   	A5 , \field Pressure Control Availability Schedule Name
-       \note Availability schedule name for pressure controller. Schedule value > 0 means the 
+       \note Availability schedule name for pressure controller. Schedule value > 0 means the
 	   \note pressure controller is enabled. If this field is blank, then pressure controller is \note always enabled.
        \type object-list
        \object-list ScheduleNames
@@ -379,7 +379,7 @@ AirflowNetwork:Distribution:Component:ReliefAirFlow
 
 	AirflowNetwork:Distribution:Component:ReliefAirFlow
       \min-fields 3
-      \memo This object allows variation of air flow rate to perform pressure. 
+      \memo This object allows variation of air flow rate to perform pressure.
  	A1 , \field Name
        \required-field
        \reference AFNReliefAirFlowNames
@@ -432,7 +432,7 @@ This is the mass flow rate used to achieve the pressure control in kg/s. If the 
 ## Engineering Reference ##
 
 A new section of Pressure Control will be added under the AirflowNetwork model.
- 
+
 ###AirflowNetwork Model
 ...
 ####Pressure Control
@@ -442,14 +442,14 @@ The pressure control is achieved by varying either zone exhaust fan flow rate in
 
 1. The AirflowNetwork model will run twice with zero and maximum flow rates for either the controlled zone exhaust fan or relief air flow rate. The controlled zone pressures are the return values.
 
-	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief nodewill produce the minimum zone pressure. 
+	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief nodewill produce the minimum zone pressure.
 
-2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan or relief node flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate or outdoor air flow rate, The AirflowNetwork model will use Regula Falsi to find a solution with calculated zone exhaust fan flow rate. Otherwise, the pressure setpoint will not be met. 
+2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan or relief node flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate or outdoor air flow rate, The AirflowNetwork model will use Regula Falsi to find a solution with calculated zone exhaust fan flow rate. Otherwise, the pressure setpoint will not be met.
 
-3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust or outdoor flow rate will be forced. 
+3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust or outdoor flow rate will be forced.
 
 4. If both maximum and minimum pressures are lower than the setpoint, the zero flow rate will be forced.
-  
+
 ## Example File and Transition Changes ##
 
 A new example file will be created to demonstrate pressure control.
@@ -462,19 +462,19 @@ This new feature will revise several modules: DataAirflowNetwork, AirflowNetwork
 
 ###DataAirflowNetwork###
 
-The revision includes three new variables and two new structs. The three new variables allow data exchange among AirflowNetwork modules. Two new structs accommodate 3 new objects. It should be pointed out that  both AirflowNetwork:Distribution:Component:OutdoorAirFlow and AirflowNetwork:Distribution:Component:ReliefAirFlow objects have similar fields. They can be combined together as a single struct.   
+The revision includes three new variables and two new structs. The three new variables allow data exchange among AirflowNetwork modules. Two new structs accommodate 3 new objects. It should be pointed out that  both AirflowNetwork:Distribution:Component:OutdoorAirFlow and AirflowNetwork:Distribution:Component:ReliefAirFlow objects have similar fields. They can be combined together as a single struct.
 
 #### PressureSetFlag
 
 A new variable of PressureSetFlag will be added to show pressure control status.
- 
+
 	0: No pressure control;
 	1: Use exhaust fan to perform pressure control
 	2: Use a central relief flow to perform pressure control
 
 ####ExhaustFanMassFlowRate and ReliefMassFlowRate
 
-Two new variables of mass flow rate are added to allow the model to access the variables to perform pressure control. The first variable represents the exhaust fan flow rate when PressureSetFlag = 1. The second variable represents the central relief flow rate when PressureSetFlag = 2. These two variables are used in Regula Falsi to reach pressure control. 
+Two new variables of mass flow rate are added to allow the model to access the variables to perform pressure control. The first variable represents the exhaust fan flow rate when PressureSetFlag = 1. The second variable represents the central relief flow rate when PressureSetFlag = 2. These two variables are used in Regula Falsi to reach pressure control.
 
 	Real64 ExhaustFanMassFlowRate( 0.0 ); // Exhaust fan flow rate used in PressureStat
 	Real64 ReliefMassFlowRate( 0.0 ); // OA Mixer relief node flow rate used in PressureStat
@@ -649,7 +649,7 @@ Add a new section to allow iteration to find flow rate of either exhaust fan or 
 
 ####A new function to handle Regula Falsi
 
-A new function of AFNPressureResidual will be generated to find a solution of exhaust fan flow rate for pressure control. The argument variable is ExFanMassFlowRate.  
+A new function of AFNPressureResidual will be generated to find a solution of exhaust fan flow rate for pressure control. The argument variable is ExFanMassFlowRate.
 
 	Real64 AFNPressureResidual (
 		Real64 const PresCtrMassFlowRate, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
@@ -680,7 +680,7 @@ A new function of AFNPressureResidual will be generated to find a solution of ex
 
 ###AirflowNetworkSolver###
 
-The revision involves modification of an existing function as AFEEXF and additions of two functions as AFEOAF and AFEREF.  
+The revision involves modification of an existing function as AFEEXF and additions of two functions as AFEOAF and AFEREF.
 
 ####A modified function of AFEEXF
 
@@ -720,7 +720,3 @@ This function will simulate a fan to deliver relief air. The mass flow rate will
 ## References ##
 
 insert text
-
-
-
-

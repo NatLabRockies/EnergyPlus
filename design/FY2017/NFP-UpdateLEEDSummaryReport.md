@@ -7,11 +7,11 @@ Update LEED Summary Report
 **Jason Glazer, GARD Analytics**
 
  - May 24, 2017
- 
+
 
 ## Justification for New Feature ##
 
-The current Leadership in Energy and Environmental Design (LEED) Summary Report available in EnergyPlus helps users working with LEED forms. However, the report functionality has not been updated since it was first implemented in 2006. An update of the Summary Report functionality would help LEED users and Green Building Council Certification (GBCI) reviewers. 
+The current Leadership in Energy and Environmental Design (LEED) Summary Report available in EnergyPlus helps users working with LEED forms. However, the report functionality has not been updated since it was first implemented in 2006. An update of the Summary Report functionality would help LEED users and Green Building Council Certification (GBCI) reviewers.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -30,7 +30,7 @@ http://www.usgbc.org/resources/minimum-energy-performance-calculator
 The scope of work for this NFP is to enhance the EnergyPlus LEED Summary Report functionality:
 
  - To provide more information as required by LEED submittals.
- - With details as required by the U.S. Green Building Council (USGBC), including the information needed for the Energy Performance Calculator and Table 1.4 spreadsheets. 
+ - With details as required by the U.S. Green Building Council (USGBC), including the information needed for the Energy Performance Calculator and Table 1.4 spreadsheets.
 
 In addition, the current outputs from the LEED Summary Report shall be revised to be consistent with the requirements of the USGBC.
 
@@ -41,21 +41,21 @@ The main approach used was to reach out to stakeholders and to review the Minimu
 
 Summary of a call with USGBC representatives:
 
-- Update the performance results including new end uses (included). 
+- Update the performance results including new end uses (included).
 - Old EAp2-1 style labels are not longer used. Should just use names of tabs and subtable names (included).
 - Gathering results now scattered through out current tabular results file more valuable to LEED users that deriving new outputs for other tabs of Minimum Energy Performance Calculator calculator (included).
 
 - Importing. Best option would be for utility to automatically populate Minimum Energy Performance Calculator spreadsheet based on EnergyPlus inputs and outputs (EnergyPlus or OpenStudio team would maintain the custom spreadsheet). Second best option would be make importing results as simple as possible (USGBC would maintain spreadsheet and importing formulas). A special CSV would make this more repeatable. (not included)
-- Flag zones that are signficantly different maximum heating and cooling loads for Appendix G3.1.1c (not included). 
-- Economizer use status (not included). 
-- Peak operating vs. design capacity and timestamp of peak (not included). 
+- Flag zones that are signficantly different maximum heating and cooling loads for Appendix G3.1.1c (not included).
+- Economizer use status (not included).
+- Peak operating vs. design capacity and timestamp of peak (not included).
 - When is optimum start used (not included).
 
 In addition to the USGBC call, numerous email exchanges with various users and stakeholders suggest the following changes:
 
  - Demand for each end use should be the peak demand for the individual end use (included).
  - New custom end uses will be attached to end use subcategory user input so that users can categorize (included).
- 
+
  - Allow for import of EnergyPlus results to Minimum Energy Performance Calculator spreadsheet (not included).
  - Enhance the AppGPostProcess software to compare the proposed with the four rotated buildings and report the savings and LEED points (not included).
  - Aggregate the areas based on program type for use in the space by space lighting and equipment power density summaries. Add a space program type field into the zone object to allow for such aggregation of results (not included).
@@ -68,17 +68,17 @@ In addition to the USGBC call, numerous email exchanges with various users and s
  - Add estimate for monthly and annual surface heat gains and losses (not included).
 
 The Minimum Energy Performance Calculator spreadsheet is being updated as part of the pilot to support Appendix G from 90.1-2016. It may include other end-use subcategories and those will be included if possible.
- 
+
 Requested features from were evaluated. More may be included if budget allows.
 
-Several issues related to the LEED reporting may be addressed independently prior to the release of EnergyPlus 8.8.0 including: 
+Several issues related to the LEED reporting may be addressed independently prior to the release of EnergyPlus 8.8.0 including:
 
 https://github.com/NREL/EnergyPlus/issues/5672 EAp2-4/5. Demand data taken from Design Days instead of from Annual Peak
 https://github.com/NREL/EnergyPlus/issues/5559 Add LEED reporting of peak end use and EFLH
 https://github.com/NREL/EnergyPlus/issues/5895 LEED Summary EAp2-4/5 Report Problems
 https://github.com/NREL/EnergyPlus/issues/5613 LEED Tables service water heating doesn't appear
 https://github.com/NREL/EnergyPlus/issues/5956 Report VAV minimum volume setpoint
-https://github.com/NREL/EnergyPlus/issues/5298 Outdoor Air Summary report improvements 
+https://github.com/NREL/EnergyPlus/issues/5298 Outdoor Air Summary report improvements
 
 
 ## Testing/Validation/Data Sources ##
@@ -93,7 +93,7 @@ Also need to update the Using EnergyPlus for Compliance documentation.
 
 ## Input Description ##
 
-For the following objects which already have End-Use Subcategory fields: 
+For the following objects which already have End-Use Subcategory fields:
 
  - Lights
  - ElectricEquipment
@@ -161,7 +161,7 @@ To:
        \key FansKitchenVentilation
        \key InteriorLightingProcess
        \key LightingInApartments
-       \key Cooking 
+       \key Cooking
        \key IndustrialProcess
        \key ElevatorsEscalators
        \key ITequipment
@@ -197,7 +197,7 @@ To:
        \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
        \type alpha
        \retaincase
- 
+
 
 ```
 
@@ -213,7 +213,7 @@ The revised LEED Summary report is shown below:
 <p>For:<b> Entire Facility</b></p>
 <p>Timestamp: <b>2017-05-17
     08:43:51</b></p>
-<b>General Information - General</b><br><br> 
+<b>General Information - General</b><br><br>
 <table border="1" cellpadding="4" cellspacing="0">
   <tr><td></td>
     <td align="right">Data</td>
@@ -1379,11 +1379,8 @@ No changes
 
 ## Example File and Transition Changes ##
 
-The end use subcategory fields will be updated. 
+The end use subcategory fields will be updated.
 
 ## References ##
 
 v4_Minimum Energy Performance Calculator_v04.xlsm
-
-
-

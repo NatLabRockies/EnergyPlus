@@ -5,11 +5,11 @@ Zone Air Mass Flow Balance Improvement
 
  - Original Date: January 19, 2021
  - Revision Date: January 22, 2021
- 
+
 
 ## Justification for New Feature ##
 
-ZoneAirMassFlowConservation is intended to balance airflows but current design is that the procedure adjusts zone mixing and/or infiltration flow rates. User that have complex air transfer models like grocery stores, restaurants, and some big box retailers need the ability to model actual air transfer and account for ventilation movement between spaces. In these cases, users want the infiltration, zone mixing, and exhaust fan flow rates to stay fixed at user specified flows, instead adjust the system return air to balance zone air flow. 
+ZoneAirMassFlowConservation is intended to balance airflows but current design is that the procedure adjusts zone mixing and/or infiltration flow rates. User that have complex air transfer models like grocery stores, restaurants, and some big box retailers need the ability to model actual air transfer and account for ventilation movement between spaces. In these cases, users want the infiltration, zone mixing, and exhaust fan flow rates to stay fixed at user specified flows, instead adjust the system return air to balance zone air flow.
 
 This new feature provides an alternative air flow balancing method that maintains the ZoneMixing flows at user specified flow rate to allow user preferred inter-zone air flows by adjusting the zone return air flows and in some cases by modifying user specified zone infiltration air flows.
 
@@ -71,7 +71,7 @@ The zone mixing object flows will always remain at user specified values such th
 Current zone air mass flow conservation equation is formulated to solve the following equation by adjusting the Zone Mixing flow, and zone infiltration flow sequentially.
 
  0.0 = [m_{sup} - m_{exh} - m_{ret} + m_{zmreceiving} - m_{zmsource} + m_{inf}]
-	
+
 where,
 m_{sup} = Zone Supply Air Mass Flow Rate, [kg/s]
 m_{exh} = Zone Exhaust Air Mass Flow Rate, [kg/s]
@@ -87,40 +87,40 @@ The requested feature will be implemented by adjusting the return air mass flow 
 Solving the zone air flow mass balance equation for zone return air mass flow:
 
 m_{ret} = [m_{sup} - m_{exh} + m_{zmreceiving} - m_{zmsource} + m_{inf}]
- 
+
 Depending on the sign of the value of return air mass flow rate calculated using the above equation two different cases that require different solution scheme are formulated:
 
 Case I:  [m_{ret} >= 0.0]
 
          The zone is under positive pressure hence requires non-zero zone return air mass flow rate to balance the zone air flow. The return air flow rate will be adjusted within the bounds of 0 and a maximum zone return air flow rate that balance the zone air mass flow. The zone maximum return flow rate is determined by a check that the sum of zone return air flow of all the zones served does not exceed the design supply air flow rate of the air loop serving the zones.
-		 		 
+
 Case II: [m_{ret} < 0.0]
          The zone is under negative pressure hence requires additional supply air or infiltration air is required to balance the zone air flow. There are two possibilities that can be considered: (A) increasing zone infiltration air flow or (B) increasing the zone supply air flow.
-		 The preferred implementation approach is alternative IIA but both alternatives are presented for discussion. 
-		 
+		 The preferred implementation approach is alternative IIA but both alternatives are presented for discussion.
+
 		 Alternative IIA:
 		 In alternative IIA the infiltration air flow is increased proportionally and the return air mass flow rate will be reset to zero to balance zone air flow.
 		 [m_{inf} += m_{ret};]
-		 [m_{ret} = 0.0;] 
-		 
+		 [m_{ret} = 0.0;]
+
 		 Alternative IIB:
 		 In alternative IIB the supply air flow is increased proportionally and the return air mass flow rate will be reset to zero to balance zone air flow.
 		 [m_{sup} += m_{ret};]
-         [m_{ret} = 0.0;]   
-		 
+         [m_{ret} = 0.0;]
+
 		 Alternative IIB may cause convergence problem that leads to exceeding maximum iteration limits or even missing the zone thermostat set-point because of fighting between the HVAC control and zone air mass balance flow adjustment. There could also be flow balancing problem when the HVAC system is scheduled off and the ZoneMixing or zone exhaust fan are active.
 
-The ZoneMixing objects air flows are always maintained at user specified values to allow user defined inter-zone air transfer. 
+The ZoneMixing objects air flows are always maintained at user specified values to allow user defined inter-zone air transfer.
 
 
 ## Testing/Validation/Data Sources ##
 
-(1) Any new subroutine(s) will have a unit test that validate that the subroutine is functioning properly.  
+(1) Any new subroutine(s) will have a unit test that validate that the subroutine is functioning properly.
 (2) Verifies the zone air flow mass balance without altering user specified ZoneMixing object flows.
 
 ## Input Output Reference Documentation ##
 
-This new feature will be implemented by adding a new choice key "AdjustZoneReturnFlow” to the existing input field "Adjust Zone Mixing For Zone Air Mass Flow Balance" in the ZoneAirMassFlowConservation object. 
+This new feature will be implemented by adding a new choice key "AdjustZoneReturnFlow” to the existing input field "Adjust Zone Mixing For Zone Air Mass Flow Balance" in the ZoneAirMassFlowConservation object.
 
 The existing input field "Adjust Zone Mixing For Zone Air Mass Flow Balance" better be renamed to "Zone Air Mass Flow Balance Method" and the two existing choice keys needs to be renamed as well for clarity. For example the "Yes" choice key will be replaced with "AdjustZoneMixingFlow" and the "No" choice key with "None". See below modified ZoneAirMassFlowConservation object.
 
@@ -138,16 +138,16 @@ ZoneAirMassFlowConservation,
        \unique-object
        \min-fields 3
   A1,  \field Zone Air Mass Flow Balance Method
-       \note If AdjutsZoneMixingFlow, Zone mixing object flow rates are adjusted to balance the zone air 
-       \note mass flow and additional infiltration air flow may be added if required in order to balance 
+       \note If AdjutsZoneMixingFlow, Zone mixing object flow rates are adjusted to balance the zone air
+       \note mass flow and additional infiltration air flow may be added if required in order to balance
        \note the zone air mass flow.
-	   \note If AdjustZoneReturnFlow, zone return air mass flow is adjusted to balance the zone air flow 
-	   \note and additional infiltration air flow may be added if required in order to balance the zone 
-       \note air mass flow. ZoneMixing objects air flow is always maintained at user specified value.	   
+	   \note If AdjustZoneReturnFlow, zone return air mass flow is adjusted to balance the zone air flow
+	   \note and additional infiltration air flow may be added if required in order to balance the zone
+       \note air mass flow. ZoneMixing objects air flow is always maintained at user specified value.
        \type choice
        \key AdjutsZoneMixingFlow
 	   \key AdjustZoneReturnFlow
-       \key None   
+       \key None
        \default None
   A2,  \field Infiltration Balancing Method
        \note This input field allows user to choose how zone infiltration flow is treated during
@@ -180,13 +180,13 @@ No new output variables will be implemented.
 
 ## Engineering Reference ##
 
-Will be updated as needed. 
+Will be updated as needed.
 
 ## Example File and Transition Changes ##
 
-One new example file will be added to the test suite to demonstrate this feature is functioning properly. 
+One new example file will be added to the test suite to demonstrate this feature is functioning properly.
 
-IDD change is required to add new choice key to an existing input field, and rename the input field and the key choices. Transition is required. 
+IDD change is required to add new choice key to an existing input field, and rename the input field and the key choices. Transition is required.
 
 ## References ##
 

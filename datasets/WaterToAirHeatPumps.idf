@@ -6,7 +6,7 @@
 !-----------------------------------------------------------------------------------------------
 
 !- ClimateMaster TCH072 - Water loop heat pump
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 69 kBtu/h at 86F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 13.3 EER at 86F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 92.5 kBtu/h at 68F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
@@ -128,7 +128,7 @@ Curve:QuadLinear,
 
 !- ClimateMaster TCH072 - Ground source/water heat pump
 !- Performance curve based on 15% methanol antifreeze solution
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 77.72 kBtu/h at 59F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 19.37 EER at 59F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 73.08 kBtu/h at 50F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
@@ -255,7 +255,7 @@ Curve:QuadLinear,
 
 !- ClimateMaster TCH072 - Ground loop/water heat pump
 !- Performance curve based on 15% methanol antifreeze solution
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 70.29 kBtu/h at 77F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 14.35 EER at 77F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 56.14 kBtu/h at 32F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb

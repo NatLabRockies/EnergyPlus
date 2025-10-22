@@ -24,7 +24,7 @@ $$\Delta T_{supply}=\Delta T_{in}-\Delta T_{supply}$$
 
 $$\Delta T_{return}=\Delta T_{return}-\Delta T_{out}$$
 
-Where, 
+Where,
 
 T<sub>in</sub>: IT equipment inlet temperature
 
@@ -34,9 +34,9 @@ T<sub>return</sub> : The actual AHU return air temperature
 
 T<sub>out</sub> : The IT equipment outlet temperature
 
-The two approach temperatures can be calculated by CFD tools for typical IT load levels and air flow management of data centers, or provided by measurement data or lookup tables. 
+The two approach temperatures can be calculated by CFD tools for typical IT load levels and air flow management of data centers, or provided by measurement data or lookup tables.
 
-This document describes the simulation algorithm, as well as the proposed modifications to the existing ITE object in EnergyPlus. 
+This document describes the simulation algorithm, as well as the proposed modifications to the existing ITE object in EnergyPlus.
 ![Diagram](DataCenterAirFlowDiagram.png)
 **Figure 1 Illustrative diagram of air flow and tempaerature profile in typical data centers**
 
@@ -45,24 +45,24 @@ This document describes the simulation algorithm, as well as the proposed modifi
 We propose a calculation logic as shown in Figure 2. Detailed calculation steps are as follows:
 (Note: inputs marked with stars (*) are already in the existing ITE object in EnergyPlus)
 
-+ **Step 1**: 
++ **Step 1**:
 	Calculate IT inlet temperature (Tin):
 
 	$$T_{in}=T_{supply}+\Delta T_{supply}$$
 	- Input:
-		- T<sub>supply</sub>*: AHU supply air temperature	
+		- T<sub>supply</sub>*: AHU supply air temperature
 		- ∆T<sub>supply</sub>: Supply approach temperature
 	- Output：
 		- T<sub>in</sub>: IT inlet temperature
 
 + **Step 2**:
 	Calculate CPU power (Q\_IT), IT fan air flow rate (V\_IT\_fan), IT fan power (Q\_IT\_fan), and IT outlet temperature (Tout).
-	
-	$$Q_{IT}=f1(T_{in},SchCPULoading)$$	
 
-	$$V_{ITfan}=f2(T_{in},SchCPULoading)$$	
+	$$Q_{IT}=f1(T_{in},SchCPULoading)$$
 
-	$$Q_{ITfan}=f3(V_{ITfan} )$$	
+	$$V_{ITfan}=f2(T_{in},SchCPULoading)$$
+
+	$$Q_{ITfan}=f3(V_{ITfan} )$$
 
 	$$T_{out}=T_{in}+(Q_{IT}+Q_{ITfan})/V_{ITfan}$$
 	- Input:
@@ -80,7 +80,7 @@ We propose a calculation logic as shown in Figure 2. Detailed calculation steps 
 
 + **Step 3**:
 	Calculate AHU return air temperature (Treturn) and AHU air flow rate (V\_AHU).
-	
+
 	$$T_{return}=\Delta T_{return}+T_{out}$$
 
 	$$Q_{AHU}=Q_{IT}+Q_{ITfan}+Q_{UPS}$$
@@ -114,10 +114,10 @@ We will modify the existing ITE object, keeping its current function and inputs,
 Fields to add:
 
 1.	Calculation Method (type: object-list)
-	
+
 	a. FlowFromSystem(Default, same as the current function)
 
-	b. FlowControlWithApproachTemperatures 
+	b. FlowControlWithApproachTemperatures
 
 2.	Supply Approach Temperature (required if choosing b @Calculation Method)
 3.	Supply Approach Temperature Schedule (optional, always 1 if leave blank)
@@ -132,7 +132,7 @@ The following existing fields of the ITE object are not required if choosing b @
 2.	Design Recirculation Fraction
 3.	Recirculation Function of Loading and Supply Temperature Curve Name
 
-All the other fields remain the same. 
+All the other fields remain the same.
 
 ## Proposed additions to Meters: ##
 N/A
@@ -175,14 +175,14 @@ I think I follow the proposed method.  Some questions/concerns:
 	Calculation Method
 		FlowFromSystem
 		FlowControlWithApproachTemperatures
-	Perhaps you can suggest better names, but the change in method alters both the ITE inlet temperature and whether the system airflow rate is used directly or is controlled by this object.  
+	Perhaps you can suggest better names, but the change in method alters both the ITE inlet temperature and whether the system airflow rate is used directly or is controlled by this object.
 
 	> Agree
 
-4.  The main challenge will be communicating the supply flow rate to the terminal unit that is serving the zone.  Have you thought about how to do that?  It may require modifying one or more terminal units or finding a way to adjust the current zone load values so that the terminal unit calculates the same flow rate. 
+4.  The main challenge will be communicating the supply flow rate to the terminal unit that is serving the zone.  Have you thought about how to do that?  It may require modifying one or more terminal units or finding a way to adjust the current zone load values so that the terminal unit calculates the same flow rate.
 
 	> Indeed there needs to overwrite the calculated supply air flow rate for the terminal units serving the data center zone.
-	
+
 	MJW – Then you will need a field for Controlled Supply Inlet Node or NodeList Name, so you know which node(s) to act on.  Or maybe just allow one supply inlet node to be controlled?  I don’t know that you can safely assume that you’ll be able to figure out the node name unless you restrict this to zones with only a single inlet node (i.e. no other forced air equipment in that zone).
 
 	> Great point. We will limit to zones with only a single inlet node.

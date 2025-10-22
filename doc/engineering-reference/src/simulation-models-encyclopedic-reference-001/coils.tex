@@ -21,13 +21,13 @@ The Model has two blocks: 1\(^{st}\) = Design Block with the Design Inputs. This
 % table 52
 \begin{longtable}[c]{p{1.79in}p{4.2in}}
 \caption{Design Inputs (User Inputs) \label{table:design-inputs-user-inputs}} \tabularnewline
-\toprule 
+\toprule
 Input Field & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Design Inputs (User Inputs)} \tabularnewline
-\toprule 
+\toprule
 Input Field & Description \tabularnewline
 \midrule
 \endhead
@@ -45,13 +45,13 @@ DesOutletAirHumRat & Outlet Air Humidity Ratio at Design Conditions \tabularnewl
 % table 53
 \begin{longtable}[c]{p{1.84in}p{4.16in}}
 \caption{Operating Conditions (From Nodes -- not user inputs) \label{table:operating-conditions-from-nodes-not-user}} \tabularnewline
-\toprule 
+\toprule
 Condition Variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Operating Conditions (From Nodes -- not user inputs)} \tabularnewline
-\toprule 
+\toprule
 Condition Variable & Description \tabularnewline
 \midrule
 \endhead
@@ -71,13 +71,13 @@ The various U-Factor Times Area values (UA) required by this model are calculate
 % table 54
 \begin{longtable}[c]{p{1.5in}p{4.5in}}
 \caption{UA Descriptions of Model \label{table:ua-descriptions-of-model}} \tabularnewline
-\toprule 
+\toprule
 UA Variable Name & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{UA Descriptions of Model} \tabularnewline
-\toprule 
+\toprule
 UA Variable Name & Description \tabularnewline
 \midrule
 \endhead
@@ -565,11 +565,11 @@ The cooling coil may be completely dry, completely wet with condensation, or it 
 % table 55
 \begin{longtable}[c]{|p{1.0in}p{2.0in}|p{1.0in}p{2.0in}|}
 \caption{Coil Geometry and Flow Variables for Coils \label{table:coil-geometry-and-flow-variables-for-coils}} \tabularnewline
-\toprule 
+\toprule
 \endfirsthead
 
 \caption[]{Coil Geometry and Flow Variables for Coils} \tabularnewline
-\toprule 
+\toprule
 \endhead
 
 A & area & LMHD & log mean enthalpy difference \tabularnewline
@@ -813,7 +813,7 @@ The implementation of detailed heating coil models in IBLAST was another importa
 In addition, it was concluded that, since much simpler and less computationally expensive heating coil simulations are possible, an option was provided in IBLAST for a heating coil design using only the UA value of the coil, the product of heat transfer coefficient and coil area.~ This model was largely based on the TYPE10 subroutine implemented in MODSIM.~ The equations used to model the performance of the TYPE10 heating coil are as follows:
 
 \begin{equation}
-  \begin{array}{rl} 
+  \begin{array}{rl}
     T_{a,out} & = T_{a,in} + \left( T_{w,in} - T_{a,in} \right) \varepsilon \left( \frac{\min \left( C_{p,a} \dot m_a,C_{p,w}\dot m_w \right)} {C_{p,a}\dot m_a} \right) \\
     T_{w,out} & = T_{w,in} - \left( T_{a,out} - T_{a,in} \right) \left( \frac{C_{p,a}\dot m_a}{C_{p,w}\dot m_w} \right)
   \end{array}
@@ -1646,7 +1646,7 @@ Else
 End If
 
 where
- 
+
 \(SHR_{Normal}\) = Gross sensible heat ratio in normal mode
 
 \(SHR_{Subl}\) = Gross sensible heat ratio in subcool mode
@@ -1662,15 +1662,15 @@ where
 For single-speed direct expansion cooling coils in Unitary air conditioners and heat pumps, the following industry standard ratings are calculated and reported according to the industry standards listed below:
 
 ANSI/AHRI 210/240 Performance Rating of Unitary Air-conditioning and Air-source Heat Pump Equipment
-For small single-speed direct expansion (DX) cooling coils, the industry standard ratings of Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER), Integrated Energy Efficiency Ratio (IEER), and Seasonal Energy Efficiency Ratio (SEER) are calculated and reported according to two versions of the ANSI/AHRI Standard 210-240 (AHRI 2017 and AHRI 2023). These ratings apply to unitary air conditioners and air-source unitary heat pumps with air-cooled condensers and standard rating cooling capacities under 19 kW (\textless{}65,000 Btu/hr). The equations presented in the next two sections are from the 2017 version of the standard.  Equations for the 2023 standard rating calculations are detailed in the standard (section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-210240-2023-2020-performance-rating-unitary-air-conditioning-air-source-heat). 
+For small single-speed direct expansion (DX) cooling coils, the industry standard ratings of Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER), Integrated Energy Efficiency Ratio (IEER), and Seasonal Energy Efficiency Ratio (SEER) are calculated and reported according to two versions of the ANSI/AHRI Standard 210-240 (AHRI 2017 and AHRI 2023). These ratings apply to unitary air conditioners and air-source unitary heat pumps with air-cooled condensers and standard rating cooling capacities under 19 kW (\textless{}65,000 Btu/hr). The equations presented in the next two sections are from the 2017 version of the standard.  Equations for the 2023 standard rating calculations are detailed in the standard (section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-210240-2023-2020-performance-rating-unitary-air-conditioning-air-source-heat).
 
 AHRI Standard 340/360 Performance Rating for Commercial and Industrial Unitary Air Conditioning and Heat Pump Equipment
 For larger DX cooling coils, the industry standard ratings of Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER), and Integrated Energy Efficiency Ratio (IEER) are calculated according to the ANSI/AHRI Standard 340/360 (AHRI 2022). These ratings apply to unitary air conditioners and unitary heat pumps with standard rating cooling capacities from 19 kW (65,000 Btu/hr) to below 73.2 kW (\textless{}250,000 Btu/hr). The equations used in this implementation are detailed in the standard (Section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air).
 
-For the Coil:Cooling:DX:SingleSpeed object in EnergyPlus, these standard ratings are not direct inputs to the model. However, these standard ratings can be calculated using user-entered information for the Coil:Cooling:DX:SingleSpeed object. Since users sometimes lump the performance of several smaller DX cooling units into a single larger cooling coil object for simulation purposes, EnergyPlus outputs the Standard Rating Cooling Capacity, SEER, EER, and IEER regardless of the magnitude of the standard rating cooling capacity of the coil. It is up to the user to determine which standard ratings are applicable to the cooling coil(s) they are modeling. 
+For the Coil:Cooling:DX:SingleSpeed object in EnergyPlus, these standard ratings are not direct inputs to the model. However, these standard ratings can be calculated using user-entered information for the Coil:Cooling:DX:SingleSpeed object. Since users sometimes lump the performance of several smaller DX cooling units into a single larger cooling coil object for simulation purposes, EnergyPlus outputs the Standard Rating Cooling Capacity, SEER, EER, and IEER regardless of the magnitude of the standard rating cooling capacity of the coil. It is up to the user to determine which standard ratings are applicable to the cooling coil(s) they are modeling.
 
 Standard Ratings Reporting
-The values for these Standard Ratings are reported in the eplusout.eio output file (Ref. OutputDetailsAndExamples.pdf) and also in the predefined tabular output reports (Output:Table:SummaryReports object, '2017 Standard Ratings for DX Coils' and '2023 Standard Ratings for DX Coils'). 
+The values for these Standard Ratings are reported in the eplusout.eio output file (Ref. OutputDetailsAndExamples.pdf) and also in the predefined tabular output reports (Output:Table:SummaryReports object, '2017 Standard Ratings for DX Coils' and '2023 Standard Ratings for DX Coils').
 
 \subsubsection{Standard Rating Cooling Capacity}
 
@@ -1800,7 +1800,7 @@ Powe{r_{Total,{\kern 1pt} PartLoad}} = LF\left( {{C_D} \cdot Powe{r_{CompCondFan
 
 \begin{equation}
 \begin{split}
-Power_{CompCondFan,PartLoad} = \dot{Q}_{Total,Rated}\PB{TotCapTempModFac_{PartLoad}} \\ 
+Power_{CompCondFan,PartLoad} = \dot{Q}_{Total,Rated}\PB{TotCapTempModFac_{PartLoad}} \\
 \cdot \PB{TotCapFlowModFac_{Rated}} \cdot EIR_{PartLoad}
 \end{split}
 \end{equation}
@@ -1840,7 +1840,7 @@ For computer and data processing room unitary air conditioners single-speed dire
 \textbf{Note}: The standard ratings described in this section require that the DX cooling coil model be evaluated at sixteen different test conditions (i.e., specific wet-bulb temperatures for air entering the cooling coil and dry-bulb temperatures for air entering the air-cooled {[}outdoor{]} condenser) for each of the four standard tests and four application classes (ASHRAE -- 2012). The four test conditions: A, B, C and D are provided in the ANSI/ASHRAE Standard 127. And the test conditions are different for each application classes described in the standard. In total sixteen performance data of net cooling capacity and total electric power inputs are reported. The total cooling electric power includes the supply fan power.
 
 \begin{longtable}[c]{p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}}
-\toprule 
+\toprule
 \multicolumn{6}{l}{Rated Cooling Tests} \tabularnewline \midrule
 \endhead
 & Application Class & A & B & C & D \tabularnewline
@@ -2308,8 +2308,8 @@ ANSI/AHRI Standard 210-240 (AHRI 2017 and 2023)
 [AHRI 2017] For multi-speed direct expansion cooling coils, the industry standard ratings are calculated according to ANSI/AHRI Standard 210-240 (AHRI 2017). These Standard Ratings are: Standard Rating Cooling Capacity and Seasonal Energy Efficiency Ratio (SEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:MultiSpeed object. These AHRI Standard ratings apply only to air-to-air unitary heat pumps and air conditioners with rated cooling capacities less than 65,000 Btu/h (19,000 Watts). The equations required to calculate the net cooling capacity and SEER values according to the AHRI 2017 standard are outlined in the next two sections. Further detail can be found in the AHRI Standard 210-240 (2017) (section 11).
 [AHRI 2023] Support for the 2023 version of this Standard was added in EnergyPlus version 22.2. The updated Standard Ratings are designated as: Standard Rating (Net) Cooling Capacity, Energy Efficiency Ratio (EER2), and Seasonal Energy Efficiency Ratio (SEER2). As with the 2017 version, this standard and ratings apply only to air-to-air unitary heat pumps and air conditioners with rated cooling capacities less than 65,000 Btu/h (19 kW). The equations used in this implementation are detailed in the AHRI standard (Section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-210240-2023-2020-performance-rating-unitary-air-conditioning-air-source-heat).
 
-ANSI/AHRI Standard 340-360 (AHRI 2022) 
-The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:MultiSpeed object (see the EnergyPlus I/O Reference manual for details). According to AHRI Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are detailed in this standard (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air). 
+ANSI/AHRI Standard 340-360 (AHRI 2022)
+The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:MultiSpeed object (see the EnergyPlus I/O Reference manual for details). According to AHRI Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are detailed in this standard (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air).
 
 Standard Ratings Reporting
 The values for these Standard Ratings are reported in the eplusout.eio output file and also in the predefined tabular output reports (Output:Table:SummaryReports object, '2017 Standard Ratings for DX Coils' and '2023 Standard Ratings for DX Coils').
@@ -2573,7 +2573,7 @@ For units when operating continuously at maximum (high) compressor speed (k = 2)
 % table 56
 \begin{longtable}[c]{>{\raggedright}p{1.5in}p{0.7in}p{0.7in}p{0.7in}p{0.7in}p{0.7in}>{\raggedright}p{1.0in}}
 \caption{Cooling Mode Test Conditions for Units Having a Two-Capacity Compressor \label{table:cooling-mode-test-conditions-for-units-having}} \tabularnewline
-\toprule 
+\toprule
 Test & \multicolumn{2}{p{1.4in}}{\raggedright Air Entering Indoor Unit Temperature (\(^{\circ}\)F/\(^{\circ}\)C)} & \multicolumn{2}{p{1.4in}}{\raggedright Air Entering Outdoor Unit Temperature (\(^{\circ}\)F/\(^{\circ}\)C)} \tabularnewline
 \cmidrule(r){2-3}
 \cmidrule(l){4-5}
@@ -2582,7 +2582,7 @@ Description & Dry Bulb & Wet Bulb & Dry Bulb & Wet Bulb & Compressor Capacity & 
 \endfirsthead
 
 \caption[]{Cooling Mode Test Conditions for Units Having a Two-Capacity Compressor} \tabularnewline
-\toprule 
+\toprule
 Test & \multicolumn{2}{p{1.4in}}{\raggedright Air Entering Indoor Unit Temperature (\(^{\circ}\)F/\(^{\circ}\)C)} & \multicolumn{2}{p{1.4in}}{\raggedright Air Entering Outdoor Unit Temperature (\(^{\circ}\)F/\(^{\circ}\)C)} \tabularnewline
 \cmidrule(r){2-3}
 \cmidrule(l){4-5}
@@ -2605,11 +2605,11 @@ F1 Test-optional (steady, dry coil) & 80.0/26.7 & 67.0/19.4 & 67.0/19.4 & 53.5/1
 % table 57
 \begin{longtable}[c]{p{1.5in}p{1.5in}p{1.5in}p{1.5in}}
 \caption{Distribution of Fractional Hours with in Cooling Season Temperature Bins \label{table:distribution-of-fractional-hours-with-in}} \tabularnewline
-\toprule 
+\toprule
 \endfirsthead
 
 \caption[]{Distribution of Fractional Hours with in Cooling Season Temperature Bins} \tabularnewline
-\toprule 
+\toprule
 \endhead
 
 Bin Number j & Bin Temperature Range (\(^{\circ}\)C) & Representative Temperature for bin (\(^{\circ}\)C) & Fraction of Total Temperature Bin Hours Nj/N \tabularnewline
@@ -2669,8 +2669,8 @@ Basin heater for the object Coil:Cooling:DX:TwoSpeed operates in the same manner
 
 For Two-Speed direct expansion cooling coils, the following industry standard ratings are calculated and reported according to the industry standards listed below:
 
-ANSI/AHRI Standard 340-360 (AHRI 2022) 
-The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:TwoSpeed object (see the I/O Reference manual for details). According to Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are outlined in the next section.  For more detail is provided in this standard itself (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air). 
+ANSI/AHRI Standard 340-360 (AHRI 2022)
+The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:TwoSpeed object (see the I/O Reference manual for details). According to Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are outlined in the next section.  For more detail is provided in this standard itself (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air).
 
 Standard Ratings Reporting
 The values for these Standard Ratings are reported in the eplusout.eio output file and also in the predefined tabular output reports (Output:Table:SummaryReports object, '2017 Standard Ratings for DX Coils' and '2023 Standard Ratings for DX Coils').
@@ -2766,13 +2766,13 @@ The following table summarizes the test points.
 % table 58
 \begin{longtable}[c]{p{0.8in}p{0.8in}p{0.8in}p{0.8in}p{0.8in}p{2.0in}}
 \caption{Test points for Two-Speed DX Coil Ratings \label{table:test-points-for-two-speed-dx-coil-ratings}} \tabularnewline
-\toprule 
+\toprule
 Point & Net Capacity & Coil inlet wetbulb & Coil inlet drybulb & Condenser inlet drybulb & Supply air flow rate \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Test points for Two-Speed DX Coil Ratings} \tabularnewline
-\toprule 
+\toprule
 Point & Net Capacity & Coil inlet wetbulb & Coil inlet drybulb & Condenser inlet drybulb & Supply air flow rate \tabularnewline
 \midrule
 \endhead
@@ -3133,12 +3133,12 @@ The water consumption rate is calculated based on the interpolated condenser air
 \subsubsection{Standard Rating of Variable Speed DX Cooling Coils}\label{standard-rating-of-variable-speed-dx-cooling-coils}
 
 For variable speed direct expansion cooling coils, the following industry standard ratings are calculated and reported according to the industry standards listed below:
-ANSI/AHRI Standard 210-240 (AHRI 2017 and 2023) 
+ANSI/AHRI Standard 210-240 (AHRI 2017 and 2023)
 [AHRI 2017] The Standard Rating calculations defined in the 2017 version of this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER), Integrated Energy Efficiency Ratio (IEER), and Seasonal Energy Efficiency Ratio (SEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:DX:MultiSpeed object. These AHRI Standard ratings apply only to air-to-air unitary heat pumps and air conditioners with rated cooling capacities less than 65,000 Btu/h (19,000 Watts). The equations required to calculate the net cooling capacity and SEER values according to the AHRI 2017 standard are outlined below (sections 15.2.5.9 and 15.2.5.10) further detail can be found in the AHRI Standard 210-240 (2017) (section 11).
-[AHRI 2023] Support for the 2023 version of this Standard was added in EnergyPlus version 22.2. The updated Standard Ratings are designated as: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER2), and Seasonal Energy Efficiency Ratio (SEER2). As with the 2017 version, this standard and ratings apply only to air-to-air unitary heat pumps and air conditioners with rated cooling capacities less than 65,000 Btu/h (19 kW). The equations used in this implementation are detailed in the AHRI standard (Section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-210240-2023-2020-performance-rating-unitary-air-conditioning-air-source-heat). 
+[AHRI 2023] Support for the 2023 version of this Standard was added in EnergyPlus version 22.2. The updated Standard Ratings are designated as: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER2), and Seasonal Energy Efficiency Ratio (SEER2). As with the 2017 version, this standard and ratings apply only to air-to-air unitary heat pumps and air conditioners with rated cooling capacities less than 65,000 Btu/h (19 kW). The equations used in this implementation are detailed in the AHRI standard (Section 11). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-210240-2023-2020-performance-rating-unitary-air-conditioning-air-source-heat).
 
-ANSI/AHRI Standard 340-360 (AHRI 2022) 
-The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:VariableSpeed object (see the EnergyPlus I/O Reference manual for details). According to AHRI Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are detailed in this standard (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air). 
+ANSI/AHRI Standard 340-360 (AHRI 2022)
+The Standard Rating calculations defined in this standard include: Standard Rating Cooling Capacity, Energy Efficiency Ratio (EER) and Integrated Energy Efficiency Ratio (IEER). These standard ratings are calculated using the user-entered data in the Coil:Cooling:VariableSpeed object (see the EnergyPlus I/O Reference manual for details). According to AHRI Standard, these ratings apply to factory-made Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment with rated cooling/heating capacities greater than 65,000 Btu/h (19 kW) and less than 250,000 Btu/h (73.2 kW). The equations used in this implementation are detailed in this standard (Section 6). The reader can download the standard document to view these details from AHRI(https://www.ahrinet.org/search-standards/ahri-340360-i-p2022-performance-rating-commercial-and-industrial-unitary-air).
 
 Standard Ratings Reporting
 The values for these Standard Ratings are reported in the eplusout.eio output file and also in the predefined tabular output reports (Output:Table:SummaryReports object, '2017 Standard Ratings for DX Coils' and '2023 Standard Ratings for DX Coils').
@@ -3903,7 +3903,7 @@ For a single speed heat pump with a fixed speed indoor fan installed, a constant
 
 \begin{equation}
   DHR_{min} =
-  \left\{ 
+  \left\{
     \begin{array}{l}
       {\dot{Q}_h}(8.33) \cdot (1.8) \cdot \left( {\frac{{18.33 - {T_{OD}}}}{{60.0}}} \right), {~for~Regions~I,~II,~III,~IV,~and~VI} \\
       {\dot{Q}_h}(8.33),{~for~Region~V}
@@ -3913,7 +3913,7 @@ For a single speed heat pump with a fixed speed indoor fan installed, a constant
 
 \begin{equation}
   DHR_{max} =
-  \left\{ 
+  \left\{
     \begin{array}{l}
       {2 \cdot \dot{Q}_h}(8.33) \cdot (1.8) \cdot \left( {\frac{{18.33 - {T_{OD}}}}{{60.0}}} \right), {~for~Regions~I,~II,~III,~IV,~and~VI} \\
       {2.2 \cdot \dot{Q}_h}(8.33),{~for~Region~V}
@@ -3936,7 +3936,7 @@ The intermediate term used in the calculations of HSPF can be calculated using t
 Where,
 
 \begin{equation}
-X({T_j}) = \left\{ 
+X({T_j}) = \left\{
     \begin{array}{l}
       BL({T_J})/\mathop {{Q_h}}\limits^ \cdot  ({T_j}) \\
       {\rm{or}} \\
@@ -3966,7 +3966,7 @@ where \({C_{{D^h}}}\) is the degradation coefficient which is defaulted to the v
 The low temperature cut-out factor \(\delta ({T_j})\) is determined as follows:
 
 \begin{equation}
-\delta ({T_j}) = \left\{ 
+\delta ({T_j}) = \left\{
     \begin{array}{l}
       {\rm{0,~if~}}{T_j} \le {T_{off}}{\rm{~or~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} < 1 \\
       {\rm{1/2,~if~}}{T_{off}} < {T_j} \le {T_{on}}{\rm{~and~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} \ge 1 \\
@@ -3998,7 +3998,7 @@ Calculate \(\dot{Q}_{h} \cdot ({T_j})\) and \(\dot{E}_{h} \cdot ({T_j})\) using:
 % table 59
 \begin{longtable}[c]{>{\raggedright}p{2.0in}p{0.75in}p{0.75in}p{0.75in}p{0.75in}>{\raggedright}p{1.0in}}
 \caption{Heating Mode Test Conditions for Units Having a Single-Speed Compressor and a Fixed-Speed Indoor Fan, a Constant Air Volume Rate Indoor Fan, or No Indoor Fan \label{table:heating-mode-test-conditions-for-units-having}} \tabularnewline
-\toprule 
+\toprule
 Test description & \multicolumn{2}{p{1.5in}}{\raggedright Air Entering Indoor Unit Temperature (\(^{\circ}\)C)} & \multicolumn{2}{p{1.5in}}{\raggedright Air Entering Outdoor Unit Temperature (\(^{\circ}\)C)} & Heating Air Volume Rate \tabularnewline
 \cmidrule(r){2-3}
 \cmidrule(l){4-5}
@@ -4007,7 +4007,7 @@ Test description & \multicolumn{2}{p{1.5in}}{\raggedright Air Entering Indoor Un
 \endfirsthead
 
 \caption[]{Heating Mode Test Conditions for Units Having a Single-Speed Compressor and a Fixed-Speed Indoor Fan, a Constant Air Volume Rate Indoor Fan, or No Indoor Fan} \tabularnewline
-\toprule 
+\toprule
 Test description & \multicolumn{2}{p{1.5in}}{\raggedright Air Entering Indoor UnitTemperature (°C)} & \multicolumn{2}{p{1.5in}}{\raggedright Air Entering Outdoor UnitTemperature (°C)} & Heating Air Volume Rate \tabularnewline
 \cmidrule(r){2-3}
 \cmidrule(l){4-5}
@@ -4027,7 +4027,7 @@ H3 Test (Required, Steady) & 21.11 & 15.56 & -8.33 & -9.44 & Heating Full-load \
 % table 60
 \begin{longtable}[c]{p{0.75in}p{0.75in}p{0.75in}p{0.75in}p{0.75in}p{0.75in}p{0.75in}p{0.75in}}
 \caption{Generalized Climatic Region Information \label{table:generalized-climatic-region-information}} \tabularnewline
-\toprule 
+\toprule
 \multicolumn{2}{p{1.5in}}{\raggedright Region Number} & I & II & III & IV & V & VI \tabularnewline
 \multicolumn{2}{p{1.5in}}{\raggedright Heating Load Hours, HLH} & 750 & 1250 & 1750 & 2250 & 2750 & *2750 \tabularnewline
 \multicolumn{2}{p{1.5in}}{\raggedright Outdoor Design Temperature, \(T_{OD}\) (°C)} & 2.78 & -2.78 & -8.33 & -15 & -23.33 & -1.11 \tabularnewline
@@ -4037,7 +4037,7 @@ H3 Test (Required, Steady) & 21.11 & 15.56 & -8.33 & -9.44 & Heating Full-load \
 \endfirsthead
 
 \caption[]{Generalized Climatic Region Information} \tabularnewline
-\toprule 
+\toprule
 \(j\) & \(T_j\) (°C) & \multicolumn{6}{c}{Fractional Bin Hours \(\frac{n_j}{N}\)} \tabularnewline
 \midrule
 \endhead
@@ -4068,12 +4068,12 @@ H3 Test (Required, Steady) & 21.11 & 15.56 & -8.33 & -9.44 & Heating Full-load \
 % table 61
 \begin{longtable}[c]{p{1.5in}p{1.5in}p{1.5in}p{1.5in}}
 \caption{Standardized Design Heating Requirements (W) \label{table:standardized-design-heating-requirements-w}} \tabularnewline
-\toprule 
+\toprule
 \tabularnewline
 \endfirsthead
 
 \caption[]{Standardized Design Heating Requirements (W)} \tabularnewline
-\toprule 
+\toprule
 \tabularnewline
 \endhead
 
@@ -4384,7 +4384,7 @@ TempModifier is the waste heat modifier as a function of indoor and outdoor air 
 
 For multi-speed direct expansion heating coils, the industry standard ratings are calculated according to the ANSI/AHRI Standard 210-240 (AHRI 2008, AHRI 2017).  These Standard Ratings are: Standard Rating (Net) Heating Capacity and Standard Rating Heating Seasonal Performance Factor (HSPF)
 
-These standard ratings are calculated using the user-entered data for the Coil:Heating:DX:MultiSpeed object. According to AHRI 210-240 Standard, these Standard Ratings apply to air-to-air unitary heat pumps with rated heating capacities under 19,000 watts (65,000 Btu/h). The Heating Mode Test Conditions for Units Having two-capacity Compressor standard tests H0\(_{1}\), H1\(_{1}\), H2\(_{1}\), H3\(_{1}\), H1\(_{2}\), H2\(_{2}\), and H3\(_{2}\) are also provided in Table~\ref{table:heating-mode-test-conditions-for-units-having-001}. The rated Energy Efficiency Ratio (EER) is not calculated for any DX Heating Coils as this time. 
+These standard ratings are calculated using the user-entered data for the Coil:Heating:DX:MultiSpeed object. According to AHRI 210-240 Standard, these Standard Ratings apply to air-to-air unitary heat pumps with rated heating capacities under 19,000 watts (65,000 Btu/h). The Heating Mode Test Conditions for Units Having two-capacity Compressor standard tests H0\(_{1}\), H1\(_{1}\), H2\(_{1}\), H3\(_{1}\), H1\(_{2}\), H2\(_{2}\), and H3\(_{2}\) are also provided in Table~\ref{table:heating-mode-test-conditions-for-units-having-001}. The rated Energy Efficiency Ratio (EER) is not calculated for any DX Heating Coils as this time.
 
 Note: Support for newer version of these Standard Ratings was added in Energy+ version 22.2.  These were introduced in the 2023 version of the ANSI/AHRI Standard 210/240 (AHRI 2023).  The new Standard Ratings are designated as: High Temperature Heating Standard (Net) Rating Capacity, Low Temperature Heating Standard (Net) Rating Capacity, Heating Seasonal Performance Factor (HSPF2).
 The equations used in this implementation are detailed in this standard (Section 11.2.2.3).  The reader can download the standard document to view these details from. \href{https://www.ahrinet.org/App_Content/ahri/files/STANDARDS/AHRI/AHRI_Standard_210-240_2023.pdf}{AHRI}.
@@ -4461,7 +4461,7 @@ DHR is the design heating requirement for each generalized climate region (Btu/h
 The heating capacity delivered and electric power input of the heat pump when operating at minimum (low) compressor capacity and outdoor air temperature of \emph{T\(_{j}\)} is given by:
 
 \begin{equation}
-{\rm{\dot Q}}_h^{k = 1}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{ 
+{\rm{\dot Q}}_h^{k = 1}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{
     \begin{array}{l}
       {\rm{\dot Q}}_h^{k = 1}(8.33) + \;\frac{{\left[ {{\rm{\dot Q}}_h^{k = 1}{\rm{(16}}{\rm{.67) - \dot Q}}_h^{k = 1}{\rm{(8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} - 8.33} \right)}}{{\left( {16.67 - 8.33} \right)}}\,{\rm{,~if }}\,{{\rm{T}}_{\rm{j}}} \ge 4.44{\rm{^\circ C}} \\
       {\rm{\dot Q}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\rm{\dot Q}}_h^{k = 1}{\rm{(1}}{\rm{.67) - \dot Q}}_h^{k = 1}{\rm{( - 8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} + 8.33} \right)}}{{\left( {1.67 + 8.33} \right)}}\,{\rm{,~if }}\, - 8.33{\rm{^\circ C}} \le {{\rm{T}}_{\rm{j}}} < 4.44{\rm{^\circ C}} \\
@@ -4616,7 +4616,7 @@ X(T\(_{j}\)) is the heating mode load factor for temperature bin j (-)
 % table 62
 \begin{longtable}[c]{p{1.2in}p{0.7in}p{0.7in}p{0.7in}p{0.7in}p{0.85in}p{1.0in}}
 \caption{Heating Mode Test Conditions for Units Having Two-Capacity Compressor \label{table:heating-mode-test-conditions-for-units-having-001}} \tabularnewline
-\toprule 
+\toprule
 Test & \multicolumn{2}{l}{Air Entering Indoor} & \multicolumn{2}{l}{Air Entering Outdoor} & Compressor & Heating Air \tabularnewline
 Description & \multicolumn{2}{l}{Unit Temperature} & \multicolumn{2}{l}{Unit Temperature} & Speed & Volume Flow Rate \tabularnewline
 \midrule
@@ -5427,30 +5427,30 @@ Nimmo, B.G. et al. 1993.DEAC: Desiccant Enhancement of Cooling-Based Dehumidific
 
 \subsubsection{Overview}\label{overview-ASIHP}
 
-Air Source Integrated Heat Pump (ASIHP) is an air source, multi-functional spacing conditioning unit with water heating function (WH), which usually uses a variable-speed compressor, variable-speed indoor blower, and outdoor fan. By recovering the condenser waste heat for water heating, ASIHPs are able to achieve significant energy savings. 
+Air Source Integrated Heat Pump (ASIHP) is an air source, multi-functional spacing conditioning unit with water heating function (WH), which usually uses a variable-speed compressor, variable-speed indoor blower, and outdoor fan. By recovering the condenser waste heat for water heating, ASIHPs are able to achieve significant energy savings.
 
 \subsubsection{Model Description}\label{model-description-ASIHP}
 
-The latest technology for commercial air conditioners and air-to-air heat pumps can utilize a variable-speed compressor with a variable-speed indoor blower and outdoor fan. Integrated heat pumps are multi-functional units capable of space conditioning and water heating. They use condenser waste heat for water heating, and thus achieve significant energy saving. The control and operation of ASIHPs are complicated because they have six working modes in total:  (1) space cooling (SC), (2) space heating (SH), (3) dedicated water heating (DWH), (4) combined space cooling and water heating with full condensing (SCWH), (5) combined space cooling and water heating with desuperheating (SCDWH), and (6) combined space heating and water heating with desuperheating (SHDWH). 
+The latest technology for commercial air conditioners and air-to-air heat pumps can utilize a variable-speed compressor with a variable-speed indoor blower and outdoor fan. Integrated heat pumps are multi-functional units capable of space conditioning and water heating. They use condenser waste heat for water heating, and thus achieve significant energy saving. The control and operation of ASIHPs are complicated because they have six working modes in total:  (1) space cooling (SC), (2) space heating (SH), (3) dedicated water heating (DWH), (4) combined space cooling and water heating with full condensing (SCWH), (5) combined space cooling and water heating with desuperheating (SCDWH), and (6) combined space heating and water heating with desuperheating (SHDWH).
 
-The SC mode has the same operation as Coil:Cooling:DX:VariableSpeed. The SH mode has the same operation as Coil:Heating:DX:VariableSpeed. The DWH mode uses outdoor air as the heating source, which can be represented by an object of Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The SCWH mode uses indoor air as the heating source and full condenser heat for water heating.  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed is used for the mode. 
+The SC mode has the same operation as Coil:Cooling:DX:VariableSpeed. The SH mode has the same operation as Coil:Heating:DX:VariableSpeed. The DWH mode uses outdoor air as the heating source, which can be represented by an object of Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The SCWH mode uses indoor air as the heating source and full condenser heat for water heating.  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed is used for the mode.
 
-The SCDWH mode uses the superheated section of an outdoor condenser to heat the water. In this combined SCDWH mode, the cooling function is simulated using an object of Coil:Cooling:DX:VariableSpeed, containing temperature correction curves as a function of the indoor air and ambient temperatures at each speed level. The water heating function is simulated using an object of Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed, having temperature correction curves as a function of the ambient air temperature and entering water temperature at each speed level.  It should be noted that the rated power and power correction curves are contained in the Coil:Cooling:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWater--HeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SCDWH mode is accounted by the cooling coil part. 
+The SCDWH mode uses the superheated section of an outdoor condenser to heat the water. In this combined SCDWH mode, the cooling function is simulated using an object of Coil:Cooling:DX:VariableSpeed, containing temperature correction curves as a function of the indoor air and ambient temperatures at each speed level. The water heating function is simulated using an object of Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed, having temperature correction curves as a function of the ambient air temperature and entering water temperature at each speed level.  It should be noted that the rated power and power correction curves are contained in the Coil:Cooling:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWater--HeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SCDWH mode is accounted by the cooling coil part.
 
-The SHDWH uses the superheated section of an indoor condenser to heat the water. In this combined mode, the heating function is simulated using an object of Coil:Heating:DX:VariableSpeed, having temperature correction curves as a function of the indoor air and ambient temperatures at each speed level. The water heating function is simulated using an object of Coil:WaterHeating:AirTo--WaterHeatPump:VariableSpeed, having temperature correction curves as a function of the ambient air temperature and entering water temperature at each speed level. It should be noted that the rated power and power correction curves are contained in the Coil:Heating:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SHDWH mode is accounted by the heating coil. Coil:Heating:DX:VariableSpeed object calculates the total heating capacity added to the indoor air flow. The WH capacity is calculated using Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. 
+The SHDWH uses the superheated section of an indoor condenser to heat the water. In this combined mode, the heating function is simulated using an object of Coil:Heating:DX:VariableSpeed, having temperature correction curves as a function of the indoor air and ambient temperatures at each speed level. The water heating function is simulated using an object of Coil:WaterHeating:AirTo--WaterHeatPump:VariableSpeed, having temperature correction curves as a function of the ambient air temperature and entering water temperature at each speed level. It should be noted that the rated power and power correction curves are contained in the Coil:Heating:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SHDWH mode is accounted by the heating coil. Coil:Heating:DX:VariableSpeed object calculates the total heating capacity added to the indoor air flow. The WH capacity is calculated using Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed.
 
-The parent object of the ASIHP is named as CoilSystem:IntegratedHeatPump--:AirSource, which is a collection of all the sub-models as above. Also, CoilSystem:IntegratedHeatPump:AirSource facilitates mode switch and control algorithms. 
+The parent object of the ASIHP is named as CoilSystem:IntegratedHeatPump--:AirSource, which is a collection of all the sub-models as above. Also, CoilSystem:IntegratedHeatPump:AirSource facilitates mode switch and control algorithms.
 
 
 \subsubsection{Working Modes}\label{Working-Modes-ASIHP}
 
-The ASIHP is a collection of working modes, i.e., objects, as described below: 
+The ASIHP is a collection of working modes, i.e., objects, as described below:
 
 Space Cooling Mode (SC):
 
---Coil object: Coil:Cooling:DX:VariableSpeed. 
+--Coil object: Coil:Cooling:DX:VariableSpeed.
 
---Loop object: AirLoopHVAC:UnitarySystem,  which refers to the CoilSystem:IntegratedHeatPump:AirSource object. 
+--Loop object: AirLoopHVAC:UnitarySystem,  which refers to the CoilSystem:IntegratedHeatPump:AirSource object.
 
 --Load matching: the same as a regular variable-speed air source heat pump in cooling mode.
 
@@ -5458,29 +5458,29 @@ Space Heating Mode (SH):
 
 --Coil object: Coil:Heating:DX:VariableSpeed.
 
---Loop object: AirLoopHVAC:UnitarySystem, which refers to the CoilSystem:IntegratedHeatPump:AirSource object. 
+--Loop object: AirLoopHVAC:UnitarySystem, which refers to the CoilSystem:IntegratedHeatPump:AirSource object.
 
 --Load matching: the same as a regular variable-speed air source heat pump in heating mode
 
 Dedicated Water Heating Mode (DWH):
 
---Coil object: Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The water heating coil uses outdoor air as the heating source. 
+--Coil object: Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The water heating coil uses outdoor air as the heating source.
 
---Loop object: WaterHeater:HeatPump:PumpedCondenser, which refers to the CoilSystem:IntegratedHeatPump:AirSource object. 
+--Loop object: WaterHeater:HeatPump:PumpedCondenser, which refers to the CoilSystem:IntegratedHeatPump:AirSource object.
 
 --Load matching: the same as a regular variable-speed heat pump water heating coil with outdoor air source.
 
 Combined Space Cooling and Water Heating with Full Condensing Mode (SCWH):
 
---Coil object: Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The water heating coil uses indoor air as the heating source. 
+--Coil object: Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The water heating coil uses indoor air as the heating source.
 
---Loop object: 
+--Loop object:
 
---Air side: the same loop object as the SC mode, i.e., AirLoopHVAC:UnitarySystem, which refers to the CoilSystem:IntegratedHeatPump:AirSource object. 
+--Air side: the same loop object as the SC mode, i.e., AirLoopHVAC:UnitarySystem, which refers to the CoilSystem:IntegratedHeatPump:AirSource object.
 
---Water side: the same loop object as the DWH mode, i.e., WaterHeater:HeatPump: PumpedCondenser, which refers to the CoilSystem:IntegratedHeatPump:AirSource object. 
+--Water side: the same loop object as the DWH mode, i.e., WaterHeater:HeatPump: PumpedCondenser, which refers to the CoilSystem:IntegratedHeatPump:AirSource object.
 
---Load matching: 
+--Load matching:
 
 --If one chooses to match the space cooling load, iterate the AirLoopHVAC object, and the water heating capacity in the water tank object is resultant.
 
@@ -5488,35 +5488,35 @@ Combined Space Cooling and Water Heating with Full Condensing Mode (SCWH):
 
 Combined Space Cooling and Water Heating with Desuperheating Mode (SCDWH):
 
---Coil object: use two coil objects, Coil:Cooling:DX:VariableSpeed and -- Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The desuperheater heat is used for water heating, which changes with the compressor speed and operation conditions. This is a dual-function coil, which provides both space cooling and water heating, and so performance curves for the dual functions will be included in the coil objects, respectively. These should be different objects from the SCWH mode and SC mode. The water heating coil contains temperature correction curves as a function of the ambient air temperature and entering water temperature. 
+--Coil object: use two coil objects, Coil:Cooling:DX:VariableSpeed and -- Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed. The desuperheater heat is used for water heating, which changes with the compressor speed and operation conditions. This is a dual-function coil, which provides both space cooling and water heating, and so performance curves for the dual functions will be included in the coil objects, respectively. These should be different objects from the SCWH mode and SC mode. The water heating coil contains temperature correction curves as a function of the ambient air temperature and entering water temperature.
 
-It should be noted that the rated power and power correction curves are contained in the Coil:Cooling:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SCDWH mode is accounted by the cooling coil part. 
+It should be noted that the rated power and power correction curves are contained in the Coil:Cooling:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SCDWH mode is accounted by the cooling coil part.
 
---Loop object: 
+--Loop object:
 
 --Air side: the same loop object as the SC mode, i.e., AirLoopHVAC:UnitarySystem.
 
 --Water side:  the same loop object as the DWH mode, i.e., WaterHeater:HeatPump:PumpedCondenser.
 
---Load matching: 
+--Load matching:
 
 Always match the space cooling load by iterating the AirLoopHVAC object, and the water heating amount in the water tank object is resultant.
 
 Combined Space Heating and Water Heating with Desuperheating Mode (SHDWH):
 
---Coil object: use two coil objects, Coil:Heating:DX:VariableSpeed and Coil:WaterHeating: AirToWaterHeatPump:VariableSpeed, contained in CoilSystem:IntegratedHeatPump:AirSource. The desuperheater heat is used for water heating, which changes with the compressor speed and operation conditions. This is a dual-function coil, which provides both space heating and water heating, and so performance curves for the dual functions will be included in the coil objects, respectively. 
+--Coil object: use two coil objects, Coil:Heating:DX:VariableSpeed and Coil:WaterHeating: AirToWaterHeatPump:VariableSpeed, contained in CoilSystem:IntegratedHeatPump:AirSource. The desuperheater heat is used for water heating, which changes with the compressor speed and operation conditions. This is a dual-function coil, which provides both space heating and water heating, and so performance curves for the dual functions will be included in the coil objects, respectively.
 
-It should be noted that the rated power and power correction curves are contained in the Coil:Heating:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SHDWH mode is accounted for by the heating coil part. 
+It should be noted that the rated power and power correction curves are contained in the Coil:Heating:DX:VariableSpeed object. Thus, the power values and curves in the Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed are not used. That means the power consumption at each speed level of the SHDWH mode is accounted for by the heating coil part.
 
-The Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed object contains rated water heating capacity and capacity correction curves to simulate water heating capacity as a function of the outdoor air temperature and the water entering temperature at each speed level. The Coil:Heating:DX:VariableSpeed object calculates the total heating capacity, added to indoor air flow. 
+The Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed object contains rated water heating capacity and capacity correction curves to simulate water heating capacity as a function of the outdoor air temperature and the water entering temperature at each speed level. The Coil:Heating:DX:VariableSpeed object calculates the total heating capacity, added to indoor air flow.
 
---Loop object: 
+--Loop object:
 
 --Air side: share the same air side connections as the SH mode, i.e., AirLoopHVAC:UnitarySystem.
 
 --Water side: the same loop object as the DWH mode, i.e., WaterHeater:HeatPump:PumpedCondenser.
 
---Load matching: 
+--Load matching:
 
 Always match the space heating load by iterating the AirLoopHVAC object, and the water heating amount in the water tank object is resultant.
 
@@ -5524,13 +5524,13 @@ Always match the space heating load by iterating the AirLoopHVAC object, and the
 
 At the beginning of each time step, an CoilSystem:IntegratedHeatPump:AirSource object surveys calls from all of its connected parent objects and nodes, e.g.,  AirLoopHVAC:UnitarySystem, WaterHeater:HeatPump:PumpedCondenser. Upon analyzing the space conditioning and water heating calls, the ASIHP will operate in a selected mode for the following timestep, as shown below:
 
-Case I: 
+Case I:
 If there is only a space cooling call, – run SC mode.
- 
-Case II: 
+
+Case II:
 If there is only a space heating call, – run SH mode.
 
-Case III: 
+Case III:
 If there is only a water heating call, and if ambient temperature and indoor temperature are larger than the temperature settings above which indoor overcooling is allowed, – run SCWH mode to match the water heating load above a minimum speed allowed.
 Else – run DWH mode.
 
@@ -5538,7 +5538,7 @@ Case IV:
 If there are simultaneous space cooling and water heating calls, and if the sum of heated water going through the ASIHP is less than the threshold, – run SCDWH mode by iterating the speed to match the space cooling load above a minimum speed specified.
 Else – run SCWH mode to match either the space cooling load or the water heating load, as specified, above a minimum speed allowed.
 
-Case V: 
+Case V:
 If there are simultaneous space heating and water heating calls, and if the ambient temperature and indoor temperature are larger than temperature settings above which water heating has a higher priority and space heating call can be ignored – run DWH mode.
 Otherwise, if running time of the water heating is less than a setting, – run SHDWH mode to match the space heating load by iterating the compressor speed above a minimum speed specified, with the WH electric element in the water tank disabled.
 Otherwise, if running time of the water heating is bigger than the setting, – run SHDWH mode to match the space heating load by iterating the compressor speed above a minimum speed allowed, with the WH electric element enabled.
@@ -6524,7 +6524,7 @@ The total heating capacities and EIRs at Speed x-1 and Speed x are given by:
     Q_{total,x} =& RatedTotalHeatingCapacity@SpeedLevel\left( x \right) \\
                 &* TotCapTempModFac_x \\
                 &* TotCapAirFlowModFac_x \\
-                &* TotCapWaterFlowModFac_x 
+                &* TotCapWaterFlowModFac_x
  \end{array}
 \end{equation}
 
@@ -6873,7 +6873,7 @@ The EIR is calculated as:
   \begin{array}{rl}
     EIR_1 =& \frac{1.0}{ReferenceUnitCOP@Speed(1)} EIRTempModFac_1 \\
           &* EIRAirFlowModFac_1 \\
-          &* EIRWaterFlowModWaterFac_1 
+          &* EIRWaterFlowModWaterFac_1
   \end{array}
 \end{equation}
 
@@ -7111,7 +7111,7 @@ where:
 
 \(SHRFT\) is the sensible heat ratio modifier normalized biquadratic curve as a function of secondary DX coil entering air wet-bulb and primary DX coil entering air dry-bulb temperature. The secondary DX coil (evaporator) entering air wet-bulb temperature is the secondary zone air wet-bulb temperature.
 
-\(SHRFFF\) is the sensible heat ratio modifier normalized quadratic curve as a function of air mass flow fraction. 
+\(SHRFFF\) is the sensible heat ratio modifier normalized quadratic curve as a function of air mass flow fraction.
 
 \(FF\), flow fraction,  is the ratio of actual to rated mass flow rate of air through the secondary DX coil.
 
@@ -7179,21 +7179,21 @@ where:
 
 \(h_{Inlet}\) is the enthalpy of air entering the passive coil (J/kg)
 
-\(h_{Outlet}\) is the enthalpy of air leaving the passive coil (J/kg) 
+\(h_{Outlet}\) is the enthalpy of air leaving the passive coil (J/kg)
 
 \(h_{T_{in},\omega_{out}}\) is the enthalpy of air at the leaving humidity ratio and the entering dry bulb temperature
 
-\(\dot{m}_{sec}\) is the secondary DX coil mass flow rate (kg/s) 
+\(\dot{m}_{sec}\) is the secondary DX coil mass flow rate (kg/s)
 
 PLR is the primary DX cooling coil compressor part-load ratio
 
 \(P_{Tot}\) is the total pressure at the inlet of secondary DX coil (Pa)
 
-\(T_{Outlet}\) is the secondary coil outlet air temperature (\(^{\circ}\)C) 
+\(T_{Outlet}\) is the secondary coil outlet air temperature (\(^{\circ}\)C)
 
 \(T_{Outlet,Sat}\) is the secondary coil saturated air temperature at the outlet enthalpy (\(^{\circ}\)C)
 
-\(\omega_{Inlet}\) is the secondary coil inlet node air humidity ratio (kgH2O/kgDryair) 
+\(\omega_{Inlet}\) is the secondary coil inlet node air humidity ratio (kgH2O/kgDryair)
 
 \(\omega_{Outlet}\) is the secondary coil outlet node air humidity ratio (kgH2O/kgDryair).
 

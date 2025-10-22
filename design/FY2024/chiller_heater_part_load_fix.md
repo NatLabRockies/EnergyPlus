@@ -5,7 +5,7 @@ DEFECT: Fix for Chiller Heater Always Assuming Evaporator is at Full Load
 
  - Original Date: July 22, 2024
  - Revision Date: July 30, 2024
- 
+
 
 ## Justification for New Feature ##
 
@@ -101,6 +101,3 @@ No transition changes are needed since there is no change to the input.  A chang
 ## References ##
 
 Current code in PlantCentralGSHP.cc
-
-
-

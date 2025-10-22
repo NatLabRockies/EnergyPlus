@@ -23072,7 +23072,7 @@
     1,
     0,
     1;
-    
+
   Schedule:Constant,CondenserdT,,10;
 
   Curve:Biquadratic,

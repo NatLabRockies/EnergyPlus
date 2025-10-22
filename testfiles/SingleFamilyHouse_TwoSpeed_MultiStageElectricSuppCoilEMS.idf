@@ -2011,7 +2011,7 @@
     1.0,                     !- Motor In Airstream Fraction
     Air Loop Inlet Node,     !- Air Inlet Node Name
     Cooling Coil Air Inlet Node;  !- Air Outlet Node Name
-    
+
   EnergyManagementSystem:Sensor,
     HeatingSetpoint,                               !- Name
     LIVING ZONE,                                   !- Output:Variable or Output:Meter Index Key Name
@@ -2057,14 +2057,14 @@
     SuppCoilSpeedControl,                                                                            !- Name
     IF (ZoneAirTemperature < HeatingSetpoint - 1.0),                                                   !- Program Line 1
     SET SuppCoilSpeedOverride = 1.9,                                                                 !- Program Line 2
-    SET SuppCoilSpeedLevelOverrideReport = 1,    
+    SET SuppCoilSpeedLevelOverrideReport = 1,
     ELSEIF (ZoneAirTemperature < HeatingSetpoint - 0.1),                                         !- Program Line 4
     SET SuppCoilSpeedOverride = 1,                                                                   !- Program Line 5
     SET SuppCoilSpeedLevelOverrideReport = 1,                                                        !- Program Line 6
     ELSE,                                                                                        !- Program Line 13
     SET SuppCoilSpeedOverride = Null,                                                                !- Program Line 14
     SET SuppCoilSpeedLevelOverrideReport = 0,                                                        !- Program Line 15
-    ENDIF;       
+    ENDIF;
 
   Output:Variable,*,Cooling Coil Total Cooling Energy,TimeStep;
 

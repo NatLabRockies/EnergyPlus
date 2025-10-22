@@ -9,38 +9,38 @@ Ruleset Model Description Phase 3
 
 ## Justification for New Feature ##
 
-This continues the work from 2022 and 2023 to develop the createRMD script that creates a JSON file consistent with the 
-ASHRAE Standard 229 Ruleset Model Description schema to show the feasibility of the schema, uncover problems with 
-implementation, and provide an implementation for early adopters. The goal is to provide an RMD file that fully supports 
+This continues the work from 2022 and 2023 to develop the createRMD script that creates a JSON file consistent with the
+ASHRAE Standard 229 Ruleset Model Description schema to show the feasibility of the schema, uncover problems with
+implementation, and provide an implementation for early adopters. The goal is to provide an RMD file that fully supports
 the data currently used by PNNL Ruleset Checking Tool. The repo for the script development is here:
 
 https://github.com/JasonGlazer/createRulesetModelDescription
 
 The title, purpose, and scope of ASHRAE Standard 229 are:
 
-Title: 
+Title:
 
 - Protocols for Evaluating Ruleset Application in Building Performance Models
 
-Purpose: 
+Purpose:
 
-- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building 
+- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building
 performance models.
 
 Scope:
 
-- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their 
-systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:  
-- 2.1 building performance modeling software    
+- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their
+systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:
+- 2.1 building performance modeling software
 - 2.2 software that evaluates building performance models and associated information to check the application of a ruleset
 
-ASHRAE Standard 229 has not been published and is under development by the ASHRAE SPC 229P committee which is expecting 
-a public review shortly. The intention of the standard is to provide code officials and rating authorities with files 
-that they can use with a Ruleset Checking Tool (currently, an example is under development at PNNL) to automatically 
-check if a ruleset (such as 90.1 Appendix G, RESNET, California Title 24 performance paths, or Canada National Energy 
-Code for Buildings performance path) has been implemented correctly. Since each EnergyPlus IDF file could generate an 
-RMD file, the Ruleset Checking Tool will be able to see if the changes between the RMD files correspond to rules in 
-the ruleset by looking at both the baseline and proposed RMD file. 
+ASHRAE Standard 229 has not been published and is under development by the ASHRAE SPC 229P committee which is expecting
+a public review shortly. The intention of the standard is to provide code officials and rating authorities with files
+that they can use with a Ruleset Checking Tool (currently, an example is under development at PNNL) to automatically
+check if a ruleset (such as 90.1 Appendix G, RESNET, California Title 24 performance paths, or Canada National Energy
+Code for Buildings performance path) has been implemented correctly. Since each EnergyPlus IDF file could generate an
+RMD file, the Ruleset Checking Tool will be able to see if the changes between the RMD files correspond to rules in
+the ruleset by looking at both the baseline and proposed RMD file.
 
 The schema is described here:
 
@@ -53,8 +53,8 @@ no discussion yet
 ## Overview ##
 
 The initial phase was on focused on data groups describing the building envelope and internal loads. The second phase added
-support for some HVAC data groups and elements. This phase will continue working on the HVAC data groups and elements. The 
-PNNL Ruleset Checking Tool (RCT) supports evaluation of rules using many data groups but does not evaluate all data groups. 
+support for some HVAC data groups and elements. This phase will continue working on the HVAC data groups and elements. The
+PNNL Ruleset Checking Tool (RCT) supports evaluation of rules using many data groups but does not evaluate all data groups.
 The data groups that are not included are related to refrigeration, elevators, SWH, transformers, district and data validation
 points. These excluded data groups will not be supported in this phase of development for createRMD.
 
@@ -85,7 +85,7 @@ Targeted data groups from the 229 RMD Schema for this effort are the HVAC portio
 This effort will focus on trying to implement as many data groups and elements as possible with the expectation to support
 all the data elements used by the PNNL Ruleset Checking Tool.
 
-Since this NFP builds on the efforts described in previous NFPs, some details are skipped that are already described in those 
+Since this NFP builds on the efforts described in previous NFPs, some details are skipped that are already described in those
 ealier NFPs:
 
 https://github.com/NREL/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
@@ -98,8 +98,8 @@ https://github.com/JasonGlazer/createRulesetModelDescription/blob/main/docs/less
 
 ## Approach ##
 
-The effort will continue the approach used in 2022 and 2023 development of the createRMD but 
-will add more reporting to EnergyPlus to be consistent with the goal of being driven by EnergyPlus 
+The effort will continue the approach used in 2022 and 2023 development of the createRMD but
+will add more reporting to EnergyPlus to be consistent with the goal of being driven by EnergyPlus
 outputs and not needing to read the IDF or epJSON files. The approach has two focuses:
 
 - Enhance EnergyPlus Tabular Output Reports
@@ -108,7 +108,7 @@ outputs and not needing to read the IDF or epJSON files. The approach has two fo
 In addition, selected fixes of the createRMD Python script will be incorporated from the current list of issues
 in the repository.
 
-To understand how when data elements can be populated by either EnergyPlus input or EnergyPlus output as the 
+To understand how when data elements can be populated by either EnergyPlus input or EnergyPlus output as the
 source of the RMD data elements, a specially tagged version of the schema file was created here:
 
 https://github.com/open229/ruleset-model-description-schema/blob/EPtags/schema-source/ASHRAE229_extra.schema.yaml
@@ -193,15 +193,15 @@ The new columns would be:
 #### System Summary - Demand Controlled Ventilation using Controller:MechanicalVentilation ####
 
 The current columns are:
-- Controller:MechanicalVentilation Name 
-- Outdoor Air Per Person [m3/s-person] 
-- Outdoor Air Per Area [m3/s-m2] 
-- Outdoor Air Per Zone [m3/s] 
-- Outdoor Air ACH [ach] 
-- Outdoor Air Method 
-- Outdoor Air Schedule Name 
-- Air Distribution Effectiveness in Cooling Mode 
-- Air Distribution Effectiveness in Heating Mode 
+- Controller:MechanicalVentilation Name
+- Outdoor Air Per Person [m3/s-person]
+- Outdoor Air Per Area [m3/s-m2]
+- Outdoor Air Per Zone [m3/s]
+- Outdoor Air ACH [ach]
+- Outdoor Air Method
+- Outdoor Air Schedule Name
+- Air Distribution Effectiveness in Cooling Mode
+- Air Distribution Effectiveness in Heating Mode
 - Air Distribution Effectiveness Schedule Name
 
 The new columns would be:
@@ -304,7 +304,7 @@ The new columns would be:
 
 HVAC Topology
 
-This report would consists of many tables, one for each air loop, plant loop, or zone equipment. Each would be in the order of how 
+This report would consists of many tables, one for each air loop, plant loop, or zone equipment. Each would be in the order of how
 the branches appear in the loop and the order of components within each branch. After each splitter would be each branch.
 
 The columns would be:
@@ -320,15 +320,15 @@ The "Side" would be either "Demand" or "Supply" for airloops and plant loops. Fo
 
 A "Parent Type" could be: Branch, UnitarySystem, and would be blank for the demand side of airloops.
 
-The "Component Type" and "Component Name" would usually list equipment or other HVAC components with their names but should also 
+The "Component Type" and "Component Name" would usually list equipment or other HVAC components with their names but should also
 include Zone and the name of the zone for the demand side of an airloop.
 
 No node names would be included.
 
-If time allows, the "Connection Type" would be included for components that have multiple pairs of nodes. The "Connection Type" 
-would describe the type for that pair of nodes. For example, a water coil with both air and water nodes would say "air" or "water" 
-as appropriate.  A chiller would have "chilled water" and "condenser water" and maybe "heat recovery." For 
-"PlantEquipmentOperation" it might be "Reference" and for AvailabilityManager it might show as "Sensor" and SetPointManger 
+If time allows, the "Connection Type" would be included for components that have multiple pairs of nodes. The "Connection Type"
+would describe the type for that pair of nodes. For example, a water coil with both air and water nodes would say "air" or "water"
+as appropriate.  A chiller would have "chilled water" and "condenser water" and maybe "heat recovery." For
+"PlantEquipmentOperation" it might be "Reference" and for AvailabilityManager it might show as "Sensor" and SetPointManger
 might have "setpoint" here.
 
 For implementation, the following data structures are likely to be used
@@ -342,7 +342,7 @@ For implementation, the following data structures are likely to be used
 - state.dataZoneEquip->ReturnAirPath
 - SimAirServingZones::InitAirLoop for supply/return path indexes to the AirPrimaryLoop struct
 - thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathIndex - this gets set in SystemReports::InitEnergyReports
-- for connection type, SystemReports::CreateEnergyReportStructure could potentially add calls to predefined reports right in here 
+- for connection type, SystemReports::CreateEnergyReportStructure could potentially add calls to predefined reports right in here
 as each component gets added to the data structures to deduce connection type
 
 Eventually, anything in the Energy+.idd that has a \type node field would be represented.
@@ -350,7 +350,7 @@ Eventually, anything in the Energy+.idd that has a \type node field would be rep
 #### Controls ####
 
 A new report that includes Setpoint Managers, Controllers, Availability Managers, PlantEquipmentOperation, and components
-with control options and identifies the type, where they apply, sense, and control parameters from the input. Need: 
+with control options and identifies the type, where they apply, sense, and control parameters from the input. Need:
 
 - minimum and maximum setpoint temperatures
 - minimum turndown ratio
@@ -361,7 +361,7 @@ with control options and identifies the type, where they apply, sense, and contr
 - Outdoor Low Temperature
 - Setpoint at Outdoor High Temperature
 - Outdoor High Temperature
-   
+
 This is probably a series of tables, one for each input object. The report would include the pertinent information,
 including the controls, related temperatures, and what they apply to but would generally be limited to what is already
 available within the data structure that would be useful to report. Include specifically:
@@ -378,7 +378,7 @@ available within the data structure that would be useful to report. Include spec
 
 ## Testing/Validation/Data Sources ##
 
-Since the output JSON file needs to comply with a JSON schema, it should be easy to confirm that it is valid. 
+Since the output JSON file needs to comply with a JSON schema, it should be easy to confirm that it is valid.
 The Python jsonschema library can be used to confirm that the RMD file is consistent with the schema. Comparison
 of input and related outputs should provide the final check if the reporting is being done correctly.
 
@@ -394,11 +394,11 @@ Additional tabular outputs will be described in the IOref.
 ## createRMD Enhancements ###
 
 The following describes the new data elements and data groups that will be added to createRMD. These are based on
-what is needed since they are used by PNNL's Ruleset Checking Tool. Note that not all data elements will be 
+what is needed since they are used by PNNL's Ruleset Checking Tool. Note that not all data elements will be
 supported that are shown below. Data elements followed by (cp) are compliance parameters and are not able to be
 captured in input to, or output from, EnergyPlus. In addition, data elements followed by (nc) have no corresponding
 data column from EnergyPlus output and no plans to support that data element. These are typically only available
-as input or would be complicated to support as output. After other data elements in parenthesis is the EnergyPlus 
+as input or would be complicated to support as output. After other data elements in parenthesis is the EnergyPlus
 report that can be used to populate that data element.
 
 ^means that it is in in schema.yaml and column is defined-delete after assessment
@@ -446,7 +446,7 @@ Terminal (probably should do early since critical)
 - heating_source (Equipment Summary - AirTerminals - Heat/Reheat Coil Object Type)
 - heating_from_loop (Equipment Summary - AirTerminals - Hot Water Plant Loop Name)
 - cooling_source (Equipment Summary - AirTerminals, Chilled Water Coil Object Type)
-- cooling_from_loop (Equipment Summary - AirTerminals, Chilled Water Plant Loop Name) 
+- cooling_from_loop (Equipment Summary - AirTerminals, Chilled Water Plant Loop Name)
 - fan (Equipment Summary - AirTerminals, Fan Name)
 - fan_configuration (Equipment Summary - AirTerminals, type of input object)
 - primary_airflow (Equipment Summary - AirTerminals, Primary Air Flow Rate)
@@ -487,7 +487,7 @@ Boiler
 - operation_lower_limit (Controls)
 - operation_upper_limit (Controls)
 
-Chiller 
+Chiller
 - compressor_type (cp)
 - is_chilled_water_pump_interlocked (topology)
 - is_condenser_water_pump_interlocked (topology)
@@ -581,59 +581,59 @@ Schedule
 
 Weather
 - ground_temperature_schedule (nc)
-- data_source_type (cp) 
+- data_source_type (cp)
 
 (cp) indicates that it may need to be compliance parameter not based on simulation inputs or outputs
 (nc) indicates that no corresponding data column exists and we have no plans to support that data element
 
-This list is based on two sources: 
+This list is based on two sources:
 - baseline_model.json
-- docs\data_elements_used.yaml 
+- docs\data_elements_used.yaml
 
 The baseline_model.json file is from https://github.com/pnnl/ruleset-checking-tool/blob/develop/examples/chicago_demo/baseline_model.json
 
-The data_elements_used.yaml file was generated by script from the files related to the PNNL Ruleset Checking 
+The data_elements_used.yaml file was generated by script from the files related to the PNNL Ruleset Checking
 Tool in /ruletest_engine/ruletest_jsons/ashrae9012019
 
 ## Handling Compliance Parameters ##
 
-Compliance parameters are those that cannot be determined by the simulation input or output and instead need to be 
-provided by the modeler as they are interpreting the design. These parameters should be organized so they can be 
-merged into the RMD file that is produced by the script. 
+Compliance parameters are those that cannot be determined by the simulation input or output and instead need to be
+provided by the modeler as they are interpreting the design. These parameters should be organized so they can be
+merged into the RMD file that is produced by the script.
 
 Options for compliance parameters:
 
-1. Add new fields to existing input objects associated with them and create or add to tabular report that echos 
+1. Add new fields to existing input objects associated with them and create or add to tabular report that echos
 them out
 2. Add new fields to existing input objects associated with them and parse the epJSON files to get them
 3. Add new Compliance input objects like existing Compliance:Building and report them in tabular reports
-4. Add new Compliance input objects like existing Compliance:Building and parse the epJSON to get them (essentially 
+4. Add new Compliance input objects like existing Compliance:Building and parse the epJSON to get them (essentially
 ignore these inputs by EnergyPlus like HVACTemplate objects are ignored). A preprocessor would need to delete them.
-5. Add new generic tag object (https://github.com/NREL/EnergyPlus/issues/8775) to associate new key-value pairs for 
+5. Add new generic tag object (https://github.com/NREL/EnergyPlus/issues/8775) to associate new key-value pairs for
 compliance parameters and create a tabular report that echos them out
-6. Create a JSON file that contains the compliance parameters but the layout would need to match the layout of the 
-RMD file so that it could be merged. Use createRMD to make an empty file to make it easier for user to populate 
+6. Create a JSON file that contains the compliance parameters but the layout would need to match the layout of the
+RMD file so that it could be merged. Use createRMD to make an empty file to make it easier for user to populate
 and would be different for each EnergyPlus input file. GUI developers would probably not need the created empty files.
-7. Create a YAML file that contains the compliance parameters but the layout would need to match the layout of the 
-RMD file so that it could be merged. Use createRMD to make an empty file to make it easier for user to populate and 
+7. Create a YAML file that contains the compliance parameters but the layout would need to match the layout of the
+RMD file so that it could be merged. Use createRMD to make an empty file to make it easier for user to populate and
 would be different for each EnergyPlus input file.  GUI developers would probably not need the created empty files.
-8. Create a JSON patch file (https://jsonpatch.com/) containing the compliance parameters and values. Use createRMD 
+8. Create a JSON patch file (https://jsonpatch.com/) containing the compliance parameters and values. Use createRMD
 to make an empty file to make it easier for user to populate and would be different for each EnergyPlus input file.
-9. Create a separate IDD for the compliance parameters and users can create a special IDF that just contains them 
+9. Create a separate IDD for the compliance parameters and users can create a special IDF that just contains them
 that can be read. Keeping both files synchronized would be difficult.
 
-For many of these the factor of being able to use IDF Editor (or eventually the epJSON Editor) or simply add and 
-manipulate an IDF file using current workflows is important. For GUIs they would probably also prefer to simply 
-generate an IDF or epJSON file directly that contains everything since the GUI would also now need new entry 
+For many of these the factor of being able to use IDF Editor (or eventually the epJSON Editor) or simply add and
+manipulate an IDF file using current workflows is important. For GUIs they would probably also prefer to simply
+generate an IDF or epJSON file directly that contains everything since the GUI would also now need new entry
 fields for users to populate. A GUI could also generate the JSON patch file directly.
 
-Options 1 to 5 are all keeping the information together in a single IDF or epJSON file and would probably be 
+Options 1 to 5 are all keeping the information together in a single IDF or epJSON file and would probably be
 easiest for the user or GUI developer.
 
-Options 6 to 8 may be easier to program but more difficult for users and developers. If no creation of empty 
-compliance parameter file is done, they are definitely the easiest approach. 
+Options 6 to 8 may be easier to program but more difficult for users and developers. If no creation of empty
+compliance parameter file is done, they are definitely the easiest approach.
 
-For now the recommendation is to use option 8. In the future, options 2 and 4 could be pursued and they could create 
+For now the recommendation is to use option 8. In the future, options 2 and 4 could be pursued and they could create
 a JSON patch file as part of the preprocessor. Option 8 is the easiest option in the short term to implement.
 
 ## Outputs Description ##
@@ -653,7 +653,7 @@ None required.
 ## Design Document ##
 
 In general, to try to maximize the number of new data elements implemented during this phase, items should be added based
-on complexity. 
+on complexity.
 
 For EnergyPlus changes, add new columns in the following order based on difficulty:
 1. Existing tables where new output is simple echo of input or already computed and in data structure
@@ -665,10 +665,10 @@ Echos of input are indicated in the eptags schema file.
 
 Provide draft updated output from EnergyPlus for OpenStudio team to test prior to release.
 
-For the createRulesetModelDecription Python script, will continue being developed using the same approach 
+For the createRulesetModelDecription Python script, will continue being developed using the same approach
 as the 2022 adn 2023 work and will continue to include unit tests. This includes:
 
- - The Python utility is separate from EnergyPlus and will eventually be packaged with the EnergyPlus installer. It will 
+ - The Python utility is separate from EnergyPlus and will eventually be packaged with the EnergyPlus installer. It will
  continue to be developed in its own repository but eventually this may be merged or linked from the  EnergyPlus repository.
 
  - The Python utility reads the JSON files that EnergyPlus produces when  the output:JSON input object is used as the primary
@@ -676,14 +676,14 @@ as the 2022 adn 2023 work and will continue to include unit tests. This includes
 
  - The Ruleset Model Description (RMD) format will be produced by the utility and is also a JSON format.
 
- - Verification that the RMD output produced by the new utility is consistent with the RMD schema is performed by using 
+ - Verification that the RMD output produced by the new utility is consistent with the RMD schema is performed by using
  the jsonschema Python library "validate" method.
 
  - The PathLib library is used for accessing files.
 
  - The unittest library is used for providing unit testing. The goal is to have tests for almost all of the methods.
 
- - Only a subset of data groups from the RMD schema will be generated and only data elements that are most direct will be 
+ - Only a subset of data groups from the RMD schema will be generated and only data elements that are most direct will be
  implemented. This is expected to be the first step in an ongoing effort to fully implement the RMD schema as an output format.
 
 ## References ##

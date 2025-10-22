@@ -37,7 +37,7 @@ This current project will rename this existing object to allow for water source 
 
   ```HeatPump:PlantLoop:EIR:(Cooling/Heating)```
 
-  "PlantLoop" could also be replaced by suggestions from the reviewers. Perhaps, "WaterSide" or "WaterSideLoad"? 
+  "PlantLoop" could also be replaced by suggestions from the reviewers. Perhaps, "WaterSide" or "WaterSideLoad"?
 
 - Implement code changes
 
@@ -158,6 +158,3 @@ A transition rule will be written to insert the ```Condenser Type``` field into 
 ## Engineering Reference
 
 No changes expected, aside from any minor changes requried to explain the water- vs. air-source operation.
-
-
-

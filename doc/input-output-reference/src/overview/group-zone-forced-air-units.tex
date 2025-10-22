@@ -519,7 +519,7 @@ The total heating fuel energy (or rate) consumed to maintain the desired air con
 \paragraph{Zone Ideal Loads Zone Cooling Fuel Energy {[}J{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-j}
 
 \paragraph{Zone Ideal Loads Zone Cooling Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-rate-w}
-  
+
 The total cooling fuel energy (or rate) consumed to maintain the desired air conditions in the cooled zone is calculated by dividing the Zone Ideal Loads Zone Total Cooling Energy (or Rate) by the cooling fuel efficiency.
 
 \paragraph{Zone Ideal Loads Economizer Active Time {[}hr{]}}\label{zone-ideal-loads-economizer-active-time-hr}
@@ -2379,7 +2379,7 @@ ZoneHVAC:PackagedTerminalAirConditioner,
   autosize,              !- Cooling Supply Air Flow Rate {m3/s}
   autosize,              !- Heating Supply Air Flow Rate operation {m3/s}
   autosize,              !- No Load Supply Air Flow Rate {m3/s}
-  ,                         !- No Load Supply Air Flow Rate Control Set To Low Speed 
+  ,                         !- No Load Supply Air Flow Rate Control Set To Low Speed
   autosize,              !- Cooling Outdoor Air Flow Rate {m3/s}
   autosize,              !- Heating Outdoor Air Flow Rate {m3/s}
   autosize,              !- No Load Outdoor Air Flow Rate  {m3/s}
@@ -3057,7 +3057,7 @@ For this zone heat pump,there are two types of WaterToAirHeatPump coil model all
 
 When the inputs of the last two fields (Design Specification Multispeed Object Type and Design Specification Multispeed Fan Object Name) are entered, a multiuspeed fan with different air flow rates is applied.  The fan speed number is determined by zone load. The fan air flow cycles between adjacent speeds based on the cooling / heating capacity (or coordinate with the cooling / heating coil stage for variable speed water to air coils). When Coil:Cooling:WaterToAirHeatPump:EquationFit and Coil:Heating:WaterToAirHeatPump:EquationFit are used, the water flow rate in the coils remain the same.
 
-When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object. 
+When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object.
 
 \begin{figure}[hbtp] % fig 113
 \centering
@@ -3283,7 +3283,7 @@ This input specifies the ratio of heat pump heating to cooling capacity. The def
 \item
   \hyperref[unitarysystemperformancemultispeed]{UnitarySystemPerformance:Multispeed}
 \end{itemize}
- 
+
 \paragraph{Field: Design Specification Multispeed Object Name}\label{field-design-specification-multispeed-object-name-2}
 
 This optional alpha field contains the identifying name for the design specification multispeed object. This field is only needed when multispeed fan is applied.
@@ -4044,7 +4044,7 @@ Terminal units with variable refrigerant flow compound HVAC object are used excl
 
 When the inputs of the last two fields (Design Specification Multispeed Object Type and Design Specification Multispeed Fan Object Name) are entered, a multiuspeed fan with different air flow rates is applied to Coil:Cooling:DX:VariableRefrigerantFlow and Coil:Heating:DX:VariableRefrigerantFlow.  The fan speed number is determined by zone load. The fan air flow cycles between adjacent speeds based on the cooling / heating capacity (or coordinate with the cooling / heating coil stage for variable speed water to air coils). However, the water flow rate in the coils remain the same while air flow rate varies with speed.
 
-When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object. 
+When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object.
 
 
 \begin{callout}
@@ -4061,7 +4061,7 @@ The terminal units operate to satisfy a heating or cooling load in a zone based 
 
 A supply air fan can be modeled as either draw through or blow through. The supply air fan is required for zone equipment and optional for air loop and outdoor air system equipment. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel}, \hyperref[fanonoff]{Fan:OnOff}, or \hyperref[fanconstantvolume]{Fan:ConstantVolume} if \hyperref[airconditionervariablerefrigerantflow]{AirConditioner:VariableRefrigerantFlow} is used to model the VRF outdoor unit. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fanvariablevolume]{Fan:VariableVolume} if AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl or AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl:HR is used to model the VRF outdoor unit.
 
-Multispeed fan operation is available to both coils as\textit{\hyperref[coilcoolingdxvariablerefrigerantflow]{Coil:Cooling:DX:VariableRefrigerantFlow}} and \textit{\hyperref[coilheatingdxvariablerefrigerantflow]{Coil:Heating:DX:VariableRefrigerantFlow}}. There are two ways to accomplish multispeed fan operation. The first way is to input last two fields: Design Specification Multispeed Object Type and Design Specification Multispeed Object Name.The object allows users to input multiple speed fan flow fractions for both heating and cooling. It also allows users to input the supply air flow ratio with no load. 
+Multispeed fan operation is available to both coils as\textit{\hyperref[coilcoolingdxvariablerefrigerantflow]{Coil:Cooling:DX:VariableRefrigerantFlow}} and \textit{\hyperref[coilheatingdxvariablerefrigerantflow]{Coil:Heating:DX:VariableRefrigerantFlow}}. There are two ways to accomplish multispeed fan operation. The first way is to input last two fields: Design Specification Multispeed Object Type and Design Specification Multispeed Object Name.The object allows users to input multiple speed fan flow fractions for both heating and cooling. It also allows users to input the supply air flow ratio with no load.
 
 \subsubsection{Inputs}\label{inputs-14-018}
 
@@ -4206,7 +4206,7 @@ This optional alpha field contains the identifying type for the design specifica
 \item
   \hyperref[unitarysystemperformancemultispeed]{UnitarySystemPerformance:Multispeed}
 \end{itemize}
- 
+
 \paragraph{Field: Design Specification Multispeed Object Name}\label{field-design-specification-multispeed-object-name-3}
 
 This optional alpha field contains the identifying name for the design specification multispeed object. This field is only needed when multispeed fan is applied.

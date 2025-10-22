@@ -48645,13 +48645,13 @@ ZoneHVAC:AirDistributionUnit,
        \object-list DesignSpecificationAirTerminalSizingName
 
 ZoneHVAC:ExhaustControl,
-       \memo Defines a controlled exhaust flow from a zone which finally feeds into 
+       \memo Defines a controlled exhaust flow from a zone which finally feeds into
        \memo one of AirLoopHVAC:ZoneMixer's inlets, which are part of an AirLoopHVAC:ExhaustSystem.
   A1 , \field Name
        \required-field
   A2 , \field Availability Schedule Name
        \note Availability schedule name for this exhaust system. Schedule value > 0 means it is available.
-       \note If this field is blank, the exhaust system is always available. If the attached 
+       \note If this field is blank, the exhaust system is always available. If the attached
        \note AirLoopHVAC:ExhaustSystem is off, then the flow will be zero.
        \type object-list
        \object-list ScheduleNames

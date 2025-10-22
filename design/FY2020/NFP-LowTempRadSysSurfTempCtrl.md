@@ -6,7 +6,7 @@ Low Temperature Radiant System Surface Temperature Control
  - Original Date: April 29, 2020
  - Latest Revision Date: May 11, 2020 (Version 4, Design Document)
  - Minor edit/correction of type: May 25, 2020 (Version 5)
- 
+
 
 ## Justification for New Feature ##
 
@@ -39,7 +39,7 @@ The change for the variable flow radiant system regarding what point in the syst
 
 ## Testing/Validation/Data Sources ##
 
-Testing will be done using unit tests as well as new/modified input files in the existing EnergyPlus series of test files.  The changes/additions will include at least one example for each of the new control types and also looking at using a 0.0 throttling range.  The setpoint temperature for variable flow radiant systems will be checked comparison EnergyPlus output before and after the change.  So, this will rely on existing EnergyPlus test files and modified versions of those files.  
+Testing will be done using unit tests as well as new/modified input files in the existing EnergyPlus series of test files.  The changes/additions will include at least one example for each of the new control types and also looking at using a 0.0 throttling range.  The setpoint temperature for variable flow radiant systems will be checked comparison EnergyPlus output before and after the change.  So, this will rely on existing EnergyPlus test files and modified versions of those files.
 
 ## Input Output Reference Documentation ##
 
@@ -94,6 +94,3 @@ New and modified example files will be created to test the new controls that are
 Google document authored by CBE (their own internal document)
 Current EnergyPlus code and documentation
 RadiantControlsWorkWishlistWithEvaluation.docx (author’s internal document, submitted to CBE and NREL and available upon request)
-
-
-

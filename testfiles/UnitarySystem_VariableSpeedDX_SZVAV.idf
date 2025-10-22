@@ -3025,7 +3025,7 @@
     Sys 2 Furnace DX Cool Cool Coil EIR-FT,                   !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     Sys 2 Furnace DX Cool Cool Coil EIR-FF;                   !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
-    
+
   Curve:Quadratic,
     fan_curve,               !- Name
     0,                       !- Coefficient1 Constant

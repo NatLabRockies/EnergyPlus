@@ -249,7 +249,7 @@ An example of the AirLoopHVAC:ExhaustSystem input object is like this:
 
 AirLoopHVAC:ExhaustSystem,
     Central Exhaust 1,           !- Name
-    AirLoopExhaustMixer1,        !- Zone Mixer Name    
+    AirLoopExhaustMixer1,        !- Zone Mixer Name
     Fan:SystemModel,             !- Fan Object Type
     CentralExhaustFan1;          !- Fan Name
 
@@ -257,7 +257,7 @@ AirLoopHVAC:ExhaustSystem,
 
 \subsubsection{Outputs}
 
-The following output will be added the to the new exhaust system: 
+The following output will be added the to the new exhaust system:
 
 \begin{itemize}
 
@@ -491,7 +491,7 @@ An example of this statement in an IDF is:
 
 \subsection{AirLoopHVAC:Mixer}\label{airloophvacmixer}
 
-The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object. 
+The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object.
 
 \subsubsection{Inputs}\label{inputs-5-002}
 

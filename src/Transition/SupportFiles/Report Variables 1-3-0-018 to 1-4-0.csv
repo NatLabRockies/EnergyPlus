@@ -5,4 +5,3 @@ DHW:Gas,WaterSystems:Gas
 DHW:Electricity,WaterSystems:Electricity
 DHW:Water,WaterSystems:Water
 old variable name,new variable name -- put variable names in quotes and leave off units -- <DELETE> to delete
-

@@ -9255,7 +9255,7 @@ Space,
        \memo Every Zone contains one or more spaces. Space is an optional input.
        \memo If a Zone has no Space(s) specified in input then a default Space named <Zone Name> will be created.
        \memo If some surfaces in a Zone are assigned to a space and some are not, then a default Space
-       \memo named <Zone Name>-Remainder will be created. 
+       \memo named <Zone Name>-Remainder will be created.
        \memo Input references to Space Names must have a matching Space object
        \memo (default space names may not be referenced except in output variable keys).
        \min-fields 3
@@ -9460,10 +9460,10 @@ SpaceList,
 
 Zone,
        \memo Defines a thermal zone of the building. Every zone contains one or more Spaces.
-       \memo Space is an optional input. 
+       \memo Space is an optional input.
        \memo If a Zone has no Space(s) specified in input then a default Space named <Zone Name> will be created.
        \memo If some surfaces in a Zone are assigned to a space and some are not, then a default Space
-       \memo named <Zone Name>-Remainder will be created. 
+       \memo named <Zone Name>-Remainder will be created.
        \memo Input references to Space Names must have a matching Space object
        \memo (default space names may not be referenced except in output variable keys).
        \format vertices
@@ -25017,7 +25017,7 @@ AirflowNetwork:MultiZone:ReferenceCrackConditions,
       \required-field
       \type real
       \units C
-      \note Enter the reference temperature under which the surface crack data were obtained. 
+      \note Enter the reference temperature under which the surface crack data were obtained.
       \note Suggested value 20C.
  N2 , \field Reference Barometric Pressure
       \type real
@@ -33426,8 +33426,8 @@ DesignSpecification:OutdoorAir,
       \note System Outdoor Air Method = ProportionalControlBasedOnDesignOARate in Controller:MechanicalVentilation.
 
 DesignSpecification:OutdoorAir:SpaceList,
-       \memo Defines a list of DesignSpecification:OutdoorAir names which can be referenced as a group. 
-       \memo The DesignSpecification:OutdoorAir:SpaceList name may be used in Sizing:Zone and 
+       \memo Defines a list of DesignSpecification:OutdoorAir names which can be referenced as a group.
+       \memo The DesignSpecification:OutdoorAir:SpaceList name may be used in Sizing:Zone and
        \memo Controller:MechanicalVentilation to specify space-by-space OA requirements and anywhere else
        \memo that accepts a DesignSpecification:OutdoorAir object name.
        \min-fields 3
@@ -33706,7 +33706,7 @@ Sizing:Zone,
       \units kgWater/kgDryAir
   A4, \field Design Specification Outdoor Air Object Name
       \note Specify the name of a DesignSpecification:OutdoorAir object to specify one set of requirements for the Zone.
-      \note Use a DesignSpecification:OutdoorAir:SpaceList object name to specify different 
+      \note Use a DesignSpecification:OutdoorAir:SpaceList object name to specify different
       \note requirements for Spaces within the Zone.
       \type object-list
       \object-list DesignSpecificationOutdoorAirNames
@@ -34322,7 +34322,7 @@ Sizing:System,
       \minimum 0.0
       \autosizable
       \default autosize
-      \note The Occupant Diversity is used to determine a multi-zone system's outdoor air intake when the System Outdoor Air Method is 
+      \note The Occupant Diversity is used to determine a multi-zone system's outdoor air intake when the System Outdoor Air Method is
       \note Standard62.1VentilationRateProcedure or the Standard62.1SimplifiedProcedure. If set to be autosized, it will be calculated
       \note using the information in the People objects assigned to each zone attached to this system/airloop.
 
@@ -50602,8 +50602,8 @@ Coil:Cooling:Water:DetailedGeometry,
        \minimum> 0
        \note This input field is optional. If specified, it is used for sizing the coil Design Geomtery
        \note Parameters. If autosized, the Design Loop Exit Temperature value specified in Sizing:Plant
-       \note object is used for sizing the coil Design Geomtery Parameters. If the autosized value is 
-       \note higher than the coil design outlet air temperature, then the design inlet water temperature 
+       \note object is used for sizing the coil Design Geomtery Parameters. If the autosized value is
+       \note higher than the coil design outlet air temperature, then the design inlet water temperature
        \note value is reset to coil design outlet air temperature minus 5.0 DeltaC.
 
 CoilSystem:Cooling:Water,
@@ -50647,15 +50647,15 @@ CoilSystem:Cooling:Water,
        \key Multimode
        \key CoolReheat
        \default None
-       \note None = meet sensible load only. Valid with all cooling coil types. When a heat 
-       \note exchanger assisted cooling coil is used, the heat exchanger is locked on at all times.   
-       \note Multimode = activate water coil and meet sensible load. If no sensible load exists,     
+       \note None = meet sensible load only. Valid with all cooling coil types. When a heat
+       \note exchanger assisted cooling coil is used, the heat exchanger is locked on at all times.
+       \note Multimode = activate water coil and meet sensible load. If no sensible load exists,
        \note and Run on Latent Load = Yes, and a latent load exists, the coil will operate to meet
        \note the latent load. If the latent load cannot be met the heat exchanger will be activated.
-       \note Valid only with cooling coil type CoilSystem:Cooling:Water:HeatExchangerAssisted.   
+       \note Valid only with cooling coil type CoilSystem:Cooling:Water:HeatExchangerAssisted.
        \note CoolReheat = cool beyond the dry-bulb setpoint as required to meet the humidity setpoint.
        \note Valid with all cooling coil types. When a heat exchanger assisted cooling coil is used,
-       \note the heat exchanger is locked on at all times.      
+       \note the heat exchanger is locked on at all times.
        \note For all dehumidification controls, the max humidity setpoint on the Sensor Node is used.
        \note SetpointManager:SingleZone:Humidity:Maximum,
        \note SetpointManager:MultiZone:Humidity:Maximum, or
@@ -50701,7 +50701,7 @@ CoilSystem:Cooling:Water,
   A11; \field Companion Coil Used For Heat Recovery
        \note Only used for heat recovery loops.
        \note Entering a coil name indicates a heat recovery loop is specified.
-       \note Coil listed is connected in series with this objects coil on demand side 
+       \note Coil listed is connected in series with this objects coil on demand side
        \note branch of a plant loop. A dedicated plant loop with no supply side
        \note equipment, other than a pump, is currently required.
        \note Only Coil:Cooling:Water coil type is currently allowed for heat recovery loops.
@@ -64985,7 +64985,7 @@ Controller:MechanicalVentilation,
         \note A zone name or a zone list name may be used here
    A6,  \field Design Specification Outdoor Air Object Name 1
         \note Specify the name of a DesignSpecification:OutdoorAir object to specify one set of requirements for the Zone.
-        \note Use a DesignSpecification:OutdoorAir:SpaceList object name to specify different 
+        \note Use a DesignSpecification:OutdoorAir:SpaceList object name to specify different
         \note requirements for Spaces within the Zone.
         \note If left blank, the name will be taken from the Sizing:Zone object for this zone.
         \note If no specification is found for this zone, then the default of 0.00944 m3/s-person will be used.

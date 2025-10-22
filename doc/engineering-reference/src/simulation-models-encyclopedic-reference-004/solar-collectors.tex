@@ -1281,7 +1281,7 @@ This section discusses the implementation of an air-based parallel flow building
 \subsubsection{Energy Balance}\label{BIPVT-energy-balance}
 The input object SolarCollector:FlatPlate:PhotovoltaicThermal provides models for flat plate photovoltaic/thermal collectors. To use the BIPVT collector model, use the SolarCollectorPerformance:PhotovoltaicThermal:BIPVT object and specify its name under the parameter `Photovoltaic-Thermal Model Performance Name' of the SolarCollector:FlatPlate:PhotovoltaicThermal object.
 The heat balances for the various layers of the BIPVT collector discussed here is taken from work by Delisle and Kummert (2014), but the solution methodology is different (discussed in a later section). The thermal resistance circuit representation is shown in Figure~\ref{fig:BIPVT-resistance-circuit}.
-The equations \ref{eq:BIPVT-pv-outer-surf} through \ref{eq:BIPVT-cavity-air} describe energy balances on the various layers of interest. These are the PV glazing outer layer, the PV cells, the PV backing outer surface, and the air cavity. The energy balances are for a length (along flow direction) of collector \(dx\). 
+The equations \ref{eq:BIPVT-pv-outer-surf} through \ref{eq:BIPVT-cavity-air} describe energy balances on the various layers of interest. These are the PV glazing outer layer, the PV cells, the PV backing outer surface, and the air cavity. The energy balances are for a length (along flow direction) of collector \(dx\).
 
 
 \begin{figure}[hbtp] % fig 301
@@ -1531,7 +1531,7 @@ Leeward Roof      & 5.617  & 0.657 \\
 Windward Vertical & 10.925 & 0.643 \\
 Side Vertical     & 8.851  & 0.677 \\
 Leeward Vertical  & 7.514  & 0.624 \\ \hline
-			
+
 		\end{tabular}
 	\caption{Variables for external heat transfer coefficients}
 	\label{tab:BIPVT-table-htc-ext}
@@ -1569,20 +1569,20 @@ A=-\frac{W}{\dot{m}C_p}\left(h_{conv,f1}+h_{conv,f2}\right)
 \end{equation}
 
 \begin{equation}
-B=\frac{W}{\dot{m}C_p}\left(h_{conv,f1}\cdot T_1+h_{conv,f2}\cdot T_2\right)		
+B=\frac{W}{\dot{m}C_p}\left(h_{conv,f1}\cdot T_1+h_{conv,f2}\cdot T_2\right)
 \label{eq:BIPVT-B}
 \end{equation}
 
 re-arranging equation~\ref{eq:BIPVT-cavity-air} yields:
 \begin{equation}
-\frac{dT_f}{dx}=A\cdot T_f+B 	
+\frac{dT_f}{dx}=A\cdot T_f+B
 \label{eq:BIPVT-dtdx}
 \end{equation}
 
 Re-arrange equation~\ref{eq:BIPVT-dtdx} and integrate both sides for the entire length of the collector (length=\(L\)).
 
 \begin{equation}
-\int_{x=0}^{x=L}{\frac{dT_f}{{A\cdot T}_f+B}=\int_{x=0}^{x=L}dx}	
+\int_{x=0}^{x=L}{\frac{dT_f}{{A\cdot T}_f+B}=\int_{x=0}^{x=L}dx}
 \label{eq:BIPVT-integral}
 \end{equation}
 
@@ -1606,7 +1606,7 @@ We have previously assumed that all other layer's temperatures are not functions
 
 \begin{equation}
 \begin{split}
-\left[\begin{matrix}h_{conv,t}+h_{rad,t}+h_{PVg-PV}&-h_{PVg-PV}&0\\h_{PVg-PV}&-h_{PVg-PV}-h_{PV-1}&h_{PV-1}\\0&h_{PV-1}&-h_{PV-1}-h_{conv,f1}-h_{rad,1-2}\\\end{matrix}\right]\left[\begin{matrix}{\bar{T}}_{PVg}\\{\bar{T}}_{PV}\\{\bar{T}}_1\\\end{matrix}\right] \\ 
+\left[\begin{matrix}h_{conv,t}+h_{rad,t}+h_{PVg-PV}&-h_{PVg-PV}&0\\h_{PVg-PV}&-h_{PVg-PV}-h_{PV-1}&h_{PV-1}\\0&h_{PV-1}&-h_{PV-1}-h_{conv,f1}-h_{rad,1-2}\\\end{matrix}\right]\left[\begin{matrix}{\bar{T}}_{PVg}\\{\bar{T}}_{PV}\\{\bar{T}}_1\\\end{matrix}\right] \\
 =\left[\begin{matrix}h_{conv,t}T_a+h_{rad,t}T_{sur}\\-S\\-S_1-h_{rad,1-2}{\bar{T}}_2-h_{conv,f1}\bar{T_f}\\\end{matrix}\right]
 \end{split}
 \label{eq:BIPVT-matrix}

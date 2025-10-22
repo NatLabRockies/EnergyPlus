@@ -690,7 +690,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(20:CurArgs+1)=InArgs(19:CurArgs)
                 CurArgs = CurArgs + 1
 
-              ! If your original object starts with D, insert the rules here              
+              ! If your original object starts with D, insert the rules here
               CASE('DISTRICTHEATING')
                 nodiff=.false.
                 ObjectName='DistrictHeating:Water'

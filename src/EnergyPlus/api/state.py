@@ -53,7 +53,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_void_p
+from ctypes import c_void_p, cdll
 
 
 class StateManager:

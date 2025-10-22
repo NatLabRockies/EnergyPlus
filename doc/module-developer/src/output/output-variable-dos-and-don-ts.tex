@@ -56,13 +56,13 @@ For Version 8.0, a comprehensive effort was made to rename output variables to f
 % table 5
 \begin{longtable}[c]{p{1.5in}p{1.5in}p{1.5in}p{1.5in}}
 \caption{Output Variable Classifications \label{table:output-variable-classifications}} \tabularnewline
-\toprule 
+\toprule
 Model Classification & Spatial Classification & Type of Component & Dimensional Nature \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Output Variable Classifications} \tabularnewline
-\toprule 
+\toprule
 Model Classification & Spatial Classification & Type of Component & Dimensional Nature \tabularnewline
 \midrule
 \endhead
@@ -86,13 +86,13 @@ Setpoint Manager & Node & Baseboard & Status \tabularnewline
 % table 6
 \begin{longtable}[c]{p{1.5in}p{4.5in}}
 \caption{Output Variable Example Abbreviations \label{table:output-variable-example-abbreviations}} \tabularnewline
-\toprule 
+\toprule
 Acronym & Definition \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Output Variable Example Abbreviations} \tabularnewline
-\toprule 
+\toprule
 Acronym & Definition \tabularnewline
 \midrule
 \endhead
@@ -156,16 +156,16 @@ In EnergyPlus meters are an additional output reporting capability. A meter is a
 Meter output variables are created at the same time and in the same manner as ordinary output variables. SetupOutputVariable is called but the optional arguments ResourceTypeKey, EndUseKey, and GroupKey must be used in addition to the usual arguments. For example, in the electric steam humidifier module
 
 \begin{lstlisting}
-SetupOutputVariable( "Humidifier Electric Energy", OutputProcessor::Unit::J, 
+SetupOutputVariable( "Humidifier Electric Energy", OutputProcessor::Unit::J,
   Humidifier( HumNum ).ElecUseEnergy, "System", "Sum", Humidifier( HumNum ).Name);
- 
+
 \end{lstlisting}
 
 creates an output variable labeled `Humidifier Electric Energy {[}J{]}' with the value of Humidifier(HumNum)\%ElecUseEnergy.
 
 \begin{lstlisting}
-SetupOutputVariable( "Humidifier Electric Energy", OutputProcessor::Unit::J, 
-  Humidifier( HumNum ).ElecUseEnergy, "System", "Sum", Humidifier( HumNum ).Name, _, 
+SetupOutputVariable( "Humidifier Electric Energy", OutputProcessor::Unit::J,
+  Humidifier( HumNum ).ElecUseEnergy, "System", "Sum", Humidifier( HumNum ).Name, _,
   "ELECTRICITY", "HUMIDIFIER", _, "System" );
 
 \end{lstlisting}

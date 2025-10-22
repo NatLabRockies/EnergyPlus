@@ -3846,7 +3846,7 @@ TEST_F(ConvectionCoefficientsFixture, SurroundingSurfacesHRadCoefTest)
         1,                            !- Multiplier
         autocalculate,                !- Ceiling Height {m}
         autocalculate;                !- Volume {m3}
-                          
+
 	  Material,
         NothWallConcreteBlock,        !- Name
         MediumRough,                  !- Roughness
@@ -3955,7 +3955,7 @@ TEST_F(ConvectionCoefficientsFixture, SurroundingSurfacesHRadCoefTest)
         SrdSurfs:Surface 4,           !- Surrounding Surface 2 Name
         0.2,                          !- Surrounding Surface 2 View Factor
         Surrounding Temp Sch 4;       !- Surrounding Surface 2 Temperature Schedule Name
-							
+
       Schedule:Compact,
         Surrounding Temp Sch 1,       !- Name
         Any Number,                   !- Schedule Type Limits Name

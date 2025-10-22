@@ -764,7 +764,7 @@
    7,                              !- End Month
    3,                              !- End Day of Month
    18;                             !- End Hour of Day
-   
+
   Output:Table:ReportPeriod,
    VisualResilienceReportTimeWinter,  !- field Name,
    VisualResilienceSummary,           !- field Report Name,

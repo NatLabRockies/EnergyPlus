@@ -377,7 +377,7 @@
   Output:Variable,*,Boiler Heating Rate,Hourly;
 
   Output:Variable,*,Boiler Steam Efficiency,Hourly;
-  
+
   Output:Variable,*,Boiler Steam Mass Flow Rate,Hourly;
 
   Output:Variable,*,Boiler Steam Inlet Temperature,Hourly;

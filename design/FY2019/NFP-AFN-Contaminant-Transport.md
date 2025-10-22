@@ -8,7 +8,7 @@ non-trace contaminant transport). The lack of filtration is particularly
 limiting. Many species/materials of interest may be filtered (or removed with a
 similar process), including particulate matter, CO2, and water vapor. Similarly,
 the lack of more source and sink options tends to limit simulation to very
-basic situations. In many cases (particularly for those with limited data on 
+basic situations. In many cases (particularly for those with limited data on
 the details of the building), these limitations are not important because the
 level of detail is simply not needed. For more advanced simulations,
 particularly of innovative HVAC systems, this limitation bars use of EnergyPlus
@@ -51,7 +51,7 @@ of the flow along the path. The right hand side terms are lumped together as
 `RHS` for purposes of the explanations below. For trace contaminants, this
 equation is coupled to the airflow calculation in one direction: the airflow
 calculation determines the `F_j`s, but the transport of material has no impact
-upon the airflows. 
+upon the airflows.
 
 To advance the conservation equations through time, there are a number of
 different options. For now, the first order finite difference discretization in
@@ -59,7 +59,7 @@ time will be used in two different ways. First, the implicit Euler method will
 be implemented as follows, with subscript indicating time:
 
 ```
-M_(t+h) = M_t + h*RHS_(t+h)  
+M_(t+h) = M_t + h*RHS_(t+h)
 ```
 
 where `h` is the timestep. This method is implicit in that the right hand side
@@ -76,7 +76,7 @@ This method also requires solution of simultaneous equations. In the future, an
 explicit Euler method may be implemented as
 
 ```
-M_(t+h) = M_t + h*RHS_(t)  
+M_(t+h) = M_t + h*RHS_(t)
 ```
 
 This approach was included in the original NFP, but due to the need for warnings and/or
@@ -218,7 +218,7 @@ AirflowNetwork:SimulationControl,
       \key ConjugateGradient
       \default SkylineLU
  A9 ; \field Transport Simulation Type
-      \note The type of transport simulation desired. 
+      \note The type of transport simulation desired.
       \note Selecting None will disable simulation entirely.
       \choice
       \key None
@@ -308,7 +308,7 @@ so leaving this for a future release after the feature has gotten some use is a 
 would probably tightly link the flow model and material transport model too much. Considering options for renaming the additional
 field in linkages.
 * Ambient versus default concentration (Lixing Gu): Will rename the ambient concentration field to be default.
-* Use of Material as name (Mike Witte): After further discussion, the terminology "AirflowNetwork Material" will be adopted for use in EnergyPlus 
+* Use of Material as name (Mike Witte): After further discussion, the terminology "AirflowNetwork Material" will be adopted for use in EnergyPlus
 
 ## References ##
 Lorenzetti, David M, and Craig P Wray. "Air-Handling System Modeling in EnergyPlus: Recommendations for Meeting Stakeholder Needs." 2014. LBNL-6863E.

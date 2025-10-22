@@ -5,7 +5,7 @@ Run-around Heat Recovery Loop
 
  - Original Date - 2/5/21 DRAFT NFP
  - Revision Date - 8/2/21 FINAL NFP and Design Doc
- 
+
 
 ## Justification for New Feature ##
 
@@ -25,9 +25,9 @@ The following is an except of the abstract from <http://what-when-how.com/energy
 
 Run-around heat-recovery systems are often used to recover heat from the exhaust air in building ventilation systems, particularly in cold climates. In a typical heat-recovery system, an ethylene glycol and water solution is used as a “coupling fluid” to prevent the system from freezing. The design of a run-around heat-recovery system involves consideration of the heat-transfer rates between the fluids. A challenging problem is how to significantly increase those rates between the fluids, while using less energy for heating and cooling loads in buildings. Due to the heat-transfer characteristics of this coupling fluid and the operating and capital cost factors, the typical overall effectiveness of such systems is only about 50%. Studies show that two-phase, gas-liquid coupling fluids have much higher convective heat-transfer rates than single-phase flows at the same mass flow rates.
 
-The following figures and text were provided in the Trane TRACE 700 User’s Manual • CDS-PRM001-EN at <https://software.trane.com/RightNow/0103-CoilLoopEnergyRecovery/Coil_loop_exhaust-air_energy_recovery.pdf>. 
+The following figures and text were provided in the Trane TRACE 700 User’s Manual • CDS-PRM001-EN at <https://software.trane.com/RightNow/0103-CoilLoopEnergyRecovery/Coil_loop_exhaust-air_energy_recovery.pdf>.
 
-A simple schematic of a run-around coil heat recovery loop is shown in Figure 1. Insert A and B show heat recovery between two air stream while insert C shows energy transfer from before to after a cooling coil (similar to `CoilSystem:Cooling:DX:HeatExchangerAssisted`. 
+A simple schematic of a run-around coil heat recovery loop is shown in Figure 1. Insert A and B show heat recovery between two air stream while insert C shows energy transfer from before to after a cooling coil (similar to `CoilSystem:Cooling:DX:HeatExchangerAssisted`.
 
 ![RunaroundCoilLoop](RunaroundCoilHXLoop.png)
 ## *Figure 1. Run around coil loop schematic.* ##
@@ -36,7 +36,7 @@ Figure 2 shows an example run-around coil design for winter and summer operation
 warms the air brought into the building. Operation of the coil loop is limited to prevent the supply-air temperature from exceeding the cooling set point. (This condition is most likely to occur on mild days during the spring and fall.) Preconditioning the outdoor
 air (OA) in this manner reduces the heating load, which in turn reduces the energy consumption of the HVAC system.
 
-![RunaroundCoilDesignExample](RunaroundCoilDesignExample.png) 
+![RunaroundCoilDesignExample](RunaroundCoilDesignExample.png)
 ## *Figure 2. Run around coil design example.* ##
 
 ## Approach ##
@@ -49,11 +49,11 @@ There are 3 water coil models in EnergyPlus.
 
 As shown in figure 2, one coil heats in winter and cools in summer while the other does the reverse as is typical in heat recovery components. For this reason, a water coil model that can exchange heat based on the entering air and water temperature is required. It is believed that the cooling coil model behaves this way (i.e., can heat the air under certain conditions). I have also seen this a few times and MJWitte also believes the water cooling coil model has this capability. Through testing it has been confirmed Coil:Cooling:Water has the ability to cool or heat the air/water.
 
-There are two possible approaches I can think of. 
+There are two possible approaches I can think of.
 
-1. Connect 2 water cooling coils in a typical plant configuration. With one coil on the demand side of the plant loop while the other is a supply side component. This would allow alternate configurations if desired. For example to allow a boiler, chiller, evap cooler, etc. on the supply side which maintains a certain temperature to the supply side coil. Although I can't think of a reason to do this, it seems like a very flexible way to achieve the goal for a run-around coil application. A user could create a plant loop and then add two coils and a pump. 
+1. Connect 2 water cooling coils in a typical plant configuration. With one coil on the demand side of the plant loop while the other is a supply side component. This would allow alternate configurations if desired. For example to allow a boiler, chiller, evap cooler, etc. on the supply side which maintains a certain temperature to the supply side coil. Although I can't think of a reason to do this, it seems like a very flexible way to achieve the goal for a run-around coil application. A user could create a plant loop and then add two coils and a pump.
 
-**Pro:** This approach may require minimal changes to the IDD (the PlantLoop field for Plant Equipment Operation Scheme Name is required). Would provide flexibility in configuration. Pipe losses could be modeled.  
+**Pro:** This approach may require minimal changes to the IDD (the PlantLoop field for Plant Equipment Operation Scheme Name is required). Would provide flexibility in configuration. Pipe losses could be modeled.
 **Con:** The coil model would use ControlcompOutput as the solution algorithm. The air-side and water-side calculations would be disassociated the same as water coils on a branch are currently modeled.
 
 I'm not yet sure if objects other than the PlantLoop are even needed for a loop with 2 coils and a pump. Without a plant component (e.g., boiler or chiller) would the other typical plant objects shown here even be needed?
@@ -100,7 +100,7 @@ I'm not yet sure if objects other than the PlantLoop are even needed for a loop 
 
 2. Connect two water cooling coils together water outlet node of one coil is connected directly to the water inlet node of the other coil. A pump could be connected in series with these coils. Using this approach a new object could be created that specifies the type and name of the water coils, and also the pump. Since these components would be in an air stream, air inlet and outlet node name would be needed. Two of these objects would be required to complete the configuration and these objects could be placed in any air loop directly on a branch. A tentative approach would be to model both coils when any object is simulated.
 
-**Pro:** The ControlCompOutput solution algorithm would not be required. RootSolver could be used instead and the solution of the air and water sides of this loop could be solved at one time.  
+**Pro:** The ControlCompOutput solution algorithm would not be required. RootSolver could be used instead and the solution of the air and water sides of this loop could be solved at one time.
 **Con:** This approach would require an IDD change. There is also no real pipe objects so pipe losses could not be modeled. Pipe objects should be considered as part of this effort (i.e., use of plant and demand side branch and connector lists).
 
     CoilSystem:WaterCoil:HeatExchanger,
@@ -132,7 +132,7 @@ I'm not yet sure if objects other than the PlantLoop are even needed for a loop 
     A11; \field Companion Coil Used For Heat Recovery
          \note Only used for heat recovery loops.
          \note Entering a coil name indicates a heat recovery loop is specified.
-         \note Coil listed is connected in series with this objects coil on demand side 
+         \note Coil listed is connected in series with this objects coil on demand side
          \note branch of a plant loop. A dedicated plant loop with no supply side
          \note equipment, other than a pump, is currently required.
          \note Only Coil:Cooling:Water coil type is currently allowed for heat recovery loops.

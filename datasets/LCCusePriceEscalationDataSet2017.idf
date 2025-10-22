@@ -1,7 +1,7 @@
 ! The source of the values for the following objects is:
 !
 !    NISTIR 85-3273-31
-! 
+!
 !    ENERGY PRICE INDICES AND DISCOUNT FACTORS
 !    FOR LIFE-CYCLE COST ANALYSIS - 2016
 !
@@ -10,12 +10,12 @@
 !    Priya D. Lavappa
 !    Joshua D. Kneifel
 !
-! These are factors for the United States and regions of the United States. 
+! These are factors for the United States and regions of the United States.
 !
-! The factors are from a file available upon request from NIST called ENCOSTxx.TXT and are 
+! The factors are from a file available upon request from NIST called ENCOSTxx.TXT and are
 ! converted into EnergyPlus objects using a spreadsheet called ConvertENCOSTtoEnergyPlusLifeCycleCost.xls
 ! which is available upon request.
- 
+
 LifeCycleCost:UsePriceEscalation,
     NorthEast Residential-Electricity,  !- Name
     Electricity,                         !- Resource

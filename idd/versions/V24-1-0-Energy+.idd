@@ -22671,8 +22671,8 @@ OtherEquipment,
        \default General
 
 IndoorLivingWall,
-   \memo Indoor greenery systems such as indoor living walls are panels of plants, which grow hydroponically or from substrates. 
-   \memo The living wall structures can be either free-standing or attached to walls. 
+   \memo Indoor greenery systems such as indoor living walls are panels of plants, which grow hydroponically or from substrates.
+   \memo The living wall structures can be either free-standing or attached to walls.
    \memo The IndoorLivingWall module directly connects with inside surface heat balance, zone air heat balance, and zone air moisture balance.
   A1 , \field Name
        \required-field
@@ -22700,42 +22700,42 @@ IndoorLivingWall,
        \key LED
        \key Daylight
        \key LED-Daylight
-  A6 , \field LED Intensity Schedule Name 
+  A6 , \field LED Intensity Schedule Name
        \type object-list
        \object-list ScheduleNames
   A7 , \field Daylighting Control Name
-       \note If daylighting is used in the selected lighting methods (Daylight or LED-Daylight), 
-       \note users should define an object of Daylighting:Control to obtain the daylighting illumance level 
-       \note and an object for Daylighing:ReferencePoint for the daylighting sensor location in the thermal zone. 
-       \note The name of the object of Daylighting:Controls should be specified in this field. 
-       \type alpha 
+       \note If daylighting is used in the selected lighting methods (Daylight or LED-Daylight),
+       \note users should define an object of Daylighting:Control to obtain the daylighting illumance level
+       \note and an object for Daylighing:ReferencePoint for the daylighting sensor location in the thermal zone.
+       \note The name of the object of Daylighting:Controls should be specified in this field.
+       \type alpha
   A8 , \field LED-Daylight Targeted Lighting Intensity Schedule Name
-       \note This field defines targeted LED intensity level for indoor living wall systems. 
-       \note The schedule values can be any positive number representing targeted photosynthetic photon flux density (PPFD). 
-       \note Based on the available daylighting, the required LED lighting level and power will be automatically adjusted to meet the targeted LED intensity level. 
+       \note This field defines targeted LED intensity level for indoor living wall systems.
+       \note The schedule values can be any positive number representing targeted photosynthetic photon flux density (PPFD).
+       \note Based on the available daylighting, the required LED lighting level and power will be automatically adjusted to meet the targeted LED intensity level.
        \type object-list
        \object-list ScheduleNames
   N1 , \field Total Leaf Area
-       \note The value is the one-sided leaf area of an indoor living wall. 
-       \note Based on the users’ input, LAI is calculated as the ratio of the total leaf area and the partition wall area. 
-       \note Typical LAIs are 1.0 for grass and 3.0 for bushes and shrubs. The maximum LAI is 2.0 for the IndoorLivingWall module in EnergyPlus. 
-       \note If the calculated LAI is greater than 2.0, the maximum value of 2.0 is used for LAI in the simulation. 
+       \note The value is the one-sided leaf area of an indoor living wall.
+       \note Based on the users’ input, LAI is calculated as the ratio of the total leaf area and the partition wall area.
+       \note Typical LAIs are 1.0 for grass and 3.0 for bushes and shrubs. The maximum LAI is 2.0 for the IndoorLivingWall module in EnergyPlus.
+       \note If the calculated LAI is greater than 2.0, the maximum value of 2.0 is used for LAI in the simulation.
        \units m2
        \type real
        \ip-units ft2
-  N2 , \field LED Nominal Intensity 
-       \note The value represents photosynthetic photon flux density (PPFD) of LED grow light. 
+  N2 , \field LED Nominal Intensity
+       \note The value represents photosynthetic photon flux density (PPFD) of LED grow light.
        \note PPFD is measured in micro-mole per m2 per second (umol_m2s) which establishes exactly how many photosynthetically active radiation (PAR) photons are landing on a specific area.
        \units umol/m2-s
        \type real
        \ip-units umol/ft2-s
   N3 , \field LED Nominal Power
-       \note This field defines nominal total LED power for an indoor living wall system. 
+       \note This field defines nominal total LED power for an indoor living wall system.
        \units W
        \type real
        \ip-units W
   N4 ; \field Radiant Fraction of LED Lights
-       \note This field defines the fraction of radiation from LED lights 
+       \note This field defines the fraction of radiation from LED lights
        \type real
        \minimum 0.0
        \maximum 1.0
@@ -63493,7 +63493,7 @@ AirLoopHVAC:UnitarySystem,
        \key Yes
        \key No
        \default Yes
-       \note This field is not used when Design Specification Multispeed Object Type input is present 
+       \note This field is not used when Design Specification Multispeed Object Type input is present
        \note When Yes is selected the minimum air flow rate is used.
        \note When No is selected the maximum air flow rate is used.
   N17, \field Maximum Supply Air Temperature

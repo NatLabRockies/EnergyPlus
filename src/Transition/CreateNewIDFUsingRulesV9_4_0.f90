@@ -879,8 +879,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       EXIT
                     ENDIF
                   ENDDO
-                  IF (.not. DelThis) THEN 
-                  
+                  IF (.not. DelThis) THEN
+
                     ! Begin - Special section for v9.4
                     changeMeterNameFlag = .true.
                     DO numMeterCustom=1, totMeterCustom + totMeterCustomDecr
@@ -893,7 +893,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       CALL ReplaceFuelNameWithEndUseSubcategory(OutArgs(CurVar), NoDiff)
                     END IF
                     ! End - Special section for v9.4
-                    
+
                     CurVar=CurVar+2
                   END IF
                 ENDDO
@@ -1000,8 +1000,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       EXIT
                     ENDIF
                   ENDDO
-                  IF (.not. DelThis) THEN 
-                  
+                  IF (.not. DelThis) THEN
+
                     ! Begin - Special section for v9.4
                     changeMeterNameFlag = .true.
                     DO numMeterCustom=1, totMeterCustom + totMeterCustomDecr
@@ -1014,7 +1014,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       CALL ReplaceFuelNameWithEndUseSubcategory(OutArgs(CurVar), NoDiff)
                     END IF
                     ! End - Special section for v9.4
-                    
+
                     CurVar=CurVar+3
                   END IF
                 ENDDO
@@ -1117,8 +1117,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       EXIT
                     ENDIF
                   ENDDO
-                  IF (.not. DelThis) THEN 
-                  
+                  IF (.not. DelThis) THEN
+
                     ! Begin - Special section for v9.4
                     changeMeterNameFlag = .true.
                     DO numMeterCustom=1, totMeterCustom + totMeterCustomDecr
@@ -1131,7 +1131,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       CALL ReplaceFuelNameWithEndUseSubcategory(OutArgs(CurVar), NoDiff)
                     END IF
                     ! End - Special section for v9.4
-                  
+
                   CurVar=CurVar+2
                   END IF
                 ENDDO
@@ -1241,8 +1241,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       EXIT
                     ENDIF
                   ENDDO
-                  IF (.not. DelThis) THEN 
-                  
+                  IF (.not. DelThis) THEN
+
                     ! Begin - Special section for v9.4
                     changeMeterNameFlag = .true.
                     DO numMeterCustom=1, totMeterCustom + totMeterCustomDecr
@@ -1255,7 +1255,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       CALL ReplaceFuelNameWithEndUseSubcategory(OutArgs(CurVar), NoDiff)
                     END IF
                     ! End - Special section for v9.4
-                                    
+
                   CurVar=CurVar+2
                   END IF
                 ENDDO
@@ -1323,7 +1323,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                      CurArgs, &
                      Written, &
                      .false.)
-                       
+
                   ! Begin - Special section for v9.4
                   IF (CurArgs .GE. Var) THEN
                     changeMeterNameFlag = .true.

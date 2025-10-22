@@ -4925,7 +4925,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_SizeZoneEquipment_DOASLoadTest)
 TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 {
     std::string_view constexpr idf_objects = R"IDF(
-	
+
 	  ZoneHVAC:AirDistributionUnit,
 		ADU CV HW Rht,           !- Name
 		Node 5,                  !- Air Distribution Unit Outlet Node Name
@@ -4946,7 +4946,7 @@ TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 		0,                       !- Minimum Hot Water or Steam Flow Rate {m3/s}
 		0.001,                   !- Convergence Tolerance
 		50;                      !- Maximum Reheat Air Temperature {C}
-	
+
       ZoneHVAC:AirDistributionUnit,
         ADU VAV Rht,             !- Name
         Node 5,                  !- Air Distribution Unit Outlet Node Name

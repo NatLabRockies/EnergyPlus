@@ -8,7 +8,7 @@ Earth Tube 1-D Conduction Enhancement (Design Document)
  - Revision Date (Version 3): May 12, 2023
  - Revision Date (Version 4): June 7, 2023 (converted to a design document, minor grammatical edits, addition of the Code Development setion)
  - Revision Date (Version 5): June 27, 2023 (switch to LU decomposition)
- 
+
 
 ## Justification for New Feature ##
 
@@ -240,7 +240,7 @@ EARTHTUBE,
   0.0000000E+00,    !- Velocity**2 Term Flow Coef
   Vertical,         !- Earth Tube Model Type
   EarthTubeParams;  !- Earth Tube Model Parameters
-  
+
 EarthTube:Parameters,
   EarthTubeParams,  !- Earth Tube Model Parameters (Name)
   5,                !- Earth Tube Nodes Above
@@ -248,7 +248,7 @@ EarthTube:Parameters,
   1.0,              !- Earth Tube Dimensionless Boundary Above
   0.5,              !- Earth Tube Dimensionless Boundary Below
   4.0;              !- Earth Tube Dimensionless Solution Space Width
-  
+
 \end{lstlisting}
 
 ## Outputs Description ##
@@ -405,6 +405,3 @@ One potential improvememt that could be considered in the future for the model i
 Existing EnergyPlus Earth Tube Model, EnergyPlus Engineering Reference, EnergyPlus Input-Output Reference.
 
 Liu, X., M. Xu, J. Guo, and R. Zhu.  2019.  “Conceptual Development of the Earth Tube Cooling System For a Tall Building,” Journal of Green Building (2019) 14 (2): 1–28.
-
-
-

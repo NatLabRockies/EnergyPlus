@@ -9,8 +9,8 @@ Every Zone contains one or more spaces.
 
 Space is an optional input. If a Zone has no Space(s) specified in the input then a default Space named \textless{}Zone Name\textgreater{} will be created.
 If some surfaces in a Zone are assigned to a Space and some are not, then a default Space
-named \textless{}Zone Name\textgreater{}-Remainder will be created. 
-Input references to Space Names must have a matching Space object. 
+named \textless{}Zone Name\textgreater{}-Remainder will be created.
+Input references to Space Names must have a matching Space object.
 Default space names may not be referenced in the input except for \hyperref[outputvariable]{Output:Variable} keys).
 
 Space geometry is specified by attaching surfaces to a space using the ``Space Name'' field. If a Space has only floor surface(s) and internal mass assigned to it, the Space is assumed to share the same enclosure with other such Spaces in the same Zone (and with any surfaces that are not explicitly assigned to a space). If a Space also has other types of surfaces (e.g. wall, ceiling, or roof) then the Space forms its own enclosure unless it is connected to other spaces with air boundaries (see \hyperref[constructionairboundary]{Construction:AirBoundary}).
@@ -47,13 +47,13 @@ For each Zone, the calculated floor area is the sum of the space floor areas bel
 
 \paragraph{Field: Space Type}\label{space-type}
 
-Space type is used to categorize spaces by activity type, such as office, classroom, storage, etc. There is no predefined list of space types; 
+Space type is used to categorize spaces by activity type, such as office, classroom, storage, etc. There is no predefined list of space types;
 any valid input string may be used. Several table outputs include a subtable by Space Type. There are also SpaceType \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meters}. See the meter details (mtd) output file for a list of all available meters for a given simulation.
 If left blank, this field defaults to ``General'''.
- 
+
 \paragraph{Field: Tag \textless{}\#\textgreater{}}\label{field-space-tag}
 
-Tags are used to group spaces by additional characteristics that may be more or less detailed than Space Type. For example, codes and standards designations for ventilation or occupancy may use specific terms that are different from one standard to the next. There is no predefined list of tags; 
+Tags are used to group spaces by additional characteristics that may be more or less detailed than Space Type. For example, codes and standards designations for ventilation or occupancy may use specific terms that are different from one standard to the next. There is no predefined list of tags;
 any valid input string may be used. Several table outputs include a subtable by Space Tag.
 
 
@@ -90,8 +90,8 @@ This object defines a thermal zone of the building. Every Zone contains one or m
 
 Space is an optional input. If a Zone has no Space(s) specified in the input then a default Space named \textless{}Zone Name\textgreater{} will be created.
 If some surfaces in a Zone are assigned to a Space and some are not, then a default Space
-named \textless{}Zone Name\textgreater{}-Remainder will be created. 
-Input references to Space Names must have a matching Space object. 
+named \textless{}Zone Name\textgreater{}-Remainder will be created.
+Input references to Space Names must have a matching Space object.
 Default space names may not be referenced in the input except for \hyperref[outputvariable]{Output:Variable} keys).
 
 \subsubsection{Inputs}\label{inputs-048}
@@ -416,13 +416,13 @@ The Zone Air Heat Balance Internal Convective Heat Gain Rate is the sum, in watt
 	EnergyPlus Object &  Convective Heat Gain Type \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain Constituents} \tabularnewline
 	\toprule
 	EnergyPlus Object &  Convective Heat Gain Type \tabularnewline
 	\midrule
 	\endhead
-	
+
 	People     &     People    \tabularnewline
 	Lights     &     Lights    \tabularnewline
 	ElectricEquipment     &     ElectricEquipment    \tabularnewline
@@ -487,13 +487,13 @@ The Zone Air Heat Balance Internal Convective Heat Gain Rate is the sum, in watt
 	FenestrationSurface:Detailed Components &  Internal Convective Heat Gain Sources \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain Constituents} \tabularnewline
 	\toprule
 	FenestrationSurface:Detailed Components &  Internal Convective Heat Gain Sources \tabularnewline
 	\midrule
 	\endhead
-	
+
 	WindowProperty:FrameAndDivider &  Convective heat gain from window frame and divider  \tabularnewline
 	Construction:WindowEquivalentLayer  &  Other convective heat gain from equivalent layer window model \tabularnewline
 	Construction &  Natural convection heat gain from a gap \tabularnewline
@@ -624,7 +624,7 @@ These output variables express the sum of heat gain in Watts (for rate) or joule
 
 \paragraph{Space or Zone Total Internal Convective Heating Energy {[}J{]}}\label{zone-total-internal-convective-heating-energy-j}
 
-These output variables represent the sum of convective gains from specific sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes convective gain from Energyplus objects that are listed in Table \ref{table:space-or-zone-total-internal-heat-gain-constituents}: 
+These output variables represent the sum of convective gains from specific sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes convective gain from Energyplus objects that are listed in Table \ref{table:space-or-zone-total-internal-heat-gain-constituents}:
 
 \begin{longtable}[c]{@{}lcc@{}}
 	\caption{Space or Zone Total Internal Heat Gain Constituents} \label{table:space-or-zone-total-internal-heat-gain-constituents} \tabularnewline
@@ -632,13 +632,13 @@ These output variables represent the sum of convective gains from specific sourc
 	EnergyPlus Object &  Internal Heat Gain Type \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Space or Zone Total Internal Heat Gain Constituents} \tabularnewline
 	\toprule
 	EnergyPlus Object &  Internal Heat Gain Type \tabularnewline
 	\midrule
 	\endhead
-	
+
 	People   &  People \tabularnewline
 	Lights   &  Lights \tabularnewline
 	ElectricEquipment   &  ElectricEquipment \tabularnewline
@@ -647,7 +647,7 @@ These output variables represent the sum of convective gains from specific sourc
 	HotWaterEquipment   &  HotWaterEquipment \tabularnewline
 	SteamEquipment   &  SteamEquipment \tabularnewline
 	OtherEquipment   &  OtherEquipment \tabularnewline
-	
+
 	\bottomrule
 
 \end{longtable}
@@ -678,7 +678,7 @@ This output variable tracks the summation of all energy within a zone that is as
 
 \paragraph{Zone Exfiltration Latent Heat Transfer Rate {[}W{]}}\label{zone-exfiltration-latent-heat-transfer-rate-w}
 
-These output variables represent the heat emitted to ambient from exfiltration in Watts. The exfiltration rate is calculated by solving a mass flow balance on the zone including infiltration, ventilation, outdoor air mixing, zone-to-zone mixing, and all of the zone inlet, exhaust, and return nodes. The latent parts are determined by taking the difference between the total and the sensible rate. Positive values indicate the zone injects heat to the environment, while negative values indicate the building extracts heat from the environment. 
+These output variables represent the heat emitted to ambient from exfiltration in Watts. The exfiltration rate is calculated by solving a mass flow balance on the zone including infiltration, ventilation, outdoor air mixing, zone-to-zone mixing, and all of the zone inlet, exhaust, and return nodes. The latent parts are determined by taking the difference between the total and the sensible rate. Positive values indicate the zone injects heat to the environment, while negative values indicate the building extracts heat from the environment.
 
 \paragraph{Zone Exhaust Air Heat Transfer Rate {[}W{]}}\label{zone-exhaust-heat-transfer-rate-w}
 
@@ -686,7 +686,7 @@ These output variables represent the heat emitted to ambient from exfiltration i
 
 \paragraph{Zone Exhaust Air Latent Heat Transfer Rate {[}W{]}}\label{zone-exhaust-latent-heat-transfer-rate-w}
 
-These output variables represent the heat emitted to ambient from exhaust air in Watts. The zone exhaust air flow rate is aggregated from the zone exhaust nodes. Positive values indicate the building injects heat to the environment, while negative values indicate the building extracts heat from the environment. 
+These output variables represent the heat emitted to ambient from exhaust air in Watts. The zone exhaust air flow rate is aggregated from the zone exhaust nodes. Positive values indicate the building injects heat to the environment, while negative values indicate the building extracts heat from the environment.
 
 \paragraph{Site Total Zone Exfiltration Heat Loss {[}W{]}}\label{site-total-exfiltration-heat-transfer-rate-w}
 
@@ -3591,15 +3591,15 @@ The net heat flow to the zone through the glazing, frame and divider of an exter
 For a window \emph{without an interior shading device}, this heat flow is equal to:
 
   {[}Surface Window Transmitted Solar Radiation Rate{]}
-  
+
   + {[}Surface Window Inside Face Glazing Zone Convection Heat Gain Rate{]}
-  
+
   + {[}Surface Window Inside Face Glazing Net Infrared Heat Transfer Rate{]}
-  
+
   + {[}Surface Window Inside Face Frame and Divider Zone Heat Gain Rate{]} (if present)
-  
+
   - {[}Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate{]}
-  
+
   - {[}Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate{]}
 
   + {[Surface Window Gap Convective Heat Transfer Rate] (for \hyperref[windowpropertyairflowcontrol]{WindowProperty:AirflowControl} with destination IndoorAir)}
@@ -3623,7 +3623,7 @@ For a window \emph{with an interior shading device}, this heat flow is equal to:
   - {[}Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate{]}
 
   - {[}Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate{]}
-  
+
   + {[Surface Window Gap Convective Heat Transfer Rate] (for \hyperref[windowpropertyairflowcontrol]{WindowProperty:AirflowControl} with destination IndoorAir)}
 
 The total window heat flow can also be thought of as the sum of the solar and conductive gain \emph{to the zone} from the window.
@@ -4528,7 +4528,7 @@ This method is the required if you want to add a shading device to a constructio
 Note that if both ``Name of Construction with Shading'' and ``Material Name of Shading Device'' are specified, the former takes precedence.
 \end{itemize}
 
-Most Shading Control Types allow you to specify a schedule that determines when the control is active. One example is a control that is active seasonally. For example, to deploy shading only in the summer when the incident solar is high enough, use Shading Control Type = OnIfHighSolarOnWindow with a schedule that is 1 during the summer months and 0 otherwise and specify Shading Control Is Scheduled = YES. 
+Most Shading Control Types allow you to specify a schedule that determines when the control is active. One example is a control that is active seasonally. For example, to deploy shading only in the summer when the incident solar is high enough, use Shading Control Type = OnIfHighSolarOnWindow with a schedule that is 1 during the summer months and 0 otherwise and specify Shading Control Is Scheduled = YES.
 
 To deploy one shading device during one time period and another during another time period for the same window, specify two different WindowShadingControl objects that both reference the same fenestration.  Each of the WindowShadingControl input objects would include the same window on their lists of fenestration objects, but would reference different schedule input objects. The referenced schedule input objects should have non-zero values specified at different times for each WindowShadingControl. This approach can be used to add shading that is different for different seasons. When more than one WindowShadingControl is used for the same window based on schedule, the type of shading, control type, setpoints, and several other parameters must be the same in the different WindowShadingControl objects, but the shading device and construction can be different.
 
@@ -5081,7 +5081,7 @@ The solar absorptance of the inside reveal surfaces other than the sill.
 
 \paragraph{Field: NFRC Product Type for Assembly Calculations}\label{field-nfrc-product-type-for-assembly-calculations}
 
-The selection made for this field corresponds to NFRC 100 ``Procedure for Determining Fenestration Product U-factors'' product types which are used when computing the overall u-factor, SHGC, and visual transmittance. The default is CurtainWall. The options are: CasementDouble, CasementSingle, DualAction, Fixed, Garage, Greenhouse, HingedEscape, HorizontalSlider, Jal, Pivoted, Projecting, DoorSidelite, Skylight, SlidingPatioDoor, CurtainWall, SpandrelPanel, SideHingedDoor, DoorTransom, TropicalAwning, TubularDaylightingDevice, and VerticalSlider. The sizes used in the calculation of the overall u-factor, overall SHGC, and overall VT are based on NFRC 100 Table 4-3 (see Figure~\ref{fig:nfrc100-product-types} ). 
+The selection made for this field corresponds to NFRC 100 ``Procedure for Determining Fenestration Product U-factors'' product types which are used when computing the overall u-factor, SHGC, and visual transmittance. The default is CurtainWall. The options are: CasementDouble, CasementSingle, DualAction, Fixed, Garage, Greenhouse, HingedEscape, HorizontalSlider, Jal, Pivoted, Projecting, DoorSidelite, Skylight, SlidingPatioDoor, CurtainWall, SpandrelPanel, SideHingedDoor, DoorTransom, TropicalAwning, TubularDaylightingDevice, and VerticalSlider. The sizes used in the calculation of the overall u-factor, overall SHGC, and overall VT are based on NFRC 100 Table 4-3 (see Figure~\ref{fig:nfrc100-product-types} ).
 
 
 \begin{figure}[hbtp] % fig 38

@@ -53,8 +53,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from pyenergyplus.plugin import EnergyPlusPlugin
 import math
+
+from pyenergyplus.plugin import EnergyPlusPlugin
 
 
 class Set_Shade_Control_State(EnergyPlusPlugin):
@@ -81,42 +82,35 @@ class Set_Shade_Control_State(EnergyPlusPlugin):
             # get handles if needed
             if self.need_to_get_handles:
                 self.Solar_Beam_Incident_Cos_handle = self.api.exchange.get_variable_handle(
-                    state,
-                    "Surface Outside Face Beam Solar Incident Angle Cosine Value",
-                    "Zn001:Wall001:Win001"
+                    state, "Surface Outside Face Beam Solar Incident Angle Cosine Value", "Zn001:Wall001:Win001"
                 )
 
                 self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle = self.api.exchange.get_actuator_handle(
-                    state,
-                    "Window Shading Control",
-                    "Control Status",
-                    "Zn001:Wall001:Win001"
+                    state, "Window Shading Control", "Control Status", "Zn001:Wall001:Win001"
                 )
 
                 self.Zn001_Wall001_Win001_Shading_Deploy_Status_output_handle = self.api.exchange.get_global_handle(
-                    state,
-                    "Zn001_Wall001_Win001_Shading_Deploy_Status")
-
-                self.Zone_Sensible_Cool_Rate_handle = self.api.exchange.get_variable_handle(
-                    state,
-                    "Zone Air System Sensible Cooling Rate",
-                    "WEST ZONE"
+                    state, "Zn001_Wall001_Win001_Shading_Deploy_Status"
                 )
 
-                self.Shade_Status_Off_handle = self.api.exchange.get_global_handle(
-                    state,
-                    "Shade_Status_Off")
+                self.Zone_Sensible_Cool_Rate_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Air System Sensible Cooling Rate", "WEST ZONE"
+                )
+
+                self.Shade_Status_Off_handle = self.api.exchange.get_global_handle(state, "Shade_Status_Off")
 
                 self.Shade_Status_Interior_Blind_On_handle = self.api.exchange.get_global_handle(
-                    state,
-                    "Shade_Status_Interior_Blind_On")
+                    state, "Shade_Status_Interior_Blind_On"
+                )
 
                 self.IncidentAngle_handle = self.api.exchange.get_global_handle(state, "IncidentAngle")
 
                 self.need_to_get_handles = False
 
             # calculations
-            Solar_Beam_Incident_Cos_handle = self.api.exchange.get_variable_value(state, self.Solar_Beam_Incident_Cos_handle)
+            Solar_Beam_Incident_Cos_handle = self.api.exchange.get_variable_value(
+                state, self.Solar_Beam_Incident_Cos_handle
+            )
             IncidentAngleRad = math.acos(Solar_Beam_Incident_Cos_handle)
             IncidentAngle = self.rad_to_deg(IncidentAngleRad)
             self.api.exchange.set_global_value(state, self.IncidentAngle_handle, IncidentAngle)
@@ -124,23 +118,32 @@ class Set_Shade_Control_State(EnergyPlusPlugin):
             Zone_Sensible_Cool_Rate = self.api.exchange.get_variable_value(state, self.Zone_Sensible_Cool_Rate_handle)
             shade_status_off = self.api.exchange.get_global_value(state, self.Shade_Status_Off_handle)
             shade_status_interior_blind_on = self.api.exchange.get_global_value(
-                state, self.Shade_Status_Interior_Blind_On_handle)
+                state, self.Shade_Status_Interior_Blind_On_handle
+            )
 
             if IncidentAngle < 45.0:
-                self.api.exchange.set_actuator_value(state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle,
-                                                     shade_status_interior_blind_on)
+                self.api.exchange.set_actuator_value(
+                    state,
+                    self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle,
+                    shade_status_interior_blind_on,
+                )
                 shade_status_rpt = shade_status_interior_blind_on
             elif Zone_Sensible_Cool_Rate > 20.0:
-                self.api.exchange.set_actuator_value(state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle,
-                                                     shade_status_interior_blind_on)
+                self.api.exchange.set_actuator_value(
+                    state,
+                    self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle,
+                    shade_status_interior_blind_on,
+                )
                 shade_status_rpt = shade_status_interior_blind_on
             else:
-                self.api.exchange.set_actuator_value(state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle,
-                                                     shade_status_off)
+                self.api.exchange.set_actuator_value(
+                    state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_actuator_handle, shade_status_off
+                )
                 shade_status_rpt = shade_status_off
 
-            self.api.exchange.set_global_value(state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_output_handle,
-                                               shade_status_rpt)
+            self.api.exchange.set_global_value(
+                state, self.Zn001_Wall001_Win001_Shading_Deploy_Status_output_handle, shade_status_rpt
+            )
             return 0
         else:
             return 0
@@ -177,7 +180,8 @@ class InitializeShadeControlFlags(EnergyPlusPlugin):
             if self.need_to_get_handles:
                 self.Shade_Status_Off_handle = self.api.exchange.get_global_handle(state, "Shade_Status_Off")
                 self.Shade_Status_Interior_Blind_On_handle = self.api.exchange.get_global_handle(
-                    state, "Shade_Status_Interior_Blind_On")
+                    state, "Shade_Status_Interior_Blind_On"
+                )
                 self.need_to_get_handles = False
             self.api.exchange.set_global_value(state, self.Shade_Status_Off_handle, 0.0)
             self.api.exchange.set_global_value(state, self.Shade_Status_Interior_Blind_On_handle, 6.0)
@@ -195,25 +199,49 @@ class ConstantVolumePurchasedAirExample(EnergyPlusPlugin):
 
     def get_handles(self, state):
         # global zone state variable handles
-        self.zn_1_state_hndl = self.api.exchange.get_global_handle(state, 'zn_1_state')
-        self.zn_2_state_hndl = self.api.exchange.get_global_handle(state, 'zn_2_state')
-        self.zn_3_state_hndl = self.api.exchange.get_global_handle(state, 'zn_3_state')
+        self.zn_1_state_hndl = self.api.exchange.get_global_handle(state, "zn_1_state")
+        self.zn_2_state_hndl = self.api.exchange.get_global_handle(state, "zn_2_state")
+        self.zn_3_state_hndl = self.api.exchange.get_global_handle(state, "zn_3_state")
         # zone sensible load "sensor" handles
-        self.zn_1_sen_load_hndl = self.api.exchange.get_variable_handle(state, 'Zone Predicted Sensible Load to Setpoint Heat Transfer Rate', 'West Zone')
-        self.zn_2_sen_load_hndl = self.api.exchange.get_variable_handle(state, 'Zone Predicted Sensible Load to Setpoint Heat Transfer Rate', 'EAST ZONE')
-        self.zn_3_sen_load_hndl = self.api.exchange.get_variable_handle(state, 'Zone Predicted Sensible Load to Setpoint Heat Transfer Rate', 'NORTH ZONE')
+        self.zn_1_sen_load_hndl = self.api.exchange.get_variable_handle(
+            state, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate", "West Zone"
+        )
+        self.zn_2_sen_load_hndl = self.api.exchange.get_variable_handle(
+            state, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate", "EAST ZONE"
+        )
+        self.zn_3_sen_load_hndl = self.api.exchange.get_variable_handle(
+            state, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate", "NORTH ZONE"
+        )
         # mass flow rate actuators handles
-        self.zn_1_air_mdot_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Mass Flow Rate', 'ZONE1AIR')
-        self.zn_2_air_mdot_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Mass Flow Rate', 'ZONE2AIR')
-        self.zn_3_air_mdot_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Mass Flow Rate', 'ZONE3AIR')
+        self.zn_1_air_mdot_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Mass Flow Rate", "ZONE1AIR"
+        )
+        self.zn_2_air_mdot_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Mass Flow Rate", "ZONE2AIR"
+        )
+        self.zn_3_air_mdot_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Mass Flow Rate", "ZONE3AIR"
+        )
         # temperature actuators handles
-        self.zn_1_air_tsup_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Temperature', 'ZONE1AIR')
-        self.zn_2_air_tsup_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Temperature', 'ZONE2AIR')
-        self.zn_3_air_tsup_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Temperature', 'ZONE3AIR')
+        self.zn_1_air_tsup_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Temperature", "ZONE1AIR"
+        )
+        self.zn_2_air_tsup_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Temperature", "ZONE2AIR"
+        )
+        self.zn_3_air_tsup_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Temperature", "ZONE3AIR"
+        )
         # humidity ratio actuators handles
-        self.zn_1_air_hmrt_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Humidity Ratio', 'ZONE1AIR')
-        self.zn_2_air_hmrt_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Humidity Ratio', 'ZONE2AIR')
-        self.zn_3_air_hmrt_hndl = self.api.exchange.get_actuator_handle(state, 'Ideal Loads Air System', 'Air Humidity Ratio', 'ZONE3AIR')
+        self.zn_1_air_hmrt_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Humidity Ratio", "ZONE1AIR"
+        )
+        self.zn_2_air_hmrt_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Humidity Ratio", "ZONE2AIR"
+        )
+        self.zn_3_air_hmrt_hndl = self.api.exchange.get_actuator_handle(
+            state, "Ideal Loads Air System", "Air Humidity Ratio", "ZONE3AIR"
+        )
 
     # state representation:  0 is off, 1 is heating, 2 is cooling
     def determine_purch_air_state(self, state):

@@ -58,24 +58,24 @@ Cross-platform setup.py for building the EnergyPlus Python module.
 Bare-bones library, no pre- or post-processing tools.
 """
 
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext
-from shutil import rmtree, copy
-from platform import machine, system
 from os import cpu_count
 from pathlib import Path
-from subprocess import check_call, CalledProcessError
+from platform import machine, system
 from re import findall
+from shutil import copy, rmtree
+from subprocess import CalledProcessError, check_call
 
+from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext
 from wheel.bdist_wheel import bdist_wheel
 
 
 def get_ep_version_string(repository_root_dir: Path) -> str:
-    version_info_file = repository_root_dir / 'cmake' / 'Version.cmake'
+    version_info_file = repository_root_dir / "cmake" / "Version.cmake"
     version_contents = version_info_file.read_text()
-    version_major = findall(r'CMAKE_VERSION_MAJOR (\d+)', version_contents)[0]
-    version_minor = findall(r'CMAKE_VERSION_MINOR (\d+)', version_contents)[0]
-    version_patch = findall(r'CMAKE_VERSION_PATCH (\d+)', version_contents)[0]
+    version_major = findall(r"CMAKE_VERSION_MAJOR (\d+)", version_contents)[0]
+    version_minor = findall(r"CMAKE_VERSION_MINOR (\d+)", version_contents)[0]
+    version_patch = findall(r"CMAKE_VERSION_PATCH (\d+)", version_contents)[0]
     build_increment = 1
     return f"{version_major}.{version_minor}.{version_patch}.{build_increment}"  # TODO: Determine good numbering
 
@@ -135,7 +135,7 @@ class EnergyPlusBuild(build_ext):
         current_config = get_current_wheel_details()
         cmake_cmd = ["cmake", "-G", current_config["build_tool"]]
         if "arch" in current_config:
-            cmake_cmd += ["-A", current_config['arch']]
+            cmake_cmd += ["-A", current_config["arch"]]
         cmake_cmd.append("-DBUILD_FORTRAN=OFF")
         if system() != "Windows":
             cmake_cmd.append("-DCMAKE_BUILD_TYPE=Release")
@@ -148,21 +148,21 @@ class EnergyPlusBuild(build_ext):
         if system() == "Windows":  # VS builds require specifying the build config
             cmake_build_cmd.extend(["--config", "Release"])
         else:  # MSBuild doesn't like the -j passed in, so only do this on Non-Windows
-            cmake_build_cmd.extend(['--', '-j', f"{cpu_count() - 1}"])
+            cmake_build_cmd.extend(["--", "-j", f"{cpu_count() - 1}"])
         return cmake_build_cmd
 
     @staticmethod
     def fixup_copied_python_file(python_file: Path):
         t = python_file.read_text()
-        t = t.replace('from pyenergyplus.', 'from energyplus.')
+        t = t.replace("from pyenergyplus.", "from energyplus.")
         t = t.replace(
-            'api_dll_dir = os.path.dirname(os.path.normpath(this_script_dir))',
-            'api_dll_dir = os.path.normpath(this_script_dir)'
+            "api_dll_dir = os.path.dirname(os.path.normpath(this_script_dir))",
+            "api_dll_dir = os.path.normpath(this_script_dir)",
         )
         python_file.write_text(t)
 
     def run(self):
-        self.build_lib = 'build/energyplus'  # I feel like this variable has meaning on this class, so leaving it
+        self.build_lib = "build/energyplus"  # I feel like this variable has meaning on this class, so leaving it
 
         try:
             cmake_cmd = self.cmake_configure_command()
@@ -176,9 +176,7 @@ class EnergyPlusBuild(build_ext):
             cmake_build_cmd = self.cmake_build_command()
             check_call(cmake_build_cmd, cwd=build_root_directory)
         except CalledProcessError as cpe:
-            raise Exception(
-                f"CMake failed to build EnergyPlus, check error logs, raw error message: {cpe}"
-            ) from None
+            raise Exception(f"CMake failed to build EnergyPlus, check error logs, raw error message: {cpe}") from None
 
         # while EnergyPlus is built in the repo/build-wheel folder, set up the path to the actual wheel build
         # this will be in repo/build-wheel/build/energyplus to avoid conflicting with dev's normal repo/build folders
@@ -190,9 +188,9 @@ class EnergyPlusBuild(build_ext):
         wheel_build_directory.mkdir(parents=True)
 
         # Copy the shared library files and Python API files to the output directory
-        products_dir = build_root_directory / 'Products'
+        products_dir = build_root_directory / "Products"
         if system() == "Windows":
-            products_dir /= 'Release'
+            products_dir /= "Release"
         built_shared_libraries = products_dir.glob(f"*.{get_current_wheel_details()['extension']}*")
         for lib in built_shared_libraries:
             copy(lib, wheel_build_directory)
@@ -210,7 +208,7 @@ class EnergyPlusBuild(build_ext):
 
 # find the repository root early, and set up a new build-directory called build-wheel where all build ops will occur
 repo_root_directory = Path(__file__).resolve().parent
-build_root_directory = repo_root_directory / 'build-wheel'
+build_root_directory = repo_root_directory / "build-wheel"
 build_root_directory.mkdir(exist_ok=True)
 
 setup(
@@ -223,14 +221,12 @@ setup(
     url="https://github.com/NREL/EnergyPlus",
     description="EnergyPlus is a building simulation program for modeling energy and water use in buildings.",
     long_description=(repo_root_directory / "README.md").read_text(),
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     ext_modules=[Extension("energyplus", sources=[])],
     cmdclass={
         "build_ext": EnergyPlusBuild,
         "bdist_wheel": PyenergyplusBDistWheel,
     },
-    options={
-        'bdist_wheel': {'bdist_dir': str(build_root_directory / 'build')}
-    },
-    build_base='.'
+    options={"bdist_wheel": {"bdist_dir": str(build_root_directory / "build")}},
+    build_base=".",
 )

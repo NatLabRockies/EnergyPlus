@@ -5,7 +5,7 @@ TITLE OF FEATURE
 
  - Original Date
  - Revision Date
- 
+
 
 ## Justification for New Feature ##
 
@@ -50,6 +50,3 @@ insert text
 ## References ##
 
 insert text
-
-
-

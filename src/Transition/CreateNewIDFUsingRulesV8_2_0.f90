@@ -357,7 +357,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ! conditionally apply field 11 (A10)
                 if (SameString(InArgs(8), "ONOFF")) then
                   OutArgs(11)="No"
-                elseif (SameString(InArgs(8), "CONTINUOUS")) then 
+                elseif (SameString(InArgs(8), "CONTINUOUS")) then
                   OutArgs(11)="Yes"
                 else
                   CALL ShowWarningError("Invalid fan control type in original v8.1 idf...expected onoff or continuous...assuming onoff")
@@ -366,7 +366,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ! the net effect here is the addition of 1 field
                 OutArgs(12:15)=InArgs(11:14)
                 CurArgs = CurArgs + 1
-      
+
               CASE('PLANTLOOP', 'CONDENSERLOOP')
                 nodiff=.false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -449,8 +449,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ! although there are new fields added to the end, they dont need to be filled out, so dont worry about them
                 !OutArgs(29:36) = ""
                 !CurArgs = CurArgs + 8
-                
-              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:WATER') 
+
+              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:WATER')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-6
@@ -460,9 +460,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(8) = InArgs(7)
                 OutArgs(9:10) = ""
                 OutArgs(11:214) = InArgs(8:211)
-                CurArgs = CurArgs + 3                
-                
-              CASE('ZONEHVAC:HIGHTEMPERATURERADIANT') 
+                CurArgs = CurArgs + 3
+
+              CASE('ZONEHVAC:HIGHTEMPERATURERADIANT')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-3
@@ -472,9 +472,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(5) = InArgs(4)
                 OutArgs(6:7) = ""
                 OutArgs(8:216) = InArgs(5:213)
-                CurArgs = CurArgs + 3         
-                
-              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:STEAM') 
+                CurArgs = CurArgs + 3
+
+              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:STEAM')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-4
@@ -484,9 +484,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(6) = 'Autosize'
                 OutArgs(7:8) = ''
                 OutArgs(9:213) = InArgs(5:209)
-                CurArgs = CurArgs + 4      
-                
-              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:ELECTRIC') 
+                CurArgs = CurArgs + 4
+
+              CASE('ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:ELECTRIC')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-6
@@ -496,9 +496,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(4) = InArgs(3)
                 OutArgs(5:6) = ""
                 OutArgs(7:209) = InArgs(4:206)
-                CurArgs = CurArgs + 3                
-                
-              CASE('ZONEHVAC:BASEBOARD:CONVECTIVE:WATER') 
+                CurArgs = CurArgs + 3
+
+              CASE('ZONEHVAC:BASEBOARD:CONVECTIVE:WATER')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-4
@@ -508,9 +508,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(6) = 'Autosize'
                 OutArgs(7:8) = ''
                 OutArgs(9:11) = InArgs(5:7)
-                CurArgs = CurArgs + 4         
-                
-              CASE('ZONEHVAC:BASEBOARD:CONVECTIVE:ELECTRIC') 
+                CurArgs = CurArgs + 4
+
+              CASE('ZONEHVAC:BASEBOARD:CONVECTIVE:ELECTRIC')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-2
@@ -520,9 +520,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(4) = InArgs(3)
                 OutArgs(5:6) = ""
                 OutArgs(7) = InArgs(4)
-                CurArgs = CurArgs + 3            
-                
-              CASE('ZONEHVAC:LOWTEMPERATURERADIANT:VARIABLEFLOW') 
+                CurArgs = CurArgs + 3
+
+              CASE('ZONEHVAC:LOWTEMPERATURERADIANT:VARIABLEFLOW')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-7
@@ -540,8 +540,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(19:20) = ''
                 CurArgs = CurArgs + 4
                 OutArgs(21:29) = InArgs(13:21)
-                
-              CASE('ZONEHVAC:LOWTEMPERATURERADIANT:ELECTRIC') 
+
+              CASE('ZONEHVAC:LOWTEMPERATURERADIANT:ELECTRIC')
                 nodiff = .false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! nothing for fields 1-4
@@ -551,8 +551,8 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(6) = InArgs(5)
                 OutArgs(7:8) = ""
                 OutArgs(9:11) = InArgs(6:8)
-                CurArgs = CurArgs + 3     
-                                
+                CurArgs = CurArgs + 3
+
     !!!   Changes for report variables, meters, tables -- update names
 
               CASE('OUTPUT:VARIABLE')

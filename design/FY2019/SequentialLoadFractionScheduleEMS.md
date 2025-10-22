@@ -1,4 +1,4 @@
-Zone Equipment List Sequential Load Fraction Scheduling or Actuators 
+Zone Equipment List Sequential Load Fraction Scheduling or Actuators
 ====================================================================
 
 **Noel Merket, NREL**
@@ -11,11 +11,11 @@ Zone Equipment List Sequential Load Fraction Scheduling or Actuators
 
 -- Noel Merket, during the discussions about adding load fractions to `ZoneHVAC:EquipmentList`
 
-Well, it turns out there are some cases where it would be convenient to have the load fraction be available to be actuated via EMS. Specifically, in retrofit scenarios a mini split can be added to a building with a furnace or boiler is already sized to meet the whole load. The capacity of the mini split varies with outdoor temperature and it would be useful to be able to actuate the fraction to reflect that. 
+Well, it turns out there are some cases where it would be convenient to have the load fraction be available to be actuated via EMS. Specifically, in retrofit scenarios a mini split can be added to a building with a furnace or boiler is already sized to meet the whole load. The capacity of the mini split varies with outdoor temperature and it would be useful to be able to actuate the fraction to reflect that.
 
 ## E-mail and  Conference Call Conclusions ##
 
-Based on the feedback received on the proposal, I am inclined to go with Option A, changing the fraction to a schedule. It allows for the most user flexibility. 
+Based on the feedback received on the proposal, I am inclined to go with Option A, changing the fraction to a schedule. It allows for the most user flexibility.
 
 ### Feedback on Proposal
 
@@ -41,11 +41,11 @@ I added sequential load fractions in the 9.1 release to capture situations where
 
 ## Approach ##
 
-There are a couple ways to do this, each with some benefits and drawbacks. 
+There are a couple ways to do this, each with some benefits and drawbacks.
 
 ### Option A: Change the single fractional input to a schedule
 
-This would change the following 
+This would change the following
 
 ```
   N4 , \field Zone Equipment 1 Sequential Heating Fraction
@@ -57,7 +57,7 @@ This would change the following
        \default 1.0
 ```
 
-to something like 
+to something like
 
 ```
   N4 , \field Zone Equipment 1 Sequential Heating Fraction Schedule Name
@@ -95,8 +95,8 @@ In this case we would have both the numerical fraction and a schedule input for 
 
 #### Cons
 
-- It's kind of an icky pattern to start using. I don't think this is being doing anywhere else in EnergyPlus. 
-- It could be confusing which inputs need to be provided for an already confusing input. 
+- It's kind of an icky pattern to start using. I don't think this is being doing anywhere else in EnergyPlus.
+- It could be confusing which inputs need to be provided for an already confusing input.
 
 ### Option C: Add an EMS actuator for sequential load fraction
 
@@ -133,4 +133,3 @@ TBD
 ## Example File and Transition Changes ##
 
 TBD
-

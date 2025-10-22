@@ -3842,7 +3842,7 @@ ZoneAirHeatBalanceAlgorithm,
 
   Output:Variable,*,Zone Air Humidity Ratio,hourly; !- HVAC Average []
   Output:Variable,*,Zone Air Relative Humidity,hourly; !- HVAC Average [%]
-  
+
   Output:Variable,*,Space Air Humidity Ratio,hourly; !- HVAC Average []
   Output:Variable,*,Space Air Relative Humidity,hourly; !- HVAC Average [%]
 

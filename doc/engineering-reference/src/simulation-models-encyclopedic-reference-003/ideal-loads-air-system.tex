@@ -58,14 +58,14 @@ The user specifies some or all of the following data for each ZoneHVAC:IdealLoad
   \item Set the unit on/off flag \emph{UnitOn}. The unit is off (\emph{UnitOn} = \emph{False}) if the unit availability schedule value is \(\leq\) 0; otherwise the unit is on (\emph{UnitOn} = \emph{True}). If the unit is on, the calculation proceeds through the remaining steps. If the unit is off, the zone inlet node conditions are set to the zone node condition, the inlet node mass flow rate is set to zero, and the unit outputs are set to zero.
   \item Calculate the minimum outdoor air mass flow rate based on the specifications in the DesignSpecification:OutdoorAir object, if specified.
   \item Calculate the sensible and latent impact of the outdoor air flow relative to the zone conditions
-  \item Determine if the unit needs to heat or cool 
+  \item Determine if the unit needs to heat or cool
     \begin{itemize}
       \item If outdoor air sensible impact is \(\geq\) load to zone cooling setpoint and the current thermostat type is not SingleHeatingSetPoint, then unit is in cooling mode
       \item If outdoor air sensible impact is \textless{} load to zone heating setpoint then unit is in heating mode
-      \item Else if neither condition is true, then unit is in deadband mode (provides outdoor air but shuts off economizer and heat recovery and all humidity control options except \emph{Humidistat} option) 
+      \item Else if neither condition is true, then unit is in deadband mode (provides outdoor air but shuts off economizer and heat recovery and all humidity control options except \emph{Humidistat} option)
     \end{itemize}
   \item If in cooling mode, simulate outdoor air economizer and adjust outdoor air mass flow rate
-  \item Calculate supply air mass flow rate 
+  \item Calculate supply air mass flow rate
 
     \begin{itemize}
       \item If outdoor air flow rate exceeds applicable maximum flow rate (heating or cooling) then reduce outdoor air mass flow rate, issue warning, and set supply air mass flow rate equal to outdoor air mass flow rate
@@ -144,7 +144,7 @@ The user specifies some or all of the following data for each ZoneHVAC:IdealLoad
     \end{equation}
 
     where,
- 
+
     \begin{itemize}
       \item \( E_{\text{heat}} \) = total heating fuel energy consumption rate (W)
       \item \( E_{\text{cool}} \) = total cooling fuel energy consumption rate (W)

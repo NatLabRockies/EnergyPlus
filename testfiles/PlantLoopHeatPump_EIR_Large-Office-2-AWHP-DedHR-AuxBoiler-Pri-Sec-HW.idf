@@ -1,6 +1,6 @@
 ! PlantLoopHeatPump_EIR_Large-Office-2-AWHP-DedHR-AuxBoiler-Pri-Sec-HW
 !
-! Test file for new plant supervisory control,  
+! Test file for new plant supervisory control,
 !
 ! Large office, new construction 90.1-2004
 ! ASHRAE Standards 90.1-2004 and 62-1999
@@ -4431,12 +4431,12 @@ Fan:SystemModel,
   TotalEfficiencyAndPressure, !- Design Power Sizing Method
   , !- Electric Power Per Unit Flow Rate
   , !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.6045,  !- Fan Total Efficiency 
+  0.6045,  !- Fan Total Efficiency
   VAV Fan Curve, !- Electric Power Function of Flow Fraction Curve Name
   , !- Night Ventilation Mode Pressure Rise
   , !- Night Ventilation Mode Flow Fraction
   , !- Motor Loss Zone Name
-  , !- Motor Loss Radiative Fraction 
+  , !- Motor Loss Radiative Fraction
   Fan Energy; !- End-Use Subcategory
 
 Curve:Quartic,
@@ -4469,12 +4469,12 @@ Fan:SystemModel,
   TotalEfficiencyAndPressure, !- Design Power Sizing Method
   , !- Electric Power Per Unit Flow Rate
   , !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.6175,  !- Fan Total Efficiency 
+  0.6175,  !- Fan Total Efficiency
   VAV Fan Curve, !- Electric Power Function of Flow Fraction Curve Name
   , !- Night Ventilation Mode Pressure Rise
   , !- Night Ventilation Mode Flow Fraction
   , !- Motor Loss Zone Name
-  , !- Motor Loss Radiative Fraction 
+  , !- Motor Loss Radiative Fraction
   Fan Energy; !- End-Use Subcategory
 
 Fan:SystemModel,
@@ -4492,12 +4492,12 @@ Fan:SystemModel,
   TotalEfficiencyAndPressure, !- Design Power Sizing Method
   , !- Electric Power Per Unit Flow Rate
   , !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.6045,  !- Fan Total Efficiency 
+  0.6045,  !- Fan Total Efficiency
   VAV Fan Curve, !- Electric Power Function of Flow Fraction Curve Name
   , !- Night Ventilation Mode Pressure Rise
   , !- Night Ventilation Mode Flow Fraction
   , !- Motor Loss Zone Name
-  , !- Motor Loss Radiative Fraction 
+  , !- Motor Loss Radiative Fraction
   Fan Energy; !- End-Use Subcategory
 
 Fan:SystemModel,
@@ -4515,12 +4515,12 @@ Fan:SystemModel,
   TotalEfficiencyAndPressure, !- Design Power Sizing Method
   , !- Electric Power Per Unit Flow Rate
   , !- Electric Power Per Unit Flow Rate Per Unit Pressure
-   0.5915,  !- Fan Total Efficiency 
+   0.5915,  !- Fan Total Efficiency
   VAV Fan Curve, !- Electric Power Function of Flow Fraction Curve Name
   , !- Night Ventilation Mode Pressure Rise
   , !- Night Ventilation Mode Flow Fraction
   , !- Motor Loss Zone Name
-  , !- Motor Loss Radiative Fraction 
+  , !- Motor Loss Radiative Fraction
   Fan Energy; !- End-Use Subcategory
 
   Coil:Heating:Water,
@@ -6189,7 +6189,7 @@ Fan:SystemModel,
     ,                        !- Supplemental Heating Coil Name
     SupplyAirFlowRate,       !- Cooling Supply Air Flow Rate Method
     autosize;                !- Cooling Supply Air Flow Rate
-    
+
 
   Coil:Cooling:Water,
     Perimeter_top_ZN_1 Cooling Coil, !- Name
@@ -6319,7 +6319,7 @@ Fan:SystemModel,
     ,                        !- Supplemental Heating Coil Name
     SupplyAirFlowRate,       !- Cooling Supply Air Flow Rate Method
     autosize;                !- Cooling Supply Air Flow Rate
-    
+
 
   Coil:Cooling:Water,
     Perimeter_top_ZN_2 Cooling Coil, !- Name
@@ -6356,7 +6356,7 @@ Fan:SystemModel,
     0.7;                     !- Fan Total Efficiency
 
   Fan:SystemModel,
-    Perimeter_top_ZN_2 PIUHEATING Fan,        !- Name  
+    Perimeter_top_ZN_2 PIUHEATING Fan,        !- Name
     HVACOperationSchd,    !- Availability Schedule Name
     Perimeter_top_ZN_2 PIUHEATING Fan Inlet Node,  !- Air Inlet Node Name
     Perimeter_top_ZN_2 PIUHEATING Reheat Coil Air In Node,  !- Air Outlet Node Name
@@ -6443,7 +6443,7 @@ Fan:SystemModel,
     ,                        !- Supplemental Heating Coil Name
     SupplyAirFlowRate,       !- Cooling Supply Air Flow Rate Method
     autosize;                !- Cooling Supply Air Flow Rate
-    
+
 
   Coil:Cooling:Water,
     Perimeter_top_ZN_3 Cooling Coil,     !- Name
@@ -7527,7 +7527,7 @@ Fan:SystemModel,
     Perimeter_bot_ZN_1,
     Min Rel Hum Set Sched,
     Max Rel Hum Set Sched;
-    
+
   ZoneControl:Thermostat,
     Perimeter_bot_ZN_2 Thermostat,  !- Name
     Perimeter_bot_ZN_2,      !- Zone or ZoneList Name
@@ -7540,14 +7540,14 @@ Fan:SystemModel,
     Perimeter_bot_ZN_2,
     Min Rel Hum Set Sched,
     Max Rel Hum Set Sched;
-    
+
   ZoneControl:Thermostat,
     Perimeter_bot_ZN_3 Thermostat,  !- Name
     Perimeter_bot_ZN_3,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_bot_ZN_3 DualSPSched;  !- Control 1 Name
-    
+
   ZoneControl:Humidistat,
     Perimeter_bot_ZN_3 Humidistat,
     Perimeter_bot_ZN_3,
@@ -7566,7 +7566,7 @@ Fan:SystemModel,
     Perimeter_bot_ZN_4,
     Min Rel Hum Set Sched,
     Max Rel Hum Set Sched;
-    
+
   ZoneControl:Thermostat,
     Perimeter_mid_ZN_1 Thermostat,  !- Name
     Perimeter_mid_ZN_1,      !- Zone or ZoneList Name
@@ -7605,7 +7605,7 @@ Fan:SystemModel,
     Perimeter_mid_ZN_3,
     Min Rel Hum Set Sched,
     Max Rel Hum Set Sched;
-    
+
   ZoneControl:Thermostat,
     Perimeter_mid_ZN_4 Thermostat,  !- Name
     Perimeter_mid_ZN_4,      !- Zone or ZoneList Name
@@ -8656,7 +8656,7 @@ Fan:SystemModel,
    Perimeter_mid_ZN_2 PIUHEATING Secondary Inlet Node,
    Perimeter_mid_ZN_1 PIUHEATING Secondary Inlet Node,
    Perimeter_mid_ZN_4 PIUHEATING Secondary Inlet Node;
-   
+
   AirLoopHVAC:ReturnPlenum,
     VAV_1 Return Plenum,     !- Name
     GroundFloor_Plenum,      !- Zone Name
@@ -9118,7 +9118,7 @@ Fan:SystemModel,
     Secondary Heating Demand Load Branch 19,  !- Branch 20 Name
     Secondary Heating Demand Load Branch 20,  !- Branch 21 Name
     Secondary Heating Demand Bypass Branch;  !- Branch 22 Name
-    
+
 
   Connector:Mixer,
     Secondary HW Demand Mixer,  !- Name
@@ -9182,7 +9182,7 @@ Fan:SystemModel,
   BranchList,
     Secondary Heating Supply Side Branches,  !- Name
     Secondary HW Pump Branch,!- Branch 1 Name
-    Secondary HW HX Supply Branch,  !- Branch 2 Name   
+    Secondary HW HX Supply Branch,  !- Branch 2 Name
     Secondary Heating Supply Bypass Branch,  !- Branch 3 Name
     Secondary Heating Supply Outlet;  !- Branch 4 Name
 
@@ -9765,7 +9765,7 @@ Fan:SystemModel,
     HeatPump:PlantLoop:EIR:Cooling,
     Dedicated HR Cooling Side WSHP,            !- Name
     Cooling Side WSHP Load Side Inlet,  !- Load Side Inlet Node Name
-    Cooling Side WSHP Load Side Outlet,  !- Load Side Outlet Node Name   
+    Cooling Side WSHP Load Side Outlet,  !- Load Side Outlet Node Name
     Pump:VariableSpeed,      !- Component 1 Object Type
     Secondary CW Circ Pump,  !- Component 1 Name
     Cooling Side WSHP Load Side Outlet,  !- Component 1 Inlet Node Name
@@ -10066,7 +10066,7 @@ Fan:SystemModel,
     AWHP_1 Cooling Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Cooling Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_1 Heating Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
@@ -10084,7 +10084,7 @@ Fan:SystemModel,
   OutdoorAir:Node,
     AWHP_1 Cooling Side Condenser Air Inlet Node,
     -1;
-  
+
   HeatPump:PlantLoop:EIR:Cooling,
     AWHP_2 Cooling Side,            !- Name
     AWHP_2 Cooling Side Inlet Node,  !- Load Side Inlet Node Name
@@ -10093,7 +10093,7 @@ Fan:SystemModel,
     AWHP_2 Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_2 Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_2 Heating Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
@@ -10108,7 +10108,7 @@ Fan:SystemModel,
     VariableSpeedPumping,            !- Flow Mode
     0.2;                     !- Minimum Part Load Ratio
 
-!- ACX 140 Biquadratic cooling curves provided by Trane 
+!- ACX 140 Biquadratic cooling curves provided by Trane
 Curve:Biquadratic,
     CoolCapCurveFuncTemp,    !- Name
     1.06722728893252,        !- Coefficient1 Constant
@@ -10144,11 +10144,11 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
     AWHP_2 Condenser Air Inlet Node,
     -1;
-  
+
   HeatPump:PlantLoop:EIR:Heating,
     AWHP_1 Heating Side,            !- Name
     AWHP_1 Heating Side Inlet,  !- Load Side Inlet Node Name
@@ -10157,11 +10157,11 @@ Curve:Biquadratic,
     AWHP_1 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name   
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_1 Cooling Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
-    ,                           !- Heat Recovery Reference Flow Rate {m3/s} 
+    ,                           !- Heat Recovery Reference Flow Rate {m3/s}
     autosize,                   !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
     1.0,                        !- Sizing Factor
@@ -10222,11 +10222,11 @@ Curve:Biquadratic,
     AWHP_2 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_2 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name   
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_2 Cooling Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
-    ,                           !- Heat Recovery Reference Flow Rate {m3/s} 
+    ,                           !- Heat Recovery Reference Flow Rate {m3/s}
     autosize,                   !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
     1.0,                        !- Sizing Factor
@@ -10251,7 +10251,7 @@ Curve:Biquadratic,
     TimedDefrostHeatLoad,    !- Timed Demand Defrost Heat Load Penalty Curve Name
     TimedDefrostHeatEnergy;  !- Timed Demand Defrost Heat Input Energy Fraction Curve Name
 
-!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves  
+!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves
 Curve:Biquadratic,
     HeatCapCurveFuncTemp,    !- Name
     0.794900878202383,       !- Coefficient1 Constant
@@ -10287,7 +10287,7 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
     AWHP_2 Heating Side Condenser Air Inlet Node,
     -1;
@@ -10319,8 +10319,8 @@ Curve:Biquadratic,
     0.0,                     !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
- 
- 
+
+
    Curve:Quadratic,
      TimedDefrostHeatEnergy,  !- Name
      0.03423,                 !- Coefficient1 Constant
@@ -10328,7 +10328,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      TimedDefrostFrequency,   !- Name
      0.71582,                 !- Coefficient1 Constant
@@ -10336,7 +10336,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      TimedDefrostHeatLoad,    !- Name
      0.08286,                 !- Coefficient1 Constant
@@ -10344,7 +10344,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      HeatDryCoilFuncOAT,      !- Name
      0.9574744,               !- Coefficient1 Constant
@@ -10352,7 +10352,7 @@ Curve:Biquadratic,
      0.000055728,             !- Coefficient3 x**2
      -11.675,                 !- Minimum Value of x !- curve evaluates to ~1 here
      26.6666667;              !- Maximum Value of x !- curve evaluates to min value here, ~ 0.91728
- 
+
    Curve:Quadratic,
      HeatCapCurveFuncPLR,     !- Name
      0.0473,                  !- Coefficient1 Constant
@@ -10431,7 +10431,7 @@ Curve:Biquadratic,
   Connector:Splitter,
     CoolSys1 Supply Splitter,!- Name
     CoolSys1 Supply Inlet Branch,  !- Inlet Branch Name
-    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name  
+    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
     CoolSys1 Supply Equipment Branch 2;
 !    CoolSys1 Supply Equipment Bypass Branch;  !- Outlet Branch 3 Name
 
@@ -10451,7 +10451,7 @@ Curve:Biquadratic,
     HeatSys1 Supply Splitter,!- Name
     HeatSys1 Supply Inlet Branch,  !- Inlet Branch Name
     HeatSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
-    HeatSys1 Supply Equipment Branch 2;  !- Outlet Branch 1 Name    
+    HeatSys1 Supply Equipment Branch 2;  !- Outlet Branch 1 Name
 !    HeatSys1 Supply Equipment Bypass Branch;  !- Outlet Branch 2 Name
 
   Connector:Mixer,
@@ -10553,7 +10553,7 @@ Curve:Biquadratic,
     Heating Side WSHP Source Side Inlet,  !- Source Side Inlet Node Name
     Heating Side WSHP Source Side Oulet,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name   
+    ,                           !- Heat Recovery Outlet Node Name
     Dedicated HR Cooling Side WSHP,       !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
@@ -10627,7 +10627,7 @@ Curve:Biquadratic,
     Cooling Side WSHP Source Side Inlet,   !- Source Side Inlet Node Name
     Cooling Side WSHP Source Side Outlet,  !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name      
+    ,                        !- Heat Recovery Outlet Node Name
     Dedicated HR Heating Side WSHP,        !- Companion Heat Pump Name
     autosize,                !- Load Side Reference Flow Rate {m3/s}
     autosize,                !- Source Side Reference Flow Rate {m3/s}
@@ -11598,7 +11598,7 @@ Output:Variable,Cooling Side WSHP Load Side Outlet,System Node Mass Flow Rate,ti
     One AWHP Heating Operation Scheme,              !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
     Dedicated HR Cooling Side WSHP,                 !- Dedicated Chilled Water Return Recovery HeatPump Name
     Dedicated HR Heating Side WSHP;                 !- Dedicated Hot Water Return Recovery HeatPump Name
-    
+
   PlantEquipmentOperation:CoolingLoad,
     Two AWHP Cooling Operation Scheme,  !- Name
     0.0,                                         !- Load Range 1 Lower Limit {W}
@@ -11607,14 +11607,14 @@ Output:Variable,Cooling Side WSHP Load Side Outlet,System Node Mass Flow Rate,ti
     50000,                                       !- Load Range 2 Lower Limit {W}
     10000000000000,                              !- Load Range 2 Upper Limit {W}
     Two AWHP Cooling Equipment List;             !- Range 2 Equipment List Name
-  
+
 
   PlantEquipmentList,
     Two AWHP Cooling Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
     AWHP_1 Cooling Side,             !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 2 Object Type
-    AWHP_2 Cooling Side;             !- Equipment 2 Name  
+    AWHP_2 Cooling Side;             !- Equipment 2 Name
 
   PlantEquipmentOperation:HeatingLoad,
     Two AWHP Heating Operation Scheme,  !- Name
@@ -11624,13 +11624,13 @@ Output:Variable,Cooling Side WSHP Load Side Outlet,System Node Mass Flow Rate,ti
     100000,                                      !- Load Range 2 Lower Limit {W}
     10000000000000,                              !- Load Range 2 Upper Limit {W}
     Two AWHP Heating Equipment List;             !- Range 2 Equipment List Name
-    
+
   PlantEquipmentList,
     Two AWHP Heating Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
     AWHP_1 Heating Side,             !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
-    AWHP_2 Heating Side;             !- Equipment 2 Name    
+    AWHP_2 Heating Side;             !- Equipment 2 Name
 
 
   PlantEquipmentOperation:CoolingLoad,
@@ -11638,13 +11638,13 @@ Output:Variable,Cooling Side WSHP Load Side Outlet,System Node Mass Flow Rate,ti
     0.0,                                         !- Load Range 1 Lower Limit {W}
     10000000000000000,                           !- Load Range 1 Upper Limit {W}
     One AWHP Cooling Equipment List;             !- Range 1 Equipment List Name
-    
- 
+
+
   PlantEquipmentList,
     One AWHP Cooling Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
     AWHP_1 Cooling Side;             !- Equipment 1 Name
-    
+
   PlantEquipmentOperation:HeatingLoad,
     One AWHP Heating Operation Scheme,  !- Name
     0.0,                                !- Load Range 1 Lower Limit {W}
@@ -11656,7 +11656,7 @@ Output:Variable,Cooling Side WSHP Load Side Outlet,System Node Mass Flow Rate,ti
     One AWHP Heating Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
     AWHP_2 Heating Side;             !- Equipment 1 Name
-  
+
 
   ZoneList,
     All Conditioned Zones,

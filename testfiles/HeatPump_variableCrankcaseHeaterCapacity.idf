@@ -1166,7 +1166,7 @@
     0.0512,                  !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
-    
+
   Curve:Linear,
     heaterCapCurve,          !- Name
     0.571428571428572,       !- Coefficient1 Constant
@@ -1506,12 +1506,12 @@
     ,                        !- Supply Water Storage Tank Name
     ,                        !- Condensate Collection Water Storage Tank Name
     200,                     !- Basin Heater Capacity {W/K}
-    ,                     
-    ,                     
     ,
     ,
-    ,                     
-    ;                     
+    ,
+    ,
+    ,
+    ;
 
   Coil:Heating:DX:SingleSpeed,
     Heat Pump DX Heating Coil 1,  !- Name

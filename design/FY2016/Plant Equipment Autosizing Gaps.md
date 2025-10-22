@@ -6,52 +6,52 @@ Plant Equipment Autosizing Gaps
  - first draft 6/20/2016
  - second draft 7/5/2016, with changes from review.
  - third draft 7/11/2016, add new input field for turbine eff
- 
+
  ## Justification for New Feature ##
- 
+
  The ability to autosize input is a very powerful and important capability in EnergyPlus.  However there remain gaps where fields are not yet autosizable but they should be.  This contribution will fill some gaps by making it possible to autosize ten existing fields across four plant component models. Addressing gaps involving missing autosize capabilities has been a long-standing request by a major interface developer. Users and interface developers who apply EnergyPlus for design sizing and model diverse plant systems will benefit from the ability to autosize these fields.
- 
+
  ## E-mail and  Conference Call Conclusions ##
- 
- Discussed and approved during sizing subgroup conference call on 6-22-2016.  Use "Reference" instead of "Rated" to rename fields in heat pump objects.  
- 
+
+ Discussed and approved during sizing subgroup conference call on 6-22-2016.  Use "Reference" instead of "Rated" to rename fields in heat pump objects.
+
  ## Overview ##
- 
+
 This contribution will make it possible to autosize the following ten fields in four different objects:
 
-     Chiller:CombustionTurbine, 
+     Chiller:CombustionTurbine,
        N45, \field Design Heat Recovery Water Flow Rate  >> need autosizable
 
      Chiller:EngineDriven,
        N26, \field Design Heat Recovery Water Flow Rate  >> need autosizable
 
-     HeatPump:WaterToWater:EquationFit:Cooling and 
+     HeatPump:WaterToWater:EquationFit:Cooling and
      HeatPump:WaterToWater:EquationFit:Heating
        N1,  \field Rated Load Side Flow Rate  >> need autosizable
        N2,  \field Rated Source Side Flow Rate  >> need autosizable
        N3,  \field Rated Cooling Capacity  >> need autosizable
        N4,  \field Rated Cooling Power Consumption need autosizable
 
-The project will not modify the simulation models beyond sizing calculations.  It is expected that additional input fields will need to be added to provide data for sizing calculations and to provide control over scaling of the sizing results. 
+The project will not modify the simulation models beyond sizing calculations.  It is expected that additional input fields will need to be added to provide data for sizing calculations and to provide control over scaling of the sizing results.
 
 
 ## Approach ##
- 
-Calculations for the design heat recovery flow rate for the two chillers will be added to their respective sizing routines.  A new input field will be added to each to allow scaling the flow rate and capacity of heat recovery section relative to the condenser, as is already being done for other chillers.  
 
-The combustion turbine chiller will add a new field for turbine efficiency for scalable Gas Turbine Engine Capacity when autosizing. 
+Calculations for the design heat recovery flow rate for the two chillers will be added to their respective sizing routines.  A new input field will be added to each to allow scaling the flow rate and capacity of heat recovery section relative to the condenser, as is already being done for other chillers.
+
+The combustion turbine chiller will add a new field for turbine efficiency for scalable Gas Turbine Engine Capacity when autosizing.
 
 The equation fit water to water heat pumps will be modified to add a new sizing routine to calculate sizes for the four main design values, flow rates.  New input for a nominal COP will be added to scale design power from design capacity, because the models as formulated have no input for efficiency, effectiveness, COP, etc.  New Sizing factor fields will be added to scale each component as a fraction of the overall loop sizing result.
 
 The implementation will follow current code practice in the affected modules; no significant refactoring is planned.
 
 ## Testing/Validation/Data Sources ##
- 
+
 Autosize input will be compared to equivalent hard size input to verify.
- 
+
 ## Input Output Reference Documentation ##
- 
-Draft I/O ref changes have been made in the document source file called "group-plant-equipment.tex."  Those input fields with changes are excerpted below. 
+
+Draft I/O ref changes have been made in the document source file called "group-plant-equipment.tex."  Those input fields with changes are excerpted below.
 
 ###HeatPump:WaterToWater:EquationFit:Cooling
 
@@ -92,8 +92,8 @@ Source Side Flow Rate, Reference Cooling Capacity, and Reference Cooling Power C
 Sizing Factor allows the user to size a component to meet part of the plant loop’s design load while
 continuing to use the autosizing feature. For example if there are two heat pumps on the supply
 side, each one could be sized to be half of the design load.
- 
- 
+
+
 ###HeatPump:WaterToWater:EquationFit:Heating
 Changed and new input fields
 
@@ -155,7 +155,7 @@ capacity fraction is set to 1.0.
 
 ####1.22.10.1.71 Field: Turbine Engine Efficiency
 
-This optional field is the nominal turbine engine efficiency and is used when Gas Turbine Engine Capacity 
+This optional field is the nominal turbine engine efficiency and is used when Gas Turbine Engine Capacity
 is set to Autosize. Default of 0.35.
 
 
@@ -178,22 +178,22 @@ nominal COP to model a capacity limit for the heat rejection. If this field is n
 capacity fraction is set to 1.0.
 
 ## Input Description ##
- 
+
 see I/O ref.
- 
+
 ## Outputs Description ##
- 
-  No new output variables.  Some new Sizing Reports will be generated when the new autosizable capabilities are used. 
- 
+
+  No new output variables.  Some new Sizing Reports will be generated when the new autosizable capabilities are used.
+
 ## Engineering Reference ##
- 
-Sizing calculation documentation will be expanded to include these new autosize fields. 
- 
+
+Sizing calculation documentation will be expanded to include these new autosize fields.
+
 ## Example File and Transition Changes ##
- 
-Planning to change some existing field names to use the word "Reference" instead of "Rated" in the simple equation fit water to water heat pump models.  For the EnergyPlus team, these will just get picked up by the IDD change and not really require Transition coding.  
- 
- 
+
+Planning to change some existing field names to use the word "Reference" instead of "Rated" in the simple equation fit water to water heat pump models.  For the EnergyPlus team, these will just get picked up by the IDD change and not really require Transition coding.
+
+
 ## References ##
- 
+
 none

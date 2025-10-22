@@ -2,7 +2,7 @@
 !
 ! - testfile derived from FourPipeBeamLargeOffice.idf
 ! - Demonstrates supervisory control of air source heat pump plants serving chilled water and hot water plants
-! - 
+! -
 
 ! Large office, new construction 90.1-2004
 ! ASHRAE Standards 90.1-2004 and 62-1999
@@ -7698,7 +7698,7 @@
     ,                 !- Dedicated Chilled Water Return Recovery HeatPump Name
     ,                 !- Dedicated Hot Water Return Recovery HeatPump Name
     ;                                            !-  Dedicated Recovery Heat Pump Control Load Capacity Factor
-    
+
   PlantEquipmentOperation:CoolingLoad,
     Two AWHP Cooling Operation Scheme,  !- Name
     0.0,                                         !- Load Range 1 Lower Limit {W}
@@ -7707,14 +7707,14 @@
     50000,                                       !- Load Range 2 Lower Limit {W}
     10000000000000,                              !- Load Range 2 Upper Limit {W}
     Two AWHP Cooling Equipment List;             !- Range 2 Equipment List Name
-  
+
 
   PlantEquipmentList,
     Two AWHP Cooling Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
     AWHP_1 Cooling Side,             !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 2 Object Type
-    AWHP_2 Cooling Side;             !- Equipment 2 Name  
+    AWHP_2 Cooling Side;             !- Equipment 2 Name
 
   PlantEquipmentOperation:HeatingLoad,
     Two AWHP Heating Operation Scheme,  !- Name
@@ -7724,13 +7724,13 @@
     100000,                                      !- Load Range 2 Lower Limit {W}
     10000000000000,                              !- Load Range 2 Upper Limit {W}
     Two AWHP Heating Equipment List;             !- Range 2 Equipment List Name
-    
+
   PlantEquipmentList,
     Two AWHP Heating Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
     AWHP_1 Heating Side,             !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
-    AWHP_2 Heating Side;             !- Equipment 2 Name    
+    AWHP_2 Heating Side;             !- Equipment 2 Name
 
 
   PlantEquipmentOperation:CoolingLoad,
@@ -7738,13 +7738,13 @@
     0.0,                                         !- Load Range 1 Lower Limit {W}
     10000000000000000,                           !- Load Range 1 Upper Limit {W}
     One AWHP Cooling Equipment List;             !- Range 1 Equipment List Name
-    
- 
+
+
   PlantEquipmentList,
     One AWHP Cooling Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
     AWHP_1 Cooling Side;             !- Equipment 1 Name
-    
+
   PlantEquipmentOperation:HeatingLoad,
     One AWHP Heating Operation Scheme,  !- Name
     0.0,                                !- Load Range 1 Lower Limit {W}
@@ -7756,7 +7756,7 @@
     One AWHP Heating Equipment List, !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
     AWHP_2 Heating Side;             !- Equipment 1 Name
-  
+
 
   ZoneList,
     All Conditioned Zones,
@@ -8431,7 +8431,7 @@
     AWHP_1 Cooling Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Cooling Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                                !- Heat Recovery Inlet Node Name
-    ,                                !- Heat Recovery Outlet Node Name   
+    ,                                !- Heat Recovery Outlet Node Name
     AWHP_1 Heating Side,             !- Companion Heat Pump Name
     autosize,                        !- Load Side Reference Flow Rate {m3/s}
     autosize,                        !- Source Side Reference Flow Rate {m3/s}
@@ -8458,7 +8458,7 @@
   OutdoorAir:Node,
     AWHP_1 Cooling Side Condenser Air Inlet Node,
     -1;
-  
+
   HeatPump:PlantLoop:EIR:Cooling,
     AWHP_2 Cooling Side,              !- Name
     AWHP_2 Cooling Side Inlet Node,   !- Load Side Inlet Node Name
@@ -8500,7 +8500,7 @@
     0.0,                     !- Minimum Curve Output
     1.0;                     !- Maximum Curve Output
 
-!- ACX 140 Biquadratic cooling curves provided by Trane 
+!- ACX 140 Biquadratic cooling curves provided by Trane
 Curve:Biquadratic,
     CoolCapCurveFuncTemp,    !- Name
     1.06722728893252,        !- Coefficient1 Constant
@@ -8536,11 +8536,11 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
     AWHP_2 Condenser Air Inlet Node,
     -1;
-  
+
   HeatPump:PlantLoop:EIR:Heating,
     AWHP_1 Heating Side,            !- Name
     AWHP_1 Heating Side Inlet,  !- Load Side Inlet Node Name
@@ -8549,7 +8549,7 @@ Curve:Biquadratic,
     AWHP_1 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_1 Cooling Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
@@ -8614,7 +8614,7 @@ Curve:Biquadratic,
     AWHP_2 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_2 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
     ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
+    ,                           !- Heat Recovery Outlet Node Name
     AWHP_2 Cooling Side,            !- Companion Heat Pump Name
     autosize,                   !- Load Side Reference Flow Rate {m3/s}
     autosize,                   !- Source Side Reference Flow Rate {m3/s}
@@ -8643,7 +8643,7 @@ Curve:Biquadratic,
     TimedDefrostHeatLoad,    !- Timed Demand Defrost Heat Load Penalty Curve Name
     TimedDefrostHeatEnergy;  !- Timed Demand Defrost Heat Input Energy Fraction Curve Name
 
-!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves  
+!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves
 Curve:Biquadratic,
     HeatCapCurveFuncTemp,    !- Name
     0.794900878202383,       !- Coefficient1 Constant
@@ -8679,7 +8679,7 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
     AWHP_2 Heating Side Condenser Air Inlet Node,
     -1;
@@ -8691,7 +8691,7 @@ Curve:Biquadratic,
     0.0,                     !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
- 
+
    Curve:Quadratic,
      TimedDefrostHeatEnergy,  !- Name
      0.03423,                 !- Coefficient1 Constant
@@ -8699,7 +8699,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      TimedDefrostFrequency,   !- Name
      0.71582,                 !- Coefficient1 Constant
@@ -8707,7 +8707,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      TimedDefrostHeatLoad,    !- Name
      0.08286,                 !- Coefficient1 Constant
@@ -8715,7 +8715,7 @@ Curve:Biquadratic,
      0.0,                     !- Coefficient3 x**2
      -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
      10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
+
    Curve:Quadratic,
      HeatDryCoilFuncOAT,      !- Name
      0.9574744,               !- Coefficient1 Constant
@@ -8723,7 +8723,7 @@ Curve:Biquadratic,
      0.000055728,             !- Coefficient3 x**2
      -11.675,                 !- Minimum Value of x !- curve evaluates to ~1 here
      26.6666667;              !- Maximum Value of x !- curve evaluates to min value here, ~ 0.91728
- 
+
    Curve:Quadratic,
      HeatCapCurveFuncPLR,     !- Name
      0.0473,                  !- Coefficient1 Constant
@@ -8822,7 +8822,7 @@ Curve:Biquadratic,
   Connector:Splitter,
     CoolSys1 Supply Splitter,!- Name
     CoolSys1 Supply Inlet Branch,  !- Inlet Branch Name
-    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name  
+    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
     CoolSys1 Supply Equipment Branch 2;
 
   Connector:Splitter,
@@ -8840,7 +8840,7 @@ Curve:Biquadratic,
     HeatSys1 Supply Splitter,!- Name
     HeatSys1 Supply Inlet Branch,  !- Inlet Branch Name
     HeatSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
-    HeatSys1 Supply Equipment Branch 2,  !- Outlet Branch 1 Name    
+    HeatSys1 Supply Equipment Branch 2,  !- Outlet Branch 1 Name
     HeatSys1 Supply Equipment Bypass Branch;  !- Outlet Branch 2 Name
 
   Connector:Mixer,
@@ -10377,7 +10377,7 @@ Curve:Biquadratic,
 
   Output:Variable,*,Zone Heating Setpoint Not Met While Occupied Time,hourly; !- Zone Sum [hr]
   Output:Variable,*,Zone Cooling Setpoint Not Met While Occupied Time,hourly; !- Zone Sum [hr]
-  
+
   Output:Variable,*,Plant Supply Side Inlet Mass Flow Rate,hourly; !- HVAC Average [kg/s]
   Output:Variable,*,Plant Supply Side Inlet Temperature,hourly; !- HVAC Average [C]
   Output:Variable,*,Plant Supply Side Outlet Temperature,hourly; !- HVAC Average [C]
