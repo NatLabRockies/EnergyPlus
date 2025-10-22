@@ -59,14 +59,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import glob
 import io
-
-# standard library imports
 import sys
 from os import path
 
 import idd_parser_library
-
-# local library imports
 import idf_parser_library
 
 # 3 arguments: a directory to the idfs, and an output html file

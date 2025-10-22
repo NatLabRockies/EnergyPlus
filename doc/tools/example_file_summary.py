@@ -59,12 +59,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import glob
 import io
-
-# standard library imports
 import sys
 from os import path
 
-# local library imports
 import idf_parser_library
 import idf_summary_class
 

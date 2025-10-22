@@ -3,8 +3,6 @@
 import os
 import sys
 from json import load
-
-# -- Path setup --------------------------------------------------------------
 from pathlib import Path
 from shutil import copytree, rmtree
 from subprocess import DEVNULL, CalledProcessError, check_call
