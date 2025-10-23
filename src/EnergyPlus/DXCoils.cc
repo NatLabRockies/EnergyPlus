@@ -13379,7 +13379,29 @@ void CalcMultiSpeedDXCoilCooling(EnergyPlusData &state,
             hTinwout = InletAirEnthalpy - (1.0 - SHR) * hDelta;
             LSOutletAirHumRat = PsyWFnTdbH(state, InletAirDryBulbTemp, hTinwout, RoutineName);
             LSOutletAirDryBulbTemp = PsyTdbFnHW(LSOutletAirEnthalpy, LSOutletAirHumRat);
+            if ((LSOutletAirDryBulbTemp > 13.28 && LSOutletAirDryBulbTemp < 13.80) && std::abs(LSOutletAirDryBulbTemp - 13.291120776361900369) > 0.00001) {
+                fmt::print(stderr, "WRONG LSOutletAirDryBulbTemp={:.18f}!\n", LSOutletAirDryBulbTemp);
+            }
             OutletAirDryBulbTempSat = PsyTsatFnHPb(state, LSOutletAirEnthalpy, OutdoorPressure, RoutineName);
+            // Debug print all variables that might lead to this result being different
+            fmt::print(stderr,
+                    "* LSOutletAirDryBulbTemp={:.18f}\n"
+                    "* OutletAirDryBulbTempSat={:.18f}\n"
+                    "* InletAirDryBulbTemp={:.18f}\n"
+                    "* InletAirHumRat={:.18f}\n"
+                    "* InletAirEnthalpy={:.18f}\n"
+                    "* hDelta={:.18f}\n"
+                    "* SHR={:.18f}\n"
+                    "* PLF={:.18f}\n",
+                    LSOutletAirDryBulbTemp,
+                    OutletAirDryBulbTempSat,
+                    InletAirDryBulbTemp,
+                    InletAirHumRat,
+                    InletAirEnthalpy,
+                    hDelta,
+                    SHR,
+                    PLF
+            );
             if (LSOutletAirDryBulbTemp < OutletAirDryBulbTempSat) { // Limit to saturated conditions at OutletAirEnthalpy
                 LSOutletAirDryBulbTemp = OutletAirDryBulbTempSat;
                 LSOutletAirHumRat = PsyWFnTdbH(state, LSOutletAirDryBulbTemp, LSOutletAirEnthalpy, RoutineName);

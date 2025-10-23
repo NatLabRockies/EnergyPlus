@@ -1694,6 +1694,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_MultiSpeedDXCoolCoil_Only_NoFan)
     thisSys->m_EMSOverrideCoilSpeedNumOn = false;
     FirstHVACIteration = true;
 
+    fmt::print(stderr, "====== COOLING MODE =====\n");
     // COOLING mode
     thisSys->simulate(*state,
                       thisSys->Name,

@@ -13497,6 +13497,24 @@ namespace UnitarySystems {
                                 SpeedRatio = 0.0;
                                 this->m_CoolingSpeedRatio = SpeedRatio;
                                 auto f = [&state, this, DesOutTemp, SpeedRatio, AirLoopNum, FirstHVACIteration](Real64 const CycRatio) {
+                                   // Print all non-static arguments passed to DXCoilCyclingRation
+                                    fmt::print(stderr, "DXCoilCyclingResidual called with:\n"
+                                            "* CycRatio={:.18f}\n"
+                                            "* CoolingCoilIndex={}\n"
+                                            "* DesOutTemp={:.18f}\n"
+                                            "* UnitarySysNum={}\n"
+                                            "* SpeedRatio={:.18f}\n"
+                                            "* CoolingSpeedNum={}\n"
+                                            "* AirLoopNum={}\n"
+                                            "* FirstHVACIteration={}\n",
+                                                 CycRatio,
+                                                 this->m_CoolingCoilIndex,
+                                                 DesOutTemp,
+                                                 this->m_UnitarySysNum,
+                                                 SpeedRatio,
+                                                 this->m_CoolingSpeedNum,
+                                                 AirLoopNum,
+                                                 FirstHVACIteration);
                                     return UnitarySys::DXCoilCyclingResidual(state,
                                                                              CycRatio,
                                                                              this->m_CoolingCoilIndex,
@@ -16553,6 +16571,11 @@ namespace UnitarySystems {
                 thisSys.m_CoolingPartLoadFrac = CycRatio;
                 thisSys.calcPassiveSystem(state, AirloopNum, FirstHVACIteration);
             } else {
+                fmt::print(stderr, "DXCoilCyclingResidual, calling DXCoils::CalcMultiSpeedDXCoilCooling:\n"
+                        " * OnOffAirFlowRatio = {:.18f}\n"
+                        " * CycRatio = {:.18f}\n"
+                        " * SpeedRatio = {:.18f}\n",
+                        OnOffAirFlowRatio, CycRatio, SpeedRatio);
                 DXCoils::CalcMultiSpeedDXCoilCooling(state, CoilIndex, SpeedRatio, CycRatio, SpeedNum, fanOp, compressorOp, 0);
             }
             OutletAirTemp = state.dataDXCoils->DXCoilOutletTemp(CoilIndex);
@@ -16573,6 +16596,10 @@ namespace UnitarySystems {
             assert(false);
         } break;
         }
+        fmt::print(stderr, "DXCoilCyclingResidual:\n"
+                " * DesOutTemp = {:.18f}\n"
+                " * OutletAirTemp = {:.18f}\n",
+                DesOutTemp, OutletAirTemp);
         return DesOutTemp - OutletAirTemp;
     }
 

@@ -182,6 +182,13 @@ void SolveRoot(const EnergyPlusData &state,
     // = -1: no convergence
     // >  0: number of iterations performed
 
+    fmt::print(stderr, "Entering SolveRoot, arguments:\n"
+            "*    Eps={}\n"
+            "* MaxIte={}\n"
+            "*   Xres={:.18f}\n"
+            "*    X_0={:.18f}\n"
+            "*    X_1={:.18f}\n", Eps, MaxIte, XRes, X_0, X_1);
+
     Real64 constexpr SMALL(1.e-10);
     Real64 X0 = X_0;   // present 1st bound
     Real64 X1 = X_1;   // present 2nd bound
@@ -189,7 +196,9 @@ void SolveRoot(const EnergyPlusData &state,
     int NIte = 0;      // number of iterations
     int AltIte = 0;    // an accounter used for Alternation choice
 
+    fmt::print(stderr, "=== Calculating Y0 ===\n");
     Real64 Y0 = f(X0); // f at X0
+    fmt::print(stderr, "=== Calculating Y1 ===\n");
     Real64 Y1 = f(X1); // f at X1
     // check initial values
     if (Y0 * Y1 > 0) {
@@ -208,10 +217,20 @@ void SolveRoot(const EnergyPlusData &state,
         if (std::abs(X1 - X0) < SMALL) {
             break;
         }
+        // Print on several lines likes this
+        // Entier
+        fmt::print(stderr, "Entering iteration {}:\n"
+                "* X0={:.18f}\n"
+                "* Y0={:.18f}\n"
+                "* X1={:.18f}\n"
+                "* Y1={:.18f}\n"
+                "* DY={:.18f}\n",
+                NIte + 1, X0, Y0, X1, Y1, DY);
         // new estimation
         switch (state.dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod) {
         case HVACSystemRootSolverAlgorithm::RegulaFalsi: {
             XTemp = (Y0 * X1 - Y1 * X0) / DY;
+            fmt::print(stderr, "Using RegulaFalsi: XTemp={:.18f}\n", XTemp);
             break;
         }
         case HVACSystemRootSolverAlgorithm::Bisection: {
@@ -258,13 +277,23 @@ void SolveRoot(const EnergyPlusData &state,
         }
         }
 
+        fmt::print(stderr, "=== Calculating YTemp with XTemp={:.18f} ===\n", XTemp);
         Real64 const YTemp = f(XTemp);
 
         ++NIte;
         ++AltIte;
+        fmt::print(stderr, "Result of Iteration={}:\n"
+                "*    X0={:.18f}\n"
+                "*    Y0={:.18f}\n"
+                "*    X1={:.18f}\n"
+                "*    Y1={:.18f}\n"
+                "* XTemp={:.18f}\n"
+                "* YTemp={:.18f}\n",
+                NIte, X0, Y0, X1, Y1, XTemp, YTemp);
 
         // check convergence
         if (std::abs(YTemp) < Eps) {
+            fmt::print(stderr, "Converged: |YTemp| < Eps: {:.18f} < {:.18f}\n", std::abs(YTemp), Eps);
             Flag = NIte;
             XRes = XTemp;
             return;
