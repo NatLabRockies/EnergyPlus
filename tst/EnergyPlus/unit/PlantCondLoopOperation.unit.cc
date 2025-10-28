@@ -1008,3 +1008,175 @@ TEST_F(EnergyPlusFixture, ThermalEnergyStorageWithIceForceDualOp)
     // We should now alos have two TES SPMs created, and that's all of them
     EXPECT_EQ(state->dataSetPointManager->spms.size(), 2);
 }
+
+TEST_F(EnergyPlusFixture, FindRangeBasedOrUncontrolledInputTest)
+{
+    std::string currentModuleObject;
+    int numSchemes;
+    int loopNum;
+    int schemeNum;
+    bool errorFound;
+
+    std::string const idf_objects = delimited_string({
+        "PlantEquipmentOperationSchemes,",
+        "  CW Loop Operation,       !- Name,",
+        "  PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type",
+        "  Central Chiller Only,    !- Control Scheme 1 Name",
+        "  PlantOnSched;            !- Control Scheme 1 Schedule Name",
+
+        "PlantEquipmentOperation:CoolingLoad,",
+        "  Central Chiller Only,    !- Name",
+        "  0,                       !- Load Range 1 Lower Limit {W}",
+        "  900000,                  !- Load Range 1 Upper Limit {W}",
+        "  cooling plant;           !- Range 1 Equipment List Name",
+
+        "PlantEquipmentOperationSchemes,",
+        "  HW Loop Operation,       !- Name",
+        "  PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type",
+        "  Central Boiler Only,     !- Control Scheme 1 Name",
+        "  PlantOnSched;            !- Control Scheme 1 Schedule Name",
+
+        "PlantEquipmentOperation:HeatingLoad,",
+        "  Central Boiler Only,     !- Name",
+        "  0,                       !- Load Range 1 Lower Limit {W}",
+        "  1000000,                 !- Load Range 1 Upper Limit {W}",
+        "  heating plant;           !- Range 1 Equipment List Name",
+
+        "PlantEquipmentOperationSchemes,",
+        "  Alternate Operation,     !- Name",
+        "  PlantEquipmentOperation:OutdoorDryBulb,  !- Control Scheme 1 Object Type",
+        "  ODB Control,             !- Control Scheme 1 Name",
+        "  PlantOnSched;            !- Control Scheme 1 Schedule Name",
+
+        "PlantEquipmentOperation:OutdoorDryBulb,",
+        "  ODB Control,     !- Name",
+        "  -30.0,                   !- Load Range 1 Lower Temperature {C}",
+        "  -10.0,                   !- Load Range 1 Upper Temperature {C}",
+        "  heating plant,           !- Range 1 Equipment List Name",
+        "  -10.0,                   !- Load Range 2 Lower Temperature {C}",
+        "  -15.0,                   !- Load Range 2 Upper Temperature {C}",
+        "  fighting against itself plant; !- Range 2 Equipment List Name",
+
+        "PlantEquipmentList,",
+        "  heating plant,           !- Name",
+        "  Boiler:HotWater,         !- Equipment 1 Object Type",
+        "  Central Boiler;          !- Equipment 1 Name",
+
+        "PlantEquipmentList,",
+        "  cooling plant,            !- Name",
+        "  Chiller:Electric,         !- Equipment 1 Object Type",
+        "  Central Chiller;          !- Equipment 1 Name",
+
+        "PlantEquipmentList,",
+        "  fighting against itself plant, !- Name",
+        "  Chiller:Electric,         !- Equipment 1 Object Type",
+        "  Central Chiller,          !- Equipment 1 Name",
+        "  Boiler:HotWater,          !- Equipment 1 Object Type",
+        "  Central Boiler;           !- Equipment 1 Name",
+
+        "Schedule:Compact,",
+        "  PlantOnSched,  !- Name",
+        "  Fraction,                !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,1;          !- Field 3",
+
+        "ScheduleTypeLimits,",
+        "  Fraction,                !- Name",
+        "  0.0,                     !- Lower Limit Value",
+        "  1.0,                     !- Upper Limit Value",
+        "  CONTINUOUS,              !- Numeric Type",
+        "  Dimensionless;           !- Unit Type",
+
+        "Chiller:Electric,",
+        "  Central Chiller,         !- Name",
+        "  AirCooled,               !- Condenser Type",
+        "  autosize,                !- Nominal Capacity {W}",
+        "  3.2,                     !- Nominal COP {W/W}",
+        "  Central Chiller Inlet Node,  !- Chilled Water Inlet Node Name",
+        "  Central Chiller Outlet Node,  !- Chilled Water Outlet Node Name",
+        "  Central Chiller Condenser Inlet Node,  !- Condenser Inlet Node Name",
+        "  Central Chiller Condenser Outlet Node,  !- Condenser Outlet Node Name",
+        "  0.0,                     !- Minimum Part Load Ratio",
+        "  1.0,                     !- Maximum Part Load Ratio",
+        "  0.65,                    !- Optimum Part Load Ratio",
+        "  35.0,                    !- Design Condenser Inlet Temperature {C}",
+        "  2.778,                   !- Temperature Rise Coefficient",
+        "  6.67,                    !- Design Chilled Water Outlet Temperature {C}",
+        "  autosize,                !- Design Chilled Water Flow Rate {m3/s}",
+        "  autosize,                !- Design Condenser Fluid Flow Rate {m3/s}",
+        "  0.9949,                  !- Coefficient 1 of Capacity Ratio Curve",
+        "  -0.045954,               !- Coefficient 2 of Capacity Ratio Curve",
+        "  -0.0013543,              !- Coefficient 3 of Capacity Ratio Curve",
+        "  2.333,                   !- Coefficient 1 of Power Ratio Curve",
+        "  -1.975,                  !- Coefficient 2 of Power Ratio Curve",
+        "  0.6121,                  !- Coefficient 3 of Power Ratio Curve",
+        "  0.03303,                 !- Coefficient 1 of Full Load Ratio Curve",
+        "  0.6852,                  !- Coefficient 2 of Full Load Ratio Curve",
+        "  0.2818,                  !- Coefficient 3 of Full Load Ratio Curve",
+        "  5,                       !- Chilled Water Outlet Temperature Lower Limit {C}",
+        "  LeavingSetpointModulated;!- Chiller Flow Mode",
+
+        "Boiler:HotWater,",
+        "  Central Boiler,          !- Name",
+        "  NaturalGas,              !- Fuel Type",
+        "  autosize,                !- Nominal Capacity {W}",
+        "  0.8,                     !- Nominal Thermal Efficiency",
+        "  LeavingBoiler,           !- Efficiency Curve Temperature Evaluation Variable",
+        "  BoilerEfficiency,        !- Normalized Boiler Efficiency Curve Name",
+        "  autosize,                !- Design Water Flow Rate {m3/s}",
+        "  0.0,                     !- Minimum Part Load Ratio",
+        "  1.2,                     !- Maximum Part Load Ratio",
+        "  1.0,                     !- Optimum Part Load Ratio",
+        "  Central Boiler Inlet Node,  !- Boiler Water Inlet Node Name",
+        "  Central Boiler Outlet Node,  !- Boiler Water Outlet Node Name",
+        "  100.,                    !- Water Outlet Upper Temperature Limit {C}",
+        "  LeavingSetpointModulated;!- Boiler Flow Mode",
+    });
+
+    EXPECT_TRUE(process_idf(idf_objects, false));
+
+    state->init_state(*state);
+
+    // Setup the plant itself manually
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).TypeOfLoop = EnergyPlus::DataPlant::LoopType::Plant;
+
+    state->dataPlnt->PlantLoop(1).OpScheme.allocate(3);
+    state->dataPlnt->PlantLoop(1).OpScheme(1).Name = "Central Chiller Only";
+    state->dataPlnt->PlantLoop(1).OpScheme(2).Name = "Central Boiler Only";
+    state->dataPlnt->PlantLoop(1).OpScheme(3).Name = "ODB Control";
+    state->dataPlnt->PlantLoop(1).OpScheme(1).NumEquipLists = 1;
+    state->dataPlnt->PlantLoop(1).OpScheme(2).NumEquipLists = 1;
+    state->dataPlnt->PlantLoop(1).OpScheme(3).NumEquipLists = 2;
+
+    // Test 1: Cooling scheme (all good, no errors)
+    numSchemes = 3;
+    loopNum = 1;
+    schemeNum = 1;
+    errorFound = false;
+    currentModuleObject = "PlantEquipmentOperation:CoolingLoad";
+    EnergyPlus::PlantCondLoopOperation::FindRangeBasedOrUncontrolledInput(*state, currentModuleObject, numSchemes, loopNum, schemeNum, errorFound);
+    EXPECT_FALSE(errorFound);
+
+    // Test 2: Heating scheme (all good, no errors)
+    numSchemes = 3;
+    loopNum = 1;
+    schemeNum = 2;
+    errorFound = false;
+    currentModuleObject = "PlantEquipmentOperation:HeatingLoad";
+    EnergyPlus::PlantCondLoopOperation::FindRangeBasedOrUncontrolledInput(*state, currentModuleObject, numSchemes, loopNum, schemeNum, errorFound);
+    EXPECT_FALSE(errorFound);
+
+    // Test 3: ODB scheme (load range 2 temperatures are incorrect, error found)
+    numSchemes = 3;
+    loopNum = 1;
+    schemeNum = 3;
+    errorFound = false;
+    currentModuleObject = "PlantEquipmentOperation:OutdoorDryBulb";
+    EnergyPlus::PlantCondLoopOperation::FindRangeBasedOrUncontrolledInput(*state, currentModuleObject, numSchemes, loopNum, schemeNum, errorFound);
+    EXPECT_TRUE(errorFound);
+    EXPECT_TRUE(
+        compare_err_stream_substring("found a lower limit that is higher than an upper limit in PlantEquipmentOperation:OutdoorDryBulb", true));
+}

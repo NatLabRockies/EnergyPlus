@@ -6545,6 +6545,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Desiccant DXSystem Cooling Coil,    !- Name",
+        "    ,                        !- Availability Schedule Name",
         "     Desiccant DXSystem Mixed Air Node,  !- Indoor Air Inlet Node Name",
         "    HX Process Inlet Node,   !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",

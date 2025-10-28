@@ -139,14 +139,10 @@ namespace OutputReportPredefined {
         std::string typeField;
         std::string nameField;
         std::string description;
-        Real64 valField;
-        bool active;
-        bool written;
-
-        // Default Constructor
-        CompSizeTableEntryType() : valField(0.0), active(false), written(false)
-        {
-        }
+        Real64 valField = 0.0;
+        std::string strField;
+        bool active = false;
+        bool written = false;
     };
 
     struct ShadowRelateType
@@ -183,6 +179,12 @@ namespace OutputReportPredefined {
 
     void AddCompSizeTableEntry(
         EnergyPlusData &state, std::string_view FieldType, std::string_view FieldName, std::string_view FieldDescription, Real64 const FieldValue);
+
+    void AddCompSizeTableStrEntry(EnergyPlusData &state,
+                                  std::string_view FieldType,
+                                  std::string_view FieldName,
+                                  std::string_view FieldDescription,
+                                  std::string_view FieldValue);
 
     void AddShadowRelateTableEntry(EnergyPlusData &state, int const castingField, int const receivingField, int const receivingKind);
 
@@ -248,7 +250,23 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchFanMotorEff = 0;
     int pdchFanMotorHeatToZoneFrac = 0; // Motor Heat to Zone Fraction
     int pdchFanMotorHeatZone = 0;       // Motor Loss Zone Name
+    int pdchFanSpeedCtrlMethod = 0;
+    int pdchFanNumSpeeds = 0;
     int pdchFanAirLoopName = 0;
+
+    int pdstFanPower = 0;
+    int pdchFanPowerType = 0;
+    int pdchFanPower00 = 0;
+    int pdchFanPower01 = 0;
+    int pdchFanPower02 = 0;
+    int pdchFanPower03 = 0;
+    int pdchFanPower04 = 0;
+    int pdchFanPower05 = 0;
+    int pdchFanPower06 = 0;
+    int pdchFanPower07 = 0;
+    int pdchFanPower08 = 0;
+    int pdchFanPower09 = 0;
+    int pdchFanPower10 = 0;
 
     // Pump subtable
     int pdstPump = 0;
@@ -310,6 +328,20 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDXCoolCoilNetCapSID = 0;  // Standard Rated (Net) Cooling Capacity [W], Test D
     int pdchDXCoolCoilElecPowerD = 0; // Standard Rated Electric Power [W], Test D
 
+    // ACCA Manual S report
+    int pdstACCAMS = 0;
+    int pdchMSHPName = 0;
+    int pdchMSHPType = 0;
+    int pdchMSCoilType = 0;
+    int pdchMSSizMethod = 0;
+    int pdchMSTotLoad = 0;
+    int pdchMSSensLoad = 0;
+    int pdchMSTotCapacity = 0;
+    int pdchMSSensCapacity = 0;
+    int pdchMSTotRatio = 0;
+    int pdchMSSensRatio = 0;
+    int pdchMSLatRatio = 0;
+
     // Water-to-Air HP report
     int pdstWAHP = 0;
     int pdchWAHPType = 0;
@@ -344,6 +376,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     // DX Heating Coil subtable
     int pdstDXHeatCoil = 0;
     int pdchDXHeatCoilType = 0; // DX Heating coil type
+    int pdchDXHeatCoilSizingRatio = 0;
     int pdchDXHeatCoilHighCap = 0;
     int pdchDXHeatCoilLowCap = 0;
     int pdchDXHeatCoilHSPFSI = 0;    // HSPF value in SI unit at AHRI std. 340/360 conditions [W/W]
@@ -384,6 +417,52 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchSWHThEff = 0;
     int pdchSWHRecEff = 0;
     int pdchSWHEnFac = 0;
+    int pdchSWHFuelType = 0;
+    int pdchSWHSchHt1StptName = 0;
+    int pdchSWHSchHt1Stpt11amWedVal = 0;
+    int pdchSWHSchHt1Stpt11amWedCnt = 0;
+    int pdchSWHSchHt1StptMonthUsed = 0;
+    int pdchSWHSchHt2StptName = 0;
+    int pdchSWHSchHt2Stpt11amWedVal = 0;
+    int pdchSWHSchHt2Stpt11amWedCnt = 0;
+    int pdchSWHSchHt2StptMonthUsed = 0;
+    int pdchSWHPkUseFlwRt = 0;
+    int pdchSWHUseSch = 0;
+    int pdchSWHAmbZoneNm = 0;
+
+    // wateruse:equipment table
+    int pdstWtEq = 0;
+    int pdchWtEqZone = 0;
+    int pdchWtEqEndUse = 0;
+    int pdchWtEqPkFlw = 0;
+    int pdchWtEqFlwFractSch = 0;
+    int pdchWtEqFlwFractMax = 0;
+    int pdchWtEqTargTempSch = 0;
+    int pdchWtEqTargTempMax = 0;
+    int pdchWtEqConnNm = 0;
+    int pdchWtEqHotTempSch = 0;
+    int pdchWtEqHotTempMax = 0;
+    int pdchWtEqColdTempSch = 0;
+    int pdchWtEqColdTempMin = 0;
+    int pdchWtEqSensFracSch = 0;
+    int pdchWtEqsensFracMax = 0;
+    int pdchWtEqLatFracSch = 0;
+    int pdchWtEqLatFracMax = 0;
+
+    // WaterUse:Connections table
+    int pdstWtCn = 0;
+    int pdchWtCnDrnHxType = 0;
+    int pdchWtCnDrnHxDest = 0;
+    int pdchWtCnDrnHxUA = 0;
+    int pdchWtCnDrnHxEff = 0;
+    int pdchWtCnHotTempSch = 0;
+    int pdchWtCnHotTempMax = 0;
+    int pdchWtCnColdTempSch = 0;
+    int pdchWtCnColdTempMin = 0;
+    int pdchWtCnPltLpNm = 0;
+    int pdchWtCnBrchNm = 0;
+    int pdchWtCnSupTnk = 0;
+    int pdchWtCnRecTnk = 0;
 
     // Std 229 Chiller Table in Equipment Summary
     int pdstChiller = 0;
@@ -423,6 +502,25 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchBoilerFuelType = 0;            // Fuel type
     int pdchBoilerParaElecLoad = 0;        // Parasitic electric load
 
+    // AWHP Table in Equipment Summary
+    int pdstAWHP = 0;
+    int pdchAWHPType = 0;                    // Type
+    int pdchAWHPRefCap = 0;                  // Reference Capacity[W]
+    int pdchAWHPRefCOP = 0;                  // Reference COP
+    int pdchAWHPRefEff = 0;                  // Reference Efficiency [W/W]
+    int pdchAWHPRatedCap = 0;                // Rated Capacity [W]
+    int pdchAWHPRatedEff = 0;                // Rated Efficiency [W/W]
+    int pdchAWHPSEER = 0;                    // SEER
+    int pdchAWHPHSPF = 0;                    // HSPF
+    int pdchAWHPMinPLR = 0;                  // Minimum part load ratio
+    int pdchAWHPDesSizeRefAirTemp;           // Design Size Reference Air Temperature [C]"
+    int pdchAWHPDesEnterWaterTemp;           // Entering Water Temperature [C]"
+    int pdchAWHPDesLeaveWaterTemp;           // Leaving Water Temperature [C]"
+    int pdchAWHPDesSizeRefWaterFlowRate = 0; // "Design Size Reference Water Flow Rate [kg/s]");
+    int pdchAWHPDesSizeRefAirFlowRate = 0;   // "Design Size Reference Air Flow Rate [kg/s]");
+    int pdchAWHPPlantloopName = 0;           // Plantloop name
+    int pdchAWHPPlantloopBranchName = 0;     // Plantloop branch name
+
     // Std 229 cooling towers and fluid coolers Table in Equipment Summary
     int pdstCTFC = 0;
     int pdchCTFCType = 0;               // Type
@@ -443,38 +541,47 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchPLCLProvCool = 0;        // provides cooling
     int pdchPLCLMaxLoopFlowRate = 0; // Maximum Loop Flow Rate
     int pdchPLCLMinLoopFlowRate = 0; // Minimum Loop Flow Rate
+    int pdchPLCLSupTemp = 0;         // "Design Supply Temperature [C]");
+    int pdchPLCLRetTemp = 0;         // "Design Return Temperature [C]");
+    int pdchPLCLDesCap = 0;          // "Design Capacity [W]");
 
     // Std 229 Air Terminal Table in Equipment Summary
     int pdstAirTerm = 0;
-    int pdchAirTermZoneName = 0;       // Zone Name
-    int pdchAirTermMinFlow = 0;        // Minimum Flow
-    int pdchAirTermMinOutdoorFlow = 0; // Minimum Outdoor Flow
-    int pdchAirTermSupCoolingSP = 0;   // Supply cooling setpoint
-    int pdchAirTermSupHeatingSP = 0;   // Supply heating setpoint
-    int pdchAirTermHeatingCap = 0;     // Heating capacity
-    int pdchAirTermCoolingCap = 0;     // Cooling capacity
-    int pdchAirTermTypeInp = 0;        // Type of Input Object
-    int pdchAirTermHeatCoilType = 0;   // Heat/Reheat Coil Object Type
-    int pdchAirTermCoolCoilType = 0;   // Chilled Water Coil Object Type
-    int pdchAirTermFanType = 0;        // Fan Object Type
-    int pdchAirTermFanName = 0;        // Fan Name
-    int pdchAirTermPrimFlow = 0;       // Primary Air Flow Rate
-    int pdchAirTermSecdFlow = 0;       // Secondary Air Flow Rate
-    int pdchAirTermMinFlowSch = 0;     // Minimum Flow Schedule Name
-    int pdchAirTermMaxFlowReh = 0;     // Maximum Flow During Reheat
-    int pdchAirTermMinOAflowSch = 0;   // Minimum Outdoor Flow Schedule Name
-    int pdchAirTermTempCntl = 0;       // Temperature Control
+    int pdchAirTermZoneName = 0;        // Zone Name
+    int pdchAirTermMinFlow = 0;         // Minimum Flow
+    int pdchAirTermMinOutdoorFlow = 0;  // Minimum Outdoor Flow
+    int pdchAirTermSupCoolingSP = 0;    // Supply cooling setpoint
+    int pdchAirTermSupHeatingSP = 0;    // Supply heating setpoint
+    int pdchAirTermHeatingCap = 0;      // Heating capacity
+    int pdchAirTermCoolingCap = 0;      // Cooling capacity
+    int pdchAirTermTypeInp = 0;         // Type of Input Object
+    int pdchAirTermHeatCoilType = 0;    // Heat/Reheat Coil Object Type
+    int pdchAirTermCoolCoilType = 0;    // Chilled Water Coil Object Type
+    int pdchAirTermFanType = 0;         // Fan Object Type
+    int pdchAirTermFanName = 0;         // Fan Name
+    int pdchAirTermFanCtrlType = 0;     // Fan Control Type
+    int pdchAirTermPrimFlow = 0;        // Primary Air Flow Rate
+    int pdchAirTermSecdFlow = 0;        // Secondary Air Flow Rate
+    int pdchAirTermMinFlowSch = 0;      // Minimum Flow Schedule Name
+    int pdchAirTermMaxFlowReh = 0;      // Maximum Flow During Reheat
+    int pdchAirTermMinOAflowSch = 0;    // Minimum Outdoor Flow Schedule Name
+    int pdchAirTermPIUHeatCtrlType = 0; // PIU Heating Control Type
 
     // Std 229 Air Heat Recovery
     int pdstAirHR = 0;
     int pdchAirHRInputObjType = 0;              // input object type
     int pdchAirHRPlateOrRotary = 0;             // plate/rotary
+    int pdchAirHROperation = 0;                 // operation control
     int pdchAirHRSenEffAt100PerHeatAirFlow = 0; // Sensible Effectiveness at 100% Heating Air Flow
     int pdchAirHRSenEffAt100PerCoolAirFlow = 0; // Sensible Effectiveness at 100% Cooling Air Flow
     int pdchAirHRLatEffAt100PerHeatAirFlow = 0; // Latent Effectiveness at 100% Heating Air Flow
     int pdchAirHRLatEffAt100PerCoolAirFlow = 0; // Latent Effectiveness at 100% Cooling Air Flow
     int pdchAirHRExhaustAirflow = 0;            // Exhaust (Secondary) airflow
     int pdchAirHRSupplyAirflow = 0;             // Supply (Outdoor) airflow
+    int pdchAirHRZoneHVACName = 0;              // Zone ERV name
+    int pdchAirHRAirloopName = 0;               // Airloop name
+    int pdchAirHROASysName = 0;                 // OA system name
+    int pdchAirHROAControllerName = 0;          // OA controller name
 
     // Envelope Report
     int pdrEnvelope = 0;
@@ -871,6 +978,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchEcoRetEnth = 0;
     int pdchEcoOATempLim = 0;
     int pdchEcoOAEnthLim = 0;
+    int pdchEcoOAsysNm = 0;
     int pdstDemCntlVent = 0;
     int pdchDCVventMechName = 0;
     int pdchDCVperPerson = 0;
@@ -903,6 +1011,61 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchStatSchdTypeName1 = 0;
     int pdchStatSchdHeatName = 0;
     int pdchStatSchdCoolName = 0;
+
+    int pdstFanOper = 0.0;
+    int pdchFanOpOccHrs = 0.0;
+    int pdchFanOpOccCont = 0.0;
+    int pdchFanOpOccCyc = 0.0;
+    int pdchFanOpOccOff = 0.0;
+    int pdchFanOpUnoccHrs = 0.0;
+    int pdchFanOpUnoccCont = 0.0;
+    int pdchFanOpUnoccCyc = 0.0;
+    int pdchFanOpUnoccOff = 0.0;
+
+    // Controls Summary
+
+    int pdrCtrl = 0;
+
+    int pdstStPtOAR = 0;
+    int pdchSPMOArStPtNd = 0;
+    int pdchSPMOArStPtLp = 0;
+    int pdchSPMOArType = 0;
+    int pdchSPMOArStLo1 = 0;
+    int pdchSPMOArStHi1 = 0;
+    int pdchSPMOArOutLo1 = 0;
+    int pdchSPMOArOutHi1 = 0;
+    int pdchSPMOArSchNm = 0;
+    int pdchSPMOArStLo2 = 0;
+    int pdchSPMOArStHi2 = 0;
+    int pdchSPMOArOutLo2 = 0;
+    int pdchSPMOArOutHi2 = 0;
+
+    int pdstStPtRetT = 0;
+    int pdchSPMRetType = 0;
+    int pdchSPMRetOutNd = 0;
+    int pdchSPMRetInNd = 0;
+    int pdchSPMRetPltLp = 0;
+    int pdchSPMRetMinT = 0;
+    int pdchSPMRetMaxT = 0;
+    int pdchSPMRetRetType = 0;
+    int pdchSPMRetRetT = 0;
+    int pdchSPMRetRetSch = 0;
+
+    int pdstAvlMgrSch = 0;
+    int pdchAvlMgrSchAvailNm = 0;
+    int pdchAvlMgrSchType = 0;
+    int pdchAvlMgrSchSchNm = 0;
+
+    int pdstPLtEqOpLb = 0;
+    int pdchPLtEqOpLbPltLpNm = 0;
+    int pdchPLtEqOpLbNm = 0;
+    int pdchPLtEqOpLbType = 0;
+    int pdchPLtEqOpLbSchNm = 0;
+    int pdchPLtEqOpLbIndex = 0;
+    int pdchPLtEqOpLbLow = 0;
+    int pdchPLtEqOpLbUp = 0;
+    int pdchPLtEqOpLbEqLstNm = 0;
+    int pdchPLtEqOpLbEquip = 0;
 
     // HVAC Topology
     int pdrTopology = 0;
@@ -984,6 +1147,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaMvZoneArea = 0;
     int pdchOaMvDesZnOa = 0;
     int pdchOaMvMinDynTrgVent = 0;
+    int pdchOaMvZoneMult = 0;
 
     int pdstOAtotAirByZone = 0;
     int pdchOaTaBzMechVent = 0;
@@ -996,6 +1160,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaTaBzTmAt = 0;
     int pdchOaTaBzTmAbove = 0;
     int pdchOaTaBzTmAboveUnocc = 0;
+    int pdchOaTaBzZoneMult = 0;
 
     int pdstOAavgOccByZone = 0;
     int pdchOaOccBzMechVent = 0;
@@ -1007,6 +1172,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaOccBzTmBelow = 0;
     int pdchOaOccBzTmAt = 0;
     int pdchOaOccBzTmAbove = 0;
+    int pdchOaOccBzZoneMult = 0;
 
     int pdstOAtotAirByLoop = 0;
     int pdchOaTaAlMechVent = 0;

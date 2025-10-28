@@ -138,6 +138,7 @@ namespace Furnaces {
         int HeatCoilAirInletNode = 0;                           // air inlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly
         int HeatCoilAirOutletNode = 0;                          // air outlet node number of HW coil for PTAC, PTHP, HeatCool, HeatOnly
         int HeatCoilPLFCurveIndex = 0;
+        Real64 HeatSizingRatio = 1.0;
       
         HVAC::CoilType suppHeatCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent for Supplemental Heat Coil Type
         std::string SuppCoilName;                              // name of supplemental heating coil

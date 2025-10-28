@@ -90,10 +90,11 @@ constexpr std::array<std::string_view, (int)EconConv::Num> econConvNamesUC = {
 
 constexpr std::array<std::string_view, (int)DemandWindow::Num> demandWindowStrings = {"/Hr", "/Hr", "/Hr", "/Day", "/Wk"};
 
-constexpr std::array<std::string_view, (int)BuySell::Num> buySellNames = {"BuyFromUtility", "SellToUtility", "NetMetering"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)BuySell::Num> buySellNames = {"BuyFromUtility", "SellToUtility", "NetMetering"};
 constexpr std::array<std::string_view, (int)BuySell::Num> buySellNamesUC = {"BUYFROMUTILITY", "SELLTOUTILITY", "NETMETERING"};
 
-constexpr std::array<std::string_view, (int)Season::Num> seasonNames = {"Unused", "Winter", "Spring", "Summer", "Fall", "Annual", "Monthly"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)Season::Num> seasonNames = {
+    "Unused", "Winter", "Spring", "Summer", "Fall", "Annual", "Monthly"};
 constexpr std::array<std::string_view, (int)Season::Num> seasonNamesUC = {"Unused", "WINTER", "SPRING", "SUMMER", "FALL", "ANNUAL", "MONTHLY"};
 
 constexpr std::array<std::string_view, (int)Op::Num> opNamesUC = {"SUM",
@@ -212,7 +213,7 @@ constexpr std::array<std::string_view, (int)Native::Num> nativeNamesUC = {"TOTAL
                                                                           "ABOVECUSTOMERBASEENERGY",
                                                                           "BELOWCUSTOMERBASEENERGY"};
 
-constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNames = {"Energy", "Demand", "Dimensionless", "Currency"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNames = {"Energy", "Demand", "Dimensionless", "Currency"};
 constexpr std::array<std::string_view, (int)VarUnitType::Num> varUnitTypeNamesUC = {"ENERGY", "DEMAND", "DIMENSIONLESS", "CURRENCY"};
 
 void UpdateUtilityBills(EnergyPlusData &state)
@@ -618,7 +619,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         // period schedule
         if (len(s_ipsc->cAlphaArgs(4)) > 0) {
             if ((tariff.periodSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(4))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
+                ShowDetailedSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                 ErrorsFound = true;
             }
         }
@@ -626,7 +627,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         // season schedule
         if (len(s_ipsc->cAlphaArgs(5)) > 0) {
             if ((tariff.seasonSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(5))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
+                ShowDetailedSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
                 ErrorsFound = true;
             }
         }
@@ -634,7 +635,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         // month schedule
         if (len(s_ipsc->cAlphaArgs(6)) > 0) {
             if ((tariff.monthSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(6))) == nullptr) {
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
+                ShowDetailedSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
                 ErrorsFound = true;
             }
         }
@@ -1429,7 +1430,7 @@ void parseComputeLine(EnergyPlusData &state, std::string const &lineOfCompute, i
         // first see if word is an operator
         Op op = static_cast<Op>(getEnumValue(opNamesUC, word));
         if (op == Op::Invalid) {
-            static_cast<Op>(getEnumValue(opNames2UC, word));
+            op = static_cast<Op>(getEnumValue(opNames2UC, word));
         }
 
         // if not an operator then look for
@@ -4079,13 +4080,6 @@ void WriteTabularTariffReports(EnergyPlusData &state)
 
     auto &s_econ = state.dataEconTariff;
 
-    // Here to it is ready to assign ort->unitStyle_SQLite (not in SQLiteProcedures.cc)
-    // when ort->unitsStyle inputs should have been concretely processed and assigned.
-    // Included this here to make sure the units specifications are correctly updated.
-    if (state.dataOutRptTab->unitsStyle_SQLite == OutputReportTabular::UnitsStyle::NotFound) {
-        state.dataOutRptTab->unitsStyle_SQLite = state.dataOutRptTab->unitsStyle; // This is the default UseOutputControlTableStyles
-    }
-
     // compute floor area if no ABUPS
     if (state.dataOutRptTab->buildingConditionedFloorArea == 0.0) {
         OutputReportTabular::DetermineBuildingFloorArea(state);
@@ -4096,9 +4090,6 @@ void WriteTabularTariffReports(EnergyPlusData &state)
 
         if (state.dataOutRptTab->displayEconomicResultSummary) {
             DisplayString(state, "Writing Tariff Reports");
-            for (auto &e : econVar) {
-                e.isReported = false;
-            }
             showWarningsBasedOnTotal(state);
             //---------------------------------
             // Economics Results Summary Report
@@ -4106,23 +4097,12 @@ void WriteTabularTariffReports(EnergyPlusData &state)
             OutputReportTabular::WriteReportHeaders(
                 state, "Economics Results Summary Report", "Entire Facility", OutputProcessor::StoreType::Average);
 
-            for (int iUnitSystem = 0; iUnitSystem <= 1; iUnitSystem++) {
-                OutputReportTabular::UnitsStyle unitsStyle_cur = state.dataOutRptTab->unitsStyle;
-                bool produceTabular = true;
-                bool produceSQLite = false;
-                if (produceDualUnitsFlags(iUnitSystem,
-                                          state.dataOutRptTab->unitsStyle,
-                                          state.dataOutRptTab->unitsStyle_SQLite,
-                                          unitsStyle_cur,
-                                          produceTabular,
-                                          produceSQLite)) {
-                    break;
-                }
+            for (auto &currentStyle : state.dataOutRptTab->tabularReportPasses) {
 
                 // do unit conversions if necessary
                 std::string perAreaUnitName;
-                if ((unitsStyle_cur == OutputReportTabular::UnitsStyle::InchPound) ||
-                    (unitsStyle_cur == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity)) {
+                if ((currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound) ||
+                    (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity)) {
                     int unitConvIndex = 0;
                     std::string SIunit = "[~~$~~/m2]";
                     OutputReportTabular::LookupSItoIP(state, SIunit, unitConvIndex, perAreaUnitName);
@@ -4165,42 +4145,42 @@ void WriteTabularTariffReports(EnergyPlusData &state)
                         }
                     }
                 }
-                tableBody(1, 1) = OutputReportTabular::RealToStr(elecTotalCost, 2);
-                tableBody(2, 1) = OutputReportTabular::RealToStr(gasTotalCost, 2);
-                tableBody(3, 1) = OutputReportTabular::RealToStr(otherTotalCost, 2);
-                tableBody(4, 1) = OutputReportTabular::RealToStr(allTotalCost, 2);
+                tableBody(1, 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, elecTotalCost, 2);
+                tableBody(2, 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, gasTotalCost, 2);
+                tableBody(3, 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, otherTotalCost, 2);
+                tableBody(4, 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, allTotalCost, 2);
                 if (state.dataOutRptTab->buildingGrossFloorArea > 0.0) {
-                    tableBody(1, 2) =
-                        OutputReportTabular::RealToStr((elecTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
-                    tableBody(2, 2) =
-                        OutputReportTabular::RealToStr((gasTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
-                    tableBody(3, 2) =
-                        OutputReportTabular::RealToStr((otherTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
-                    tableBody(4, 2) =
-                        OutputReportTabular::RealToStr((allTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
+                    tableBody(1, 2) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (elecTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
+                    tableBody(2, 2) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (gasTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
+                    tableBody(3, 2) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (otherTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
+                    tableBody(4, 2) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (allTotalCost / state.dataOutRptTab->buildingGrossFloorArea) * perAreaUnitConv, 2);
                 }
                 if (state.dataOutRptTab->buildingConditionedFloorArea > 0.0) {
-                    tableBody(1, 3) =
-                        OutputReportTabular::RealToStr((elecTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
-                    tableBody(2, 3) =
-                        OutputReportTabular::RealToStr((gasTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
-                    tableBody(3, 3) =
-                        OutputReportTabular::RealToStr((otherTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
-                    tableBody(4, 3) =
-                        OutputReportTabular::RealToStr((allTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
+                    tableBody(1, 3) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (elecTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
+                    tableBody(2, 3) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (gasTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
+                    tableBody(3, 3) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (otherTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
+                    tableBody(4, 3) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, (allTotalCost / state.dataOutRptTab->buildingConditionedFloorArea) * perAreaUnitConv, 2);
                 }
                 columnWidth = 14; // array assignment - same for all columns
-                if (produceTabular) {
+                if (currentStyle.produceTabular) {
                     OutputReportTabular::WriteSubtitle(state, "Annual Cost");
                     OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
                 }
-                if (produceSQLite) {
+                if (currentStyle.produceSQLite) {
                     if (state.dataSQLiteProcedures->sqlite) {
                         state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
                             tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Annual Cost");
                     }
                 }
-                if (produceTabular) {
+                if (currentStyle.produceJSON) {
                     if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
                         state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
                             tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Annual Cost");
@@ -4223,243 +4203,268 @@ void WriteTabularTariffReports(EnergyPlusData &state)
             columnHead(4) = "Buy or Sell";
             columnHead(5) = "Group";
             columnHead(6) = "Annual Cost (~~$~~)";
-            for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
-                auto const &tariff = s_econ->tariff(iTariff);
-                rowHead(iTariff) = tariff.tariffName;
-                tableBody(1, iTariff) = yesNoNames[(int)tariff.isSelected];
-                tableBody(2, iTariff) = yesNoNames[(int)tariff.isQualified];
+            for (auto &currentStyle : state.dataOutRptTab->tabularReportPasses) {
+                for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
+                    auto const &tariff = s_econ->tariff(iTariff);
+                    rowHead(iTariff) = tariff.tariffName;
+                    tableBody(1, iTariff) = yesNoNames[(int)tariff.isSelected];
+                    tableBody(2, iTariff) = yesNoNames[(int)tariff.isQualified];
 
-                tableBody(3, iTariff) = tariff.reportMeter;
+                    tableBody(3, iTariff) = tariff.reportMeter;
 
-                if (tariff.buyOrSell == BuySell::BuyFromUtility) {
-                    tableBody(4, iTariff) = "Buy";
-                } else if (tariff.buyOrSell == BuySell::SellToUtility) {
-                    tableBody(4, iTariff) = "Sell";
-                } else if (tariff.buyOrSell == BuySell::NetMetering) {
-                    tableBody(4, iTariff) = "Net";
+                    if (tariff.buyOrSell == BuySell::BuyFromUtility) {
+                        tableBody(4, iTariff) = "Buy";
+                    } else if (tariff.buyOrSell == BuySell::SellToUtility) {
+                        tableBody(4, iTariff) = "Sell";
+                    } else if (tariff.buyOrSell == BuySell::NetMetering) {
+                        tableBody(4, iTariff) = "Net";
+                    }
+
+                    if (tariff.groupName == "") {
+                        tableBody(5, iTariff) = "(none)";
+                    } else {
+                        tableBody(5, iTariff) = tariff.groupName;
+                    }
+                    tableBody(6, iTariff) = OutputReportTabular::RealToStr(currentStyle.formatReals, tariff.totalAnnualCost, 2);
                 }
-
-                if (tariff.groupName == "") {
-                    tableBody(5, iTariff) = "(none)";
-                } else {
-                    tableBody(5, iTariff) = tariff.groupName;
+                columnWidth = 14; // array assignment - same for all columns
+                if (currentStyle.produceTabular) {
+                    OutputReportTabular::WriteSubtitle(state, "Tariff Summary");
+                    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
                 }
-                tableBody(6, iTariff) = OutputReportTabular::RealToStr(tariff.totalAnnualCost, 2);
-            }
-            columnWidth = 14; // array assignment - same for all columns
-            OutputReportTabular::WriteSubtitle(state, "Tariff Summary");
-            OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            if (state.dataSQLiteProcedures->sqlite) {
-                state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                    tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Tariff Summary");
-            }
-            if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                    tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Tariff Summary");
+                if (currentStyle.produceSQLite) {
+                    if (state.dataSQLiteProcedures->sqlite) {
+                        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                            tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Tariff Summary");
+                    }
+                }
+                if (currentStyle.produceJSON) {
+                    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                            tableBody, rowHead, columnHead, "Economics Results Summary Report", "Entire Facility", "Tariff Summary");
+                    }
+                }
             }
             columnHead.deallocate();
             rowHead.deallocate();
             columnWidth.deallocate();
             tableBody.deallocate();
-        }
-        //---------------------------------
-        // Tariff Report
-        //---------------------------------
-        if (state.dataOutRptTab->displayTariffReport) {
-            for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
-                auto const &tariff = s_econ->tariff(iTariff);
-                auto const &computation = s_econ->computation(iTariff);
-                OutputReportTabular::WriteReportHeaders(state, "Tariff Report", tariff.tariffName, OutputProcessor::StoreType::Average);
-                rowHead.allocate(7);
-                columnHead.allocate(1);
-                columnWidth.allocate(1);
-                tableBody.allocate(1, 7);
-                tableBody = "";
-                columnHead(1) = "Parameter";
-                rowHead(1) = "Meter";
-                rowHead(2) = "Selected";
-                rowHead(3) = "Group";
-                rowHead(4) = "Qualified";
-                rowHead(5) = "Disqualifier";
-                rowHead(6) = "Computation";
-                rowHead(7) = "Units";
-                tableBody(1, 1) = tariff.reportMeter;
-                if (tariff.isSelected) {
-                    tableBody(1, 2) = "Yes";
-                } else {
-                    tableBody(1, 2) = "No";
-                }
-                if (tariff.groupName == "") {
-                    tableBody(1, 3) = "(none)";
-                } else {
-                    tableBody(1, 3) = tariff.groupName;
-                }
-                if (tariff.isQualified) {
-                    tableBody(1, 4) = "Yes";
-                } else {
-                    tableBody(1, 4) = "No";
-                }
-                if (tariff.isQualified) {
-                    tableBody(1, 5) = "n/a";
-                } else {
-                    tableBody(1, 5) = econVar(tariff.ptDisqualifier).name;
-                }
-                if (computation.isUserDef) {
-                    tableBody(1, 6) = computation.computeName;
-                } else {
-                    tableBody(1, 6) = "automatic";
-                }
-                switch (tariff.convChoice) {
-                case EconConv::USERDEF: {
-                    tableBody(1, 7) = "User Defined";
-                } break;
-                case EconConv::KWH: {
-                    tableBody(1, 7) = "kWh";
-                } break;
-                case EconConv::THERM: {
-                    tableBody(1, 7) = "Therm";
-                } break;
-                case EconConv::MMBTU: {
-                    tableBody(1, 7) = "MMBtu";
-                } break;
-                case EconConv::MJ: {
-                    tableBody(1, 7) = "MJ";
-                } break;
-                case EconConv::KBTU: {
-                    tableBody(1, 7) = "kBtu";
-                } break;
-                case EconConv::MCF: {
-                    tableBody(1, 7) = "MCF";
-                } break;
-                case EconConv::CCF: {
-                    tableBody(1, 7) = "CCF";
-                } break;
-                default:
-                    break;
-                }
-                columnWidth = 14; // array assignment - same for all columns
-                OutputReportTabular::WriteSubtitle(state, "General");
-                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-                if (state.dataSQLiteProcedures->sqlite) {
-                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                        tableBody, rowHead, columnHead, "Tariff Report", tariff.tariffName, "General");
-                }
-                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                        tableBody, rowHead, columnHead, "Tariff Report", tariff.tariffName, "General");
-                }
-                columnHead.deallocate();
-                rowHead.deallocate();
-                columnWidth.deallocate();
-                tableBody.deallocate();
-                //---- Categories
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                econVar(tariff.cats[(int)Cat::EnergyCharges]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::DemandCharges]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::ServiceCharges]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Basis]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Adjustment]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Surcharge]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Subtotal]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Taxes]).activeNow = true;
-                econVar(tariff.cats[(int)Cat::Total]).activeNow = true;
-                ReportEconomicVariable(state, "Categories", false, true, tariff.tariffName);
-                //---- Charges
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
-                    if (econVar(kVar).tariffIndx == iTariff) {
-                        if ((econVar(kVar).kindOfObj == ObjType::ChargeSimple) || (econVar(kVar).kindOfObj == ObjType::ChargeBlock)) {
-                            econVar(kVar).activeNow = true;
-                        }
+            //---------------------------------
+            // Tariff Report
+            //---------------------------------
+            if (state.dataOutRptTab->displayTariffReport) {
+                for (auto &currentStyle : state.dataOutRptTab->tabularReportPasses) {
+                    // Clear this for each style pass
+                    for (auto &e : econVar) {
+                        e.isReported = false;
                     }
-                }
-                ReportEconomicVariable(state, "Charges", true, true, tariff.tariffName);
-                //---- Sources for Charges
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
-                    if (econVar(kVar).tariffIndx == iTariff) {
-                        int indexInChg = econVar(kVar).index;
-                        if (econVar(kVar).kindOfObj == ObjType::ChargeSimple) {
-                            auto &chargeSimple = s_econ->chargeSimple(indexInChg);
-                            if (chargeSimple.sourcePt > 0) {
-                                econVar(chargeSimple.sourcePt).activeNow = true;
-                            }
-                        } else if (econVar(kVar).kindOfObj == ObjType::ChargeBlock) {
-                            auto &chargeBlock = s_econ->chargeBlock(indexInChg);
-                            if (chargeBlock.sourcePt > 0) {
-                                econVar(chargeBlock.sourcePt).activeNow = true;
-                            }
-                        }
-                    }
-                }
-                ReportEconomicVariable(state, "Corresponding Sources for Charges", false, false, tariff.tariffName);
-                //---- Rachets
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
-                    if (econVar(kVar).tariffIndx == iTariff) {
-                        if (econVar(kVar).kindOfObj == ObjType::Ratchet) {
-                            econVar(kVar).activeNow = true;
-                        }
-                    }
-                }
-                ReportEconomicVariable(state, "Ratchets", false, false, tariff.tariffName);
-                //---- Qualifies
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
-                    if (econVar(kVar).tariffIndx == iTariff) {
-                        if (econVar(kVar).kindOfObj == ObjType::Qualify) {
-                            econVar(kVar).activeNow = true;
-                        }
-                    }
-                }
-                ReportEconomicVariable(state, "Qualifies", false, false, tariff.tariffName);
-                //---- Native Variables
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = tariff.firstNative; kVar <= tariff.lastNative; ++kVar) {
-                    econVar(kVar).activeNow = true;
-                }
-                ReportEconomicVariable(state, "Native Variables", false, false, tariff.tariffName);
-                //---- Other Variables
-                for (auto &e : econVar) {
-                    e.activeNow = false;
-                }
-                for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
-                    if (econVar(kVar).tariffIndx == iTariff) {
-                        if (!econVar(kVar).isReported) {
-                            econVar(kVar).activeNow = true;
-                        }
-                    }
-                }
-                ReportEconomicVariable(state, "Other Variables", false, false, tariff.tariffName);
-                //---- Computation
-                if (computation.isUserDef) {
-                    OutputReportTabular::WriteTextLine(state, "Computation -  User Defined", true);
-                } else {
-                    OutputReportTabular::WriteTextLine(state, "Computation -  Automatic", true);
-                }
-                std::string outString = "";
-                for (int lStep = computation.firstStep; lStep <= computation.lastStep; ++lStep) {
-                    auto &step = s_econ->steps(lStep);
 
-                    if (step.type == StepType::EOL) {
-                        OutputReportTabular::WriteTextLine(state, rstrip(outString));
-                        outString = "";
-                    } else if (step.type == StepType::Var) {
-                        outString = econVar(step.varNum).name + ' ' + outString;
-                    } else if (step.type == StepType::Op) {
-                        outString = format("{} {}", opNamesUC[(int)step.op], outString);
+                    for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
+                        auto const &tariff = s_econ->tariff(iTariff);
+                        auto const &computation = s_econ->computation(iTariff);
+                        if (currentStyle.produceTabular) {
+                            OutputReportTabular::WriteReportHeaders(state, "Tariff Report", tariff.tariffName, OutputProcessor::StoreType::Average);
+                        }
+                        rowHead.allocate(7);
+                        columnHead.allocate(1);
+                        columnWidth.allocate(1);
+                        tableBody.allocate(1, 7);
+                        tableBody = "";
+                        columnHead(1) = "Parameter";
+                        rowHead(1) = "Meter";
+                        rowHead(2) = "Selected";
+                        rowHead(3) = "Group";
+                        rowHead(4) = "Qualified";
+                        rowHead(5) = "Disqualifier";
+                        rowHead(6) = "Computation";
+                        rowHead(7) = "Units";
+                        tableBody(1, 1) = tariff.reportMeter;
+                        if (tariff.isSelected) {
+                            tableBody(1, 2) = "Yes";
+                        } else {
+                            tableBody(1, 2) = "No";
+                        }
+                        if (tariff.groupName == "") {
+                            tableBody(1, 3) = "(none)";
+                        } else {
+                            tableBody(1, 3) = tariff.groupName;
+                        }
+                        if (tariff.isQualified) {
+                            tableBody(1, 4) = "Yes";
+                        } else {
+                            tableBody(1, 4) = "No";
+                        }
+                        if (tariff.isQualified) {
+                            tableBody(1, 5) = "n/a";
+                        } else {
+                            tableBody(1, 5) = econVar(tariff.ptDisqualifier).name;
+                        }
+                        if (computation.isUserDef) {
+                            tableBody(1, 6) = computation.computeName;
+                        } else {
+                            tableBody(1, 6) = "automatic";
+                        }
+                        switch (tariff.convChoice) {
+                        case EconConv::USERDEF: {
+                            tableBody(1, 7) = "User Defined";
+                        } break;
+                        case EconConv::KWH: {
+                            tableBody(1, 7) = "kWh";
+                        } break;
+                        case EconConv::THERM: {
+                            tableBody(1, 7) = "Therm";
+                        } break;
+                        case EconConv::MMBTU: {
+                            tableBody(1, 7) = "MMBtu";
+                        } break;
+                        case EconConv::MJ: {
+                            tableBody(1, 7) = "MJ";
+                        } break;
+                        case EconConv::KBTU: {
+                            tableBody(1, 7) = "kBtu";
+                        } break;
+                        case EconConv::MCF: {
+                            tableBody(1, 7) = "MCF";
+                        } break;
+                        case EconConv::CCF: {
+                            tableBody(1, 7) = "CCF";
+                        } break;
+                        default:
+                            break;
+                        }
+                        columnWidth = 14; // array assignment - same for all columns
+                        if (currentStyle.produceTabular) {
+                            OutputReportTabular::WriteSubtitle(state, "General");
+                            OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+                        }
+                        if (currentStyle.produceSQLite) {
+                            if (state.dataSQLiteProcedures->sqlite) {
+                                state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                                    tableBody, rowHead, columnHead, "Tariff Report", tariff.tariffName, "General");
+                            }
+                        }
+                        if (currentStyle.produceJSON) {
+                            if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                                state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                                    tableBody, rowHead, columnHead, "Tariff Report", tariff.tariffName, "General");
+                            }
+                        }
+                        columnHead.deallocate();
+                        rowHead.deallocate();
+                        columnWidth.deallocate();
+                        tableBody.deallocate();
+                        //---- Categories
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        econVar(tariff.cats[(int)Cat::EnergyCharges]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::DemandCharges]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::ServiceCharges]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Basis]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Adjustment]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Surcharge]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Subtotal]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Taxes]).activeNow = true;
+                        econVar(tariff.cats[(int)Cat::Total]).activeNow = true;
+                        ReportEconomicVariable(state, "Categories", false, true, tariff.tariffName, currentStyle);
+                        //---- Charges
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
+                            if (econVar(kVar).tariffIndx == iTariff) {
+                                if ((econVar(kVar).kindOfObj == ObjType::ChargeSimple) || (econVar(kVar).kindOfObj == ObjType::ChargeBlock)) {
+                                    econVar(kVar).activeNow = true;
+                                }
+                            }
+                        }
+                        ReportEconomicVariable(state, "Charges", true, true, tariff.tariffName, currentStyle);
+                        //---- Sources for Charges
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
+                            if (econVar(kVar).tariffIndx == iTariff) {
+                                int indexInChg = econVar(kVar).index;
+                                if (econVar(kVar).kindOfObj == ObjType::ChargeSimple) {
+                                    auto &chargeSimple = s_econ->chargeSimple(indexInChg);
+                                    if (chargeSimple.sourcePt > 0) {
+                                        econVar(chargeSimple.sourcePt).activeNow = true;
+                                    }
+                                } else if (econVar(kVar).kindOfObj == ObjType::ChargeBlock) {
+                                    auto &chargeBlock = s_econ->chargeBlock(indexInChg);
+                                    if (chargeBlock.sourcePt > 0) {
+                                        econVar(chargeBlock.sourcePt).activeNow = true;
+                                    }
+                                }
+                            }
+                        }
+                        ReportEconomicVariable(state, "Corresponding Sources for Charges", false, false, tariff.tariffName, currentStyle);
+                        //---- Rachets
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
+                            if (econVar(kVar).tariffIndx == iTariff) {
+                                if (econVar(kVar).kindOfObj == ObjType::Ratchet) {
+                                    econVar(kVar).activeNow = true;
+                                }
+                            }
+                        }
+                        ReportEconomicVariable(state, "Ratchets", false, false, tariff.tariffName, currentStyle);
+                        //---- Qualifies
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
+                            if (econVar(kVar).tariffIndx == iTariff) {
+                                if (econVar(kVar).kindOfObj == ObjType::Qualify) {
+                                    econVar(kVar).activeNow = true;
+                                }
+                            }
+                        }
+                        ReportEconomicVariable(state, "Qualifies", false, false, tariff.tariffName, currentStyle);
+                        //---- Native Variables
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = tariff.firstNative; kVar <= tariff.lastNative; ++kVar) {
+                            econVar(kVar).activeNow = true;
+                        }
+                        ReportEconomicVariable(state, "Native Variables", false, false, tariff.tariffName, currentStyle);
+                        //---- Other Variables
+                        for (auto &e : econVar) {
+                            e.activeNow = false;
+                        }
+                        for (int kVar = 1; kVar <= s_econ->numEconVar; ++kVar) {
+                            if (econVar(kVar).tariffIndx == iTariff) {
+                                if (!econVar(kVar).isReported) {
+                                    econVar(kVar).activeNow = true;
+                                }
+                            }
+                        }
+                        ReportEconomicVariable(state, "Other Variables", false, false, tariff.tariffName, currentStyle);
+                        //---- Computation
+                        if (currentStyle.produceTabular) {
+                            if (computation.isUserDef) {
+                                OutputReportTabular::WriteTextLine(state, "Computation -  User Defined", true);
+                            } else {
+                                OutputReportTabular::WriteTextLine(state, "Computation -  Automatic", true);
+                            }
+                            std::string outString = "";
+                            for (int lStep = computation.firstStep; lStep <= computation.lastStep; ++lStep) {
+                                auto &step = s_econ->steps(lStep);
+
+                                if (step.type == StepType::EOL) {
+                                    OutputReportTabular::WriteTextLine(state, rstrip(outString));
+                                    outString = "";
+                                } else if (step.type == StepType::Var) {
+                                    outString = econVar(step.varNum).name + ' ' + outString;
+                                } else if (step.type == StepType::Op) {
+                                    outString = format("{} {}", opNamesUC[(int)step.op], outString);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -4516,8 +4521,12 @@ void getMaxAndSum(EnergyPlusData &state, int const varPointer, Real64 &sumResult
     maxResult = maximumVal;
 }
 
-void ReportEconomicVariable(
-    EnergyPlusData &state, std::string const &titleString, bool const includeCategory, bool const showCurrencySymbol, std::string const &forString)
+void ReportEconomicVariable(EnergyPlusData &state,
+                            std::string const &titleString,
+                            bool const includeCategory,
+                            bool const showCurrencySymbol,
+                            std::string const &forString,
+                            OutputReportTabular::tabularReportStyle &style)
 {
     //    AUTHOR         Jason Glazer of GARD Analytics, Inc.
     //    DATE WRITTEN   July 2004
@@ -4603,14 +4612,14 @@ void ReportEconomicVariable(
             for (jMonth = 1; jMonth <= 12; ++jMonth) { // note not all months get printed out if more than 12 are used.- need to fix this later
                 curVal = econVar(iVar).values(jMonth);
                 if ((curVal > 0) && (curVal < 1)) {
-                    tableBody(jMonth, nCntOfVar) = OutputReportTabular::RealToStr(curVal, 4);
+                    tableBody(jMonth, nCntOfVar) = OutputReportTabular::RealToStr(style.formatReals, curVal, 4);
                 } else {
-                    tableBody(jMonth, nCntOfVar) = OutputReportTabular::RealToStr(curVal, 2);
+                    tableBody(jMonth, nCntOfVar) = OutputReportTabular::RealToStr(style.formatReals, curVal, 2);
                 }
             }
             getMaxAndSum(state, iVar, sumVal, maximumVal);
-            tableBody(13, nCntOfVar) = OutputReportTabular::RealToStr(sumVal, 2);
-            tableBody(14, nCntOfVar) = OutputReportTabular::RealToStr(maximumVal, 2);
+            tableBody(13, nCntOfVar) = OutputReportTabular::RealToStr(style.formatReals, sumVal, 2);
+            tableBody(14, nCntOfVar) = OutputReportTabular::RealToStr(style.formatReals, maximumVal, 2);
             if (includeCategory) {
                 // first find category
                 curCategory = 0;
@@ -4645,14 +4654,21 @@ void ReportEconomicVariable(
         }
     }
     columnWidth = 14; // array assignment - same for all columns
-    OutputReportTabular::WriteSubtitle(state, titleString);
-    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-    if (state.dataSQLiteProcedures->sqlite) {
-        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody, rowHead, columnHead, "Tariff Report", forString, titleString);
+    if (style.produceTabular) {
+        OutputReportTabular::WriteSubtitle(state, titleString);
+        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
     }
-    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-            tableBody, rowHead, columnHead, "Tariff Report", forString, titleString);
+    if (style.produceSQLite) {
+        if (state.dataSQLiteProcedures->sqlite) {
+            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                tableBody, rowHead, columnHead, "Tariff Report", forString, titleString);
+        }
+    }
+    if (style.produceJSON) {
+        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                tableBody, rowHead, columnHead, "Tariff Report", forString, titleString);
+        }
     }
     columnHead.deallocate();
     rowHead.deallocate();

@@ -1299,6 +1299,16 @@ associated with this zone.
 
 If the input is \emph{coincident} the zone equipment will be sized on the coincident zone load across all spaces in the zone. If the input is \emph{noncoincident} the zone equipment will be sized on the sum of the noncoincident space loads. The default is \emph{coincident}. This field is ignored unless \hyperref[zoneairheatbalancealgorithm]{ZoneAirHeatBalanceAlgorithm} ``Do Space Heat Balance for Sizing'' is Yes.
 
+\paragraph{Field: Heating Coil Sizing Method}\label{field-heating-coil-sizing-method-0101}
+
+This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
+
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} above to correctly account for latent loads. 
+
+\paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0101}
+
+This input sets a limit to how much the heating capacity can exceed the cooling load or cooling capacity required to meet the cooling load including the outdoor air load. If the heating capacity is determined to be larger than the cooling load multiplied by this value, and also considers the value of the DX Heating Coil Sizing Ratio specified in parent objects, then the heating capacity will be limited by this input. Otherwise the heating capacity considers only the DX Heating Coil Sizing Ratio specified in parent objects.
+
 An IDF example:
 
 \begin{lstlisting}
@@ -1340,7 +1350,9 @@ An IDF example:
       0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
       ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
       ,                        !- Zone Humidistat Humidification Set Point Schedule Name
-      Coincident;              !- Type of Space Sum to Use
+      Coincident,              !- Type of Space Sum to Use
+      Cooling,                 !- Heating Coil Sizing Method
+      1.1;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio
       
   DesignSpecification:OutdoorAir,
       DSOA1,                   !- Name
@@ -1846,6 +1858,16 @@ Specifies how the central cooling coil will be controlled, which affects the coi
 
 The Occupant Diversity (D) as defined in ASHRAE Standard 62.1. The Occupant Diversity is a ratio of the expected peak population to the design zone population for all zones attached to the air system. If left blank or set to autosize, EnergyPlus will calculate it by using the people schedules and design levels included in the model.
 
+\paragraph{Field: Heating Coil Sizing Method}\label{field-heating-coil-sizing-method-0102}
+
+This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
+
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} in the \hyperref[sizingzone]{Sizing:Zone} object to correctly account for latent loads. 
+
+\paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0102}
+
+This input sets a limit to how much the heating capacity can exceed the cooling load or cooling capacity required to meet the cooling load including the outdoor air load. If the heating capacity is determined to be larger than the cooling load multiplied by this value, and also considers the value of the DX Heating Coil Sizing Ratio specified in parent objects, then the heating capacity will be limited by this input. Otherwise the heating capacity considers only the DX Heating Coil Sizing Ratio specified in parent objects.
+
 An IDF example:
 
 \begin{lstlisting}
@@ -1886,7 +1908,12 @@ Sizing:System,
   HeatingDesignCapacity,   !- Heating Design Capacity Method
   autosize,                !- Heating Design Capacity {W}
   ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-  ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+  ,                        !- Fraction of Autosized Cooling Design Capacity {-}
+  ,                        !- Central Cooling Capacity Control Method
+  ,                        !- Occupant Diversity
+  ,                        !- Heating Coil Sizing Method
+  ;                        !- Maximum Heating Capacity To Cooling Capacity Sizing Ratio
+
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-006}

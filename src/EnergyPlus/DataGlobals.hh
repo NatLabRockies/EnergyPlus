@@ -162,6 +162,7 @@ struct DataGlobal : BaseGlobalStruct
     bool AnyBasementsInModel = false;              // true if there are any basements in the input file
     bool DoCoilDirectSolutions = false;            // true if use coil direction solutions
     bool createPerfLog = false; // true if the _perflog.csv file should be created and a PerformancePrecisionTradeoffs object is used
+    bool ReportPlantCompWaterFlowDataFlag = true;
     void (*fProgressPtr)(int const) = nullptr;
     void (*fMessagePtr)(std::string const &) = nullptr;
     std::function<void(int const)> progressCallback = nullptr;

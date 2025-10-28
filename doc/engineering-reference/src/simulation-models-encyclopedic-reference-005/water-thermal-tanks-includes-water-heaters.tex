@@ -498,7 +498,17 @@ Note: All heat pump water heater output variables, including off-cycle ancillary
 
 \subsection{Stratified Water Thermal Tank}\label{stratified-water-thermal-tank}
 
-The input objects WaterHeater:Stratified and ThermalStorage:ChilledWater:Stratified provide models for a stratified water thermal tank that divides the water tank into multiple nodes of equal volume. This model is used for both the stratified water heater and the stratified chilled water storage tank. The nodes are coupled by vertical conduction effects, internode fluid flow, and temperature inversion mixing. The object simultaneously solves the differential equations governing the energy balances on the nodes using an analytical solution to a simplified representation of the heat balance equation. The system time step is divided into multiple substeps at which control decisions are evaluated that allow the simulation to capture events that occur on a short time scale.
+The input objects WaterHeater:Stratified,
+ThermalStorage:ChilledWater:Stratified, and ThermalStorage:HotWater:Stratified
+provide models for a stratified water thermal tank that divides the water tank
+into multiple nodes of equal volume. This model is used for both the stratified
+water heater and the stratified hot and chilled water storage tank. The nodes are
+coupled by vertical conduction effects, internode fluid flow, and temperature
+inversion mixing. The object simultaneously solves the differential equations
+governing the energy balances on the nodes using an analytical solution to a
+simplified representation of the heat balance equation. The system time step is
+divided into multiple substeps at which control decisions are evaluated that
+allow the simulation to capture events that occur on a short time scale.
 
 \subsubsection{Energy Balance}\label{energy-balance-1}
 
@@ -693,6 +703,15 @@ And for the use side connection:
     b_n &= \varepsilon_{use} \dot{m}_{use} c_p T_{use}
   \end{array}
 \end{equation}
+
+Note that two schedule fields, ``Use Side Flow Direction Schedule'' and ``Source Side
+Flow Direction Schedule'', are available in the ThermalStorage:HotWater:Stratified
+to allow the user to specify the flow direction of the use side and source side
+plant connections. The schedule value of 1 indicates that the water flows in at
+the inlet node and out the outlet node, while a value of -1 indicates that the
+use side water flows out of the tank at the use side inlet node and in the
+outlet node. In short, the inlet and outlet nodes are swapped when the schedule
+is -1.
 
 \paragraph{Internodal Flow}
 

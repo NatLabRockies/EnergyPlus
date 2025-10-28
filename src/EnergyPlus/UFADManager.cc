@@ -693,12 +693,13 @@ namespace RoomAir {
         } // END FLOOR
     }
 
-    static constexpr std::array<DataHeatBalance::IntGainType, 51> IntGainTypesOccupied = {
+    static constexpr std::array<DataHeatBalance::IntGainType, 52> IntGainTypesOccupied = {
         DataHeatBalance::IntGainType::People,
         DataHeatBalance::IntGainType::WaterHeaterMixed,
         DataHeatBalance::IntGainType::WaterHeaterStratified,
         DataHeatBalance::IntGainType::ThermalStorageChilledWaterMixed,
         DataHeatBalance::IntGainType::ThermalStorageChilledWaterStratified,
+        DataHeatBalance::IntGainType::ThermalStorageHotWaterStratified,
         DataHeatBalance::IntGainType::ElectricEquipment,
         DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
         DataHeatBalance::IntGainType::GasEquipment,
@@ -751,7 +752,7 @@ namespace RoomAir {
 
     // Explicitly list internal gains not applicable for UFAD
     // Explicitly list internal gains not applicable for Displacement Vent
-    static constexpr std::array<DataHeatBalance::IntGainType, 2> ExcludedIntGainTypes = {
+    [[maybe_unused]] static constexpr std::array<DataHeatBalance::IntGainType, 2> ExcludedIntGainTypes = {
         DataHeatBalance::IntGainType::ZoneContaminantSourceAndSinkCarbonDioxide,
         DataHeatBalance::IntGainType::ZoneContaminantSourceAndSinkGenericContam};
 

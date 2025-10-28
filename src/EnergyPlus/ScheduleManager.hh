@@ -223,7 +223,8 @@ namespace Sched {
         bool checkValsForLimitViolations(EnergyPlusData &state) const;
         bool checkValsForBadIntegers(EnergyPlusData &state) const;
         void populateFromMinuteVals(EnergyPlusData &state, std::array<Real64, Constant::iMinutesInDay> const &minuteVals);
-        std::vector<Real64> const &getDayVals([[maybe_unused]] EnergyPlusData &state, int jDay = -1, int dayOfWeek = -1)
+        std::vector<Real64> const &
+        getDayVals([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int jDay = -1, [[maybe_unused]] int dayOfWeek = -1)
         {
             return tsVals;
         }

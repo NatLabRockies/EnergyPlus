@@ -2568,7 +2568,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
     int SysNum = 1;
     int ZoneNodeNum = 1;
     bool FirstHVACIteration = true;
-    Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
+    // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
     PoweredInductionUnits::InitPIU(*state, SysNum, FirstHVACIteration); // Run thru init once with FirstHVACIteration set to true
@@ -2775,7 +2775,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     int SysNum = 1;
     int ZoneNodeNum = 1;
     bool FirstHVACIteration = true;
-    Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
+    // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
     PoweredInductionUnits::InitPIU(*state, SysNum, FirstHVACIteration); // Run thru init once with FirstHVACIteration set to true
@@ -3016,7 +3016,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     int SysNum = 1;
     int ZoneNodeNum = 1;
     bool FirstHVACIteration = true;
-    Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
+    // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
     PoweredInductionUnits::InitPIU(*state, SysNum, FirstHVACIteration); // Run thru init once with FirstHVACIteration set to true

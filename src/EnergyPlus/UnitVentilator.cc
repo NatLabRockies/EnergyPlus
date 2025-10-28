@@ -208,7 +208,6 @@ namespace UnitVentilator {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool ErrorsFound(false);       // Set to true if errors in input, fatal at end of routine
         int IOStatus;                  // Used in GetObjectItem
-        bool IsNotOK;                  // TRUE if there was a problem with a list name
         int NumFields;                 // Total number of fields in object
         int NumAlphas;                 // Number of Alphas for each GetObjectItem call
         int NumNumbers;                // Number of Numbers for each GetObjectItem call
@@ -926,7 +925,7 @@ namespace UnitVentilator {
             SetupOutputVariable(state,
                                 "Zone Unit Ventilator Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)unitVent.availStatus,
+                                unitVent.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 unitVent.Name);
@@ -942,11 +941,13 @@ namespace UnitVentilator {
 
             if (unitVent.HeatCoilPresent) {
                 ReportCoilSelection::setCoilSupplyFanInfo(
-                    state, unitVent.HeatCoilName, unitVent.heatCoilType, unitVent.FanName, unitVent.fanType, unitVent.Fan_Index);
+                    state, ReportCoilSelection::getReportIndex(state, unitVent.HeatCoilName, unitVent.heatCoilType),
+                    unitVent.FanName, unitVent.fanType, unitVent.Fan_Index);
             }
             if (unitVent.CoolCoilPresent) {
                 ReportCoilSelection::setCoilSupplyFanInfo(
-                    state, unitVent.CoolCoilName, unitVent.coolCoilType, unitVent.FanName, unitVent.fanType, unitVent.Fan_Index);
+                    state, ReportCoilSelection::getReportIndex(state, unitVent.CoolCoilName, unitVent.coolCoilType),
+                    unitVent.FanName, unitVent.fanType, unitVent.Fan_Index);
             }
         }
     }
@@ -1238,7 +1239,6 @@ namespace UnitVentilator {
         Real64 EnthSteamOutWet = 0.0;
         Real64 LatentHeatSteam = 0.0;
         Real64 SteamDensity = 0.0;
-        int CoilWaterOutletNode = 0;
         Real64 rho = 0.0;
         Real64 Cp = 0.0;
 

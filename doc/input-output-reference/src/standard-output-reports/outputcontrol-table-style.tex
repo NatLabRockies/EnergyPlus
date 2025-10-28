@@ -60,15 +60,20 @@ This field is optional and if not specified defaults to no unit conversions. Fou
 
 The current options are limited to just how the energy is being reported. The default is to report energy in the form of Joules but since the magnitude of those numbers for many buildings is very large, these other conversion factors are available.
 
-The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the \hyperref[outputtablemonthly]{Output:Table:Monthly} reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since they it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the tabular output file.~ In addition, this option does not effect the standard eplusout.eso file. The eplusout.eso file may be converted by using the ConvertESOMTR utility.
+The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the \hyperref[outputtablemonthly]{Output:Table:Monthly} reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since they it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the tabular output file.~ In addition, this option does not affect the standard eplusout.eso file. The eplusout.eso file may be converted by using the ConvertESOMTR utility.
+
+\paragraph{Field: Format Numeric Values}\label{field-format-numeric-values-tablestyle}
+
+This field determines if any rounding will be performed for the values in the tabular reports. If No, all digits are shown after the decimal point without any rounding (23.238769213). If Yes, values are rounded for readability (23.24). The number of digets will vary depending on the type of value.
 
 An example IDF input object follows.
 
 \begin{lstlisting}
 
 OutputControl:Table:Style,
-    Comma,                     ! Column Separator
-    InchPound;                 ! Unit Conversion
+    Comma,                     !- Column Separator
+    InchPound,                 !- Unit Conversion
+    Yes;                       !- Format Numeric Values
 \end{lstlisting}
 
 Examples of the tabular reports and descriptions are contained in the Output Details and Examples document.

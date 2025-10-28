@@ -30,6 +30,9 @@ target_include_directories(glfw PUBLIC
  ${PROJECT_SOURCE_DIR}/vendor/glfw/include
  ${PROJECT_SOURCE_DIR}/vendor/glfw/deps
 )
+if(NOT MSVC)
+  target_compile_options(glfw PRIVATE -Wno-deprecated-declarations)
+endif()
 
 # tess2 library
 file(GLOB libtess2_sources "${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Source/[a-zA-Z]*.c")

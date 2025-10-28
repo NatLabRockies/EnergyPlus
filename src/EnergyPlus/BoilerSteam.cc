@@ -148,7 +148,6 @@ namespace BoilerSteam {
 
         // Locals
         static constexpr std::string_view RoutineName("GetBoilerInput: ");
-        static constexpr std::string_view routineName = "GetBoilerInput";
 
         // LOCAL VARIABLES
         int BoilerNum; // boiler identifier

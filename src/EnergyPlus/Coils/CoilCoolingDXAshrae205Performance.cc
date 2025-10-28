@@ -195,7 +195,7 @@ void CoilCoolingDX205Performance::calculate_air_mass_flow(EnergyPlus::EnergyPlus
 
 void CoilCoolingDX205Performance::size(EnergyPlusData &state)
 {
-    for (int index = 0; index < speeds.size(); index++) {
+    for (int index = 0; index < static_cast<int>(speeds.size()); index++) {
         calculate_air_mass_flow(state, index);
     }
 }
@@ -212,7 +212,6 @@ void CoilCoolingDX205Performance::simulate(EnergyPlus::EnergyPlusData &state,
                                            bool const, // singleMode,
                                            Real64)     // LoadSHR)
 {
-    static constexpr std::string_view RoutineName = "CoilCoolingDX205Performance::simulate";
     Real64 reportingConstant = state.dataHVACGlobal->TimeStepSys * Constant::iSecsInHour;
     recoveredEnergyRate = 0.0;
     NormalSHR = 0.0;
@@ -246,7 +245,6 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
     // if not cycling (discrete): compressor_sequence_number = speed -1 & speed, MFR is different for each call to
     // performance. Results are interpolated between the 2 performance calls;
     // if not cycling (continuous): compressor_sequence_number = speed - 1 + ratio, MFR is scaled using the ratio
-    static constexpr std::string_view RoutineName = "CoilCoolingDX205Performance::calculate";
 
     const auto this_speed = max(speedNum, 1); // 1 for single-speed, speedNum for multispeed. Disallow speed = 0
 
@@ -303,7 +301,7 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
             // compressor_sequence_number = speed - 1 + ratio
             // For example, a speed number of 2 with a ratio between (0,1) indicates that the compressor is modulating between speeds 1 and 2 with the
             // given ratio. The ASHRAE205 model simply interpolates using a decimal fraction speed.
-            const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
+            [[maybe_unused]] const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
                 representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                           indoor_coil_entering_relative_humidity,
                                                                                           indoor_coil_entering_dry_bulb_temperature_K,

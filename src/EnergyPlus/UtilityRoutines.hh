@@ -165,7 +165,8 @@ void emitWarningMessages(EnergyPlusData &state,
                          std::initializer_list<std::string> const &msgs,
                          bool countAsError = false);
 
-void ShowFatalError(EnergyPlusData &state, std::string const &ErrorMessage, OptionalOutputFileRef OutUnit1 = {}, OptionalOutputFileRef OutUnit2 = {});
+[[noreturn]] void
+ShowFatalError(EnergyPlusData &state, std::string const &ErrorMessage, OptionalOutputFileRef OutUnit1 = {}, OptionalOutputFileRef OutUnit2 = {});
 
 void ShowSevereError(EnergyPlusData &state,
                      std::string const &ErrorMessage,
@@ -286,6 +287,15 @@ void ShowSevereEmptyField(EnergyPlusData &state,
                           std::string_view depFieldName = {},
                           std::string_view depFieldValue = {});
 void ShowSevereItemNotFound(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue);
+/// <summary>
+/// Similar to ShowSevereItemNotFound, except for the severe error added to the list contains the information about
+/// what item is missing.
+/// </summary>
+/// <param name="state">EnergyPus state, used for tracking the severe error</param>
+/// <param name="eoh">Error object header, used to get the routineName</param>
+/// <param name="fieldName">Name of the unmatched field</param>
+/// <param name="fieldValue">Value of the unmatched field</param>
+void ShowDetailedSevereItemNotFound(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue);
 void ShowSevereItemNotFoundAudit(EnergyPlusData &state, ErrorObjectHeader const &eoh, std::string_view fieldName, std::string_view fieldValue);
 
 void ShowSevereDuplicateAssignment(

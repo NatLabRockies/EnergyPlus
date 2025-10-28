@@ -104,12 +104,12 @@ namespace FuelCellElectricGenerator {
     constexpr std::array<std::string_view, (int)DataGenerators::AirSupRateMode::Num> airSupRateModeNamesUC = {
         "QUADRATIC FUNCTION OF FUEL RATE", "AIRRATIOBYSTOICS", "QUADRATICFUNCTIONOFELECTRICPOWER"}; // Seriously with the first one?
 
-    constexpr std::array<std::string_view, (int)DataGenerators::RecoverMode::Num> recoverModeNames = {"NoRecovery",
-                                                                                                      "RecoverBurnerInverterStorage",
-                                                                                                      "RecoverAuxiliaryBurner",
-                                                                                                      "RecoverInverterandStorage",
-                                                                                                      "RecoverInverter",
-                                                                                                      "RecoverElectricalStorage"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::RecoverMode::Num> recoverModeNames = {"NoRecovery",
+                                                                                                                       "RecoverBurnerInverterStorage",
+                                                                                                                       "RecoverAuxiliaryBurner",
+                                                                                                                       "RecoverInverterandStorage",
+                                                                                                                       "RecoverInverter",
+                                                                                                                       "RecoverElectricalStorage"};
     constexpr std::array<std::string_view, (int)DataGenerators::RecoverMode::Num> recoverModeNamesUC = {"NORECOVERY",
                                                                                                         "RECOVERBURNERINVERTERSTORAGE",
                                                                                                         "RECOVERAUXILIARYBURNER",
@@ -117,27 +117,28 @@ namespace FuelCellElectricGenerator {
                                                                                                         "RECOVERINVERTER",
                                                                                                         "RECOVERELECTRICALSTORAGE"};
 
-    constexpr std::array<std::string_view, (int)DataGenerators::ConstituentMode::Num> constituentModeNames = {"AmbientAir",
-                                                                                                              "UserDefinedConstituents"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::ConstituentMode::Num> constituentModeNames = {
+        "AmbientAir", "UserDefinedConstituents"};
     constexpr std::array<std::string_view, (int)DataGenerators::ConstituentMode::Num> constituentModeNamesUC = {"AMBIENTAIR",
                                                                                                                 "USERDEFINEDCONSTITUENTS"};
 
-    constexpr std::array<std::string_view, (int)DataGenerators::WaterTempMode::Num> waterTempModeNames = {
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::WaterTempMode::Num> waterTempModeNames = {
         "MainsWaterTemperature", "TemperatureFromAirNode", "TemperatureFromWaterNode", "TemperatureFromSchedule"};
     constexpr std::array<std::string_view, (int)DataGenerators::WaterTempMode::Num> waterTempModeNamesUC = {
         "MAINSWATERTEMPERATURE", "TEMPERATUREFROMAIRNODE", "TEMPERATUREFROMWATERNODE", "TEMPERATUREFROMSCHEDULE"};
 
-    constexpr std::array<std::string_view, (int)DataGenerators::InverterEfficiencyMode::Num> inverterEfficiencyModeNames = {"Constant", "Quadratic"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::InverterEfficiencyMode::Num> inverterEfficiencyModeNames = {
+        "Constant", "Quadratic"};
     constexpr std::array<std::string_view, (int)DataGenerators::InverterEfficiencyMode::Num> inverterEfficiencyModeNamesUC = {"CONSTANT",
                                                                                                                               "QUADRATIC"};
 
-    constexpr std::array<std::string_view, (int)DataGenerators::ExhaustGasHX::Num> exhaustGasHXNames = {
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::ExhaustGasHX::Num> exhaustGasHXNames = {
         "FixedEffectiveness", "EmpiricalUAeff", "FundementalUAeff", "Condensing"};
     constexpr std::array<std::string_view, (int)DataGenerators::ExhaustGasHX::Num> exhaustGasHXNamesUC = {
         "FIXEDEFFECTIVENESS", "EMPIRICALUAEFF", "FUNDEMENTALUAEFF", "CONDENSING"};
 
-    constexpr std::array<std::string_view, (int)DataGenerators::LossDestination::Num> lossDestinationNames = {"SurroundingZone",
-                                                                                                              "AirInletForFuelCell"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)DataGenerators::LossDestination::Num> lossDestinationNames = {"SurroundingZone",
+                                                                                                                               "AirInletForFuelCell"};
     constexpr std::array<std::string_view, (int)DataGenerators::LossDestination::Num> lossDestinationNamesUC = {"SURROUNDINGZONE",
                                                                                                                 "AIRINLETFORFUELCELL"};
 
@@ -904,8 +905,6 @@ namespace FuelCellElectricGenerator {
                                                                      s_ipsc->cAlphaFieldNames,
                                                                      s_ipsc->cNumericFieldNames);
 
-            ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, AlphArray(1)};
-
             int fuelCellNum = Util::FindItemInList(AlphArray(1), state.dataFuelCellElectGen->FuelCell, &FCDataStruct::NameElecStorage);
 
             if (fuelCellNum > 0) {
@@ -1023,8 +1022,6 @@ namespace FuelCellElectricGenerator {
                                                                          s_ipsc->lAlphaFieldBlanks,
                                                                          s_ipsc->cAlphaFieldNames,
                                                                          s_ipsc->cNumericFieldNames);
-
-                ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, AlphArray(1)};
 
                 int fuelCellNum = Util::FindItemInList(AlphArray(1), state.dataFuelCellElectGen->FuelCell, &FCDataStruct::NameStackCooler);
 

@@ -231,7 +231,6 @@ namespace VentilatedSlab {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool ErrorsFound(false);       // Set to true if errors in input, fatal at end of routine
         int IOStatus;                  // Used in GetObjectItem
-        bool IsNotOK;                  // TRUE if there was a problem with a list name
         int NumAlphas;                 // Number of Alphas for each GetObjectItem call
         int NumArgs;                   // Unused variable that is part of a subroutine call
         int NumNumbers;                // Number of Numbers for each GetObjectItem call
@@ -1348,7 +1347,7 @@ namespace VentilatedSlab {
             SetupOutputVariable(state,
                                 "Zone Ventilated Slab Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)ventSlab.availStatus,
+                                ventSlab.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 ventSlab.Name);
@@ -1383,8 +1382,6 @@ namespace VentilatedSlab {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int AirRelNode; // relief air node number in Ventilated Slab loop
         Real64 RhoAir;  // air density at InNode
-        Real64 TempSteamIn;
-        Real64 SteamDensity;
         Real64 rho;
 
         // Do the one time initializations
@@ -2139,7 +2136,6 @@ namespace VentilatedSlab {
                                 EnthSteamOutWet = steam->getSatEnthalpy(state, TempSteamIn, 0.0, RoutineName);
                                 LatentHeatSteam = EnthSteamInDry - EnthSteamOutWet;
                                 SteamDensity = steam->getSatDensity(state, TempSteamIn, 1.0, RoutineName);
-                                int DummyWaterIndex = 1;
 
                                 auto *water = Fluid::GetWater(state);
                                 Cp = water->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);

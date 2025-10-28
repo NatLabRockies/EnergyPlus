@@ -5670,7 +5670,7 @@ namespace CondenserLoopTowers {
         return outletWaterTempLocal;
     }
 
-    Real64 CoolingTower::calculateVariableSpeedApproach(EnergyPlusData &state,
+    Real64 CoolingTower::calculateVariableSpeedApproach([[maybe_unused]] EnergyPlusData &state,
                                                         Real64 const PctWaterFlow,      // Water flow ratio of cooling tower
                                                         Real64 const airFlowRatioLocal, // Air flow ratio of cooling tower
                                                         Real64 const Twb,               // Inlet air wet-bulb temperature [C]

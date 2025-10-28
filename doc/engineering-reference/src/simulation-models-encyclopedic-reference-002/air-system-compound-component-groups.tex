@@ -3055,3 +3055,307 @@ Where $\mathrm{Norminal Auxiliary Power}$ and $\mathrm{Electricity}_{\mathrm{Sta
 \begin{equation}
 \mathrm{EIR}_{\mathrm{auxiliary}} = a + b \times T_{\mathrm{ret}} + c \times T_{\mathrm{ret}}^{2} + d \times T_{\mathrm{amb}} + e \times T_{\mathrm{amb}}^{2} + f \times T_{\mathrm{amb}} \times T_{\mathrm{ret}}
 \end{equation}
+
+\subsection{Modular Air to Water Heat Pumps}\label{modular-air-to-water-heat-pumps}
+
+The AWHP, modeled with object HeatPump:AirToWater, is a 2-pipe unit that
+transfers thermal energy from the outside to a water loop. It does not provide
+simultaneous hot and chilled water; instead, it switches between cooling and
+heating modes based on the temperature requirements of the connected loop.
+
+In cooling mode, it functions like an air-cooled chiller, using the
+refrigeration cycle to absorb heat from the water loop and dissipate it to the
+ambient air. Conversely, in heating mode, it acts as a heat pump, absorbing heat
+from the ambient air and transferring it to the water loop.
+
+Depending on the application, the air-to-water heat pump can be assigned to a
+chilled water loop, a heating hot water loop, a domestic hot water loop, or a
+condenser water loop.
+
+In this object:
+\begin{itemize}
+\item The source side is connected to an outdoor air node
+\item The heating load side can connect to a hot water loop, a domestic hot water loop, or a condenser water loop
+\item The cooling load side can connect to a chilled water loop or a condenser water loop
+\end{itemize}
+
+If the heating (or cooling) load side node names are left empty, the
+air-to-water heat pump will only produce chilled water (or hot water). To
+correctly assign the heating cooling components to the correct plant loop, the
+object Plantloop must have values in the field of ``Water Loop Type''.
+
+\subsubsection{Performance calculations}
+
+Similar to the other AWHP objects (i.e. the HeatPump:PlantLoop:EIR:Cooling and
+HeatPump:PlantLoop:EIR:Heating with Condenser Type being AirSource), this object
+also characterizes the heating/cooling capacity and electricity consumption for
+different temperatures and part load ratios. However, this object will have more
+than one group of such curves to model air-to-water heat pumps with fixed-speed
+compressors and inverter-driven compressors.
+
+\noindent\textbf{Heating mode}
+
+The heating capacity at speed level k is derived from the nominal (rated)
+capacity and a normalized capacity function of temperatures in Equation .
+
+\begin{equation}
+Capacity_{heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{amb},T_{leaving})	                 
+\end{equation}
+
+Where $Capacity_{heating,k}$ is the heating capacity at speed level k.
+$Capacity_{heating,rated}$ is the rated capacity for heating. $T_{amb}$ is the ambient air
+temperature. $T_{leaving}$ is the load side leaving water temperature $CAPFT_{heating,k}$
+is a normalized bivariate function characterizing the relationship between
+capacity and two temperature inputs: the ambient air temperature and the leaving
+water temperature. It is derived based on manufacturing data.
+
+The heating electricity use of the heat pump is calculated using the rated EIR,
+the EIR adjustment function, and the EIR part load ratio adjustment curve, as is
+shown in equation .
+
+\begin{equation}\label{eq:heating_electricity_use}
+Electricity_{heating,k}=EIR_{heating,rated} \times EIRFT_{heating,k}(T_{amb}, T_{leaving}) \times EIRPLR_{heating,k}(PLR)       
+\end{equation}
+
+$Electricity_{heating,k}$ is the electricity usage for heating at speed level k.
+$EIR_{heating,rated}$ is the rated heating energy input ratio. The
+$EIRFT_{heating,k}(., .)$ is a normalized bivariate function adjusting the EIR
+relative to the given ambient temperature and leaving water temperature, at
+speed level k. $EIRPLR_{heating,k}(.)$ is a normalized univariate function
+adjusting the EIR based on the part load ratio.
+
+\noindent\textbf{Cooling Mode}
+
+The cooling capacity at speed level k is derived from the nominal (rated)
+capacity and a normalized capacity function of temperatures in Equation .
+
+\begin{equation}
+Capacity_{cooling,k}=Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{amb},T_{leaving})	                 
+\end{equation}
+
+Where $Capacity_{cooling,k}$ is the cooling capacity at speed level k.
+$Capacity_{cooling,rated}$ is the rated capacity for cooling. $T_{amb}$ is the ambient air
+temperature. $T_{leaving}$ is the load side leaving water temperature $CAPFT_{cooling,k}$
+is a normalized bivariate function characterizing the relationship between
+capacity and two temperature inputs: the ambient air temperature and the leaving
+water temperature. It is derived based on manufacturing data.
+
+The cooling electricity use of the heat pump is calculated using the rated EIR,
+the EIR adjustment function, and the EIR part load ratio adjustment curve, as is
+shown in equation \ref{eq:cooling_electricity_use}.
+
+\begin{equation}\label{eq:cooling_electricity_use}
+Electricity_{cooling,k}=EIR_{cooling,rated} \times EIRFT_{cooling,k}(T_{amb}, T_{leaving}) \times EIRPLR_{cooling,k}(PLR)       
+\end{equation}
+
+$Electricity_{cooling,k}$ is the electricity usage for cooling at speed level k.
+$EIR_{cooling,rated}$ is the rated cooling energy input ratio. The $EIRFT_{cooling,k}(., .)$ is a
+normalized bivariate function adjusting the EIR relative to the given ambient temperature
+and leaving water temperature, at speed level $k$.
+$EIRPLR_{cooling,k}(.)$ is a normalized univariate function adjusting the EIR based
+on the part load ratio.
+
+\subsubsection{Defrost}
+
+\noindent\textbf{Defrost control}
+
+As this heat pump object is performance-curve-based and does not model
+refrigerant pressure, the object cannot model products with refrigerant pressure
+as control targets.
+
+The defrost control of this object resembles the HeatPump:PlantLoop:EIR:*
+object, with three options: Timed, OnDemand, or TimedEmpirical.
+\begin{itemize}
+  \item 
+when Timed or OnDemand is selected, defrost power is calculated as shown in
+the following equation.
+\begin{equation}
+Power_{defrost} = EIRFT_{defrost}(Capacity_{heating,rated}/1.01667) \times fracDefrostTime  
+\end{equation}
+$Power_{defrost}$ is the power usage of defrosting.
+$EIRF_{defrost}(.)$ is from user input ``Defrost Energy Input Ratio Function of
+Temperature Curve'' if it's present or 1/COP if it's blank. $Capacity_{heating,rated}$
+is the ``Rated Heating Capacity'' input field. ``Timed'' and ``OnDemand'' differ in
+the fractional Defrost Time (fracDefrostTime). For ``Timed'', it gets value from
+the user input ``Heat Pump Defrost Time Period Fraction''. For ``OnDemand'', it is
+calculated as 
+\begin{equation}
+fracDefrostTime =1.0 / (1.0 + 0.01446 / OutdoorCoildw) 
+\end{equation}
+
+Where
+
+\begin{equation}
+OutdoorCoildw=HumidityRatio_{outdoor}-HumidityRatio_{saturated}              
+\end{equation}
+$HumidityRatio_{saturated}$ is calculated using outdoor temperature and outdoor air barometric pressure
+
+\item when TimedEmpirical is selected, defrost power is calculated as shown in equation 
+\begin{equation}
+Power_{defrost}=\frac{Capacity_{heating,rated}}{COP_{heating,ref}} \times
+defrostHeatEnergyFraction \times DefrostCycles                                           
+\end{equation}
+
+where $defrostHeatEnergyFraction$ is based on the user input curve ``Timed Empirical Defrost Heat Input Energy Fraction Curve''. 
+$COP_{heating,ref}$ is the reference heating COP. The $DefrostCycles$ is the number of defrost cycles in an hour. 
+It is determined by the ``Timed Empirical Defrost Frequency Curve'', part load ratio, and cycling ratio.
+
+\end{itemize}
+
+The following actuators are added to enable more flexible custom defrost controls:
+\begin{itemize}
+  \item heat pump operation mode
+  \item compressor suction temperature
+  \item entering water temperature, enteringTemp
+  \item leaving water temperature, leavingTemp
+\end{itemize}
+Note that if the time duration since start or end of defrost is needed, a
+defrost timer globar variable can be used to record time since start or end of
+defrost.
+\begin{verbatim}
+  EnergyManagementSystem:GlobalVariable,
+    DefrostTimer; !- Tracks the cumulative time since defrost started or stopped (seconds)
+\end{verbatim}
+
+\subsubsection{Temperature and Flow Calculations}
+\noindent\textbf{Heating Mode}
+
+Initially, the flow rate of the air and water side will both be rated flow rate.
+The air side inlet temperature will be the ambient outdoor temperature. The
+waterside outlet temperature will be assumed to reach the leaving water
+temperature setpoint.
+
+With this information, for a series of fixed-speed compressors, the available
+capacity for the kth fixed-speed compressor can be calculated using eq.
+
+\begin{equation}
+Capacity_{avail,heating,k}=Capacity_{heating,rated} \times CAPFT_{heating,k}(T_{air,in},T_{leavingWaterSetpoint}) 
+\end{equation}
+
+The appropriate number of fixed-speed compressors, a, is selected such that
+\begin{equation}
+\sum_{i=1}^{a} Capacity_{avail,heating,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,heating,i} 
+\end{equation}
+
+The cycling ratio of the (a+1)th compressor will be calculated
+
+\begin{equation}
+CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,heating,i}}{Capacity_{avail,heating,a+1}} 
+\end{equation}
+
+When the plant loop demand does not exceed the available capacity, load-side
+actual heat transfer just equals the plant loop demand.
+
+\begin{equation}
+Q_{load} = Demand_{plantLoop} 
+\end{equation}
+
+When the plant loop demand is larger than the available capacity, then the
+actual load transfer is
+
+\begin{equation}
+Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,heating,i} 
+\end{equation}
+
+where maxSpeedLevel is the maximum number of compressor speed levels.
+
+The heating mode load-side (water) outlet temperature will be 
+
+\begin{equation}
+T_{out,load} = T_{in,load} + \frac{Q_{load}}{m_{load}C_{load}} 
+\end{equation}
+
+Where $T_{in,load}$ is the load side inlet temperature. $m_{load}$ is the load
+side mass flow rate. $C_{load}$ is the load-side specific heat.
+
+Power is evaluated using equation \ref{eq:heating_electricity_use}. 
+
+In heating mode, source-side heat transfer will be
+
+\begin{equation}
+Q_{source} = Q_{load} - Power 
+\end{equation}
+
+The source-side outlet temperature is thus
+
+\begin{equation}
+T_{out,source} = T_{in,source} - \frac{Q_{source}}{m_{source}C_{source}} 
+\end{equation}
+
+For a variable-speed compressor, the available capacity for the speed level k
+can be calculated using eq as well. The appropriate compressor speed is
+calculated by interpolation between $Capacity_{avail,heating,a}$ and
+$Capacity_{avail,heating,a+1}$ such that $Capacity_{avail,heating,a} <
+Demand_{plantLoop} < Capacity_{avail,heating,a+1}$. When the plant loop demand
+is larger than the available capacity, then the actual load transfer is
+
+\begin{equation}
+Q_{load} = Capacity_{avail,heating,maxSpeedLevel} . 
+\end{equation}
+
+The other calculations are the same as the fixed-speed compressors.
+
+\noindent\textbf{Cooling mode}
+
+The available cooling capacity at speed-level k can be calculated using eq .
+
+\begin{equation}
+Capacity_{avail,cooling,k} = Capacity_{cooling,rated} \times CAPFT_{cooling,k}(T_{air,in},T_{leavingWaterSetpoint}) 
+\end{equation}
+
+The appropriate number of fixed-speed compressors, a, is selected such that
+\begin{equation}
+\sum_{i=1}^{a} Capacity_{avail,cooling,i} < Demand_{plantLoop} < \sum_{i=1}^{a+1} Capacity_{avail,cooling,i} 
+\end{equation}
+
+The cycling ratio of the (a+1)th stage compressor will be calculated
+
+\begin{equation}
+CyclingRatio = \frac{Demand_{plantLoop} - \sum_{i=1}^{a} Capacity_{avail,cooling,i}}{Capacity_{avail,cooling,a+1}} 
+\end{equation}
+
+When the plant loop demand does not exceed the available capacity, load-side
+actual heat transfer just equals the plant loop demand.
+
+\begin{equation}
+Q_{load} = Demand_{plantLoop} 
+\end{equation}
+
+When the plant loop demand is larger than the available capacity, then the actual load transfer is
+
+\begin{equation}
+Q_{load} = \sum_{i=1}^{maxSpeedLevel} Capacity_{avail,cooling,i} 
+\end{equation}
+
+The cooling mode load-side (water) outlet temperature will be 
+
+\begin{equation}
+T_{out,load} = T_{in,load} - \frac{Q_{load}}{m_{load}C_{load}} 
+\end{equation}
+
+Where $T_{in,load}$ is the load side inlet temperature. $m_{load}$ is the load side mass
+flow rate. $C_{load}$ is the load-side specific heat.
+
+Power is evaluated using equation \ref{eq:cooling_electricity_use}. 
+
+In cooling mode, source-side heat transfer will be
+
+\begin{equation}
+Q_{source} = Q_{load} + Power 
+\end{equation}
+
+The source-side outlet temperature is thus
+
+\begin{equation}
+_{out,source} = T_{in,source} + \frac{Q_{source}}{m_{source}C_{source}} 
+\end{equation}
+
+\subsubsection{Crankcase heater}
+
+When the outdoor air dry-bulb temperature is below the value specified in the
+input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation,
+the crankcase heater is enabled during the time that the compressor is not
+running. The capacity is specified in the input field ``crankcase heater
+capacity''. If ``Crankcase Heater Capacity Function of Temperature Curve Name'' is
+defined, a multiplier is applied to adjust the crankcase heater capacity based
+on the ambient temperature condition.

@@ -148,6 +148,22 @@ The latent heat recovery effectiveness, where effectiveness is defined as the ch
 
 This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Heating Air Flow Rate and Maximum Cooling Air Flow Rate in a Ideal Load Air System zone HVAC object. The scaled maximum heating and cooling air flow rates are used to size the heating and cooling capacities.
 
+\paragraph{Field: Heating Fuel Efficiency Schedule Name}\label{field-heating-fuel-efficiency-schedule-name}
+
+This optional input field is the name of a \textbf{Schedule} object. The name must correspond to unique name of a \textit{schedule} object. References heating fuel efficiency value for converting heating ideal air loads into heating fuel energy consumption. The minimum schedule value must be greater than 0.0. The maximum value depends on the technology, and can exceed 1 (e.g. a DX Heating Coil). If blank, heating fuel efficiency value is always 1.0.
+
+\paragraph{Field: Heating Fuel Type}\label{field-heating-fuel-type}
+
+This is an optional input alpha field that determines the heating fuel type used by the ideal loads air system. This field offers thirteen choices: Electricity, NaturalGas, Propane, Diesel, Gasoline, FuelOilNo1, FuelOilNo2, OtherFuel1, OtherFuel2, DistrictCooling, DistrictHeatingWater, or DistrictHeatingSteam. The default key choice is DistrictHeatingWater.
+
+\paragraph{Field: Cooling Fuel Efficiency Schedule Name}\label{field-cooling-fuel-efficiency-schedule-name}
+
+This optional input field is the name of a \textbf{Schedule} object. The name must correspond to unique name of a \textit{schedule} object. References cooling fuel efficiency value for converting cooling ideal air loads into cooling fuel energy consumption. The minimum schedule value must be greater than 0.0. The maximum value depends on the technology, and can exceed 1 (e.g. a DX Cooling Coil). If blank, cooling fuel efficiency value is always 1.0.
+
+\paragraph{Field: Cooling Fuel Type}\label{field-cooling-fuel-type}
+
+This is an optional input alpha field that determines the cooling fuel type used by the ideal loads air system. This field offers thirteen choices: Electricity, NaturalGas, Propane, Diesel, Gasoline, FuelOilNo1, FuelOilNo2, OtherFuel1, OtherFuel2, DistrictCooling, DistrictHeatingWater, or DistrictHeatingSteam. The default key choice is DistrictCooling.
+
 An example of this object in an IDF is:
 
 \begin{lstlisting}
@@ -235,6 +251,14 @@ The Ideal Loads air system outdoor air load variables are only calculated when t
 \item
   HVAC,Sum,Zone Ideal Loads Heat Recovery Total Cooling Energy {[}J{]}
 \item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Heating Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Cooling Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Heating Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Cooling Fuel Energy {[}J{]}
+\item
   HVAC,Average,Zone Ideal Loads Supply Air Sensible Heating Rate {[}W{]}
 \item
   HVAC,Average,Zone Ideal Loads Supply Air Latent Heating Rate {[}W{]}
@@ -282,6 +306,14 @@ The Ideal Loads air system outdoor air load variables are only calculated when t
   HVAC,Average,Zone Ideal Loads Heat Recovery Latent Cooling Rate {[}W{]}
 \item
   HVAC,Average,Zone Ideal Loads Heat Recovery Total Cooling Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Cooling Fuel Energy Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Heating Fuel Energy Rat {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Cooling Fuel Energy Rat {[}W{]}
 \item
   HVAC,Sum,Zone Ideal Loads Economizer Active Time {[}hr{]}
 \item
@@ -357,6 +389,18 @@ The latent cooling energy (or rate) removed to lower the humidity ratio of the m
 \paragraph{Zone Ideal Loads Supply Air Total Cooling Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-cooling-rate-w}
 
 The total (sensible and latent) cooling energy (or rate) removed to lower the mixed air stream to the temperature and humidity ratio of the supply air stream. \emph{Zone Ideal Loads Supply Air Total Cooling Energy} is metered as DistrictCooling energy. This is the ideal ``cooling coil'' total load.
+
+\paragraph{Zone Ideal Loads Supply Air Total Heating Fuel Energy {[}J{]}}\label{zone-ideal-loads-supply-air-total-heating-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-heating-fuel-energy-rate-w}
+
+The total heating fuel energy (or rate) consumed to raise the mixed air stream to the temperature and humidity ratio of the supply air stream, to maintain the desired air conditions in a heated zone. It is calculated by dividing the Zone Ideal Loads Supply Air Total Heating Energy (or Rate) by the heating fuel efficiency.
+
+\paragraph{Zone Ideal Loads Supply Air Total Cooling Fuel Energy {[}J{]}}\label{zone-ideal-loads-supply-air-total-cooling-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Supply Air Total Cooling Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-cooling-fuel-energy-rate-w}
+
+The total cooling fuel energy (or rate) consumed to lower the mixed air stream to the temperature and humidity ratio of the supply air stream, to maintain the desired air conditions in a cooled zone. It is calculated by dividing the Zone Ideal Loads Supply Air Total Cooling Energy (or Rate) by the cooling fuel efficiency.
 
 \paragraph{Zone Ideal Loads Zone Sensible Heating Energy {[}J{]}}\label{zone-ideal-loads-zone-sensible-heating-energy-j}
 
@@ -465,6 +509,18 @@ The latent cooling energy (or rate) removed from the outdoor air stream from hea
 \paragraph{Zone Ideal Loads Heat Recovery Total Cooling Rate {[}W{]}}\label{zone-ideal-loads-heat-recovery-total-cooling-rate-w}
 
 The total (sensible and latent) cooling energy (or rate) removed from the outdoor air stream from heat recovery.
+
+\paragraph{Zone Ideal Loads Zone Heating Fuel Energy {[}J{]}}\label{zone-ideal-loads-zone-heating-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Zone Heating Fuel Energy Rate {[}W{]}}{zone-ideal-loads-zone-heating-fuel-energy-rate-w}
+
+The total heating fuel energy (or rate) consumed to maintain the desired air conditions in the heated zone is calculated by dividing the Zone Ideal Loads Zone Total Heating Energy (or Rate) by the heating fuel efficiency.
+
+\paragraph{Zone Ideal Loads Zone Cooling Fuel Energy {[}J{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Zone Cooling Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-rate-w}
+  
+The total cooling fuel energy (or rate) consumed to maintain the desired air conditions in the cooled zone is calculated by dividing the Zone Ideal Loads Zone Total Cooling Energy (or Rate) by the cooling fuel efficiency.
 
 \paragraph{Zone Ideal Loads Economizer Active Time {[}hr{]}}\label{zone-ideal-loads-economizer-active-time-hr}
 
@@ -2689,6 +2745,9 @@ When Capacity Control Method = SingleZoneVAV, enter the minimum air temperature 
 
 When Capacity Control Method = SingleZoneVAV, enter the maximum air temperature limit for reduced fan speed in heating mode. For SingleZoneVAV, this field's minimum supply air temperature is 0.0\si{\degreeCelsius}. This field is autosizable and the default is autosize.
 
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0101}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
 
 As shown in the example below, correct specification of the packaged terminal heat pump requires the following objects in addition to the compound object itself:
 
@@ -3214,6 +3273,10 @@ This optional input field is the name of a \hyperref[designspecificationzonehvac
 \paragraph{Field: Design Specification Multispeed Object Type}\label{field-design-specification-multispeed-object-type-2}
 
 This optional alpha field contains the identifying type for the design specification multispeed object. This field is only needed when multispeed fan is applied. The only available type is:
+
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0102}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
 
 \begin{itemize}
 \tightlist

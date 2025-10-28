@@ -780,8 +780,25 @@ std::string CreateSysTimeIntervalString(EnergyPlusData &state)
     //  ActualTimeS=INT(CurrentTime)+(SysTimeElapsed+(CurrentTime - INT(CurrentTime)))
     // CR6902  ActualTimeS=INT(CurrentTime-TimeStepZone)+SysTimeElapsed
     // [DC] TODO: Improve display accuracy up to fractional seconds using hh:mm:ss.0 format
-    Real64 ActualTimeS = state.dataGlobal->CurrentTime - state.dataGlobal->TimeStepZone + SysTimeElapsed;
-    Real64 ActualTimeE = ActualTimeS + TimeStepSys;
+
+    // NOTE: SysTimeElapsed is updated at the END of the HVAC time step (loop), so it's current value is
+    //       the end of the last HVAC time step not the end of the current HVAC time step.  The other
+    //       conditions below are for when we are in the zone heat balance (SysTimeElapsed = 0) or after
+    //       we have finished the last HVAC time step.
+
+    Real64 ActualTimeS;
+    Real64 ActualTimeE;
+    Real64 constexpr toleranceTime = 0.0001; // less than 1 second (to avoid comparisons that are not exactly identical but are essentially the same
+    if (SysTimeElapsed == 0.0) {
+        ActualTimeE = state.dataGlobal->CurrentTime;
+        ActualTimeS = ActualTimeE - state.dataGlobal->TimeStepZone;
+    } else if (std::abs(state.dataGlobal->TimeStepZone - SysTimeElapsed) <= toleranceTime) {
+        ActualTimeE = state.dataGlobal->CurrentTime;
+        ActualTimeS = ActualTimeE - TimeStepSys;
+    } else {
+        ActualTimeS = state.dataGlobal->CurrentTime - state.dataGlobal->TimeStepZone + SysTimeElapsed;
+        ActualTimeE = ActualTimeS + TimeStepSys;
+    }
     int ActualTimeHrS = int(ActualTimeS);
     //  ActualTimeHrE=INT(ActualTimeE)
     int ActualTimeMinS = nint((ActualTimeS - ActualTimeHrS) * FracToMin);

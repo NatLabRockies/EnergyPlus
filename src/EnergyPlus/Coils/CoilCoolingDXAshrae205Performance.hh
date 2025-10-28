@@ -79,21 +79,21 @@ struct CoilCoolingDX205Performance : public CoilCoolingDXPerformanceBase
         return representation->performance.performance_map_cooling.grid_variables.compressor_sequence_number.size();
     }
 
-    Real64 ratedCBF(EnergyPlusData &state) override
+    Real64 ratedCBF([[maybe_unused]] EnergyPlusData &state) override
     {
         return 0.001;
     };
 
     Real64 grossRatedSHR(EnergyPlusData &state) override;
 
-    Real64 evapAirFlowRateAtSpeedIndex(EnergyPlusData &state, int index) override // Volumetric
+    Real64 evapAirFlowRateAtSpeedIndex([[maybe_unused]] EnergyPlusData &state, int index) override // Volumetric
     {
         return speeds[index].evaporator_air_volumetric_flow;
     }
 
     Real64 ratedTotalCapacityAtSpeedIndex(EnergyPlusData &, int) override;
 
-    Real64 ratedEvapAirMassFlowRate(EnergyPlusData &state) override
+    Real64 ratedEvapAirMassFlowRate([[maybe_unused]] EnergyPlusData &state) override
     {
         return speeds[nominal_speed_index].evaporator_air_mass_flow;
     }

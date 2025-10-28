@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <limits>
 #include <map>
 
 // ObjexxFCL Headers
@@ -251,7 +252,7 @@ namespace Sched {
         sched->tsVals.assign(Constant::iHoursInDay * max(1, s_glob->TimeStepsInHour), value);
 
         s_sched->schedules.push_back(sched);
-        s_sched->scheduleMap.insert_or_assign(std::move(Util::makeUPPER(sched->Name)), sched->Num);
+        s_sched->scheduleMap.insert_or_assign(Util::makeUPPER(sched->Name), sched->Num);
 
         return sched;
     } // AddScheduleConstant()
@@ -265,7 +266,7 @@ namespace Sched {
 
         sched->Num = (int)s_sched->schedules.size();
         s_sched->schedules.push_back(sched);
-        s_sched->scheduleMap.insert_or_assign(std::move(Util::makeUPPER(sched->Name)), sched->Num);
+        s_sched->scheduleMap.insert_or_assign(Util::makeUPPER(sched->Name), sched->Num);
 
         sched->type = SchedType::Year;
         return sched;
@@ -281,9 +282,10 @@ namespace Sched {
 
         daySched->Num = (int)s_sched->daySchedules.size();
         s_sched->daySchedules.push_back(daySched);
-        s_sched->dayScheduleMap.insert_or_assign(std::move(Util::makeUPPER(daySched->Name)), daySched->Num);
+        s_sched->dayScheduleMap.insert_or_assign(Util::makeUPPER(daySched->Name), daySched->Num);
 
-        daySched->tsVals.resize(Constant::iHoursInDay * s_glob->TimeStepsInHour);
+        // When InitConstantScheduleData is called, TimeStepsInHour is 0, so we ensure 24
+        daySched->tsVals.assign(Constant::iHoursInDay * max(1, s_glob->TimeStepsInHour), 0.0);
 
         return daySched;
     } // AddDaySchedule()
@@ -295,9 +297,14 @@ namespace Sched {
         auto *weekSched = new WeekSchedule;
         weekSched->Name = name;
 
+        // Fill the dayScheds with the Missing Day Schedule (Always Off)
+        for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
+            weekSched->dayScheds[iDayType] = s_sched->daySchedules[SchedNum_AlwaysOff];
+        }
+
         weekSched->Num = (int)s_sched->weekSchedules.size();
         s_sched->weekSchedules.push_back(weekSched);
-        s_sched->weekScheduleMap.insert_or_assign(std::move(Util::makeUPPER(weekSched->Name)), weekSched->Num);
+        s_sched->weekScheduleMap.insert_or_assign(Util::makeUPPER(weekSched->Name), weekSched->Num);
 
         return weekSched;
     } // AddWeekSchedule()
@@ -313,6 +320,10 @@ namespace Sched {
         auto *schedOn = AddScheduleConstant(state, "Constant-1.0", 1.0);
         assert(schedOn->Num == SchedNum_AlwaysOn);
         schedOn->isUsed = true; // Suppress unused warnings
+
+        auto *missingDaySchedule = AddDaySchedule(state, "MissingDaySchedule-0.0");
+        assert(missingDaySchedule->Num == SchedNum_AlwaysOff);
+        missingDaySchedule->isUsed = true;
     }
 
     void ProcessScheduleInput(EnergyPlusData &state)
@@ -394,7 +405,6 @@ namespace Sched {
         std::string subString;
         int MaxNums1;
         char ColumnSep;
-        bool FileIntervalInterpolated;
         int rowLimitCount;
         int skiprowCount;
         int curcolCount;
@@ -1209,6 +1219,9 @@ namespace Sched {
         //  A3 , \field Complex Field #1
         //  A4 , \field Complex Field #2
         //  A5 , \field Complex Field #3
+
+        // When InitConstantScheduleData is called, TimeStepsInHour is 0, so we delay it here
+        static_cast<DaySchedule *>(s_sched->daySchedules[SchedNum_AlwaysOff])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 0.0);
 
         SchNum = NumRegSchedules;
         CurrentModuleObject = "Schedule:Compact";
@@ -2199,7 +2212,7 @@ namespace Sched {
             }
             times.emplace_back(fmt::format("{}:00", HrField[hr + 1]));
         }
-        assert(times.size() == NumTimesInDay);
+        assert(static_cast<int>(times.size()) == NumTimesInDay);
 
         std::string_view const &reportLevelName = reportLevelNames[(int)LevelOfDetail];
         std::string const dayScheduleTableName = format("DaySchedule - {}", reportLevelName);
@@ -2225,8 +2238,13 @@ namespace Sched {
             }
             print(state.files.eio, "\n");
 
-            // ! <Schedule_Hourly>,Name,ScheduleType,{Until Date,WeekSchedule}** Repeated until Dec 31
-            print(state.files.eio, "! <{}>,Name,ScheduleType,{{Until Date,WeekSchedule}}** Repeated until Dec 31\n", scheduleTableName);
+            print(state.files.eio,
+                  "! <{}>,Name,ScheduleType,"
+                  "Until Date 1,WeekSchedule 1,Until Date 2,WeekSchedule 2,Until Date 3,WeekSchedule 3,"
+                  "Until Date 4,WeekSchedule 4,Until Date 5,WeekSchedule 5,Until Date 6,WeekSchedule 6,"
+                  "Until Date 7,WeekSchedule 7,Until Date 8,WeekSchedule 8,Until Date 9,WeekSchedule 9,"
+                  "\n",
+                  scheduleTableName);
         }
 
         for (auto *daySched : s_sched->daySchedules) {
@@ -2379,10 +2397,6 @@ namespace Sched {
 
         auto const *weekSched = this->weekScheds[thisDayOfYear];
         auto const *daySched = (thisHolidayNum > 0) ? weekSched->dayScheds[thisHolidayNum] : weekSched->dayScheds[thisDayOfWeek];
-        if (daySched == nullptr) {
-            // We already warned in ProcessScheduleInput that there were missing days: Missing day types will have 0.0 as Schedule Values
-            return 0.0;
-        }
 
         // If Unspecified or equal to zero, use NumOfTimeStepInHour, otherwise use supplied
         if (ts <= 0) {
@@ -2477,9 +2491,6 @@ namespace Sched {
             weekSched->isUsed = true;
             for (int iDayType = 1; iDayType < (int)DayType::Num; ++iDayType) {
                 auto *daySched = weekSched->dayScheds[iDayType];
-                if (daySched == nullptr) {
-                    continue;
-                }
                 daySched->isUsed = true;
             }
         }
@@ -2529,7 +2540,8 @@ namespace Sched {
         isMinMaxSet = true;
     }
 
-    std::vector<Real64> const &ScheduleConstant::getDayVals(EnergyPlusData &state, [[maybe_unused]] int jDay, [[maybe_unused]] int dayofWeek)
+    std::vector<Real64> const &
+    ScheduleConstant::getDayVals([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int jDay, [[maybe_unused]] int dayofWeek)
     {
         assert((int)tsVals.size() == Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour);
         return this->tsVals;
@@ -2827,7 +2839,6 @@ namespace Sched {
         // representation.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 rRetHH; // real Returned "hour"
         std::string hHour;
         std::string mMinute;
 

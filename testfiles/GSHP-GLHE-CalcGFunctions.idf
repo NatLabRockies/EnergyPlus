@@ -660,6 +660,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Main Floor WAHP Cooling Coil,  !- Name
+    ,                              !- Availability Schedule Name
     Main Floor WAHP Cooling Water Inlet Node,  !- Water Inlet Node Name
     Main Floor WAHP Cooling Water Outlet Node,  !- Water Outlet Node Name
     Main Floor WAHP Mixed Air Outlet,  !- Air Inlet Node Name
@@ -704,6 +705,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Main Floor WAHP Heating Coil,  !- Name
+    ,                              !- Availability Schedule Name
     Main Floor WAHP Heating Water Inlet Node,  !- Water Inlet Node Name
     Main Floor WAHP Heating Water Outlet Node,  !- Water Outlet Node Name
     Main Floor WAHP Cooling Coil Outlet,  !- Air Inlet Node Name

@@ -65,6 +65,21 @@ struct EnergyPlusData;
 
 namespace InternalHeatGains {
 
+    enum class DesignLevelMethod
+    {
+        Invalid = -1,
+        People,
+        PeoplePerArea,
+        AreaPerPerson,
+        LightingLevel,
+        EquipmentLevel,
+        WattsPerArea,
+        WattsPerPerson,
+        PowerPerArea,
+        PowerPerPerson,
+        Num
+    };
+
     struct GlobalInternalGainMiscObject
     {
         // Members
@@ -90,6 +105,17 @@ namespace InternalHeatGains {
                                 int &numGainInstances,
                                 bool &errors,
                                 const bool zoneListNotAllowed = false);
+
+    Real64 setDesignLevel(EnergyPlusData &state,
+                          bool &ErrorsFound,
+                          std::string_view const objectType,
+                          InternalHeatGains::GlobalInternalGainMiscObject const &inputObject,
+                          DesignLevelMethod const method,
+                          int const zoneNum,
+                          int const spaceNum,
+                          Real64 const inputValue,
+                          bool const inputBlank,
+                          std::string_view const fieldName);
 
     void setupIHGOutputs(EnergyPlusData &state);
 

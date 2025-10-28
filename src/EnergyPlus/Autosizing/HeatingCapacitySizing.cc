@@ -449,29 +449,27 @@ Real64 HeatingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
 
     if (this->isCoilReportObject) {
         if (CoilInTemp > -999.0) { // set inlet air properties used during capacity sizing if available, allow for negative winter temps
-            ReportCoilSelection::setCoilEntAirTemp(
-                state, this->compName, this->coilType, CoilInTemp, this->curSysNum, this->curZoneEqNum);
-            ReportCoilSelection::setCoilEntAirHumRat(state, this->compName, this->coilType, CoilInHumRat);
+            ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, CoilInTemp, this->curSysNum, this->curZoneEqNum);
+            ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, CoilInHumRat);
         }
         if (CoilOutTemp > -999.0) { // set outlet air properties used during capacity sizing if available
-            ReportCoilSelection::setCoilLvgAirTemp(state, this->compName, this->coilType, CoilOutTemp);
-            ReportCoilSelection::setCoilLvgAirHumRat(state, this->compName, this->coilType, CoilOutHumRat);
+            ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, CoilOutTemp);
+            ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, CoilOutHumRat);
         }
-        ReportCoilSelection::setCoilAirFlow(state, this->compName, this->coilType, DesVolFlow, this->wasAutoSized);
+        ReportCoilSelection::setCoilAirFlow(state, this->coilReportNum, DesVolFlow, this->wasAutoSized);
         Real64 constexpr FanCoolLoad = 0.0;
         Real64 constexpr TotCapTempModFac = 1.0;
         ReportCoilSelection::setCoilHeatingCapacity(state,
-                                                                                   this->compName,
-                                                                                   this->coilType,
-                                                                                   this->autoSizedValue,
-                                                                                   this->wasAutoSized,
-                                                                                   this->curSysNum,
-                                                                                   this->curZoneEqNum,
-                                                                                   this->curOASysNum,
-                                                                                   FanCoolLoad,
-                                                                                   TotCapTempModFac,
-                                                                                   DXFlowPerCapMinRatio,
-                                                                                   DXFlowPerCapMaxRatio);
+                                                    this->coilReportNum,
+                                                    this->autoSizedValue,
+                                                    this->wasAutoSized,
+                                                    this->curSysNum,
+                                                    this->curZoneEqNum,
+                                                    this->curOASysNum,
+                                                    FanCoolLoad,
+                                                    TotCapTempModFac,
+                                                    DXFlowPerCapMinRatio,
+                                                    DXFlowPerCapMaxRatio);
     }
     return this->autoSizedValue;
 }

@@ -230,6 +230,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -251,6 +252,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
 
         " Coil:Heating:WaterToAirHeatPump:EquationFit,",
         "  Sys 5 Heat Pump Heating Mode,  !- Name",
+        "  ,                              !- Availability Schedule Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name",
         "  Sys 5 Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -600,6 +602,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestWaterFlowControl)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -621,6 +624,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestWaterFlowControl)
 
         " Coil:Heating:WaterToAirHeatPump:EquationFit,",
         "  Sys 5 Heat Pump Heating Mode,  !- Name",
+        "  ,                              !- Availability Schedule Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name",
         "  Sys 5 Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -1086,6 +1090,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     wahp1.Name = "WAHP Coolng Coil";
     wahp1.coilType = HVAC::CoilType::CoolingWAHPSimple;
     wahp1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp1.Name, wahp1.coilType);
+    wahp1.availSched = Sched::GetScheduleAlwaysOn(*state);
     wahp1.RatedAirVolFlowRate = AutoSize;
     wahp1.RatedCapCoolTotal = AutoSize;
     wahp1.RatedCapCoolSens = AutoSize;
@@ -1102,9 +1107,10 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     wahp2.Name = "WAHP Heating Coil";
     wahp2.coilType = HVAC::CoilType::HeatingWAHPSimple;
     wahp2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp2.Name, wahp2.coilType);
+    wahp2.availSched = Sched::GetScheduleAlwaysOn(*state);
     wahp2.RatedAirVolFlowRate = AutoSize;
     wahp2.RatedCapHeat = AutoSize;
-    wahp2.RatedWaterVolFlowRate = 0.0;
+    wahp2.RatedWaterVolFlowRate = AutoSize;
     wahp2.WaterInletNodeNum = 3;
     wahp2.WaterOutletNodeNum = 4;
     wahp2.RatedEntWaterTemp = 20.0;
@@ -1246,17 +1252,20 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type = wahp1.coilPlantType;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = wahp1.WaterInletNodeNum;
     wahp1.plantLoc.loopNum = 1;
+    wahp1.plantLoc.loop = &state->dataPlnt->PlantLoop(1);
 
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(2).Name = wahp2.Name;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(2).Type = wahp2.coilPlantType;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(2).NodeNumIn = wahp2.WaterInletNodeNum;
     wahp2.plantLoc.loopNum = 1;
+    wahp2.plantLoc.loop = &state->dataPlnt->PlantLoop(1);
 
     // plant loop design leaving water temperature (design entering water temperature for WAHP coil)
     state->dataSize->NumPltSizInput = 1;
     state->dataSize->PlantSizData.allocate(1);
     state->dataSize->PlantSizData(1).PlantLoopName = "Condenser Water Loop";
     state->dataSize->PlantSizData(1).ExitTemp = 29.4;
+    state->dataSize->PlantSizData(1).DeltaT = 5.56;
 
     WaterToAirHeatPumpSimple::SizeHVACWaterToAir(*state, 1);
     WaterToAirHeatPumpSimple::SizeHVACWaterToAir(*state, 2);
@@ -1285,6 +1294,13 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
                     wahp1.RatedCapCoolAtRatedCdts,
                 1.23,
                 0.00001);
+    EXPECT_NEAR(wahp1.RatedWaterVolFlowRate - wahp2.RatedWaterVolFlowRate, 0.0, 0.00001);
+    EXPECT_TRUE(wahp1.RatedWaterVolFlowRate > 0.0);
+    
+    Real64 waterVolFlowRate = max(((1 - 1 / wahp2.RatedCOPHeatAtRatedCdts) * wahp2.RatedCapHeat),
+                                  ((1 + 1 / wahp1.RatedCOPCoolAtRatedCdts) * wahp1.RatedCapCoolTotal)) /
+                              (state->dataSize->PlantSizData(1).DeltaT * 4179.88 * 995.768);
+    EXPECT_NEAR(waterVolFlowRate - wahp2.RatedWaterVolFlowRate, 0.0, 0.00001);
 }
 
 TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedConditionsNoDesHtgAirFlow)
@@ -1310,10 +1326,11 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     wahp1.Name = "WAHP Cooling Coil";
     wahp1.coilType = HVAC::CoilType::CoolingWAHPSimple;
     wahp1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp1.Name, wahp1.coilType);
+    wahp1.availSched = Sched::GetScheduleAlwaysOn(*state);
     wahp1.RatedAirVolFlowRate = AutoSize;
     wahp1.RatedCapCoolTotal = AutoSize;
     wahp1.RatedCapCoolSens = AutoSize;
-    wahp1.RatedWaterVolFlowRate = 0.0;
+    wahp1.RatedWaterVolFlowRate = AutoSize;
     wahp1.WaterInletNodeNum = 1;
     wahp1.WaterOutletNodeNum = 2;
     wahp1.RatedEntWaterTemp = 30.0;
@@ -1326,9 +1343,10 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     wahp2.Name = "WAHP Heating Coil";
     wahp2.coilType = HVAC::CoilType::HeatingWAHPSimple;
     wahp2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp2.Name, wahp2.coilType);
+    wahp2.availSched = Sched::GetScheduleAlwaysOn(*state);
     wahp2.RatedAirVolFlowRate = AutoSize;
     wahp2.RatedCapHeat = AutoSize;
-    wahp2.RatedWaterVolFlowRate = 0.0;
+    wahp2.RatedWaterVolFlowRate = 0.000185;
     wahp2.WaterInletNodeNum = 3;
     wahp2.WaterOutletNodeNum = 4;
     wahp2.RatedEntWaterTemp = 20.0;
@@ -1481,11 +1499,14 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     state->dataSize->PlantSizData.allocate(1);
     state->dataSize->PlantSizData(1).PlantLoopName = "Condenser Water Loop";
     state->dataSize->PlantSizData(1).ExitTemp = 29.4;
+    state->dataSize->PlantSizData(1).DeltaT = 5.56;
 
     WaterToAirHeatPumpSimple::SizeHVACWaterToAir(*state, 1);
     WaterToAirHeatPumpSimple::SizeHVACWaterToAir(*state, 2);
 
     EXPECT_NEAR(wahp2.RatedCapHeatAtRatedCdts / wahp1.RatedCapCoolAtRatedCdts, 1.23, 0.00001);
+    EXPECT_NEAR(wahp2.RatedWaterVolFlowRate - 0.000185, 0.0, 0.000001);
+    EXPECT_NEAR(wahp2.RatedWaterVolFlowRate - wahp1.RatedWaterVolFlowRate, 0.0, 0.000001);
 }
 
 TEST_F(EnergyPlusFixture, EquationFit_Initialization)
@@ -1494,6 +1515,7 @@ TEST_F(EnergyPlusFixture, EquationFit_Initialization)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -1587,8 +1609,8 @@ TEST_F(EnergyPlusFixture, EquationFit_Initialization)
     int NumAlphas = 0;
     int NumNumbers = 0;
     state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
-    EXPECT_EQ(TotalArgs, 22);
-    EXPECT_EQ(NumAlphas, 9);
+    EXPECT_EQ(TotalArgs, 23);
+    EXPECT_EQ(NumAlphas, 10);
     EXPECT_EQ(NumNumbers, 13);
 
     WaterToAirHeatPumpSimple::GetSimpleWatertoAirHPInput(*state);

@@ -75,6 +75,7 @@
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -424,6 +425,10 @@ void GetStandAloneERV(EnergyPlusData &state)
                     state, format("{} controller type ZoneHVAC:EnergyRecoveryVentilator:Controller not found = {}", CurrentModuleObject, Alphas(6)));
                 ErrorsFound = true;
                 standAloneERV.ControllerNameDefined = false;
+            } else {
+                state.dataHeatRecovery->ExchCond(standAloneERV.hxNum).hasZoneERVController = true;
+                OutputReportPredefined::PreDefTableEntry(
+                    state, state.dataOutRptPredefined->pdchAirHROAControllerName, standAloneERV.hxName, standAloneERV.ControllerName);
             }
         }
 
@@ -567,6 +572,8 @@ void GetStandAloneERV(EnergyPlusData &state)
         // Add HX to component sets array
         BranchNodeConnections::SetUpCompSets(
             state, standAloneERV.UnitType, standAloneERV.Name, "UNDEFINED", standAloneERV.hxName, "UNDEFINED", "UNDEFINED");
+        OutputReportPredefined::PreDefTableEntry(
+            state, state.dataOutRptPredefined->pdchAirHRZoneHVACName, standAloneERV.hxName, standAloneERV.Name);
 
         // Add supply fan to component sets array
         BranchNodeConnections::SetUpCompSets(state,
@@ -1018,7 +1025,7 @@ void GetStandAloneERV(EnergyPlusData &state)
         SetupOutputVariable(state,
                             "Zone Ventilator Supply Fan Availability Status",
                             Constant::Units::None,
-                            (int &)standAloneERV.availStatus,
+                            standAloneERV.availStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             standAloneERV.Name);

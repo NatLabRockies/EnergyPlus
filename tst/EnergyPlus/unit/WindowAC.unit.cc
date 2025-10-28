@@ -159,6 +159,7 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Zone1WindAC_VS_DXCoil,    !- Name",
+        "    ,                         !- Availability Schedule Name",
         "    Zone1WindACFanOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1WindACAirOutletNode,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",
@@ -634,6 +635,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Zone1WindAC_VS_DXCoil,    !- Name",
+        "    ,                         !- Availability Schedule Name",
         "    Zone1WindACFanOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1WindACAirOutletNode,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",

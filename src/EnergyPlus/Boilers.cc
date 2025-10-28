@@ -254,7 +254,7 @@ void GetBoilerInput(EnergyPlusData &state)
             ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
             ErrorsFound = true;
         } else if (thisBoiler.EfficiencyCurve->numDims != 1 && thisBoiler.EfficiencyCurve->numDims != 2) {
-            Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "1 or 2", thisBoiler.EfficiencyCurve->numDims);
+            Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "1 or 2", thisBoiler.EfficiencyCurve->numDims);
             ErrorsFound = true;
         } else
             // if curve uses temperature, make sure water temp mode has been set

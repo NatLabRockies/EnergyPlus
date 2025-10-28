@@ -3268,6 +3268,10 @@ The Variable-Speed DX Cooling Coil is a collection of performance curves that re
 
 This alpha field contains the identifying name for the variable-speed cooling coil.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-001}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period. A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-12}
 
 This alpha field contains the cooling coil load side inlet node name.
@@ -4721,6 +4725,10 @@ The Variable-Speed Air-to-Air Heating DX Coil is a collection of performance cur
 
 This alpha field contains the identifying name for the variable speed heating coil.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-002}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period. A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-15}
 
 This alpha field contains the heating coil load side inlet node name.
@@ -5949,6 +5957,10 @@ The input fields for this object are described below in detail:
 
 This alpha field defines a unique user-assigned name for an instance of a heat pump water heater DX coil. Any reference to this coil by another object (e.g., \hyperref[waterheaterheatpumppumpedcondenser]{\lstinline!WaterHeater:HeatPump:PumpedCondenser!}) will use this name.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-003}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX Water Heating coil can run during a given time period. A schedule value of 0 indicates that the DX Water Heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Rated Heating Capacity}\label{field-rated-heating-capacity}
 
 This numeric field defines the DX coil heating capacity in Watts at the rated evaporator inlet air temperatures, rated condenser inlet water temperature, rated evaporator air flow rate, and rated condenser water flow rate specified below. Values must be greater than 0. This value represents water heating capacity, and it may or may not include the impact of condenser pump heat (see field Condenser Pump Heat Included in Rated Heating Capacity below).
@@ -6201,6 +6213,10 @@ The heat pump water heater DX coil model performs the following major functions:
 
 This alpha field defines a unique user-assigned name for an instance of a heat pump water heater DX coil. Any reference to this coil by another object (e.g., \hyperref[waterheaterheatpumpwrappedcondenser]{\lstinline!WaterHeater:HeatPump:WrappedCondenser!}) will use this name.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-004}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX Water Heating coil can run during a given time period. A schedule value of 0 indicates that the DX Water Heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Rated Heating Capacity}\label{field-rated-heating-capacity-1}
 
 This numeric field defines the DX coil heating capacity in Watts at the rated evaporator inlet air temperatures, rated condenser inlet water temperature, rated evaporator air flow rate, and rated condenser water flow rate specified below. Values must be greater than 0. This value represents water heating capacity, and it may or may not include the impact of condenser pump heat (see field Condenser Pump Heat Included in Rated Heating Capacity below).
@@ -6417,6 +6433,9 @@ The input fields for this object are described below in detail:
 This alpha field defines a unique user-assigned name for an instance of a heat pump water heater Variable Speed DX coil.
 Any reference to this coil by another object (e.g., \lstinline!WaterHeater:HeatPump:PumpedCondenser! or \lstinline!CoilSystem:IntegratedHeatPump:AirSource!) will use this name.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-005}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX Water Heating coil can run during a given time period. A schedule value of 0 indicates that the DX Water Heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 \paragraph{Field: Number of Speeds}\label{vshpwhheating-number-of-speeds}
 
@@ -6975,6 +6994,10 @@ Tang,C. C. 2005. Modeling Packaged Heat Pumps in Quasi-Steady State Energy Simul
 
 This alpha field contains the identifying name for the coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-006}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period. A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Compressor Type}\label{field-compressor-type}
 
 Type of compressor mode used for the heat pump. Choices available are reciprocating, rotary and scroll compressor. Note that the parameters vary for different compressor.
@@ -7164,6 +7187,10 @@ Tang,C. C. 2005. Modeling Packaged Heat Pumps in Quasi-Steady State Energy Simul
 \paragraph{Field: Name}\label{field-name-29}
 
 This alpha field contains the identifying name for the coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
+
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-007}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period. A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 \paragraph{Field: Water Inlet Node Name}\label{field-water-inlet-node-name-6-000}
 
@@ -7485,6 +7512,11 @@ The Variable-Speed Water-to-Air Cooling Equation Fit Coil is a collection of per
 \paragraph{Field: Name}\label{field-name-30}
 
 This alpha field contains the identifying name for the variable speed cooling coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
+
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-008}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period. A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 
 \paragraph{Field: Water Inlet Node Name}\label{field-water-inlet-node-name-7}
 
@@ -8028,6 +8060,10 @@ The Water to Air heat pump heating coil is a deterministic model that requires p
 
 This alpha field contains the identifying name for the coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
 
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-009}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period. A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
+
 \paragraph{Field: Compressor Type}\label{field-compressor-type-1}
 
 Type of compressor mode used for the heat pump. Choices available are reciprocating, rotary and scroll compressor. Note that the parameters vary for different compressor.
@@ -8175,6 +8211,10 @@ The Water to Air Heating Equation Fit Coil is a simple curve-fit model that requ
 \paragraph{Field: Name}\label{field-name-32}
 
 This alpha field contains the identifying name for the coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
+
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-010}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period. A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 \paragraph{Field: Water Inlet Node Name}\label{field-water-inlet-node-name-9}
 
@@ -8350,6 +8390,10 @@ The Variable-Speed Water-to-Air Heating Equation Fit Coil is a collection of per
 \paragraph{Field: Name}\label{field-name-33}
 
 This alpha field contains the identifying name for the variable speed heating coil. Any reference to this coil by another object (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} or \hyperref[airloophvacunitaryheatpumpwatertoair]{AirLoopHVAC:UnitaryHeatPump:WaterToAir}) will use this name.
+
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-012}
+
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period. A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 \paragraph{Field: Water Inlet Node Name}\label{field-water-inlet-node-name-10}
 

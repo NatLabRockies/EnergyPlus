@@ -217,7 +217,7 @@
   SimulationControl,
     Yes,                     !- Do Zone Sizing Calculation
     Yes,                     !- Do System Sizing Calculation
-    No,                      !- Do Plant Sizing Calculation
+    Yes,                     !- Do Plant Sizing Calculation
     No,                      !- Run Simulation for Sizing Periods
     Yes,                     !- Run Simulation for Weather File Run Periods
     YES,                     !- Do HVAC Sizing Simulation for Sizing Periods

@@ -355,6 +355,8 @@ namespace Fans {
         Num
     };
 
+    static constexpr std::array<std::string_view, (int)SpeedControl::Num> speedControlNames = {"Discrete", "Continuous"};
+
     static constexpr std::array<std::string_view, (int)SpeedControl::Num> speedControlNamesUC = {"DISCRETE", "CONTINUOUS"};
 
     class FanSystem : public FanBase

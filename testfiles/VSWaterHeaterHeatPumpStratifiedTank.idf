@@ -369,6 +369,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHPlantDXCoilVS,       !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     25000.0,                 !- Rated Water Heating Capacity {W}

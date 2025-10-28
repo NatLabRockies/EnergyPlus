@@ -934,6 +934,7 @@ TEST_F(SQLiteFixture, DesignDay_EnthalpyAtMaxDB)
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, false));
 
+    OutputReportTabular::setTabularReportStyles(*state);
     OutputReportTabular::WriteEioTables(*state);
 
     // Close output files *after* the EIO has been written to

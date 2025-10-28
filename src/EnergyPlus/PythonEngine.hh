@@ -71,6 +71,7 @@ namespace Python {
         PythonEngine &operator=(PythonEngine &&) = delete;
         ~PythonEngine();
 
+        static std::string getBasicPreamble();
         static std::string getTclPreppedPreamble(std::vector<std::string> const &python_fwd_args);
         void exec(std::string_view sv);
 

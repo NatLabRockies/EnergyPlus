@@ -502,7 +502,6 @@ namespace AirLoopHVACDOAS {
                 int CoolingCoilOrder = 0;
                 int FanOrder = 0;
                 for (int CompNum = 1; CompNum <= thisOutsideAirSys.NumComponents; ++CompNum) {
-                    std::string &CompType = thisOutsideAirSys.ComponentType(CompNum);
                     std::string &CompName = thisOutsideAirSys.ComponentName(CompNum);
 
                     bool InletNodeErrFlag = false;

@@ -372,6 +372,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
     HPWHPlantDXCoil,         !- Name
+    ,                        !- Availability Schedule Name
     2349.6,                  !- Rated Heating Capacity {W}
     2.4,                     !- Rated COP {W/W}
     0.981,                   !- Rated Sensible Heat Ratio

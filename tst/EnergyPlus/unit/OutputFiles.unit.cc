@@ -62,7 +62,6 @@ TEST_F(EnergyPlusFixture, OutputFiles_Expected_Formatting_Tests)
     EXPECT_EQ(format("{:#11.{}F}", 123.456, 0), "        123.");
     EXPECT_EQ(format("{:#12.{}F}", 0.85505055394102414, 3), "       0.855");
     EXPECT_EQ(format("{:#12.{}F}", 18229.761511696095, 2), "    18229.76");
-    EXPECT_EQ(format("{:12.{}Z}", 123456789.09999999, 3), "   0.123E+09");
     EXPECT_EQ(format("{:12}", 4), "           4");
 
     // R syntax, which replicates the "RoundSigDigits" function
@@ -160,23 +159,6 @@ TEST_F(EnergyPlusFixture, OutputFiles_Expected_Formatting_Tests)
     // this code should round up as well to match behavior of others
     // EXPECT_EQ(format("{:.5R}", 0.059576949999999996577), "5.95769E-002");
 
-    // N formatting simulates the 'G' from Fortran
-    // Always has a leading 0 if printing in fixed notation < 1
-    EXPECT_EQ(format("{:20.8N}", -0.23111252E-04), "     -0.23111252E-04");
-    EXPECT_EQ(format("{:20.8N}", -0.0), "      -0.0000000    ");
-    EXPECT_EQ(format("{:20.8N}", 0.0), "       0.0000000    ");
-    EXPECT_EQ(format("{:20.8N}", 2.13608134), "       2.1360813    ");
-    EXPECT_EQ(format("{:20.8N}", 213608134.0), "      213608134.    ");
-    EXPECT_EQ(format("{:20.8N}", 213608139.6), "      213608140.    ");
-    EXPECT_EQ(format("{:20.8N}", 0.213608134), "      0.21360813    ");
-    EXPECT_EQ(format("{:13.6N}", 0.803434E+09), " 0.803434E+09");
-    EXPECT_EQ(format("{:N}", 2.06944444444444), "2.06944444444444    ");
-    //    EXPECT_EQ(format("{:N}", 999.9), "           999.9    ");
-    EXPECT_EQ(format("{:N}", 61677162.0987027), "61677162.0987027    ");
-
-    //    EXPECT_EQ(format("{:20.8N}", -0.23111252), "     -0.23111252    ");
-    //    EXPECT_EQ(format("{:20.8N}", -0.23111252), "     -0.23111252    ");
-
     // T formatting is like R, but it trims instead of rounding
     EXPECT_EQ(format("{:.3T}", 7.63142731775999418747E-003), "7.631E-003");
     EXPECT_EQ(format("{:.3T}", 1.28349999999999948505E-004), "1.283E-004");
@@ -200,24 +182,6 @@ TEST_F(EnergyPlusFixture, OutputFiles_Expected_Formatting_Tests)
     // code is expected to round down with the old version, but clearly it should not
     // for the case of "Trim"
     // EXPECT_EQ(format("{:.4T}", 0.096970000000000000639), "9.6969E-002");
-
-    // Z formatting matches Fortran's 'E' format
-    // This is the output of running a test in Fortran by issuing `PRINT "(E12.1)", 100.0`
-    //                                     "123456789xyz"   // This is properly size 12
-    EXPECT_EQ(format("{:12.1Z}", 100.0), "     0.1E+03");
-    EXPECT_EQ(format("{:12.2Z}", 100.0), "    0.10E+03"); // Why not 1E02
-    EXPECT_EQ(format("{:12.3Z}", 100.0), "   0.100E+03");
-    EXPECT_EQ(format("{:12.4Z}", 100.0), "  0.1000E+03");
-
-    EXPECT_EQ(format("{:12.1Z}", 123.456), "     0.1E+03");
-    EXPECT_EQ(format("{:12.2Z}", 123.456), "    0.12E+03"); // Why not 12E
-    EXPECT_EQ(format("{:12.3Z}", 123.456), "   0.123E+03");
-    EXPECT_EQ(format("{:12.4Z}", 123.456), "  0.1235E+03");
-
-    EXPECT_EQ(format("{:12.1Z}", 0.0), "     0.0E+00");
-    EXPECT_EQ(format("{:12.2Z}", 0.0), "    0.00E+00"); // Why not 12E
-    EXPECT_EQ(format("{:12.3Z}", 0.0), "   0.000E+00");
-    EXPECT_EQ(format("{:12.4Z}", 0.0), "  0.0000E+00");
 }
 
 TEST_F(EnergyPlusFixture, OutputControlFiles)
@@ -413,7 +377,6 @@ OutputControl:Files,
         EXPECT_EQ(end, state->files.outputControl.end);
         EXPECT_EQ(shd, state->files.outputControl.shd);
         EXPECT_EQ(dfs, state->files.outputControl.dfs);
-        EXPECT_EQ(glhe, state->files.outputControl.glhe);
         EXPECT_EQ(delightin, state->files.outputControl.delightin);
         EXPECT_EQ(delighteldmp, state->files.outputControl.delighteldmp);
         EXPECT_EQ(delightdfdmp, state->files.outputControl.delightdfdmp);
@@ -448,7 +411,6 @@ OutputControl:Files,
         state->files.outputControl.end = false;
         state->files.outputControl.shd = false;
         state->files.outputControl.dfs = false;
-        state->files.outputControl.glhe = false;
         state->files.outputControl.delightin = false;
         state->files.outputControl.delighteldmp = false;
         state->files.outputControl.delightdfdmp = false;

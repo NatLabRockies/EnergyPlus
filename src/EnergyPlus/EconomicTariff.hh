@@ -57,6 +57,7 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
@@ -628,7 +629,8 @@ namespace EconomicTariff {
                                 std::string const &titleString,
                                 bool const includeCategory,
                                 bool const showCurrencySymbol,
-                                std::string const &forString);
+                                std::string const &forString,
+                                OutputReportTabular::tabularReportStyle &style);
 
     void selectTariff(EnergyPlusData &state);
 

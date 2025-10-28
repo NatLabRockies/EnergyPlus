@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataOutputs.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
+#include <EnergyPlus/InputProcessing/CsvParser.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 
 #include <map>
@@ -2093,11 +2094,12 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", "USEOUTPUTCONTROLTABLESTYLE"}), Alphas));
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data"}), cAlphaFields));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", "USEOUTPUTCONTROLTABLESTYLE", "YES"}), Alphas));
+    EXPECT_TRUE(compare_containers(
+        std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data", "Format Numeric Values for Tabular Data"}), cAlphaFields));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({}), cNumericFields));
     EXPECT_TRUE(compare_containers(std::vector<bool>({}), lNumericBlanks));
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks));
     EXPECT_TRUE(compare_containers(std::vector<Real64>({}), Numbers));
     EXPECT_EQ(1, NumAlphas);
     EXPECT_EQ(0, NumNumbers);
@@ -2655,20 +2657,21 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
                                                              "ZONESUM",
                                                              "COOLINGDESIGNCAPACITY",
                                                              "HEATINGDESIGNCAPACITY",
-                                                             "ONOFF"}),
+                                                             "ONOFF",
+                                                             "NONE"}),
                                    Alphas));
     // The commented out compare containers is what the original input processor said that alpha blanks should be, even though the last 3 alpha fields
     // are filled in with defaults. We think the last three fields really should be considered blank, i.e. true
     //        EXPECT_TRUE( compare_containers( std::vector< bool >( { false, false, false, false, false, false, false, true, false, false, false } ),
     //        lAlphaBlanks ) );
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(26, NumNumbers);
-    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0,     0,
-                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, -99999}),
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0,      0,
+                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, -99999, 1}),
                                    Numbers));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true}),
+                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true, true}),
                                    lNumericBlanks));
     EXPECT_EQ(1, IOStatus);
 }
@@ -3584,6 +3587,7 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
     std::string const idf_objects = delimited_string({
         "Coil:Cooling:DX:VariableSpeed,",
         "  Furnace ACDXCoil 1, !- Name",
+        "  ,                   !- Availability Schedule Name",
         "  DX Cooling Coil Air Inlet Node, !- Air Inlet Node Name",
         "  Heating Coil Air Inlet Node, !- Air Outlet Node Name",
         "  10, !- Number of Speeds{ dimensionless }",
@@ -3771,8 +3775,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_EQ(50, NumAlphas);
+    EXPECT_EQ(51, NumAlphas);
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"FURNACE ACDXCOIL 1",
+                                                             "",
                                                              "DX COOLING COIL AIR INLET NODE",
                                                              "HEATING COIL AIR INLET NODE",
                                                              "PLFFPLR",
@@ -3824,9 +3829,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                              "COOLEIRFFF"}),
                                    Alphas));
     EXPECT_TRUE(compare_containers(
-        std::vector<bool>({false, false, false, false, true,  false, false, true,  true,  true,  false, false, false, false, false, false, false,
+        std::vector<bool>({false, true,  false, false, false, true,  false, false, true,  true,  true,  false, false, false, false, false, false,
                            false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
+                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
         lAlphaBlanks));
 
     EXPECT_EQ(95, NumNumbers);
@@ -4844,5 +4849,45 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
 //          EXPECT_TRUE( compare_containers( std::vector< bool >( {} ), IDFRecords( index ).NumBlank ) );
 //
 //   }
+TEST_F(InputProcessorFixture, csv_import_ending_blank_line)
+{
+    std::string csv_no_empty_line_n = "\"H1\",\"H2\",\"H3\"\n"
+                                      "1,2,3\n"
+                                      "4,5,6\n"
+                                      "7,8,9\n";
+    std::string csv_with_empty_line_n = csv_no_empty_line_n + "\\n";
+    // EXPECT_TRUE(false);
+
+    std::string csv_no_empty_line_rn = "\"H1\",\"H2\",\"H3\"\r\n"
+                                       "1,2,3\r\n"
+                                       "4,5,6\r\n"
+                                       "7,8,9\r\n";
+
+    std::string csv_with_empty_line_rn = csv_no_empty_line_rn + "\r\n";
+
+    CsvParser csvParser;
+
+    // None of the following should throw errors
+
+    // No extra lines
+    std::string_view csv = csv_no_empty_line_n;
+    size_t index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with no ending blank line parse test failed";
+    csv = csv_no_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with no ending blank line parse test failed";
+
+    // testing extra blank lines at the end
+    csv = csv_with_empty_line_n;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with with an ending blank line parse test failed";
+    csv = csv_with_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with an ending blank line parse test failed";
+}
 
 } // namespace EnergyPlus

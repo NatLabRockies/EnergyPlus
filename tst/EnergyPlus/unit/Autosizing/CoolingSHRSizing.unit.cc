@@ -135,12 +135,12 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(0.7763, sizedValue, 0.000001);
+    EXPECT_NEAR(0.776167, sizedValue, 0.000001);
     sizer.autoSizedValue = 0.0; // reset for next test
     sizedValue = 0.0;
 
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77630\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77617\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -161,7 +161,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType); // missing Data* globals and Plant data
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(0.800655, sizedValue, 0.000001); // includes impact of ValidateADP
+    EXPECT_NEAR(1.0, sizedValue, 0.000001); // includes impact of ValidateADP
     initialSHR = 0.431 + 6086.0 * HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state->dataHVACGlobal->DXCT];
     // does not include impact of ValidateADP, which increases SHR
     EXPECT_LT(initialSHR, sizedValue); // includes impact of ValidateADP
@@ -200,13 +200,13 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     EXPECT_TRUE(sizer.wasAutoSized);
     RatedVolFlowPerRatedTotCap = state->dataSize->DataFlowUsedForSizing / state->dataSize->DataCapacityUsedForSizing;
     initialSHR = 0.389 + 7684.0 * RatedVolFlowPerRatedTotCap;
-    EXPECT_NEAR(0.61952, initialSHR, 0.000001); // does not include impact of ValidateADP
-    EXPECT_NEAR(0.63152, sizedValue, 0.000001); // includes impact of ValidateADP
-    sizer.autoSizedValue = 0.0;                 // reset for next test
+    EXPECT_NEAR(0.61952, initialSHR, 0.000001);  // does not include impact of ValidateADP
+    EXPECT_NEAR(0.631462, sizedValue, 0.000001); // includes impact of ValidateADP
+    sizer.autoSizedValue = 0.0;                  // reset for next test
     sizedValue = 0.0;
 
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.63152\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.63146\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -216,7 +216,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType); // missing Data* globals and Plant data
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(0.800798, sizedValue, 0.000001); // includes impact of ValidateADP
+    EXPECT_NEAR(1.0, sizedValue, 0.000001); // includes impact of ValidateADP
     initialSHR =
         0.431 +
         6086.0 * HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state->dataHVACGlobal->DXCT]; // does not include impact of ValidateADP, which increases SHR
@@ -238,7 +238,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
         6086.0 * HVAC::MinRatedVolFlowPerRatedTotCap[(int)state->dataHVACGlobal->DXCT]; // does not include impact of ValidateADP, which increases SHR
     EXPECT_LT(initialSHR, sizedValue);                                                  // compares impact of ValidateADP
     EXPECT_NEAR(0.533062, initialSHR, 0.000001);                                        // does not include impact of ValidateADP
-    EXPECT_NEAR(0.675861, sizedValue, 0.000001);                                        // includes impact of ValidateADP
+    EXPECT_NEAR(0.675925, sizedValue, 0.000001);                                        // includes impact of ValidateADP
     sizer.autoSizedValue = 0.0;                                                         // reset for next test
 
     // reset eio stream
@@ -286,12 +286,12 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(0.77630, sizedValue, 0.000001);
+    EXPECT_NEAR(0.776167, sizedValue, 0.000001);
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77630\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77617\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -307,7 +307,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(0.800160, sizedValue, 0.000001);
+    EXPECT_NEAR(0.856504, sizedValue, 0.000001);
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // Test #13 - Airloop Equipment

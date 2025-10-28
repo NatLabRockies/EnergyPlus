@@ -1364,7 +1364,7 @@ void GetAirPathData(EnergyPlusData &state)
         SetupOutputVariable(state,
                             "Air System Simulation Cycle On Off Status",
                             Constant::Units::None,
-                            (int &)state.dataAirLoop->PriAirSysAvailMgr(AirSysNum).availStatus,
+                            state.dataAirLoop->PriAirSysAvailMgr(AirSysNum).availStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             state.dataAirSystemsData->PrimaryAirSystems(AirSysNum).Name);
@@ -4197,6 +4197,8 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
             sysSizing.loadSizingType = sysSizInput.loadSizingType;
             sysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
             sysSizing.CoolCapControl = sysSizInput.CoolCapControl;
+            sysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
+            sysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
             sysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
             sysSizing.SysAirMinFlowRat = sysSizInput.SysAirMinFlowRat;
             sysSizing.SysAirMinFlowRatWasAutoSized = sysSizInput.SysAirMinFlowRatWasAutoSized;
@@ -4258,6 +4260,8 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
         finalSysSizing.loadSizingType = sysSizInput.loadSizingType;
         finalSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
         finalSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
+        finalSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
+        finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         finalSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
         finalSysSizing.SysAirMinFlowRat = sysSizInput.SysAirMinFlowRat;
         finalSysSizing.SysAirMinFlowRatWasAutoSized = sysSizInput.SysAirMinFlowRatWasAutoSized;
@@ -4305,6 +4309,8 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
         calcSysSizing.loadSizingType = sysSizInput.loadSizingType;
         calcSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
         calcSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
+        calcSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
+        calcSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         calcSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
         calcSysSizing.SysAirMinFlowRat = sysSizInput.SysAirMinFlowRat;
         calcSysSizing.SysAirMinFlowRatWasAutoSized = sysSizInput.SysAirMinFlowRatWasAutoSized;
@@ -5186,7 +5192,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                                                 state.dataSize->FinalZoneSizing(CtrlZoneNum).ZoneName));
                     }
                 } else if (!state.dataSize->FinalZoneSizing.empty()) { // not latent sizing for air loop
-                    if (state.dataSize->FinalZoneSizing(CtrlZoneNum).zoneLatentSizing && state.dataSize->CurOverallSimDay == 1) {
+                    if (state.dataSize->FinalZoneSizing(CtrlZoneNum).zoneLatentSizing && state.dataSize->CurOverallSimDay == 1 &&
+                        state.dataSize->FinalZoneSizing(CtrlZoneNum).heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::None) {
                         ShowWarningError(state,
                                          format("Sizing for AirLoop = {} includes latent sizing in Sizing:Zone object for Zone = {}",
                                                 airToZoneNodeInfo.AirLoopName,
@@ -5427,7 +5434,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     SysHeatZoneAvgTemp += zoneSizing.HeatZoneTempSeq(TimeStepInDay) * adjustedFlow;
                 } // end heated zones loop
                 // Get peak system heating load with coincident
-                if (abs(sysSizing.SysDesHeatLoad) > abs(sysSizing.SumZoneHeatLoadSeq(TimeStepInDay))) {
+                if (std::abs(sysSizing.SysDesHeatLoad) > std::abs(sysSizing.SumZoneHeatLoadSeq(TimeStepInDay))) {
                     sysSizing.SysDesHeatLoad = sysSizing.SumZoneHeatLoadSeq(TimeStepInDay);
                     sysSizing.SysHeatLoadTimeStepPk = TimeStepInDay;
                 }

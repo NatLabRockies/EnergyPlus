@@ -54,14 +54,11 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/StandardRatings.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -113,6 +110,9 @@ namespace DXCoils {
 
         std::string Name;                      // Name of the DX Coil
         HVAC::CoilType coilType = HVAC::CoilType::Invalid;     // Integer equivalent to DXCoilType
+
+        int coilReportNum = -1;
+      
         Sched::Schedule *availSched = nullptr; // availability schedule
         //          RatedCoolCap, RatedSHR and RatedCOP do not include the thermal or electrical
         //          effects due to the supply air fan
@@ -986,6 +986,49 @@ namespace DXCoils {
 
 } // namespace DXCoils
 
+static constexpr std::array<bool, (int)HVAC::CoilType::Num> coilTypeIsDX = {
+    true, // CoolingDXSingleSpeed,
+    true, // HeatingDXSingleSpeed,
+    true, // CoolingDXTwoSpeed,
+    false, // CoolingDXHXAssisted,
+    true, // CoolingDXTwoStageWHumControl,
+    true, // WaterHeatingDXPumped,
+    true, // WaterHeatingDXWrapped,
+    true, // CoolingDXMultiSpeed,
+    true, // HeatingDXMultiSpeed,
+    false, // HeatingGasOrOtherFuel,
+    false, // HeatingGasMultiStage,
+    false, // HeatingElectric,
+    false, // HeatingElectricMultiStage,
+    false, // HeatingDesuperheater,
+    false, // CoolingWater,
+    false, // CoolingWaterDetailed,
+    false, // HeatingWater,
+    false, // HeatingSteam,
+    false, // CoolingWaterHXAssisted,
+    false, // CoolingWAHP,
+    false, // HeatingWAHP,
+    false, // CoolingWAHPSimple,
+    false, // HeatingWAHPSimple,
+    true, // CoolingVRF,
+    true, // HeatingVRF,
+    false, // UserDefined,
+    false, // CoolingDXPackagedThermalStorage,
+    false, // CoolingWAHPVariableSpeedEquationFit,
+    false, // HeatingWAHPVariableSpeedEquationFit,
+    false, // CoolingDXVariableSpeed,
+    false, // HeatingDXVariableSpeed,
+    false, // WaterHeatingAWHPVariableSpeed,
+    true, // CoolingVRFFluidTCtrl,
+    true, // HeatingVRFFluidTCtrl,
+    false, // CoolingDX,
+    false, // DXSubcoolReheat,
+    false, // CoolingDXCurveFit,
+    false, // IHPAirSource,
+    false, // CoolingSystemDX,
+    false // HeatingSystemDX,
+};
+
 struct DXCoilsData : BaseGlobalStruct
 {
 
@@ -993,19 +1036,10 @@ struct DXCoilsData : BaseGlobalStruct
     bool MyOneTimeFlag = true;     // One time flag used to allocate MyEnvrnFlag and MySizeFlag
     bool CalcTwoSpeedDXCoilStandardRatingOneTimeEIOHeaderWrite = true;
     bool CrankcaseHeaterReportVarFlag = true;
-    int NumVRFHeatingCoils = 0;                   // number of VRF heat pump heating coils
-    int NumVRFCoolingCoils = 0;                   // number of VRF heat pump cooling coils
+  
+    std::array<int, (int)HVAC::CoilType::Num> NumCoils = {0};
     int NumDXCoils = 0;                           // Total number of DX coils
-    int NumVRFHeatingFluidTCtrlCoils = 0;         // number of VRF heat pump heating coils for FluidTCtrl Model
-    int NumVRFCoolingFluidTCtrlCoils = 0;         // number of VRF heat pump cooling coils for FluidTCtrl Model
-    int NumDXHeatingCoils = 0;                    // number of DX heat pump heating coils
-    int NumDoe2DXCoils = 0;                       // number of doe2 DX  coils
-    int NumDXHeatPumpWaterHeaterPumpedCoils = 0;  // number of DX  water heater coils, pumped
-    int NumDXHeatPumpWaterHeaterWrappedCoils = 0; // number of DX  water heater coils, pumped
-    int NumDXMulSpeedCoils = 0;                   // number of DX coils with multi-speed compressor
-    int NumDXMulModeCoils = 0;                    // number of DX coils with multi-mode performance
-    int NumDXMulSpeedCoolCoils = 0;               // number of multispeed DX cooling coils
-    int NumDXMulSpeedHeatCoils = 0;               // number of multispeed DX heating coils
+
     Real64 HPWHHeatingCapacity = 0.0;             // Used by Heat Pump:Water Heater object as total water heating capacity [W]
     Real64 HPWHHeatingCOP = 0.0;                  // Used by Heat Pump:Water Heater object as water heating COP [W/W]
     Array1D_bool CheckEquipName;

@@ -55,6 +55,12 @@ namespace EnergyPlus {
 
 namespace Constant {
 
+#if LINK_WITH_PYTHON && EP_PYTHON_CLI
+    static constexpr bool python_cli_enabled = true;
+#else
+    static constexpr bool python_cli_enabled = false;
+#endif
+
     enum class EndUse
     {
         Invalid = -1,

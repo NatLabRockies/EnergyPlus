@@ -219,18 +219,32 @@ void CsvParser::parse_line(std::string_view csv, size_t &index, json &columns)
         token = look_ahead(csv, index);
         if (token == Token::LINE_END || token == Token::FILE_END) {
             if (parsed_values != num_columns) {
-                success = false;
 
                 size_t found_index = csv.find_first_of("\r\n", this_beginning_of_line_index);
                 std::string line;
                 if (found_index != std::string::npos) {
                     line = csv.substr(this_beginning_of_line_index, found_index - this_beginning_of_line_index);
                 }
-                errors_.emplace_back(
-                    fmt::format(
-                        "CsvParser - Line {} - Expected {} columns, got {}. Error in following line.", this_cur_line_num, num_columns, parsed_values),
-                    false);
-                errors_.emplace_back(line, true);
+
+                // Determine if we're at the end of the file
+                // if the token isn't end of file, check for  an additional
+                // 1 character for \n and 2 characters for \r\n
+                bool last_line = false;
+                if (token == Token::FILE_END || (found_index + 1 == csv_size) || (found_index + 2 == csv_size)) {
+                    last_line = true;
+                }
+
+                // If we're at the end of a file and the line is blank, ignore the line. This is because
+                // some external programs append an extra blank line in their exports.
+                if (!line.empty() || !last_line) {
+                    success = false;
+                    errors_.emplace_back(fmt::format("CsvParser - Line {} - Expected {} columns, got {}. Error in following line.",
+                                                     this_cur_line_num,
+                                                     num_columns,
+                                                     parsed_values),
+                                         false);
+                    errors_.emplace_back(line, true);
+                }
             }
             next_token(csv, index);
             return;

@@ -1646,6 +1646,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone1WindAC_VS_DXCoil,   !- Name
+    ,                        !- Availability Schedule Name
     Zone1WindACFanOutletNode,!- Indoor Air Inlet Node Name
     Zone1WindACAirOutletNode,!- Indoor Air Outlet Node Name
     1.0,                     !- Number of Speeds {dimensionless}

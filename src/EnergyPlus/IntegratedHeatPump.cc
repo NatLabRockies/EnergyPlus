@@ -158,7 +158,7 @@ void SimIHP(EnergyPlusData &state,
             ObjexxFCL::Optional<Real64 const> OnOffAirFlowRat // ratio of comp on to comp off air flow rate
 )
 {
-    assert(ihpNum >= 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum >= 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(ihpNum);
 
     if (!ihp.IHPCoilsSized) SizeIHP(state, ihpNum);
@@ -447,8 +447,6 @@ void GetIHPInput(EnergyPlusData &state)
     Array1D_bool lNumericBlanks;     // Logical array, numeric field input BLANK = .TRUE.
 
     bool ErrorsFound(false); // If errors detected in input
-    bool IsNotOK;            // Flag to verify name
-    bool errFlag;
     int IOStat;
 
     int NumASIHPs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "COILSYSTEM:INTEGRATEDHEATPUMP:AIRSOURCE");
@@ -1815,9 +1813,6 @@ int GetIHPDWHCoilPLFFPLR(EnergyPlusData &state,
     // incorrect coil type or name is given, ErrorsFound is returned as true and value is returned
     // as zero.
 
-    // Return value
-    int PLRNumber(0); // returned outlet node of matched coil
-
     // Obtains and Allocates WatertoAirHP related parameters from input file
     if (state.dataIntegratedHP->GetCoilsInputFlag) { // First time subroutine has been entered
         GetIHPInput(state);
@@ -2320,7 +2315,7 @@ int GetIHPIndex(EnergyPlusData &state, std::string const &ihpName)
   
 int GetIHPDWHCoilPLFFPLR(EnergyPlusData &state, int const ihpNum)
 {
-    assert(ihpNum > 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum > 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(ihpNum);
     return (ihp.DWHCoilNum > 0) ?
         VariableSpeedCoils::GetCoilPLFFPLR(state, ihp.DWHCoilNum) : VariableSpeedCoils::GetCoilPLFFPLR(state, ihp.SCWHCoilNum);
@@ -2328,7 +2323,7 @@ int GetIHPDWHCoilPLFFPLR(EnergyPlusData &state, int const ihpNum)
 
 Real64 GetIHPDWHCoilCapacity(EnergyPlusData &state, int const ihpNum)
 {
-    assert(ihpNum > 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum > 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(ihpNum);
     if (ihp.IHPCoilsSized == false) SizeIHP(state, ihpNum); // WHY?
     return (ihp.DWHCoilNum > 0) ?
@@ -2337,19 +2332,19 @@ Real64 GetIHPDWHCoilCapacity(EnergyPlusData &state, int const ihpNum)
 
 int GetIHPCoilAirInletNode(EnergyPlusData &state, int const ihpNum)
 {
-    assert(ihpNum > 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum > 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     return state.dataIntegratedHP->IntegratedHeatPumps(ihpNum).AirCoolInletNodeNum;
 }
 
 int GetIHPDWHCoilAirInletNode(EnergyPlusData &state, int const ihpNum)
 {
-    assert(ihpNum > 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum > 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     return state.dataIntegratedHP->IntegratedHeatPumps(ihpNum).ODAirInletNodeNum;
 }
 
 int GetIHPDWHCoilAirOutletNode(EnergyPlusData &state, int const ihpNum)
 {
-    assert(ihpNum > 0 && ihpNum <= state.dataIntegratedHP->IntegratedHeatPumps.size());
+    assert(ihpNum > 0 && ihpNum <= (int)state.dataIntegratedHP->IntegratedHeatPumps.size());
     return state.dataIntegratedHP->IntegratedHeatPumps(ihpNum).ODAirOutletNodeNum;
 }
 

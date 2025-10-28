@@ -82,7 +82,6 @@ TEST_F(EnergyPlusFixture, ASIHP_GetCoilIndexIHP)
 
     // Don't get any inputs
     state->dataIntegratedHP->GetCoilsInputFlag = false;
-    bool ErrorsFound = false;
 
     IntegratedHeatPumpData IHP;
     IHP.Name = "ASIHP";
@@ -100,7 +99,6 @@ TEST_F(EnergyPlusFixture, ASIHP_GetCoilInletNodeIHP)
 
     // Don't get any inputs
     state->dataIntegratedHP->GetCoilsInputFlag = false;
-    bool ErrorsFound = false;
 
     IntegratedHeatPumpData IHP;
     IHP.Name = "ASIHP";
@@ -328,6 +326,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,",
         "    HPWHOutdoorDXCoilVS,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "	10,						 !- Number of Speeds",
         "	10,						 !- Nominal speed level",
         "    4000.0,                  !- Rated Heating Capacity {W}",
@@ -472,6 +471,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         " Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,",
         "    SCWHCoil1,               !- Name",
+        "    ,                        !- Availability Schedule Name",
         "	10,						 !- Number of Speeds",
         "	10,						 !- Nominal speed level",
         "    4000.0,                  !- Rated Heating Capacity {W} at the nominal speed level",
@@ -616,6 +616,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,",
         "    SCDWHWHCoil1,            !- Name",
+        "    ,                        !- Availability Schedule Name",
         "	10,						 !- Number of Speeds",
         "	10,						 !- Nominal speed level",
         "    4000.0,                  !- Rated Heating Capacity {W} at the nominal speed level",
@@ -760,6 +761,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         " Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,",
         "    SHDWHWHCoil1,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "	10,						 !- Number of Speeds",
         "	10,						 !- Nominal speed level",
         "    4000.0,                  !- Rated Heating Capacity {W}",
@@ -1024,6 +1026,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    Heat Pump DX Heating Coil 1,  !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -1135,6 +1138,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    SHDWHHeatCoil1,  		!- Name",
+        "    ,                      !- Availability Schedule Name",
         "    Heating Coil Air Inlet Node,  	!- Indoor Air Inlet Node Name",
         "    SuppHeating Coil Air Inlet Node,  	!- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -1282,6 +1286,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Heat Pump ACDXCoil 1,    !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,   	!- Indoor Air Inlet Node Name",
         "    Heating Coil Air Inlet Node, 		!- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -1429,6 +1434,7 @@ TEST_F(EnergyPlusFixture, ASIHP_GetIHPInput)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    SCDWHCoolCoil1,    		!- Name",
+        "    ,                          !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,    !- Indoor Air Inlet Node Name",
         "    Heating Coil Air Inlet Node, 	    !- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",

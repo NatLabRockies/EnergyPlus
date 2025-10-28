@@ -1,10 +1,10 @@
-SET(SRC 
+SET(SRC
 defines.h
 utilSocket.c
 utilSocket.h
 utilXml.c
 utilXml.h
-) 
+)
 
 IF( WIN32 )
   LIST( APPEND SRC bcvtb.def )

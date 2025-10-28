@@ -231,6 +231,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Main Cooling Coil 1,    !- Name",
+        "    ,                       !- Availability Schedule Name",
         "    Heat Recovery Supply Outlet,  !- Indoor Air Inlet Node Name",
         "    Heat Recovery Exhuast Inlet Node,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",

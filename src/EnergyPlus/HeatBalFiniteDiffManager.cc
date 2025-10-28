@@ -1043,14 +1043,14 @@ namespace HeatBalFiniteDiffManager {
                 SetupOutputVariable(state,
                                     format("CondFD Phase Change State {}", node),
                                     Constant::Units::None,
-                                    (int &)SurfaceFD(SurfNum).PhaseChangeStateRep(node),
+                                    SurfaceFD(SurfNum).PhaseChangeStateRep(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);
                 SetupOutputVariable(state,
                                     format("CondFD Phase Change Previous State {}", node),
                                     Constant::Units::None,
-                                    (int &)SurfaceFD(SurfNum).PhaseChangeStateOldRep(node),
+                                    SurfaceFD(SurfNum).PhaseChangeStateOldRep(node),
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     state.dataSurface->Surface(SurfNum).Name);

@@ -1250,10 +1250,10 @@ void ASHRAE205ChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, boo
     this->QEvaporator = 0.0;
     this->QOilCooler = 0.0;
     this->QAuxiliary = 0.0;
-    int PlantLoopNum = this->CWPlantLoc.loopNum;
-    DataPlant::LoopSideLocation LoopSideNum = this->CWPlantLoc.loopSideNum;
-    int BranchNum = this->CWPlantLoc.branchNum;
-    int CompNum = this->CWPlantLoc.compNum;
+    // int PlantLoopNum = this->CWPlantLoc.loopNum;
+    // DataPlant::LoopSideLocation LoopSideNum = this->CWPlantLoc.loopSideNum;
+    // int BranchNum = this->CWPlantLoc.branchNum;
+    // int CompNum = this->CWPlantLoc.compNum;
 
     // Set module-level chiller evaporator and condenser inlet temperature variables
     // using prior time step's temperature

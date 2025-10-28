@@ -32,7 +32,7 @@ jobs:
         macos_dev_target: [12.1, 13.0]
         include:
         - macos_dev_target: 12.1
-          os: macos-13
+          os: macos-15-intel
           allow_failure: false
           arch: x86_64
           python-arch: x64
@@ -49,7 +49,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
 #    - name: Setup QtIFW 4.x
 #      uses: jmarrec/setup-qtifw@v1
@@ -82,7 +82,7 @@ jobs:
         aria2c https://www.apple.com/certificateauthority/AppleWWDRCAG2.cer
         aria2c https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
         security import AppleWWDRCAG2.cer -k $KEYCHAIN_PATH
-        security import DeveloperIDG2CA.cer -k $KEYCHAIN_PATH
+        security import DeveloperIDG2CA.cer -k $KEYCHAIN_PATH || true  # macos-15-intel seems to already have it
         security find-identity -vvvv $KEYCHAIN_PATH
         security find-identity -v -p codesigning
 
@@ -135,8 +135,8 @@ jobs:
         fi
 
         if [[ "$BUILD_DOCS" != "false" ]]; then
-          echo "Using brew to install mactex and adding it to PATH"
-          brew install --cask mactex-no-gui
+          echo "Using brew to install basictex and adding it to PATH"
+          brew install --cask basictex
           echo "/Library/TeX/texbin" >> $GITHUB_PATH
           echo "DOCUMENTATION_BUILD=BuildWithAll" >> $GITHUB_ENV
         else
@@ -149,6 +149,14 @@ jobs:
         brew list gcc@13 || brew install gcc@13
         which gfortran-13 || echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
         brew install ninja tcl-tk
+
+    - name: Install required LaTeX packages by building the Test document
+      shell: bash
+      working-directory: ./doc/test
+      run: |
+        sudo tlmgr update --self
+        sudo tlmgr install enumitem framed multirow siunitx
+        xelatex dependencies.tex
 
     - name: Create Build Directory
       run: cmake -E make_directory ./build/
@@ -166,7 +174,7 @@ jobs:
               -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DDOCUMENTATION_BUILD:STRING=$DOCUMENTATION_BUILD -DTEX_INTERACTION:STRING="batchmode" \
-              -DENABLE_OPENMP:BOOL=OFF -DUSE_OpenMP:BOOL=OFF \
+              -DENABLE_OPENMP:BOOL=OFF \
               -DCPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION:STRING="Developer ID Application: National Renewable Energy Laboratory (K7JYVQJL7R)" \
               -DCPACK_CODESIGNING_NOTARY_PROFILE_NAME:STRING=EnergyPlus \
               ../
@@ -282,7 +290,7 @@ jobs:
         macos_dev_target: [12.1, 13.0]
         include:
           - macos_dev_target: 12.1
-            os: macos-13
+            os: macos-15-intel
             arch: x86_64
             python-arch: x64
             test_key: mac12
@@ -293,19 +301,19 @@ jobs:
             test_key: mac13-arm64
 
     steps:
-    - uses: actions/checkout@v4  # Still need E+ checked out to get testing scripts
+    - uses: actions/checkout@v5  # Still need E+ checked out to get testing scripts
       with:
         path: checkout
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       id: setup-python
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         architecture: ${{ matrix.python-arch }}
 
     - name: Gather Test Package from Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.tar.gz
         path: package
@@ -323,7 +331,7 @@ jobs:
       run: python checkout/scripts/package_tests/runner.py --verbose ${{ matrix.test_key }} package/
 
     - name: Gather Dmg Package from Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.dmg
         path: dmg

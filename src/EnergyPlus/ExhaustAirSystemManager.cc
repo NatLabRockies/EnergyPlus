@@ -581,8 +581,8 @@ namespace ExhaustAirSystemManager {
             }
 
             Real64 DesignFlowRate = thisExhCtrl.DesignExhaustFlowRate;
-            Real64 FlowFrac = 0.0;
-            if (thisExhCtrl.minExhFlowFracSched != nullptr) {
+            Real64 FlowFrac = 1.0;
+            if (thisExhCtrl.exhaustFlowFractionSched != nullptr) {
                 FlowFrac = thisExhCtrl.exhaustFlowFractionSched->getCurrentVal();
                 if (FlowFrac < 0.0) {
                     ShowWarningError(

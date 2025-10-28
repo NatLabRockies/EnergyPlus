@@ -103,8 +103,7 @@ void BaseSizerWithScalableInputs::initializeWithinEP(EnergyPlusData &state,
         if (this->primaryAirSystem(this->curSysNum).supFanNum > 0) {
             ReportCoilSelection::setCoilSupplyFanInfo(
                 state,
-                this->compName,
-                this->coilType,
+                this->coilReportNum,
                 state.dataFans->fans(this->primaryAirSystem(this->curSysNum).supFanNum)->Name,
                 state.dataFans->fans(this->primaryAirSystem(this->curSysNum).supFanNum)->type,
                 this->primaryAirSystem(this->curSysNum).supFanNum);

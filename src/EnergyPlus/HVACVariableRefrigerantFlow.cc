@@ -1430,7 +1430,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
     int NumNums = 0;   // Number of real arguments
     int IOStat;        // Status
     bool errFlag;      // error flag for mining functions
-    bool IsNotOK;      // Flag to verify name
 
     // Compute for allocation
     int MaxAlphas = 0;
@@ -4300,7 +4299,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         SetupOutputVariable(state,
                             "Zone VRF Air Terminal Fan Availability Status",
                             Constant::Units::None,
-                            (int &)thisVrfTU.availStatus,
+                            thisVrfTU.availStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             thisVrfTU.Name);
@@ -7904,7 +7903,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
     }
 
     if (state.dataHVACVarRefFlow->VRFTU(VRFTUNum).suppHeatCoilType == HVAC::CoilType::HeatingWater) {
-        bool ErrorsFound = false;
         WaterCoils::SetCoilDesFlow(state,
                                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).SuppHeatCoilNum,
                                    state.dataHVACVarRefFlow->VRFTU(VRFTUNum).MaxHeatAirVolFlow);
@@ -7978,7 +7976,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         TUCoolingCapacity = 0.0;
         TUHeatingCapacity = 0.0;
         bool FoundAll = true;
-        bool errFlag; // temporary variable used for error checking
         int TUListNum = state.dataHVACVarRefFlow->VRFTU(VRFTUNum).TUListIndex;
         for (int NumTU = 1; NumTU <= state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).NumTUInList; ++NumTU) {
             int TUIndex = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).ZoneTUPtr(NumTU);

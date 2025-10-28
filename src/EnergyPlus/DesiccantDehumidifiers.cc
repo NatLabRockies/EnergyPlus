@@ -229,12 +229,10 @@ namespace DesiccantDehumidifiers {
         bool ErrorsFound(false);        // Set to true if errors in input, fatal at end of routine
         bool ErrorsFound2(false);       // Set to true if errors in input, fatal at end of routine
         bool ErrorsFoundGeneric(false); // Set to true if errors in input, fatal at end of routine
-        bool IsNotOK;                   // Flag to verify name
         bool OANodeError;               // Flag for check on outside air node
         std::string RegenCoilInlet;     // Desiccant system regeneration air heater inlet node
         std::string RegenCoilOutlet;    // Desiccant system regeneration air heater outlet node
         int DesuperHeaterIndex;         // Index of desuperheater heating coil
-        int RegenCoilControlNodeNum;    // Control node number of regen heating coil
         Real64 CoilBypassedFlowFrac;    // Bypass air fraction for multimode DX coils
         Array1D_string Alphas;          // Alpha input items for object
         Array1D_string cAlphaFields;    // Alpha field names
@@ -242,7 +240,6 @@ namespace DesiccantDehumidifiers {
         Array1D<Real64> Numbers;        // Numeric input items for object
         Array1D_bool lAlphaBlanks;      // Logical array, alpha field input BLANK = .TRUE.
         Array1D_bool lNumericBlanks;    // Logical array, numeric field input BLANK = .TRUE.
-        bool errFlag;                   // local error flag
         std::string RegenCoilType;      // Regen heating coil type
         std::string RegenCoilName;      // Regen heating coil name
 
@@ -735,7 +732,7 @@ namespace DesiccantDehumidifiers {
                         ShowContinueError(state, format("...{} = {}", cAlphaFields(9), Alphas(9)));
                         ShowContinueError(state, format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
                         ShowContinueError(
-                            state, format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
+                            state, format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNode)));
                         ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
                         ErrorsFoundGeneric = true;
                     }
@@ -799,7 +796,7 @@ namespace DesiccantDehumidifiers {
                         ShowContinueError(state, format("...{} = {}", cAlphaFields(9), Alphas(9)));
                         ShowContinueError(state, format("...{} = {}", cAlphaFields(10), desicDehum.RegenCoilName));
                         ShowContinueError(
-                            state, format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNodeNum)));
+                            state, format("...heating coil temperature setpoint node = {}", state.dataLoopNodes->NodeID(RegenCoilControlNode)));
                         ShowContinueError(state, "...leave the heating coil temperature setpoint node name blank in the regen heater object.");
                         ErrorsFoundGeneric = true;
                     }
@@ -2520,13 +2517,13 @@ namespace DesiccantDehumidifiers {
                 if (desicDehum.ErrCount < 2) {
                     ShowWarningError(state,
                                      format("{} \"{}\" - Air volume flow rate per watt of total condenser waste heat is below the minimum "
-                                            "recommended at {:N} m3/s/W.",
+                                            "recommended at {:G} m3/s/W.",
                                             desicDehum.DehumType,
                                             desicDehum.Name,
                                             VolFlowPerRatedTotQ));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowContinueError(state,
-                                      format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:N}]", MinVolFlowPerRatedTotQ));
+                                      format("Expected minimum for VolumeFlowperRatedTotalCondenserWasteHeat = [{:G}]", MinVolFlowPerRatedTotQ));
                     ShowContinueError(state, "Possible causes include inconsistent air flow rates in system components ");
                     ShowContinueError(state, "on the regeneration side of the desiccant dehumidifier.");
                 } else {

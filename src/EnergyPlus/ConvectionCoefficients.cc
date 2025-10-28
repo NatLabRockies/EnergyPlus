@@ -796,7 +796,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(intConvUserCurve.hcFnTempDiffCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(3), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(3), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -812,7 +812,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(intConvUserCurve.hcFnTempDiffDivHeightCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(4), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(4), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -828,7 +828,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(intConvUserCurve.hcFnACHCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(5), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(5), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -844,7 +844,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(intConvUserCurve.hcFnACHDivPerimLengthCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(6), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(6), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -891,7 +891,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(extConvUserCurve.hfFnWindSpeedCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(3), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(3), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -908,7 +908,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(extConvUserCurve.hnFnTempDiffCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(4), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(4), curve->Name, "1", curve->numDims);
                 }
             }
         } else {
@@ -925,7 +925,7 @@ void GetUserConvCoeffs(EnergyPlusData &state)
                 auto const *curve = state.dataCurveManager->curves(extConvUserCurve.hnFnTempDiffDivHeightCurveNum);
                 if (curve->numDims != 1) {
                     ErrorsFound = true;
-                    Curve::ShowSevereCurveDims(state, eoh, ipsc->cAlphaFieldNames(5), curve->Name, "1", curve->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, ipsc->cAlphaFieldNames(5), curve->Name, "1", curve->numDims);
                 }
             }
         } else {

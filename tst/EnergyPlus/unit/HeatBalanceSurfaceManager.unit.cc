@@ -2505,12 +2505,14 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySrdSurfLWR)
     // Test if LWR from surrounding surfaces correctly calculated
     EXPECT_DOUBLE_EQ(Constant::StefanBoltzmann * 0.9 * 0.6 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)),
                      state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(1));
-    EXPECT_DOUBLE_EQ(Constant::StefanBoltzmann * 0.9 *
-                         (0.3 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)) +
-                          0.3 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin))),
-                     state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(2));
-    EXPECT_DOUBLE_EQ(Constant::StefanBoltzmann * 0.9 * 0.5 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)),
-                     state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(3));
+    EXPECT_NEAR(Constant::StefanBoltzmann * 0.9 *
+                    (0.3 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)) +
+                     0.3 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin))),
+                state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(2),
+                0.0000000001);
+    EXPECT_NEAR(Constant::StefanBoltzmann * 0.9 * 0.5 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)),
+                state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(3),
+                0.0000000001);
     EXPECT_DOUBLE_EQ(0.0, state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(4));
     // LWR Exchange Coefficient check for CTF method heat balance algorithm
     EXPECT_EQ(state->dataHeatBal->OverallHeatTransferSolutionAlgo, DataSurfaces::HeatTransferModel::CTF);
@@ -9512,6 +9514,180 @@ TEST_F(EnergyPlusFixture, CFDHeatBalanceSurfaceManager_TestSurfPropSrdSurfLWR)
     EXPECT_DOUBLE_EQ(state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(2), lwr_flux_Surf2);
     EXPECT_DOUBLE_EQ(state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(3), lwr_flux_Surf3);
     EXPECT_DOUBLE_EQ(state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(4), 0.0);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_ZoneFaceConductionVariableTest)
+{
+    // Added as part of work on Defect #10812
+    auto &dS = state->dataSurface;
+    auto &dHB = state->dataHeatBal;
+    auto &dHBSurf = state->dataHeatBalSurf;
+    auto &dG = state->dataGlobal;
+
+    Real64 constexpr closeEnough = 0.00001;
+
+    // Set up data that doesn't change and then allocate arrays
+    dG->BeginSimFlag = false;
+    dS->TotSurfaces = 2;
+    state->dataViewFactor->NumOfSolarEnclosures = 1;
+    dG->NumOfZones = 1;
+    dG->DisplayAdvancedReportVariables = true;
+    state->dataOutRptTab->displayHeatEmissionsSummary = false;
+    dS->AnyMovableInsulation = false;
+    dG->ZoneSizingCalc = false;
+    dHB->Zone.allocate(dG->NumOfZones);
+    dHB->space.allocate(dG->NumOfZones);
+    dS->Surface.allocate(dS->TotSurfaces);
+    dS->SurfSunlitFrac.allocate(dS->TotSurfaces);
+    dS->SurfSunlitFrac = 0.0;
+    dS->SurfSunlitArea.allocate(dS->TotSurfaces);
+    dS->SurfSunlitArea = 0.0;
+    int constexpr NumTimeSteps(6);
+    int constexpr HoursInDay(24);
+    dHB->SurfSunlitFrac.allocate(HoursInDay, NumTimeSteps, dS->TotSurfaces);
+    dHB->SurfSunlitFrac = 0.0;
+    dHB->Zone(1).numSpaces = 1;
+    dHB->Zone(1).spaceIndexes.allocate(dHB->Zone(1).numSpaces);
+    dHB->Zone(1).spaceIndexes(1) = 1;
+    dS->Surface(1).Area = 1.0;
+    dS->Surface(2).Area = 2.0;
+    dG->HourOfDay = 1;
+    dG->TimeStep = 1;
+    dHB->space(1).OpaqOrIntMassSurfaceFirst = 1;
+    dHB->space(1).OpaqOrIntMassSurfaceLast = 2;
+    dHB->SurfInitialDifSolInAbsReport.allocate(dS->TotSurfaces);
+    dHB->SurfSWInAbsTotalReport.allocate(dS->TotSurfaces);
+    dHB->ZoneOpaqSurfInsFaceCond.allocate(dG->NumOfZones);
+    dHB->ZoneOpaqSurfInsFaceCondGainRep.allocate(dG->NumOfZones);
+    dHB->ZoneOpaqSurfInsFaceCondLossRep.allocate(dG->NumOfZones);
+    dHB->ZnOpqSurfInsFaceCondGnRepEnrg.allocate(dG->NumOfZones);
+    dHB->ZnOpqSurfInsFaceCondLsRepEnrg.allocate(dG->NumOfZones);
+    dHB->ZoneOpaqSurfExtFaceCond.allocate(dG->NumOfZones);
+    dHB->ZoneOpaqSurfExtFaceCondGainRep.allocate(dG->NumOfZones);
+    dHB->ZoneOpaqSurfExtFaceCondLossRep.allocate(dG->NumOfZones);
+    dHB->ZnOpqSurfExtFaceCondGnRepEnrg.allocate(dG->NumOfZones);
+    dHB->ZnOpqSurfExtFaceCondLsRepEnrg.allocate(dG->NumOfZones);
+    dG->TimeStepZoneSec = 60.0;
+    dS->Surface(1).Area = 1.0;
+    dS->Surface(2).Area = 10.0;
+
+    AllocateSurfaceHeatBalArrays(*state);
+
+    // Test 1: all positive
+    dHBSurf->SurfOpaqInsFaceCondFlux(1) = 1.0;
+    dHBSurf->SurfOpaqInsFaceCondFlux(2) = 2.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(1) = 1.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(2) = 2.0;
+    dHB->ZoneOpaqSurfInsFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1) = 0.0;
+
+    ReportSurfaceHeatBalance(*state);
+
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCond(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondGainRep(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondLossRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1), 1260.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCond(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondGainRep(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondLossRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1), 1260.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1), 0.0, closeEnough);
+
+    // Test 2: positive and negative, sum is positive
+    dHBSurf->SurfOpaqInsFaceCondFlux(1) = -10.0;
+    dHBSurf->SurfOpaqInsFaceCondFlux(2) = 2.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(1) = -10.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(2) = 2.0;
+    dHB->ZoneOpaqSurfInsFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1) = 0.0;
+
+    ReportSurfaceHeatBalance(*state);
+
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCond(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondGainRep(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondLossRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1), 600.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCond(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondGainRep(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondLossRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1), 600.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1), 0.0, closeEnough);
+
+    // Test 3: positive and negative, sum is negative
+    dHBSurf->SurfOpaqInsFaceCondFlux(1) = -30.0;
+    dHBSurf->SurfOpaqInsFaceCondFlux(2) = 2.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(1) = -30.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(2) = 2.0;
+    dHB->ZoneOpaqSurfInsFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1) = 0.0;
+
+    ReportSurfaceHeatBalance(*state);
+
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCond(1), -10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondGainRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondLossRep(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1), 600.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCond(1), -10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondGainRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondLossRep(1), 10.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1), 600.0, closeEnough);
+
+    // Test 4: all negative
+    dHBSurf->SurfOpaqInsFaceCondFlux(1) = -1.0;
+    dHBSurf->SurfOpaqInsFaceCondFlux(2) = -2.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(1) = -1.0;
+    dHBSurf->SurfOpaqOutFaceCondFlux(2) = -2.0;
+    dHB->ZoneOpaqSurfInsFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfInsFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCond(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondGainRep(1) = 0.0;
+    dHB->ZoneOpaqSurfExtFaceCondLossRep(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1) = 0.0;
+    dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1) = 0.0;
+
+    ReportSurfaceHeatBalance(*state);
+
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCond(1), -21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondGainRep(1), .0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfInsFaceCondLossRep(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondGnRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfInsFaceCondLsRepEnrg(1), 1260.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCond(1), -21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondGainRep(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondLossRep(1), 21.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1), 0.0, closeEnough);
+    EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1), 1260.0, closeEnough);
 }
 
 } // namespace EnergyPlus

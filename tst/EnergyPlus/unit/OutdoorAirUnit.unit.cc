@@ -376,7 +376,7 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_AutoSize)
         "   **   ~~~   ** Air mass balance is required by other outdoor air units: Fan:ZoneExhaust, ZoneMixing, ZoneCrossMixing, or other air flow "
         "control inputs.",
         "   **   ~~~   ** The outdoor mass flow rate = 0.602 and the exhaust mass flow rate = 0.000.",
-        "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+        "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:15",
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));

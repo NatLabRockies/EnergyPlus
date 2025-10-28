@@ -4485,4 +4485,118 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     state->dataAirLoop->AirLoopAFNInfo.deallocate();
 }
 
+TEST_F(EnergyPlusFixture, AirflowNetwork_get_people_indexTest)
+{
+    // Unit test added for fix to Defect #11027
+    int expectedIndexResult;
+    int actualIndexResult;
+    bool errFlag = false;
+
+    state->afn->MultizoneSurfaceData.allocate(10);
+    state->afn->MultizoneZoneData.allocate(3);
+    state->dataHeatBal->TotPeople = 3;
+    state->dataHeatBal->People.allocate(state->dataHeatBal->TotPeople);
+    state->dataSurface->Surface.allocate(10);
+    state->afn->AirflowNetworkNumOfZones = 3;
+
+    state->dataHeatBal->People(1).ZonePtr = 2;
+    state->dataHeatBal->People(1).AdaptiveASH55 = true;
+    state->dataHeatBal->People(1).AdaptiveCEN15251 = false;
+    state->dataHeatBal->People(2).ZonePtr = 3;
+    state->dataHeatBal->People(2).AdaptiveASH55 = false;
+    state->dataHeatBal->People(2).AdaptiveCEN15251 = true;
+    state->dataHeatBal->People(3).ZonePtr = 1;
+    state->dataHeatBal->People(3).AdaptiveASH55 = false;
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = false;
+
+    state->afn->MultizoneZoneData(1).ZoneNum = 3;
+    state->afn->MultizoneZoneData(2).ZoneNum = 1;
+    state->afn->MultizoneZoneData(3).ZoneNum = 2;
+
+    state->afn->MultizoneSurfaceData(1).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(2).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(3).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(4).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(5).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(6).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(7).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(8).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(9).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(10).ZonePtr = 1;
+
+    // Tests S1A/C: Surface--AFN Surface 1 (points to Zone 1 which is People 3 which does not use ASH55 or CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(1).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(1).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests S2A/C: Surface--AFN Surface 2 (points to Zone 2 which is People 1 which uses ASH55)
+    expectedIndexResult = 1;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(2).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(2).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests S3A/C: Surface--AFN Surface 3 (points to Zone 3 which is People 2 which uses CEN15251)    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(3).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 2;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(3).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+
+    // Tests S10C: Surface--AFN Surface 10 (points to Zone 2 but RAFN is set so this goes to Zone 1 which is People 3 which is rest to use CEN15251)
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = true;
+    expectedIndexResult = 3;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(10).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = false;
+
+    // Tests Z1A/C: Zone--Array 1 (points to Zone 3 which is People 2 which uses CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(1).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 2;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(1).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+
+    // Tests Z2A/C: Zone--Array 2 (points to Zone 1 which is People 3 which uses neither ASH55 nor CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(2).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(2).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests Z3A/C: Zone--Array 3 (points to Zone 2 which is People 1 which uses ASH55)
+    expectedIndexResult = 1;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(3).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(3).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset (not really necessary unless more tests are added)
+}
+
 } // namespace EnergyPlus

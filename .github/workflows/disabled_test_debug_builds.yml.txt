@@ -59,7 +59,6 @@ jobs:
         -DBUILD_PACKAGE:BOOL=OFF
         -DDOCUMENTATION_BUILD:STRING=DoNotBuild
         -DENABLE_OPENMP:BOOL=OFF
-        -DUSE_OpenMP:BOOL=OFF
         ../
 
     - name: Build
@@ -129,7 +128,6 @@ jobs:
           -DBUILD_PACKAGE:BOOL=OFF
           -DDOCUMENTATION_BUILD:STRING=DoNotBuild
           -DENABLE_OPENMP:BOOL=OFF
-          -DUSE_OpenMP:BOOL=OFF
           -DENABLE_COVERAGE:BOOL=ON
           ../
 

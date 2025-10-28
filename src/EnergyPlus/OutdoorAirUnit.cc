@@ -78,6 +78,7 @@
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutdoorAirUnit.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
@@ -697,6 +698,11 @@ namespace OutdoorAirUnit {
                             //          thisOutAirUnit%OAEquip(CompNum)%Type= CompType::HeatXchngr
 
                             // Desiccant Dehumidifier
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     state.dataOutRptPredefined->pdchAirHRZoneHVACName,
+                                                                     thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                                     thisOutAirUnit.Name);
+
                             break;
                         }
                         case CompType::Desiccant: {
@@ -932,7 +938,7 @@ namespace OutdoorAirUnit {
             SetupOutputVariable(state,
                                 "Zone Outdoor Air Unit Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)thisOutAirUnit.availStatus,
+                                thisOutAirUnit.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 thisOutAirUnit.Name);
@@ -1086,7 +1092,6 @@ namespace OutdoorAirUnit {
             state.dataLoopNodes->Node(OutNode).MassFlowRate = thisOutAirUnit.EMaxAirMassFlow;
 
             if (!state.dataOutdoorAirUnit->MyPlantScanFlag(OAUnitNum)) {
-                bool errFlag = false;
                 for (int compLoop = 1; compLoop <= thisOutAirUnit.NumComponents; ++compLoop) {
                     auto &oaEquip = thisOutAirUnit.OAEquip(compLoop);
                     if (oaEquip.Type == CompType::WaterCoil_Cooling ||

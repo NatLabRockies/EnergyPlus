@@ -325,7 +325,6 @@ namespace HVACUnitaryBypassVAV {
         std::string CompSetFanInlet;  // Used in SetUpCompSets call
         std::string CompSetFanOutlet; // Used in SetUpCompSets call
         bool ErrorsFound(false);      // Set to true if errors in input, fatal at end of routine
-        bool DXErrorsFound(false);    // Set to true if errors in get coil input
         Array1D_int OANodeNums(4);    // Node numbers of OA mixer (OA, EA, RA, MA)
         bool DXCoilErrFlag;           // used in warning messages
 
@@ -2138,7 +2137,6 @@ namespace HVACUnitaryBypassVAV {
                                            OnOffAirFlowRatio);
                     } else if (s_node->Node(cbvav.CoolCoilAirOutletNode).Temp < cbvav.CoilTempSetPoint) {
                         auto f = [&state, CBVAVNum, OnOffAirFlowRatio](Real64 const PartLoadFrac) {
-                            auto &s_node = state.dataLoopNodes;
                             auto &cbvav = state.dataHVACUnitaryBypassVAV->CBVAVs(CBVAVNum);
                             DXCoils::CalcDoe2DXCoil(state,
                                                     cbvav.CoolCoilNum,
@@ -2209,7 +2207,6 @@ namespace HVACUnitaryBypassVAV {
                     Real64 LocalPartLoadFrac(0.0);
                     Real64 SpeedRatio(0.0);
                     int SpeedNum(1);
-                    bool errorFlag(false);
                     int maxNumSpeeds = VariableSpeedCoils::GetCoilNumOfSpeeds(state, cbvav.CoolCoilNum);
                     Real64 DesOutTemp = cbvav.CoilTempSetPoint;
                     // Get no load result
@@ -2352,7 +2349,6 @@ namespace HVACUnitaryBypassVAV {
                                 }
                                 // now find the speed ratio for the found speednum
                                 auto f = [&state, CBVAVNum, SpeedNum, DesOutTemp](Real64 const SpeedRatio) {
-                                    auto &s_node = state.dataLoopNodes;
                                     auto &cbvav = state.dataHVACUnitaryBypassVAV->CBVAVs(CBVAVNum);
                                     // FUNCTION LOCAL VARIABLE DECLARATIONS:
                                     Real64 OutletAirTemp; // outlet air temperature [C]
@@ -2429,7 +2425,6 @@ namespace HVACUnitaryBypassVAV {
                             } else {
                                 // cycling compressor at lowest speed number, find part load fraction
                                 auto f = [&state, CBVAVNum, DesOutTemp](Real64 const PartLoadRatio) {
-                                    auto &s_node = state.dataLoopNodes;
                                     auto &cbvav = state.dataHVACUnitaryBypassVAV->CBVAVs(CBVAVNum);
                                     int speedNum = 1;
                                     Real64 speedRatio = 0.0;
@@ -2959,6 +2954,7 @@ namespace HVACUnitaryBypassVAV {
                                    OnOffAirFlowRatio);
             }
         } break;
+          
         case HVAC::CoilType::HeatingDXVariableSpeed: {
             Real64 QZnReq = 0.0;                 // Zone load (W), input to variable-speed DX coil
             Real64 QLatReq = 0.0;                // Zone latent load, input to variable-speed DX coil
@@ -2966,7 +2962,6 @@ namespace HVACUnitaryBypassVAV {
             Real64 LocalPartLoadFrac = 0.0;
             Real64 SpeedRatio = 0.0;
             int SpeedNum = 1;
-            bool errorFlag = false;
             int maxNumSpeeds = VariableSpeedCoils::GetCoilNumOfSpeeds(state, cbvav.HeatCoilNum);
             Real64 DesOutTemp = cbvav.CoilTempSetPoint;
             // Get no load result

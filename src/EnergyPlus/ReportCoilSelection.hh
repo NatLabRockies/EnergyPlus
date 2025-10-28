@@ -223,7 +223,7 @@ public:                                  // data
 }; // end class CoilSelectionData
 
     void finishCoilSummaryReportTable(EnergyPlusData &state);
-
+#ifdef OLD_API
     void setCoilFinalSizes(EnergyPlusData &state,
                            std::string const &coilName,    // user-defined name of the coil
                            HVAC::CoilType const coilType, //  coil type, e.g., Coil:Cooling:Water
@@ -406,7 +406,8 @@ public:                                  // data
                       int const curSysNum,
                       int const curOASysNum,
                       int const curZoneEqNum);
-
+#endif // OLD_API
+  
     void setCoilFinalSizes(EnergyPlusData &state,
                            int const coilReportNum,
                            Real64 const totGrossCap,       // total capacity [W]
@@ -564,6 +565,7 @@ public:                                  // data
                               int fanIndex);
 
     void setCoilEqNum(EnergyPlusData &state,
+                      int const coilReportNum,
                       int const curSysNum,
                       int const curOASysNum,
                       int const curZoneEqNum);
@@ -613,7 +615,7 @@ struct ReportCoilSelectionData : BaseGlobalStruct
 
     void clear_state() override
     {
-        for (int i = 0; i < this->coils.size(); ++i) delete this->coils[i];
+        for (int i = 0; i < (int)this->coils.size(); ++i) delete this->coils[i];
         this->coils.clear();
     }
 };

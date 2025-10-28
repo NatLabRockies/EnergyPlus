@@ -403,9 +403,10 @@ namespace Psychrometrics {
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb)];
 #endif
 
+#ifdef EP_psych_errors
         // CHECK TDB IN RANGE.
         bool FlagError = false;
-#ifdef EP_psych_errors
+
         if (TDB <= -100.0 || TDB >= 200.0) {
             if (!state.dataGlobal->WarmupFlag) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb)] == 0) {
@@ -1315,8 +1316,8 @@ namespace Psychrometrics {
 #endif
 
         // Check press in range.
-        bool FlagError = false;
 #ifdef EP_psych_errors
+        bool FlagError = false;
         if (!state.dataGlobal->WarmupFlag) {
             if (Press <= 0.0017 || Press >= 1555000.0) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::TsatFnPb)] == 0) {

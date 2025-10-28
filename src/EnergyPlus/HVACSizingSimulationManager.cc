@@ -78,7 +78,7 @@ void HVACSizingSimulationManager::DetermineSizingAnalysesNeeded(EnergyPlusData &
     // Loop over PlantSizData struct and find those plant loops that are to use coincident sizing
     for (int i = 1; i <= state.dataSize->NumPltSizInput; ++i) {
 
-        if (state.dataSize->PlantSizData(i).ConcurrenceOption == DataSizing::Coincident) {
+        if (state.dataSize->PlantSizData(i).ConcurrenceOption == DataSizing::SizingConcurrence::Coincident) {
 
             // create an instance of analysis object for each loop
             CreateNewCoincidentPlantAnalysisObject(state, state.dataSize->PlantSizData(i).PlantLoopName, i);

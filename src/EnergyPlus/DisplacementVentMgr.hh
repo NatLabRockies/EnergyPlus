@@ -78,12 +78,13 @@ namespace RoomAir {
 
     void CalcDispVent3Node(EnergyPlusData &state, int ZoneNum); // Which Zonenum
 
-    static constexpr std::array<DataHeatBalance::IntGainType, 51> IntGainTypesOccupied = {
+    static constexpr std::array<DataHeatBalance::IntGainType, 52> IntGainTypesOccupied = {
         DataHeatBalance::IntGainType::People,
         DataHeatBalance::IntGainType::WaterHeaterMixed,
         DataHeatBalance::IntGainType::WaterHeaterStratified,
         DataHeatBalance::IntGainType::ThermalStorageChilledWaterMixed,
         DataHeatBalance::IntGainType::ThermalStorageChilledWaterStratified,
+        DataHeatBalance::IntGainType::ThermalStorageHotWaterStratified,
         DataHeatBalance::IntGainType::ElectricEquipment,
         DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
         DataHeatBalance::IntGainType::GasEquipment,

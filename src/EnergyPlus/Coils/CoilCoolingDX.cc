@@ -159,6 +159,8 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
     bool errorsFound = false;
     this->name = input_data.name;
 
+    this->coilReportNum = ReportCoilSelection::getReportIndex(state, this->name, state.dataCoilCoolingDX->coilType);
+
     // initialize reclaim heat parameters
     this->reclaimHeat.Name = this->name;
     this->reclaimHeat.SourceType = HVAC::coilTypeNames[(int)state.dataCoilCoolingDX->coilType];
@@ -232,6 +234,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
         ShowSevereItemNotFound(state, eoh, "Availability Schedule Name", input_data.availability_schedule_name);
         errorsFound = true;
     }
+    this->performance->coilCoolingDXAvailSched = this->availSched;
 
     if (!input_data.condenser_zone_name.empty()) {
         this->isSecondaryDXCoilInZone = true;
@@ -431,7 +434,7 @@ void CoilCoolingDX::oneTimeInit(EnergyPlusData &state)
     SetupOutputVariable(state,
                         "Cooling Coil Dehumidification Mode",
                         Constant::Units::None,
-                        (int &)this->dehumidificationMode,
+                        this->dehumidificationMode,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         this->name);
@@ -801,8 +804,7 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             Real64 ratedSensCap(0.0);
             ratedSensCap = this->performance->ratedGrossTotalCap() * this->performance->grossRatedSHR(state);
             ReportCoilSelection::setCoilFinalSizes(state,
-                                                   this->name,
-                                                   state.dataCoilCoolingDX->coilType,
+                                                   this->coilReportNum,
                                                    this->performance->ratedGrossTotalCap(),
                                                    ratedSensCap,
                                                    this->performance->ratedEvapAirFlowRate(state),
@@ -812,8 +814,7 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             // should work for all fan types
             if (this->supplyFanIndex > 0) {
                 ReportCoilSelection::setCoilSupplyFanInfo(state,
-                                                          this->name,
-                                                          state.dataCoilCoolingDX->coilType,
+                                                          this->coilReportNum,
                                                           state.dataFans->fans(this->supplyFanIndex)->Name,
                                                           state.dataFans->fans(this->supplyFanIndex)->type,
                                                           this->supplyFanIndex);
@@ -897,8 +898,7 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             Real64 const ratedOutletWetBulb = Psychrometrics::PsyTwbFnTdbWPb(
                 state, dummyEvapOutlet.Temp, dummyEvapOutlet.HumRat, DataEnvironment::StdPressureSeaLevel, "Coil:Cooling:DX::simulate");
             ReportCoilSelection::setRatedCoilConditions(state,
-                                                        this->name,
-                                                        state.dataCoilCoolingDX->coilType,
+                                                        this->coilReportNum,
                                                         coolingRate,
                                                         sensCoolingRate,
                                                         ratedInletEvapMassFlowRate,

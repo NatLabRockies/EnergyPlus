@@ -192,6 +192,46 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_BlankDesignWaterFlowRate)
     EXPECT_ENUM_EQ(state->dataBoilers->Boiler(1).FuelType, Constant::eFuel::NaturalGas);
 }
 
+TEST_F(EnergyPlusFixture, Boiler_HotWater_ZeroNominalCapacity)
+{
+    std::string const idf_objects = delimited_string({
+        "Boiler:HotWater,",
+        "  Central Boiler,          !- Name",
+        "  NaturalGas,              !- Fuel Type",
+        "  0.0,                     !- Nominal Capacity {W}",
+        "  0.8,                     !- Nominal Thermal Efficiency",
+        "  LeavingBoiler,           !- Efficiency Curve Temperature Evaluation Variable",
+        "  BoilerEfficiency,        !- Normalized Boiler Efficiency Curve Name",
+        "  Autosize,                !- Design Water Flow Rate {m3/s}",
+        "  0.0,                     !- Minimum Part Load Ratio",
+        "  1.2,                     !- Maximum Part Load Ratio",
+        "  1.0,                     !- Optimum Part Load Ratio",
+        "  Boiler Inlet 1,          !- Boiler Water Inlet Node Name",
+        "  Boiler Inlet 2;          !- Boiler Water Outlet Node Name",
+
+        "Curve:Quadratic,",
+        "  BoilerEfficiency,        !- Name",
+        "  1.0,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0,                       !- Minimum Value of x",
+        "  1;                       !- Maximum Value of x",
+    });
+
+    EXPECT_FALSE(process_idf(idf_objects, false));
+
+    std::string const expected_error = delimited_string(
+        {"   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - \"0.000000\" - Expected number greater than 0.000000",
+         "   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - Failed to validate against child schema #0.",
+         "   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - Value type \"number\" for input \"0.000000\" not permitted by "
+         "'type' constraint.",
+         "   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - \"0.000000\" - Failed to match against any enum values.",
+         "   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - Failed to validate against child schema #1.",
+         "   ** Severe  ** <root>[Boiler:HotWater][Central Boiler][nominal_capacity] - Failed to validate against any schemas allowed by anyOf "
+         "constraint."});
+    compare_err_stream(expected_error, true);
+}
+
 TEST_F(EnergyPlusFixture, Boiler_HotWater_BoilerEfficiency)
 {
 

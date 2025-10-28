@@ -154,6 +154,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:1_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:1_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:1_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -301,6 +302,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:2_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:2_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:2_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -448,6 +450,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:3_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:3_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:3_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -595,6 +598,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:4_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:4_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:4_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}

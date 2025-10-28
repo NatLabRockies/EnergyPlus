@@ -77,6 +77,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
     std::string const idf_objects = delimited_string({
         " Coil:Cooling:WaterToAirHeatPump:ParameterEstimation, ",
         "   Sys 1 Heat Pump Cooling Mode, !- Name",
+        "   ,            !- Availability Schedule Name",
         "   Scroll,      !- Compressor Type",
         "   R22,         !- Refrigerant Type",
         "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",
@@ -107,6 +108,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
 
         " Coil:Heating:WaterToAirHeatPump:ParameterEstimation,",
         "   Sys 1 Heat Pump HEATING Mode, !- Name",
+        "   ,            !- Availability Schedule Name",
         "   Scroll,      !- Compressor Type",
         "   R22,         !- Refrigerant Type",
         "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",

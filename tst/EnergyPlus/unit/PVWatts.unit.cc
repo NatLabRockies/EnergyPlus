@@ -314,3 +314,90 @@ TEST_F(EnergyPlusFixture, PVWattsInverter_Constructor)
     eplc.inverterObj->simulate(*state, 884.018);
     EXPECT_NEAR(eplc.inverterObj->aCPowerOut(), 842.527, 0.001);
 }
+
+TEST_F(EnergyPlusFixture, PVWatts_SSC_NaNFailure)
+{
+    const std::string idfTxt = delimited_string({
+
+        "Shading:Site:Detailed,",
+        "  FlatSurfaceShadetoEast,  !- Name",
+        "  ,                        !- Transmittance Schedule Name",
+        "  4,                       !- Number of Vertices",
+        "  0.0,25.0,12.0,  !- X,Y,Z ==> Vertex 1 {m}",
+        "  0.0,20.00,12.0,  !- X,Y,Z ==> Vertex 2 {m}",
+        "  5.0,20.00,12.0,  !- X,Y,Z ==> Vertex 3 {m}",
+        "  5.0,25.0,12.0;  !- X,Y,Z ==> Vertex 4 {m}",
+
+        "Generator:PVWatts,",
+        "  PVWatts3,                !- Name",
+        "  5,                       !- PVWatts Version",
+        "  3000,                    !- DC System Capacity {W}",
+        "  Premium,                 !- Module Type",
+        "  FixedOpenRack,           !- Array Type",
+        "  0.14,                    !- System Losses",
+        "  Surface,                 !- Array Geometry Type",
+        "  ,                        !- Tilt Angle {deg}",
+        "  ,                        !- Azimuth Angle {deg}",
+        "  FlatSurfaceShadetoEast;  !- Surface Name",
+    });
+
+    const std::string name = "PVArray";
+    constexpr Real64 dcSystemCapacity = 4000.0;
+    constexpr auto moduleType = PVWatts::ModuleType::STANDARD;
+    constexpr auto arrayType = PVWatts::ArrayType::FIXED_ROOF_MOUNTED;
+    constexpr Real64 systemLosses = 0.14;
+    constexpr auto geometryType = PVWatts::GeometryType::TILT_AZIMUTH;
+    constexpr Real64 tilt = 0.0;
+    constexpr Real64 azimuth = 180.0;
+    constexpr size_t surfaceNum = 0;
+    constexpr Real64 groundCoverageRatio = 0.4;
+
+    // USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw
+    // 6/15 at 7am
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataHVACGlobal->TimeStepSys = 1.0;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
+    state->dataGlobal->BeginTimeStepFlag = true;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    Weather::AllocateWeatherData(*state); // gets us the albedo array initialized
+    state->dataEnvrn->Year = 1986;
+    state->dataEnvrn->Month = 6;
+    state->dataEnvrn->DayOfMonth = 15;
+    state->dataGlobal->HourOfDay = 8; // 8th hour of day, 7-8am
+    state->dataWeather->WeatherFileLatitude = 33.45;
+    state->dataWeather->WeatherFileLongitude = -111.98;
+    state->dataWeather->WeatherFileTimeZone = -7;
+    state->dataEnvrn->BeamSolarRad = 728;
+    state->dataEnvrn->DifSolarRad = 70;
+    state->dataEnvrn->WindSpeed = 3.1;
+    state->dataEnvrn->OutDryBulbTemp = 31.7;
+
+    // The TimeStepZone etc must be setp before calling the PVWattsGenerator constructor because it sets them on the ssc_data_t struct
+    PVWatts::PVWattsGenerator pvw(
+        *state, name, dcSystemCapacity, moduleType, arrayType, systemLosses, geometryType, tilt, azimuth, surfaceNum, groundCoverageRatio);
+    EXPECT_DOUBLE_EQ(dcSystemCapacity, pvw.getDCSystemCapacity());
+    EXPECT_ENUM_EQ(moduleType, pvw.getModuleType());
+    EXPECT_ENUM_EQ(arrayType, pvw.getArrayType());
+    EXPECT_DOUBLE_EQ(systemLosses, pvw.getSystemLosses());
+    EXPECT_ENUM_EQ(geometryType, pvw.getGeometryType());
+    EXPECT_DOUBLE_EQ(tilt, pvw.getTilt());
+    EXPECT_DOUBLE_EQ(azimuth, pvw.getAzimuth());
+    EXPECT_DOUBLE_EQ(groundCoverageRatio, pvw.getGroundCoverageRatio());
+
+    pvw.setCellTemperature(30.345);
+    pvw.setPlaneOfArrayIrradiance(92.257);
+    pvw.calc(*state);
+
+    Real64 generatorPower, generatorEnergy, thermalPower, thermalEnergy;
+    pvw.getResults(generatorPower, generatorEnergy, thermalPower, thermalEnergy);
+    EXPECT_FALSE(std::isnan(generatorPower));
+    EXPECT_FALSE(std::isnan(generatorEnergy));
+    EXPECT_FALSE(std::isnan(thermalPower));
+    EXPECT_FALSE(std::isnan(thermalEnergy));
+    EXPECT_DOUBLE_EQ(thermalPower, 0.0);
+    EXPECT_DOUBLE_EQ(thermalEnergy, 0.0);
+    EXPECT_NEAR(generatorPower, 1117.75, 0.5);
+    EXPECT_NEAR(generatorEnergy, generatorPower * 60 * 60, 1);
+}

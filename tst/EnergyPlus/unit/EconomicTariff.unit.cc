@@ -1430,8 +1430,9 @@ TEST_F(SQLiteFixture, WriteEconomicTariffTable_DualUnits)
     state->dataOutRptTab->WriteTabularFiles = true;
 
     OutputReportTabular::SetupUnitConversions(*state);
-    state->dataOutRptTab->unitsStyle = OutputReportTabular::UnitsStyle::JtoKWH;
+    state->dataOutRptTab->unitsStyle_Tabular = OutputReportTabular::UnitsStyle::JtoKWH;
     state->dataOutRptTab->unitsStyle_SQLite = OutputReportTabular::UnitsStyle::JtoKWH;
+    OutputReportTabular::setTabularReportStyles(*state);
     Real64 enerConv = OutputReportTabular::getSpecificUnitDivider(*state, "m2", "ft2");
     EXPECT_NEAR(enerConv, 0.092903, 0.001); // 0.092893973326981863
 
@@ -1508,8 +1509,9 @@ TEST_F(SQLiteFixture, WriteEconomicTariffTable_DualUnits)
     }
 
     // Second case dual-unit:
-    state->dataOutRptTab->unitsStyle = OutputReportTabular::UnitsStyle::JtoKWH;
+    state->dataOutRptTab->unitsStyle_Tabular = OutputReportTabular::UnitsStyle::JtoKWH;
     state->dataOutRptTab->unitsStyle_SQLite = OutputReportTabular::UnitsStyle::InchPound;
+    OutputReportTabular::setTabularReportStyles(*state);
 
     EconomicTariff::WriteTabularTariffReports(*state);
 
@@ -1776,4 +1778,73 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariff_with_Custom_Meter)
     EXPECT_EQ("11.200", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchLeedEtsVirt, "District Heating Water"));
 
     EXPECT_EQ("NOT FOUND", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchLeedEtsVirt, "Other"));
+}
+
+TEST_F(EnergyPlusFixture, EconomicTariff_ScheduleMismatch)
+{
+    std::string const idf_objects1 = delimited_string({
+
+        "Schedule:Compact,",
+        "  Electricity Season Schedule Mismatch,  !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 5/31,           !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,            !- Field 3",
+        "  1,                       !- Field 4",
+        "  Through: 9/30,           !- Field 5",
+        "  For: AllDays,            !- Field 6",
+        "  Until: 24:00,            !- Field 7",
+        "  3,                       !- Field 8",
+        "  Through: 12/31,          !- Field 9",
+        "  For: AllDays,            !- Field 10",
+        "  Until: 24:00,            !- Field 11",
+        "  1;                       !- Field 12",
+
+        "UtilityCost:Tariff,",
+        "  ExampleAWithVariableMonthlyCharge,     !- Name",
+        "  ElectricityNet:Facility, !- Output Meter Name",
+        "  kWh,                     !- Conversion Factor Choice",
+        "  ,                        !- Energy Conversion Factor",
+        "  ,                        !- Demand Conversion Factor",
+        "  ,                        !- Time of Use Period Schedule Name",
+        "  Electricity Season Schedule,  !- Season Schedule Name",
+        "  ,                        !- Month Schedule Name",
+        "  ,                        !- Demand Window Length",
+        "  0,                       !- Monthly Charge or Variable Name",
+        "  ,                        !- Minimum Monthly Charge or Variable Name",
+        "  ,                        !- Real Time Pricing Charge Schedule Name",
+        "  ,                        !- Customer Baseline Load Schedule Name",
+        "  ,                        !- Group Name",
+        "  NetMetering;             !- Buy Or Sell",
+
+        "UtilityCost:Variable,",
+        "VariableFixedCharge, !-Name",
+        "ExampleAWithVariableMonthlyCharge, !-Tariff Name",
+        "Energy, !-Variable Type",
+        "1.00, !-January Value",
+        "2.00, !-February Value",
+        "3.00, !-March Value",
+        "4.00, !-April Value",
+        "5.00, !-May Value",
+        "6.00, !-June Value",
+        "7.00, !-July Value",
+        "8.00, !-August Value",
+        "9.00, !-September Value",
+        "10.00, !-October Value",
+        "11.00, !-November Value",
+        "12.00; !-December Value"});
+
+    bool ErrorsFound = false;
+
+    // Load the IDF
+    ASSERT_TRUE(process_idf(idf_objects1));
+    state->init_state(*state);
+
+    // Run economics, this should throw an item not found error since the schedule is named
+    // "Electricity Season Schedule Mismatch" and referenced as "Electricity Season Schedule"
+    GetInputEconomicsTariff(*state, ErrorsFound);
+
+    // Check to make sure that the missing item is displayed in the error message.
+    std::string detailed_error_message = "** Severe  ** GetInputEconomicsTariff: Season Schedule Name = ELECTRICITY SEASON SCHEDULE, item not found.";
+    compare_err_stream_substring(detailed_error_message);
 }

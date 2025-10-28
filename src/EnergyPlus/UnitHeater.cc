@@ -204,7 +204,6 @@ namespace UnitHeater {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
         int IOStatus;            // Used in GetObjectItem
-        bool IsNotOK;            // TRUE if there was a problem with a list name
         bool errFlag(false);     // interim error flag
         int NumAlphas;           // Number of Alphas for each GetObjectItem call
         int NumNumbers;          // Number of Numbers for each GetObjectItem call
@@ -554,7 +553,7 @@ namespace UnitHeater {
             SetupOutputVariable(state,
                                 "Zone Unit Heater Fan Availability Status",
                                 Constant::Units::None,
-                                (int &)unitHeat.availStatus,
+                                unitHeat.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 unitHeat.Name);
@@ -568,7 +567,8 @@ namespace UnitHeater {
                                     unitHeat.Name);
             }
             ReportCoilSelection::setCoilSupplyFanInfo(
-                state, unitHeat.HeatCoilName, unitHeat.heatCoilType, unitHeat.FanName, unitHeat.fanType, unitHeat.Fan_Index);
+                state, ReportCoilSelection::getReportIndex(state, unitHeat.HeatCoilName, unitHeat.heatCoilType),
+                unitHeat.FanName, unitHeat.fanType, unitHeat.Fan_Index);
         }
     }
 
@@ -824,8 +824,6 @@ namespace UnitHeater {
         int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
 
         bool ErrorsFound = false;
-        Real64 MaxAirVolFlowDes = 0.0;
-        Real64 MaxAirVolFlowUser = 0.0;
         Real64 MaxVolHotWaterFlowDes = 0.0;
         Real64 MaxVolHotWaterFlowUser = 0.0;
         Real64 MaxVolHotSteamFlowDes = 0.0;
@@ -1269,7 +1267,6 @@ namespace UnitHeater {
         auto &s_node = state.dataLoopNodes;
         auto &unitHeat = state.dataUnitHeaters->UnitHeat(UnitHeatNum);
 
-        Real64 ControlOffset = unitHeat.HotControlOffset;
         HVAC::FanOp fanOp = unitHeat.fanOp;
 
         if (fanOp != HVAC::FanOp::Cycling) {

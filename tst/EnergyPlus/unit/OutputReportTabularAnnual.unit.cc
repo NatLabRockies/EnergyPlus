@@ -556,6 +556,7 @@ TEST_F(SQLiteFixture, OutputReportTabularAnnual_CurlyBraces)
 
     OutputReportTabularAnnual::GetInputTabularAnnual(*state);
     EXPECT_EQ(state->dataOutputReportTabularAnnual->annualTables.size(), 1u);
+    OutputReportTabular::setTabularReportStyles(*state);
 
     OutputReportTabularAnnual::WriteAnnualTables(*state);
 

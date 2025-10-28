@@ -115,7 +115,7 @@ namespace OutputReportTabularAnnual {
 
         void resetGathering();
 
-        void writeTable(EnergyPlusData &state, OutputReportTabular::UnitsStyle unitsStyle, bool produceTabular_para, bool produceSQLite_para);
+        void writeTable(EnergyPlusData &state, OutputReportTabular::tabularReportStyle const style);
 
         void addTableOfContents(std::ostream &);
 

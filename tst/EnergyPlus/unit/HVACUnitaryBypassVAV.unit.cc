@@ -71,6 +71,7 @@
 #include <EnergyPlus/MixedAir.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
 #include <EnergyPlus/SimulationManager.hh>
@@ -202,45 +203,51 @@ protected:
         state->dataDXCoils->DXCoilNumericFields.allocate(1);
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(1);
         state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(20);
-        state->dataDXCoils->DXCoil(1).Name = "MyDXCoolCoil";
-        state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
+
+        auto &dxCoil1 = state->dataDXCoils->DXCoil(1);
+        dxCoil1.Name = "MyDXCoolCoil";
+        dxCoil1.coilType = HVAC::CoilType::CoolingDXSingleSpeed;
+        dxCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, dxCoil1.Name, dxCoil1.coilType);
         state->dataDXCoils->NumDXCoils = 1;
         state->dataDXCoils->CheckEquipName.dimension(1, true);
         state->dataDXCoils->GetCoilsInputFlag = false;
-        state->dataDXCoils->DXCoil(1).CCapFFlow.allocate(1);
-        state->dataDXCoils->DXCoil(1).CCapFFlow(1) = 1;
-        state->dataDXCoils->DXCoil(1).CCapFTemp.allocate(1);
-        state->dataDXCoils->DXCoil(1).CCapFTemp(1) = 1;
-        state->dataDXCoils->DXCoil(1).EIRFFlow.allocate(1);
-        state->dataDXCoils->DXCoil(1).EIRFFlow(1) = 1;
-        state->dataDXCoils->DXCoil(1).EIRFTemp.allocate(1);
-        state->dataDXCoils->DXCoil(1).EIRFTemp(1) = 1;
-        state->dataDXCoils->DXCoil(1).PLFFPLR.allocate(1);
-        state->dataDXCoils->DXCoil(1).PLFFPLR(1) = 1;
+        dxCoil1.CCapFFlow.allocate(1);
+        dxCoil1.CCapFFlow(1) = 1;
+        dxCoil1.CCapFTemp.allocate(1);
+        dxCoil1.CCapFTemp(1) = 1;
+        dxCoil1.EIRFFlow.allocate(1);
+        dxCoil1.EIRFFlow(1) = 1;
+        dxCoil1.EIRFTemp.allocate(1);
+        dxCoil1.EIRFTemp(1) = 1;
+        dxCoil1.PLFFPLR.allocate(1);
+        dxCoil1.PLFFPLR(1) = 1;
         state->dataDXCoils->DXCoilFullLoadOutAirTemp.allocate(1);
         state->dataDXCoils->DXCoilFullLoadOutAirHumRat.allocate(1);
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate.allocate(1);
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) = 0.5;
-        state->dataDXCoils->DXCoil(1).RatedTotCap.allocate(1);
-        state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 10000.0;
-        state->dataDXCoils->DXCoil(1).RatedCOP(1) = 3.3333;
-        state->dataDXCoils->DXCoil(1).RatedEIR.allocate(1);
-        state->dataDXCoils->DXCoil(1).RatedEIR(1) = 0.3;
-        state->dataDXCoils->DXCoil(1).RatedSHR.allocate(1);
-        state->dataDXCoils->DXCoil(1).RatedSHR(1) = 0.7;
-        state->dataDXCoils->DXCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+        dxCoil1.RatedAirVolFlowRate.allocate(1);
+        dxCoil1.RatedAirVolFlowRate(1) = 0.5;
+        dxCoil1.RatedTotCap.allocate(1);
+        dxCoil1.RatedTotCap(1) = 10000.0;
+        dxCoil1.RatedCOP(1) = 3.3333;
+        dxCoil1.RatedEIR.allocate(1);
+        dxCoil1.RatedEIR(1) = 0.3;
+        dxCoil1.RatedSHR.allocate(1);
+        dxCoil1.RatedSHR(1) = 0.7;
+        dxCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
         state->dataDXCoils->DXCoilOutletTemp.allocate(1);
         state->dataDXCoils->DXCoilOutletHumRat.allocate(1);
         state->dataDXCoils->DXCoilPartLoadRatio.allocate(1);
         state->dataDXCoils->DXCoilFanOp.allocate(1);
         state->dataHeatBal->HeatReclaimDXCoil.allocate(1);
 
-        state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
         state->dataHeatingCoils->HeatingCoil.allocate(1);
         state->dataHeatingCoils->HeatingCoilNumericFields.allocate(1);
         state->dataHeatingCoils->HeatingCoilNumericFields(1).FieldNames.allocate(20);
-        state->dataHeatingCoils->HeatingCoil(1).Name = "MyHeatingCoil";
-        state->dataHeatingCoils->HeatingCoil(1).coilType = HVAC::CoilType::HeatingElectric;
+
+        auto &heatCoil1 = state->dataHeatingCoils->HeatingCoil(1);
+        
+        heatCoil1.Name = "MyHeatingCoil";
+        heatCoil1.coilType = HVAC::CoilType::HeatingElectric;
+        heatCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatCoil1.Name, heatCoil1.coilType);
         state->dataHeatingCoils->NumHeatingCoils = 1;
         state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, false);
         state->dataHeatingCoils->GetCoilsInputFlag = false;
@@ -278,18 +285,18 @@ protected:
         state->dataMixedAir->OAMixer(1).RelNode = 4;
         state->dataMixedAir->OAMixer(1).RetNode = 6;
         state->dataMixedAir->OAMixer(1).MixNode = 7;
-        state->dataDXCoils->DXCoil(1).AirInNode = 7;
-        cbvav.CoolCoilAirInletNode = state->dataDXCoils->DXCoil(1).AirInNode;
-        state->dataDXCoils->DXCoil(1).AirOutNode = 8;
-        cbvav.CoolCoilAirOutletNode = state->dataDXCoils->DXCoil(1).AirOutNode;
-        state->dataHeatingCoils->HeatingCoil(1).AirInletNodeNum = 8;
-        cbvav.HeatCoilAirInletNode = state->dataHeatingCoils->HeatingCoil(1).AirInletNodeNum;
-        state->dataHeatingCoils->HeatingCoil(1).AirOutletNodeNum = 9;
-        state->dataHeatingCoils->HeatingCoil(1).TempSetPointNodeNum = 9;
-        cbvav.HeatCoilAirOutletNode = state->dataHeatingCoils->HeatingCoil(1).AirOutletNodeNum;
-        state->dataHeatingCoils->HeatingCoil(1).NominalCapacity = 10000.0;
-        state->dataHeatingCoils->HeatingCoil(1).Efficiency = 1.0;
-        state->dataHeatingCoils->HeatingCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+        dxCoil1.AirInNode = 7;
+        cbvav.CoolCoilAirInletNode = dxCoil1.AirInNode;
+        dxCoil1.AirOutNode = 8;
+        cbvav.CoolCoilAirOutletNode = dxCoil1.AirOutNode;
+        heatCoil1.AirInletNodeNum = 8;
+        cbvav.HeatCoilAirInletNode = heatCoil1.AirInletNodeNum;
+        heatCoil1.AirOutletNodeNum = 9;
+        heatCoil1.TempSetPointNodeNum = 9;
+        cbvav.HeatCoilAirOutletNode = heatCoil1.AirOutletNodeNum;
+        heatCoil1.NominalCapacity = 10000.0;
+        heatCoil1.Efficiency = 1.0;
+        heatCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
         cbvav.CBVAVBoxOutletNode.allocate(1);
         cbvav.CBVAVBoxOutletNode(1) = 11;
@@ -724,6 +731,9 @@ TEST_F(CBVAVSys, UnitaryBypassVAV_AutoSize)
     auto &cbvav(state->dataHVACUnitaryBypassVAV->CBVAVs(1));
     auto &finalSysSizing(state->dataSize->FinalSysSizing(state->dataSize->CurSysNum));
 
+    auto &heatCoil1 = state->dataHeatingCoils->HeatingCoil(1);
+    auto &dxCoil1 = state->dataDXCoils->DXCoil(1);
+    
     state->dataSize->SysSizingRunDone = true; // inform sizing that system sizing run is done
     // override CBVAVSys fixture set up of hard sized inputs to AutoSize
     cbvav.FanVolFlow = DataSizing::AutoSize;
@@ -733,9 +743,9 @@ TEST_F(CBVAVSys, UnitaryBypassVAV_AutoSize)
     cbvav.CoolOutAirVolFlow = DataSizing::AutoSize;
     cbvav.HeatOutAirVolFlow = DataSizing::AutoSize;
     cbvav.NoCoolHeatOutAirVolFlow = DataSizing::AutoSize;
-    state->dataHeatingCoils->HeatingCoil(1).NominalCapacity = DataSizing::AutoSize;
-    state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) = DataSizing::AutoSize;
-    state->dataDXCoils->DXCoil(1).RatedTotCap(1) = DataSizing::AutoSize;
+    heatCoil1.NominalCapacity = DataSizing::AutoSize;
+    dxCoil1.RatedAirVolFlowRate(1) = DataSizing::AutoSize;
+    dxCoil1.RatedTotCap(1) = DataSizing::AutoSize;
 
     cbvav.fanOp = HVAC::FanOp::Cycling;                      // must set one type of fan operating mode to initialize CalcSetPointTempTarget
     state->dataLoopNodes->Node(cbvav.AirInNode).Temp = 24.0; // initialize inlet node temp used to initialize CalcSetPointTempTarget
@@ -754,9 +764,9 @@ TEST_F(CBVAVSys, UnitaryBypassVAV_AutoSize)
     EXPECT_EQ(cbvav.NoCoolHeatOutAirVolFlow, finalSysSizing.DesOutAirVolFlow);
 
     // expect coils to size appropriately based on sizing inputs
-    EXPECT_EQ(state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1), finalSysSizing.DesMainVolFlow);
-    EXPECT_GT(state->dataDXCoils->DXCoil(1).RatedTotCap(1), 30000.0);
-    EXPECT_GT(state->dataHeatingCoils->HeatingCoil(1).NominalCapacity, 45000.0);
+    EXPECT_EQ(dxCoil1.RatedAirVolFlowRate(1), finalSysSizing.DesMainVolFlow);
+    EXPECT_GT(dxCoil1.RatedTotCap(1), 30000.0);
+    EXPECT_GT(heatCoil1.NominalCapacity, 45000.0);
 }
 
 TEST_F(CBVAVSys, UnitaryBypassVAV_NoOASys)
@@ -1479,6 +1489,7 @@ TEST_F(EnergyPlusFixture, UnitaryBypassVAV_ParentElectricityRateTest)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    Main DX Heating Coil 1,  !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    Heating Coil Air Outlet Node,  !- Indoor Air Outlet Node Name",
         "    5.0,                     !-Number of Speeds{dimensionless}",
@@ -1545,6 +1556,7 @@ TEST_F(EnergyPlusFixture, UnitaryBypassVAV_ParentElectricityRateTest)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Main Cooling Coil 1,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name",
         "    4.0,                     !- Number of Speeds {dimensionless}",

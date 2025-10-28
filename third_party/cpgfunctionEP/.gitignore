@@ -1,7 +1,0 @@
-cmake-build-debug/
-.idea/
-cmake-build-release/
-build/
-Create_Branch.sh
-package-lock.json
-Shell_Speed/*

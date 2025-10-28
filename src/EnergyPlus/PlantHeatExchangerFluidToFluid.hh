@@ -220,6 +220,10 @@ namespace PlantHeatExchangerFluidToFluid {
         void findDemandSideLoopFlow(EnergyPlusData &state, Real64 TargetSupplySideLoopLeavingTemp, HXAction HXActionMode);
 
         void oneTimeInit(EnergyPlusData &state) override;
+
+        void updateCompFlowData(EnergyPlusData &state);
+
+        bool hasSupplySideTES(EnergyPlusData &state);
     };
 
     void GetFluidHeatExchangerInput(EnergyPlusData &state);

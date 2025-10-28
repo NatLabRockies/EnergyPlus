@@ -13,7 +13,7 @@ The input object ZoneHVAC:IdealLoadsAirSystem provides a model for an ideal HVAC
 
 \subsection{Model}\label{model-002}
 
-The ZoneHVAC:IdealLoadsAirSystem object is modeled as an ideal VAV terminal unit with variable supply temperature and humidity. The supply air flow rate is varied between zero and the maximum in order to satisfy the zone heating or cooling load, zone humidity controls, outdoor air requirements, and other constraints, if specified.
+The ZoneHVAC:IdealLoadsAirSystem object is modeled as an ideal VAV terminal unit with variable supply temperature and humidity. The supply air flow rate is varied between zero and the maximum in order to satisfy the zone heating or cooling load, zone humidity controls, outdoor air requirements, and other constraints, if specified. The model calculates the total heating and cooling fuel energy (or rate) based on the respective zone loads and the specified fuel efficiency values. The heating and cooling fuel types are used for reporting purposes only.
 
 \subsubsection{Inputs and Data}\label{inputs-and-data-002}
 
@@ -46,6 +46,10 @@ The user specifies some or all of the following data for each ZoneHVAC:IdealLoad
   \item heat recovery type flag (\emph{None, Sensible, or Enthalpy})
   \item sensible heat recovery effectiveness
   \item latent heat recovery effectiveness
+  \item heating fuel efficiency schedule name
+  \item heating fuel type
+  \item cooling fuel efficiency schedule name
+  \item cooling fuel type
 \end{itemize}
 
 \emph{\textbf{All input data for the ZoneHVAC:IdealLoadsAirSystem is stored in the array PurchAir. The model and data are encapsulated in the module PurchasedAirManager.}}
@@ -129,5 +133,25 @@ The user specifies some or all of the following data for each ZoneHVAC:IdealLoad
   \item Set the zone inlet node conditions to the supply air mass flow rate, temperature, and humidity ratio.
   \item Calculate the unit output and load components.
   \item If a zone return plenum is used, after all ideal loads systems that are connected to the plenum are simulated, simulate the return plenum.
-\end{itemize}
+  \item Calculate the heating and cooling fuel energy rates from the respective loads and user specified fuel efficiencies:
 
+    \begin{equation}
+     E_{\text{heat}} = \frac{\dot{Q}_{\text{heat}}}{\eta_{\text{heat}}}
+    \end{equation}
+
+    \begin{equation}
+     E_{\text{cool}} = \frac{\dot{Q}_{\text{cool}}}{\eta_{\text{cool}}}
+    \end{equation}
+
+    where,
+ 
+    \begin{itemize}
+      \item \( E_{\text{heat}} \) = total heating fuel energy consumption rate (W)
+      \item \( E_{\text{cool}} \) = total cooling fuel energy consumption rate (W)
+      \item \( \dot{Q}_{\text{heat}} \) = zone total heating load (W)
+      \item \( \dot{Q}_{\text{cool}} \) = zone total cooling load (W)
+      \item \( \eta_{\text{heat}} \) = heating fuel efficiency (-)
+      \item \( \eta_{\text{cool}} \) = cooling fuel efficiency (-)
+    \end{itemize}
+
+  \end{itemize}

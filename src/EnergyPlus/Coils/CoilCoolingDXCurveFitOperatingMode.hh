@@ -81,6 +81,7 @@ struct CoilCoolingDXCurveFitOperatingMode
 {
     std::string object_name = "Coil:Cooling:DX:CurveFit:OperatingMode";
     std::string parentName;
+    Sched::Schedule *coilCoolingDXAvailSched = nullptr;
 
     void instantiateFromInputSpec(EnergyPlusData &state, CoilCoolingDXCurveFitOperatingModeInputSpecification input_data);
     void size(EnergyPlusData &state);
@@ -131,6 +132,7 @@ struct CoilCoolingDXCurveFitOperatingMode
     Real64 ratedAirVolFlowEMSOverrideValue = 0.0;
     bool ratedTotCapFlowEMSOverrideON = false;
     Real64 ratedTotCapFlowEMSOverrideValue = 0.0;
+    Real64 minOutdoorDrybulb = -25.0;
 
     enum class CondenserType
     {

@@ -241,7 +241,6 @@ void GetPumpInput(EnergyPlusData &state)
     int NumPumpBankSimpleConst = 0;
     Real64 SteamDensity;
     Real64 TempWaterDensity;
-    int DummyWaterIndex(1);
     Real64 constexpr minToMaxRatioMax = 0.99;
 
     ErrorsFound = false;
@@ -2003,7 +2002,6 @@ void SizePump(EnergyPlusData &state, int const PumpNum)
     Real64 PumpSizFac;       // pump sizing factor
     Real64 SteamDensity;
     Real64 TempWaterDensity;
-    int DummyWaterIndex(1);
     Real64 DesVolFlowRatePerBranch; // local temporary for split of branch pumps
 
     auto &thisPump = state.dataPumps->PumpEquip(PumpNum);

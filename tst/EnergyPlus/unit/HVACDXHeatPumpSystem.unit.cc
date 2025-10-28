@@ -58,6 +58,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/HVACDXHeatPumpSystem.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
+#include <EnergyPlus/ReportCoilSelection.hh>
 
 namespace EnergyPlus {
 
@@ -136,9 +137,11 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(1);
     state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(4);
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
+    state->dataDXCoils->DXCoil(1).coilReportNum =
+        ReportCoilSelection::getReportIndex(*state, state->dataDXCoils->DXCoil(1).Name, state->dataDXCoils->DXCoil(1).coilType);
 
     // manually add a curve
-    auto *curve = Curve::AddCurve(*state, "Curve1");
+    [[maybe_unused]] auto *curve = Curve::AddCurve(*state, "Curve1");
 
     // setup some outputs
     OutputReportPredefined::SetPredefinedTables(*state);

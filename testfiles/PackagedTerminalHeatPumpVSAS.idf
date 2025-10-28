@@ -217,6 +217,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Zone1PTHPDXHeatCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Inlet Node Name
     Zone1PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -328,6 +329,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Zone2PTHPDXHeatCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone2PTHPCoolCoilOutletNode,  !- Indoor Air Inlet Node Name
     Zone2PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -439,6 +441,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Zone3PTHPDXHeatCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone3PTHPCoolCoilOutletNode,  !- Indoor Air Inlet Node Name
     Zone3PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -552,6 +555,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone1PTHPDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone1PTHPFanOutletNode,  !- Indoor Air Inlet Node Name
     Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -699,6 +703,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone2PTHPDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone2PTHPFanOutletNode,  !- Indoor Air Inlet Node Name
     Zone2PTHPCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -846,6 +851,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone3PTHPDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone3PTHPOAMixerOutletNode,  !- Indoor Air Inlet Node Name
     Zone3PTHPCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}

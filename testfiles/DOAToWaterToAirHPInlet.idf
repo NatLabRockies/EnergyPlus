@@ -2639,6 +2639,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     SPACE1-1 HP Cooling Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE1-1 HP Cooling Water Inlet,  !- Water Inlet Node Name
     SPACE1-1 HP Cooling Water Outlet,  !- Water Outlet Node Name
     SPACE1-1 Zone Unit Fan Outlet,  !- Air Inlet Node Name
@@ -2663,6 +2664,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     SPACE2-1 HP Cooling Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE2-1 HP Cooling Water Inlet,  !- Water Inlet Node Name
     SPACE2-1 HP Cooling Water Outlet,  !- Water Outlet Node Name
     SPACE2-1 Zone Unit Fan Outlet,  !- Air Inlet Node Name
@@ -2687,6 +2689,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     SPACE3-1 HP Cooling Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE3-1 HP Cooling Water Inlet,  !- Water Inlet Node Name
     SPACE3-1 HP Cooling Water Outlet,  !- Water Outlet Node Name
     SPACE3-1 Zone Unit Fan Outlet,  !- Air Inlet Node Name
@@ -2711,6 +2714,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     SPACE4-1 HP Cooling Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE4-1 HP Cooling Water Inlet,  !- Water Inlet Node Name
     SPACE4-1 HP Cooling Water Outlet,  !- Water Outlet Node Name
     SPACE4-1 Zone Unit Fan Outlet,  !- Air Inlet Node Name
@@ -2735,6 +2739,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     SPACE5-1 HP Cooling Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE5-1 HP Cooling Water Inlet,  !- Water Inlet Node Name
     SPACE5-1 HP Cooling Water Outlet,  !- Water Outlet Node Name
     SPACE5-1 Zone Unit Fan Outlet,  !- Air Inlet Node Name
@@ -2761,6 +2766,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     SPACE1-1 HP Heating Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE1-1 HP Heating Water Inlet,  !- Water Inlet Node Name
     SPACE1-1 HP Heating Water Outlet,  !- Water Outlet Node Name
     SPACE1-1 Cooling Coil Outlet,  !- Air Inlet Node Name
@@ -2778,6 +2784,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     SPACE2-1 HP Heating Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE2-1 HP Heating Water Inlet,  !- Water Inlet Node Name
     SPACE2-1 HP Heating Water Outlet,  !- Water Outlet Node Name
     SPACE2-1 Cooling Coil Outlet,  !- Air Inlet Node Name
@@ -2795,6 +2802,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     SPACE3-1 HP Heating Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE3-1 HP Heating Water Inlet,  !- Water Inlet Node Name
     SPACE3-1 HP Heating Water Outlet,  !- Water Outlet Node Name
     SPACE3-1 Cooling Coil Outlet,  !- Air Inlet Node Name
@@ -2812,6 +2820,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     SPACE4-1 HP Heating Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE4-1 HP Heating Water Inlet,  !- Water Inlet Node Name
     SPACE4-1 HP Heating Water Outlet,  !- Water Outlet Node Name
     SPACE4-1 Cooling Coil Outlet,  !- Air Inlet Node Name
@@ -2829,6 +2838,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     SPACE5-1 HP Heating Mode,!- Name
+    ,                              !- Availability Schedule Name
     SPACE5-1 HP Heating Water Inlet,  !- Water Inlet Node Name
     SPACE5-1 HP Heating Water Outlet,  !- Water Outlet Node Name
     SPACE5-1 Cooling Coil Outlet,  !- Air Inlet Node Name

@@ -11026,6 +11026,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter Basement,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter Basement Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11050,6 +11051,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter bot,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter bot Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11074,6 +11076,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter mid,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter mid Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11098,6 +11101,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter top,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter top Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11123,6 +11127,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter Basement,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter Basement,  !- Air Inlet Node Name
@@ -11140,6 +11145,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter bot,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter bot,  !- Air Inlet Node Name
@@ -11157,6 +11163,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter mid,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter mid,  !- Air Inlet Node Name
@@ -11174,6 +11181,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter top,  !- Name
+    ,                              !- Availability Schedule Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter top,  !- Air Inlet Node Name

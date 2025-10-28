@@ -226,3 +226,118 @@ Strand, R.K. 1992. ``Indirect Ice Storage System Simulation,'' M.S. Thesis, Depa
 \subsection{Other Ice Thermal Storage Options}
 
 Thermal storage can also be modeled as integrated with a packaged air-conditioning unit. For this option, see Section \ref{packaged-thermal-storage-cooling-coil}.
+
+\subsection{PCM Thermal Storage Model}\label{pcm-thermal-storage-model}
+
+\subsubsection{Overview}\label{pcm-overview}
+
+This model (object name \texttt{ThermalStorage:PCM}) represents a well-mixed phase-change material (PCM) tank connected to a plant loop on two sides: a \emph{plant side} (used to charge the PCM) and a \emph{use side} (used to discharge the PCM to meet chilled-water load). The tank stores and releases \emph{latent} energy as the PCM melts and freezes over a finite temperature range around the material’s peak melting temperature. The model is intentionally simple and robust for whole-building simulations and uses effectiveness-based heat-exchanger relationships for outlet temperatures together with an energy balance to track the tank’s state of charge (SOC).
+
+Key features and assumptions:
+
+\begin{itemize}
+  \item The tank is \emph{fully mixed} (no stratification), so one bulk PCM temperature represents the entire volume.
+  \item Only \emph{one side} (plant or use) is active in a timestep, selected by a hysteresis SOC controller; simultaneous charge and discharge are not modeled.
+  \item Heat loss to ambient is a constant rate input (W) applied every system timestep.
+  \item PCM thermophysical behavior is captured by a material function that maps temperature to specific enthalpy and vice versa; the phase change occurs over a finite temperature interval around the peak melting temperature.
+  \item The tank’s energy state is tracked in joules (J). Heat-transfer rates are in watts (W).
+\end{itemize}
+
+\subsubsection{Model Description}\label{pcm-model-description}
+
+\paragraph{Variables and parameters}\label{pcm-variables}
+
+\begin{tabular}{ll}
+$E$ & Stored energy in the PCM tank (J) \\
+$E_{\max} = m_{\mathrm{PCM}} \, h_{\ell}$ & Maximum latent storage (J), mass $\times$ latent heat \\
+$m_{\mathrm{PCM}}$ & Tank capacity as PCM mass (kg) \\
+$h_{\ell}$ & Latent heat of fusion (J/kg) \\
+$T_\mathrm{m}$ & Peak melting temperature of the PCM (°C) \\
+$\Delta T_{\ell}, \Delta T_{h}$ & Lower/upper half-widths of the melting range (°C) \\
+$\epsilon$ & Heat-exchanger effectiveness (–) \\
+$\dot m_\mathrm{use}, \dot m_\mathrm{pl}$ & Mass flow rates on use/plant sides (kg/s) \\
+$c_p$ & Water specific heat (J/(kg·K)) \\
+$\dot Q_\mathrm{loss}$ & Constant heat loss to ambient (W) \\
+$\mathrm{SOC} = E/E_{\max}$ & State of charge (–) \\
+$\mathrm{SOC}_{\mathrm{in}}, \mathrm{SOC}_{\mathrm{out}}$ & Hysteresis thresholds for charge start/stop (–)
+\end{tabular}
+
+\paragraph{Initialization}\label{pcm-initialization}
+
+At the beginning of each environment, the tank may be initialized to a specified initial charge fraction (default $=1.0$), i.e.,
+\begin{equation}
+E(t_0) = \mathrm{SOC}_0 \, E_{\max}.
+\end{equation}
+If warmup days are used, the tank can charge/discharge during warmup; thus the SOC at the first reported timestep may be lower than the initial value unless the model is explicitly reset when warmup ends.
+
+\paragraph{Outlet temperature calculations}\label{pcm-outlet-temps}
+
+For robustness, outlet water temperatures are computed with an effectiveness relation relative to the PCM phase-change temperature band. Let $T_{\mathrm{in,pl}}$ and $T_{\mathrm{in,use}}$ be inlet temperatures. The model forms target outlet temperatures
+\begin{align}
+T_{\mathrm{out,pl}} &= T_{\mathrm{in,pl}} - \epsilon \,\bigl(T_{\mathrm{in,pl}} - T_f\bigr), \\
+T_{\mathrm{out,use}} &= T_{\mathrm{in,use}} + \epsilon \,\bigl(T_m - T_{\mathrm{in,use}}\bigr),
+\end{align}
+where $T_f$ and $T_m$ are representative freezing and melting temperatures (derived from the PCM material data around $T_\mathrm{m}$). These targets are then clipped to plant loop temperature bounds. The corresponding side heat-transfer rates are
+\begin{align}
+\dot Q_{\mathrm{pl}} &= \dot m_{\mathrm{pl}} \, c_p \, \bigl(T_{\mathrm{in,pl}} - T_{\mathrm{out,pl}}\bigr), \\
+\dot Q_{\mathrm{use}} &= \dot m_{\mathrm{use}} \, c_p \, \bigl(T_{\mathrm{in,use}} - T_{\mathrm{out,use}}\bigr).
+\end{align}
+
+\paragraph{SOC control and flow selection}\label{pcm-control}
+
+A simple hysteresis controller determines which side is active:
+\begin{itemize}
+  \item If $\mathrm{SOC} \le \mathrm{SOC}_{\mathrm{in}}$ (e.g., $0.40$), \emph{charging mode} is enabled and the component requests only plant-side flow: $\dot m_{\mathrm{pl}} = \dot m_{\mathrm{pl,design}}$, $\dot m_{\mathrm{use}} = 0$.
+  \item If $\mathrm{SOC} \ge \mathrm{SOC}_{\mathrm{out}}$ (e.g., $0.95$), \emph{discharging mode} is enabled and the component requests only use-side flow: $\dot m_{\mathrm{use}} = \dot m_{\mathrm{use,design}}$, $\dot m_{\mathrm{pl}} = 0$.
+\end{itemize}
+Only one side is active per timestep by construction. If the plant loop solver does not honor a requested flow (e.g., pump off), the actual heat exchange on that side is zero for that step.
+
+\paragraph{Energy update}\label{pcm-energy-update}
+
+Let $\Delta t$ be the system timestep in seconds. The net power into the PCM is
+\begin{equation}
+\dot Q_{\mathrm{net}} = \dot Q_{\mathrm{pl}} + \dot Q_{\mathrm{use}} - \dot Q_{\mathrm{loss}}.
+\end{equation}
+The stored energy state is advanced explicitly:
+\begin{equation}
+E(t+\Delta t) = \min\!\Bigl(E_{\max}, \max\!\bigl(0,\, E(t) + \dot Q_{\mathrm{net}} \,\Delta t \bigr)\Bigr),
+\end{equation}
+and $\mathrm{SOC}(t+\Delta t) = E(t+\Delta t)/E_{\max}$.
+
+\paragraph{PCM temperature from enthalpy}\label{pcm-temp-from-enthalpy}
+
+The bulk PCM temperature is diagnosed from $E$ via the specific enthalpy function of the PCM material, $h(T)$, which includes both sensible and latent contributions across the melting range:
+\begin{equation}
+h(T) = h_\mathrm{ref} + \int_{T_\mathrm{ref}}^{T} c_{p,\mathrm{PCM}}(\theta)\, d\theta + \Phi(\theta; T_\mathrm{m}, \Delta T_{\ell}, \Delta T_h) \, h_{\ell}.
+\end{equation}
+Here $\Phi\in[0,1]$ is a smooth phase-fraction function centered at $T_\mathrm{m}$ with the specified half-widths. The model inverts $h(T)$ numerically (bisection) to obtain $T$ from the target mass-specific enthalpy $E/m_{\mathrm{PCM}}$.
+
+\paragraph{Limits and notes}\label{pcm-limits}
+
+\begin{itemize}
+  \item The tank is treated as fully mixed; axial stratification is not modeled.
+  \item Only one side (charge or discharge) may be active per timestep.
+  \item The effectiveness model is empirical; it does not resolve detailed HX geometry.
+  \item A constant heat-loss rate is assumed; radiative/convective breakdown is not modeled.
+  \item Accurate PCM material data are required for meaningful phase-transition behavior.
+\end{itemize}
+
+\subsubsection{Performance Checks}\label{pcm-performance-checks}
+
+For each system timestep, the following diagnostic identity should hold within numerical tolerance:
+\begin{equation}
+\Delta E \;\approx\; \bigl(\dot Q_{\mathrm{pl}} + \dot Q_{\mathrm{use}} - \dot Q_{\mathrm{loss}}\bigr)\,\Delta t.
+\end{equation}
+Large discrepancies indicate unmet flow requests or inconsistent reporting configurations.
+
+\subsubsection{Inputs and Outputs}\label{pcm-io-refs}
+
+See the I/O Reference section \emph{ThermalStorage:PCM} for field definitions (availability schedule, node names, PCM material, tank capacity, heat loss, and design flow rates). Typical output variables include:
+\begin{itemize}
+  \item \texttt{Thermal Energy Storage Energy Stored} \, (J)
+  \item \texttt{Thermal Energy Storage Percent Capacity} \, (\%)
+  \item \texttt{Thermal Energy Storage Plant Side Heat Transfer Rate} \, (W)
+  \item \texttt{Thermal Energy Storage Use Side Heat Transfer Rate} \, (W)
+  \item \texttt{Thermal Energy Storage Heat Loss Rate} \, (W)
+  \item \texttt{Thermal Energy Storage Tank Temperature} \, (°C)
+\end{itemize}

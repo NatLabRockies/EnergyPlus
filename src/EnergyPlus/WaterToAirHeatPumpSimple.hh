@@ -75,7 +75,9 @@ namespace WaterToAirHeatPumpSimple {
         std::string Name;                                                                     // Name of the Water to Air Heat pump
         HVAC::CoilType coilType = HVAC::CoilType::Invalid;                                        // Type of WatertoAirHP ie. Heating or Cooling
         DataPlant::PlantEquipmentType coilPlantType = DataPlant::PlantEquipmentType::Invalid; // type of component in plant
-      
+
+        Sched::Schedule *availSched = nullptr;                                                // availability schedule
+
         bool SimFlag = false;                                                                 // Heat Pump Simulation Flag
         Real64 AirVolFlowRate = 0.0;                                                          // Air Volumetric Flow Rate[m3/s]
         Real64 AirMassFlowRate = 0.0;                                                         // Air Mass Flow Rate[kg/s]

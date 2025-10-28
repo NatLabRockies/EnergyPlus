@@ -135,6 +135,7 @@ namespace SizingManager {
                           DataSizing::ZoneSizingData const &zsCalcFinalSizing,
                           Array2D<DataSizing::ZoneSizingData> const &zsCalcSizing,
                           Array2D<DataSizing::ZoneSizingData> const &zSizing,
+                          Real64 const zoneMult,
                           bool const isSpace);
 
     void reportZoneSizingEio(EnergyPlusData &state,

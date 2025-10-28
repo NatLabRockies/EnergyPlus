@@ -67,12 +67,20 @@ def format_row(row, col_widths):
     return "| " + " | ".join(f"{str(cell):<{col_widths[i]}}" for i, cell in enumerate(row)) + " |"
 
 
+def safe_read_text(path: Path) -> str:
+    """Read text from a file, trying UTF-8 first, then cp1252 as fallback.  If neither works, it will just fail"""
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return path.read_text(encoding="cp1252")
+
+
 def ensure_unique_html_tables(html_path: Path):
     """
     Ensure that each HTML table in the report has a unique name.
     If duplicates are found, append a number to the duplicate names.
     """
-    content = html_path.read_text()
+    content = safe_read_text(html_path)
 
     matches = RE_FULLNAME.findall(content)
     if not matches:

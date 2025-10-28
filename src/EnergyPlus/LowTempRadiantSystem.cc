@@ -151,14 +151,14 @@ namespace LowTempRadiantSystem {
     // Standard, run-of-the-mill variables...
 
     // Object Data
-    constexpr std::array<std::string_view, (int)CtrlType::Num> ctrlTypeNames = {"MeanAirTemperature",
-                                                                                "MeanRadiantTemperature",
-                                                                                "OperativeTemperature",
-                                                                                "OutdoorDryBulbTemperature",
-                                                                                "OutdoorWetBulbTemperature",
-                                                                                "SurfaceFaceTemperature",
-                                                                                "SurfaceInteriorTemperature",
-                                                                                "RunningMeanOutdoorDryBulbTemperature"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)CtrlType::Num> ctrlTypeNames = {"MeanAirTemperature",
+                                                                                                 "MeanRadiantTemperature",
+                                                                                                 "OperativeTemperature",
+                                                                                                 "OutdoorDryBulbTemperature",
+                                                                                                 "OutdoorWetBulbTemperature",
+                                                                                                 "SurfaceFaceTemperature",
+                                                                                                 "SurfaceInteriorTemperature",
+                                                                                                 "RunningMeanOutdoorDryBulbTemperature"};
     constexpr std::array<std::string_view, (int)CtrlType::Num> ctrlTypeNamesUC = {"MEANAIRTEMPERATURE",
                                                                                   "MEANRADIANTTEMPERATURE",
                                                                                   "OPERATIVETEMPERATURE",
@@ -168,17 +168,17 @@ namespace LowTempRadiantSystem {
                                                                                   "SURFACEINTERIORTEMPERATURE",
                                                                                   "RUNNINGMEANOUTDOORDRYBULBTEMPERATURE"};
 
-    constexpr std::array<std::string_view, (int)SetpointType::Num> setpointTypeNames = {"HalfFlowPower", "ZeroFlowPower"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)SetpointType::Num> setpointTypeNames = {"HalfFlowPower", "ZeroFlowPower"};
     constexpr std::array<std::string_view, (int)SetpointType::Num> setpointTypeNamesUC = {"HALFFLOWPOWER", "ZEROFLOWPOWER"};
 
-    constexpr std::array<std::string_view, (int)FluidToSlabHeatTransferType::Num> fluidToSlabHeatTransferTypeNames = {"ConvectionOnly",
-                                                                                                                      "ISOStandard"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)FluidToSlabHeatTransferType::Num> fluidToSlabHeatTransferTypeNames = {
+        "ConvectionOnly", "ISOStandard"};
     constexpr std::array<std::string_view, (int)FluidToSlabHeatTransferType::Num> fluidToSlabHeatTransferTypeNamesUC = {"CONVECTIONONLY",
                                                                                                                         "ISOSTANDARD"};
 
     constexpr std::array<std::string_view, (int)CondCtrlType::Num> condCtrlTypeNamesUC = {"OFF", "SIMPLEOFF", "VARIABLEOFF"};
 
-    constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNames = {"OnePerSurface", "CalculateFromCircuitLength"};
     constexpr std::array<std::string_view, (int)CircuitCalc::Num> circuitCalcNamesUC = {"ONEPERSURFACE", "CALCULATEFROMCIRCUITLENGTH"};
 
     void SimLowTempRadiantSystem(EnergyPlusData &state,
@@ -1561,7 +1561,7 @@ namespace LowTempRadiantSystem {
             SetupOutputVariable(state,
                                 "Zone Radiant HVAC Operation Mode",
                                 Constant::Units::None,
-                                (int &)thisHydrSys.opMode,
+                                thisHydrSys.opMode,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 thisHydrSys.Name);
@@ -1736,7 +1736,7 @@ namespace LowTempRadiantSystem {
             SetupOutputVariable(state,
                                 "Zone Radiant HVAC Operation Mode",
                                 Constant::Units::None,
-                                (int &)thisCFloSys.opMode,
+                                thisCFloSys.opMode,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 thisCFloSys.Name);

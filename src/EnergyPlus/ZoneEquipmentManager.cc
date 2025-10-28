@@ -73,6 +73,7 @@
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/DisplayRoutines.hh>
+#include <EnergyPlus/DuctLoss.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/EarthTube.hh>
 #include <EnergyPlus/ElectricBaseboardRadiator.hh>
@@ -1042,14 +1043,14 @@ void SetUpZoneSizingArrays(EnergyPlusData &state)
     static constexpr std::string_view Format_891(" Load Timesteps in Zone Design Calculation Averaging Window, {:4}\n");
     print(state.files.eio, Format_891, state.dataSize->NumTimeStepsInAvg);
     print(state.files.eio, "! <Heating Sizing Factor Information>, Sizing Factor ID, Value\n");
-    static constexpr std::string_view Format_991(" Heating Sizing Factor Information, Global, {:12.5N}\n");
+    static constexpr std::string_view Format_991(" Heating Sizing Factor Information, Global, {:12.5G}\n");
     print(state.files.eio, Format_991, state.dataSize->GlobalHeatSizingFactor);
     for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
         if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
             continue;
         }
         if (state.dataSize->FinalZoneSizing(CtrlZoneNum).HeatSizingFactor != 1.0) {
-            static constexpr std::string_view Format_992(" Heating Sizing Factor Information, Zone {}, {:12.5N}\n");
+            static constexpr std::string_view Format_992(" Heating Sizing Factor Information, Zone {}, {:12.5G}\n");
             print(state.files.eio,
                   Format_992,
                   state.dataSize->FinalZoneSizing(CtrlZoneNum).ZoneName,
@@ -1057,14 +1058,14 @@ void SetUpZoneSizingArrays(EnergyPlusData &state)
         }
     }
     print(state.files.eio, "! <Cooling Sizing Factor Information>, Sizing Factor ID, Value\n");
-    static constexpr std::string_view Format_994(" Cooling Sizing Factor Information, Global, {:12.5N}\n");
+    static constexpr std::string_view Format_994(" Cooling Sizing Factor Information, Global, {:12.5G}\n");
     print(state.files.eio, Format_994, state.dataSize->GlobalCoolSizingFactor);
     for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
         if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
             continue;
         }
         if (state.dataSize->FinalZoneSizing(CtrlZoneNum).CoolSizingFactor != 1.0) {
-            static constexpr std::string_view Format_995(" Cooling Sizing Factor Information, Zone {}, {:12.5N}\n");
+            static constexpr std::string_view Format_995(" Cooling Sizing Factor Information, Zone {}, {:12.5G}\n");
             print(state.files.eio,
                   Format_995,
                   state.dataSize->FinalZoneSizing(CtrlZoneNum).ZoneName,
@@ -1249,6 +1250,8 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
         zoneSizing.zoneRHHumidifySched = zoneSizingInput.zoneRHHumidifySched;
         zoneSizing.ZnLatCoolDgnSAMethod = zoneSizingInput.ZnLatCoolDgnSAMethod;
         zoneSizing.ZnLatHeatDgnSAMethod = zoneSizingInput.ZnLatHeatDgnSAMethod;
+        zoneSizing.heatCoilSizingMethod = zoneSizingInput.heatCoilSizingMethod;
+        zoneSizing.maxHeatCoilToCoolingLoadSizingRatio = zoneSizingInput.maxHeatCoilToCoolingLoadSizingRatio;
         calcZoneSizing.ZnCoolDgnSAMethod = zoneSizingInput.ZnCoolDgnSAMethod;
         calcZoneSizing.ZnHeatDgnSAMethod = zoneSizingInput.ZnHeatDgnSAMethod;
         calcZoneSizing.CoolDesTemp = zoneSizingInput.CoolDesTemp;
@@ -1286,6 +1289,8 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
         calcZoneSizing.ZnLatHeatDgnSAMethod = zoneSizingInput.ZnLatHeatDgnSAMethod;
         calcZoneSizing.LatentHeatDesHumRat = zoneSizingInput.LatentHeatDesHumRat;
         calcZoneSizing.HeatDesHumRatDiff = zoneSizingInput.HeatDesHumRatDiff;
+        calcZoneSizing.heatCoilSizingMethod = zoneSizingInput.heatCoilSizingMethod;
+        calcZoneSizing.maxHeatCoilToCoolingLoadSizingRatio = zoneSizingInput.maxHeatCoilToCoolingLoadSizingRatio;
 
         zoneSizing.allocateMemberArrays(state.dataZoneEquipmentManager->NumOfTimeStepInDay);
         calcZoneSizing.allocateMemberArrays(state.dataZoneEquipmentManager->NumOfTimeStepInDay);
@@ -1339,6 +1344,8 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
     zsFinalSizing.ZnLatHeatDgnSAMethod = zoneSizingInput.ZnLatHeatDgnSAMethod;
     zsFinalSizing.LatentHeatDesHumRat = zoneSizingInput.LatentHeatDesHumRat;
     zsFinalSizing.HeatDesHumRatDiff = zoneSizingInput.HeatDesHumRatDiff;
+    zsFinalSizing.heatCoilSizingMethod = zoneSizingInput.heatCoilSizingMethod;
+    zsFinalSizing.maxHeatCoilToCoolingLoadSizingRatio = zoneSizingInput.maxHeatCoilToCoolingLoadSizingRatio;
     zsCalcFinalSizing.ZnCoolDgnSAMethod = zoneSizingInput.ZnCoolDgnSAMethod;
     zsCalcFinalSizing.ZnHeatDgnSAMethod = zoneSizingInput.ZnHeatDgnSAMethod;
     zsCalcFinalSizing.CoolDesTemp = zoneSizingInput.CoolDesTemp;
@@ -1380,6 +1387,8 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
     zsCalcFinalSizing.ZnLatHeatDgnSAMethod = zoneSizingInput.ZnLatHeatDgnSAMethod;
     zsCalcFinalSizing.LatentHeatDesHumRat = zoneSizingInput.LatentHeatDesHumRat;
     zsCalcFinalSizing.HeatDesHumRatDiff = zoneSizingInput.HeatDesHumRatDiff;
+    zsCalcFinalSizing.heatCoilSizingMethod = zoneSizingInput.heatCoilSizingMethod;
+    zsCalcFinalSizing.maxHeatCoilToCoolingLoadSizingRatio = zoneSizingInput.maxHeatCoilToCoolingLoadSizingRatio;
 
     zsFinalSizing.allocateMemberArrays(state.dataZoneEquipmentManager->NumOfTimeStepInDay);
     zsCalcFinalSizing.allocateMemberArrays(state.dataZoneEquipmentManager->NumOfTimeStepInDay);
@@ -2795,6 +2804,7 @@ void updateZoneSizingEndZoneSizingCalc5(DataSizing::ZoneSizingData &zsFinalSizin
     zsFinalSizing.CoolDDNum = zsCalcFinalSizing.CoolDDNum;
 
     zsFinalSizing.DesHeatLoad = zsCalcFinalSizing.DesHeatLoad;
+    zsFinalSizing.DesLatentHeatLoad = zsCalcFinalSizing.DesLatentHeatLoad;
     zsFinalSizing.NonAirSysDesHeatLoad = zsCalcFinalSizing.DesHeatLoad;
     zsFinalSizing.DesHeatMassFlow = zsCalcFinalSizing.DesHeatMassFlow;
     zsFinalSizing.ZoneTempAtHeatPeak = zsCalcFinalSizing.ZoneTempAtHeatPeak;
@@ -2810,6 +2820,7 @@ void updateZoneSizingEndZoneSizingCalc5(DataSizing::ZoneSizingData &zsFinalSizin
     zsFinalSizing.CoolDesHumRat = zsCalcFinalSizing.CoolDesHumRat;
 
     zsFinalSizing.DesCoolLoad = zsCalcFinalSizing.DesCoolLoad;
+    zsFinalSizing.DesLatentCoolLoad = zsCalcFinalSizing.DesLatentCoolLoad;
     zsFinalSizing.NonAirSysDesCoolLoad = zsCalcFinalSizing.DesCoolLoad;
     zsFinalSizing.DesCoolMassFlow = zsCalcFinalSizing.DesCoolMassFlow;
     zsFinalSizing.ZoneTempAtCoolPeak = zsCalcFinalSizing.ZoneTempAtCoolPeak;
@@ -4125,6 +4136,10 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                                                           FirstCall,
                                                           SupPathInletChanged,
                                                           state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentIndex(CompNum));
+                    if (state.dataDuctLoss->DuctLossSimu) {
+                        DuctLoss::SimulateDuctLoss(
+                            state, DuctLoss::AirPath::Supply, state.dataZoneEquip->SupplyAirPath(SupplyAirPathNum).ComponentIndex(CompNum));
+                    }
                 }
             } break;
             case DataZoneEquipment::AirLoopHVACZone::SupplyPlenum: { // 'AirLoopHVAC:SupplyPlenum'
@@ -4161,6 +4176,8 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
     CalcZoneMassBalance(state, FirstHVACIteration);
 
     CalcZoneLeavingConditions(state, FirstHVACIteration);
+
+    DuctLoss::SimulateDuctLoss(state);
 
     ReturnAirPathManager::SimReturnAirPath(state);
 }
@@ -4340,10 +4357,20 @@ void initOutputRequired(EnergyPlusData &state,
             energy.SequencedOutputRequired(1) = energy.TotalOutputRequired;
             energy.SequencedOutputRequiredToHeatingSP(1) = energy.OutputRequiredToHeatingSP;
             energy.SequencedOutputRequiredToCoolingSP(1) = energy.OutputRequiredToCoolingSP;
+            if (state.dataDuctLoss->DuctLossSimu) {
+                energy.SequencedOutputRequired(1) += state.dataDuctLoss->SysSen;
+                energy.SequencedOutputRequiredToHeatingSP(1) += state.dataDuctLoss->SysSen; // array assignment
+                energy.SequencedOutputRequiredToCoolingSP(1) += state.dataDuctLoss->SysSen; // array assignment
+            }
             // init first sequenced moisture demand to the full output
             moisture.SequencedOutputRequired(1) = moisture.TotalOutputRequired;
             moisture.SequencedOutputRequiredToHumidSP(1) = moisture.OutputRequiredToHumidifyingSP;
             moisture.SequencedOutputRequiredToDehumidSP(1) = moisture.OutputRequiredToDehumidifyingSP;
+            if (state.dataDuctLoss->DuctLossSimu) {
+                moisture.SequencedOutputRequired(1) += state.dataDuctLoss->SysLat;
+                moisture.SequencedOutputRequiredToHumidSP(1) += state.dataDuctLoss->SysLat;
+                moisture.SequencedOutputRequiredToDehumidSP(1) += state.dataDuctLoss->SysLat;
+            }
         }
     }
 
@@ -4410,6 +4437,11 @@ void distributeOutputRequired(EnergyPlusData &state,
             energy.SequencedOutputRequired(priorityNum) = energy.TotalOutputRequired * loadRatio;
             energy.SequencedOutputRequiredToHeatingSP(priorityNum) = energy.OutputRequiredToHeatingSP * loadRatio;
             energy.SequencedOutputRequiredToCoolingSP(priorityNum) = energy.OutputRequiredToCoolingSP * loadRatio;
+            if (state.dataDuctLoss->DuctLossSimu) {
+                energy.SequencedOutputRequired(priorityNum) += state.dataDuctLoss->SysSen * loadRatio;
+                energy.SequencedOutputRequiredToHeatingSP(priorityNum) += state.dataDuctLoss->SysSen * loadRatio; // array assignment
+                energy.SequencedOutputRequiredToCoolingSP(priorityNum) += state.dataDuctLoss->SysSen * loadRatio; // array assignment
+            }
             energy.RemainingOutputRequired = energy.SequencedOutputRequired(priorityNum);
             energy.RemainingOutputReqToHeatSP = energy.SequencedOutputRequiredToHeatingSP(priorityNum);
             energy.RemainingOutputReqToCoolSP = energy.SequencedOutputRequiredToCoolingSP(priorityNum);
@@ -4418,6 +4450,11 @@ void distributeOutputRequired(EnergyPlusData &state,
             moisture.SequencedOutputRequired(priorityNum) = moisture.TotalOutputRequired * loadRatio;
             moisture.SequencedOutputRequiredToHumidSP(priorityNum) = moisture.OutputRequiredToHumidifyingSP * loadRatio;
             moisture.SequencedOutputRequiredToDehumidSP(priorityNum) = moisture.OutputRequiredToDehumidifyingSP * loadRatio;
+            if (state.dataDuctLoss->DuctLossSimu) {
+                moisture.SequencedOutputRequired(priorityNum) += state.dataDuctLoss->SysLat * loadRatio;
+                moisture.SequencedOutputRequiredToHumidSP(priorityNum) += state.dataDuctLoss->SysLat * loadRatio;
+                moisture.SequencedOutputRequiredToDehumidSP(priorityNum) += state.dataDuctLoss->SysLat * loadRatio;
+            }
             moisture.RemainingOutputRequired = moisture.SequencedOutputRequired(priorityNum);
             moisture.RemainingOutputReqToHumidSP = moisture.SequencedOutputRequiredToHumidSP(priorityNum);
             moisture.RemainingOutputReqToDehumidSP = moisture.SequencedOutputRequiredToDehumidSP(priorityNum);
@@ -5540,7 +5577,7 @@ void CalcAirFlowSimple(EnergyPlusData &state,
     // This subroutine calculates the air component of the heat balance.
 
     constexpr Real64 StdGravity(9.80665); // The acceleration of gravity at the sea level (m/s2)
-    static constexpr std::string_view RoutineNameVentilation("CalcAirFlowSimple:Ventilation");
+    // static constexpr std::string_view RoutineNameVentilation("CalcAirFlowSimple:Ventilation");
     static constexpr std::string_view RoutineNameMixing("CalcAirFlowSimple:Mixing");
     static constexpr std::string_view RoutineNameCrossMixing("CalcAirFlowSimple:CrossMixing");
     static constexpr std::string_view RoutineNameRefrigerationDoorMixing("CalcAirFlowSimple:RefrigerationDoorMixing");

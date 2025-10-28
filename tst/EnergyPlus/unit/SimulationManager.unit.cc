@@ -489,9 +489,9 @@ TEST_F(EnergyPlusFixture, SimulationManager_HVACSizingSimulationChoiceTest)
     EXPECT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    EXPECT_TRUE(state->dataGlobal->DoHVACSizingSimulation);
+    EXPECT_FALSE(state->dataGlobal->DoHVACSizingSimulation); // flag gets reset because Do Plant is NO
     // get a default value
-    EXPECT_EQ(state->dataGlobal->HVACSizingSimMaxIterations, 1);
+    EXPECT_EQ(state->dataGlobal->HVACSizingSimMaxIterations, 0); // this is no longer set because
 }
 
 TEST_F(EnergyPlusFixture, Test_SimulationControl_ZeroSimulation)
@@ -561,7 +561,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_ReportLoopConnectionsTest)
     state->dataBranchNodeConnections->CompSets(1).ParentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
     state->dataBranchNodeConnections->CompSets(1).ComponentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
     state->dataBranchNodeConnections->CompSets(1).CName = "WaterHeaterMixed1";
-    state->dataBranchNodeConnections->CompSets(1).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined;
     state->dataBranchNodeConnections->CompSets(1).InletNodeName = "MixedWaterHeater1Inlet";
     state->dataBranchNodeConnections->CompSets(1).OutletNodeName = "MixedWaterHeater1Outlet";
     state->dataSimulationManager->WarningOut = false;
@@ -582,4 +581,26 @@ TEST_F(EnergyPlusFixture, SimulationManager_ReportLoopConnectionsTest)
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, SimulationManager_PlantSizingInputTest)
+{
+    // Unit Test for Defect #10797: Check for Bad Input (avoid a hard crash)
+    std::string const idf_objects = delimited_string({
+        "SimulationControl,",
+        "  No,                       !- Do Zone Sizing Calculation",
+        "  No,                       !- Do System Sizing Calculation",
+        "  Yes,                      !- Do Plant Sizing Calculation",
+        "  No,                       !- Run Simulation for Sizing Periods",
+        "  No,                       !- Run Simulation for Weather File Run Periods",
+        "  Yes,                      !- Do HVAC Sizing Simulation for Sizing Periods",
+        "  2;                        !- Maximum Number of HVAC Sizing Simulation Passes",
+    });
+
+    EXPECT_TRUE(process_idf(idf_objects));
+
+    EXPECT_THROW(SimulationManager::GetProjectData(*state), std::runtime_error);
+
+    EXPECT_TRUE(compare_err_stream_substring(
+        "GetProjectData: No Sizing:Plant object entered when the Do HVAC Sizing Simulation and Do Plant Sizing are both YES", true));
 }

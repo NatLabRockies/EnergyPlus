@@ -6278,6 +6278,580 @@ This is the inlet water temperature of the fuel-fired absorption heat pump in de
 \paragraph{Fuel-fired Absorption HeatPump Outlet Temperature [C]}
 This is the outlet water temperature of the fuel-fired absorption heat pump in degree [C].
 
+\subsection{HeatPump:AirToWater}\label{plhp_air_to_water}
+
+The HeatPump:AirToWater object is an air-to-water heat pump that uses air as the
+source side heat transfer fluid. This object can provide both heating and
+cooling but not at the same time.
+
+\subsubsection{Inputs}
+\paragraph{Field: Name} The name of the air-to-water heat pump.
+
+\paragraph{Field: Availability Schedule Name Heating} A schedule that defines the
+availability of the unit in heating mode. Schedule values of 0 denote the unit
+is off. All other values denote the unit is available. If this field is left
+blank, the unit is available the entire simulation.
+\paragraph{Field: Availability Schedule Name Cooling} Enter the name of a
+schedule that defines the availability of the unit in cooling mode. Schedule
+values of 0 denote the unit is off. All other values denote the unit is
+available. If this field is left blank, the unit is available the entire
+simulation.
+\paragraph{Field: Operating Mode Control Method} There are three options,
+ScheduledModes, EMSControlled, and Load.
+\begin{itemize}
+\item ScheduledModes: the operating mode is controlled by a schedule. The
+schedule values are: 0 for off, positive integer k for k heating units being on,
+negative integer -k for k cooling units being on.
+\item EMSControlled: the operating mode is controlled by an Energy Management
+System (EMS) program setting value in an actuator called ``Operating Mode''
+defined for a HeatPump:AirToWater:Heating or HeatPump:AirToWater:Cooling. The
+EMS program must set the operating mode to 0 for off, or an integer k for the
+number of units on. When the value is k, k heating (if the actuator is HeatPump:AirToWater:Heating) 
+or cooling (if the actuator is HeatPump:AirToWater:Cooling) component will be on. 
+When the value is 0, the heating or cooling component will be off.
+\item Load: the operating mode is determined by the load on the water side of
+the heat pump. If the load is positive, the unit will operate in heating mode.
+If the load is negative, the unit will operate in cooling mode. If the load is
+zero, the unit will be off.
+\end{itemize}
+\paragraph{Field: Operating Mode Control Option for Multiple Unit} 
+This field describes the modular behavior of the AWHP, where a few units are
+connected in parallel to supply larger capacity. This determines how many units
+are in heating mode and how many are in cooling mode when the load is too large
+to be met. The following four options are available. The default is SingleMode.
+\begin{itemize}
+    \item SingleMode: when the load is too large to be met by multiple heat pump
+units, all units will operate in the same mode (either all cooling or all
+heating).
+    \item CoolingPriority: each unit will be staged one by one based on cooling
+demand first, after all cooling demand is met, if there are remaining heat
+pumps, they will be used to fulfill the remaining heating demand.
+\item HeatingPriority: similar to CoolingPriority, but will prioritize to meet
+  the heating demand first.
+\item Balanced: it balances the available compressors between cooling and heating
+  when both are needed, but not enough compressors are available to fully
+  satisfy both. It splits the shortfall as evenly as possible between the two
+  demands. For example, if 7 units are needed but only 4 are available, it will
+  allocate 2 units to cooling and 2 units to heating.
+\end{itemize}
+\paragraph{Field: Operating Mode Control Schedule Name} This field is used if
+the Operating Mode Control Method is set to ScheduledModes. Schedule values
+control operating mode as follows: 0=off, -1=cooling, 1=heating when there's
+only one unit (compressor multiplier is 1). When there are multiple units, the
+schedule values are: 0=off, positive integer k=number of heating units on,
+negative integer -k=number of cooling units on. Note that this only applies to
+the case where all units are in the same heating/cooling mode.
+\paragraph{Field: Rated Inlet Air Temperature in Heating Mode} This field is the
+inlet air dry-bulb temperature corresponding to rated heat pump performance
+(capacity, COP). The default value is 8$^\circ$C.
+\paragraph{Field: Rated Air Flow Rate in Heating Mode} This field is the air
+flow rate in m3/s corresponding to rated heat pump performance (capacity, COP).
+The default value is autosize.
+The autosize process first calculates the required heat transfer rate on the source
+side, then assumes a 10C temperature difference, finally use the sensible heat
+equation ($V = Q / (\rho \cdot Cp \cdot \Delta T)$) to solve for the volumetric flow rate.
+\paragraph{Field: Rated Leaving Water Temperature in Heating Mode} This field is
+the outlet water temperature corresponding to rated heat pump performance
+(capacity, COP). The default value is 40$^\circ$C.
+\paragraph{Field: Rated Water Flow Rate in Heating Mode} This field is the
+condenser water flow rate corresponding to rated heat pump performance
+(capacity, COP). The default value is autosize.
+The autosized flow rate equals the plant loop design volume flow rate. 
+This value could be either user-specified or autosized based on peak load and design
+temperature difference.
+\paragraph{Field: Minimum Outdoor Air Temperature in Heating Mode} This field is
+the minimum outdoor temperature allowed for heating operation. Default value is
+-100$^\circ$C. Heating is disabled below this temperature.
+\paragraph{Field: Maximum Outdoor Air Temperature in Heating Mode} This field is
+the maximum outdoor temperature allowed for heating operation. Default value is
+100$^\circ$C. Heating is disabled above this temperature.
+\paragraph{Field: Minimum Leaving Water Temperature Curve Name in Heating Mode}
+This optional alpha field specifies the name of a univariate curve or table that defines 
+the minimum leaving water temperature. When the air-water temperature combination is outside of 
+the operation boundary, the heat pump will not operate.
+\paragraph{Field: Maximum Leaving Water Temperature Curve Name in Heating Mode}
+This optional alpha field specifies the name of a univariate curve or table that defines 
+the maximum leaving water temperature. When the air-water temperature combination is outside of 
+the operation boundary, the heat pump will not operate.
+\paragraph{Field: Minimum Part Load Ratio} This field is the minimum part load
+ratio of the heat pump. The default value is 0.1. Below this operating limit,
+compressor cycling will occur.
+\paragraph{Field: Sizing Factor for Heating} This field is a multiplier for the
+autosized capacity and flow rates. The default value is 1.0.
+\paragraph{Field: Rated Inlet Air Temperature in Cooling Mode} This field is the
+inlet air dry-bulb temperature corresponding to rated heat pump performance
+(capacity, COP). The default value is 30$^\circ$C.
+\paragraph{Field: Rated Air Flow Rate in Cooling Mode} This field is the air
+flow rate in m3/s corresponding to rated heat pump performance (capacity, COP).
+The default value is autosize, which means the air flow rate will be autosized.
+The autosize process first calculates the required heat transfer on the source
+side, then assumes a 10C temperature difference, finally use the sensible heat
+equation ($V = Q / (\rho \cdot Cp \cdot \Delta T)$) to solve for the volumetric flow rate.
+\paragraph{Field: Rated Leaving Water Temperature in Cooling Mode} This field is
+the outlet water temperature corresponding to rated heat pump performance
+(capacity, COP). The default value is 8$^\circ$C.
+\paragraph{Field: Rated Water Flow Rate in Cooling Mode} This field is the
+condenser water flow rate corresponding to rated heat pump performance
+(capacity, COP). The default value is autosize.
+The autosized flow rate equals the plant loop design volume flow rate. 
+This value could be either user-specified or autosized based on peak load and design
+temperature difference.
+\paragraph{Field: Minimum Outdoor Air Temperature in Cooling Mode} This field is
+the minimum outdoor temperature allowed for cooling operation. Default value is
+-100$^\circ$C. Cooling is disabled below this temperature.
+\paragraph{Field: Maximum Outdoor Air Temperature in Cooling Mode} This field is
+the maximum outdoor temperature allowed for cooling operation. Default value is
+100$^\circ$C. Cooling is disabled above this temperature.
+\paragraph{Field: Minimum Leaving Water Temperature Curve Name in Cooling Mode}
+This optional alpha field specifies the name of a univariate curve or table that defines 
+the minimum leaving water temperature. When the air-water temperature combination is outside of 
+the operation boundary, the heat pump will not operate.
+\paragraph{Field: Maximum Leaving Water Temperature Curve Name in Cooling Mode}
+This optional alpha field specifies the name of a univariate curve or table that defines 
+the maximum leaving water temperature. When the air-water temperature combination is outside of 
+the operation boundary, the heat pump will not operate.
+\paragraph{Field: Sizing Factor for Cooling} This field is a multiplier for the
+autosized capacity and flow rates. The default value is 1.0.
+\paragraph{Field: Air Inlet Node Name} This field is the name of the node from
+which the heat pump draws its inlet air.
+\paragraph{Field: Air Outlet Node Name} This field is the name of the node to
+which the heat pump sends its outlet air.
+\paragraph{Field: Hot Water Inlet Node Name} This field is the name of the node
+from which the heat pump draws water from a hot water loop.
+\paragraph{Field: Hot Water Outlet Node Name} This field is the name of the node
+to which the heat pump sends water to a hot water loop.
+\paragraph{Field: Chilled Water Inlet Node Name} This field is the name of the
+node from which the heat pump draws water from a chilled water loop.
+\paragraph{Field: Chilled Water Outlet Node Name} This field is the name of the
+node to which the heat pump sends water to a chilled water loop.
+\paragraph{Field: Maximum Outdoor Dry Bulb Temperature For Defrost Operation}
+This field is the maximum outdoor temperature allowed for defrost operation.
+Default value is 10$^\circ$C. Defrost operation will not be active above this
+outdoor temperature.
+\paragraph{Field: Heat Pump Defrost Control} This field is the defrost control
+strategy for the heat pump. There are four options:
+\begin{itemize} % (fixme: confirm)
+    \item None: no defrost control is applied.
+    \item Timed: defrost control is applied based on a fixed time period.
+    \item OnDemand: defrost control is applied based on outdoor air temperature.
+    \item TimedEmpirical: defrost control is applied based on empirical data.
+\end{itemize} The default value is None.
+More detailed descriptions of the defrost control are in the Engineering Reference
+Section Modular Air to Water Heat Pumps sub-section Defrost control.
+\paragraph{Field: Heat Pump Defrost Time Period Fraction} This field is the
+fraction of time in defrost mode when the defrost control strategy is set to
+Timed. The default value is 0.058333, which corresponds to 2 minutes per hour.
+It is only applicable if timed defrost control is specified.
+\paragraph{Field: Resistive Defrost Heater Capacity} This field is the capacity
+of the resistive defrost heater in Watts. The default value is 0.0, which means
+no resistive defrost heater is used. This field is only applicable if the
+defrost control strategy is set to Timed.
+\paragraph{Field: Defrost Energy Input Ratio Function of Temperature Curve Name}
+This optional alpha field specifies the name of a bivariate curve or table that
+defines the defrost energy based on outdoor air moisture content. This curve is
+used only when Timed or OnDemand defrost control is selected.
+\paragraph{Field: Heat Pump Multiplier} This field specifies the number of heat 
+pumps being modeled. The value must be an integer greater than or equal to 1. 
+The default value is 1.0, which means only one heat pump is used. This input 
+field is used to model modular heat pumps where multiple heat pump units are 
+connected in parallel to provide larger heating/cooling capacity.
+\paragraph{Field: Control Type} This field is the compressor control type for
+the heat pump. There are two options:
+
+\begin{itemize}
+\item FixedSpeed: the compressor operates between several discrete speed levels.
+\item VariableSpeed: the compressor operates at variable speed, where the heat
+  pump can continuously adjust its speed.
+\end{itemize}
+The default value is VariableSpeed. In this model, we assume when the load is
+below the lowest speed level, both the variable-speed and fixed-speed heat pumps
+will cycle. When the load is between the two adjacent speed levels, the
+variable-speed one will modulate; the fixed-speed one will operate at the higher
+speed level part of the time and lower speed level the rest of the time. In the
+reported ``Heat Pump Speed Level in Heating Mode'' and ``Heat Pump Speed Level
+in Cooling Mode'', the fixed-speed heat pump will report an integer corresponding to
+the higher speed level. The variable-speed one will report a fractional speed
+level where the fraction is computed by interpolating the load between the capacities 
+at the two speed levels.
+\paragraph{Field: Crankcase Heater Capacity} This field is the capacity of the
+compressor crankcase heater in Watts. The default value is 0.0, which means no
+crankcase heater is used. The compressor crankcase heater only operates when the
+dry-bulb temperature of air surrounding the compressor is below the Maximum
+Ambient Temperature for Crankcase Heater Operation and the heat pump is off. The
+ambient temperature uses the outdoor air temperature.
+\paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
+A Curve:* or Table:Lookup object encoding the relationship between the crankcase
+heater capacity and the outdoor air temperature. When this field is missing or
+empty, constant crankcase heater capacity will be assumed.
+\paragraph{Field: Maximum Ambient Temperature for Crankcase Heater Operation}
+This field is the maximum outdoor air dry-bulb temperature in degree Celsius
+below which the crankcase heater will be turned on. When the outdoor air dry-bulb
+temperature rises above this temperature, the crankcase heater will not operate.
+The default value is 10$^\circ$C.
+\paragraph{Field: Number of Speeds for Heating} This field indicates the number
+of speed levels available for the heat pump in heating mode. The default value
+is 1, which means the heat pump operates at a single speed. If there's no
+heating and only cooling component, set this field to 0. The maximum number of
+speeds allowed is 5. Speed level 1 is the lowest speed; and speed level 5 is
+the highest speed.
+\paragraph{Field: Rated Heating Capacity at Speed i} Rated heating capacity at
+speed i, where i is the speed number from 1 to 5. For speed 1, the default value
+is autosize.
+\paragraph{Field: Rated COP for Heating at Speed i} Rated COP (Coefficient of
+Performance) for heating at speed i, where i is the speed number from 1 to 5.
+The default value is 3.0.
+\paragraph{Field: Normalized Heating Capacity Function of Temperature Curve Name
+at Speed i} The normalized heating capacity function of temperature curve name
+at speed i, where i is the speed number from 1 to 5. The curve is a biquadratic
+curve or a lookup table of outdoor air and condensing leaving water temperature.
+It is multiplied by the rated heating capacity at speed i to get the actual
+heating capacity at that speed.
+\paragraph{Field: Heating Energy Input Ratio Function of Temperature Curve Name
+at Speed i} The heating energy input ratio function of temperature curve name at
+speed i, where i is the speed number from 1 to 5. This curve is a biquadratic
+curve or a lookup table of outdoor air and condensing leaving water temperature.
+It is used to calculate the electricity energy input ratio at that speed by
+multiplying the corresponding rated EIR (1/COP).
+\paragraph{Field: Heating Energy Input Ratio Function of PLR Curve Name at Speed
+i} The heating energy input ratio function of part load ratio (PLR) curve name
+at speed i, where i is the speed number from 1 to 5. It is a cubic curve or a
+lookup table that defines the relationship between the PLR and the EIR.
+\paragraph{Field: Booster Mode On Heating} This field is a flag that indicates
+whether the heat pump has a booster mode enabled for heating operation. If the
+flag is on, booster mode will be enabled and the heat pump will operate at a
+higher capacity during heating operation. The default value is false, which
+means booster mode is not enabled. When the booster mode is on, the following
+performance fields are required.
+\paragraph{Rated Heating Capacity in Booster Mode} This field is the rated
+heating capacity in booster mode.
+\paragraph{Rated Heating COP in Booster Mode} This field is the rated heating
+COP (Coefficient of Performance) in booster mode.
+\paragraph{Normalized Heating Capacity Function of Temperature Curve Name in
+Booster Mode} This field is the normalized heating capacity function of
+temperature curve name in booster mode. This curve is a biquadratic curve or a
+lookup table of outdoor air and condensing leaving water temperature. It is
+multiplied by the rated heating capacity in booster mode to get the actual
+heating capacity in booster mode. Note that if you believe the booster mode
+capacity is just a constant scaling up of the max-speed capacity at all
+air-water-temperature combinations, you can use the same performance curves as
+the max-speed capacity and only change the rated capacity at booster mode.
+For example, for a 5-speed heat pump, if the booster mode is 10\% higher capacity
+than the max-speed capacity, you can use the same performance curves as the max-speed
+capacity and use 1.1 times the max-speed rated capacity for the rated capacity at booster mode.
+\paragraph{Heating Energy Input Ratio Function of Temperature Curve Name in
+Booster Mode} This field is the heating energy input ratio function of
+temperature curve name in booster mode. This curve is a biquadratic curve or a
+lookup table of outdoor air and condensing leaving water temperature. It is used
+to calculate the electricity energy input ratio in booster mode by multiplying
+the corresponding rated EIR (1/COP). Note that if you believe the booster mode
+EIR is just a constant scaling up of the max-speed EIR at all
+air-water-temperature combinations, you can use the same performance curves as
+the max-speed EIR and only change the rated EIR at booster mode.
+For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP 
+than the max-speed COP, you can use the same performance curves as the max-speed
+capacity and use 0.95 times the max-speed rated COP for the rated capacity at booster mode.
+\paragraph{Heating Energy Input Ratio Function of PLR Curve Name in Booster
+Mode} This field is the heating energy input ratio function of part load ratio
+(PLR) curve name in booster mode.
+\paragraph{Field: Number of Speeds for Cooling} This field indicates the number
+of speed levels available for the heat pump in cooling mode. The default value
+is 1, which means the heat pump operates at a single speed. If there's no
+cooling and only heating component, set this field to 0.
+\paragraph{Field: Rated Cooling Capacity at Speed i} Rated cooling capacity at
+speed i, where i is the speed number from 1 to 5. For speed 1, the default value
+is autosize.
+\paragraph{Field: Rated COP for Cooling at Speed i} Rated COP (Coefficient of
+Performance) for cooling at speed i, where i is the speed number from 1 to 5.
+The default value is 3.0.
+\paragraph{Field: Normalized cooling Capacity Function of Temperature Curve Name
+at Speed i} The normalized cooling capacity function of temperature curve name
+at speed i, where i is the speed number from 1 to 5. The curve is a biquadratic
+curve or a lookup table of outdoor air and condensing leaving water temperature.
+It is multiplied by the rated cooling capacity at speed i to get the actual
+cooling capacity at that speed.
+\paragraph{Field: cooling Energy Input Ratio Function of Temperature Curve Name
+at Speed i} The cooling energy input ratio function of temperature curve name at
+speed i, where i is the speed number from 1 to 5. This curve is a biquadratic
+curve or a lookup table of outdoor air and condensing leaving water temperature.
+It is used to calculate the electricity energy input ratio at that speed by
+multiplying the corresponding rated EIR (1/COP).
+\paragraph{Field: cooling Energy Input Ratio Function of PLR Curve Name at Speed
+i} The cooling energy input ratio function of part load ratio (PLR) curve name
+at speed i, where i is the speed number from 1 to 5. It is a cubic curve or a
+lookup table that defines the relationship between the PLR and the EIR.
+\paragraph{Field: Booster Mode On Cooling} This field is a flag that indicates
+whether the heat pump has a booster mode enabled for cooling operation. If the
+flag is on, booster mode will be enabled and the heat pump will operate at a
+higher capacity during cooling operation. The default value is false, which
+means booster mode is not enabled. When the booster mode is on, the following
+performance fields are required.
+\paragraph{Rated Cooling Capacity in Booster Mode} This field is the rated
+cooling capacity in booster mode.
+\paragraph{Rated Cooling COP in Booster Mode} This field is the rated cooling
+COP (Coefficient of Performance) in booster mode.
+\paragraph{Normalized Cooling Capacity Function of Temperature Curve Name in
+Booster Mode} This field is the normalized cooling capacity function of
+temperature curve name in booster mode. This curve is a biquadratic curve or a
+lookup table of outdoor air and condensing leaving water temperature. It is
+multiplied by the rated cooling capacity in booster mode to get the actual
+cooling capacity in booster mode. Note that if you believe the booster mode
+capacity is just a constant scaling up of the max-speed capacity at all
+air-water-temperature combinations, you can use the same performance curves as
+the max-speed capacity and only change the rated capacity at booster mode.
+For example, for a 5-speed heat pump, if the booster mode is 10\% higher capacity
+than the max-speed capacity, you can use the same performance curves as the max-speed
+capacity and use 1.1 times the max-speed rated capacity for the rated capacity at booster mode.
+\paragraph{Cooling Energy Input Ratio Function of Temperature Curve Name in
+Booster Mode} This field is the cooling energy input ratio function of
+temperature curve name in booster mode. This curve is a biquadratic curve or a
+lookup table of outdoor air and condensing leaving water temperature. It is used
+to calculate the electricity energy input ratio in booster mode by multiplying
+the corresponding rated EIR (1/COP). Note that if you believe the booster mode
+EIR is just a constant scaling up of the max-speed EIR at all
+air-water-temperature combinations, you can use the same performance curves as
+the max-speed EIR and only change the rated EIR at booster mode.
+For example, for a 5-speed heat pump, if the booster mode is 5\% lower COP 
+than the max-speed COP, you can use the same performance curves as the max-speed
+capacity and use 0.95 times the max-speed rated COP for the rated capacity at booster mode.
+\paragraph{Cooling Energy Input Ratio Function of PLR Curve Name in Booster
+Mode} This field is the cooling energy input ratio function of part load ratio
+(PLR) curve name in booster mode.
+
+\subsubsection{Outputs}\label{outputs-heatpump-air-to-water}
+\begin{itemize}
+\item Heat Pump Part Load Ratio in Heating Mode {[}{]}
+\item Heat Pump Cycling Ratio in Heating Mode {[}{]}
+\item Heat Pump Load Side Heat Transfer Rate in Heating Mode {[}W{]}
+\item Heat Pump Load Side Heat Transfer Energy in Heating Mode {[}J{]}
+\item Heat Pump Source Side Heat Transfer Rate in Heating Mode {[}W{]}
+\item Heat Pump Source Side Heat Transfer Energy in Heating Mode {[}J{]}
+\item Heat Pump Load Side Inlet Temperature in Heating Mode {[}C{]}
+\item Heat Pump Load Side Outlet Temperature in Heating Mode {[}C{]}
+\item Heat Pump Source Side Inlet Temperature in Heating Mode {[}C{]}
+\item Heat Pump Source Side Outlet Temperature in Heating Mode {[}C{]}
+\item Heat Pump Electricity Rate in Heating Mode {[}W{]}
+\item Heat Pump Electricity Energy in Heating Mode {[}J{]}
+\item Heat Pump Load Due To Defrost {[}W{]}
+\item Heat Pump Fractional Defrost Time {[}W{]}
+\item Heat Pump Defrost Electricity Rate {[}W{]}
+\item Heat Pump Defrost Electricity Energy {[}J{]}
+\item Heat Pump Load Side Mass Flow Rate in Heating Mode {[}kg/s{]}
+\item Heat Pump Source Side Mass Flow Rate in Heating Mode {[}kg/s{]}
+\item Heat Pump Total Heating Rate {[}W{]}
+\item Heat Pump Number Of Heating Unit On {[}{]}
+\item Heat Pump Speed Level in Heating Mode {[}{]}
+\item Heat Pump Speed Ratio in Heating Mode {[}{]}
+\item Heat Pump Air Flow Rate in Heating Mode {[}m3/s{]}
+\item Heat Pump Inlet Air Temperature in Heating Mode {[}C{]}
+\item Heat Pump Outlet Air Temperature in Heating Mode {[}C{]}
+\item Heat Pump Capacity Temperature Modifier in Heating Mode {[}{]}
+\item Heat Pump EIR Temperature Modifier in Heating Mode {[}{]}
+\item Heat Pump EIR PLR Modifier in Heating Mode {[}{]}
+\item Heat Pump Crankcase Heater Electricity Rate {[}W{]}
+\item Heat Pump Crankcase Heater Electricity Energy {[}J{]}
+\item Heat Pump Heating COP {[}{]}
+\item Heat Pump Part Load Ratio in Cooling Mode {[}{]}
+\item Heat Pump Cycling Ratio in Cooling Mode {[}{]}
+\item Heat Pump Load Side Heat Transfer Rate in Cooling Mode {[}W{]}
+\item Heat Pump Load Side Heat Transfer Energy in Cooling Mode {[}J{]}
+\item Heat Pump Source Side Heat Transfer Rate in Cooling Mode {[}W{]}
+\item Heat Pump Source Side Heat Transfer Energy in Cooling Mode {[}J{]}
+\item Heat Pump Load Side Inlet Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Load Side Outlet Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Source Side Inlet Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Source Side Outlet Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Electricity Rate in Cooling Mode {[}W{]}
+\item Heat Pump Electricity Energy in Cooling Mode {[}J{]}
+\item Heat Pump Load Side Mass Flow Rate in Cooling Mode {[}kg/s{]}
+\item Heat Pump Source Side Mass Flow Rate in Cooling Mode {[}kg/s{]}
+\item Heat Pump Total Cooling Rate {[}W{]}
+\item Heat Pump Number Of Cooling Unit On {[}{]}
+\item Heat Pump Speed Level in Cooling Mode {[}{]}
+\item Heat Pump Speed Ratio in Cooling Mode {[}{]}
+\item Heat Pump Air Flow Rate in Cooling Mode {[}m3/s{]}
+\item Heat Pump Inlet Air Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Outlet Air Temperature in Cooling Mode {[}C{]}
+\item Heat Pump Capacity Temperature Modifier in Cooling Mode {[}{]}
+\item Heat Pump EIR Temperature Modifier in Cooling Mode {[}{]}
+\item Heat Pump EIR PLR Modifier in Cooling Mode {[}{]}
+\item Heat Pump Cooling COP {[}{]}
+\end{itemize}
+\paragraph{Heat Pump Part Load Ratio in Heating Mode {[}{]}} The part load ratio
+(PLR) of the heat pump in heating mode. It is the ratio of the actual heating
+rate to the rated heating rate at the current operating conditions. The value is
+between 0 and 1, where 0 means the heat pump is off and 1 means it is operating
+at full capacity.
+\paragraph{Heat Pump Cycling Ratio in Heating Mode {[}{]}} The cycling ratio of
+the heat pump in heating mode. It is the ratio of the actual on-time to the
+total time. The value is between 0 and 1, where 0 means the heat pump is off and
+1 means it is constantly on.
+\paragraph{Heat Pump Load Side Heat Transfer Rate in Heating Mode {[}W{]}} The
+load side heat transfer rate of the heat pump in heating mode. It is the rate at
+which the heat pump transfers heat to the load side.
+\paragraph{Heat Pump Load Side Heat Transfer Energy in Heating Mode {[}J{]}} The
+load side heat transfer energy of the heat pump in heating mode. It is the
+accumulated energy transferred to the load side.
+\paragraph{Heat Pump Source Side Heat Transfer Rate in Heating Mode {[}W{]}} The
+source side heat transfer rate of the heat pump in heating mode. It is the rate
+at which the heat pump extracts heat from the source side.
+\paragraph{Heat Pump Source Side Heat Transfer Energy in Heating Mode {[}J{]}}
+The source side heat transfer energy of the heat pump in heating mode. It is the
+accumulated energy extracted from the source side.
+\paragraph{Heat Pump Load Side Inlet Temperature in Heating Mode {[}C{]}} The
+load side inlet temperature of the heat pump in heating mode. It is the
+temperature of the water entering the heat pump from the load side.
+\paragraph{Heat Pump Load Side Outlet Temperature in Heating Mode {[}C{]}} The
+load side outlet temperature of the heat pump in heating mode. It is the
+temperature of the water leaving the heat pump to the load side.
+\paragraph{Heat Pump Source Side Inlet Temperature in Heating Mode {[}C{]}} The
+source side inlet temperature of the heat pump in heating mode. It is the
+temperature of the air entering the heat pump from the source side.
+\paragraph{Heat Pump Source Side Outlet Temperature in Heating Mode {[}C{]}} The
+source side outlet temperature of the heat pump in heating mode. It is the
+temperature of the air leaving the heat pump to the source side.
+\paragraph{Heat Pump Electricity Rate in Heating Mode {[}W{]}} The electricity
+rate of the heat pump in heating mode in W.
+\paragraph{Heat Pump Electricity Energy in Heating Mode {[}J{]}} The electricity
+energy of the heat pump in heating mode in J. It is the accumulated electricity
+consumed by the heat pump.
+\paragraph{Heat Pump Load Due To Defrost {[}W{]}} 
+This output represents the additional thermal load (in Watts) imposed on the heat pump 
+system due to the defrost operation.
+\paragraph{Heat Pump Fractional Defrost Time {[}{]}} The fractional defrost
+time in heating mode. It is the ratio of the defrost time to the total operation
+time.
+\paragraph{Heat Pump Defrost Electricity Rate {[}W{]}} The electricity rate of
+the heat pump during defrost operation in heating mode.
+\paragraph{Heat Pump Defrost Electricity Energy {[}J{]}} The electricity energy
+consumed by the heat pump during defrost operation in heating mode.
+\paragraph{Heat Pump Load Side Mass Flow Rate in Heating Mode {[}kg/s{]}} The
+load side mass flow rate of the heat pump in heating mode.
+\paragraph{Heat Pump Source Side Mass Flow Rate in Heating Mode {[}kg/s{]}} The
+source side mass flow rate of the heat pump in heating mode.
+\paragraph{Heat Pump Total Heating Rate {[}W{]}} The total heating rate of the
+heat pump in W in heating mode.
+\paragraph{Heat Pump Number Of Heating Unit On {[}{]}} 
+This output represents the number of heat pump units that are currently operating
+in heating mode. If you have a multi-unit (multi-module) air-to-water heat pump, 
+operatingMode indicates how many of those units are ON to meet the current heating load.
+It can range from 0 up to the maximum number of available heat pumps. For single-unit heat pumps,
+this value will be either 0 (off) or 1 (on).
+\paragraph{Heat Pump Speed Level in Heating Mode {[}{]}} The speed level of the
+heat pump in heating mode. It is the current speed level of the compressor. For
+fixed-speed heat pumps, this value is integers. For variable-speed heat pumps,
+this value is a continuous non-negative value. When the speed level is 0,
+the heat pump used for cooling is turned off.
+\paragraph{Heat Pump Speed Ratio in Heating Mode {[}{]}} For a multi-speed heat pump, the speed ratio
+indicates how far the current operating speed is between the two adjacent discrete speed levels. 
+When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as: 
+speed ratio = (load - capacity at speed n-1) / (capacity at speed n - capacity at speed n-1).
+For a variable-speed heat pump, the speed ratio equals the part load ratio.
+When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio. 
+\paragraph{Heat Pump Air Flow Rate in Heating Mode {[}m3/s{]}}
+The air flow rate of the heat pump in heating mode in m3/s.
+\paragraph{Heat Pump Inlet Air Temperature in Heating Mode {[}C{]}}
+The inlet air dry-bulb temperature of the heat pump in heating mode.
+\paragraph{Heat Pump Outlet Air Temperature in Heating Mode {[}C{]}}
+The outlet air dry-bulb temperature of the heat pump in heating mode.
+\paragraph{Heat Pump Capacity Temperature Modifier in Heating Mode {[}{]}}
+The capacity temperature modifier function value of the heat pump in heating
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the capacity temperature modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated capacity temperature modifier between those two speed levels.
+\paragraph{Heat Pump EIR Temperature Modifier in Heating Mode {[}{]}}
+The EIR temperature modifier function value of the heat pump in heating
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the EIR temperature modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated EIR temperature modifier between those two speed levels.
+\paragraph{Heat Pump EIR PLR Modifier in Heating Mode {[}{]}}
+The EIR part load ratio (PLR) modifier function value of the heat pump in heating
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the EIR PLR modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated EIR PLR modifier between those two speed levels.
+\paragraph{Heat Pump Crankcase Heater Electricity Rate {[}W{]}} The electricity
+rate of the heat pump crankcase heater in heating mode.
+\paragraph{Heat Pump Crankcase Heater Electricity Energy {[}W{]}} The
+electricity energy of the heat pump crankcase heater in heating mode.
+\paragraph{Heat Pump Heating COP {[}{]}} The coefficient of performance (COP) of
+the heat pump in heating mode.
+\paragraph{Heat Pump Part Load Ratio in Cooling Mode {[}{]}} The part load ratio
+of the heat pump in cooling mode.
+\paragraph{Heat Pump Cycling Ratio in Cooling Mode {[}{]}} The cycling ratio of
+the heat pump in cooling mode.
+\paragraph{Heat Pump Load Side Heat Transfer Rate in Cooling Mode {[}W{]}} The
+load side heat transfer rate of the heat pump in cooling mode.
+\paragraph{Heat Pump Load Side Heat Transfer Energy in Cooling Mode {[}J{]}} The
+load side heat transfer energy of the heat pump in cooling mode.
+\paragraph{Heat Pump Source Side Heat Transfer Rate in Cooling Mode {[}W{]}} The
+source side heat transfer rate of the heat pump in cooling mode.
+\paragraph{Heat Pump Source Side Heat Transfer Energy in Cooling Mode {[}J{]}}
+The source side heat transfer energy of the heat pump in cooling mode.
+\paragraph{Heat Pump Load Side Inlet Temperature in Cooling Mode {[}C{]}} The
+load side inlet temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Load Side Outlet Temperature in Cooling Mode {[}C{]}} The
+load side outlet temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Source Side Inlet Temperature in Cooling Mode {[}C{]}} The
+source side inlet temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Source Side Outlet Temperature in Cooling Mode {[}C{]}} The
+source side outlet temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Electricity Rate in Cooling Mode {[}W{]}} The electricity
+rate of the heat pump in cooling mode in W.
+\paragraph{Heat Pump Electricity Energy in Cooling Mode {[}J{]}} The electricity
+energy of the heat pump in cooling mode in J. It is the accumulated electricity
+consumed by the heat pump.
+\paragraph{Heat Pump Load Side Mass Flow Rate in Cooling Mode {[}kg/s{]}} The
+load side mass flow rate of the heat pump in cooling mode.
+\paragraph{Heat Pump Source Side Mass Flow Rate in Cooling Mode {[}kg/s{]}} The
+source side mass flow rate of the heat pump in cooling mode.
+\paragraph{Heat Pump Total Cooling Rate {[}W{]}} The total cooling rate of the
+heat pump in W in cooling mode.
+\paragraph{Heat Pump Number Of Cooling Unit On {[}{]}} 
+This output represents the number of heat pump units that are currently operating
+in cooling mode. If you have a multi-unit (multi-module) air-to-water heat pump,
+operatingMode indicates how many of those units are ON to meet the current cooling load.
+It can range from 0 up to the maximum number of available heat pumps. For single-unit heat pumps,
+this value will be either 0 (off) or 1 (on).
+\paragraph{Heat Pump Speed Level in Cooling Mode {[}{]}} The speed level of the
+heat pump in cooling mode. It is the current speed level of the compressor. For
+fixed-speed heat pumps, this value is integers. For variable-speed heat pumps,
+this value is a continuous non-negative value. When the speed level is 0,
+the heat pump used for cooling is turned off.
+\paragraph{Heat Pump Speed Ratio in Cooling Mode {[}{]}} For a multi-speed heat pump, the speed ratio
+indicates how far the current operating speed is between the two adjacent discrete speed levels. 
+When the load is between the capacity of speed level n and speed level n-1, the speed ratio is calculated as: 
+speed ratio = (load - capacity at speed n-1) / (capacity at speed n - capacity at speed n-1).
+For a variable-speed heat pump, the speed ratio equals the part load ratio.
+When the heat pump is cycling, the speed ratio is 0, and the proportion of time that it is on is reported in cycling ratio. 
+\paragraph{Heat Pump Air Flow Rate in Cooling Mode {[}m3/s{]}}
+The air flow rate of the heat pump in cooling mode in m3/s.
+\paragraph{Heat Pump Inlet Air Temperature in Cooling Mode {[}C{]}}
+The inlet air dry-bulb temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Outlet Air Temperature in Cooling Mode {[}C{]}}
+The outlet air dry-bulb temperature of the heat pump in cooling mode.
+\paragraph{Heat Pump Capacity Temperature Modifier in Cooling Mode {[}{]}}
+The capacity temperature modifier function value of the heat pump in cooling
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the capacity temperature modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated capacity temperature modifier between those two speed levels.
+\paragraph{Heat Pump EIR Temperature Modifier in Cooling Mode {[}{]}}
+The EIR temperature modifier function value of the heat pump in heating
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the EIR temperature modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated EIR temperature modifier between those two speed levels.
+\paragraph{Heat Pump EIR PLR Modifier in Cooling Mode {[}{]}}
+The EIR part load ratio (PLR) modifier function value of the heat pump in cooling
+mode. When the load is between the capacity of two speed levels, if the heat
+pump is fixed-speed, this value is the EIR PLR modifier curve value
+at the higher speed level; if the heat pump is variable-speed, this value is the
+interpolated EIR PLR modifier between those two speed levels.
+\paragraph{Heat Pump Cooling COP {[}{]}} The coefficient of performance (COP) of
+the heat pump in cooling mode.
+
 \subsection{Steps to specify the Ground Source Heat Pump}\label{steps-to-specify-the-ground-source-heat-pump}
 
 Since the heat pump is defined with two separate objects (one for heating, one for cooling), the connections to the condenser has to be done carefully. The example below shows the configuration for parameter estimation objects. The same specifications and configuration also applies to the equation fit model.

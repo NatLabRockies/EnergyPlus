@@ -11700,9 +11700,9 @@ Output:Variable,*,Supervisory Plant Auxiliary Boiler Mode,timestep; !- HVAC Aver
 
 Output:Variable,*,Chilled Water Thermal Storage Tank Temperature,timestep; !- HVAC Average [C]
 Output:Variable,*,Chilled Water Thermal Storage Tank Heat Gain Rate,timestep; !- HVAC Average [W]
-Output:Variable,*,Chilled Water Thermal Storage Use Side Mass Flow Rate,timestep; !- HVAC Average [kg/s]
-Output:Variable,*,Chilled Water Thermal Storage Use Side Inlet Temperature,timestep; !- HVAC Average [C]
-Output:Variable,*,Chilled Water Thermal Storage Use Side Outlet Temperature,timestep; !- HVAC Average [C]
+Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Mass Flow Rate,timestep; !- HVAC Average [kg/s]
+Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Inlet Temperature,timestep; !- HVAC Average [C]
+Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Outlet Temperature,timestep; !- HVAC Average [C]
 
 Output:Variable,*,Heat Pump Part Load Ratio,timestep; !- HVAC Average []
 Output:Variable,*,Heat Pump Cycling Ratio,timestep; !- HVAC Average []

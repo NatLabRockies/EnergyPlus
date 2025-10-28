@@ -273,6 +273,28 @@ main_gui(True)
             engine.exec(cmd);
             exit(0);
         });
+
+        auto *gheDesignerSubCommand = auxiliaryToolsSubcommand->add_subcommand("ghedesigner", "GHEDesigner Operation");
+        gheDesignerSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to GHEDesigner")->option_text("ARG ...");
+        gheDesignerSubCommand->positionals_at_end(true);
+        gheDesignerSubCommand->footer(
+            "You can pass extra arguments after the ghedesigner keyword, they should be the input file and output directory.");
+
+        gheDesignerSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from ghedesigner.main import run_manager_from_cli
+run_manager_from_cli()
+)python";
+            try {
+                engine.exec(cmd);
+                exit(0);
+            } catch (std::runtime_error &) {
+                exit(1);
+            }
+        });
 #    endif
 #endif
 
@@ -404,6 +426,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         std::string zszSuffix;
         std::string spszSuffix;
         std::string sszSuffix;
+        std::string pszSuffix;
         std::string meterSuffix;
         std::string sqliteSuffix;
         std::string adsSuffix;
@@ -422,6 +445,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 zszSuffix = "zsz";
                 spszSuffix = "spsz";
                 sszSuffix = "ssz";
+                pszSuffix = "psz";
                 meterSuffix = "mtr";
                 sqliteSuffix = "sqlite";
                 adsSuffix = "ADS";
@@ -436,6 +460,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 zszSuffix = "-zsz";
                 spszSuffix = "-spsz";
                 sszSuffix = "-ssz";
+                pszSuffix = "-psz";
                 meterSuffix = "-meter";
                 sqliteSuffix = "-sqlite";
                 adsSuffix = "-ads";
@@ -450,6 +475,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 zszSuffix = "Zsz";
                 spszSuffix = "Spsz";
                 sszSuffix = "Ssz";
+                pszSuffix = "Psz";
                 meterSuffix = "Meter";
                 sqliteSuffix = "Sqlite";
                 adsSuffix = "Ads";
@@ -533,6 +559,9 @@ state.dataStrGlobals->inputFilePath='{:g}',
         state.files.outputSszCsvFilePath = composePath(sszSuffix + ".csv");
         state.files.outputSszTabFilePath = composePath(sszSuffix + ".tab");
         state.files.outputSszTxtFilePath = composePath(sszSuffix + ".txt");
+        state.files.outputPszCsvFilePath = composePath(pszSuffix + ".csv");
+        state.files.outputPszTabFilePath = composePath(pszSuffix + ".tab");
+        state.files.outputPszTxtFilePath = composePath(pszSuffix + ".txt");
         state.dataStrGlobals->outputAdsFilePath = composePath(adsSuffix + ".out");
         state.files.shade.filePath = composePath(shdSuffix + ".csv");
         if (suffixType == "L") {

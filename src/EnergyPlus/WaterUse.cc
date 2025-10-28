@@ -65,6 +65,7 @@
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -1228,6 +1229,55 @@ namespace WaterUse {
         }
     }
 
+    void WaterEquipmentType::FillPredefinedTable(EnergyPlusData &state)
+    {
+        // add values to the Equipment Summary tabular report related to Water Use Equipment
+        // J.Glazer - July 2025
+        using OutputReportPredefined::PreDefTableEntry;
+        auto &orp = state.dataOutRptPredefined;
+        if (this->Zone > 0) {
+            PreDefTableEntry(state, orp->pdchWtEqZone, this->Name, state.dataHeatBal->Zone(this->Zone).Name);
+        }
+        PreDefTableEntry(state, orp->pdchWtEqEndUse, this->Name, this->EndUseSubcatName);
+        PreDefTableEntry(state, orp->pdchWtEqPkFlw, this->Name, this->PeakVolFlowRate);
+        if (this->flowRateFracSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqFlwFractSch, this->Name, this->flowRateFracSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqFlwFractMax, this->Name, this->flowRateFracSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqFlwFractSch, this->Name, "N/A");
+        }
+        if (this->targetTempSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqTargTempSch, this->Name, this->targetTempSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqTargTempMax, this->Name, this->targetTempSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqTargTempSch, this->Name, "N/A");
+        }
+        if (this->hotTempSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqHotTempSch, this->Name, this->hotTempSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqHotTempMax, this->Name, this->hotTempSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqHotTempSch, this->Name, "N/A");
+        }
+        if (this->coldTempSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqColdTempSch, this->Name, this->coldTempSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqColdTempMin, this->Name, this->coldTempSched->getMinVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqColdTempSch, this->Name, "N/A");
+        }
+        if (this->sensibleFracSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqSensFracSch, this->Name, this->sensibleFracSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqsensFracMax, this->Name, this->sensibleFracSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqSensFracSch, this->Name, "N/A");
+        }
+        if (this->latentFracSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtEqLatFracSch, this->Name, this->latentFracSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtEqLatFracMax, this->Name, this->latentFracSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtEqLatFracSch, this->Name, "N/A");
+        }
+    }
+
     void WaterConnectionsType::InitConnections(EnergyPlusData &state)
     {
 
@@ -1587,10 +1637,78 @@ namespace WaterUse {
             if (errFlag) {
                 ShowFatalError(state, "InitConnections: Program terminated due to previous condition(s).");
             }
+            this->FillPredefinedTable(state);
         }
     }
     void WaterConnectionsType::oneTimeInit([[maybe_unused]] EnergyPlusData &state)
     {
+    }
+
+    void WaterConnectionsType::FillPredefinedTable(EnergyPlusData &state)
+    {
+        // add values to the Equipment Summary tabular report related to Water Use Connections
+        // J.Glazer - July 2025
+        using OutputReportPredefined::PreDefTableEntry;
+        auto &orp = state.dataOutRptPredefined;
+        if (this->HeatRecovery) {
+            switch (this->HeatRecoveryHX) {
+            case HeatRecovHX::Ideal:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "Ideal");
+                break;
+            case HeatRecovHX::CounterFlow:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "Counterflow");
+                break;
+            case HeatRecovHX::CrossFlow:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "Crossflow");
+                break;
+            default:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "unknown");
+            }
+            switch (this->HeatRecoveryConfig) {
+            case HeatRecovConfig::Equipment:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxDest, this->Name, "Equipment");
+                break;
+            case HeatRecovConfig::Plant:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxDest, this->Name, "Plant");
+                break;
+            case HeatRecovConfig::PlantAndEquip:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxDest, this->Name, "Plant/Equipment");
+                break;
+            default:
+                PreDefTableEntry(state, orp->pdchWtCnDrnHxDest, this->Name, "unknown");
+            }
+            PreDefTableEntry(state, orp->pdchWtCnDrnHxUA, this->Name, this->HXUA);
+        } else {
+            PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "None");
+            PreDefTableEntry(state, orp->pdchWtCnDrnHxType, this->Name, "None");
+        }
+        if (this->hotTempSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtCnHotTempSch, this->Name, this->hotTempSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtCnHotTempMax, this->Name, this->hotTempSched->getMaxVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtCnHotTempSch, this->Name, "N/A");
+        }
+        if (this->coldTempSched != nullptr) {
+            PreDefTableEntry(state, orp->pdchWtCnColdTempSch, this->Name, this->coldTempSched->Name);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchWtCnColdTempMin, this->Name, this->coldTempSched->getMinVal(state));
+        } else {
+            PreDefTableEntry(state, orp->pdchWtCnColdTempSch, this->Name, "N/A");
+        }
+        if (this->SupplyTankNum > 0) {
+            PreDefTableEntry(state, orp->pdchWtCnSupTnk, this->Name, state.dataWaterData->WaterStorage(this->SupplyTankNum).Name);
+        }
+        if (this->RecoveryTankNum > 0) {
+            PreDefTableEntry(state, orp->pdchWtCnRecTnk, this->Name, state.dataWaterData->WaterStorage(this->RecoveryTankNum).Name);
+        }
+        for (int jCn = 1; jCn <= this->NumWaterEquipment; ++jCn) {
+            int waterEq = this->myWaterEquipArr(jCn);
+            if (waterEq > 0) {
+                auto &thisWEq = state.dataWaterUse->WaterEquipment(waterEq);
+                PreDefTableEntry(state, orp->pdchWtEqConnNm, thisWEq.Name, this->Name);
+            }
+        }
+        PreDefTableEntry(state, orp->pdchWtCnPltLpNm, this->Name, this->plantLoc.loop->Name);
+        PreDefTableEntry(state, orp->pdchWtCnBrchNm, this->Name, this->plantLoc.branch->Name);
     }
 
     void CalcWaterUseZoneGains(EnergyPlusData &state)

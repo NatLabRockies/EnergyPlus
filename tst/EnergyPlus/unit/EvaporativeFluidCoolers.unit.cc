@@ -358,7 +358,14 @@ TEST_F(EnergyPlusFixture, EvapFluidCooler_SizeWhenPlantSizingIndexIsZeroAndAutos
 
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataPlnt->PlantLoop(1).PlantSizNum = 0;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+
     ptr->plantLoc.loopNum = 1;
+    ptr->plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+    ptr->plantLoc.branchNum = 1;
+    ptr->plantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, ptr->plantLoc);
 
     // Necessary to trigger the crash from #
     state->dataPlnt->PlantFirstSizesOkayToFinalize = false;

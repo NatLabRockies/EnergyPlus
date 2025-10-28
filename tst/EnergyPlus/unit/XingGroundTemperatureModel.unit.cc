@@ -92,8 +92,6 @@ TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
 
 TEST_F(EnergyPlusFixture, XingGroundTempsGetInputTest)
 {
-    Real64 constexpr closeEnough = 0.00001;
-
     std::string const idf_objects = delimited_string({
         "Site:GroundTemperature:Undisturbed:Xing,",
         "    Test1,   !- Name of object",

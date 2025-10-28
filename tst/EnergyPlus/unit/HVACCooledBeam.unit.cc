@@ -72,8 +72,8 @@ TEST_F(EnergyPlusFixture, HVACCooledBeam_reportTerminalUnit)
 
     SetPredefinedTables(*state);
 
-    auto *schedA = Sched::AddScheduleConstant(*state, "schA");
-    auto *schedB = Sched::AddScheduleConstant(*state, "schB");
+    [[maybe_unused]] auto *schedA = Sched::AddScheduleConstant(*state, "schA");
+    [[maybe_unused]] auto *schedB = Sched::AddScheduleConstant(*state, "schB");
 
     auto &adu = state->dataDefineEquipment->AirDistUnit;
     adu.allocate(2);

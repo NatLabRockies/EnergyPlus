@@ -109,6 +109,9 @@ ENERGYPLUSLIB_API char *listAllAPIDataCSV(EnergyPlusState state);
 ///          Do not call for variable, meter, actuator, or any other internal exchange data prior to this returning true.
 /// \param[in] state An active EnergyPlusState instance created with `stateNew`.
 /// \return Returns 1 (true) once the data is ready, otherwise returns 0 (false).
+/// \remark  Note that in the case of Surface actuators for "Construction State" and for a call to \link getConstructionHandle \endlink,
+///          this is not required to be true, as construction data is generally available earlier in the simulation process.
+///          Bypassing this check will allow affecting the Sizing calculations.
 ENERGYPLUSLIB_API int apiDataFullyReady(EnergyPlusState state);
 /// \brief Provides a user-facing check on the API error flag
 /// \details Some API functions return a value of 0, which could potentially indicate an error, or an actual 0 value.

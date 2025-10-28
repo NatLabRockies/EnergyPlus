@@ -342,6 +342,7 @@ void GetWaterCoilInput(EnergyPlusData &state)
 
         waterCoil.coilType = HVAC::CoilType::HeatingWater;
         waterCoil.coilPlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+        waterCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, waterCoil.Name, waterCoil.coilType);
 
         waterCoil.UACoil = NumArray(1);
         waterCoil.UACoilVariable = waterCoil.UACoil;
@@ -512,6 +513,7 @@ void GetWaterCoilInput(EnergyPlusData &state)
 
         waterCoil.coilType = HVAC::CoilType::CoolingWaterDetailed;
         waterCoil.coilPlantType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
+        waterCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, waterCoil.Name, waterCoil.coilType);
 
         waterCoil.MaxWaterVolFlowRate = NumArray(1);
         if (waterCoil.MaxWaterVolFlowRate == DataSizing::AutoSize) {
@@ -735,6 +737,7 @@ void GetWaterCoilInput(EnergyPlusData &state)
 
         waterCoil.coilType = HVAC::CoilType::CoolingWater;
         waterCoil.coilPlantType = DataPlant::PlantEquipmentType::CoilWaterCooling;
+        waterCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, waterCoil.Name, waterCoil.coilType);
 
         waterCoil.MaxWaterVolFlowRate = NumArray(1); // Liquid mass flow rate at Design  kg/s
         if (waterCoil.MaxWaterVolFlowRate == DataSizing::AutoSize) {
@@ -1271,10 +1274,8 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                             waterCoil.DesOutletAirHumRat = state.dataWaterCoils->WOutNew;
                             waterCoil.DesOutletAirTemp = state.dataWaterCoils->TOutNew;
                             // update outlet air conditions used for sizing
-                            ReportCoilSelection::setCoilLvgAirTemp(
-                                state, waterCoil.Name, waterCoil.coilType, state.dataWaterCoils->TOutNew);
-                            ReportCoilSelection::setCoilLvgAirHumRat(
-                                state, waterCoil.Name, waterCoil.coilType, state.dataWaterCoils->WOutNew);
+                            ReportCoilSelection::setCoilLvgAirTemp(state, waterCoil.coilReportNum, state.dataWaterCoils->TOutNew);
+                            ReportCoilSelection::setCoilLvgAirHumRat(state, waterCoil.coilReportNum, state.dataWaterCoils->WOutNew);
                             // end update outlet air conditions used for sizing
                         }
                     }
@@ -1600,12 +1601,10 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                       "Water Heating Coil Capacity Information,Coil:Heating:Water",
                       waterCoil.Name,
                       waterCoil.TotWaterHeatingCoilRate);
-                ReportCoilSelection::setCoilAirFlow(
-                    state, waterCoil.Name, HVAC::CoilType::HeatingWater, waterCoil.DesAirVolFlowRate, waterCoil.RequestingAutoSize);
+                ReportCoilSelection::setCoilAirFlow(state, waterCoil.coilReportNum, waterCoil.DesAirVolFlowRate, waterCoil.RequestingAutoSize);
                 ReportCoilSelection::setCoilWaterHeaterCapacityNodeNums(
                     state,
-                    waterCoil.Name,
-                    HVAC::CoilType::HeatingWater,
+                    waterCoil.coilReportNum,
                     waterCoil.DesWaterHeatingCoilRate,
                     waterCoil.RequestingAutoSize,
                     waterCoil.WaterInletNodeNum,
@@ -1649,19 +1648,14 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                       waterCoil.SenWaterCoolingCoilRate,
                       state.dataWaterCoils->RatedLatentCapacity,
                       state.dataWaterCoils->RatedSHR);
-                ReportCoilSelection::setCoilAirFlow(state,
-                                                                                   waterCoil.Name,
-                                                                                   HVAC::CoilType::CoolingWaterDetailed,
-                                                                                   waterCoil.DesAirVolFlowRate,
-                                                                                   waterCoil.RequestingAutoSize); // Coil Report
+                ReportCoilSelection::setCoilAirFlow(state, waterCoil.coilReportNum, waterCoil.DesAirVolFlowRate, waterCoil.RequestingAutoSize); 
                 ReportCoilSelection::setCoilWaterCoolingCapacity(state,
-                                                                                                waterCoil.Name,
-                                                                                                HVAC::CoilType::CoolingWaterDetailed,
-                                                                                                waterCoil.DesWaterCoolingCoilRate,
-                                                                                                waterCoil.RequestingAutoSize,
-                                                                                                waterCoil.WaterInletNodeNum,
-                                                                                                waterCoil.WaterOutletNodeNum,
-                                                                                                waterCoil.WaterPlantLoc.loopNum); // Coil Report
+                                                                 waterCoil.coilReportNum,
+                                                                 waterCoil.DesWaterCoolingCoilRate,
+                                                                 waterCoil.RequestingAutoSize,
+                                                                 waterCoil.WaterInletNodeNum,
+                                                                 waterCoil.WaterOutletNodeNum,
+                                                                 waterCoil.WaterPlantLoc.loopNum); // Coil Report
                 break;
             }
             case DataPlant::PlantEquipmentType::CoilWaterCooling: {
@@ -1706,22 +1700,20 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                       state.dataWaterCoils->UATotal,
                       state.dataWaterCoils->SurfaceArea);
                 ReportCoilSelection::setCoilAirFlow(state,
-                                                                                   waterCoil.Name,
-                                                                                   HVAC::CoilType::CoolingWater,
-                                                                                   waterCoil.DesAirVolFlowRate,
-                                                                                   waterCoil.RequestingAutoSize); // Coil Report
+                                                    waterCoil.coilReportNum,
+                                                    waterCoil.DesAirVolFlowRate,
+                                                    waterCoil.RequestingAutoSize); // Coil Report
                 ReportCoilSelection::setCoilWaterCoolingCapacity(state,
-                                                                                                waterCoil.Name,
-                                                                                                HVAC::CoilType::CoolingWater,
-                                                                                                waterCoil.DesWaterCoolingCoilRate,
-                                                                                                waterCoil.RequestingAutoSize,
-                                                                                                waterCoil.WaterInletNodeNum,
-                                                                                                waterCoil.WaterOutletNodeNum,
-                                                                                                waterCoil.WaterPlantLoc.loopNum); // Coil Report
+                                                                 waterCoil.coilReportNum,
+                                                                 waterCoil.DesWaterCoolingCoilRate,
+                                                                 waterCoil.RequestingAutoSize,
+                                                                 waterCoil.WaterInletNodeNum,
+                                                                 waterCoil.WaterOutletNodeNum,
+                                                                 waterCoil.WaterPlantLoc.loopNum); // Coil Report
                 break;
             }
             default:
-                break;
+              break;
             }
             if (waterCoil.DesWaterCoolingCoilRate <= 0.0) {
                 waterCoil.DesWaterCoolingCoilRate = waterCoil.TotWaterCoolingCoilRate;
@@ -1762,7 +1754,7 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                 coilTypeName = "Coil:Heating:Water";
             }
             ReportCoilSelection::setCoilEqNum(
-                state, waterCoil.Name, waterCoil.coilType, state.dataSize->CurSysNum, state.dataSize->CurOASysNum, state.dataSize->CurZoneEqNum);
+                state, waterCoil.coilReportNum, state.dataSize->CurSysNum, state.dataSize->CurOASysNum, state.dataSize->CurZoneEqNum);
 
             // coil outlets
             Real64 RatedOutletWetBulb(0.0);
@@ -1774,8 +1766,7 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
                 waterCoil.coilPlantType == DataPlant::PlantEquipmentType::CoilWaterCooling) {
                 ReportCoilSelection::setRatedCoilConditions(
                     state,
-                    waterCoil.Name,
-                    waterCoil.coilType,
+                    waterCoil.coilReportNum,
                     waterCoil.TotWaterCoolingCoilRate, // this is the report variable
                     waterCoil.SenWaterCoolingCoilRate, // this is the report variable
                     waterCoil.InletAirMassFlowRate,
@@ -1792,8 +1783,7 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
             } else if (waterCoil.coilPlantType == DataPlant::PlantEquipmentType::CoilWaterSimpleHeating) {
                 ReportCoilSelection::setRatedCoilConditions(
                     state,
-                    waterCoil.Name,
-                    waterCoil.coilType,
+                    waterCoil.coilReportNum,
                     waterCoil.TotWaterHeatingCoilRate, // this is the report variable
                     waterCoil.TotWaterHeatingCoilRate, // this is the report variable
                     waterCoil.InletAirMassFlowRate,
@@ -2048,6 +2038,7 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
     Real64 DesCoilAirFlow = 0.0;
     Real64 DesCoilExitTemp = 0.0;
     Real64 CpAirStd = PsyCpAirFnW(0.0);
+    state.dataSize->DataCoilNum = CoilNum;
 
     auto &waterCoil = state.dataWaterCoils->WaterCoil(CoilNum);
     // cooling coils
@@ -2263,6 +2254,7 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             sizerCWWaterflow.initializeWithinEP(state, HVAC::coilTypeNames[(int)waterCoil.coilType], CompName, bPRINT, RoutineName);
             waterCoil.MaxWaterVolFlowRate = sizerCWWaterflow.size(state, TempSize, ErrorsFound);
             state.dataSize->DataWaterFlowUsedForSizing = waterCoil.MaxWaterVolFlowRate;
+            state.dataSize->DataCoilNum = 0;
 
             if (waterCoil.coilType == HVAC::CoilType::CoolingWaterDetailed) { // 'DETAILED FLAT FIN'
                 bPRINT = false; // do not print this sizing request since this coil does not have a design air flow rate input field (we
@@ -2568,9 +2560,11 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
                 state.dataSize->DataConstantUsedForSizing = waterCoil.MaxWaterVolFlowRate;
                 state.dataSize->DataFractionUsedForSizing = 1.0;
             }
+            state.dataSize->DataCoilNum = CoilNum;
             HeatingWaterflowSizer sizerHWWaterflow;
             sizerHWWaterflow.initializeWithinEP(state, HVAC::coilTypeNames[(int)waterCoil.coilType], CompName, bPRINT, RoutineName);
             Real64 sizedMaxWaterVolFlowRate = sizerHWWaterflow.size(state, TempSize, ErrorsFound);
+            state.dataSize->DataCoilNum = 0;
             // Check if the water flow rate is defined in parent HVAC equipment and set water coil design water flow rate accordingly
             if (state.dataSize->CurZoneEqNum > 0) {
                 auto const &ZoneEqSizing = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
@@ -4637,32 +4631,29 @@ void ReportWaterCoil(EnergyPlusData &state, int const CoilNum)
             if (waterCoil.coilPlantType == DataPlant::PlantEquipmentType::CoilWaterSimpleHeating) {
                 coilObjClassName = "Coil:Heating:Water";
                 ReportCoilSelection::setCoilFinalSizes(state,
-                                                                                      waterCoil.Name,
-                                                                                      waterCoil.coilType,
-                                                                                      waterCoil.DesWaterHeatingCoilRate,
-                                                                                      waterCoil.DesWaterHeatingCoilRate,
-                                                                                      waterCoil.DesAirVolFlowRate,
-                                                                                      waterCoil.MaxWaterVolFlowRate);
+                                                       waterCoil.coilReportNum,
+                                                       waterCoil.DesWaterHeatingCoilRate,
+                                                       waterCoil.DesWaterHeatingCoilRate,
+                                                       waterCoil.DesAirVolFlowRate,
+                                                       waterCoil.MaxWaterVolFlowRate);
                 waterCoil.reportCoilFinalSizes = false;
             } else if (waterCoil.coilPlantType == DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling) {
                 coilObjClassName = "Coil:Cooling:Water:DetailedGeometry";
                 ReportCoilSelection::setCoilFinalSizes(state,
-                                                                                      waterCoil.Name,
-                                                                                      waterCoil.coilType,
-                                                                                      waterCoil.DesWaterCoolingCoilRate,
-                                                                                      -999.0,
-                                                                                      waterCoil.DesAirVolFlowRate,
-                                                                                      waterCoil.MaxWaterVolFlowRate);
+                                                       waterCoil.coilReportNum,
+                                                       waterCoil.DesWaterCoolingCoilRate,
+                                                       -999.0,
+                                                       waterCoil.DesAirVolFlowRate,
+                                                       waterCoil.MaxWaterVolFlowRate);
                 waterCoil.reportCoilFinalSizes = false;
             } else if (waterCoil.coilPlantType == DataPlant::PlantEquipmentType::CoilWaterCooling) {
                 coilObjClassName = "Coil:Cooling:Water";
                 ReportCoilSelection::setCoilFinalSizes(state,
-                                                                                      waterCoil.Name,
-                                                                                      waterCoil.coilType,
-                                                                                      waterCoil.DesWaterCoolingCoilRate,
-                                                                                      -999.0,
-                                                                                      waterCoil.DesAirVolFlowRate,
-                                                                                      waterCoil.MaxWaterVolFlowRate);
+                                                       waterCoil.coilReportNum,
+                                                       waterCoil.DesWaterCoolingCoilRate,
+                                                       -999.0,
+                                                       waterCoil.DesAirVolFlowRate,
+                                                       waterCoil.MaxWaterVolFlowRate);
                 waterCoil.reportCoilFinalSizes = false;
             }
         }

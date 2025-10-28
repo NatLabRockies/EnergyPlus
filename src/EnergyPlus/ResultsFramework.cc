@@ -68,6 +68,7 @@
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/GlobalNames.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -879,7 +880,7 @@ namespace ResultsFramework {
             return;
         }
 
-        Array1D_string alphas(5);
+        Array1D_string alphas(6);
         int numAlphas;
         Array1D<Real64> numbers(2);
         int numNumbers;
@@ -911,6 +912,13 @@ namespace ResultsFramework {
             if (numAlphas >= 4) {
                 outputMsgPack = Util::SameString(alphas(4), "Yes");
             }
+
+            auto const &ort = state.dataOutRptTab;
+            // Jan 2021 Note: Since here we do not know weather ort->unitsStyle_Tabular has been processed or not,
+            // the value "NotFound" is used for the option "UseOutputControlTableStyles" at this point;
+            // This will be updated again and got concretely assigned first thing in OutputReportTabular::WriteTabularReports().
+            ort->unitsStyle_JSON = OutputReportTabular::SetUnitsStyleFromString(alphas(5));
+            ort->formatReals_JSON = (getYesNoValue(alphas(6)) == BooleanSwitch::Yes);
         }
     }
 

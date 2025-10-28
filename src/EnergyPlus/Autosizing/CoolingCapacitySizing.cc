@@ -270,10 +270,10 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                     FanCoolLoad = state.dataSize->DataCoilSizingFanCoolLoad;
                     TotCapTempModFac = state.dataSize->DataCoilSizingCapFT;
                     if (ReportCoilSelection::isCompTypeCoil(this->compType)) {
-                        ReportCoilSelection::setCoilEntAirHumRat(state, this->compName, this->coilType, CoilInHumRat);
-                        ReportCoilSelection::setCoilEntAirTemp(state, this->compName, this->coilType, CoilInTemp, this->curSysNum, this->curZoneEqNum);
-                        ReportCoilSelection::setCoilLvgAirTemp(state, this->compName, this->coilType, CoilOutTemp);
-                        ReportCoilSelection::setCoilLvgAirHumRat(state, this->compName, this->coilType, CoilOutHumRat);
+                        ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, CoilInHumRat);
+                        ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, CoilInTemp, this->curSysNum, this->curZoneEqNum);
+                        ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, CoilOutTemp);
+                        ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, CoilOutHumRat);
                     }
                 } else if (this->curOASysNum > 0 && this->outsideAirSys(this->curOASysNum).AirLoopDOASNum > -1) {
                     auto &thisAirloopDOAS = this->airloopDOAS[this->outsideAirSys(this->curOASysNum).AirLoopDOASNum];
@@ -559,16 +559,15 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
 
     if (this->isCoilReportObject && this->curSysNum <= state.dataHVACGlobal->NumPrimaryAirSys) {
         if (CoilInTemp > -999.0) { // set inlet air properties used during capacity sizing if available, allow for negative winter temps
-            ReportCoilSelection::setCoilEntAirTemp(state, this->compName, this->coilType, CoilInTemp, this->curSysNum, this->curZoneEqNum);
-            ReportCoilSelection::setCoilEntAirHumRat(state, this->compName, this->coilType, CoilInHumRat);
+            ReportCoilSelection::setCoilEntAirTemp(state, this->coilReportNum, CoilInTemp, this->curSysNum, this->curZoneEqNum);
+            ReportCoilSelection::setCoilEntAirHumRat(state, this->coilReportNum, CoilInHumRat);
         }
         if (CoilOutTemp > -999.0) { // set outlet air properties used during capacity sizing if available
-            ReportCoilSelection::setCoilLvgAirTemp(state, this->compName, this->coilType, CoilOutTemp);
-            ReportCoilSelection::setCoilLvgAirHumRat(state, this->compName, this->coilType, CoilOutHumRat);
+            ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, CoilOutTemp);
+            ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, CoilOutHumRat);
         }
         ReportCoilSelection::setCoilCoolingCapacity(state,
-                                                    this->compName,
-                                                    this->coilType,
+                                                    this->coilReportNum,
                                                     this->autoSizedValue,
                                                     this->wasAutoSized,
                                                     this->curSysNum,

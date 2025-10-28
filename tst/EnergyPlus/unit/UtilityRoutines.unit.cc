@@ -267,22 +267,22 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
     // Test for Defect #11111: Autosized ZoneHVAC:LowTemperatureRadiant:VariableFlow with no Design Object throws allocation error
     std::string nameResult;
     std::string expectedName;
-    int ptrResult;
-    int expectedPtr;
+    int ptrResult = -99;
+    int expectedPtr = -99;
     std::string userName;
     Array1D_string userNames;
     userNames.allocate(4);
     userNames = {"First Name", "Second Name", "Third Name", "Fourth Name"};
     std::string objectType;
     std::string objectName;
-    bool gotErrors;
+    bool gotErrors = false;
 
     // Test 1: Valid input (userName matches one of the userNames)
     userName = "Second Name";
     expectedName = "Second Name";
     expectedPtr = 2;
-    objectType = {"ZoneHVAC:LowTemperatureRadiant:VariableFlow"};
-    objectName = {"MyVarFlowRadSys"};
+    objectType = "ZoneHVAC:LowTemperatureRadiant:VariableFlow";
+    objectName = "MyVarFlowRadSys";
     gotErrors = false;
 
     EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
@@ -294,8 +294,8 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
     userName = "No Name";
     expectedName = "";
     expectedPtr = 0;
-    objectType = {"ZoneHVAC:Baseboard:RadiantConvective:Water"};
-    objectName = {"MyWaterBB"};
+    objectType = "ZoneHVAC:Baseboard:RadiantConvective:Water";
+    objectName = "MyWaterBB";
     gotErrors = false;
 
     EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
@@ -311,8 +311,8 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
     userName = "";
     expectedName = "";
     expectedPtr = 0;
-    objectType = {"ZoneHVAC:Baseboard:RadiantConvective:Steam"};
-    objectName = {"MySteamBB"};
+    objectType = "ZoneHVAC:Baseboard:RadiantConvective:Steam";
+    objectName = "MySteamBB";
     gotErrors = false;
 
     EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
@@ -323,4 +323,22 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
     });
     EXPECT_TRUE(compare_err_stream(error_stringTest3, true));
     EXPECT_TRUE(gotErrors);
+}
+
+TEST_F(EnergyPlusFixture, UtilityRoutines_ShowDetailedSevereItemNotFound)
+{
+    // New error message
+    std::string detailed_error_message = "TestRoutine: MissingField = CanNotBeFound, item not found.";
+
+    // Original error message
+    std::string error_message = "TestRoutine:  =";
+
+    ErrorObjectHeader eoh{"TestRoutine", "", ""};
+    // This should output the item that's missing
+    ShowDetailedSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(detailed_error_message) != std::string::npos);
+
+    // This  should not display the item information
+    ShowSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(error_message) != std::string::npos);
 }

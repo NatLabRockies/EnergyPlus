@@ -657,9 +657,9 @@
 
   Output:Variable,Room 102 Window,Surface Window BSDF Beam Direction Number,Timestep;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,Timestep;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,Timestep;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,Timestep;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,Timestep;
 
   Output:Variable,*,Zone Mean Air Temperature,Timestep;
 

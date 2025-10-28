@@ -944,6 +944,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -965,6 +966,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1071,6 +1073,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1092,6 +1095,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name

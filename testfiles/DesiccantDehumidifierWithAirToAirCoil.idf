@@ -2805,6 +2805,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Desiccant DXSystem VS Cooling Coil,  !- Name
+    ,                        !- Availability Schedule Name
     Desiccant DXSystem Mixed Air Node,  !- Indoor Air Inlet Node Name
     HX Process Inlet Node,   !- Indoor Air Outlet Node Name
     1.0,                     !- Number of Speeds {dimensionless}

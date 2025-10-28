@@ -3678,13 +3678,13 @@
 
   Output:Variable,*,Surface Outside Face Convection Heat Transfer Coefficient,annual;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,monthly;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,monthly;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,annual;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,annual;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,monthly;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,monthly;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,annual;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,annual;
 
   Output:Variable,*,Surface Inside Face Beam Solar Radiation Heat Gain Rate,monthly;
 

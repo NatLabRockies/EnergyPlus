@@ -68,6 +68,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_mixedCoilTypesInput)
     std::string const idf_objects = delimited_string(
         {"  Coil:Cooling:DX:VariableSpeed,",
          "    PSZ-AC_1:5_CoolC Standard 4-compressor IPAK,  !- Name",
+         "    ,                        !- Availability Schedule Name",
          "    PSZ-AC_1:5_OA-PSZ-AC_1:5_CoolCNode,  !- Air Inlet Node Name",
          "    PSZ-AC_1:5_CoolC-PSZ-AC_1:5_HeatCNode,  !- Air Outlet Node Name",
          "    5,                      !- Number of Speeds {dimensionless}",
@@ -190,6 +191,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_mixedCoilTypesInput)
 
          "  Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,",
          "    Lobby_ZN_1_FLR_2 WSHP Cooling Mode,  !- Name",
+         "    ,                                    !- Availability Schedule Name",
          "    Lobby_ZN_1_FLR_2 WSHP Cooling Source Side Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
          "    Lobby_ZN_1_FLR_2 WSHP Cooling Source Side Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
          "    Lobby_ZN_1_FLR_2 WSHP Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -326,6 +328,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_mixedCoilTypesInput)
 
          "  Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,",
          "    Lobby_ZN_1_FLR_2 WSHP Heating Mode,  !- Name",
+         "    ,                                    !- Availability Schedule Name",
          "    Lobby_ZN_1_FLR_2 WSHP Heating Source Side Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
          "    Lobby_ZN_1_FLR_2 WSHP Heating Source Side Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
          "    Lobby_ZN_1_FLR_2 WSHP Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -2585,6 +2588,7 @@ TEST_F(EnergyPlusFixture, CoilHeatingDXVariableSpeed_MinOADBTempCompOperLimit)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    Heating Coil VariableSpeed,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -2710,6 +2714,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Test_CalcTotCap_VSWSHP)
     std::string const idf_objects = delimited_string({
         "  Coil:Cooling:DX:VariableSpeed,",
         "    PSZ-AC_1:5_CoolC Standard 4-compressor IPAK,  !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    PSZ-AC_1:5_OA-PSZ-AC_1:5_CoolCNode,           !- Air Inlet Node Name",
         "    PSZ-AC_1:5_CoolC-PSZ-AC_1:5_HeatCNode,        !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -2892,6 +2897,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
     std::string const idf_objects = delimited_string({
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DXCOIL,               !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    VS DXCOIL_CoolCNode,     !- Air Inlet Node Name",
         "    VS DXCOIL_HeatCNode,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -3019,50 +3025,74 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
 
     // run coil init
     VariableSpeedCoils::InitVarSpeedCoil(*state, DXCoilNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
+    // shortCut
+    auto &vsCoolingCoil = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum);
     // set coil inlet condition
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirDBTemp = 24.0;
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirHumRat = 0.009;
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(24.0, 0.009);
+    vsCoolingCoil.InletAirDBTemp = 24.0;
+    vsCoolingCoil.InletAirHumRat = 0.009;
+    vsCoolingCoil.InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(24.0, 0.009);
     // test 1: compressor is On but PLR = 0
     compressorOp = HVAC::CompressorOp::On;
     PartLoadFrac = 0.0;
     // set coil inlet air flow rate to speed 1
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate =
-        state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).MSRatedAirMassFlowRate(1) * 0.1;
-    state->dataVariableSpeedCoils->LoadSideMassFlowRate = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate;
-    state->dataLoopNodes->Node(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirInletNodeNum).MassFlowRate =
-        state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate;
+    vsCoolingCoil.AirMassFlowRate = vsCoolingCoil.MSRatedAirMassFlowRate(1) * 0.1;
+    state->dataVariableSpeedCoils->LoadSideMassFlowRate = vsCoolingCoil.AirMassFlowRate;
+    state->dataLoopNodes->Node(vsCoolingCoil.AirInletNodeNum).MassFlowRate = vsCoolingCoil.AirMassFlowRate;
     VariableSpeedCoils::CalcVarSpeedCoilCooling(
         *state, DXCoilNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
     ;
     // check coil outlet and inlet air conditions match
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirDBTemp,
-              state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirDBTemp);
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirHumRat,
-              state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirHumRat);
-    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirEnthalpy,
-              state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirEnthalpy);
+    EXPECT_EQ(vsCoolingCoil.OutletAirDBTemp, vsCoolingCoil.InletAirDBTemp);
+    EXPECT_EQ(vsCoolingCoil.OutletAirHumRat, vsCoolingCoil.InletAirHumRat);
+    EXPECT_EQ(vsCoolingCoil.OutletAirEnthalpy, vsCoolingCoil.InletAirEnthalpy);
     ;
     // test 2: compressor is On and PLR > 0
     compressorOp = HVAC::CompressorOp::On;
     PartLoadFrac = 0.1;
     // set coil inlet condition
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirDBTemp = 24.0;
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirHumRat = 0.009;
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(24.0, 0.009);
+    vsCoolingCoil.InletAirDBTemp = 24.0;
+    vsCoolingCoil.InletAirHumRat = 0.009;
+    vsCoolingCoil.InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(24.0, 0.009);
     // set coil inlet air flow rate to speed 1 times PLR
-    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate =
-        state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).MSRatedAirMassFlowRate(1) * PartLoadFrac;
-    state->dataVariableSpeedCoils->LoadSideMassFlowRate = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate;
-    state->dataLoopNodes->Node(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirInletNodeNum).MassFlowRate =
-        state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate;
+    vsCoolingCoil.AirMassFlowRate = vsCoolingCoil.MSRatedAirMassFlowRate(1) * PartLoadFrac;
+    state->dataVariableSpeedCoils->LoadSideMassFlowRate = vsCoolingCoil.AirMassFlowRate;
+    state->dataLoopNodes->Node(vsCoolingCoil.AirInletNodeNum).MassFlowRate = vsCoolingCoil.AirMassFlowRate;
     // run the coil
     VariableSpeedCoils::CalcVarSpeedCoilCooling(
         *state, DXCoilNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
     // check coil air outlet conditions
-    EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirDBTemp, 5.23333, 0.00001);
-    EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirHumRat, 0.00810, 0.00001);
-    EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).OutletAirEnthalpy, 25597.58, 0.01);
+    EXPECT_NEAR(vsCoolingCoil.OutletAirDBTemp, 5.23333, 0.00001);
+    EXPECT_NEAR(vsCoolingCoil.OutletAirHumRat, 0.00810, 0.00001);
+    EXPECT_NEAR(vsCoolingCoil.OutletAirEnthalpy, 25597.58, 0.01);
+    EXPECT_NEAR(vsCoolingCoil.Power, 785.588, 0.001);
+    EXPECT_NEAR(vsCoolingCoil.QSource, 3915.355, 0.001);
+    EXPECT_NEAR(vsCoolingCoil.QLoadTotal, 3182.143, 0.001);
+    ;
+    // test 3: dx cooling coil unavailable, compressor is On and PLR > 0
+    // run init the coil to reset coil air inlet and outlet conditions
+    VariableSpeedCoils::InitVarSpeedCoil(*state, DXCoilNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
+    compressorOp = HVAC::CompressorOp::On;
+    PartLoadFrac = 0.1;
+    // reset the cooling coil availability schedule to AlwaysOff
+    vsCoolingCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    // set coil inlet condition
+    vsCoolingCoil.InletAirDBTemp = 24.0;
+    vsCoolingCoil.InletAirHumRat = 0.009;
+    vsCoolingCoil.InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(24.0, 0.009);
+    // set coil inlet air flow rate to speed 1 times PLR
+    vsCoolingCoil.AirMassFlowRate = vsCoolingCoil.MSRatedAirMassFlowRate(1) * PartLoadFrac;
+    state->dataVariableSpeedCoils->LoadSideMassFlowRate = vsCoolingCoil.AirMassFlowRate;
+    state->dataLoopNodes->Node(vsCoolingCoil.AirInletNodeNum).MassFlowRate = vsCoolingCoil.AirMassFlowRate;
+    // run the coil
+    VariableSpeedCoils::CalcVarSpeedCoilCooling(
+        *state, DXCoilNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
+    // check coil air outlet conditions to the initial air condition, which is all zero
+    EXPECT_EQ(vsCoolingCoil.OutletAirDBTemp, 0.0);
+    EXPECT_EQ(vsCoolingCoil.OutletAirHumRat, 0.0);
+    EXPECT_EQ(vsCoolingCoil.OutletAirEnthalpy, 0.0);
+    EXPECT_EQ(vsCoolingCoil.Power, 0.0);
+    EXPECT_EQ(vsCoolingCoil.QSource, 0.0);
+    EXPECT_EQ(vsCoolingCoil.QLoadTotal, 0.0);
 }
 
 TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_ASHP_Cooling)
@@ -3070,6 +3100,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_ASHP_Cooling)
     std::string const idf_objects = delimited_string({
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DXCOIL,               !- Name",
+        ",                            !- Availability Schedule Name",
         "    VS DXCOIL_CoolCNode,     !- Air Inlet Node Name",
         "    VS DXCOIL_HeatCNode,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -3179,6 +3210,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_ASHP_Heating)
     std::string const idf_objects = delimited_string({
         "  Coil:Heating:DX:VariableSpeed,",
         "    Heat Pump DX Heating Coil 1,  !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -3311,6 +3343,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_AWHP)
     std::string const idf_objects = delimited_string({
         "  Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,",
         "    HPWHOutdoorDXCoilVS,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    10,                      !- Number of Speeds {dimensionless}",
         "    10,                      !- Nominal Speed Level {dimensionless}",
         "    4000.0,                  !- Rated Water Heating Capacity {W}",
@@ -3515,6 +3548,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_WSHP_Cooling)
     std::string const idf_objects = delimited_string({
         "  Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,",
         "    Sys 1 Heat Pump Cooling Mode,  !- Name",
+        "    ,                              !- Availability Schedule Name",
         "    Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
         "    Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
         "    Sys 1 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -3746,6 +3780,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_WSHP_Heating)
     std::string const idf_objects = delimited_string({
         "  Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,",
         "    Sys 1 Heat Pump Heating Mode,  !- Name",
+        "    ,                              !- Availability Schedule Name",
         "    Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
         "    Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
         "    Sys 1 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -3961,6 +3996,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_Initialization)
     std::string const idf_objects = delimited_string({
         "Coil:Cooling:DX:VariableSpeed,",
         "    Zone1PTHPDXCoolCoil,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Zone1PTHPFanOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Outlet Node Name",
         "    10.0,                    !- Number of Speeds {dimensionless}",
@@ -4176,8 +4212,8 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_Initialization)
     int NumAlphas = 0;
     int NumNumbers = 0;
     state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
-    EXPECT_EQ(TotalArgs, 145);
-    EXPECT_EQ(NumAlphas, 50);
+    EXPECT_EQ(TotalArgs, 146);
+    EXPECT_EQ(NumAlphas, 51);
     EXPECT_EQ(NumNumbers, 95);
     // get coil inputs
     EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
@@ -4195,6 +4231,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedHeating_Initialization)
     std::string const idf_objects =
         delimited_string({"    Coil:Heating:DX:VariableSpeed,",
                           "    Zone1PTHPDXHeatCoil,     !- Name",
+                          "    ,                        !- Availability Schedule Name",
                           "    Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Inlet Node Name",
                           "    Zone1PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name",
                           "    10.0,                    !- Number of Speeds {dimensionless}",
@@ -4388,6 +4425,7 @@ TEST_F(EnergyPlusFixture, CoolingVariableSpeedEquationFit_Initialization)
 
         "  Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,",
         "    Lobby_ZN_1_FLR_2 WSHP Cooling Mode,  !- Name",
+        "    ,                                    !- Availability Schedule Name",
         "    Lobby_ZN_1_FLR_2 WSHP Cooling Source Side Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
         "    Lobby_ZN_1_FLR_2 WSHP Cooling Source Side Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
         "    Lobby_ZN_1_FLR_2 WSHP Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -4524,6 +4562,7 @@ TEST_F(EnergyPlusFixture, CoolingVariableSpeedEquationFit_Initialization)
 
         "  Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,",
         "    Lobby_ZN_1_FLR_2 WSHP Heating Mode,  !- Name",
+        "    ,                                    !- Availability Schedule Name",
         "    Lobby_ZN_1_FLR_2 WSHP Heating Source Side Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name",
         "    Lobby_ZN_1_FLR_2 WSHP Heating Source Side Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name",
         "    Lobby_ZN_1_FLR_2 WSHP Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
@@ -6716,8 +6755,8 @@ TEST_F(EnergyPlusFixture, CoolingVariableSpeedEquationFit_Initialization)
     int NumAlphas = 0;
     int NumNumbers = 0;
     state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
-    EXPECT_EQ(TotalArgs, 147);
-    EXPECT_EQ(NumAlphas, 76);
+    EXPECT_EQ(TotalArgs, 148);
+    EXPECT_EQ(NumAlphas, 77);
     EXPECT_EQ(NumNumbers, 71);
     // get coil inputs
     EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
@@ -6799,6 +6838,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    Heating Coil VariableSpeed,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Zone1PTHPDXCoolCoilOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1PTHPDXHeatCoilOutletNode,  !- Indoor Air Outlet Node Name",
         "    10,                      !- Number of Speeds {dimensionless}",
@@ -6963,7 +7003,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
                                               OnOffAirFlowRatio);
 
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 908.10992432432420, 1e-3);
-    Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
+    // Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
     EXPECT_LT(state->dataVariableSpeedCoils->HeatingCapacityMultiplier, 1.0);
     EXPECT_LT(state->dataVariableSpeedCoils->InputPowerMultiplier, 1.0);
 
@@ -7044,6 +7084,56 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
 
     // Without the current PR (PR 10109), the DefrostPower would remain 908.1 and fail the following test:
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 0.0, 1e-3);
+    ;
+    // new test: dx cooling coil unavailable, compressor is On and PLR > 0
+    auto &vsHeatingCoil = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum);
+    // Set up some environmental parameters
+    state->dataEnvrn->OutDryBulbTemp = 5.0;
+    compressorOp = HVAC::CompressorOp::On;
+    PartLoadFrac = 1.;
+    VariableSpeedCoils::SimVariableSpeedCoils(*state,
+                                              state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,
+                                              DXCoilNum,
+                                              fanOp,
+                                              compressorOp, // compressor on/off. 0 = off; 1= on
+                                              PartLoadFrac,
+                                              SpeedCal,
+                                              SpeedRatio,
+                                              SensLoad,
+                                              LatentLoad,
+                                              OnOffAirFlowRatio);
+    // check the VS DX heating coil outputs, when the coil is available:
+    EXPECT_EQ(vsHeatingCoil.DefrostPower, 0.0);
+    EXPECT_GT(vsHeatingCoil.availSched->getCurrentVal(), 0.0);
+    EXPECT_NEAR(vsHeatingCoil.OutletAirDBTemp, 7.16, 0.001);
+    EXPECT_NEAR(vsHeatingCoil.OutletAirHumRat, 0.0, 0.001);
+    EXPECT_NEAR(vsHeatingCoil.OutletAirEnthalpy, 7219.7401811854543, 0.001);
+    EXPECT_NEAR(vsHeatingCoil.Power, 280.91365138509082, 0.0);
+    EXPECT_NEAR(vsHeatingCoil.QSource, 1163.0343848520001, 0.0);
+    EXPECT_NEAR(vsHeatingCoil.QLoadTotal, 1443.9480362370909, 0.001);
+    ;
+    // reset the heating coil availability schedule to AlwaysOff
+    vsHeatingCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    VariableSpeedCoils::SimVariableSpeedCoils(*state,
+                                              state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Name,
+                                              DXCoilNum,
+                                              fanOp,
+                                              compressorOp, // compressor on/off. 0 = off; 1= on
+                                              PartLoadFrac,
+                                              SpeedCal,
+                                              SpeedRatio,
+                                              SensLoad,
+                                              LatentLoad,
+                                              OnOffAirFlowRatio);
+    // check the VS DX heating coil outputs, when the coil is unavailable:
+    EXPECT_EQ(vsHeatingCoil.DefrostPower, 0.0);
+    EXPECT_LE(vsHeatingCoil.availSched->getCurrentVal(), 0.0);
+    EXPECT_EQ(vsHeatingCoil.OutletAirDBTemp, 0.0);
+    EXPECT_EQ(vsHeatingCoil.OutletAirHumRat, 0.0);
+    EXPECT_EQ(vsHeatingCoil.OutletAirEnthalpy, 0.0);
+    EXPECT_EQ(vsHeatingCoil.Power, 0.0);
+    EXPECT_EQ(vsHeatingCoil.QSource, 0.0);
+    EXPECT_EQ(vsHeatingCoil.QLoadTotal, 0.0);
 }
 
 TEST_F(EnergyPlusFixture, VariableSpeedCoils_ZeroRatedCoolingCapacity_Test)
@@ -7052,6 +7142,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ZeroRatedCoolingCapacity_Test)
     std::string const idf_objects = delimited_string({
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DXCOIL,               !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    VS DXCOIL_CoolCNode,     !- Air Inlet Node Name",
         "    VS DXCOIL_HeatCNode,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -7209,6 +7300,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoolingCoils_AutosizePumpPower)
     std::string const idf_objects = delimited_string(
         {"Coil:Cooling:DX:VariableSpeed,",
          "Main Cooling Coil 1,     !- Name",
+         "    ,                        !- Availability Schedule Name",
          "    Heat Recovery Supply Outlet,  !- Indoor Air Inlet Node Name",
          "    Heat Recovery Exhuast Inlet Node,  !- Indoor Air Outlet Node Name",
          "    1.0,                     !- Number of Speeds {dimensionless}",
@@ -7359,7 +7451,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     thisInletNode.GenContam = 12.345;
     thisOutletNode.GenContam = 0.0;
     thisVarSpeedCoil.reportCoilFinalSizes = false;
-    thisVarSpeedCoil.coilType == HVAC::CoilType::CoolingDXVariableSpeed;
+    thisVarSpeedCoil.coilType = HVAC::CoilType::CoolingDXVariableSpeed;
 
     // Run the test
     VariableSpeedCoils::UpdateVarSpeedCoil(*state, coilNum);

@@ -7,7 +7,13 @@ This file documents the structural changes on the output of EnergyPlus that coul
 
 This will eventually become a more structured file, but currently it isn't clear what format is best. As an intermediate solution, and to allow the form to be formed organically, this plain text file is being used. Entries should be clearly delimited. It isn't expected that there will be but maybe a couple each release at most. Entries should also include some reference back to the repo. At least a PR number or whatever.
 
+### System Summary table report, Demand Controlled Ventilation using Controller:MechanicalVentilation" Subtable
+In the first column use ZoneName for zones with a simple DSOA reference (same as before), and use ZoneName:SpaceName for the spaces in a DSOA:SpaceList.
+
+See Pull Request [#11051](https://github.com/NREL/EnergyPlus/pull/11051).
+
 ### Table Output, Equipment Summary Report, Air Heat Recovery subtable
+
 * Delete "Name" column.
 
 * Change "Input Object Type" heading to "Type".
@@ -20,7 +26,75 @@ This will eventually become a more structured file, but currently it isn't clear
 
     "Outdoor Airflow [kg/s]" --> "Supply Air Flow Rate [m3/s]"
 
+* Add more new columns:
+
+  - Heat Recovery Active ("WhenFansOn", "Scheduled", "WhenOutsideEconomizerLimits", "WhenMinimumOutdoorAir")
+  - Zone HVAC Name
+  - Airloop Name
+  - OA System Name
+  - OA Controller Name
+
 See Pull Request [#10995](https://github.com/NREL/EnergyPlus/pull/10995).
+See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+
+### Table Output, Equipment Summary Report, Air Terminals subtable
+Add two new columns:
+- PIU Heating Control Type
+- PIU Fan Control Type
+
+See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+
+### Table Output, Equipment Summary Report, Fans subtable
+Add two new columns:
+- Speed Control Method
+- Number of Speeds
+
+See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+
+### Table Output, System Summary Report, Fan Operation subtable
+New subtable with the following columns:
+- Occupied Time [hr]
+- Occupied Continuous Fan [hr]
+- Occupied Cycling Fan [hr]
+- Occupied Fan Off [hr]
+- Unoccupied Time [hr]
+- Unoccupied Continuous Fan [hr]
+- Unoccupied Cycling Fan [hr]
+- Unoccupied Fan Off [hr]
+
+See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+
+### Component Sizing (eio and tables) for PlantLoop and CondenserLoop
+
+* Change "Sizing option (Coincident/NonCoincident), 1.00000" to "Sizing Option, NonCoincident"
+
+* Always report sizing values whether autosized or hard-sized.
+
+See Pull Request [#10998](https://github.com/NREL/EnergyPlus/pull/10998).
+
+### Table Output, Equipment Summary, PlantLoop or CondenserLoop subtable
+
+* Always report sizing values whether autosized or hard-sized.
+
+* Add columns for "Design Supply Temperature", "Design ReturnTemperature", and "Design Capacity".
+
+See Pull Request [#10998](https://github.com/NREL/EnergyPlus/pull/10998).
+
+### Table Output, Equipment Summary Report, Fan Power Fractions subtable
+New table output showing fraction of full load fan power vs flow fraction.
+
+See Pull Request [#11153](https://github.com/NREL/EnergyPlus/pull/11153).
+
+### Table Output, DX Heating Coils
+* Add column Heating to Cooling Capacity Sizing Ratio
+
+See Pull Request [#11130](https://github.com/NREL/EnergyPlus/pull/11130).
+
+### Table Output, Heat Pump ACCA Manual S Report
+* New Table added.
+* Columns: Heat Pump Name, Heat Pump Type, Heat Pump Coil Type, Sizing Method, Total Load, Sensible Load, Total Capacity, Sensible Capacity, Total Capacity Sizing Factor, Sensible Capacity Sizing Factor, Latent Capacity Sizing Factor
+
+See Pull Request [#11130](https://github.com/NREL/EnergyPlus/pull/11130).
 
 ### EIO and HTML Table Output: Initialization Summary
 
@@ -92,3 +166,214 @@ The `Output:Constructions` has two possible keys: `Materials` and `Constructions
 #### Fuel Supply
 
 When using `Generator:FuelSupply`, the header was written twice in the EIO Initialization Summary as `! <Fuel Supply>,...` leading to two identical tables in the HTML report.
+
+### ThermalStorage:*:Stratified, ThermalStorage:ChilledWater:Mixed output variable name change
+
+Change the follwing variable from "... Thermal Storage ..." to "... Thermal Storage Tank ..."
+
+before change:
+- Chilled/Hot Water Thermal Storage Temperature
+- Chilled/Hot Water Thermal Storage Final Tank Temperature
+- Chilled/Hot Water Thermal Storage Use Side Mass Flow Rate
+- Chilled/Hot Water Thermal Storage Use Side Inlet Temperature
+- Chilled/Hot Water Thermal Storage Use Side Outlet Temperature
+- Chilled/Hot Water Thermal Storage Use Side Heat Transfer Rate
+- Chilled/Hot Water Thermal Storage Use Side Heat Transfer Energy
+- Chilled/Hot Water Thermal Storage Source Side Mass Flow Rate
+- Chilled/Hot Water Thermal Storage Source Side Inlet Temperature
+- Chilled/Hot Water Thermal Storage Source Side Outlet Temperature
+- Chilled/Hot Water Thermal Storage Source Side Heat Transfer Rate
+- Chilled/Hot Water Thermal Storage Source Side Heat Transfer Energy
+- Chilled/Hot Water Thermal Storage Temperature Node
+- Chilled/Hot Water Thermal Storage Final Temperature Node
+
+after change:
+- Chilled/Hot Water Thermal Storage Tank Temperature
+- Chilled/Hot Water Thermal Storage Tank Final Tank Temperature
+- Chilled/Hot Water Thermal Storage Tank Use Side Mass Flow Rate
+- Chilled/Hot Water Thermal Storage Tank Use Side Inlet Temperature
+- Chilled/Hot Water Thermal Storage Tank Use Side Outlet Temperature
+- Chilled/Hot Water Thermal Storage Tank Use Side Heat Transfer Rate
+- Chilled/Hot Water Thermal Storage Tank Use Side Heat Transfer Energy
+- Chilled/Hot Water Thermal Storage Tank Source Side Mass Flow Rate
+- Chilled/Hot Water Thermal Storage Tank Source Side Inlet Temperature
+- Chilled/Hot Water Thermal Storage Tank Source Side Outlet Temperature
+- Chilled/Hot Water Thermal Storage Tank Source Side Heat Transfer Rate
+- Chilled/Hot Water Thermal Storage Tank Source Side Heat Transfer Energy
+- Chilled/Hot Water Thermal Storage Tank Temperature Node
+- Chilled/Hot Water Thermal Storage Tank Final Temperature Node
+
+See Pull Request [#11033](https://github.com/NREL/EnergyPlus/pull/11033).
+
+### ZoneHVAC:IdealLoadsAirSystem
+
+* Added eight new report variables for ZoneHVAC:IdealLoadsAirSystem object:
+
+```
+   (1) * Zone Ideal Loads Zone Heating Fuel Energy Rate [W] *
+   (2) * Zone Ideal Loads Zone Cooling Fuel Energy Rate [W]
+   (3) * Zone Ideal Loads Zone Heating Fuel Energy [J]
+   (4) * Zone Ideal Loads Zone Cooling Fuel Energy [J]
+   (5) * Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate [W] *
+   (6) * Zone Ideal Loads Supply Air Total Cooling Fuel Energy Rate [W] *
+   (7) * Zone Ideal Loads Supply Air Total Heating Fuel Energy [J] *
+   (8) * Zone Ideal Loads Supply Air Total Cooling Fuel Energy [J] *
+```
+
+See pull request [#10971](https://github.com/NREL/EnergyPlus/pull/109710)
+
+### EIO and HTML Table Output Changes and New Tables
+
+#### EIO and HTML Table Output - Schedule-Hourly/Schedule-Timestep
+
+Change header to the EIO table to make more compatible with the parsing that the Initialization Summary so that columns for more
+that the first Until Date/WeekSchedule are shown. Made explicit for the first 9 pairs of Until's. The use of 9 pairs of columns is preferred to a report that has a flexible number of columns.
+
+Previous
+```
+! <Schedule - Hourly>,Name,ScheduleType,{Until Date,WeekSchedule}** Repeated until Dec 31
+```
+
+Changed
+```
+! <Schedule - Hourly>,Name,ScheduleType,Until Date 1,WeekSchedule 1,Until Date 2,WeekSchedule 2,Until Date 3,WeekSchedule 3,Until Date 4,WeekSchedule 4,Until Date 5,WeekSchedule 5,Until Date 6,WeekSchedule 6,Until Date 7,WeekSchedule 7,Until Date 8,WeekSchedule 8,Until Date 9,WeekSchedule 9,
+```
+
+#### EIO and HTML Table Output - Airflow Stats Nominal
+
+The EIO tables related to Airflow Stats Nominal and the Initialization Summary which include:
+
+- ZoneInfiltration Airflow Stats Nominal
+- ZoneVentilation Airflow Stats Nominal
+- Mixing Airflow Stats Nominal
+- CrossMixing Airflow Stats Nominal
+
+Have been updated to add the input object name. This was done to identify the type of algorithm used.
+
+#### EquipmentSummary Service Water Heating - Additional Columns
+
+Several new columns were added to the Service Water Heating table:
+
+- Fuel Type
+- Set Point Schedule Name for Heater 1
+- Set Point at 11am First Wednesday for Heater 1
+- Days with Same 11am Value for Heater 1
+- Month Assumed for Heater 1
+- Set Point Schedule Name for Heater 2
+- Set Point at 11am First Wednesday for Heater 2
+- Days with Same 11am Value for Heater 2
+- Month Assumed for Heater 2
+- Peak Use Water Flow Rate
+- Use Flow Rate Fraction Schedule Name
+- Ambient Temperature Zone Name
+
+#### SystemSummary Economizer - Additional Column
+
+A new column was added to the System Summary Economizer table:
+
+- AirLoopHVAC:OutdoorAirSystem Name
+
+#### Control Summary - SetpointManager:OutdoorAirReset
+
+This is entirely new table
+
+- Setpoint Nodes
+- Setpoint Node PlantLoop Name
+- Control Type
+- Setpoint at Outdoor Low Temperature
+- Setpoint at Outdoor High Temperature
+- Outdoor Low Temperature
+- Outdoor High Temperature
+- Schedule Name
+- Setpoint at Outdoor Low Temperature 2
+- Setpoint at Outdoor High Temperature 2
+- Outdoor Low Temperature 2
+- Outdoor High Temperature 2
+
+#### Control Summary - SetpointManager:ReturnTemperature
+
+This is entirely new table
+
+- Type
+- Plant Loop Supply Outlet Node
+- Plant Loop Supply Inlet Node
+- PlantLoop Name
+- Minimum Supply Temperature Setpoint [C]
+- Maximum Supply Temperature Setpoint [C]
+- Return Temperature Setpoint Input Type
+- Return Temperature Setpoint [C]
+- Return Temperature Setpoint Schedule Name
+
+#### Control Summary - AvailabilityManager:Scheduled
+
+This is entirely new table
+
+- AirLoop Name
+- AvailabilityManager Name
+- Type
+- Schedule Name
+
+#### Control Summary -  PlantEquipmentOperation Load Based
+
+This is entirely new table
+
+- Plant Loop Name
+- Name
+- Type
+- Schedule Name
+- Index
+- Lower Limit [W]
+- Upper Limit [W]
+- Equipment List Name
+- Equipment
+
+See pull request [#10949](https://github.com/NREL/EnergyPlus/pull/10949)
+
+
+### Predefined Monthly Summary Reports - Additional Columns
+
+A new column was added to the EndUseEnergyConsumptionElectricityMonthly report:
+
+- Refrigeration:Electricity
+
+A new column was added to the PeakEnergyEndUseElectricityPart2Monthly report:
+
+- Refrigeration:Electricity {Maximum}
+- Refrigeration:Electricity {Timestamp}
+
+Several new columns were added to the ElectricComponentsOfPeakDemandMonthly report:
+
+- Humidifier:Electricity {At Max/Min}
+- HeatRecovery:Electricity {At Max/Min}
+- WaterSystems:Electricity {At Max/Min}
+- Refrigeration:Electricity {At Max/Min}
+- Cogeneration:Electricity {At Max/Min}
+
+### Tabular Report output to eio
+- Add a new field for "Format Reals" to the eio output for "Tabular Report".
+- Fix unit conversion value when format is not HTML.
+- Always report this to eio, even if table reports are not active.
+
+Example before:
+```
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,NONE
+```
+
+New:
+```
+! <Tabular Report>,Style,Unit Conversion, Format Reals
+Tabular Report,HTML,NONE,Yes
+```
+See Pull Request [#11260](https://github.com/NREL/EnergyPlus/pull/11260).
+See pull request [#10209](https://github.com/NREL/EnergyPlus/pull/10209)
+
+### Table and eio Output Changes Related to Zone Multipliers
+
+* eio "Zone Sizing Information" - The values for "Floor Area {m2}" and "# Occupants" are now reported with multipliers applied to be consistent with the other values reported for zone sizing.
+
+* Outdoor Air Details table output has a new column for "Zone Multiplier".
+
+* HVAC Sizing Summary table output values for "User Design Load per Area" have been corrected to properly account for zone multipliers.
+
+See pull request [#11259](https://github.com/NREL/EnergyPlus/pull/11259)

@@ -10079,7 +10079,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // OA flow rate
     EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_MaxCoolAirVolFlow, 0.65598, 0.001);
     // Cooling capacity
-    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.01);
+    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.05);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)

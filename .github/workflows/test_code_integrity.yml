@@ -11,7 +11,7 @@ jobs:
     name: Static Code Analysis
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -40,7 +40,7 @@ jobs:
             # first find if any files changed
             # HEAD^ works in PRs because actions/checkout checks out a merge commit by default in PR contexts
             # and I specified a fetch-depth of 2
-            readarray -t changed_files < <(git diff --name-only HEAD^ HEAD src/ tst/ | /bin/grep -E '\.(cpp|cc|c|hpp|hh|h)$')
+            readarray -t changed_files < <(git diff --name-only --diff-filter=AM HEAD^ HEAD src/ tst/ | /bin/grep -E '\.(cpp|cc|c|hpp|hh|h)$')
             file_count=${#changed_files[@]}
             if [ $file_count -eq 0 ]; then
               echo "No files of type (cpp, c, hpp, h) changed. Skipping clang-formatting"
@@ -56,7 +56,7 @@ jobs:
 
             begin_group "Run clang-format for changes files"
             # Using \0 as a terminator in case we'd ever have files with spaces
-            git diff -z --name-only HEAD^ HEAD src/ tst/ \
+            git diff -z --diff-filter=AM --name-only HEAD^ HEAD src/ tst/ \
               | /bin/grep -z -E '\.(cpp|cc|c|hpp|hh|h)$' \
               | xargs -0 -P "$(nproc)" -n 1 clang-format-19 -style=file -i -fallback-style=none --verbose
 
@@ -64,7 +64,7 @@ jobs:
             git diff > clang_format.patch
             echo "::endgroup::"
 
-            # Delete if nothhing otherwise exit 1 to indicate a failed job
+            # Delete if nothing otherwise exit 1 to indicate a failed job
             if [ ! -s clang_format.patch ]; then
               rm clang_format.patch
               exit 0

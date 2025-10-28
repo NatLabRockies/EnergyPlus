@@ -328,8 +328,6 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_initEcoRoofFirstTimeErrorTest)
     state->init_state(*state);
     int surfNum = 1;
     int constrNum = 1;
-    Real64 expectedAnswer;
-    Real64 allowableTolerance = 0.000001;
 
     state->dataConstruction->Construct.allocate(constrNum);
     auto *mat = new Material::MaterialEcoRoof;

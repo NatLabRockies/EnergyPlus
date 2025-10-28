@@ -115,6 +115,9 @@ struct CoilCoolingDX
 
     CoilCoolingDXInputSpecification original_input_specs;
     std::string name;
+    HVAC::CoilType coilType = HVAC::CoilType::CoolingDX; // Why is this a state variable and not an object member variable?
+    int coilReportNum = -1;
+  
     bool myOneTimeInitFlag = true;
     int evapInletNodeIndex = 0;
     int evapOutletNodeIndex = 0;

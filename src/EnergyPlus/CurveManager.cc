@@ -722,8 +722,8 @@ namespace Curve {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "AirflowNetwork:MultiZone:WindPressureCoefficientValues");
 
         // state.dataCurveManager->NumCurves = NumBiQuad + NumCubic + NumQuad + NumQuadLinear + NumCubicLinear + NumLinear + NumBicubic + NumTriQuad +
-        NumExponent + NumQuartic + NumTableLookup + NumFanPressRise + NumExpSkewNorm + NumSigmoid + NumRectHyper1 + NumRectHyper2 + NumExpDecay +
-            NumDoubleExpDecay + NumQLinear + NumQuintLinear + NumChillerPartLoadWithLift + NumWPCValTab;
+        //     NumExponent + NumQuartic + NumTableLookup + NumFanPressRise + NumExpSkewNorm + NumSigmoid + NumRectHyper1 + NumRectHyper2 + NumExpDecay
+        //     + NumDoubleExpDecay + NumQLinear + NumQuintLinear + NumChillerPartLoadWithLift + NumWPCValTab;
 
         // Loop over biquadratic curves and load data
         CurrentModuleObject = "Curve:Biquadratic";
@@ -2488,8 +2488,7 @@ namespace Curve {
             }
         }
 
-        int numTblLookups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Table:Lookup");
-        if (numTblLookups > 0) {
+        if (NumTableLookup > 0) {
             auto const &lookupInstances = state.dataInputProcessing->inputProcessor->getObjectInstances("Table:Lookup");
             for (auto &instance : lookupInstances.items()) {
 
@@ -3065,16 +3064,16 @@ namespace Curve {
             validDimsString += format(" or {}", validDims[i]);
         }
 
-        ShowSevereCurveDims(state, eoh, curveFieldText, thisCurve->Name, validDimsString, curveDim);
+        ShowSevereBadDims(state, eoh, curveFieldText, thisCurve->Name, validDimsString, curveDim);
         return true;
     }
 
-    void ShowSevereCurveDims(EnergyPlusData &state,
-                             ErrorObjectHeader const &eoh,
-                             std::string_view const fieldName,
-                             std::string_view const curveName,
-                             std::string_view const validDims,
-                             int dim)
+    void ShowSevereBadDims(EnergyPlusData &state,
+                           ErrorObjectHeader const &eoh,
+                           std::string_view const fieldName,
+                           std::string_view const curveName,
+                           std::string_view const validDims,
+                           int dim)
     {
         ShowSevereError(state, fmt::format("{}: {}=\"{}\"", eoh.routineName, eoh.objectType, eoh.objectName));
         ShowContinueError(state, format("...Invalid curve for {}.", fieldName));
@@ -3332,7 +3331,7 @@ namespace Curve {
         // Given the curve index, sets the minimum and maximum possible value for this curve.
         // Certain curve types have set limits (e.g., PLF curve should not be greater than 1 or less than 0.7).
 
-        if (CurveIndex > 0 && CurveIndex <= state.dataCurveManager->curves.size()) {
+        if (CurveIndex > 0 && CurveIndex <= static_cast<int>(state.dataCurveManager->curves.size())) {
             Curve *thisCurve = state.dataCurveManager->curves(CurveIndex);
             thisCurve->outputLimits.min = CurveMin;
             thisCurve->outputLimits.minPresent = true;
@@ -3361,7 +3360,7 @@ namespace Curve {
         // Given the curve index, sets the minimum and maximum possible value for this curve.
         // Certain curve types have set limits (e.g., PLF curve should not be greater than 1 or less than 0.7).
 
-        if (CurveIndex > 0 && CurveIndex <= state.dataCurveManager->curves.size()) {
+        if (CurveIndex > 0 && CurveIndex <= static_cast<int>(state.dataCurveManager->curves.size())) {
             Curve *thisCurve = state.dataCurveManager->curves(CurveIndex);
             thisCurve->outputLimits.max = CurveMax;
             thisCurve->outputLimits.maxPresent = true;
@@ -3624,6 +3623,17 @@ namespace Curve {
                 ShowContinueError(state, format("... Curve output at rated conditions = {:.3T}", CurveVal));
             }
         }
+    }
+
+    void ShowWarningIsNotNormalizedToOne(EnergyPlusData &state,
+                                         ErrorObjectHeader const &eoh,                 // index to curve object
+                                         std::string const &cFieldName,        // object field name
+                                         std::string const &cFieldValue,       // user input curve name
+                                         Real64 const curveVal)                    // required 1st independent variable
+    {
+        ShowWarningError(state, format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
+        ShowContinueError(state, format("... {} = {} output is not equal to 1.0 (+ or - 10%) at rated conditions.", cFieldName, cFieldValue));
+        ShowContinueError(state, format("... Curve output at rated conditions = {:.3T}", curveVal));
     }
 
     void checkCurveIsNormalizedToOne(EnergyPlusData &state,

@@ -4,10 +4,6 @@ on:
   pull_request:
     branches: [ develop ]
 
-defaults:
-  run:
-    shell: bash
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   FC: gfortran-13
@@ -27,144 +23,219 @@ jobs:
           macos_dev_target: 13.0
           arch: arm64
           python-arch: arm64
-          generator: "Unix Makefiles"
-          nproc: 3
           run_regressions: true
           pretty: "Mac arm64"
-#        - os: ubuntu-24.04
-#          arch: x86_64
-#          python-arch: x64
-#          generator: "Unix Makefiles"
-#          nproc: 4
-#          run_regressions: false
-#          pretty: "Ubuntu 24.04"
-#        - os: windows-2022
-#          arch: x86_64
-#          python-arch: x64
-#          generator: "Visual Studio 17 2022"
-#          nproc: 4
-#          run_regressions: false
-#          pretty: "Windows x64"
+        - os: ubuntu-24.04
+          arch: x86_64
+          python-arch: x64
+          run_regressions: true
+          pretty: "Ubuntu 24.04"
+        - os: windows-2022
+          arch: x86_64
+          python-arch: x64
+          run_regressions: false
+          pretty: "Windows x64"
 
     steps:
 
-    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v5
+
+    - name: Setup System
+      id: setup-runner
+      uses: ./.github/actions/setup-runner
       with:
         python-version: ${{ env.Python_REQUIRED_VERSION }}
+        python-arch: ${{ matrix.python-arch }}
 
-    - name: Install Dependencies for Mac  # gcc13 reinstall may not be needed
-      if: runner.os == 'macOS'
+    - name: Get Develop and Branch Git SHA
+      shell: bash
       run: |
-        brew update
-        brew install tcl-tk
-        brew reinstall gcc@13
-        echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
-        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
-        pip install pytest lxml
+        echo "Figuring out the develop GIT SHA"
+        # github.event.pull_request.base.sha points to develop at the time the PR was created, not the current one
+        DEVELOP_SHA=$(git ls-remote https://github.com/$GITHUB_REPOSITORY.git develop | cut -f1 | cut -c1-10)
+        echo "Develop GIT SHA is '${DEVELOP_SHA}'"
+        echo "DEVELOP_SHA=$DEVELOP_SHA" >> $GITHUB_ENV
 
-    - name: Install Dependencies for Linux
-      if: runner.os == 'Linux'
+        CURRENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}
+        echo "Current Branch HEAD SHA is '${CURRENT_HEAD_SHA}'"
+        echo "CURRENT_HEAD_SHA=$DEVELOP_SHA" >> $GITHUB_ENV
+
+        echo "Current merge commit SHA is '${GITHUB_SHA}'"
+        echo "::endgroup::"
+        # We default to using PCH, in case we don't find the baseline reg tests,
+        # since it speeds up the build significantly and we'll build TWICE
+        echo "ENABLE_PCH=ON" >> $GITHUB_ENV
+
+    - name: Baseline Regression Testing caching
+      uses: actions/cache@v4
+      id: cachebaselineregression
+      with:
+        path: |
+          ./build/testfiles-develop
+        key: baselineregression-${{ matrix.os }}-${{ env.DEVELOP_SHA }}
+
+    - name: Did restoring the Baseline Regression Tests work? Yes
+      if: steps.cachebaselineregression.outputs.cache-hit == 'true'
+      shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
-        if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
-          # https://github.com/actions/runner-images/issues/10025
-          echo "FC=gfortran-13" >> $GITHUB_ENV
-        fi
-        pip install pytest lxml
+        echo "Found the regression tests!"
+        # We turn off the PCH in that case, since that's how develop builds it
+        echo "ENABLE_PCH=OFF" >> $GITHUB_ENV
 
-    # BUILD AND TEST INTEGRATION FILES ON THE BASELINE BRANCH
+    - name: Restore Cache CCACHE
+      uses: actions/cache/restore@v4
+      id: cacheccache-restore
+      with:
+        path: |
+          ${{ steps.setup-runner.outputs.ccache-dir }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}-pch=${{ env.ENABLE_PCH }}
+        restore-keys: |
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.DEVELOP_SHA }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
+          ccache-${{ matrix.os }}-
 
+    - name: Did restoring the CCache-cache work?
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+        BrightYellow='\033[93m'
+
+        if [ "${{ steps.cacheccache-restore.outputs.cache-hit }}" == "true" ]; then
+          echo -e "✅ ${Green}CCache primary key was hit${Color_Off}"
+        else
+          FILES_IN_CACHE=$(ccache --print-stats | grep "^files_in_cache" | awk '{print $2}')
+          if [ "$FILES_IN_CACHE" -gt 0 ]; then
+            echo -e "⚠️  ${BrightYellow}Secondary cache hit${Color_Off}"
+          else
+            echo -e "❌ ${Red}No cache hit${Color_Off}"
+          fi;
+        fi;
+
+        begin_group "Showing existing ccache stats"
+        ccache --show-stats -vv || ccache --show-stats
+        echo "::endgroup::"
+
+        ccache --zero-stats
+        begin_group "Showing CCache config"
+        ccache -p
+        echo "::endgroup::"
+
+    - name: Create Build Directory
+      shell: bash
+      run: |
+        cmake -E make_directory ./build/
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          # The MACOSX_DEPLOYMENT_TARGET environment variable sets the default value for the CMAKE_OSX_DEPLOYMENT_TARGET variable.
+          echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
+        fi;
+
+    # Checkout baseline, overrides the branch basically
     - name: Baseline Checkout
-      if: matrix.run_regressions
-      uses: actions/checkout@v4
+      if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
+      uses: actions/checkout@v5
       with:
         ref: develop
-        path: baseline
+        clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 
-    - name: Baseline Create Build Directory
-      if: matrix.run_regressions
-      run: cmake -E make_directory ./baseline/build/
-
-    - name: Baseline Configure CMake
-      if: matrix.run_regressions
-      working-directory: ./baseline/build
-      run: >
-        cmake
-        -G "${{ matrix.generator }}"
-        -DCMAKE_BUILD_TYPE:STRING=Release
-        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }}
-        -DLINK_WITH_PYTHON:BOOL=ON
-        -DPYTHON_CLI:BOOL=ON
-        -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
-        -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/
-        -DBUILD_TESTING:BOOL=ON
-        -DBUILD_FORTRAN:BOOL=ON
-        -DBUILD_PACKAGE:BOOL=OFF
-        -DDOCUMENTATION_BUILD:STRING=DoNotBuild
-        -DENABLE_OPENMP:BOOL=OFF
-        -DUSE_OpenMP:BOOL=OFF
-        ../
-
-    # During baseline builds, just build specific target list so that we don't waste time building the unit test binary
-
-    - name: Baseline Build on Windows
-      if: matrix.run_regressions && runner.os == 'Windows'
-      working-directory: ./baseline/build
-      run: cmake --build . -j ${{ matrix.nproc }} --config Release --target energyplus ExpandObjects_build ReadVars_build Slab_build Basement_build AppGPostProcess_build ParametricPreprocessor_build
-
-    - name: Baseline Build on Mac/Linux
-      if: matrix.run_regressions && runner.os != 'Windows'
-      working-directory: ./baseline/build
-      run: cmake --build . -j ${{ matrix.nproc }} --target energyplus ExpandObjects ReadVarsESO Slab Basement AppGPostProcess ParametricPreprocessor
+    - name: Baseline Configure and Build
+      if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
+      uses: ./.github/actions/configure-and-build
+      with:
+        enable-pch: ${{ env.ENABLE_PCH }} # this is 'ON' in this case
+        minimal-targets: true
+        build-directory: ./build
+        nproc: ${{ steps.setup-runner.outputs.nproc }}
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
 
     - name: Baseline Test
-      if: matrix.run_regressions
-      working-directory: ./baseline/build
-      run: ctest -C Release -R integration -j 3  # TODO: Speed up basement so we don't have to skip it.
-
-    # BUILD AND TEST EVERYTHING ON THE CURRENT BRANCH
-
-    - name: Branch Checkout
-      uses: actions/checkout@v4
-      with:
-        path: branch
-
-    - name: Branch Create Build Directory
-      run: cmake -E make_directory ./branch/build/
-
-    - name: Branch Configure CMake
-      working-directory: ./branch/build
-      run: >
-        cmake
-        -G "${{ matrix.generator }}"
-        -DCMAKE_BUILD_TYPE:STRING=Release
-        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }}
-        -DLINK_WITH_PYTHON:BOOL=ON
-        -DPYTHON_CLI:BOOL=ON
-        -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
-        -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/
-        -DBUILD_TESTING:BOOL=ON
-        -DBUILD_FORTRAN:BOOL=ON
-        -DBUILD_PACKAGE:BOOL=OFF
-        -DDOCUMENTATION_BUILD:STRING=DoNotBuild
-        -DENABLE_OPENMP:BOOL=OFF
-        -DUSE_OpenMP:BOOL=OFF
-        ../
-
-    - name: Branch Build
-      id: branch_build
-      working-directory: ./branch/build
+      if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
+      working-directory: ./build
+      shell: bash
       run: |
-        echo "::add-matcher::./branch/.github/workflows/cpp-problem-matcher.json"
-        cmake --build . -j ${{ matrix.nproc }} --config Release
-        echo "::remove-matcher owner=gcc-problem-matcher::"
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
 
-    - name: Branch Test
-      working-directory: ./branch/build
-      run: ctest -C Release -j 3
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -j ${{ env.NPROC }}; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely... But not failing the workflow"
+          ctest --rerun-failed -VV || true
+          echo "::endgroup::"
+        fi;
+        mv testfiles testfiles-develop
+
+    - name: Checkout Branch again
+      if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
+      uses: actions/checkout@v5
+      with:
+        clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
+
+    - name: Install problem matcher
+      shell: bash
+      run: echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
+
+    - name: Configure and Build
+      id: branch_build
+      uses: ./.github/actions/configure-and-build
+      with:
+        enable-pch: ${{ env.ENABLE_PCH }}
+        minimal-targets: false
+        build-directory: ./build
+        nproc: ${{ steps.setup-runner.outputs.nproc }}
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+
+    - name: Remove problem matcher
+      shell: bash
+      run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Save CCache cache
+      if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ steps.setup-runner.outputs.ccache-dir }}
+        key: ${{ steps.cacheccache-restore.outputs.cache-primary-key }}
+
+    - name: Run Tests
+      working-directory: ./build
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -j ${{ env.NPROC }}; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely..."
+          ctest --rerun-failed -VV
+          echo "::endgroup::"
+        fi;
 
     - name: Install Regression Tool
       if: always() && matrix.run_regressions && steps.branch_build.outcome != 'failure'  # always run this step as long as we actually built
@@ -175,32 +246,33 @@ jobs:
       id: regressions
       # steps.regressions.conclusion is always "success", but if no regressions, steps.regressions.outcome is "success"
       continue-on-error: true
-      run: python ./branch/scripts/dev/gha_regressions.py ./baseline/build/testfiles ./branch/build/testfiles/ ./regressions
+      run: python ./scripts/dev/gha_regressions.py ./build/testfiles-develop ./build/testfiles ./regressions
 
     - uses: actions/upload-artifact@v4
       id: upload_regressions
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'  # only run this if regressions were encountered "failed"
       with:
-        name: "regressions-${{ matrix.os }}"
+        name: "regressions-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
         path: "${{ github.workspace }}/regressions"
 
     - name: Generate Regression Summary GitHub Script
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'
       run: >
-        python ./branch/scripts/dev/build_regression_summary.py
-        ${{ github.workspace }}/regressions/summary.md
-        ${{ github.workspace }}/regressions/summary.js
+        python ./scripts/dev/build_regression_summary.py
+        ${{ github.workspace }}
         ${{ matrix.os }}
         ${{ github.sha }}
         ${{ github.run_id }}
         ${{ steps.upload_regressions.outputs.artifact-url }}
 
-    - uses: actions/github-script@v7
+    - uses: actions/github-script@v8
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == 'NREL/EnergyPlus'
       with:
         script: |
-          const script = require('${{ github.workspace }}/regressions/summary.js')
-          console.log(script({github, context}))
+          const path = require('path')
+          const summaryPath = path.join(process.env.GITHUB_WORKSPACE, 'regressions', 'summary.js')
+          const script = require(summaryPath)
+          console.log(script({ github, context }))
 
     # - uses: lhotari/action-upterm@v1
 

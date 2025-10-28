@@ -204,6 +204,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone1PTACDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone1PTACFanOutletNode,  !- Indoor Air Inlet Node Name
     Zone1PTACDXCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -351,6 +352,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone2PTACDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone2PTACFanOutletNode,  !- Indoor Air Inlet Node Name
     Zone2PTACCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -498,6 +500,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Zone3PTACDXCoolCoil,     !- Name
+    ,                        !- Availability Schedule Name
     Zone3PTACOAMixerOutletNode,  !- Indoor Air Inlet Node Name
     Zone3PTACCoolCoilOutletNode,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}

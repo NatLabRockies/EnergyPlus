@@ -1069,7 +1069,7 @@ namespace OutputProcessor {
         iVar.StoreValue = 0;
         iVar.NumStored = 1;
         iVar.MinValue = iVar.MaxValue = 0;
-        iVar.minValueDate = iVar.minValueDate = 0;
+        iVar.minValueDate = 0;
         iVar.freq = ReportFreq::TimeStep;
 
         iVar.writeReportData(*state);
@@ -1539,8 +1539,8 @@ namespace OutputProcessor {
 
         // For now I don't accept anything else than TimeStepZone or TimeStepSystem, but to make it easier if we need to change that later
         // and to preserve the original test (passing int=3 before should have defaulted to Zone...)
-        TimeStepType aThirdTimeStepType = TimeStepType::Zone;
-        std::string aThirdTimeStepString = timeStepZoneString;
+        // TimeStepType aThirdTimeStepType = TimeStepType::Zone;
+        // std::string aThirdTimeStepString = timeStepZoneString;
 
         OutVarReal rVar;
         rVar.freq = ReportFreq::TimeStep;
@@ -1774,7 +1774,7 @@ namespace OutputProcessor {
              {"29", "0", "Avg", "indexGroup", timeStepSystemString, "keyedValue", "variableName", "Run Period", "", "m3/s"}});
 
         EXPECT_EQ(reportDataDictionary.size(), reportDataDictionaryResults.size());
-        for (int i = 0; i < reportDataDictionary.size(); ++i) {
+        for (size_t i = 0; i < reportDataDictionary.size(); ++i) {
             EXPECT_EQ(reportDataDictionary[i], reportDataDictionaryResults[i]);
         }
     }
@@ -5368,7 +5368,6 @@ namespace OutputProcessor {
 
     TEST_F(EnergyPlusFixture, OutputProcessor_StdoutRecordCount)
     {
-        auto &op = state->dataOutputProcessor;
         std::string const idf_objects = delimited_string({
             "Output:Meter,Electricity:Facility,Timestep;",
             "Output:Variable,*,Lights Electricity Energy,Timestep;",

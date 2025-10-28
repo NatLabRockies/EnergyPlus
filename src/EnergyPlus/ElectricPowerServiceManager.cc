@@ -538,7 +538,7 @@ void ElectricPowerServiceManager::reportPVandWindCapacity(EnergyPlusData &state)
     for (auto const &lc : elecLoadCenterObjs) {
         if (lc->numGenerators > 0) {
             for (auto const &g : lc->elecGenCntrlObj) {
-                if (g->generatorType == GeneratorType::PV) {
+                if ((g->generatorType == GeneratorType::PV) || (g->generatorType == GeneratorType::PVWatts)) {
                     pvTotalCapacity_ += g->maxPowerOut;
                 }
                 if (g->generatorType == GeneratorType::WindTurbine) {
@@ -3218,7 +3218,7 @@ ElectricStorage::ElectricStorage( // main constructor
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                 errorsFound = true;
             } else if (chargeCurve_->numDims != 1) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "1", chargeCurve_->numDims);
+                Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "1", chargeCurve_->numDims);
                 errorsFound = true;
             }
 
@@ -3229,7 +3229,7 @@ ElectricStorage::ElectricStorage( // main constructor
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
                 errorsFound = true;
             } else if (dischargeCurve_->numDims != 1) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "1", dischargeCurve_->numDims);
+                Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "1", dischargeCurve_->numDims);
                 errorsFound = true;
             }
 
@@ -3250,7 +3250,7 @@ ElectricStorage::ElectricStorage( // main constructor
                     ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7));
                     errorsFound = true;
                 } else if (lifeCurve_->numDims != 1) {
-                    Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7), "1", lifeCurve_->numDims);
+                    Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7), "1", lifeCurve_->numDims);
                     errorsFound = true;
                 }
 

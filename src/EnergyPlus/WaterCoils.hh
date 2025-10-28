@@ -79,6 +79,7 @@ namespace WaterCoils {
 
         HVAC::CoilType coilType = HVAC::CoilType::Invalid;
         DataPlant::PlantEquipmentType coilPlantType = DataPlant::PlantEquipmentType::Invalid; // Type of WaterCoil ie. Heating or Cooling
+        int coilReportNum = -1;
         Sched::Schedule *availSched = nullptr;       // availability schedule
         bool RequestingAutoSize;                     // True if this coil has appropriate autosize fields
         Real64 InletAirMassFlowRate;                 // MassFlow through the WaterCoil being Simulated [kg/s]

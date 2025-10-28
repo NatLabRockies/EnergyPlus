@@ -490,7 +490,7 @@ void GetSysInput(EnergyPlusData &state)
 
         // The reheat coil control node is necessary for hot water and steam reheat, but not necessary for
         // electric or gas reheat.
-        if (sdAirTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel &&
+        if (sdAirTerm.reheatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel ||
             sdAirTerm.reheatCoilType == HVAC::CoilType::HeatingElectric) {
             sdAirTerm.ReheatCoilNum = HeatingCoils::GetCoilIndex(state, sdAirTerm.ReheatCoilName);
             if (sdAirTerm.ReheatCoilNum == 0) {
@@ -3165,7 +3165,8 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         }
         if (this->ReheatCoilNum > 0) {
             ReportCoilSelection::setCoilReheatMultiplier(
-                state, this->ReheatCoilName, this->reheatCoilType, TermUnitSizing(state.dataSize->CurTermUnitSizingNum).ReheatLoadMult);
+                state, ReportCoilSelection::getReportIndex(state, this->ReheatCoilName, this->reheatCoilType),
+                TermUnitSizing(state.dataSize->CurTermUnitSizingNum).ReheatLoadMult);
         }
     }
 
@@ -3453,7 +3454,6 @@ void SingleDuctAirTerminal::SimVAV(EnergyPlusData &state, bool const FirstHVACIt
     Real64 MaxFlowWater;      // This is the value passed to the Controller depending if FirstHVACIteration or not
     Real64 MinFlowWater;      // This is the value passed to the Controller depending if FirstHVACIteration or not
     Real64 QActualHeating;    // the heating load seen by the reheat coil
-    Real64 QHeatingDelivered; // the actual output from heating coil
     Real64 LeakLoadMult;      // load multiplier to adjust for downstream leaks
     Real64 MinFlowFrac;       // minimum flow fraction (and minimum damper position)
     Real64 MassFlowBasedOnOA; // supply air mass flow rate based on zone OA requirements
@@ -4388,7 +4388,6 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     // region 1: active cooling with fan on
     FanOp = 1;
     if (heatCoilType == HVAC::CoilType::HeatingSteam) {
-        bool ErrorsFound; // returned from mining function call
         this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
         this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MinMassFlow, FanOp, QCoolFanOnMin);
         // region 2: active heating with fan on

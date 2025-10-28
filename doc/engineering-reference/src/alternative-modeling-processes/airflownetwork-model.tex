@@ -1605,3 +1605,35 @@ Walton, G. N. 1989. ``AIRNET -- A Computer Program for Building Airflow Network 
 Walton, G. N. and W. S. Dols. 2003. ``CONTAM 2.1 Supplemental User Guide and Program Documentation,'' NISTIR 7049, National Institute of Standards and Technology, Gaithersburg, Maryland.
 
 Warren, P.R. and Parkins, L.M. (1985) Single-sided ventilation through open windows. In Proceedings of the ASHRAE/DOE/BTECC Conference on Thermal Performance of the Exterior Envelopes of Buildings III, December 2-5, 1985, Clearwater Beach, Florida, pp. 209-228.
+
+\section{Simple Duct Model}\label{simple-duct-model}
+
+\subsection{Overview}\label{simple-duct-model-overview}
+
+The Simple Duct model provides the ability to simulate duct conduction and leakage losses in an AirLoopHVAC (i.e., AirLoopHVAC object) without using Airflow Network model.
+
+\subsection{Calculation Procedure}\label{simple-duct-model-calculation-procedure}
+
+The calculation procedure is provided below. In order to eliminate internal iteration, all Duct:Loss objects are simulated in order from AirLoopHVAC outlet to its inlet.
+
+\begin{itemize}
+\item
+  Call DuctLoss module from the beginning of AirLoopHVAC
+\item
+  Initialize zone temperatures and humidity ratios for DuctLoss nodes
+\item
+  Calculate each Duct:Loss object. The starting point is a node at the AirLoopHVAC outlet. The calculation order is based on the mass flow direction: Supply Trunk duct, Supply Trunk leak, Supply Branch duct, Supply Branch leak, Return Branch leak, Return Branch duct, Return Trunk leak, and Return Trunk duct.
+\item
+  Sum all losses based on zones. The zone is defined in the field of Thermal Zone Name in the AirflowNetwork:Distribution:Linkage object for supply conduction, and in the terminated zone for supply leaks.
+\item
+  Add all supply conduction and leakage losses into a system, by revising zone predicted load in both functions of initOutputRequired and distributeOutputRequired in the ZoneEquipmentManager module. The revised loads in both initOutputRequired and distributeOutputRequired functions allow the simplified duct model to be used in different types of HVAC systems.
+\item
+  Add all sensible and latent loads in both functions of correctAirTemp and correctAiHumRat in the ZoneTempPredictorCorrector module.
+\item
+  Force AirLoop and ZoneEquip to iterate 3 times
+\end{itemize}
+
+Note:
+
+The return conduction and leak losses are not part of system loads. The impact is the temperature and moisture change at the AirLoopHVAC inlet node. The HVAC system in an AirLoopHVAC uses changed inlet conditions to cover the return conduction and leakage impact.
+

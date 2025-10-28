@@ -216,7 +216,6 @@ namespace ZoneDehumidifier {
         Array1D_bool lAlphaBlanks;     // Logical array, alpha field input BLANK = .TRUE.
         Array1D_bool lNumericBlanks;   // Logical array, numeric field input BLANK = .TRUE.
         int TotalArgs(0);              // Total number of alpha and numeric arguments (max)
-        Real64 CurveVal;               // Output from curve object (water removal or energy factor curves)
 
         int NumDehumidifiers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
 
@@ -318,7 +317,7 @@ namespace ZoneDehumidifier {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(5), Alphas(5));
                 ErrorsFound = true;
             } else if (dehumid.WaterRemovalCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(5), Alphas(5), "2", dehumid.WaterRemovalCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, cAlphaFields(5), Alphas(5), "2", dehumid.WaterRemovalCurve->numDims);
                 ErrorsFound = true;
             } else {
                 Real64 CurveVal = dehumid.WaterRemovalCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
@@ -337,7 +336,7 @@ namespace ZoneDehumidifier {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(6), Alphas(6));
                 ErrorsFound = true;
             } else if (dehumid.EnergyFactorCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(6), Alphas(6), "2", dehumid.EnergyFactorCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, cAlphaFields(6), Alphas(6), "2", dehumid.EnergyFactorCurve->numDims);
                 ErrorsFound = true;
             } else {
                 Real64 CurveVal = dehumid.EnergyFactorCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
@@ -356,7 +355,7 @@ namespace ZoneDehumidifier {
                 ShowSevereItemNotFound(state, eoh, cAlphaFields(7), Alphas(7));
                 ErrorsFound = true;
             } else if (dehumid.PartLoadCurve->numDims != 1) {
-                Curve::ShowSevereCurveDims(state, eoh, cAlphaFields(7), Alphas(7), "1", dehumid.PartLoadCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, cAlphaFields(7), Alphas(7), "1", dehumid.PartLoadCurve->numDims);
                 ErrorsFound = true;
             }
 

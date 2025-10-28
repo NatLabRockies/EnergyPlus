@@ -3757,18 +3757,28 @@ namespace HeatBalanceManager {
         }
 
     Label10:;
-        for (LineNum = 2; LineNum <= 5; ++LineNum) {
+        NextLine = W5DataFile.readLine();
+        if (NextLine.eof) {
+            goto Label1000;
+        }
+        ++FileLineCount;
+        if (!has_prefixi(NextLine.data, "WINDOW NAME")) {
+            // Berkeley Lab WINDOW 7 has been found to include extra blank lines after the "WINDOW5" line
+            // so find the line that begins with "WINDOW NAME"
+            goto Label10;
+        } else {
+            // Get window name
+            W5Name = std::string{NextLine.data.substr(19)};
+            WindowNameInW5DataFile = Util::makeUPPER(W5Name);
+
+            // Get description (currently not used)
             NextLine = W5DataFile.readLine();
             if (NextLine.eof) {
                 goto Label1000;
             }
-            DataLine(LineNum) = NextLine.data;
             ++FileLineCount;
         }
-
-        // Get window name and check for match
-        W5Name = std::string{DataLine(4).substr(19)};
-        WindowNameInW5DataFile = Util::makeUPPER(W5Name);
+        // Check for window name match
         if (DesiredConstructionName != WindowNameInW5DataFile) {
             // Doesn't match; read through file until next window entry is found
         Label20:;

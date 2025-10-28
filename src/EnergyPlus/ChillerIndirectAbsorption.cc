@@ -1823,7 +1823,7 @@ void IndirectAbsorberSpecs::calculate(EnergyPlusData &state, Real64 MyLoad, bool
             } break;
             case DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand: {
                 if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) ||
-                    (state, this->CWPlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) ||
+                    (this->CWPlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) ||
                     (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi != DataLoopNode::SensedNodeFlagValue)) {
                     TempEvapOutSetPoint = state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi;
                 } else {

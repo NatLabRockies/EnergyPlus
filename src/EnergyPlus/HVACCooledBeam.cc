@@ -749,6 +749,17 @@ namespace HVACCooledBeam {
             }
         }
 
+        BaseSizer::calcCoilWaterFlowRates(state,
+                                          coolBeam.Name,
+                                          coolBeam.UnitType,
+                                          coolBeam.MaxCoolWaterVolFlow,
+                                          coolBeam.CWPlantLoc.loopNum,
+                                          state.dataSize->CurZoneEqNum,
+                                          state.dataSize->CurSysNum,
+                                          state.dataSize->CurOASysNum,
+                                          state.dataSize->FinalZoneSizing,
+                                          state.dataSize->FinalSysSizing);
+
         if (coolBeam.NumBeams == AutoSize) {
             rho = state.dataPlnt->PlantLoop(coolBeam.CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
 

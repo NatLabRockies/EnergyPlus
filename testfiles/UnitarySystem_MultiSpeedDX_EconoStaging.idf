@@ -4853,6 +4853,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Sys 4 Heat Pump Air Source Cooling Coil,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 4 Heat Pump Air Source Supply Fan Outlet,  !- Indoor Air Inlet Node Name
     Sys 4 Heat Pump Air Source Cooling Coil Outlet,  !- Indoor Air Outlet Node Name
     4,                       !- Number of Speeds {dimensionless}

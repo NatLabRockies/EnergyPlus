@@ -281,20 +281,14 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     state->dataFurnaces->Furnaces(FurnaceNum).HeatCoilNum = 2;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP.allocate(2);
     state->dataWaterToAirHeatPumpSimple->NumWatertoAirHPs = 2;
+
     auto &wahp1 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1);
     wahp1.Name = "WATERCOOLINGCOIL";
     wahp1.coilPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
     wahp1.coilType = HVAC::CoilType::CoolingWAHPSimple;
     wahp1.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp1.Name, wahp1.coilType);
+    wahp1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    auto &wahp2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
-    wahp2.Name = "WATERHEATINGCOIL";
-    wahp2.coilPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
-    wahp2.coilType = HVAC::CoilType::HeatingWAHPSimple;
-    wahp2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp2.Name, wahp2.coilType);
-
-    state->dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag.allocate(2);
-    
     wahp1.AirInletNodeNum = 1;
     wahp1.AirOutletNodeNum = 3;
     wahp1.WaterInletNodeNum = 5;
@@ -307,6 +301,13 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     wahp1.RatedCOPCoolAtRatedCdts = 3.0;
     wahp1.RatedCapHeat = 30000.0;
     wahp1.RatedCOPHeatAtRatedCdts = 3.0;
+
+    auto &wahp2 = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2);
+    wahp2.Name = "WATERHEATINGCOIL";
+    wahp2.coilPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
+    wahp2.coilType = HVAC::CoilType::HeatingWAHPSimple;
+    wahp2.coilReportNum = ReportCoilSelection::getReportIndex(*state, wahp2.Name, wahp2.coilType);
+    wahp2.availSched = Sched::GetScheduleAlwaysOn(*state);
 
     wahp2.AirInletNodeNum = 3;
     wahp2.AirOutletNodeNum = 2;
@@ -321,6 +322,8 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     wahp2.RatedCapHeat = 30000.0;
     wahp2.RatedCOPHeatAtRatedCdts = 3.0;
 
+    state->dataWaterToAirHeatPumpSimple->SimpleHPTimeStepFlag.allocate(2);
+    
     // set up plant loop
     state->dataPlnt->TotNumLoops = 2;
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);

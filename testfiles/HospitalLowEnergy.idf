@@ -2162,6 +2162,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Cafe Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Cafe Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Cafe Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Cafe Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2179,6 +2180,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Cafe Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Cafe Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Cafe Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Cafe Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2992,6 +2994,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Clean Heat Pump Heat Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Clean Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Clean Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Clean Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -3009,6 +3012,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Clean Heat Pump Cool Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Clean Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Clean Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Clean Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -3604,6 +3608,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Conference Heat Pump Heat Coil,  !- Name
+    ,                                        !- Availability Schedule Name
     Floor 1 Conference Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Conference Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Conference Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -3621,6 +3626,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Conference Heat Pump Cool Coil,  !- Name
+    ,                                        !- Availability Schedule Name
     Floor 1 Conference Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Conference Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Conference Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -4174,6 +4180,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Dining Heat Pump Heat Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Dining Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Dining Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Dining Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -4191,6 +4198,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Dining Heat Pump Cool Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Dining Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Dining Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Dining Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -4769,6 +4777,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Elevator Heat Pump Heat Coil,  !- Name
+    ,                                      !- Availability Schedule Name    
     Floor 1 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -4786,6 +4795,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Elevator Heat Pump Cool Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Elevator Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Elevator Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Elevator Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5299,6 +5309,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Exam Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Exam Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Exam Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Exam Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5316,6 +5327,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Exam Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Exam Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Exam Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Exam Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5842,6 +5854,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Food Storage Heat Pump Heat Coil,  !- Name
+    ,                                          !- Availability Schedule Name
     Floor 1 Food Storage Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Food Storage Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Food Storage Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5859,6 +5872,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Food Storage Heat Pump Cool Coil,  !- Name
+    ,                                          !- Availability Schedule Name    
     Floor 1 Food Storage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -6547,6 +6561,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Gas Storage Heat Pump Heat Coil,  !- Name
+    ,                                         !- Availability Schedule Name
     Floor 1 Gas Storage Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Gas Storage Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Gas Storage Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -6564,6 +6579,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Gas Storage Heat Pump Cool Coil,  !- Name
+    ,                                         !- Availability Schedule Name
     Floor 1 Gas Storage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Gas Storage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Gas Storage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -7044,6 +7060,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Imaging Heat Pump Heat Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Imaging Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Imaging Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Imaging Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -7061,6 +7078,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Imaging Heat Pump Cool Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Imaging Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Imaging Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Imaging Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -7608,6 +7626,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Kitchen Heat Pump Heat Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Kitchen Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Kitchen Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Kitchen Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -7625,6 +7644,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Kitchen Heat Pump Cool Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Kitchen Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Kitchen Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Kitchen Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -8152,6 +8172,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Lab 1 Heat Pump Heat Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lab 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lab 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lab 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -8169,6 +8190,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Lab 1 Heat Pump Cool Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lab 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lab 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lab 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -8710,6 +8732,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Lab 2 Heat Pump Heat Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lab 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lab 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lab 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -8727,6 +8750,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Lab 2 Heat Pump Cool Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lab 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lab 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lab 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -9343,6 +9367,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Laundry Heat Pump Heat Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Laundry Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Laundry Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Laundry Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -9360,6 +9385,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Laundry Heat Pump Cool Coil,  !- Name
+    ,                                     !- Availability Schedule Name
     Floor 1 Laundry Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Laundry Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Laundry Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -9930,6 +9956,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Lobby Heat Pump Heat Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lobby Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lobby Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lobby Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -9947,6 +9974,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Lobby Heat Pump Cool Coil,  !- Name
+    ,                                   !- Availability Schedule Name
     Floor 1 Lobby Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lobby Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lobby Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -10416,6 +10444,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Lounge Heat Pump Heat Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Lounge Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lounge Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lounge Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -10433,6 +10462,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Lounge Heat Pump Cool Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Lounge Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Lounge Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Lounge Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -10924,6 +10954,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Mech 1 Heat Pump Heat Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Mech 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Mech 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Mech 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -10941,6 +10972,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Mech 1 Heat Pump Cool Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Mech 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Mech 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Mech 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -11481,6 +11513,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Mech 2 Heat Pump Heat Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Mech 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Mech 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Mech 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -11498,6 +11531,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Mech 2 Heat Pump Cool Coil,  !- Name
+    ,                                    !- Availability Schedule Name
     Floor 1 Mech 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Mech 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Mech 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12051,6 +12085,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 1 Heat Pump Heat Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12068,6 +12103,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 1 Heat Pump Cool Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12621,6 +12657,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 2 Heat Pump Heat Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12638,6 +12675,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 2 Heat Pump Cool Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -13208,6 +13246,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Heat Pump Heat Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -13225,6 +13264,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Heat Pump Cool Coil,  !- Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Office 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -13778,6 +13818,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 1 Heat Pump Heat Coil,  !- Name
+    ,                                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -13795,6 +13836,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 1 Heat Pump Cool Coil,  !- Name
+    ,                                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -14348,6 +14390,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 2 Heat Pump Heat Coil,  !- Name
+    ,                                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -14365,6 +14408,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 2 Heat Pump Cool Coil,  !- Name
+    ,                                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -14958,6 +15002,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -14975,6 +15020,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Office 3 Perimeter 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Office 3 Perimeter 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -15515,6 +15561,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Patient Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Patient Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Patient Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Patient Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -15532,6 +15579,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Patient Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Patient Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Patient Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Patient Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -15974,6 +16022,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Pharmacy Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Pharmacy Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Pharmacy Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Pharmacy Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -15991,6 +16040,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Pharmacy Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Pharmacy Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Pharmacy Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Pharmacy Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -16460,6 +16510,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Physical Therapy Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Physical Therapy Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Physical Therapy Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Physical Therapy Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -16477,6 +16528,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Physical Therapy Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Physical Therapy Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Physical Therapy Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Physical Therapy Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -16968,6 +17020,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Receiving Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Receiving Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Receiving Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Receiving Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -16985,6 +17038,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Receiving Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Receiving Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Receiving Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Receiving Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -17538,6 +17592,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Reception Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Reception Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Reception Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Reception Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -17555,6 +17610,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Reception Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Reception Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Reception Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Reception Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18030,6 +18086,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Soil Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Soil Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Soil Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Soil Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18047,6 +18104,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Soil Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Soil Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Soil Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Soil Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18462,6 +18520,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Storage Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Storage Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Storage Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Storage Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18479,6 +18538,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Storage Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Storage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Storage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Storage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18948,6 +19008,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Waiting Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Waiting Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Waiting Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Waiting Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -18965,6 +19026,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Waiting Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 1 Waiting Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Waiting Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Waiting Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -19518,6 +19580,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Chapel Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Chapel Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Chapel Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Chapel Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -19535,6 +19598,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Chapel Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Chapel Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Chapel Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Chapel Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -20004,6 +20068,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Clean 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Clean 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Clean 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Clean 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -20021,6 +20086,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Clean 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Clean 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Clean 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Clean 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -20490,6 +20556,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Clean 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Clean 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Clean 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Clean 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -20507,6 +20574,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Clean 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Clean 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Clean 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Clean 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -21040,6 +21108,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Corridor Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Corridor Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Corridor Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Corridor Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -21057,6 +21126,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Corridor Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Corridor Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Corridor Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Corridor Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -21635,6 +21705,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Elevator Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -21652,6 +21723,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Elevator Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Elevator Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Elevator Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Elevator Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -22205,6 +22277,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -22222,6 +22295,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -22691,6 +22765,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -22708,6 +22783,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -23177,6 +23253,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -23194,6 +23271,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -23680,6 +23758,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -23697,6 +23776,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Exam 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Exam 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Exam 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Exam 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -24235,6 +24315,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Gift Shop Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Gift Shop Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Gift Shop Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Gift Shop Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -24252,6 +24333,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Gift Shop Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Gift Shop Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Gift Shop Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Gift Shop Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -24749,6 +24831,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -24766,6 +24849,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -25349,6 +25433,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -25366,6 +25451,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -25922,6 +26008,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -25939,6 +26026,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Imaging 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Imaging 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Imaging 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Imaging 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -26442,6 +26530,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Lab 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lab 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lab 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lab 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -26459,6 +26548,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Lab 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lab 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lab 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lab 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -26973,6 +27063,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Lab 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lab 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lab 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lab 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -26990,6 +27081,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Lab 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lab 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lab 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lab 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -27493,6 +27585,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Lockers Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lockers Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lockers Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lockers Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -27510,6 +27603,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Lockers Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lockers Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lockers Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lockers Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -27962,6 +28056,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Lounge 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lounge 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lounge 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lounge 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -27979,6 +28074,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Lounge 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lounge 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lounge 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lounge 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -28572,6 +28668,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Lounge 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lounge 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lounge 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lounge 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -28589,6 +28686,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Lounge 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Lounge 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Lounge 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Lounge 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -29086,6 +29184,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Nurse Station 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Nurse Station 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Nurse Station 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Nurse Station 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -29103,6 +29202,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Nurse Station 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Nurse Station 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Nurse Station 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Nurse Station 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -29701,6 +29801,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Nurse Station 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Nurse Station 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Nurse Station 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Nurse Station 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -29718,6 +29819,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Nurse Station 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Nurse Station 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Nurse Station 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Nurse Station 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -30187,6 +30289,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -30204,6 +30307,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -30757,6 +30861,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -30774,6 +30879,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -31243,6 +31349,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -31260,6 +31367,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -31853,6 +31961,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -31870,6 +31979,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Office 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Office 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Office 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Office 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -32997,6 +33107,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 PACU Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 PACU Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 PACU Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 PACU Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -33014,6 +33125,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 PACU Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 PACU Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 PACU Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 PACU Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -33527,6 +33639,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Patient 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Patient 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Patient 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Patient 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -33544,6 +33657,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Patient 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Patient 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Patient 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Patient 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -34013,6 +34127,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Patient 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Patient 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Patient 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Patient 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -34030,6 +34145,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Patient 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Patient 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Patient 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Patient 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -34527,6 +34643,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Procedure 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Procedure 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Procedure 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Procedure 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -34544,6 +34661,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Procedure 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Procedure 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Procedure 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Procedure 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -35041,6 +35159,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Procedure 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Procedure 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Procedure 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Procedure 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -35058,6 +35177,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Procedure 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Procedure 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Procedure 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Procedure 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -35609,6 +35729,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Reception Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Reception Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Reception Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Reception Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -35626,6 +35747,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Reception Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Reception Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Reception Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Reception Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -36173,6 +36295,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Restroom 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Restroom 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Restroom 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Restroom 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -36190,6 +36313,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Restroom 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Restroom 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Restroom 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Restroom 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -36745,6 +36869,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Restroom 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Restroom 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Restroom 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Restroom 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -36762,6 +36887,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Restroom 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Restroom 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Restroom 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Restroom 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -37220,6 +37346,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Soil 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Soil 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Soil 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Soil 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -37237,6 +37364,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Soil 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Soil 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Soil 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Soil 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -37695,6 +37823,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Soil 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Soil 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Soil 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Soil 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -37712,6 +37841,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Soil 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Soil 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Soil 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Soil 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -38218,6 +38348,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Sterilizing Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Sterilizing Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Sterilizing Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Sterilizing Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -38235,6 +38366,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Sterilizing Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Sterilizing Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Sterilizing Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Sterilizing Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -38650,6 +38782,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Storage 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Storage 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Storage 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Storage 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -38667,6 +38800,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Storage 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Storage 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Storage 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Storage 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -39099,6 +39233,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Storage 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Storage 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Storage 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Storage 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -39116,6 +39251,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Storage 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Storage 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Storage 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Storage 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -39640,6 +39776,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Trauma Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Trauma Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Trauma Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Trauma Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -39657,6 +39794,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Trauma Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Trauma Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Trauma Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Trauma Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -40208,6 +40346,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Triage Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Triage Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Triage Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Triage Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -40225,6 +40364,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Triage Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Triage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Triage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Triage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -40776,6 +40916,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 2 Waiting Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Waiting Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Waiting Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Waiting Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -40793,6 +40934,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 2 Waiting Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 2 Waiting Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 2 Waiting Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 2 Waiting Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -41262,6 +41404,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Clean Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Clean Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Clean Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Clean Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -41279,6 +41422,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Clean Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Clean Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Clean Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Clean Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -41887,6 +42031,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Elevator Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -41904,6 +42049,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Elevator Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Elevator Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Elevator Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Elevator Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -42373,6 +42519,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Exam Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Exam Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Exam Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Exam Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -42390,6 +42537,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Exam Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Exam Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Exam Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Exam Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -42979,6 +43127,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 ICU Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 ICU Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 ICU Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 ICU Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -42996,6 +43145,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 ICU Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 ICU Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 ICU Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 ICU Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -43550,6 +43700,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Nurse Station 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nurse Station 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nurse Station 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nurse Station 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -43567,6 +43718,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Nurse Station 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nurse Station 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nurse Station 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nurse Station 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -44163,6 +44315,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Nurse Station 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nurse Station 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nurse Station 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nurse Station 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -44180,6 +44333,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Nurse Station 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nurse Station 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nurse Station 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nurse Station 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -44720,6 +44874,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Nursery Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nursery Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nursery Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nursery Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -44737,6 +44892,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Nursery Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Nursery Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Nursery Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Nursery Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -45263,6 +45419,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Office Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Office Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Office Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Office Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -45280,6 +45437,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Office Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Office Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Office Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Office Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -46332,6 +46490,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -46349,6 +46508,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -46877,6 +47037,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -46894,6 +47055,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -47439,6 +47601,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -47456,6 +47619,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -48009,6 +48173,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -48026,6 +48191,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -48530,6 +48696,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient Corridor 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient Corridor 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient Corridor 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient Corridor 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -48547,6 +48714,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient Corridor 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient Corridor 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient Corridor 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient Corridor 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -49078,6 +49246,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient Corridor 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient Corridor 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient Corridor 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient Corridor 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -49095,6 +49264,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Patient Corridor 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Patient Corridor 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Patient Corridor 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Patient Corridor 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -49663,6 +49833,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Procedure Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Procedure Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Procedure Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Procedure Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -49680,6 +49851,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Procedure Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Procedure Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Procedure Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Procedure Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -50128,6 +50300,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Soil Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Soil Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Soil Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Soil Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -50145,6 +50318,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Soil Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Soil Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Soil Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Soil Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -50604,6 +50778,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Supply Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Supply Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Supply Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Supply Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -50621,6 +50796,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Supply Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Supply Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Supply Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Supply Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -51174,6 +51350,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Triage Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Triage Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Triage Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Triage Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -51191,6 +51368,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Triage Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Triage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Triage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Triage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -51727,6 +51905,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 3 Waiting Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Waiting Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Waiting Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Waiting Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -51744,6 +51923,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 3 Waiting Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 3 Waiting Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 3 Waiting Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 3 Waiting Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -52213,6 +52393,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Clean Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Clean Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Clean Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Clean Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -52230,6 +52411,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Clean Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Clean Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Clean Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Clean Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -52838,6 +53020,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Elevator Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -52855,6 +53038,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Elevator Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Elevator Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Elevator Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Elevator Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -53436,6 +53620,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Nurse Station Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Nurse Station Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Nurse Station Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Nurse Station Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -53453,6 +53638,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Nurse Station Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Nurse Station Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Nurse Station Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Nurse Station Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -54006,6 +54192,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Office Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Office Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Office Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Office Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -54023,6 +54210,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Office Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Office Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Office Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Office Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -54603,6 +54791,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -54620,6 +54809,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -55148,6 +55338,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -55165,6 +55356,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -55693,6 +55885,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -55710,6 +55903,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -56263,6 +56457,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -56280,6 +56475,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -56784,6 +56980,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient Corridor 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient Corridor 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient Corridor 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient Corridor 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -56801,6 +56998,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient Corridor 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient Corridor 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient Corridor 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient Corridor 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -57332,6 +57530,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient Corridor 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient Corridor 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient Corridor 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient Corridor 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -57349,6 +57548,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Patient Corridor 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Patient Corridor 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Patient Corridor 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Patient Corridor 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -57824,6 +58024,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Soil Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Soil Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Soil Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Soil Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -57841,6 +58042,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Soil Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Soil Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Soil Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Soil Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -58300,6 +58502,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Supply Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Supply Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Supply Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Supply Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -58317,6 +58520,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 4-6 Supply Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 4-6 Supply Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 4-6 Supply Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 4-6 Supply Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -58786,6 +58990,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Clean Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Clean Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Clean Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Clean Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -58803,6 +59008,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Clean Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Clean Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Clean Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Clean Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -59411,6 +59617,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Elevator Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -59428,6 +59635,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Elevator Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Elevator Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Elevator Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Elevator Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -60009,6 +60217,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Nurse Station Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Nurse Station Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Nurse Station Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Nurse Station Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -60026,6 +60235,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Nurse Station Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Nurse Station Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Nurse Station Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Nurse Station Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -60579,6 +60789,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Office Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Office Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Office Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Office Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -60596,6 +60807,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Office Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Office Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Office Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Office Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -61176,6 +61388,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -61193,6 +61406,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -61721,6 +61935,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -61738,6 +61953,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -62266,6 +62482,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -62283,6 +62500,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -62836,6 +63054,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -62853,6 +63072,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -63357,6 +63577,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient Corridor 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient Corridor 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient Corridor 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient Corridor 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -63374,6 +63595,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient Corridor 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient Corridor 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient Corridor 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient Corridor 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -63905,6 +64127,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient Corridor 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient Corridor 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient Corridor 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient Corridor 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -63922,6 +64145,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Patient Corridor 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Patient Corridor 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Patient Corridor 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Patient Corridor 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -64397,6 +64621,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Soil Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Soil Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Soil Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Soil Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -64414,6 +64639,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Soil Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Soil Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Soil Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Soil Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -64873,6 +65099,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 7 Supply Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Supply Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Supply Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Supply Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -64890,6 +65117,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 7 Supply Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     Floor 7 Supply Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 7 Supply Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 7 Supply Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -65359,6 +65587,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Core Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Core Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Core Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Core Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -65376,6 +65605,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Core Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Core Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Core Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Core Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -65929,6 +66159,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -65946,6 +66177,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -66524,6 +66756,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -66541,6 +66774,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -67094,6 +67328,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -67111,6 +67346,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 1 Perimeter 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 1 Perimeter 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 1 Perimeter 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 1 Perimeter 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -67580,6 +67816,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Core Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Core Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Core Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Core Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -67597,6 +67834,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Core Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Core Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Core Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Core Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -68150,6 +68388,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -68167,6 +68406,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -68745,6 +68985,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -68762,6 +69003,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -69315,6 +69557,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -69332,6 +69575,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -69885,6 +70129,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -69902,6 +70147,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 2-4 Perimeter 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 2-4 Perimeter 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -70371,6 +70617,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Core Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Core Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Core Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Core Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -70388,6 +70635,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Core Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Core Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Core Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Core Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -70941,6 +71189,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 1 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 1 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 1 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 1 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -70958,6 +71207,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 1 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 1 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 1 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 1 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -71536,6 +71786,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 2 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 2 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 2 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 2 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -71553,6 +71804,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 2 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 2 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 2 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 2 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -72106,6 +72358,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 3 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 3 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 3 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 3 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -72123,6 +72376,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 3 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 3 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 3 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 3 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -72698,6 +72952,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 4 Heat Pump Heat Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 4 Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 4 Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 4 Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -72715,6 +72970,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     MOB Floor 5 Perimeter 4 Heat Pump Cool Coil,  !- Name
+    ,                                  !- Availability Schedule Name
     MOB Floor 5 Perimeter 4 Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     MOB Floor 5 Perimeter 4 Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     MOB Floor 5 Perimeter 4 Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name

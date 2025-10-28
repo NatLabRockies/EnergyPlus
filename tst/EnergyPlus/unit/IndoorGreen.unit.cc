@@ -206,7 +206,6 @@ TEST_F(EnergyPlusFixture, IndoorGreen_CheckGetInputDataFunction)
 }
 TEST_F(EnergyPlusFixture, IndoorGreen_CheckETFunction)
 {
-    bool ErrorsFound(false);
     int IndoorGreenNum(1);
     Real64 ZonePreTemp = 0.0; // C
     Real64 ZonePreHum = 0.001;

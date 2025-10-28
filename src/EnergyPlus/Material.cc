@@ -147,10 +147,6 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     Real64 TransmittivityVis; // Glass transmittivity, visible
     Real64 DenomRGas;         // Denominator for WindowGas calculations of NominalR
     Real64 Openness;          // insect screen openness fraction = (1-d/s)^2
-    Real64 minAngValue;       // minimum value of angle
-    Real64 maxAngValue;       // maximum value of angle
-    Real64 minLamValue;       // minimum value of wavelength
-    Real64 maxLamValue;       // maximum value of wavelength
 
     // Added TH 1/9/2009 to read the thermochromic glazings
 
@@ -621,7 +617,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ErrorsFound = true;
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
             } else if (mat->GlassSpecAngTransCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "2", mat->GlassSpecAngTransCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "2", mat->GlassSpecAngTransCurve->numDims);
                 ErrorsFound = true;
             } else {
                 Real64 minAng = mat->GlassSpecAngTransCurve->inputLimits[0].min;
@@ -673,7 +669,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ErrorsFound = true;
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
             } else if (mat->GlassSpecAngFReflCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6), "2", mat->GlassSpecAngFReflCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6), "2", mat->GlassSpecAngFReflCurve->numDims);
                 ErrorsFound = true;
             } else {
                 Real64 minAng = mat->GlassSpecAngFReflCurve->inputLimits[0].min;
@@ -721,7 +717,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ErrorsFound = true;
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7));
             } else if (mat->GlassSpecAngBReflCurve->numDims != 2) {
-                Curve::ShowSevereCurveDims(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7), "2", mat->GlassSpecAngBReflCurve->numDims);
+                Curve::ShowSevereBadDims(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7), "2", mat->GlassSpecAngBReflCurve->numDims);
                 ErrorsFound = true;
             } else {
                 Real64 minAng = mat->GlassSpecAngFReflCurve->inputLimits[0].min;

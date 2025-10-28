@@ -53,6 +53,7 @@
 #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
+#include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -60,6 +61,7 @@
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/IceThermalStorage.hh>
@@ -97,6 +99,7 @@ namespace IceThermalStorage {
 
     // REFERENCES: Dion J. King, ASHRAE Transactions v104, pt1, 1998.
 
+    std::string const cIceStorageSizing("ThermalStorage:Sizing");
     std::string const cIceStorageSimple("ThermalStorage:Ice:Simple");
     std::string const cIceStorageDetailed("ThermalStorage:Ice:Detailed");
 
@@ -192,7 +195,7 @@ namespace IceThermalStorage {
             this->MyEnvrnFlag = true;
         }
 
-        this->oneTimeInit(state);
+        this->initialize(state); // Initialize simple ice storage
 
         //------------------------------------------------------------------------
         // FIRST PROCESS (MyLoad = 0.0 as IN)
@@ -270,6 +273,13 @@ namespace IceThermalStorage {
         this->RecordOutput(MyLoad2, RunFlag);
     }
 
+    void SimpleIceStorageData::onInitLoopEquip([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
+    {
+        this->oneTimeInit(state); // Initialize detailed ice storage
+
+        this->size(state);
+    }
+
     void DetailedIceStorageData::simulate(EnergyPlusData &state,
                                           [[maybe_unused]] const PlantLocation &calledFromLocation,
                                           [[maybe_unused]] bool FirstHVACIteration,
@@ -286,13 +296,20 @@ namespace IceThermalStorage {
             this->MyEnvrnFlag = true;
         }
 
-        this->oneTimeInit(state); // Initialize detailed ice storage
+        this->initialize(state); // Initialize detailed ice storage
 
         this->SimDetailedIceStorage(state); // Simulate detailed ice storage
 
         this->UpdateDetailedIceStorage(state); // Update detailed ice storage
 
         this->ReportDetailedIceStorage(state); // Report detailed ice storage
+    }
+
+    void DetailedIceStorageData::onInitLoopEquip([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
+    {
+        this->oneTimeInit(state); // Initialize detailed ice storage
+
+        this->size(state);
     }
 
     void DetailedIceStorageData::SimDetailedIceStorage(EnergyPlusData &state)
@@ -691,10 +708,53 @@ namespace IceThermalStorage {
         ErrorsFound = false; // Always need to reset this since there are multiple types of ice storage systems
 
         // LOAD ARRAYS WITH SimpleIceStorage DATA
+        state.dataIceThermalStorage->NumThermalStorageSizing =
+            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cIceStorageSizing);
         state.dataIceThermalStorage->NumSimpleIceStorage =
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cIceStorageSimple); // by ZG
         state.dataIceThermalStorage->NumDetailedIceStorage =
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cIceStorageDetailed);
+
+        // Allocate ThermalStorage:Sizing based on NumThermalStorageSizing
+        state.dataIceThermalStorage->ThermalStorageSizing.allocate(state.dataIceThermalStorage->NumThermalStorageSizing);
+
+        state.dataIPShortCut->cCurrentModuleObject = cIceStorageSizing;
+        for (int sizingNum = 1; sizingNum <= state.dataIceThermalStorage->NumThermalStorageSizing; ++sizingNum) {
+
+            int NumAlphas;
+            int NumNums;
+            int IOStat;
+            state.dataInputProcessing->inputProcessor->getObjectItem(state,
+                                                                     state.dataIPShortCut->cCurrentModuleObject,
+                                                                     sizingNum,
+                                                                     state.dataIPShortCut->cAlphaArgs,
+                                                                     NumAlphas,
+                                                                     state.dataIPShortCut->rNumericArgs,
+                                                                     NumNums,
+                                                                     IOStat,
+                                                                     _,
+                                                                     _,
+                                                                     _,
+                                                                     state.dataIPShortCut->cNumericFieldNames);
+            Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataIPShortCut->cCurrentModuleObject, ErrorsFound);
+
+            state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).name = state.dataIPShortCut->cAlphaArgs(1);
+            state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakStart = state.dataIPShortCut->rNumericArgs(1);
+            state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakEnd = state.dataIPShortCut->rNumericArgs(2);
+            state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).sizingFactor = state.dataIPShortCut->rNumericArgs(3);
+            if (state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakEnd <=
+                state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakStart) {
+                ShowSevereError(state,
+                                format("{}{}=\"{}\"",
+                                       routineName,
+                                       state.dataIPShortCut->cCurrentModuleObject,
+                                       state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).name));
+                ShowContinueError(state,
+                                  format("Invalid start {} and end times {}. End time must be greater than start time.",
+                                         state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakStart,
+                                         state.dataIceThermalStorage->ThermalStorageSizing(sizingNum).onPeakEnd));
+            }
+        }
 
         // Allocate SimpleIceStorage based on NumOfIceStorage
         state.dataIceThermalStorage->SimpleIceStorage.allocate(state.dataIceThermalStorage->NumSimpleIceStorage);
@@ -714,8 +774,8 @@ namespace IceThermalStorage {
                                                                      NumNums,
                                                                      IOStat,
                                                                      _,
-                                                                     _,
-                                                                     _,
+                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
+                                                                     state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
             Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataIPShortCut->cCurrentModuleObject, ErrorsFound);
 
@@ -739,7 +799,9 @@ namespace IceThermalStorage {
 
             // Get and Verify ITS nominal Capacity (user input is in GJ, internal value in in J)
             state.dataIceThermalStorage->SimpleIceStorage(iceNum).ITSNomCap = state.dataIPShortCut->rNumericArgs(1) * 1.e+09;
-            if (state.dataIPShortCut->rNumericArgs(1) == 0.0) {
+            if (state.dataIPShortCut->rNumericArgs(1) == DataSizing::AutoSize) {
+                state.dataIceThermalStorage->SimpleIceStorage(iceNum).NomCapacityWasAutoSized = true;
+            } else if (state.dataIPShortCut->rNumericArgs(1) == 0.0) {
                 ShowSevereError(state, format("{}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state,
                                   format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
@@ -777,6 +839,19 @@ namespace IceThermalStorage {
                                                state.dataIPShortCut->cAlphaArgs(3),
                                                state.dataIPShortCut->cAlphaArgs(4),
                                                "Chilled Water Nodes");
+
+            state.dataIceThermalStorage->SimpleIceStorage(iceNum).TESSizingIndex = Util::FindItemInList(
+                state.dataIPShortCut->cAlphaArgs(5), state.dataIceThermalStorage->ThermalStorageSizing, &ThermalStorageSizingData::name);
+            if (state.dataIceThermalStorage->SimpleIceStorage(iceNum).TESSizingIndex == 0 &&
+                state.dataIceThermalStorage->SimpleIceStorage(iceNum).NomCapacityWasAutoSized) {
+                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
+                ShowContinueError(state, format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowContinueError(state,
+                                  format("Input field {} must be entered when input field {} is autosized",
+                                         state.dataIPShortCut->cAlphaFieldNames(5),
+                                         state.dataIPShortCut->cNumericFieldNames(1)));
+                ErrorsFound = true;
+            }
 
             // Initialize Report Variables
             state.dataIceThermalStorage->SimpleIceStorage(iceNum).MyLoad = 0.0;
@@ -845,8 +920,9 @@ namespace IceThermalStorage {
             // Convert J to W-hr by dividing by number of seconds in an hour (3600)
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).NomCapacity =
                 state.dataIPShortCut->rNumericArgs(1) * (1.e+09) / Constant::rSecsInHour;
-
-            if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) {
+            if (state.dataIPShortCut->rNumericArgs(1) == DataSizing::AutoSize) {
+                state.dataIceThermalStorage->DetailedIceStorage(iceNum).NomCapacityWasAutoSized = true;
+            } else if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) {
                 ShowSevereError(state,
                                 format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
                 ShowContinueError(state, format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
@@ -1003,6 +1079,18 @@ namespace IceThermalStorage {
                 ShowContinueError(state, R"(Value should either be "InsideMelt" or "OutsideMelt")");
                 state.dataIceThermalStorage->DetailedIceStorage(iceNum).ThawProcessIndex =
                     DetIce::InsideMelt; // Severe error will end simulation, but just in case...
+                ErrorsFound = true;
+            }
+            state.dataIceThermalStorage->DetailedIceStorage(iceNum).TESSizingIndex = Util::FindItemInList(
+                state.dataIPShortCut->cAlphaArgs(10), state.dataIceThermalStorage->ThermalStorageSizing, &ThermalStorageSizingData::name);
+            if (state.dataIceThermalStorage->DetailedIceStorage(iceNum).TESSizingIndex == 0 &&
+                state.dataIceThermalStorage->DetailedIceStorage(iceNum).NomCapacityWasAutoSized) {
+                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(10), state.dataIPShortCut->cAlphaArgs(10)));
+                ShowContinueError(state, format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowContinueError(state,
+                                  format("Input field {} must be entered when input field {} is autosized",
+                                         state.dataIPShortCut->cAlphaFieldNames(10),
+                                         state.dataIPShortCut->cNumericFieldNames(1)));
                 ErrorsFound = true;
             }
 
@@ -1314,6 +1402,10 @@ namespace IceThermalStorage {
             this->setupOutputVars(state);
             this->MyPlantScanFlag = false;
         }
+    }
+
+    void DetailedIceStorageData::initialize(EnergyPlusData &state)
+    {
 
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag2) { // Beginning of environment initializations
             // Make sure all state variables are reset at the beginning of every environment to avoid problems.
@@ -1368,6 +1460,107 @@ namespace IceThermalStorage {
         this->ParasiticElecEnergy = 0.0;
     }
 
+    void DetailedIceStorageData::size(EnergyPlusData &state)
+    {
+        int const TESTankIndex = Util::FindItemInList(this->Name, state.dataIceThermalStorage->DetailedIceStorage, &DetailedIceStorageData::Name);
+        int const TESSizingIndex = state.dataIceThermalStorage->DetailedIceStorage(TESTankIndex).TESSizingIndex;
+        if (TESSizingIndex == 0) {
+            return;
+        }
+        std::string_view const tankType = "ThermalStorage:Ice:Detailed";
+        std::string_view const callingRoutine = "DetailedIceStorageData::size";
+        // Real64 constexpr tankHeatOfFusion = 334000.0; // J/Kg
+        auto &plntLoop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+        int PltSizNum = plntLoop.PlantSizNum;
+        auto &plntSizData = state.dataSize->PlantSizData(PltSizNum);
+
+        int startPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
+        int endPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
+        Real64 onPeakTimeSteps = endPeak - startPeak;
+        Real64 onPeakHours = onPeakTimeSteps / state.dataGlobal->TimeStepsInHour;
+        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).sizingFactor;
+        Real64 onPeakSumWaterFlow = 0.0;
+        if (!plntLoop.plantDesWaterFlowRate.empty()) {
+            for (int ts = 0; ts < 24 * state.dataGlobal->TimeStepsInHour; ++ts) {
+                if (ts > startPeak && ts <= endPeak) {
+                    onPeakSumWaterFlow += plntLoop.plantDesWaterFlowRate[ts];
+                }
+            }
+            onPeakSumWaterFlow /= onPeakTimeSteps;
+        }
+        Real64 Cp = plntLoop.glycol->getSpecificHeat(state, plntSizData.ExitTemp, callingRoutine);
+        Real64 rho = plntLoop.glycol->getDensity(state, plntSizData.ExitTemp, callingRoutine);
+        Real64 onPeakEnergy = onPeakSumWaterFlow * rho * Cp * plntSizData.DeltaT * Constant::rSecsInHour *
+                              onPeakHours; // need Joules here, J = m3/s * kg/m3 * J/kg-C * C * sec/hr * hr
+
+        // now apply the heat of fusion J/Kg and size tank
+        // Real64 tankCapacityKg = onPeakEnergy * sizingFactor / tankHeatOfFusion;    // kg
+        // Real64 tankCapacityM3 = tankCapacityKg / rho;                              // m3
+        Real64 tankCapacity = onPeakEnergy * sizingFactor / Constant::rSecsInHour; // kWh for detailed model
+
+        if (this->NomCapacityWasAutoSized) {
+            this->NomCapacity = std::max(1.0, tankCapacity);
+        }
+        if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+            if (!this->NomCapacityWasAutoSized) {
+                BaseSizer::reportSizerOutput(
+                    state, tankType, this->Name, "User-Specified Capacity [GJ]", this->NomCapacity * Constant::rSecsInHour / 1.0E9);
+            }
+            BaseSizer::reportSizerOutput(state, tankType, this->Name, "Design Size Capacity [GJ]", tankCapacity * Constant::rSecsInHour / 1.0E9);
+        }
+    }
+
+    void SimpleIceStorageData::size(EnergyPlusData &state)
+    {
+        int const TESTankIndex = Util::FindItemInList(this->Name, state.dataIceThermalStorage->SimpleIceStorage, &SimpleIceStorageData::Name);
+        int const TESSizingIndex = state.dataIceThermalStorage->SimpleIceStorage(TESTankIndex).TESSizingIndex;
+        if (TESSizingIndex == 0) {
+            return;
+        }
+        std::string_view const tankType = "ThermalStorage:Ice:Simple";
+        std::string_view const callingRoutine = "SimpleIceStorageData::size";
+        // Real64 constexpr tankHeatOfFusion = 334000.0; // J/Kg
+        auto &plntLoop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+        int PltSizNum = plntLoop.PlantSizNum;
+        auto &plntSizData = state.dataSize->PlantSizData(PltSizNum);
+
+        Real64 startPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
+        Real64 endPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
+        Real64 onPeakTimeSteps = endPeak - startPeak;
+        Real64 onPeakHours = onPeakTimeSteps / state.dataGlobal->TimeStepsInHour;
+        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).sizingFactor;
+        Real64 onPeakSumWaterFlow = 0.0;
+        if (!plntLoop.plantDesWaterFlowRate.empty()) {
+            for (int ts = 0; ts < 24 * state.dataGlobal->TimeStepsInHour; ++ts) {
+                if (ts > startPeak && ts <= endPeak) {
+                    onPeakSumWaterFlow += plntLoop.plantDesWaterFlowRate[ts];
+                }
+            }
+            onPeakSumWaterFlow /= onPeakTimeSteps; // average m3/s
+        }
+        Real64 Cp = plntLoop.glycol->getSpecificHeat(state, plntSizData.ExitTemp, callingRoutine);
+        Real64 rho = plntLoop.glycol->getDensity(state, plntSizData.ExitTemp, callingRoutine);
+        // Real64 onPeakEnergy2 = onPeakSumWaterFlow * rho * Constant::rSecsInHour * onPeakHours *
+        //                        tankHeatOfFusion; // need Joules here, J = m3/s * kg/m3 * sec/hr * hr * J/kg
+        Real64 onPeakEnergy = onPeakSumWaterFlow * rho * Cp * plntSizData.DeltaT * Constant::rSecsInHour *
+                              onPeakHours; // need Joules here, J = m3/s * kg/m3 * J/kg-C * C * sec/hr * hr
+
+        // now apply the heat of fusion J/Kg and size tank
+        // Real64 tankCapacityKg = onPeakEnergy * sizingFactor / tankHeatOfFusion; // kg
+        // Real64 tankCapacityM3 = tankCapacityKg / rho;                           // m3
+        Real64 tankCapacity = onPeakEnergy * sizingFactor; // J for simple model
+
+        if (this->NomCapacityWasAutoSized) {
+            this->ITSNomCap = std::max(1.0, tankCapacity);
+        }
+        if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+            if (!this->NomCapacityWasAutoSized) {
+                BaseSizer::reportSizerOutput(state, tankType, this->Name, "User-Specified Capacity [GJ]", this->ITSNomCap / 1.0E9);
+            }
+            BaseSizer::reportSizerOutput(state, tankType, this->Name, "Design Size Capacity [GJ]", tankCapacity / 1.0E9);
+        }
+    }
+
     void SimpleIceStorageData::oneTimeInit(EnergyPlusData &state)
     {
 
@@ -1383,6 +1576,10 @@ namespace IceThermalStorage {
             this->setupOutputVars(state);
             this->MyPlantScanFlag = false;
         }
+    }
+
+    void SimpleIceStorageData::initialize(EnergyPlusData &state)
+    {
 
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag2) {
             this->DesignMassFlowRate = state.dataPlnt->PlantLoop(this->plantLoc.loopNum).MaxMassFlowRate;

@@ -3737,6 +3737,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
     Heat Pump Water Heater Evaporator_unit1,  !- Name
+    ,                        !- Availability Schedule Name
     1500,                    !- Rated Heating Capacity {W}
     3.0,                     !- Rated COP {W/W}
     0.981,                   !- Rated Sensible Heat Ratio

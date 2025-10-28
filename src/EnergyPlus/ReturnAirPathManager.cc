@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
+#include <EnergyPlus/DuctLoss.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/MixerComponent.hh>
@@ -234,6 +235,10 @@ namespace ReturnAirPathManager {
                     SimAirMixer(state,
                                 state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).ComponentName(ComponentNum),
                                 state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).ComponentIndex(ComponentNum));
+                    if (state.dataDuctLoss->DuctLossSimu) {
+                        DuctLoss::SimulateDuctLoss(
+                            state, DuctLoss::AirPath::Return, state.dataZoneEquip->ReturnAirPath(ReturnAirPathNum).ComponentIndex(ComponentNum));
+                    }
                 }
 
                 break;

@@ -120,10 +120,6 @@ namespace HeatingCoils {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int CoilNum(0);       // The HeatingCoil that you are currently loading input into
-        Real64 QCoilActual2;  // coil load actually delivered returned from specific coil
-        HVAC::FanOp fanOp;    // fan operating mode
-        Real64 PartLoadFrac;  // part-load fraction of heating coil
-        Real64 QCoilRequired; // local variable for optional argument
 
         // Obtains and Allocates HeatingCoil related parameters from input file
         if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
@@ -395,6 +391,7 @@ namespace HeatingCoils {
 
             heatingCoil.HeatingCoilModel = "Electric";
             heatingCoil.coilType = HVAC::CoilType::HeatingElectric;
+            heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, heatingCoil.Name, heatingCoil.coilType);
 
             heatingCoil.Efficiency = Numbers(1);
             heatingCoil.NominalCapacity = Numbers(2);
@@ -505,6 +502,7 @@ namespace HeatingCoils {
 
             heatingCoil.HeatingCoilModel = "Electric:MultiStage";
             heatingCoil.coilType = HVAC::CoilType::HeatingElectricMultiStage;
+            heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, heatingCoil.Name, heatingCoil.coilType);
 
             heatingCoil.NumOfStages = static_cast<int>(Numbers(1));
 
@@ -625,6 +623,7 @@ namespace HeatingCoils {
 
             heatingCoil.HeatingCoilModel = "Fuel";
             heatingCoil.coilType = HVAC::CoilType::HeatingGasOrOtherFuel;
+            heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, heatingCoil.Name, heatingCoil.coilType);
 
             heatingCoil.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Alphas(3)));
             if (!(heatingCoil.FuelType == Constant::eFuel::NaturalGas || heatingCoil.FuelType == Constant::eFuel::Propane ||
@@ -799,6 +798,7 @@ namespace HeatingCoils {
 
             heatingCoil.HeatingCoilModel = "Gas:MultiStage";
             heatingCoil.coilType = HVAC::CoilType::HeatingGasMultiStage;
+            heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, heatingCoil.Name, heatingCoil.coilType);
 
             heatingCoil.ParasiticFuelCapacity = Numbers(1);
 
@@ -975,6 +975,7 @@ namespace HeatingCoils {
 
             heatingCoil.HeatingCoilModel = "Desuperheater";
             heatingCoil.coilType = HVAC::CoilType::HeatingDesuperheater;
+            heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, heatingCoil.Name, heatingCoil.coilType);
 
             // HeatingCoil(CoilNum)%Efficiency       = Numbers(1)
             //(Numbers(1)) error limits checked and defaults applied on efficiency after
@@ -2806,7 +2807,7 @@ namespace HeatingCoils {
         if (heatCoil.reportCoilFinalSizes) {
             if (!state.dataGlobal->WarmupFlag && !state.dataGlobal->DoingHVACSizingSimulations && !state.dataGlobal->DoingSizing) {
                 ReportCoilSelection::setCoilFinalSizes(
-                    state, heatCoil.Name, heatCoil.coilType, heatCoil.NominalCapacity, heatCoil.NominalCapacity, -999.0, -999.0);
+                    state, heatCoil.coilReportNum, heatCoil.NominalCapacity, heatCoil.NominalCapacity, -999.0, -999.0);
                 heatCoil.reportCoilFinalSizes = false;
             }
         }

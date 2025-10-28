@@ -214,7 +214,6 @@ namespace FanCoilUnits {
         int NumNumbers;                // Number of Numbers for each GetObjectItem call
         Array1D_int OANodeNums(4);     // Node numbers of Outdoor air mixer (OA, EA, RA, MA)
         int IOStatus;                  // Used in GetObjectItem
-        bool IsNotOK;                  // Flag to verify name
         Array1D_string Alphas;         // Alpha input items for object
         Array1D_string cAlphaFields;   // Alpha field names
         Array1D_string cNumericFields; // Numeric field names
@@ -921,15 +920,17 @@ namespace FanCoilUnits {
             SetupOutputVariable(state,
                                 "Fan Coil Availability Status",
                                 Constant::Units::None,
-                                (int &)fanCoil.availStatus,
+                                fanCoil.availStatus,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 fanCoil.Name);
 
             ReportCoilSelection::setCoilSupplyFanInfo(
-                state, fanCoil.CoolCoilName, fanCoil.coolCoilType, fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
+                state, ReportCoilSelection::getReportIndex(state, fanCoil.CoolCoilName, fanCoil.coolCoilType),
+                fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
             ReportCoilSelection::setCoilSupplyFanInfo(
-                state, fanCoil.HeatCoilName, fanCoil.heatCoilType, fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
+                state, ReportCoilSelection::getReportIndex(state, fanCoil.HeatCoilName, fanCoil.heatCoilType),
+                fanCoil.FanName, fanCoil.fanType, fanCoil.FanIndex);
         }
     }
 
@@ -1150,7 +1151,6 @@ namespace FanCoilUnits {
         bool PrintFlag;   // TRUE when sizing information is reported in the eio file
                           // FractionOfAutosizedHeatingAirflow ...)
         Real64 WaterCoilSizDeltaT; // water coil deltaT for design water flow rate autosizing
-        int CoilNum;               // index of water coil object
 
         bool ErrorsFound = false;             // TRUE if errors found during sizing
         bool IsAutoSize = false;              // Indicator to autosize for reporting

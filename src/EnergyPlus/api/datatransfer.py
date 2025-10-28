@@ -110,7 +110,7 @@ class DataExchange:
             #: and represents the control actuation.  For a node setpoint actuation, this could be "temperature" or
             #: "humidity", for example.
             self.type: str = _type
-            #: This represents the unit of measure for this exchange point.  
+            #: This represents the unit of measure for this exchange point.
             #: This is NOT used for plugin variables such as PluginGlobalVariable and PluginTrendVariable.
             self.unit: str = _unit
 
@@ -330,11 +330,17 @@ class DataExchange:
 
     def api_data_fully_ready(self, state: c_void_p) -> bool:
         """
-        Check whether the data exchange API is ready.
-        Handles to variables, actuators, and other data are not reliably defined prior to this being true.
+        Check whether the data exchange API is fully ready.
+        Handles to variables, actuators, and other data are not guaranteed to be defined prior to this being true.
+        Up until this point some output vars, meters, actuators, etc., may not have been registered yet.
 
-        :param state: An active EnergyPlus "state" that is returned from a call to `api.state_manager.new_state()`.
+        :param state: An active EnergyPlus "state" that is returned from a call to :func:`api.state_manager.new_state() <state.StateManager.new_state>`.
         :return: Returns a boolean value to indicate whether variables, actuators, and other data are ready for access.
+
+        .. note::
+            In the case of Surface actuators for "Construction State" and for a call to :func:`get_construction_handle`,
+            this is not required to be true, as construction data is generally available earlier in the simulation process.
+            Bypassing this check will allow affecting the Sizing calculations.
         """
         if self.api.apiDataFullyReady(state) == 1:
             return True

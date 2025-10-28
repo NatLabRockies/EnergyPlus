@@ -604,7 +604,7 @@ void Foundation::createMeshData() {
   double xyNearInt = std::min({xyWallInterior, xyPerimeterSurface, xyNearMin});
   double xyNearExt = std::max({xyWallExterior, xyNearMax});
 
-  // Set depending on N dimensions, coordinate system, and 2D appoximation method
+  // Set depending on N dimensions, coordinate system, and 2D approximation method
   double xMin, xMax, yMin, yMax;
 
   Ranges xRanges;
@@ -658,6 +658,7 @@ void Foundation::createMeshData() {
   // Set 3D foundation areas (for calculation of total heat transfer rates)
 
   Box boundingBox;
+  boost::geometry::assign_inverse(boundingBox);
   boost::geometry::envelope(polygon, boundingBox);
 
   double xMinBB = boundingBox.min_corner().get<0>();

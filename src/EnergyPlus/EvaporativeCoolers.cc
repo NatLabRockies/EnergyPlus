@@ -3729,7 +3729,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
         SetupOutputVariable(state,
                             "Zone Evaporative Cooler Unit Fan Availability Status",
                             Constant::Units::None,
-                            (int &)thisZoneEvapUnit.FanAvailStatus,
+                            thisZoneEvapUnit.FanAvailStatus,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             thisZoneEvapUnit.Name);

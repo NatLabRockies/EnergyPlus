@@ -618,7 +618,6 @@ TEST_F(EnergyPlusFixture, RoomAirflowNetwork_CheckEquipName_Test)
     std::string const EquipName = "ZoneEquip";
     std::string SupplyNodeName;
     std::string ReturnNodeName;
-    int TotNumEquip = 1;
     int EquipIndex = 1; // Equipment index
     DataZoneEquipment::ZoneEquipType zoneEquipType;
 

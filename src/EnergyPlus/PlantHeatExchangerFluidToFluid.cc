@@ -91,13 +91,13 @@ namespace EnergyPlus::PlantHeatExchangerFluidToFluid {
 
 std::string const ComponentClassName("HeatExchanger:FluidToFluid");
 
-constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNames = {"CrossFlowBothUnMixed",
-                                                                                  "CrossFlowBothMixed",
-                                                                                  "CrossFlowSupplyMixedDemandUnMixed",
-                                                                                  "CrossFlowSupplyUnMixedDemandMixed",
-                                                                                  "CounterFlow",
-                                                                                  "ParallelFlow",
-                                                                                  "Ideal"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNames = {"CrossFlowBothUnMixed",
+                                                                                                   "CrossFlowBothMixed",
+                                                                                                   "CrossFlowSupplyMixedDemandUnMixed",
+                                                                                                   "CrossFlowSupplyUnMixedDemandMixed",
+                                                                                                   "CounterFlow",
+                                                                                                   "ParallelFlow",
+                                                                                                   "Ideal"};
 constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNamesUC = {"CROSSFLOWBOTHUNMIXED",
                                                                                     "CROSSFLOWBOTHMIXED",
                                                                                     "CROSSFLOWSUPPLYMIXEDDEMANDUNMIXED",
@@ -106,18 +106,18 @@ constexpr std::array<std::string_view, (int)FluidHXType::Num> fluidHXTypeNamesUC
                                                                                     "PARALLELFLOW",
                                                                                     "IDEAL"};
 
-constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNames = {"UncontrolledOn",
-                                                                                  "OperationSchemeModulated",
-                                                                                  "OperationSchemeOnOff",
-                                                                                  "HeatingSetpointModulated",
-                                                                                  "HeatingSetpointOnOff",
-                                                                                  "CoolingSetpointModulated",
-                                                                                  "CoolingSetpointOnOff",
-                                                                                  "DualDeadbandSetpointModulated",
-                                                                                  "DualDeadbandSetpointOnOff",
-                                                                                  "CoolingDifferentialOnOff",
-                                                                                  "CoolingSetpointOnOffWithComponentOverride",
-                                                                                  "TrackComponentOnOff"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNames = {"UncontrolledOn",
+                                                                                                   "OperationSchemeModulated",
+                                                                                                   "OperationSchemeOnOff",
+                                                                                                   "HeatingSetpointModulated",
+                                                                                                   "HeatingSetpointOnOff",
+                                                                                                   "CoolingSetpointModulated",
+                                                                                                   "CoolingSetpointOnOff",
+                                                                                                   "DualDeadbandSetpointModulated",
+                                                                                                   "DualDeadbandSetpointOnOff",
+                                                                                                   "CoolingDifferentialOnOff",
+                                                                                                   "CoolingSetpointOnOffWithComponentOverride",
+                                                                                                   "TrackComponentOnOff"};
 constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNamesUC = {"UNCONTROLLEDON",
                                                                                     "OPERATIONSCHEMEMODULATED",
                                                                                     "OPERATIONSCHEMEONOFF",
@@ -131,7 +131,8 @@ constexpr std::array<std::string_view, (int)ControlType::Num> controlTypeNamesUC
                                                                                     "COOLINGSETPOINTONOFFWITHCOMPONENTOVERRIDE",
                                                                                     "TRACKCOMPONENTONOFF"};
 
-constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNames = {"WetBulbTemperature", "DryBulbTemperature", "Loop"};
+[[maybe_unused]] constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNames = {
+    "WetBulbTemperature", "DryBulbTemperature", "Loop"};
 constexpr std::array<std::string_view, (int)CtrlTempType::Num> ctrlTempTypeNamesUC = {"WETBULBTEMPERATURE", "DRYBULBTEMPERATURE", "LOOP"};
 
 PlantComponent *HeatExchangerStruct::factory(EnergyPlusData &state, std::string const &objectName)
@@ -909,6 +910,7 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMechType, this->Name, "HeatExchanger:FluidToFluid");
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMechNomCap, this->Name, this->SupplySideLoop.MaxLoad);
     }
+    this->updateCompFlowData(state);
 }
 
 void HeatExchangerStruct::control(EnergyPlusData &state, Real64 MyLoad, bool FirstHVACIteration)
@@ -1996,6 +1998,103 @@ void HeatExchangerStruct::oneTimeInit(EnergyPlusData &state)
         }
         this->MyFlag = false;
     }
+}
+
+void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
+{
+    int demandArrayIndex = -1;
+    int supplyArrayIndex = -1;
+    auto &demandCompNames = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).plantCoilObjectNames;
+    auto &demandCompTypes = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).plantCoilObjectTypes;
+    auto &supplyCompNames = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).plantCoilObjectNames;
+    auto &supplyCompTypes = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).plantCoilObjectTypes;
+    for (size_t i = 0; i < demandCompNames.size(); ++i) {
+        if (demandCompNames[i] == this->Name && demandCompTypes[i] == this->DemandSideLoop.comp->Type) {
+            demandArrayIndex = i;
+            break;
+        }
+    }
+    for (size_t i = 0; i < supplyCompNames.size(); ++i) {
+        if (supplyCompNames[i] == this->Name && supplyCompTypes[i] == this->SupplySideLoop.comp->Type) {
+            supplyArrayIndex = i;
+            break;
+        }
+    }
+    size_t demandCompSize = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).compDesWaterFlowRate.size();
+    auto &demandCoilData = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).compDesWaterFlowRate;
+    size_t supplyCompSize = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate.size();
+    auto &supplyCoilData = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate;
+    std::vector<Real64> supplyFlowData;
+    supplyFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
+    for (size_t i = 0; i < supplyFlowData.size(); ++i) {
+        supplyFlowData[i] = 0.0;
+    }
+    if (supplyCompSize > 0) {
+        for (size_t comp = 0; comp < supplyCoilData.size(); ++comp) {
+            if (static_cast<int>(comp) == supplyArrayIndex) {
+                continue;
+            }
+            for (size_t ts = 0; ts < supplyCoilData[comp].tsDesWaterFlowRate.size(); ++ts) {
+                supplyFlowData[ts] += supplyCoilData[comp].tsDesWaterFlowRate[ts];
+            }
+            supplyFlowData[0] = -1;
+        }
+        if (demandArrayIndex == -1) {
+            demandCompNames.emplace_back(this->Name);
+            demandCompTypes.emplace_back(this->SupplySideLoop.comp->Type);
+            size_t arrayIndex = demandCoilData.size() + 1;
+            demandCoilData.resize(arrayIndex);
+            demandCoilData[arrayIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
+            demandCoilData[arrayIndex - 1].tsDesWaterFlowRate = supplyFlowData;
+        } else {
+            demandCoilData[demandArrayIndex].tsDesWaterFlowRate = supplyFlowData;
+        }
+    }
+    if (hasSupplySideTES(state)) {
+        // if the supply side of the HX contains a TES system then copy demand side coil data to supply side so TES can size on the whole load
+        std::vector<Real64> demandFlowData;
+        demandFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
+        for (size_t i = 0; i < demandFlowData.size(); ++i) {
+            demandFlowData[i] = 0.0;
+        }
+        if (demandCompSize > 0) {
+            for (size_t comp = 0; comp < demandCoilData.size(); ++comp) {
+                if (static_cast<int>(comp) == demandArrayIndex) {
+                    continue;
+                }
+                for (size_t ts = 0; ts < demandCoilData.size(); ++ts) {
+                    demandFlowData[ts] += demandCoilData[comp].tsDesWaterFlowRate[ts];
+                }
+                demandFlowData[0] = -1;
+            }
+        }
+        if (demandCompSize > 0) {
+            if (supplyArrayIndex == -1) {
+                supplyCompNames.emplace_back(this->Name);
+                supplyCompTypes.emplace_back(this->SupplySideLoop.comp->Type);
+                size_t arrayIndex = supplyCoilData.size() + 1;
+                supplyCoilData.resize(arrayIndex);
+                supplyCoilData[arrayIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
+                supplyCoilData[arrayIndex - 1].tsDesWaterFlowRate = demandFlowData;
+            } else {
+                supplyCoilData[demandArrayIndex].tsDesWaterFlowRate = demandFlowData;
+            }
+        }
+    }
+}
+
+bool HeatExchangerStruct::hasSupplySideTES(EnergyPlusData &state)
+{
+    for (auto const &loopSide : state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).LoopSide) {
+        for (auto const &branch : loopSide.Branch) {
+            for (auto const &comp : branch.Comp) {
+                if (comp.Type == DataPlant::PlantEquipmentType::TS_IceDetailed || comp.Type == DataPlant::PlantEquipmentType::TS_IceSimple) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace EnergyPlus::PlantHeatExchangerFluidToFluid

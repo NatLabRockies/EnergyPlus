@@ -1313,6 +1313,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.001,                   !- Design Source Side Flow Rate {m3/s}
@@ -1348,6 +1349,7 @@
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.001,                   !- Design Source Side Flow Rate {m3/s}

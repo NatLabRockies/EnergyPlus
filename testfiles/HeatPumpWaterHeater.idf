@@ -2255,6 +2255,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     HPWHDXCoil,              !- Name
+    ,                        !- Availability Schedule Name
     4000.0,                  !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.6956,                  !- Rated Sensible Heat Ratio
@@ -2476,6 +2477,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     Zone4HPWHDXCoil,         !- Name
+    ,                        !- Availability Schedule Name
     4000.0,                  !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.6956,                  !- Rated Sensible Heat Ratio
@@ -2600,6 +2602,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     Zone4bHPWHDXCoil,        !- Name
+    ,                        !- Availability Schedule Name
     4000,                    !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.6956,                  !- Rated Sensible Heat Ratio
@@ -2726,6 +2729,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     HPWHOutdoorDXCoil,       !- Name
+    ,                        !- Availability Schedule Name
     4000.0,                  !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.736,                   !- Rated Sensible Heat Ratio
@@ -2877,6 +2881,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     HPWHScheduledDXCoil,     !- Name
+    ,                        !- Availability Schedule Name
     4000.0,                  !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.736,                   !- Rated Sensible Heat Ratio
@@ -3964,6 +3969,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Pumped,
     HPWHPlantDXCoil,         !- Name
+    ,                        !- Availability Schedule Name
     25000.0,                 !- Rated Heating Capacity {W}
     3.2,                     !- Rated COP {W/W}
     0.736,                   !- Rated Sensible Heat Ratio
@@ -4607,8 +4613,6 @@
     0.00379,                 !- Peak Flow Rate {m3/s}
     Hot Water Demand Schedule,  !- Flow Rate Fraction Schedule Name
     ;                        !- Target Temperature Schedule Name
-
-  Schedule:Constant,SSBWaterTempSchedule,TEMPERATURE,43.333333333333336;
 
   WaterUse:Connections,
     Domestic Hot Water,      !- Name

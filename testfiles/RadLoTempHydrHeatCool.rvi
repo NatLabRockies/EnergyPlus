@@ -12,6 +12,7 @@ Zone Radiant HVAC Mass Flow Rate
 Zone Radiant HVAC Inlet Temperature
 Zone Radiant HVAC Outlet Temperature
 Surface Internal Source Location Temperature
+Zone Thermal Comfort Clothing Value
 Zone Thermal Comfort Fanger Model PMV
 Zone Thermal Comfort Pierce Model Thermal Sensation Index
 Zone Thermal Comfort KSU Model Thermal Sensation Vote

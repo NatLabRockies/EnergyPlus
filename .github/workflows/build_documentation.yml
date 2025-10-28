@@ -23,21 +23,32 @@ jobs:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             pretty: "Windows"
+#         - os: macos-15
+#           generator: "Unix Makefiles"
+#           pretty: 'Mac arm64'
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - name: Checkout EnergyPlus
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
     - name: Set up LaTeX on Linux
       if: runner.os == 'Linux'
       run: sudo apt update && sudo apt install -y texlive texlive-xetex texlive-science poppler-utils
+
+    - name: Setup up LaTeX on Mac
+      if: runner.os == 'macOS'
+      run: |
+        echo "Using brew to install basictex and adding it to PATH"
+        brew install --cask basictex
+        echo "/Library/TeX/texbin" >> $GITHUB_PATH
+        brew install poppler
 
     - name: Set up LaTeX on Windows
       if: runner.os == 'Windows'
@@ -99,6 +110,19 @@ jobs:
           exit 1
         fi;
         echo "TOC is available for pass NO.2"
+
+    - name: Preinstall Packages on macOS
+      if: runner.os == 'macOS'
+      working-directory: ./doc/test
+      run: |
+        sudo tlmgr update --self
+        # Just install these, since I now know what we need
+        sudo tlmgr install enumitem framed multirow siunitx
+        # sudo tlmgr list --only-installed --data name > ori_installed.lst
+        # sudo tlmgr install texliveonfly
+        # sudo texliveonfly --compiler=xelatex dependencies.tex
+        # sudo tlmgr list --only-installed --data name > new_installed.lst
+        # python -c "from pathlib import Path; ori_lines = set(Path('./ori_installed.lst').read_text().splitlines()); new_lines = set(Path('./new_installed.lst').read_text().splitlines()); new_pkgs = new_lines - ori_lines; print([x for x in new_pkgs if not x.startswith('texliveonfly')])"
 
     - name: Create Build Environment
       run: cmake -E make_directory ./doc/build
@@ -179,9 +203,9 @@ jobs:
 
     - name: Upload entire pdf folder
       uses: actions/upload-artifact@v4
-      if: always() && matrix.os == 'ubuntu-24.04'
+      if: always()
       with:
-        name: AllDocumentation
+        name: "AllDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
         path: ${{ github.workspace }}/doc/build/pdf/
 
     - name: Upload log folder upon failure

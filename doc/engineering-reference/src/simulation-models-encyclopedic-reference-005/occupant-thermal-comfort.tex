@@ -231,6 +231,8 @@ DryRespHeatLoss = 0.0014*ActLevel*(34.- AirTemp)
 \label{eq:FangerQr}
 \end{equation}
 
+It should be noted that the calculation of the clothing surface temperature in the previous two equations is based on ANSI/ASHRAE Standard 55-2020 and ISO 7730:2005. The equations and iterative algorithm used by EnergyPlus to calculate the clothing surface temperature variables are equivalent to these standards.
+
 In the EnergyPlus source code, Q\(_{dry}\), Q\(_{c}\) and Q\(_{r}\) are calculated using the following equations, respectively:
 
 DryHeatLoss = ConvHeatLoss + RadHeatLoss

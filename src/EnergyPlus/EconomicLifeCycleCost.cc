@@ -1678,659 +1678,809 @@ void WriteTabularLifeCycleCostReport(EnergyPlusData &state)
 
     auto const &elcc = state.dataEconLifeCycleCost;
 
-    if (elcc->LCCparamPresent && state.dataOutRptTab->displayLifeCycleCostReport) {
-        //---------------------------------
-        // Life-Cycle Cost Verification and Results Report
-        //---------------------------------
-        OutputReportTabular::WriteReportHeaders(state, "Life-Cycle Cost Report", "Entire Facility", OutputProcessor::StoreType::Average);
-        //---- Life-Cycle Cost Parameters
-        rowHead.allocate(11);
-        columnHead.allocate(1);
-        columnWidth.allocate(1);
-        tableBody.allocate(1, 11);
-        tableBody = "";
-        rowHead(1) = "Name";
-        rowHead(2) = "Discounting Convention";
-        rowHead(3) = "Inflation Approach";
-        rowHead(4) = "Real Discount Rate";
-        rowHead(5) = "Nominal Discount Rate";
-        rowHead(6) = "Inflation";
-        rowHead(7) = "Base Date";
-        rowHead(8) = "Service Date";
-        rowHead(9) = "Length of Study Period in Years";
-        rowHead(10) = "Tax rate";
-        rowHead(11) = "Depreciation Method";
-        columnHead(1) = "Value";
-
-        tableBody(1, 1) = elcc->LCCname;
-        tableBody(1, 2) = DiscConvNames[static_cast<int>(elcc->discountConvention)];
-        tableBody(1, 3) = InflApprNames[static_cast<int>(elcc->inflationApproach)];
-        if (elcc->inflationApproach == InflAppr::ConstantDollar) {
-            tableBody(1, 4) = OutputReportTabular::RealToStr(elcc->realDiscountRate, 4);
-        } else {
-            tableBody(1, 4) = "-- N/A --";
-        }
-        if (elcc->inflationApproach == InflAppr::CurrentDollar) {
-            tableBody(1, 5) = OutputReportTabular::RealToStr(elcc->nominalDiscountRate, 4);
-        } else {
-            tableBody(1, 5) = "-- N/A --";
-        }
-        if (elcc->inflationApproach == InflAppr::CurrentDollar) {
-            tableBody(1, 6) = OutputReportTabular::RealToStr(elcc->inflation, 4);
-        } else {
-            tableBody(1, 6) = "-- N/A --";
-        }
-        tableBody(1, 7) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear);
-        tableBody(1, 8) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->serviceDateMonth)], elcc->serviceDateYear);
-        tableBody(1, 9) = fmt::to_string(elcc->lengthStudyYears);
-        tableBody(1, 10) = OutputReportTabular::RealToStr(elcc->taxRate, 4);
-        tableBody(1, 11) = DeprMethodNames[static_cast<int>(elcc->depreciationMethod)];
-
-        columnWidth = 14; // array assignment - same for all columns
-        OutputReportTabular::WriteSubtitle(state, "Life-Cycle Cost Parameters");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Life-Cycle Cost Parameters");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Life-Cycle Cost Parameters");
-        }
-
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Use Price Escalation
-        int numColumns = max(1, elcc->numUsePriceEscalation);
-        rowHead.allocate(elcc->lengthStudyYears + 2);
-        columnHead.allocate(numColumns);
-        columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
-        tableBody.allocate(numColumns, elcc->lengthStudyYears + 2);
-        tableBody = "";
-        columnHead = "none";
-        rowHead(1) = "Resource";
-        rowHead(2) = "Start Date";
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear + 2) = fmt::to_string(iYear);
-        }
-        for (int jObj = 1; jObj <= elcc->numUsePriceEscalation; ++jObj) { // loop through objects not columns to add names
-            columnHead(jObj) = elcc->UsePriceEscalation(jObj).name;
-            tableBody(jObj, 1) = Constant::eResourceNames[static_cast<int>(elcc->UsePriceEscalation(jObj).resource)];
-            tableBody(jObj, 2) = format("{} {}",
-                                        Util::MonthNamesCC[static_cast<int>(elcc->UsePriceEscalation(jObj).escalationStartMonth)],
-                                        elcc->UsePriceEscalation(jObj).escalationStartYear);
-        }
-        for (int jObj = 1; jObj <= elcc->numUsePriceEscalation; ++jObj) {
-            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                tableBody(jObj, iYear + 2) = OutputReportTabular::RealToStr(elcc->UsePriceEscalation(jObj).Escalation(iYear), 6);
+    for (auto &currentStyle : state.dataOutRptTab->tabularReportPasses) {
+        if (elcc->LCCparamPresent && state.dataOutRptTab->displayLifeCycleCostReport) {
+            //---------------------------------
+            // Life-Cycle Cost Verification and Results Report
+            //---------------------------------
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteReportHeaders(state, "Life-Cycle Cost Report", "Entire Facility", OutputProcessor::StoreType::Average);
             }
-        }
-        OutputReportTabular::WriteSubtitle(state, "Use Price Escalation");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Price Escalation");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Price Escalation");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Use Adjustment
-        if (elcc->numUseAdjustment >= 1) { // only create table if objects used
-            numColumns = max(1, elcc->numUseAdjustment);
-            int numYears = elcc->lengthStudyYears - (elcc->serviceDateYear - elcc->baseDateYear);
-            rowHead.allocate(numYears + 1);
-            columnHead.allocate(numColumns);
-            columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
-            tableBody.allocate(numColumns, numYears + 1);
+            //---- Life-Cycle Cost Parameters
+            rowHead.allocate(11);
+            columnHead.allocate(1);
+            columnWidth.allocate(1);
+            tableBody.allocate(1, 11);
             tableBody = "";
-            columnHead = "none";
-            rowHead(1) = "";
-            for (int iYear = 1; iYear <= numYears; ++iYear) {
-                rowHead(iYear + 1) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->serviceDateMonth)], elcc->serviceDateYear + iYear - 1);
+            rowHead(1) = "Name";
+            rowHead(2) = "Discounting Convention";
+            rowHead(3) = "Inflation Approach";
+            rowHead(4) = "Real Discount Rate";
+            rowHead(5) = "Nominal Discount Rate";
+            rowHead(6) = "Inflation";
+            rowHead(7) = "Base Date";
+            rowHead(8) = "Service Date";
+            rowHead(9) = "Length of Study Period in Years";
+            rowHead(10) = "Tax rate";
+            rowHead(11) = "Depreciation Method";
+            columnHead(1) = "Value";
+
+            tableBody(1, 1) = elcc->LCCname;
+            tableBody(1, 2) = DiscConvNames[static_cast<int>(elcc->discountConvention)];
+            tableBody(1, 3) = InflApprNames[static_cast<int>(elcc->inflationApproach)];
+            if (elcc->inflationApproach == InflAppr::ConstantDollar) {
+                tableBody(1, 4) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->realDiscountRate, 4);
+            } else {
+                tableBody(1, 4) = "-- N/A --";
             }
-            for (int jObj = 1; jObj <= elcc->numUseAdjustment; ++jObj) { // loop through objects not columns to add names
-                columnHead(jObj) = elcc->UseAdjustment(jObj).name;
-                tableBody(jObj, 1) = Constant::eResourceNames[static_cast<int>(elcc->UseAdjustment(jObj).resource)];
+            if (elcc->inflationApproach == InflAppr::CurrentDollar) {
+                tableBody(1, 5) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->nominalDiscountRate, 4);
+            } else {
+                tableBody(1, 5) = "-- N/A --";
             }
-            for (int jObj = 1; jObj <= elcc->numUseAdjustment; ++jObj) {
-                for (int iYear = 1; iYear <= numYears; ++iYear) {
-                    tableBody(jObj, iYear + 1) = OutputReportTabular::RealToStr(elcc->UseAdjustment(jObj).Adjustment(iYear), 6);
+            if (elcc->inflationApproach == InflAppr::CurrentDollar) {
+                tableBody(1, 6) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->inflation, 4);
+            } else {
+                tableBody(1, 6) = "-- N/A --";
+            }
+            tableBody(1, 7) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear);
+            tableBody(1, 8) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->serviceDateMonth)], elcc->serviceDateYear);
+            tableBody(1, 9) = fmt::to_string(elcc->lengthStudyYears);
+            tableBody(1, 10) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->taxRate, 4);
+            tableBody(1, 11) = DeprMethodNames[static_cast<int>(elcc->depreciationMethod)];
+
+            columnWidth = 14; // array assignment - same for all columns
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Life-Cycle Cost Parameters");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Life-Cycle Cost Parameters");
                 }
             }
-            OutputReportTabular::WriteSubtitle(state, "Use Adjustment");
-            OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            if (state.dataSQLiteProcedures->sqlite) {
-                state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                    tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Adjustment");
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Life-Cycle Cost Parameters");
+                }
             }
-            if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                    tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Adjustment");
+
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Use Price Escalation
+            int numColumns = max(1, elcc->numUsePriceEscalation);
+            rowHead.allocate(elcc->lengthStudyYears + 2);
+            columnHead.allocate(numColumns);
+            columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
+            tableBody.allocate(numColumns, elcc->lengthStudyYears + 2);
+            tableBody = "";
+            columnHead = "none";
+            rowHead(1) = "Resource";
+            rowHead(2) = "Start Date";
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear + 2) = fmt::to_string(iYear);
+            }
+            for (int jObj = 1; jObj <= elcc->numUsePriceEscalation; ++jObj) { // loop through objects not columns to add names
+                columnHead(jObj) = elcc->UsePriceEscalation(jObj).name;
+                tableBody(jObj, 1) = Constant::eResourceNames[static_cast<int>(elcc->UsePriceEscalation(jObj).resource)];
+                tableBody(jObj, 2) = format("{} {}",
+                                            Util::MonthNamesCC[static_cast<int>(elcc->UsePriceEscalation(jObj).escalationStartMonth)],
+                                            elcc->UsePriceEscalation(jObj).escalationStartYear);
+            }
+            for (int jObj = 1; jObj <= elcc->numUsePriceEscalation; ++jObj) {
+                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                    tableBody(jObj, iYear + 2) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->UsePriceEscalation(jObj).Escalation(iYear), 6);
+                }
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Use Price Escalation");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Price Escalation");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Price Escalation");
+                }
             }
             columnHead.deallocate();
             rowHead.deallocate();
             columnWidth.deallocate();
             tableBody.deallocate();
-        }
-        //---- Cash Flow for Recurring and Nonrecurring Costs
-        numColumns = max(1, elcc->numRecurringCosts + elcc->numNonrecurringCost);
-        rowHead.allocate(elcc->lengthStudyYears + 1);
-        columnHead.allocate(numColumns);
-        columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
-        tableBody.allocate(numColumns, elcc->lengthStudyYears + 1);
-        tableBody = "";
-        rowHead(1) = "";
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear + 1) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-        }
-        for (int jObj = 0; jObj < (elcc->numRecurringCosts + elcc->numNonrecurringCost); ++jObj) {
-            int curCashFlow = CostCategory::Num + jObj;
-            columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
-
-            tableBody(jObj + 1, 1) = SourceKindTypeNames[static_cast<int>(elcc->CashFlow[curCashFlow].SourceKind)];
-
-            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                tableBody(jObj + 1, iYear + 1) = OutputReportTabular::RealToStr(elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
-            }
-        }
-        OutputReportTabular::WriteSubtitle(state, "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
-                                                                               rowHead,
-                                                                               columnHead,
-                                                                               "Life-Cycle Cost Report",
-                                                                               "Entire Facility",
-                                                                               "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody,
-                rowHead,
-                columnHead,
-                "Life-Cycle Cost Report",
-                "Entire Facility",
-                "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Energy and Water Cost Cash Flows (Without Escalation)
-        numColumns = max(1, elcc->numResourcesUsed + 1);
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(numColumns);
-        columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
-        tableBody.allocate(numColumns, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-        }
-        for (int jObj = 0; jObj < elcc->numResourcesUsed; ++jObj) {
-            int curCashFlow = CostCategory::Num + elcc->numRecurringCosts + elcc->numNonrecurringCost + jObj;
-            columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
-            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                tableBody(jObj + 1, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
-            }
-        }
-        columnHead(numColumns) = Total;
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            tableBody(elcc->numResourcesUsed + 1, iYear) = OutputReportTabular::RealToStr(
-                elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear) + elcc->CashFlow[CostCategory::Water].yrAmount(iYear), 2);
-        }
-        OutputReportTabular::WriteSubtitle(state, "Energy and Water Cost Cash Flows (Without Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Energy and Water Cost Cash Flows (Without Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Energy and Water Cost Cash Flows (Without Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Energy and Water Cost Cash Flows (With Escalation)
-        numColumns = max(1, elcc->numResourcesUsed + 1);
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(numColumns);
-        columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
-        tableBody.allocate(numColumns, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-        }
-        for (int jObj = 0; jObj < elcc->numResourcesUsed; ++jObj) {
-            int curCashFlow = CostCategory::Num + elcc->numRecurringCosts + elcc->numNonrecurringCost + jObj;
-            columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
-            Constant::eResource curResource = elcc->CashFlow[curCashFlow].Resource;
-            if (elcc->CashFlow[curCashFlow].Resource != Constant::eResource::Water) {
-                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                    tableBody(jObj + 1, iYear) = OutputReportTabular::RealToStr(elcc->EscalatedEnergy[iYear][static_cast<int>(curResource)], 2);
+            //---- Use Adjustment
+            if (elcc->numUseAdjustment >= 1) { // only create table if objects used
+                numColumns = max(1, elcc->numUseAdjustment);
+                int numYears = elcc->lengthStudyYears - (elcc->serviceDateYear - elcc->baseDateYear);
+                rowHead.allocate(numYears + 1);
+                columnHead.allocate(numColumns);
+                columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
+                tableBody.allocate(numColumns, numYears + 1);
+                tableBody = "";
+                columnHead = "none";
+                rowHead(1) = "";
+                for (int iYear = 1; iYear <= numYears; ++iYear) {
+                    rowHead(iYear + 1) =
+                        format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->serviceDateMonth)], elcc->serviceDateYear + iYear - 1);
                 }
-            } else { // for water just use the original cashflow since not involved in escalation
-                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                    tableBody(jObj + 1, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
+                for (int jObj = 1; jObj <= elcc->numUseAdjustment; ++jObj) { // loop through objects not columns to add names
+                    columnHead(jObj) = elcc->UseAdjustment(jObj).name;
+                    tableBody(jObj, 1) = Constant::eResourceNames[static_cast<int>(elcc->UseAdjustment(jObj).resource)];
                 }
-            }
-        }
-        columnHead(numColumns) = Total;
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            tableBody(elcc->numResourcesUsed + 1, iYear) =
-                OutputReportTabular::RealToStr(elcc->EscalatedTotEnergy(iYear) + elcc->CashFlow[CostCategory::Water].yrAmount(iYear), 2);
-        }
-        OutputReportTabular::WriteSubtitle(state, "Energy and Water Cost Cash Flows (With Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Energy and Water Cost Cash Flows (With Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Energy and Water Cost Cash Flows (With Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-
-        //---- Capital Cash Flow by Category
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(4);
-        columnWidth.allocate(4);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(4, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int CostCategory = CostCategory::Construction, tableColumnIndex = 1; CostCategory <= CostCategory::OtherCapital;
-             ++tableColumnIndex, ++CostCategory) {
-            columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[static_cast<int>(CostCategory)];
-        }
-        columnHead(4) = Total;
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-            for (int CostCategory = CostCategory::Construction, tableColumnIndex = 1; CostCategory <= CostCategory::TotCaptl;
-                 ++tableColumnIndex, ++CostCategory) {
-                tableBody(tableColumnIndex, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[CostCategory].yrAmount(iYear), 2);
-            }
-        }
-        OutputReportTabular::WriteSubtitle(state, "Capital Cash Flow by Category (Without Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Capital Cash Flow by Category (Without Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Capital Cash Flow by Category (Without Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Operating Cash Flow by Category (Without Escalation)
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(10);
-        columnWidth.allocate(10);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(10, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int CostCategory = CostCategory::Maintenance, tableColumnIndex = 1; CostCategory <= CostCategory::Energy;
-             ++tableColumnIndex, ++CostCategory) {
-            columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[CostCategory];
-        }
-        columnHead(10) = Total;
-
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-            for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotOper; ++CashFlowCostCategory) {
-                tableBody(CashFlowCostCategory + 1, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[CashFlowCostCategory].yrAmount(iYear), 2);
-            }
-        }
-        OutputReportTabular::WriteSubtitle(state, "Operating Cash Flow by Category (Without Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Operating Cash Flow by Category (Without Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Operating Cash Flow by Category (Without Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Operating Cash Flow by Category (With Escalation)
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(10);
-        columnWidth.allocate(10);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(10, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int CostCategory = CostCategory::Maintenance, tableColumnIndex = 1; CostCategory <= CostCategory::Energy;
-             ++tableColumnIndex, ++CostCategory) {
-            columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[CostCategory];
-        }
-        columnHead(10) = Total;
-
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-            for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::Water; ++CashFlowCostCategory) {
-                tableBody(CashFlowCostCategory + 1, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[CashFlowCostCategory].yrAmount(iYear), 2);
-            }
-            tableBody(9, iYear) = OutputReportTabular::RealToStr(elcc->EscalatedTotEnergy(iYear), 2);
-            Real64 yearly_total_cost = elcc->CashFlow[CostCategory::TotOper].yrAmount(iYear) + elcc->EscalatedTotEnergy(iYear) -
-                                       elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear);
-            tableBody(10, iYear) = OutputReportTabular::RealToStr(yearly_total_cost, 2);
-        }
-        OutputReportTabular::WriteSubtitle(state, "Operating Cash Flow by Category (With Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Operating Cash Flow by Category (With Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Operating Cash Flow by Category (With Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- DEBUG ONLY - Monthly Cash Flows
-        // bool showMonthlyCashFlows = false;
-        // if (showMonthlyCashFlows) {
-        //    rowHead.allocate(elcc->lengthStudyTotalMonths);
-        //    columnHead.allocate(elcc->numCashFlow);
-        //    columnWidth.allocate(elcc->numCashFlow);
-        //    tableBody.allocate(elcc->numCashFlow, elcc->lengthStudyTotalMonths);
-        //    tableBody = "";
-        //    columnHead(1) = "mnt";
-        //    columnHead(2) = "rpr";
-        //    columnHead(3) = "opr";
-        //    columnHead(4) = "repl";
-        //    columnHead(5) = "mOvhl";
-        //    columnHead(6) = "MOvhl";
-        //    columnHead(7) = "oOpr";
-        //    columnHead(8) = "cons";
-        //    columnHead(9) = "slvg";
-        //    columnHead(10) = "oCap";
-        //    columnHead(11) = "H2O";
-        //    columnHead(12) = "ene";
-        //    columnHead(13) = "tEne";
-        //    columnHead(14) = "tOpr";
-        //    columnHead(15) = "tCap";
-        //    columnHead(16) = "Totl";
-        //    for (int jObj = CostCategory::Num; jObj < elcc->numCashFlow; ++jObj) {
-        //        columnHead(jObj + 1) = elcc->CashFlow[jObj].name;
-        //    }
-        //    for (int kMonth = 1; kMonth <= elcc->lengthStudyTotalMonths; ++kMonth) {
-        //        rowHead(kMonth) = format("{} {}",
-        //                                 Util::MonthNamesCC[static_cast<int>(1 + (kMonth + elcc->baseDateMonth - 2) % 12) - 1],
-        //                                 elcc->baseDateYear + int((kMonth - 1) / 12));
-        //        for (int jObj = 0; jObj < elcc->numCashFlow; ++jObj) {
-        //            tableBody(jObj + 1, kMonth) = OutputReportTabular::RealToStr(elcc->CashFlow[jObj].mnAmount(kMonth), 2);
-        //        }
-        //    }
-        //    OutputReportTabular::WriteSubtitle(state, "DEBUG ONLY - Monthly Cash Flows");
-        //    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        //    if (state.dataSQLiteProcedures->sqlite) {
-        //        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-        //            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "DEBUG ONLY - Monthly Cash Flows");
-        //    }
-        //    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-        //        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-        //            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "DEBUG ONLY - Monthly Cash Flows");
-        //    }
-        //    columnHead.deallocate();
-        //    rowHead.deallocate();
-        //    columnWidth.deallocate();
-        //    tableBody.deallocate();
-        //}
-        //---- Monthly Total Cash Flow
-        rowHead.allocate(elcc->lengthStudyYears);
-        columnHead.allocate(12);
-        columnWidth.allocate(12);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(12, elcc->lengthStudyYears);
-        tableBody = "";
-        for (int kMonth = 1; kMonth <= 12; ++kMonth) {
-            columnHead(kMonth) = Util::MonthNamesCC[static_cast<int>(kMonth - 1)];
-        }
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = fmt::to_string(elcc->baseDateYear + iYear - 1);
-            for (int kMonth = 1; kMonth <= 12; ++kMonth) {
-                tableBody(kMonth, iYear) =
-                    OutputReportTabular::RealToStr(elcc->CashFlow[CostCategory::TotGrand].mnAmount((iYear - 1) * 12 + kMonth), 2);
-            }
-        }
-        OutputReportTabular::WriteSubtitle(state, "Monthly Total Cash Flow (Without Escalation)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Monthly Total Cash Flow (Without Escalation)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Monthly Total Cash Flow (Without Escalation)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Present Value for Recurring, Nonrecurring and Energy Costs
-        int numRows = max(1, elcc->numRecurringCosts + elcc->numNonrecurringCost + elcc->numResourcesUsed);
-        rowHead.allocate(numRows + 1);
-        columnHead.allocate(5);
-        columnWidth.allocate(5);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(5, numRows + 1);
-        tableBody = "";
-        columnHead(1) = "Category";
-        columnHead(2) = "Kind";
-        columnHead(3) = "Cost";
-        columnHead(4) = "Present Value";
-        columnHead(5) = "Present Value Factor";
-        Real64 totalPV = 0.0;
-        rowHead(numRows + 1) = TotalUC;
-        for (int jObj = 0; jObj < (elcc->numRecurringCosts + elcc->numNonrecurringCost + elcc->numResourcesUsed); ++jObj) {
-            int offset = CostCategory::Num;
-            rowHead(jObj + 1) = elcc->CashFlow[offset + jObj].name;
-            switch (elcc->CashFlow[offset + jObj].Category) {
-            case CostCategory::Maintenance:
-            case CostCategory::Repair:
-            case CostCategory::Operation:
-            case CostCategory::Replacement:
-            case CostCategory::MinorOverhaul:
-            case CostCategory::MajorOverhaul:
-            case CostCategory::OtherOperational:
-            case CostCategory::Construction:
-            case CostCategory::Salvage:
-            case CostCategory::OtherCapital:
-            case CostCategory::Water:
-            case CostCategory::Energy: {
-                tableBody(1, jObj + 1) = CostCategoryNames[static_cast<int>(elcc->CashFlow[offset + jObj].Category)];
-                break;
-            }
-            default:
-                tableBody(1, jObj + 1) = "-";
-                break;
-            }
-            switch (elcc->CashFlow[offset + jObj].SourceKind) {
-            case SourceKindType::Nonrecurring:
-            case SourceKindType::Recurring: {
-                tableBody(2, jObj + 1) = SourceKindTypeNames[static_cast<int>(elcc->CashFlow[offset + jObj].SourceKind)];
-                break;
-            }
-            case SourceKindType::Resource: {
-                if (elcc->CashFlow[offset + jObj].Category == CostCategory::Water) {
-                    tableBody(2, jObj + 1) = ResourceCostCategoryNames[static_cast<int>(ResourceCostCategory::Water)];
-                } else {
-                    tableBody(2, jObj + 1) = ResourceCostCategoryNames[static_cast<int>(ResourceCostCategory::Energy)];
+                for (int jObj = 1; jObj <= elcc->numUseAdjustment; ++jObj) {
+                    for (int iYear = 1; iYear <= numYears; ++iYear) {
+                        tableBody(jObj, iYear + 1) =
+                            OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->UseAdjustment(jObj).Adjustment(iYear), 6);
+                    }
                 }
-                break;
+                if (currentStyle.produceTabular) {
+                    OutputReportTabular::WriteSubtitle(state, "Use Adjustment");
+                    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+                }
+                if (currentStyle.produceSQLite) {
+                    if (state.dataSQLiteProcedures->sqlite) {
+                        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Adjustment");
+                    }
+                }
+                if (currentStyle.produceJSON) {
+                    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Use Adjustment");
+                    }
+                }
+                columnHead.deallocate();
+                rowHead.deallocate();
+                columnWidth.deallocate();
+                tableBody.deallocate();
             }
-            default: {
-                tableBody(2, jObj + 1) = "-";
-                break;
-            }
-            }
-            tableBody(3, jObj + 1) = OutputReportTabular::RealToStr(elcc->CashFlow[offset + jObj].orginalCost, 2);
-            tableBody(4, jObj + 1) = OutputReportTabular::RealToStr(elcc->CashFlow[offset + jObj].presentValue, 2);
-            totalPV += elcc->CashFlow[offset + jObj].presentValue;
-            if (elcc->CashFlow[offset + jObj].orginalCost != 0.0) {
-                tableBody(5, jObj + 1) =
-                    OutputReportTabular::RealToStr(elcc->CashFlow[offset + jObj].presentValue / elcc->CashFlow[offset + jObj].orginalCost, 4);
-            } else {
-                tableBody(5, jObj + 1) = "-";
-            }
-        }
-        tableBody(4, numRows + 1) = OutputReportTabular::RealToStr(totalPV, 2);
-        OutputReportTabular::WriteSubtitle(state, "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody,
-                rowHead,
-                columnHead,
-                "Life-Cycle Cost Report",
-                "Entire Facility",
-                "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody,
-                rowHead,
-                columnHead,
-                "Life-Cycle Cost Report",
-                "Entire Facility",
-                "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Present Value by Category
-        rowHead.allocate(16);
-        columnHead.allocate(1);
-        columnWidth.allocate(1);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(1, 16);
-        tableBody = "";
-        for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotGrand; ++CashFlowCostCategory) {
-            rowHead(CashFlowCostCategory + 1) = CostCategoryNames[CashFlowCostCategory];
-        }
-        columnHead(1) = "Present Value";
-
-        for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotGrand; ++CashFlowCostCategory) {
-            tableBody(1, CashFlowCostCategory + 1) = OutputReportTabular::RealToStr(elcc->CashFlow[CashFlowCostCategory].presentValue, 2);
-        }
-
-        OutputReportTabular::WriteSubtitle(state, "Present Value by Category");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Category");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Category");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- Present Value by Year
-        rowHead.allocate(elcc->lengthStudyYears + 1);
-        columnHead.allocate(3);
-        columnWidth.allocate(3);
-        columnWidth = 14; // array assignment - same for all columns
-        tableBody.allocate(3, elcc->lengthStudyYears + 1);
-        tableBody = "";
-        columnHead(1) = "Total Cost (Without Escalation)";
-        columnHead(2) = "Total Cost (With Escalation)";
-        columnHead(3) = "Present Value of Costs";
-
-        totalPV = 0.0;
-        for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-            rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-            tableBody(1, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[CostCategory::TotGrand].yrAmount(iYear), 2);
-            // adjust for escalated energy costs
-            Real64 yearly_total_cost = elcc->CashFlow[CostCategory::TotGrand].yrAmount(iYear) + elcc->EscalatedTotEnergy(iYear) -
-                                       elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear);
-            tableBody(2, iYear) = OutputReportTabular::RealToStr(yearly_total_cost, 2);
-            tableBody(3, iYear) = OutputReportTabular::RealToStr(elcc->CashFlow[CostCategory::TotGrand].yrPresVal(iYear), 2);
-            totalPV += elcc->CashFlow[CostCategory::TotGrand].yrPresVal(iYear);
-        }
-
-        rowHead(elcc->lengthStudyYears + 1) = TotalUC;
-        tableBody(3, elcc->lengthStudyYears + 1) = OutputReportTabular::RealToStr(totalPV, 2);
-
-        OutputReportTabular::WriteSubtitle(state, "Present Value by Year");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Year");
-        }
-        if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-            state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Year");
-        }
-        columnHead.deallocate();
-        rowHead.deallocate();
-        columnWidth.deallocate();
-        tableBody.deallocate();
-        //---- After Tax Estimate
-        if (elcc->taxRate != 0.0) {
+            //---- Cash Flow for Recurring and Nonrecurring Costs
+            numColumns = max(1, elcc->numRecurringCosts + elcc->numNonrecurringCost);
             rowHead.allocate(elcc->lengthStudyYears + 1);
+            columnHead.allocate(numColumns);
+            columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
+            tableBody.allocate(numColumns, elcc->lengthStudyYears + 1);
+            tableBody = "";
+            rowHead(1) = "";
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear + 1) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+            }
+            for (int jObj = 0; jObj < (elcc->numRecurringCosts + elcc->numNonrecurringCost); ++jObj) {
+                int curCashFlow = CostCategory::Num + jObj;
+                columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
+
+                tableBody(jObj + 1, 1) = SourceKindTypeNames[static_cast<int>(elcc->CashFlow[curCashFlow].SourceKind)];
+
+                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                    tableBody(jObj + 1, iYear + 1) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
+                }
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Cash Flow for Recurring and Nonrecurring Costs (Without Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Energy and Water Cost Cash Flows (Without Escalation)
+            numColumns = max(1, elcc->numResourcesUsed + 1);
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(numColumns);
+            columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
+            tableBody.allocate(numColumns, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+            }
+            for (int jObj = 0; jObj < elcc->numResourcesUsed; ++jObj) {
+                int curCashFlow = CostCategory::Num + elcc->numRecurringCosts + elcc->numNonrecurringCost + jObj;
+                columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
+                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                    tableBody(jObj + 1, iYear) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
+                }
+            }
+            columnHead(numColumns) = Total;
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                tableBody(elcc->numResourcesUsed + 1, iYear) = OutputReportTabular::RealToStr(
+                    currentStyle.formatReals,
+                    elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear) + elcc->CashFlow[CostCategory::Water].yrAmount(iYear),
+                    2);
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Energy and Water Cost Cash Flows (Without Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
+                                                                                       rowHead,
+                                                                                       columnHead,
+                                                                                       "Life-Cycle Cost Report",
+                                                                                       "Entire Facility",
+                                                                                       "Energy and Water Cost Cash Flows (Without Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Energy and Water Cost Cash Flows (Without Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Energy and Water Cost Cash Flows (With Escalation)
+            numColumns = max(1, elcc->numResourcesUsed + 1);
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(numColumns);
+            columnWidth.dimension(numColumns, 14); // array assignment - same for all columns
+            tableBody.allocate(numColumns, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+            }
+            for (int jObj = 0; jObj < elcc->numResourcesUsed; ++jObj) {
+                int curCashFlow = CostCategory::Num + elcc->numRecurringCosts + elcc->numNonrecurringCost + jObj;
+                columnHead(jObj + 1) = elcc->CashFlow[curCashFlow].name;
+                Constant::eResource curResource = elcc->CashFlow[curCashFlow].Resource;
+                if (elcc->CashFlow[curCashFlow].Resource != Constant::eResource::Water) {
+                    for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                        tableBody(jObj + 1, iYear) =
+                            OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->EscalatedEnergy[iYear][static_cast<int>(curResource)], 2);
+                    }
+                } else { // for water just use the original cashflow since not involved in escalation
+                    for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                        tableBody(jObj + 1, iYear) =
+                            OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[curCashFlow].yrAmount(iYear), 2);
+                    }
+                }
+            }
+            columnHead(numColumns) = Total;
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                tableBody(elcc->numResourcesUsed + 1, iYear) = OutputReportTabular::RealToStr(
+                    currentStyle.formatReals, elcc->EscalatedTotEnergy(iYear) + elcc->CashFlow[CostCategory::Water].yrAmount(iYear), 2);
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Energy and Water Cost Cash Flows (With Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
+                                                                                       rowHead,
+                                                                                       columnHead,
+                                                                                       "Life-Cycle Cost Report",
+                                                                                       "Entire Facility",
+                                                                                       "Energy and Water Cost Cash Flows (With Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Energy and Water Cost Cash Flows (With Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+
+            //---- Capital Cash Flow by Category
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(4);
+            columnWidth.allocate(4);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(4, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int CostCategory = CostCategory::Construction, tableColumnIndex = 1; CostCategory <= CostCategory::OtherCapital;
+                 ++tableColumnIndex, ++CostCategory) {
+                columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[static_cast<int>(CostCategory)];
+            }
+            columnHead(4) = Total;
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+                for (int CostCategory = CostCategory::Construction, tableColumnIndex = 1; CostCategory <= CostCategory::TotCaptl;
+                     ++tableColumnIndex, ++CostCategory) {
+                    tableBody(tableColumnIndex, iYear) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CostCategory].yrAmount(iYear), 2);
+                }
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Capital Cash Flow by Category (Without Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
+                                                                                       rowHead,
+                                                                                       columnHead,
+                                                                                       "Life-Cycle Cost Report",
+                                                                                       "Entire Facility",
+                                                                                       "Capital Cash Flow by Category (Without Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Capital Cash Flow by Category (Without Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Operating Cash Flow by Category (Without Escalation)
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(10);
+            columnWidth.allocate(10);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(10, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int CostCategory = CostCategory::Maintenance, tableColumnIndex = 1; CostCategory <= CostCategory::Energy;
+                 ++tableColumnIndex, ++CostCategory) {
+                columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[CostCategory];
+            }
+            columnHead(10) = Total;
+
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+                for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotOper; ++CashFlowCostCategory) {
+                    tableBody(CashFlowCostCategory + 1, iYear) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CashFlowCostCategory].yrAmount(iYear), 2);
+                }
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Operating Cash Flow by Category (Without Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
+                                                                                       rowHead,
+                                                                                       columnHead,
+                                                                                       "Life-Cycle Cost Report",
+                                                                                       "Entire Facility",
+                                                                                       "Operating Cash Flow by Category (Without Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Operating Cash Flow by Category (Without Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Operating Cash Flow by Category (With Escalation)
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(10);
+            columnWidth.allocate(10);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(10, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int CostCategory = CostCategory::Maintenance, tableColumnIndex = 1; CostCategory <= CostCategory::Energy;
+                 ++tableColumnIndex, ++CostCategory) {
+                columnHead(tableColumnIndex) = CostCategoryNamesNoSpace[CostCategory];
+            }
+            columnHead(10) = Total;
+
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+                for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::Water; ++CashFlowCostCategory) {
+                    tableBody(CashFlowCostCategory + 1, iYear) =
+                        OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CashFlowCostCategory].yrAmount(iYear), 2);
+                }
+                tableBody(9, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->EscalatedTotEnergy(iYear), 2);
+                Real64 yearly_total_cost = elcc->CashFlow[CostCategory::TotOper].yrAmount(iYear) + elcc->EscalatedTotEnergy(iYear) -
+                                           elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear);
+                tableBody(10, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, yearly_total_cost, 2);
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Operating Cash Flow by Category (With Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(tableBody,
+                                                                                       rowHead,
+                                                                                       columnHead,
+                                                                                       "Life-Cycle Cost Report",
+                                                                                       "Entire Facility",
+                                                                                       "Operating Cash Flow by Category (With Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Operating Cash Flow by Category (With Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- DEBUG ONLY - Monthly Cash Flows
+            // bool showMonthlyCashFlows = false;
+            // if (showMonthlyCashFlows) {
+            //    rowHead.allocate(elcc->lengthStudyTotalMonths);
+            //    columnHead.allocate(elcc->numCashFlow);
+            //    columnWidth.allocate(elcc->numCashFlow);
+            //    tableBody.allocate(elcc->numCashFlow, elcc->lengthStudyTotalMonths);
+            //    tableBody = "";
+            //    columnHead(1) = "mnt";
+            //    columnHead(2) = "rpr";
+            //    columnHead(3) = "opr";
+            //    columnHead(4) = "repl";
+            //    columnHead(5) = "mOvhl";
+            //    columnHead(6) = "MOvhl";
+            //    columnHead(7) = "oOpr";
+            //    columnHead(8) = "cons";
+            //    columnHead(9) = "slvg";
+            //    columnHead(10) = "oCap";
+            //    columnHead(11) = "H2O";
+            //    columnHead(12) = "ene";
+            //    columnHead(13) = "tEne";
+            //    columnHead(14) = "tOpr";
+            //    columnHead(15) = "tCap";
+            //    columnHead(16) = "Totl";
+            //    for (int jObj = CostCategory::Num; jObj < elcc->numCashFlow; ++jObj) {
+            //        columnHead(jObj + 1) = elcc->CashFlow[jObj].name;
+            //    }
+            //    for (int kMonth = 1; kMonth <= elcc->lengthStudyTotalMonths; ++kMonth) {
+            //        rowHead(kMonth) = format("{} {}",
+            //                                 Util::MonthNamesCC[static_cast<int>(1 + (kMonth + elcc->baseDateMonth - 2) % 12) - 1],
+            //                                 elcc->baseDateYear + int((kMonth - 1) / 12));
+            //        for (int jObj = 0; jObj < elcc->numCashFlow; ++jObj) {
+            //            tableBody(jObj + 1, kMonth) = OutputReportTabular::RealToStr(currentStyle.formatReals,
+            //            elcc->CashFlow[jObj].mnAmount(kMonth), 2);
+            //        }
+            //    }
+            //    OutputReportTabular::WriteSubtitle(state, "DEBUG ONLY - Monthly Cash Flows");
+            //    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            //    if (state.dataSQLiteProcedures->sqlite) {
+            //        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+            //            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "DEBUG ONLY - Monthly Cash Flows");
+            //    }
+            //    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+            //        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+            //            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "DEBUG ONLY - Monthly Cash Flows");
+            //    }
+            //    columnHead.deallocate();
+            //    rowHead.deallocate();
+            //    columnWidth.deallocate();
+            //    tableBody.deallocate();
+            //}
+            //---- Monthly Total Cash Flow
+            rowHead.allocate(elcc->lengthStudyYears);
+            columnHead.allocate(12);
+            columnWidth.allocate(12);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(12, elcc->lengthStudyYears);
+            tableBody = "";
+            for (int kMonth = 1; kMonth <= 12; ++kMonth) {
+                columnHead(kMonth) = Util::MonthNamesCC[static_cast<int>(kMonth - 1)];
+            }
+            for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                rowHead(iYear) = fmt::to_string(elcc->baseDateYear + iYear - 1);
+                for (int kMonth = 1; kMonth <= 12; ++kMonth) {
+                    tableBody(kMonth, iYear) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, elcc->CashFlow[CostCategory::TotGrand].mnAmount((iYear - 1) * 12 + kMonth), 2);
+                }
+            }
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Monthly Total Cash Flow (Without Escalation)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Monthly Total Cash Flow (Without Escalation)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Monthly Total Cash Flow (Without Escalation)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Present Value for Recurring, Nonrecurring and Energy Costs
+            int numRows = max(1, elcc->numRecurringCosts + elcc->numNonrecurringCost + elcc->numResourcesUsed);
+            rowHead.allocate(numRows + 1);
             columnHead.allocate(5);
             columnWidth.allocate(5);
             columnWidth = 14; // array assignment - same for all columns
-            tableBody.allocate(5, elcc->lengthStudyYears + 1);
+            tableBody.allocate(5, numRows + 1);
             tableBody = "";
-            columnHead(1) = "Depreciated Capital";
-            columnHead(2) = "Taxable Income";
-            columnHead(3) = "Income Taxes";
-            columnHead(4) = "After Tax Cash Flow";
-            columnHead(5) = "After Tax Present Value";
+            columnHead(1) = "Category";
+            columnHead(2) = "Kind";
+            columnHead(3) = "Cost";
+            columnHead(4) = "Present Value";
+            columnHead(5) = "Present Value Factor";
+            Real64 totalPV = 0.0;
+            rowHead(numRows + 1) = TotalUC;
+            for (int jObj = 0; jObj < (elcc->numRecurringCosts + elcc->numNonrecurringCost + elcc->numResourcesUsed); ++jObj) {
+                int offset = CostCategory::Num;
+                rowHead(jObj + 1) = elcc->CashFlow[offset + jObj].name;
+                switch (elcc->CashFlow[offset + jObj].Category) {
+                case CostCategory::Maintenance:
+                case CostCategory::Repair:
+                case CostCategory::Operation:
+                case CostCategory::Replacement:
+                case CostCategory::MinorOverhaul:
+                case CostCategory::MajorOverhaul:
+                case CostCategory::OtherOperational:
+                case CostCategory::Construction:
+                case CostCategory::Salvage:
+                case CostCategory::OtherCapital:
+                case CostCategory::Water:
+                case CostCategory::Energy: {
+                    tableBody(1, jObj + 1) = CostCategoryNames[static_cast<int>(elcc->CashFlow[offset + jObj].Category)];
+                    break;
+                }
+                default:
+                    tableBody(1, jObj + 1) = "-";
+                    break;
+                }
+                switch (elcc->CashFlow[offset + jObj].SourceKind) {
+                case SourceKindType::Nonrecurring:
+                case SourceKindType::Recurring: {
+                    tableBody(2, jObj + 1) = SourceKindTypeNames[static_cast<int>(elcc->CashFlow[offset + jObj].SourceKind)];
+                    break;
+                }
+                case SourceKindType::Resource: {
+                    if (elcc->CashFlow[offset + jObj].Category == CostCategory::Water) {
+                        tableBody(2, jObj + 1) = ResourceCostCategoryNames[static_cast<int>(ResourceCostCategory::Water)];
+                    } else {
+                        tableBody(2, jObj + 1) = ResourceCostCategoryNames[static_cast<int>(ResourceCostCategory::Energy)];
+                    }
+                    break;
+                }
+                default: {
+                    tableBody(2, jObj + 1) = "-";
+                    break;
+                }
+                }
+                tableBody(3, jObj + 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[offset + jObj].orginalCost, 2);
+                tableBody(4, jObj + 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[offset + jObj].presentValue, 2);
+                totalPV += elcc->CashFlow[offset + jObj].presentValue;
+                if (elcc->CashFlow[offset + jObj].orginalCost != 0.0) {
+                    tableBody(5, jObj + 1) = OutputReportTabular::RealToStr(
+                        currentStyle.formatReals, elcc->CashFlow[offset + jObj].presentValue / elcc->CashFlow[offset + jObj].orginalCost, 4);
+                } else {
+                    tableBody(5, jObj + 1) = "-";
+                }
+            }
+            tableBody(4, numRows + 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, totalPV, 2);
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody,
+                        rowHead,
+                        columnHead,
+                        "Life-Cycle Cost Report",
+                        "Entire Facility",
+                        "Present Value for Recurring, Nonrecurring and Energy Costs (Before Tax)");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Present Value by Category
+            rowHead.allocate(16);
+            columnHead.allocate(1);
+            columnWidth.allocate(1);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(1, 16);
+            tableBody = "";
+            for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotGrand; ++CashFlowCostCategory) {
+                rowHead(CashFlowCostCategory + 1) = CostCategoryNames[CashFlowCostCategory];
+            }
+            columnHead(1) = "Present Value";
+
+            for (int CashFlowCostCategory = CostCategory::Maintenance; CashFlowCostCategory <= CostCategory::TotGrand; ++CashFlowCostCategory) {
+                tableBody(1, CashFlowCostCategory + 1) =
+                    OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CashFlowCostCategory].presentValue, 2);
+            }
+
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Present Value by Category");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+            }
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Category");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Category");
+                }
+            }
+            columnHead.deallocate();
+            rowHead.deallocate();
+            columnWidth.deallocate();
+            tableBody.deallocate();
+            //---- Present Value by Year
+            rowHead.allocate(elcc->lengthStudyYears + 1);
+            columnHead.allocate(3);
+            columnWidth.allocate(3);
+            columnWidth = 14; // array assignment - same for all columns
+            tableBody.allocate(3, elcc->lengthStudyYears + 1);
+            tableBody = "";
+            columnHead(1) = "Total Cost (Without Escalation)";
+            columnHead(2) = "Total Cost (With Escalation)";
+            columnHead(3) = "Present Value of Costs";
 
             totalPV = 0.0;
             for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
                 rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
-                tableBody(1, iYear) = OutputReportTabular::RealToStr(elcc->DepreciatedCapital(iYear), 2);
-                tableBody(2, iYear) = OutputReportTabular::RealToStr(elcc->TaxableIncome(iYear), 2);
-                tableBody(3, iYear) = OutputReportTabular::RealToStr(elcc->Taxes(iYear), 2);
-                tableBody(4, iYear) = OutputReportTabular::RealToStr(elcc->AfterTaxCashFlow(iYear), 2);
-                tableBody(5, iYear) = OutputReportTabular::RealToStr(elcc->AfterTaxPresentValue(iYear), 2);
-                totalPV += elcc->AfterTaxPresentValue(iYear);
+                tableBody(1, iYear) =
+                    OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CostCategory::TotGrand].yrAmount(iYear), 2);
+                // adjust for escalated energy costs
+                Real64 yearly_total_cost = elcc->CashFlow[CostCategory::TotGrand].yrAmount(iYear) + elcc->EscalatedTotEnergy(iYear) -
+                                           elcc->CashFlow[CostCategory::TotEnergy].yrAmount(iYear);
+                tableBody(2, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, yearly_total_cost, 2);
+                tableBody(3, iYear) =
+                    OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->CashFlow[CostCategory::TotGrand].yrPresVal(iYear), 2);
+                totalPV += elcc->CashFlow[CostCategory::TotGrand].yrPresVal(iYear);
             }
 
             rowHead(elcc->lengthStudyYears + 1) = TotalUC;
-            tableBody(5, elcc->lengthStudyYears + 1) = OutputReportTabular::RealToStr(totalPV, 2);
+            tableBody(3, elcc->lengthStudyYears + 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, totalPV, 2);
 
-            OutputReportTabular::WriteSubtitle(state, "After Tax Estimate");
-            OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
-            if (state.dataSQLiteProcedures->sqlite) {
-                state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-                    tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "After Tax Estimate");
+            if (currentStyle.produceTabular) {
+                OutputReportTabular::WriteSubtitle(state, "Present Value by Year");
+                OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
             }
-            if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
-                state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                    tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "After Tax Estimate");
+            if (currentStyle.produceSQLite) {
+                if (state.dataSQLiteProcedures->sqlite) {
+                    state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Year");
+                }
+            }
+            if (currentStyle.produceJSON) {
+                if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                    state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                        tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "Present Value by Year");
+                }
             }
             columnHead.deallocate();
             rowHead.deallocate();
             columnWidth.deallocate();
             tableBody.deallocate();
+            //---- After Tax Estimate
+            if (elcc->taxRate != 0.0) {
+                rowHead.allocate(elcc->lengthStudyYears + 1);
+                columnHead.allocate(5);
+                columnWidth.allocate(5);
+                columnWidth = 14; // array assignment - same for all columns
+                tableBody.allocate(5, elcc->lengthStudyYears + 1);
+                tableBody = "";
+                columnHead(1) = "Depreciated Capital";
+                columnHead(2) = "Taxable Income";
+                columnHead(3) = "Income Taxes";
+                columnHead(4) = "After Tax Cash Flow";
+                columnHead(5) = "After Tax Present Value";
+
+                totalPV = 0.0;
+                for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
+                    rowHead(iYear) = format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear + iYear - 1);
+                    tableBody(1, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->DepreciatedCapital(iYear), 2);
+                    tableBody(2, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->TaxableIncome(iYear), 2);
+                    tableBody(3, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->Taxes(iYear), 2);
+                    tableBody(4, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->AfterTaxCashFlow(iYear), 2);
+                    tableBody(5, iYear) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->AfterTaxPresentValue(iYear), 2);
+                    totalPV += elcc->AfterTaxPresentValue(iYear);
+                }
+
+                rowHead(elcc->lengthStudyYears + 1) = TotalUC;
+                tableBody(5, elcc->lengthStudyYears + 1) = OutputReportTabular::RealToStr(currentStyle.formatReals, totalPV, 2);
+
+                if (currentStyle.produceTabular) {
+                    OutputReportTabular::WriteSubtitle(state, "After Tax Estimate");
+                    OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth);
+                }
+                if (currentStyle.produceSQLite) {
+                    if (state.dataSQLiteProcedures->sqlite) {
+                        state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+                            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "After Tax Estimate");
+                    }
+                }
+                if (currentStyle.produceJSON) {
+                    if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
+                        state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
+                            tableBody, rowHead, columnHead, "Life-Cycle Cost Report", "Entire Facility", "After Tax Estimate");
+                    }
+                }
+                columnHead.deallocate();
+                rowHead.deallocate();
+                columnWidth.deallocate();
+                tableBody.deallocate();
+            }
         }
     }
 }

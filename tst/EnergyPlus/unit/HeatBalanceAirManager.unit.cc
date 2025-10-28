@@ -828,7 +828,6 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
 
     state->init_state(*state);
 
-    bool ErrorsFound = false;
     // HeatBalanceManager::GetHeatBalanceInput(*state);
     std::string const error_string = delimited_string(
         {format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),

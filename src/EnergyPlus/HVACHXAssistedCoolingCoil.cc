@@ -119,8 +119,6 @@ namespace HXAssistCoil {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int HXAssistedCoilNum; // Index for HXAssistedCoolingCoil
-        Real64 AirFlowRatio;   // Ratio of compressor ON air mass flow rate to AVEARAGE over time step
-        bool HXUnitOn;         // flag to enable heat exchanger
 
         // Obtains and allocates HXAssistedCoolingCoil related parameters from input file
         if (state.dataHVACAssistedCC->GetCoilsInputFlag) { // First time subroutine has been called, get input data
@@ -186,7 +184,7 @@ namespace HXAssistCoil {
                                   ObjexxFCL::Optional<Real64 const> LoadSHR                       // Optional CoilSHR pass over
     )
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         Real64 AirFlowRatio;   // Ratio of compressor ON air mass flow rate to AVEARAGE over time step
         bool HXUnitOn;         // flag to enable heat exchanger
 
@@ -269,7 +267,6 @@ namespace HXAssistCoil {
         int NumNums;                      // Number of number inputs
         int IOStat;                       // Return status from GetObjectItem call
         bool ErrorsFound(false);          // set TRUE if errors detected in input
-        bool HXErrFlag;                   // Error flag for HX node numbers mining call
         bool CoolingCoilErrFlag;          // Error flag for cooling coil node numbers mining call
         std::string CurrentModuleObject;  // Object type for getting and error messages
         Array1D_string AlphArray;         // Alpha input items for object
@@ -1268,74 +1265,74 @@ namespace HXAssistCoil {
 
     HVAC::CoilType GetCoilChildCoilType(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).coolCoilType;
     }
 
     std::string GetCoilChildCoilName(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).CoolCoilName;
     }
 
     int GetCoilChildCoilIndex(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).CoolCoilNum;
     }
   
     Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).MaxWaterFlowRate;
     }
 
     Real64 GetCoilMaxAirFlowRate(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).MaxAirFlowRate;
     }
   
     Real64 GetCoilCapacity(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).Capacity;
     }
 
     int GetCoilAirInletNode(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).HXCoilInNodeNum;
     }
 
     int GetCoilAirOutletNode(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).HXCoilOutNodeNum;
     }
   
     int GetCoilWaterInletNode(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).CoolCoilWaterInNodeNum;
     }
 
     int GetCoilWaterOutletNode(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).CoolCoilWaterOutNodeNum;
     }
 
     int GetCoilCondenserInletNode(EnergyPlusData &state, int const coilNum)
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return state.dataHVACAssistedCC->HXAssistedCoils(coilNum).CoolCoilCondenserInNodeNum;
     }
 
 
     Real64 GetCoilScheduleValue(EnergyPlusData &state, int const coilNum) 
     {
-        assert(coilNum > 0 && coilNum <= state.dataHVACAssistedCC->HXAssistedCoils.size());
+        assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return 1.0; // Not scheduled? Always available?
     }
 

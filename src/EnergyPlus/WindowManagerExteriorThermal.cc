@@ -272,7 +272,7 @@ namespace Window {
         auto aFactory = CWCEHeatTransferFactory(state, surface, surfNum, constrNum); // (AUTO_OK)
 
         const auto summerGlassUnit = aFactory.getTarcogSystemForReporting(state, true, windowWidth, windowHeight, tilt); // (AUTO_OK_SPTR)
-        return summerGlassUnit->getSHGC(state.dataConstruction->Construct(surface.Construction).SolTransNorm);
+        return summerGlassUnit->getSHGC(state.dataConstruction->Construct(constrNum).SolTransNorm);
     }
 
     void GetWindowAssemblyNfrcForReport(EnergyPlusData &state,

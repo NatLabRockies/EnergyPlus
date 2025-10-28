@@ -214,6 +214,9 @@ namespace HVACMultiSpeedHeatPump {
         bool EMSOverrideCoilSpeedNumOn;
         Real64 EMSOverrideCoilSpeedNumValue;
         int CoilSpeedErrIndex;
+        Real64 HeatingSizingRatio = 1.0;
+        bool isHeatPump = false;
+        bool reportACCAManualS = true;
 
         // Default Constructor
         MSHeatPumpData()

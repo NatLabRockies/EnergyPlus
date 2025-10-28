@@ -138,6 +138,7 @@ enum class PlantEquipmentType
     PurchHotWater,
     TS_IceDetailed,
     TS_IceSimple,
+    TS_PCM,
     ValveTempering,
     WtrHeaterMixed,
     WtrHeaterStratified,
@@ -167,6 +168,7 @@ enum class PlantEquipmentType
     EvapFluidCooler_TwoSpd,
     ChilledWaterTankMixed,
     ChilledWaterTankStratified,
+    HotWaterTankStratified,
     PVTSolarCollectorFlatPlate,
     Baseboard_Conv_Water,
     Baseboard_Rad_Conv_Steam,
@@ -207,6 +209,9 @@ enum class PlantEquipmentType
     HeatPumpEIRHeating,
     HeatPumpFuelFiredCooling,
     HeatPumpFuelFiredHeating,
+    HeatPumpAirToWaterCooling,
+    HeatPumpAirToWaterHeating,
+    HeatPumpAirToWater,
     PurchSteam,
     Num
 };

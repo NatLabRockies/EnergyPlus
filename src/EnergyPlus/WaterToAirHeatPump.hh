@@ -77,7 +77,9 @@ namespace WaterToAirHeatPump {
     {
         // Members
         std::string Name;                       // Name of the Water to Air Heat pump
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid; // Coil type
         DataPlant::PlantEquipmentType coilPlantType = DataPlant::PlantEquipmentType::Invalid; // type of component in plant
+        Sched::Schedule *availSched = nullptr;  // availability schedule
         std::string Refrigerant;                // Refrigerant name
         Fluid::RefrigProps *refrig = nullptr;
         bool SimFlag;

@@ -55,9 +55,12 @@
 // EnergyPlus Headers
 #include <AirflowNetwork/Solver.hpp>
 #include <EnergyPlus/Autosizing/Base.hh>
+#include <EnergyPlus/Autosizing/CoolingCapacitySizing.hh>
+#include <EnergyPlus/Autosizing/HeatingCapacitySizing.hh>
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirSystems.hh>
@@ -704,14 +707,12 @@ namespace Furnaces {
         std::string CompSetHeatInlet;
         std::string CompSetHeatOutlet;
         bool ErrorsFound(false);       // If errors detected in input
-        bool IsNotOK;                  // Flag to verify name
         bool AirNodeFound;             // Used to determine if control zone is valid
         bool AirLoopFound;             // Used to determine if control zone is served by furnace air loop
         int TstatZoneNum;              // Used to determine if control zone has a thermostat object
         int HStatZoneNum;              // Used to determine if control zone has a humidistat object
         bool errFlag;                  // Mining function error flag
         std::string FanName;           // Used in mining function CALLS
-        bool PrintMessage;             // Used in mining function CALLS
         auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
         DataLoopNode::ConnectionObjectType currentModuleObjectType;
 
@@ -771,8 +772,6 @@ namespace Furnaces {
             state.dataFurnaces->UniqueFurnaceNames.reserve(state.dataFurnaces->NumFurnaces);
         }
         state.dataFurnaces->CheckEquipName.dimension(state.dataFurnaces->NumFurnaces, true);
-
-        int IHPCoilIndex = 0;
 
         // Get the data for the HeatOnly Furnace
         for (int HeatOnlyNum = 1; HeatOnlyNum <= NumHeatOnly + NumUnitaryHeatOnly; ++HeatOnlyNum) {
@@ -2665,6 +2664,9 @@ namespace Furnaces {
             furnace.MaxOATSuppHeat = Numbers(5);
             OutputReportPredefined::PreDefTableEntry(
                 state, state.dataOutRptPredefined->pdchDXHeatCoilSuppHiT, furnace.HeatCoilName, furnace.MaxOATSuppHeat);
+            furnace.HeatSizingRatio = Numbers(6);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchDXHeatCoilSizingRatio, furnace.HeatCoilName, furnace.HeatSizingRatio);
 
             // set minimum outdoor temperature for compressor operation
             SetMinOATCompressor(state, FurnaceNum, cCurrentModuleObject, ErrorsFound);
@@ -3233,6 +3235,9 @@ namespace Furnaces {
             furnace.MaxOATSuppHeat = Numbers(5);
             OutputReportPredefined::PreDefTableEntry(
                 state, state.dataOutRptPredefined->pdchDXHeatCoilSuppHiT, furnace.HeatCoilName, furnace.MaxOATSuppHeat);
+            furnace.HeatSizingRatio = Numbers(6);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchDXHeatCoilSizingRatio, furnace.HeatCoilName, furnace.HeatSizingRatio);
 
             // set minimum outdoor temperature for compressor operation
             SetMinOATCompressor(state, FurnaceNum, cCurrentModuleObject, ErrorsFound);
@@ -3574,7 +3579,6 @@ namespace Furnaces {
         Real64 SumOfMassFlowRateMax(0.0);                 // the sum of mass flow rates at inlet to zones in an airloop
         Real64 CntrlZoneTerminalUnitMassFlowRateMax(0.0); // Maximum mass flow rate through controlled zone terminal unit
 
-        bool ErrorsFound(false);                 // flag returned from mining call
         Real64 mdot(0.0);                        // local temporary for mass flow rate (kg/s)
         Real64 rho(0.0);                         // local for fluid density
         Real64 CoilMaxVolFlowRate(0.0);          // coil fluid maximum volume flow rate
@@ -4719,6 +4723,7 @@ namespace Furnaces {
         Real64 MulSpeedFlowScale; // variable speed air flow scaling factor
         Real64 dummy(0.0);
         bool anyRan;
+        std::string_view constexpr RoutineName = "SizeFurnace";
         EMSManager::ManageEMS(state, EMSManager::EMSCallFrom::UnitarySystemSizing, anyRan, ObjexxFCL::Optional_int_const()); // calling point
 
         state.dataSize->DXCoolCap = 0.0;
@@ -4733,12 +4738,87 @@ namespace Furnaces {
 
         state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace = furnace.fanPlace;
 
+        // ACCA Manual S sizing
+        bool const isHeatPump = furnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
+                                furnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir;
+        Real64 SysTotCoolingLoad;
+        Real64 SysCoolingLoad;
+        Real64 SysCoolingCapacity;
+        Real64 SysLatCoolingLoad;
+        Real64 SysHeatingCapacity;
+        Real64 SysHeatingLoad;
+        if (isHeatPump && !state.dataSize->FinalSysSizing.empty() &&
+            state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None &&
+            !furnace.isIHP) {
+            bool const PrintFlag = false;
+            bool errorsFound = false;
+            std::string_view CompType;
+            std::string_view CompName;
+            auto const &finalSysSizing = state.dataSize->FinalSysSizing(state.dataSize->CurSysNum);
+            if (finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident) {
+                state.dataSize->DataFlowUsedForSizing = finalSysSizing.NonCoinCoolMassFlow / state.dataEnvrn->StdRhoAir;
+            } else {
+                state.dataSize->DataFlowUsedForSizing = finalSysSizing.CoinCoolMassFlow / state.dataEnvrn->StdRhoAir;
+            }
+
+            if (furnace.coolCoilType == HVAC::CoilType::CoolingWAHPSimple) {
+                // auto const &thisCoil = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(thisFurnace.CoolingCoilIndex);
+                state.dataSize->DataTotCapCurveIndex = 0; // this model uses a non-standard CapFT curve, disregard CapFT for now
+            } else if (furnace.coolCoilType == HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit ||
+                       furnace.coolCoilType == HVAC::CoilType::CoolingDXVariableSpeed) {
+                auto const &thisCoil = state.dataVariableSpeedCoils->VarSpeedCoil(furnace.CoolCoilNum);
+                state.dataSize->DataTotCapCurveIndex = thisCoil.MSCCapFTemp(thisCoil.NumOfSpeeds);
+            } else {
+                if (!state.dataDXCoils->DXCoil.empty() && furnace.CoolCoilNum <= (int)state.dataDXCoils->DXCoil.size()) {
+                    auto const &thisCoil = state.dataDXCoils->DXCoil(furnace.CoolCoilNum);
+                    state.dataSize->DataTotCapCurveIndex = thisCoil.CCapFTemp(thisCoil.NumCapacityStages);
+                } else {
+                    ShowWarningError(state,
+                                     format("Developer Error in Heat Pump ACCA Sizing: cooling coil not found for {}:{} with coil type = {}.",
+                                            furnace.type,
+                                            furnace.Name,
+                                            HVAC::coilTypeNames[(int)furnace.coolCoilType]));
+                }
+            }
+            Real64 TempSize = furnace.DesignCoolingCapacity;
+            CoolingCapacitySizer sizingCoolingCapacity;
+            sizingCoolingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
+            SysCoolingCapacity = sizingCoolingCapacity.size(state, TempSize, errorsFound);
+            SysCoolingLoad = finalSysSizing.SensCoolCap;
+            SysTotCoolingLoad = finalSysSizing.TotCoolCap;
+            SysLatCoolingLoad = SysTotCoolingLoad - SysCoolingLoad;
+
+            if (finalSysSizing.SizingOption == DataSizing::SizingConcurrence::NonCoincident) {
+                state.dataSize->DataFlowUsedForSizing = finalSysSizing.NonCoinHeatMassFlow / state.dataEnvrn->StdRhoAir;
+            } else {
+                state.dataSize->DataFlowUsedForSizing = finalSysSizing.CoinHeatMassFlow / state.dataEnvrn->StdRhoAir;
+            }
+
+            TempSize = furnace.DesignHeatingCapacity;
+            HeatingCapacitySizer sizingHeatingCapacity;
+            sizingHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
+            SysHeatingCapacity = sizingHeatingCapacity.size(state, TempSize, errorsFound) / furnace.HeatSizingRatio;
+            SysHeatingLoad = finalSysSizing.HeatCap;
+
+            DataSizing::setHeatPumpSize(state, SysCoolingCapacity, SysHeatingCapacity, furnace.HeatSizingRatio);
+            auto &EqSizing = state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum);
+            EqSizing.CoolingCapacity = true;
+            EqSizing.DesCoolingLoad = SysCoolingCapacity;
+            EqSizing.HeatingCapacity = true;
+            EqSizing.DesHeatingLoad = SysHeatingCapacity;
+            state.dataSize->DataFlowUsedForSizing = 0.0;
+        }
+
         if (furnace.coolCoilType == HVAC::CoilType::CoolingDXSingleSpeed) {
-            DXCoils::SimDXCoil(state, furnace.CoolCoilNum, HVAC::CompressorOp::On, true, HVAC::FanOp::Cycling, 0.0);
-            
+            DXCoils::SimDXCoil(state, BlankString, HVAC::CompressorOp::On, true, furnace.CoolCoilNum, HVAC::FanOp::Cycling, 0.0);
         } else if (furnace.coolCoilType == HVAC::CoilType::CoolingDXHXAssisted) {
-            if (furnace.childCoolCoilType == HVAC::CoilType::CoolingDX) {
-                state.dataCoilCoolingDX->coilCoolingDXs[furnace.childCoolCoilNum].size(state);
+            auto const &hxCoil = state.dataHVACAssistedCC->HXAssistedCoils(furnace.CoolCoilNum);
+            if (hxCoil.coolCoilType == HVAC::CoilType::CoolingDX) {
+                if (hxCoil.CoolCoilNum < 0) {
+                    ShowContinueError(state, "Occurs in sizing HeatExchangerAssistedCoolingCoil.");
+                }
+                auto &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[hxCoil.CoolCoilNum];
+                newCoil.size(state);
             }
             HXAssistCoil::SimHXAssistedCoolingCoil(
                 state, furnace.CoolCoilNum, true, HVAC::CompressorOp::On, 0.0, HVAC::FanOp::Cycling, false, 1.0, false);
@@ -4843,6 +4923,80 @@ namespace Furnaces {
                 furnace.MaxNoCoolHeatAirMassFlow = furnace.IdleMassFlowRate;
                 furnace.NoHeatCoolSpeedRatio = furnace.IdleSpeedRatio;
             }
+        }
+
+        // ACCA Manual S reporting
+        if (isHeatPump && state.dataSize->CurSysNum > 0 && !state.dataSize->FinalSysSizing.empty() &&
+            state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None &&
+            !furnace.isIHP) {
+            std::string_view cCoilName;
+            std::string_view hCoilName;
+            Real64 coilSHR;
+            if (furnace.coolCoilType == HVAC::CoilType::CoolingWAHPSimple) {
+                auto const &thisCoil = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(furnace.CoolCoilNum);
+                cCoilName = thisCoil.Name;
+                coilSHR = 0.8;
+            } else if (furnace.coolCoilType == HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit ||
+                       furnace.coolCoilType == HVAC::CoilType::CoolingDXVariableSpeed) {
+                auto const &thisCoil = state.dataVariableSpeedCoils->VarSpeedCoil(furnace.CoolCoilNum);
+                cCoilName = thisCoil.Name;
+                coilSHR = thisCoil.MSRatedSHR(thisCoil.NumOfSpeeds);
+            } else {
+                auto const &thisCoil = state.dataDXCoils->DXCoil(furnace.CoolCoilNum);
+                cCoilName = thisCoil.Name;
+                coilSHR = (thisCoil.NumOfSpeeds == 0) ? thisCoil.RatedSHR(1) : thisCoil.RatedSHR(thisCoil.NumOfSpeeds);
+            }
+            if (furnace.heatCoilType == HVAC::CoilType::HeatingWAHPSimple) {
+                auto const &thisCoil = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(furnace.HeatCoilNum);
+                hCoilName = thisCoil.Name;
+            } else if (furnace.heatCoilType == HVAC::CoilType::HeatingWAHPVariableSpeedEquationFit ||
+                       furnace.heatCoilType == HVAC::CoilType::HeatingDXVariableSpeed) {
+                auto const &thisCoil = state.dataVariableSpeedCoils->VarSpeedCoil(furnace.HeatCoilNum);
+                hCoilName = thisCoil.Name;
+            } else {
+                auto const &thisCoil = state.dataDXCoils->DXCoil(furnace.HeatCoilNum);
+                hCoilName = thisCoil.Name;
+            }
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchMSHPType, cCoilName, HVAC::unitarySysTypeNamesUC[int(furnace.type)]);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSHPName, cCoilName, furnace.Name);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchMSCoilType, cCoilName, HVAC::coilTypeNames[(int)furnace.coolCoilType]);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchMSSizMethod,
+                                                     cCoilName,
+                                                     DataSizing::HeatCoilSizMethodNamesUC[static_cast<int>(
+                                                         state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod)]);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotLoad, cCoilName, SysTotCoolingLoad);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensLoad, cCoilName, SysCoolingLoad);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotCapacity, cCoilName, SysCoolingCapacity);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensCapacity, cCoilName, SysCoolingCapacity * coilSHR);
+            Real64 coilTotFactor = (SysTotCoolingLoad > 0.0) ? SysCoolingCapacity / SysTotCoolingLoad : 1.0;
+            Real64 coilSensFactor = (SysCoolingLoad > 0.0) ? SysCoolingCapacity * coilSHR / SysCoolingLoad : 1.0;
+            Real64 coilLatFactor = (SysLatCoolingLoad > 0.0) ? SysCoolingCapacity * (1.0 - coilSHR) / SysLatCoolingLoad : 1.0;
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotRatio, cCoilName, coilTotFactor);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensRatio, cCoilName, coilSensFactor);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSLatRatio, cCoilName, coilLatFactor);
+
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchMSHPType, hCoilName, HVAC::unitarySysTypeNamesUC[(int)furnace.type]);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSHPName, hCoilName, furnace.Name);
+            OutputReportPredefined::PreDefTableEntry(
+                state, state.dataOutRptPredefined->pdchMSCoilType, hCoilName, HVAC::coilTypeNames[(int)furnace.heatCoilType]);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchMSSizMethod,
+                                                     hCoilName,
+                                                     DataSizing::HeatCoilSizMethodNamesUC[static_cast<int>(
+                                                         state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod)]);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotLoad, hCoilName, SysHeatingLoad);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensLoad, hCoilName, SysHeatingLoad);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotCapacity, hCoilName, SysHeatingCapacity);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensCapacity, hCoilName, SysHeatingCapacity);
+            coilTotFactor = (SysHeatingLoad > 0.0) ? SysHeatingCapacity / SysHeatingLoad : 1.0;
+            coilLatFactor = 0.0;
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSTotRatio, hCoilName, coilTotFactor);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSSensRatio, hCoilName, coilTotFactor);
+            OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMSLatRatio, hCoilName, coilLatFactor);
         }
 
         if (furnace.DesignFanVolFlowRate == DataSizing::AutoSize) {

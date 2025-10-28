@@ -318,9 +318,6 @@ target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third
 target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
 target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.61.0/")
 
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP/include)
-
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING
       OFF
@@ -447,7 +444,6 @@ mark_as_advanced(ENABLE_GTEST_DEBUG_MODE)
 mark_as_advanced(ENABLE_GTEST_SHUFFLE)
 mark_as_advanced(ENABLE_MEMORY_SANITIZER)
 mark_as_advanced(ENABLE_OPENMP)
-mark_as_advanced(USE_OpenMP)
 mark_as_advanced(KIVA_3D)
 mark_as_advanced(KIVA_COVERAGE)
 mark_as_advanced(KIVA_EXE_BUILD)

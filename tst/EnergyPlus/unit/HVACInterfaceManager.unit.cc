@@ -125,7 +125,6 @@ TEST_F(EnergyPlusFixture, UpdateHVACInterface_Test)
     state->dataHVACInterfaceMgr->TmpRealARR.allocate(10);
     state->dataConvergeParams->AirLoopConvergence.allocate(AirLoopNum);
     state->dataLoopNodes->Node.allocate(2);
-    DataConvergParams::CalledFrom CalledFrom = DataConvergParams::CalledFrom::AirSystemDemandSide;
 
     state->dataLoopNodes->Node(InletNode).MassFlowRate = 0.01;
     state->dataLoopNodes->Node(OutletNode).MassFlowRate = 0.01;

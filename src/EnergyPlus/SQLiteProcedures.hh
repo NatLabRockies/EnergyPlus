@@ -235,6 +235,12 @@ public:
                                         Real64 const VarValue      // the value from the sizing calculation
     );
 
+    void addSQLiteComponentSizingStrRecord(std::string_view CompType, // the type of the component
+                                           std::string_view CompName, // the name of the component
+                                           std::string_view VarDesc,  // the description of the input variable
+                                           std::string_view VarValue  // the sizing option or result
+    );
+
     void createSQLiteDaylightMapTitle(
         int const mapNum, std::string_view mapName, std::string_view environmentName, int const zone, std::string_view refPts, Real64 const zCoord);
 

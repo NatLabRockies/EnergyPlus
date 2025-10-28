@@ -49,7 +49,6 @@
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
-#include <EnergyPlus/General.hh>
 
 namespace EnergyPlus {
 

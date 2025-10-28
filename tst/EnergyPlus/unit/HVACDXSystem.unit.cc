@@ -97,6 +97,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_DOASDXCoilTest)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DX Cooling Coil,              !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
         "    Heating Coil Air Inlet Node,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -461,6 +462,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DX Cooling Coil,              !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
         "    Heating Coil Air Inlet Node,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",
@@ -661,6 +663,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_LatentDegradation_Test)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    VS DX Cooling Coil,              !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
         "    Heating Coil Air Inlet Node,     !- Air Outlet Node Name",
         "    5,                       !- Number of Speeds {dimensionless}",

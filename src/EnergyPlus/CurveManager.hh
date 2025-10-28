@@ -309,7 +309,7 @@ namespace Curve {
 
     bool IsCurveOutputTypeValid(std::string const &InOutputType); // index of curve in curve array
 
-    void ShowSevereCurveDims(EnergyPlusData &state,
+    void ShowSevereBadDims(EnergyPlusData &state,
                              ErrorObjectHeader const &eoh,
                              std::string_view const fieldName,
                              std::string_view const curveName,
@@ -442,6 +442,11 @@ namespace Curve {
                                      Real64 Var1,                          // required 1st independent variable
                                      Real64 Var2);                         // 2nd independent variable
 
+    void ShowWarningIsNotNormalizedToOne(EnergyPlusData &state,
+                                         ErrorObjectHeader const &eoh,         // index to curve object
+                                         const std::string &cFieldName,        // object field name
+                                         const std::string &cFieldValue,       // user input curve name
+                                         Real64 const curveVal);                         // required 1st independent variable
 } // namespace Curve
 
 struct CurveManagerData : BaseGlobalStruct

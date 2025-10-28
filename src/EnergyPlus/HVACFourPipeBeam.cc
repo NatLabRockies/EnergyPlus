@@ -1011,10 +1011,32 @@ namespace FourPipeBeam {
         // save the design water volume flow rate for use by the water loop sizing algorithms
         if (this->vDotDesignCW > 0.0 && this->beamCoolingPresent) {
             RegisterPlantCompDesignFlow(state, this->cWInNodeNum, this->vDotDesignCW);
+            BaseSizer::calcCoilWaterFlowRates(state,
+                                              this->name,
+                                              this->unitType,
+                                              this->vDotDesignCW,
+                                              this->cWplantLoc.loopNum,
+                                              state.dataSize->CurZoneEqNum,
+                                              state.dataSize->CurSysNum,
+                                              state.dataSize->CurOASysNum,
+                                              state.dataSize->FinalZoneSizing,
+                                              state.dataSize->FinalSysSizing);
         }
+
         if (this->vDotDesignHW > 0.0 && this->beamHeatingPresent) {
             RegisterPlantCompDesignFlow(state, this->hWInNodeNum, this->vDotDesignHW);
+            BaseSizer::calcCoilWaterFlowRates(state,
+                                              this->name,
+                                              this->unitType,
+                                              this->vDotDesignHW,
+                                              this->hWplantLoc.loopNum,
+                                              state.dataSize->CurZoneEqNum,
+                                              state.dataSize->CurSysNum,
+                                              state.dataSize->CurOASysNum,
+                                              state.dataSize->FinalZoneSizing,
+                                              state.dataSize->FinalSysSizing);
         }
+
         if (ErrorsFound) {
             ShowFatalError(state, "Preceding four pipe beam sizing errors cause program termination");
         }

@@ -2253,6 +2253,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHDXCoilVS,            !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -2596,6 +2597,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     Zone4HPWHDXCoilVS,       !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -2835,6 +2837,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHOutdoorDXCoilVS,     !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -3099,6 +3102,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHScheduledDXCoilVS,   !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -4291,6 +4295,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHPlantDXCoilVS,       !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     25000.0,                 !- Rated Water Heating Capacity {W}

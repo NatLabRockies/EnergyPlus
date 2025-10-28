@@ -123,6 +123,7 @@ struct BaseSizer
     bool dataScalableSizingON = false;
     bool dataScalableCapSizingON = false;
     bool isCoilReportObject = false; // provides access to coil reporting
+    int coilReportNum = -1; // Coil report index
     bool isFanReportObject = false;  // provides access to fan reporting
     bool initialized = false;        // indicates initializeWithinEP was called
     AutoSizingResultType errorType = AutoSizingResultType::NoError;
@@ -144,6 +145,7 @@ struct BaseSizer
     std::string compName;
     bool isEpJSON = false;
 
+    
     bool sysSizingRunDone = false;
     bool zoneSizingRunDone = false;
     int curSysNum = 0;
@@ -307,6 +309,9 @@ public:
                                   ObjexxFCL::Optional_string_const UsrDesc = _,
                                   ObjexxFCL::Optional<Real64 const> UsrValue = _);
 
+    static void reportSizerStrOutput(
+        EnergyPlusData &state, std::string_view CompType, std::string_view CompName, std::string_view VarDesc, std::string_view VarValue);
+
     static Real64 setOAFracForZoneEqSizing(const EnergyPlusData &state, Real64 desMassFlow, DataSizing::ZoneEqSizingData const &zoneEqSizing);
     static Real64 setHeatCoilInletTempForZoneEqSizing(Real64 outAirFrac,
                                                       DataSizing::ZoneEqSizingData const &zoneEqSizing,
@@ -320,6 +325,16 @@ public:
     static Real64 setCoolCoilInletHumRatForZoneEqSizing(Real64 outAirFrac,
                                                         DataSizing::ZoneEqSizingData const &zoneEqSizing,
                                                         DataSizing::ZoneSizingData const &finalZoneSizing);
+    static void calcCoilWaterFlowRates(EnergyPlusData &state,
+                                       std::string const &compName,
+                                       std::string const &compType,
+                                       Real64 const peakWaterFlow,
+                                       int const loopNum,
+                                       int const curZoneEqNum,
+                                       int const curSysNum,
+                                       int const curOASysNum,
+                                       EPVector<DataSizing::ZoneSizingData> const &finalZoneSizing,
+                                       EPVector<DataSizing::SystemSizingData> const &finalSysSizing);
 };
 
 } // namespace EnergyPlus

@@ -122,6 +122,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
+    ,                             !- Availability Schedule Name
     Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     5.0,                     !- Number of Speeds {dimensionless}
@@ -188,6 +189,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Heat Pump ACDXCoil 1,    !- Name
+    ,                        !- Availability Schedule Name
     DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     4.0,                     !- Number of Speeds {dimensionless}

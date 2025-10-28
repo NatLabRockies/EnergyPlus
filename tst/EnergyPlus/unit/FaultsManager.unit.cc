@@ -338,7 +338,6 @@ TEST_F(EnergyPlusFixture, FaultsManager_FaultFoulingAirFilters_CalFaultyFanAirFl
     //     Calculate the decrease of the fan air flow rate, given the fan curve
     //     and the increase of fan pressure rise due to fouling air filters
 
-    int FanNum;
     double FanDesignFlowRateDec;
     double FanFaultyDeltaPressInc = 0.10; // Increase by 10%
 

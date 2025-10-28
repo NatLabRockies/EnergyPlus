@@ -5801,31 +5801,31 @@
 
   Output:Variable,*,Chilled Water Thermal Storage Tank Temperature,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Final Tank Temperature,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Final Tank Temperature,hourly;
 
   Output:Variable,*,Chilled Water Thermal Storage Tank Heat Gain Rate,hourly;
 
   Output:Variable,*,Chilled Water Thermal Storage Tank Heat Gain Energy,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Use Side Mass Flow Rate,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Mass Flow Rate,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Use Side Inlet Temperature,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Inlet Temperature,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Use Side Outlet Temperature,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Outlet Temperature,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Use Side Heat Transfer Rate,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Heat Transfer Rate,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Use Side Heat Transfer Energy,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Use Side Heat Transfer Energy,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Source Side Mass Flow Rate,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Source Side Mass Flow Rate,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Source Side Inlet Temperature,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Source Side Inlet Temperature,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Source Side Outlet Temperature,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Source Side Outlet Temperature,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Source Side Heat Transfer Rate,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Source Side Heat Transfer Rate,hourly;
 
-  Output:Variable,*,Chilled Water Thermal Storage Source Side Heat Transfer Energy,hourly;
+  Output:Variable,*,Chilled Water Thermal Storage Tank Source Side Heat Transfer Energy,hourly;
 
   Output:Variable,*,HVAC System Solver Iteration Count,hourly;
 

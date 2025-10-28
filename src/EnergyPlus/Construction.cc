@@ -1900,7 +1900,7 @@ void ConstructionProps::calculateFinalCoefficients()
 void ConstructionProps::reportTransferFunction(EnergyPlusData &state, int const cCounter)
 {
 
-    static constexpr std::string_view Format_700{" Construction CTF,{},{:4},{:4},{:4},{:8.3F},{:15.4N},{:8.3F},{:8.3F},{:8.3F},{:8.3F},{}\n"};
+    static constexpr std::string_view Format_700{" Construction CTF,{},{:4},{:4},{:4},{:8.3F},{:15.4G},{:8.3F},{:8.3F},{:8.3F},{:8.3F},{}\n"};
     print(state.files.eio,
           Format_700,
           this->Name,
@@ -1920,11 +1920,11 @@ void ConstructionProps::reportTransferFunction(EnergyPlusData &state, int const 
         auto const *thisMaterial = state.dataMaterial->materials(Layer);
         switch (thisMaterial->group) {
         case Material::Group::AirGap: {
-            static constexpr std::string_view Format_702(" Material:Air CTF Summary,{},{:12.4N}\n");
+            static constexpr std::string_view Format_702(" Material:Air CTF Summary,{},{:12.4G}\n");
             print(state.files.eio, Format_702, thisMaterial->Name, thisMaterial->Resistance);
         } break;
         default: {
-            static constexpr std::string_view Format_701(" Material CTF Summary,{},{:8.4F},{:14.3F},{:11.3F},{:13.3F},{:12.4N}\n");
+            static constexpr std::string_view Format_701(" Material CTF Summary,{},{:8.4F},{:14.3F},{:11.3F},{:13.3F},{:12.4G}\n");
             Material::MaterialBase const *mp = thisMaterial;
             print(state.files.eio, Format_701, mp->Name, mp->Thickness, mp->Conductivity, mp->Density, mp->SpecHeat, mp->Resistance);
         } break;
@@ -1933,10 +1933,10 @@ void ConstructionProps::reportTransferFunction(EnergyPlusData &state, int const 
 
     for (int I = this->NumCTFTerms; I >= 0; --I) {
         if (I != 0) {
-            static constexpr std::string_view Format_703(" CTF,{:4},{:20.8N},{:20.8N},{:20.8N},{:20.8N}\n");
+            static constexpr std::string_view Format_703(" CTF,{:4},{:20.8G},{:20.8G},{:20.8G},{:20.8G}\n");
             print(state.files.eio, Format_703, I, this->CTFOutside[I], this->CTFCross[I], this->CTFInside[I], this->CTFFlux[I]);
         } else {
-            static constexpr std::string_view Format_704(" CTF,{:4},{:20.8N},{:20.8N},{:20.8N}\n");
+            static constexpr std::string_view Format_704(" CTF,{:4},{:20.8G},{:20.8G},{:20.8G}\n");
             print(state.files.eio, Format_704, I, this->CTFOutside[I], this->CTFCross[I], this->CTFInside[I]);
         }
     }
@@ -1944,18 +1944,18 @@ void ConstructionProps::reportTransferFunction(EnergyPlusData &state, int const 
     if (this->SourceSinkPresent) {
         // QTFs...
         for (int I = this->NumCTFTerms; I >= 0; --I) {
-            static constexpr std::string_view Format_705(" QTF,{:4},{:20.8N},{:20.8N}\n");
+            static constexpr std::string_view Format_705(" QTF,{:4},{:20.8G},{:20.8G}\n");
             print(state.files.eio, Format_705, I, this->CTFSourceOut[I], this->CTFSourceIn[I]);
         }
         // QTFs for source/sink location temperature calculation...
         for (int I = this->NumCTFTerms; I >= 0; --I) {
-            static constexpr std::string_view Format_706(" Source/Sink Loc Internal Temp QTF,{:4},{:20.8N},{:20.8N},{:20.8N}\n");
+            static constexpr std::string_view Format_706(" Source/Sink Loc Internal Temp QTF,{:4},{:20.8G},{:20.8G},{:20.8G}\n");
             print(state.files.eio, Format_706, I, this->CTFTSourceOut[I], this->CTFTSourceIn[I], this->CTFTSourceQ[I]);
         }
         if (this->TempAfterLayer != 0) {
             // QTFs for user specified interior temperature calculation...
             for (int I = this->NumCTFTerms; I >= 0; --I) {
-                static constexpr std::string_view Format_707(" User Loc Internal Temp QTF,{:4},{:20.8N},{:20.8N},{:20.8N}\n");
+                static constexpr std::string_view Format_707(" User Loc Internal Temp QTF,{:4},{:20.8G},{:20.8G},{:20.8G}\n");
                 print(state.files.eio, Format_707, I, this->CTFTUserOut[I], this->CTFTUserIn[I], this->CTFTUserSource[I]);
             }
         }
