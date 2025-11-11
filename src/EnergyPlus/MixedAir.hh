@@ -389,7 +389,7 @@ namespace MixedAir {
     void ProcessOAControllerInputs(EnergyPlusData &state,
                                    std::string_view CurrentModuleObject,
                                    int OutAirNum,
-                                   Array1D_string const &AlphArray,
+                                   Array1D_string &AlphArray,
                                    int const NumAlphas,
                                    Array1D<Real64> const &NumArray,
                                    int const NumNums,
@@ -400,7 +400,7 @@ namespace MixedAir {
                                    bool &ErrorsFound                     // If errors found in input
     );
 
-    void InitOutsideAirSys(EnergyPlusData &state, int OASysNum, int AirLoopNum);
+    void InitOutsideAirSys(EnergyPlusData &state, int const (OASysNum), int const AirLoopNum);
 
     void InitOAController(EnergyPlusData &state, int OAControllerNum, bool FirstHVACIteration, int AirLoopNum);
 

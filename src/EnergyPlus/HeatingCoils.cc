@@ -2898,7 +2898,7 @@ namespace HeatingCoils {
     }
 
     void CheckHeatingCoilSchedule(EnergyPlusData &state,
-                                  std::string const &CompType, // unused1208
+                                  std::string &CompType, // unused1208
                                   std::string_view CompName,
                                   Real64 &Value,
                                   int &CompIndex)
@@ -3157,7 +3157,7 @@ namespace HeatingCoils {
     }
 
     int GetHeatReclaimSourceIndex(EnergyPlusData &state,
-                                  std::string const &CoilType, // must match coil types in this module
+                                  std::string &CoilType, // must match coil types in this module
                                   std::string const &CoilName, // must match coil names for the coil type
                                   bool &ErrorsFound            // set to true if problem
     )

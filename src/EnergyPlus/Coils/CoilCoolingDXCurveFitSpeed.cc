@@ -299,7 +299,7 @@ CoilCoolingDXCurveFitSpeed::CoilCoolingDXCurveFitSpeed(EnergyPlus::EnergyPlusDat
                                                                  state.dataIPShortCut->rNumericArgs,
                                                                  NumNumbers,
                                                                  IOStatus);
-        if (!Util::SameString(name_to_find, state.dataIPShortCut->cAlphaArgs(1))) {
+        if (!Util::SameString(state.dataIPShortCut->cAlphaArgs(1), name_to_find)) {
             continue;
         }
         found_it = true;

@@ -1060,8 +1060,9 @@ namespace FaultsManager {
                     state.dataCondenserLoopTowers->towers(TowerNum).FaultyTowerFoulingIndex = jFault_TowerFouling;
 
                     // Check the faulty tower type
-                    if (!Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(state.dataCondenserLoopTowers->towers(TowerNum).TowerType)],
-                                          faultsTowerFouling.TowerType)) {
+                    if (!Util::SameString(faultsTowerFouling.TowerType, DataPlant::PlantEquipTypeNames[static_cast<int>(
+                                              state.dataCondenserLoopTowers->towers(TowerNum).TowerType)]
+                                          )) {
                         ShowWarningError(
                             state,
                             format("{} = \"{}\" invalid {} = \"{}\" not match the type of {}. Tower type in the fault model is updated. ",
@@ -1168,8 +1169,9 @@ namespace FaultsManager {
                     state.dataCondenserLoopTowers->towers(TowerNum).FaultyCondenserSWTIndex = jFault_CondenserSWT;
 
                     // Check the faulty tower type
-                    if (!Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(state.dataCondenserLoopTowers->towers(TowerNum).TowerType)],
-                                          faultsCondSWTFouling.TowerType)) {
+                    if (!Util::SameString(faultsCondSWTFouling.TowerType, DataPlant::PlantEquipTypeNames[static_cast<int>(
+                                              state.dataCondenserLoopTowers->towers(TowerNum).TowerType)]
+                                          )) {
                         ShowWarningError(state,
                                          format("{} = \"{}\" invalid {} = \"{}\" not match the type of {}. Tower type is updated. ",
                                                 cFaultCurrentObject,

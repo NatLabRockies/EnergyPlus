@@ -1315,7 +1315,7 @@ void ParseExpression(EnergyPlusData &state,
                 const size_t len = strlen(string);
                 const std::string potential_match = String.substr(Pos, len);
 
-                if ((case_insensitive && Util::SameString(potential_match, string)) || (!case_insensitive && potential_match == string)) {
+                if ((case_insensitive && equali(potential_match, string)) || (!case_insensitive && potential_match == string)) {
                     if (state.dataSysVars->DeveloperFlag) {
                         print(state.files.debug, "OPERATOR \"{}\"\n", potential_match);
                     }

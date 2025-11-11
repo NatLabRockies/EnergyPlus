@@ -329,8 +329,8 @@ void InitEnergyReports(EnergyPlusData &state)
                     for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumMeteredVars; ++VarNum) {
                         if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                             thisZoneEquipList.EquipData(AirDistUnitNum).EnergyTransComp = EnergyTransfer;
-                            const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
-                            const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
+                            std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
+                            std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
                             int Idx = 0;
                             int MatchLoop = 0;
                             int MatchLoopType = 0;
@@ -351,8 +351,8 @@ void InitEnergyReports(EnergyPlusData &state)
                             if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).resource ==
                                 Constant::eResource::EnergyTransfer) {
                                 thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).EnergyTransComp = EnergyTransfer;
-                                const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
-                                const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
+                                std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
+                                std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
                                 int Idx = 0;
                                 int MatchLoop = 0;
                                 int MatchLoopType = 0;
@@ -384,9 +384,9 @@ void InitEnergyReports(EnergyPlusData &state)
                                         .SubEquipData(SubEquipNum)
                                         .SubSubEquipData(SubSubEquipNum)
                                         .EnergyTransComp = EnergyTransfer;
-                                    const std::string &CompType =
+                                    std::string &CompType =
                                         thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).SubSubEquipData(SubSubEquipNum).TypeOf;
-                                    const std::string &CompName =
+                                    std::string &CompName =
                                         thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).SubSubEquipData(SubSubEquipNum).Name;
                                     int Idx = 0;
                                     int MatchLoop = 0;
@@ -725,8 +725,8 @@ void InitEnergyReports(EnergyPlusData &state)
                                 auto &thisVentRepComp = state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
                                                             .Branch(BranchNum)
                                                             .Comp(CompNum);
-                                const std::string &CompType = thisVentRepComp.TypeOf;
-                                const std::string &CompName = thisVentRepComp.Name;
+                                std::string &CompType = thisVentRepComp.TypeOf;
+                                std::string &CompName = thisVentRepComp.Name;
                                 int MatchLoop = 0;
                                 int MatchLoopType = 0;
                                 int MatchBranch = 0;
@@ -754,8 +754,8 @@ void InitEnergyReports(EnergyPlusData &state)
                                 auto &thisVentRepComp = state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
                                                             .Branch(BranchNum)
                                                             .Comp(CompNum);
-                                const std::string &CompType = thisVentRepComp.TypeOf;
-                                const std::string &CompName = thisVentRepComp.Name;
+                                std::string &CompType = thisVentRepComp.TypeOf;
+                                std::string &CompName = thisVentRepComp.Name;
                                 int MatchLoop = 0;
                                 int MatchLoopType = 0;
                                 int MatchBranch = 0;
@@ -4529,8 +4529,8 @@ void MatchPlantSys(EnergyPlusData &state,
             for (int VarNum = 1; VarNum <= thisComp.NumMeteredVars; ++VarNum) {
                 if (thisComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                     thisComp.EnergyTransComp = EnergyTrans;
-                    const std::string &CompType = thisComp.TypeOf;
-                    const std::string &CompName = thisComp.Name;
+                    std::string &CompType = thisComp.TypeOf;
+                    std::string &CompName = thisComp.Name;
                     bool MatchFound = false; // Set to .TRUE. when a match is found
                     int MatchLoop = 0;       // Loop number of the match
                     int MatchBranch = 0;     // Branch number of the match
@@ -4552,8 +4552,8 @@ void MatchPlantSys(EnergyPlusData &state,
                     for (int VarNum = 1; VarNum <= thisSubComp.NumMeteredVars; ++VarNum) {
                         if (thisSubComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                             thisSubComp.EnergyTransComp = EnergyTrans;
-                            const std::string &CompType = thisComp.TypeOf;
-                            const std::string &CompName = thisComp.Name;
+                            std::string &CompType = thisComp.TypeOf;
+                            std::string &CompName = thisComp.Name;
                             bool MatchFound = false; // Set to .TRUE. when a match is found
                             int MatchLoop = 0;       // Loop number of the match
                             int MatchBranch = 0;     // Branch number of the match
@@ -4576,8 +4576,8 @@ void MatchPlantSys(EnergyPlusData &state,
                             for (int VarNum = 1; VarNum <= thisSubSubComp.NumMeteredVars; ++VarNum) {
                                 if (thisSubSubComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                                     thisSubSubComp.EnergyTransComp = EnergyTrans;
-                                    const std::string &CompType = thisComp.TypeOf;
-                                    const std::string &CompName = thisComp.Name;
+                                    std::string &CompType = thisComp.TypeOf;
+                                    std::string &CompName = thisComp.Name;
                                     bool MatchFound = false; // Set to .TRUE. when a match is found
                                     int MatchLoop = 0;       // Loop number of the match
                                     int MatchBranch = 0;     // Branch number of the match
@@ -4611,8 +4611,8 @@ void MatchPlantSys(EnergyPlusData &state,
 }
 
 void FindDemandSideMatch(EnergyPlusData &state,
-                         std::string const &CompType, // Inlet node of the component to find the match of
-                         std::string_view CompName,   // Outlet node of the component to find the match of
+                         std::string &CompType, // Inlet node of the component to find the match of
+                         std::string &CompName,   // Outlet node of the component to find the match of
                          bool &MatchFound,            // Set to .TRUE. when a match is found
                          int &MatchLoopType,          // Loop number of the match
                          int &MatchLoop,              // Loop number of the match

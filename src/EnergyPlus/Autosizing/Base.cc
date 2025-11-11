@@ -605,7 +605,7 @@ void BaseSizer::select2StgDXHumCtrlSizerOutput(EnergyPlusData &state, bool &erro
     }
 }
 
-bool BaseSizer::isValidCoilType(std::string const &_compType)
+bool BaseSizer::isValidCoilType(std::string &_compType)
 {
     int coilNum = 0;
     for (auto const &coilType : HVAC::cAllCoilTypes) {
@@ -619,7 +619,7 @@ bool BaseSizer::isValidCoilType(std::string const &_compType)
     return false;
 }
 
-bool BaseSizer::isValidFanType(std::string const &_compType)
+bool BaseSizer::isValidFanType(std::string &_compType)
 {
     // if compType name is one of the fan objects, then return true
     if (Util::SameString(_compType, "Fan:SystemModel")) {

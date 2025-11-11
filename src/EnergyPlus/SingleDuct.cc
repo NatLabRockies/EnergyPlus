@@ -3056,8 +3056,8 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         } else {
             CheckZoneSizing(state, this->sysType, this->SysName);
             if (Util::SameString(this->ReheatComp, "Coil:Heating:Water")) {
-                state.dataSingleDuct->CoilWaterInletNodeSS = GetCoilWaterInletNode(state, "Coil:Heating:Water", this->ReheatName, ErrorsFound);
-                state.dataSingleDuct->CoilWaterOutletNodeSS = GetCoilWaterOutletNode(state, "Coil:Heating:Water", this->ReheatName, ErrorsFound);
+                state.dataSingleDuct->CoilWaterInletNodeSS = GetCoilWaterInletNode(state, this->ReheatName, "Coil:Heating:Water", ErrorsFound);
+                state.dataSingleDuct->CoilWaterOutletNodeSS = GetCoilWaterOutletNode(state, this->ReheatName, "Coil:Heating:Water", ErrorsFound);
                 if (IsAutoSize) {
                     PlantSizingErrorsFound = false;
                     PltSizHeatNum = MyPlantSizingIndex(state,
@@ -3167,8 +3167,8 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         } else {
             CheckZoneSizing(state, this->sysType, this->SysName);
             if (Util::SameString(this->ReheatComp, "Coil:Heating:Steam")) {
-                state.dataSingleDuct->CoilSteamInletNodeSS = GetCoilSteamInletNode(state, "Coil:Heating:Steam", this->ReheatName, ErrorsFound);
-                state.dataSingleDuct->CoilSteamOutletNodeSS = GetCoilSteamOutletNode(state, "Coil:Heating:Steam", this->ReheatName, ErrorsFound);
+                state.dataSingleDuct->CoilSteamInletNodeSS = GetCoilSteamInletNode(state, this->ReheatName, "Coil:Heating:Steam", ErrorsFound);
+                state.dataSingleDuct->CoilSteamOutletNodeSS = GetCoilSteamOutletNode(state, this->ReheatName, "Coil:Heating:Steam", ErrorsFound);
                 if (IsAutoSize) {
                     PlantSizingErrorsFound = false;
                     PltSizHeatNum = MyPlantSizingIndex(state,

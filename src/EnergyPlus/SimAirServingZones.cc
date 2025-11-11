@@ -7621,11 +7621,11 @@ bool CheckWaterCoilOnPrimaryAirLoopBranch(EnergyPlusData &state, SimAirServingZo
 
     if (state.dataHVACGlobal->NumPrimaryAirSys > 0) {
         for (int AirSysNum = 1; AirSysNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirSysNum) {
-            auto const &primaryAirSystems = state.dataAirSystemsData->PrimaryAirSystems(AirSysNum);
+            auto &primaryAirSystems = state.dataAirSystemsData->PrimaryAirSystems(AirSysNum);
             for (int BranchNum = 1; BranchNum <= primaryAirSystems.NumBranches; ++BranchNum) {
                 for (int CompNum = 1; CompNum <= primaryAirSystems.Branch(BranchNum).TotalComponents; ++CompNum) {
                     if ((CompTypeNum == primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num) &&
-                        Util::SameString(CompName, primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name)) {
+                        Util::SameString(primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name, CompName)) {
                         return true;
                     }
                 }
@@ -7656,7 +7656,7 @@ bool CheckWaterCoilOnOASystem(EnergyPlusData &state, SimAirServingZones::CompTyp
             auto &outsideAirSys = state.dataAirLoop->OutsideAirSys(OASysNum);
             for (int OACompNum = 1; OACompNum <= outsideAirSys.NumComponents; ++OACompNum) {
                 if ((CompTypeNum == outsideAirSys.ComponentTypeEnum(OACompNum)) &&
-                    (Util::SameString(CompName, outsideAirSys.ComponentName(OACompNum)))) {
+                    (Util::SameString(outsideAirSys.ComponentName(OACompNum), CompName))) {
                     return true;
                 }
             }
@@ -7693,7 +7693,7 @@ bool CheckWaterCoilSystemOnAirLoopOrOASystem(EnergyPlusData &state, SimAirServin
         for (int HXASSCoilNum = 1; HXASSCoilNum <= state.dataHVACAssistedCC->TotalNumHXAssistedCoils; ++HXASSCoilNum) {
             std::string CompType = state.dataHVACAssistedCC->HXAssistedCoil(HXASSCoilNum).CoolingCoilType;
             if ((Util::SameString(CompType, "Coil:Cooling:Water") || Util::SameString(CompType, "Coil:Cooling:Water:DetailedGeometry")) &&
-                Util::SameString(CompName, state.dataHVACAssistedCC->HXAssistedCoil(HXASSCoilNum).CoolingCoilName)) {
+                Util::SameString(state.dataHVACAssistedCC->HXAssistedCoil(HXASSCoilNum).CoolingCoilName, CompName)) {
                 CoilSystemName = state.dataHVACAssistedCC->HXAssistedCoil(HXASSCoilNum).Name;
                 CoilSystemTypeNum = SimAirServingZones::CompType::WaterCoil_CoolingHXAsst;
                 WaterCoilIsOnWaterCoilSystem = true;

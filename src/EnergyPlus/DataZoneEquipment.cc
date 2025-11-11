@@ -1801,7 +1801,7 @@ int GetZoneEquipControlledZoneNum(EnergyPlusData &state, DataZoneEquipment::Zone
         }
         for (int Num = 1; Num <= state.dataZoneEquip->ZoneEquipList(CtrlZone).NumOfEquipTypes; ++Num) {
             if (zoneEquipType == state.dataZoneEquip->ZoneEquipList(CtrlZone).EquipType(Num) &&
-                Util::SameString(EquipmentName, state.dataZoneEquip->ZoneEquipList(CtrlZone).EquipName(Num))) {
+                Util::SameString(state.dataZoneEquip->ZoneEquipList(CtrlZone).EquipName(Num), EquipmentName)) {
                 return ControlZoneNum = CtrlZone;
             }
         }

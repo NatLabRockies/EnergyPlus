@@ -64,7 +64,7 @@
 using namespace EnergyPlus;
 
 void CoilCoolingDXCurveFitPerformance::instantiateFromInputSpec(EnergyPlus::EnergyPlusData &state,
-                                                                const CoilCoolingDXCurveFitPerformanceInputSpecification &input_data)
+                                                                 CoilCoolingDXCurveFitPerformanceInputSpecification &input_data)
 {
     static constexpr std::string_view routineName("CoilCoolingDXCurveFitPerformance::instantiateFromInputSpec: ");
 
@@ -173,7 +173,7 @@ CoilCoolingDXCurveFitPerformance::CoilCoolingDXCurveFitPerformance(EnergyPlus::E
                                                                  IOStatus,
                                                                  _,
                                                                  state.dataIPShortCut->lAlphaFieldBlanks);
-        if (!Util::SameString(name_to_find, state.dataIPShortCut->cAlphaArgs(1))) {
+        if (!Util::SameString(state.dataIPShortCut->cAlphaArgs(1), name_to_find)) {
             continue;
         }
         found_it = true;

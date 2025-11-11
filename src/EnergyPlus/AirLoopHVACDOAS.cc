@@ -318,8 +318,8 @@ namespace AirLoopHVACDOAS {
 
         int index = -1;
         std::size_t loop = 0;
-        for (const auto &thisAirLoopMixerObject : state.dataAirLoopHVACDOAS->airloopMixer) {
-            if (Util::SameString(objectName, thisAirLoopMixerObject.name)) {
+        for (auto &thisAirLoopMixerObject : state.dataAirLoopHVACDOAS->airloopMixer) {
+            if (Util::SameString(thisAirLoopMixerObject.name, objectName)) {
                 index = static_cast<int>(loop);
                 return index;
             }
@@ -367,8 +367,8 @@ namespace AirLoopHVACDOAS {
 
         int index = -1;
         std::size_t loop = 0;
-        for (const auto &thisAirLoopSplitterObj : state.dataAirLoopHVACDOAS->airloopSplitter) {
-            if (Util::SameString(objectName, thisAirLoopSplitterObj.name)) {
+        for (auto &thisAirLoopSplitterObj : state.dataAirLoopHVACDOAS->airloopSplitter) {
+            if (Util::SameString(thisAirLoopSplitterObj.name, objectName)) {
                 index = static_cast<int>(loop);
                 return index;
             }
@@ -506,13 +506,13 @@ namespace AirLoopHVACDOAS {
                 int CoolingCoilOrder = 0;
                 int FanOrder = 0;
                 for (int CompNum = 1; CompNum <= thisOutsideAirSys.NumComponents; ++CompNum) {
-                    std::string const &CompType = thisOutsideAirSys.ComponentType(CompNum);
-                    std::string const &CompName = thisOutsideAirSys.ComponentName(CompNum);
+                    std::string &CompType = thisOutsideAirSys.ComponentType(CompNum);
+                    std::string &CompName = thisOutsideAirSys.ComponentName(CompNum);
 
                     bool InletNodeErrFlag = false;
                     bool OutletNodeErrFlag = false;
 
-                    const std::string typeNameUC = Util::makeUPPER(thisOutsideAirSys.ComponentType(CompNum));
+                    std::string typeNameUC = Util::makeUPPER(thisOutsideAirSys.ComponentType(CompNum));
                     switch (static_cast<ValidEquipListType>(getEnumValue(validEquipNamesUC, typeNameUC))) {
                     case ValidEquipListType::OutdoorAirMixer:
                     case ValidEquipListType::FanConstantVolume:
@@ -560,7 +560,7 @@ namespace AirLoopHVACDOAS {
                     case ValidEquipListType::CoilCoolingWater:
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
-                        thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, "COIL:COOLING:WATER", CompName, errorsFound);
+                        thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, CompName, "COIL:COOLING:WATER", errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
@@ -576,7 +576,7 @@ namespace AirLoopHVACDOAS {
                     case ValidEquipListType::CoilHeatingWater:
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
-                        thisDOAS.HWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", CompName, errorsFound);
+                        thisDOAS.HWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, CompName, "Coil:Heating:Water", errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
@@ -597,7 +597,7 @@ namespace AirLoopHVACDOAS {
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
                         thisDOAS.CWCtrlNodeNum =
-                            WaterCoils::GetCoilWaterInletNode(state, "Coil:Cooling:Water:DetailedGeometry", CompName, errorsFound);
+                            WaterCoils::GetCoilWaterInletNode(state, CompName, "Coil:Cooling:Water:DetailedGeometry", errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
@@ -867,8 +867,8 @@ namespace AirLoopHVACDOAS {
             bool ErrorsFound = false;
             Real64 rho;
             for (int CompNum = 1; CompNum <= state.dataAirLoop->OutsideAirSys(this->m_OASystemNum).NumComponents; ++CompNum) {
-                std::string const &CompType = state.dataAirLoop->OutsideAirSys(this->m_OASystemNum).ComponentType(CompNum);
-                std::string const &CompName = state.dataAirLoop->OutsideAirSys(this->m_OASystemNum).ComponentName(CompNum);
+                std::string &CompType = state.dataAirLoop->OutsideAirSys(this->m_OASystemNum).ComponentType(CompNum);
+                std::string &CompName = state.dataAirLoop->OutsideAirSys(this->m_OASystemNum).ComponentName(CompNum);
                 if (Util::SameString(CompType, "FAN:SYSTEMMODEL")) {
                     state.dataFans->fans(this->m_FanIndex)->simulate(state, FirstHVACIteration);
                 }
@@ -878,7 +878,7 @@ namespace AirLoopHVACDOAS {
 
                 if (Util::SameString(CompType, "COIL:HEATING:WATER")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_HeatCoilNum);
-                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", CompName, ErrorsFound);
+                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Heating:Water", ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->HWPlantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,
@@ -888,7 +888,7 @@ namespace AirLoopHVACDOAS {
                 }
                 if (Util::SameString(CompType, "COIL:COOLING:WATER")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_CoolCoilNum);
-                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Cooling:Water", CompName, ErrorsFound);
+                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Cooling:Water", ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,
@@ -899,7 +899,7 @@ namespace AirLoopHVACDOAS {
                 if (Util::SameString(CompType, "COIL:COOLING:WATER:DETAILEDGEOMETRY")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_CoolCoilNum);
                     Real64 const CoilMaxVolFlowRate =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Cooling:Water:DetailedGeometry", CompName, ErrorsFound);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Cooling:Water:DetailedGeometry", ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,

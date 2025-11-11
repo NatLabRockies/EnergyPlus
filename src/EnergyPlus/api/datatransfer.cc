@@ -600,7 +600,7 @@ int getEMSGlobalVariableHandle(EnergyPlusState state, const char *name)
         index++;
         // only respond if we are outside of the built-in EMS var range
         if (index < thisState->dataRuntimeLang->emsVarBuiltInStart || index > thisState->dataRuntimeLang->emsVarBuiltInEnd) {
-            if (EnergyPlus::Util::SameString(name, erlVar.Name)) {
+            if (equali(name, erlVar.Name)) {
                 return index;
             }
         }

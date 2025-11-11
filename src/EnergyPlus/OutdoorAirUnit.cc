@@ -595,29 +595,25 @@ namespace OutdoorAirUnit {
                                                   CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
                                                   thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                   ErrorsFound);
+                            std::string tempCompName(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
-                                WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                WaterCoils::GetCoilInletNodeConstCoil(state, tempCompName,
                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                              ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
-                                WaterCoils::GetCoilOutletNode(state,
-                                                              CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                WaterCoils::GetCoilOutletNode(state, tempCompName,
                                                               thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                               ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
-                                GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                GetCoilWaterInletNode(state, tempCompName,
                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                       ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
-                                GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                GetCoilWaterOutletNode(state, tempCompName,
                                                        thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                        ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
-                                WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                    CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                WaterCoils::GetCoilMaxWaterFlowRate(state, tempCompName,
                                                                     thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                                     ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
@@ -630,25 +626,25 @@ namespace OutdoorAirUnit {
                                                   CompTypeNamesUC[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
                                                   thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                   ErrorsFound);
+                            std::string tempCompName(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
                                 WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
+                                                             tempCompName,
                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                              ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode = WaterCoils::GetCoilOutletNode(
-                                state, "Coil:Heating:Water", thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
+                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, "Coil:Heating:Water", ErrorsFound);
+                            std::string const tempContantCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
                                 GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName, tempContantCompType,
                                                       ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
                                 GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName, tempContantCompType,
                                                        ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow = WaterCoils::GetCoilMaxWaterFlowRate(
-                                state, "Coil:Heating:Water", thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
+                                state, thisOutAirUnit.OAEquip(CompNum).ComponentName, "Coil:Heating:Water", ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
                             break;
                         }
@@ -665,10 +661,10 @@ namespace OutdoorAirUnit {
                                 state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode = GetCoilSteamInletNode(
                                 state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
+                            std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
                                 GetCoilSteamOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                        ErrorsFound);
 
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
@@ -686,35 +682,32 @@ namespace OutdoorAirUnit {
                                                   thisOutAirUnit.OAEquip(CompNum).ComponentName,
                                                   ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
+                            std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
                                 WaterCoils::GetCoilInletNode(state,
-                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                             thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                              ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirOutletNode =
                                 WaterCoils::GetCoilOutletNode(state,
-                                                              CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                              thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                               ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
                                 GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                       ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
                                 GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                        ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
-                                WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                    CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                                    thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                WaterCoils::GetCoilMaxWaterFlowRate(state, thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
+                                                                    
                                                                     ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
                             break;
                         }
                         case CompType::WaterCoil_CoolingHXAsst: {
+                            std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilAirInletNode =
                                 HVACHXAssistedCoolingCoil::GetCoilInletNode(state,
                                                                             CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
@@ -727,18 +720,16 @@ namespace OutdoorAirUnit {
                                                                              ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode =
                                 GetCoilWaterInletNode(state,
-                                                      CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                      thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                       ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
                                 GetCoilWaterOutletNode(state,
-                                                       CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
                                                        ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow = HVACHXAssistedCoolingCoil::GetCoilMaxWaterFlowRate(
                                 state,
-                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)],
                                 thisOutAirUnit.OAEquip(CompNum).ComponentName,
+                                tempConstCompType,
                                 ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).MinVolWaterFlow = 0.0;
                             break;
@@ -1204,10 +1195,10 @@ namespace OutdoorAirUnit {
                 for (int compLoop = 1; compLoop <= thisOutAirUnit.NumComponents; ++compLoop) {
                     if ((thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_Cooling) ||
                         (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_DetailedCool)) {
+                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
                             WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
-                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName,
+                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName, tempConstCompType,
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
@@ -1221,10 +1212,10 @@ namespace OutdoorAirUnit {
                     }
 
                     if (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_SimpleHeat) {
+                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
                             WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
-                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName,
+                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName, tempConstCompType,
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -1250,10 +1241,11 @@ namespace OutdoorAirUnit {
                                            thisOutAirUnit.OAEquip(compLoop).CoilWaterOutletNode);
                     }
                     if (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_CoolingHXAsst) {
+                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
                             WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)],
                                                                 thisOutAirUnit.OAEquip(compLoop).ComponentName,
+                                                                tempConstCompType,
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);

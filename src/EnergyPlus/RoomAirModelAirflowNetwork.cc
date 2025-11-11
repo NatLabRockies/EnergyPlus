@@ -299,7 +299,7 @@ namespace RoomAir {
                                             }
                                         }
                                     }
-                                } else if (Util::SameString(zoneEquipList.EquipName(I), afnHVAC.Name)) {
+                                } else if (Util::SameString(afnHVAC.Name, zoneEquipList.EquipName(I))) {
                                     if (afnHVAC.EquipConfigIndex == 0) {
                                         afnHVAC.EquipConfigIndex = I;
                                     }

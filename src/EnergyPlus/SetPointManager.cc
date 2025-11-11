@@ -1840,15 +1840,15 @@ void InitSetPointManagers(EnergyPlusData &state)
                         }
                     }
 
-                    auto const &primaryAirSystem = state.dataAirSystemsData->PrimaryAirSystems(spmSZR->airLoopNum);
+                    auto &primaryAirSystem = state.dataAirSystemsData->PrimaryAirSystems(spmSZR->airLoopNum);
                     MixedAirNode = primaryAirSystem.OASysOutletNodeNum;
                     InletBranchNum = primaryAirSystem.InletBranchNum[0];
                     LoopInNode = primaryAirSystem.Branch(InletBranchNum).NodeNumIn;
                     // get the supply fan inlet and outlet nodes
                     if (MixedAirNode > 0) {
                         bool LookForFan = false;
-                        for (auto const &branch : primaryAirSystem.Branch) {
-                            for (auto const &comp : branch.Comp) {
+                        for (auto &branch : primaryAirSystem.Branch) {
+                            for (auto &comp : branch.Comp) {
                                 if (MixedAirNode == comp.NodeNumIn) {
                                     LookForFan = true;
                                 }
@@ -1863,8 +1863,8 @@ void InitSetPointManagers(EnergyPlusData &state)
                             }
                         } // for (BranchNum)
                     } else {
-                        for (auto const &branch : primaryAirSystem.Branch) {
-                            for (auto const &comp : branch.Comp) {
+                        for (auto &branch : primaryAirSystem.Branch) {
+                            for (auto &comp : branch.Comp) {
                                 if (Util::SameString(comp.TypeOf, "Fan:ConstantVolume") || Util::SameString(comp.TypeOf, "Fan:VariableVolume") ||
                                     Util::SameString(comp.TypeOf, "Fan:OnOff") || Util::SameString(comp.TypeOf, "Fan:ComponentModel")) {
                                     FanNodeIn = comp.NodeNumIn;

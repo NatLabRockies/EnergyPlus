@@ -477,7 +477,7 @@ void FluidCoolerspecs::setupOutputVars(EnergyPlusData &state)
 
 bool FluidCoolerspecs::validateSingleSpeedInputs(EnergyPlusData &state,
                                                  std::string const &cCurrentModuleObject,
-                                                 Array1D<std::string> const &AlphArray,
+                                                 Array1D<std::string> &AlphArray,
                                                  Array1D<std::string> const &cNumericFieldNames,
                                                  Array1D<std::string> const &cAlphaFieldNames)
 {
@@ -617,7 +617,7 @@ bool FluidCoolerspecs::validateSingleSpeedInputs(EnergyPlusData &state,
 
 bool FluidCoolerspecs::validateTwoSpeedInputs(EnergyPlusData &state,
                                               std::string const &cCurrentModuleObject,
-                                              Array1D<std::string> const &AlphArray,
+                                              Array1D<std::string> &AlphArray,
                                               Array1D<std::string> const &cNumericFieldNames,
                                               Array1D<std::string> const &cAlphaFieldNames)
 {

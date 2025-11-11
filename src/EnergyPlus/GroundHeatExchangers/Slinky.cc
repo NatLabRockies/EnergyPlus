@@ -113,10 +113,10 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     this->pipe.outRadius = this->pipe.outDia / 2.0;
     this->pipe.thickness = j["pipe_thickness"].get<Real64>();
 
-    std::string const hxConfig = Util::makeUPPER(j["heat_exchanger_configuration"].get<std::string>());
-    if (Util::SameString(hxConfig, "VERTICAL")) {
+    std::string hxConfig = Util::makeUPPER(j["heat_exchanger_configuration"].get<std::string>());
+    if (hxConfig == "VERTICAL") {
         this->verticalConfig = true;
-    } else if (Util::SameString(hxConfig, "HORIZONTAL")) {
+    } else if (hxConfig == "HORIZONTAL") {
         this->verticalConfig = false;
     }
 

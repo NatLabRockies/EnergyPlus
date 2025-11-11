@@ -2284,7 +2284,7 @@ namespace HeatBalanceManager {
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
-                         Array1D_string const &cAlphaArgs,
+                         Array1D_string &cAlphaArgs,
                          int const NumAlphas,
                          Array1D<Real64> const &rNumericArgs,
                          int const NumNumbers,
@@ -2376,9 +2376,9 @@ namespace HeatBalanceManager {
         // Process the input field:    Part of Total Floor Area
         //   The default value is YES and so only NO needs to be handled
         if (NumAlphas > 3) {
-            if (Util::SameString("No", cAlphaArgs(4))) {
+            if (Util::SameString(cAlphaArgs(4), "No")) {
                 state.dataHeatBal->Zone(ZoneLoop).isPartOfTotalArea = false;
-            } else if (Util::SameString("Yes", cAlphaArgs(4)) || lAlphaFieldBlanks(4)) {
+            } else if (Util::SameString(cAlphaArgs(4), "Yes") || lAlphaFieldBlanks(4)) {
                 state.dataHeatBal->Zone(ZoneLoop).isPartOfTotalArea = true;
             } else {
                 ShowSevereError(state, format("{}{}=\"{}\".", RoutineName, cCurrentModuleObject, state.dataHeatBal->Zone(ZoneLoop).Name));

@@ -1897,7 +1897,7 @@ int FindTariffIndex(
     int found = 0;
 
     for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
-        if (Util::SameString(nameOfTariff, s_econ->tariff(iTariff).tariffName)) {
+        if (Util::SameString(s_econ->tariff(iTariff).tariffName, nameOfTariff)) {
             found = iTariff;
             break;
         }

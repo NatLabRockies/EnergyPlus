@@ -2001,7 +2001,7 @@ void GetOAMixerInputs(EnergyPlusData &state)
 void ProcessOAControllerInputs(EnergyPlusData &state,
                                std::string_view const CurrentModuleObject,
                                int const OutAirNum,
-                               Array1D_string const &AlphArray,
+                               Array1D_string &AlphArray,
                                int const NumAlphas,
                                Array1D<Real64> const &NumArray,
                                int const NumNums,
@@ -4724,7 +4724,7 @@ void OAControllerProps::SizeOAController(EnergyPlusData &state)
     // to the coil components that don't have design air flow as an input.
     if (state.dataSize->CurOASysNum > 0) {
         for (int CompNum = 1; CompNum <= state.dataAirLoop->OutsideAirSys(state.dataSize->CurOASysNum).NumComponents; ++CompNum) {
-            std::string const &CompType = state.dataAirLoop->OutsideAirSys(state.dataSize->CurOASysNum).ComponentType(CompNum);
+            std::string &CompType = state.dataAirLoop->OutsideAirSys(state.dataSize->CurOASysNum).ComponentType(CompNum);
             std::string const &CompName = state.dataAirLoop->OutsideAirSys(state.dataSize->CurOASysNum).ComponentName(CompNum);
             if (Util::SameString(CompType, "COIL:COOLING:WATER:DETAILEDGEOMETRY") || Util::SameString(CompType, "COIL:HEATING:WATER") ||
                 Util::SameString(CompType, "COILSYSTEM:COOLING:WATER:HEATEXCHANGERASSISTED")) {

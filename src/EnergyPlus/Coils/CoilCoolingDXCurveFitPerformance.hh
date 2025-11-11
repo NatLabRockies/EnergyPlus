@@ -86,7 +86,7 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
     static constexpr std::string_view object_name = "Coil:Cooling:DX:CurveFit:Performance";
     std::string parentName;
 
-    void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXCurveFitPerformanceInputSpecification &input_data);
+    void instantiateFromInputSpec(EnergyPlusData &state, CoilCoolingDXCurveFitPerformanceInputSpecification &input_data);
 
     void simulate(EnergyPlusData &state,
                   const DataLoopNode::NodeData &inletNode,

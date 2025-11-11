@@ -858,10 +858,10 @@ int ReportCoilSelection::getIndexForOrCreateDataObjFromCoilName(EnergyPlusData &
         bool locIsCooling(false);
         bool locIsHeating(false);
         for (int loop = 1; loop <= HVAC::NumAllCoilTypes; ++loop) {
-            if (Util::SameString(coilType, HVAC::cAllCoilTypes(loop))) {
+            if (equali(coilType, HVAC::cAllCoilTypes(loop))) {
                 found = true;
-                locIsCooling = Util::SameString(coilType, HVAC::cCoolingCoilTypes(loop));
-                locIsHeating = Util::SameString(coilType, HVAC::cHeatingCoilTypes(loop));
+                locIsCooling = equali(coilType, HVAC::cCoolingCoilTypes(loop));
+                locIsHeating = equali(coilType, HVAC::cHeatingCoilTypes(loop));
                 break;
             }
         }
@@ -2030,7 +2030,7 @@ std::string ReportCoilSelection::getTimeText(EnergyPlusData &state, int const ti
     return returnString;
 }
 
-bool ReportCoilSelection::isCompTypeFan(std::string const &compType // string component type, input object class name
+bool ReportCoilSelection::isCompTypeFan(std::string &compType // string component type, input object class name
 )
 {
     // if compType name is one of the fan objects, then return true
@@ -2049,7 +2049,7 @@ bool ReportCoilSelection::isCompTypeFan(std::string const &compType // string co
     }
 }
 
-bool ReportCoilSelection::isCompTypeCoil(std::string const &compType // string component type, input object class name
+bool ReportCoilSelection::isCompTypeCoil(std::string &compType // string component type, input object class name
 )
 {
     // if compType name is one of the coil objects, then return true

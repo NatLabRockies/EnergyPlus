@@ -290,9 +290,9 @@ protected:
 
     void select2StgDXHumCtrlSizerOutput(EnergyPlusData &state, bool &errorsFound);
 
-    bool isValidCoilType(std::string const &compType);
+    bool isValidCoilType(std::string &compType);
 
-    bool isValidFanType(std::string const &compType);
+    bool isValidFanType(std::string &compType);
 
     bool checkInitialized(EnergyPlusData &state, bool &errorsFound);
 

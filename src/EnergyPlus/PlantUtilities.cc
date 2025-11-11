@@ -1686,7 +1686,7 @@ void ScanPlantLoopsForObject(EnergyPlusData &state,
                 for (CompCtr = 1; CompCtr <= this_branch.TotalComponents; ++CompCtr) {
                     auto &this_component = this_branch.Comp(CompCtr);
                     if (this_component.Type == CompType) {
-                        if (Util::SameString(CompName, this_component.Name)) {
+                        if (Util::SameString(this_component.Name, CompName)) {
                             FoundCompName = true;
                             if (present(InletNodeNumber)) {
                                 if (InletNodeNumber > 0) {

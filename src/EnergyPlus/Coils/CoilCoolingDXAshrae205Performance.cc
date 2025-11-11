@@ -90,7 +90,7 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
         auto const &fields = instance.value();
         name = instance.key();
 
-        if (!Util::SameString(name_to_find, name)) {
+        if (!Util::SameString(name, name_to_find)) {
             ShowFatalError(state, format("Could not find Coil:Cooling:DX:Performance object with name: {}", name_to_find));
         }
 

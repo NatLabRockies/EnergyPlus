@@ -1507,9 +1507,9 @@ namespace FanCoilUnits {
                     }
                 } else {
                     state.dataFanCoilUnits->CoilWaterInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", fanCoil.HCoilName, ErrorsFound);
+                        WaterCoils::GetCoilWaterInletNode(state, fanCoil.HCoilName, "Coil:Heating:Water", ErrorsFound);
                     state.dataFanCoilUnits->CoilWaterOutletNode =
-                        WaterCoils::GetCoilWaterOutletNode(state, "Coil:Heating:Water", fanCoil.HCoilName, ErrorsFound);
+                        WaterCoils::GetCoilWaterOutletNode(state, fanCoil.HCoilName, "Coil:Heating:Water", ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,
                                                                                "Coil:Heating:Water",

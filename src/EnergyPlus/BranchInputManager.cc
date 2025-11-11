@@ -367,8 +367,8 @@ namespace BranchInputManager {
         } else {
             for (BranchNum = 1; BranchNum <= NumBranches; ++BranchNum) {
                 for (CompNum = 1; CompNum <= state.dataBranchInputManager->Branch(BranchNum).NumOfComponents; ++CompNum) {
-                    if (Util::SameString(CompType, state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType) &&
-                        Util::SameString(CompName, state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).Name)) {
+                    if (Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType, CompType) &&
+                        Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).Name, CompName)) {
                         GetAirBranchIndex = BranchNum;
                         goto BranchLoop_exit;
                     }
@@ -421,10 +421,10 @@ namespace BranchInputManager {
         } else {
             if (BranchNum > 0 && BranchNum <= NumBranches) {
                 for (CompNum = 1; CompNum <= state.dataBranchInputManager->Branch(BranchNum).NumOfComponents; ++CompNum) {
-                    if (Util::SameString("Fan:OnOff", state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType) ||
-                        Util::SameString("Fan:ConstantVolume", state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType) ||
-                        Util::SameString("Fan:VariableVolume", state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType) ||
-                        Util::SameString("Fan:SystemModel", state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType)) {
+                    if (Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType, "Fan:OnOff") ||
+                        Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType, "Fan:ConstantVolume") ||
+                        Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType, "Fan:VariableVolume") ||
+                        Util::SameString(state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType, "Fan:SystemModel")) {
                         FanType = state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).CType;
                         FanName = state.dataBranchInputManager->Branch(BranchNum).Component(CompNum).Name;
                         break;
@@ -1093,7 +1093,7 @@ namespace BranchInputManager {
     void GetSingleBranchInput(EnergyPlusData &state,
                               std::string_view const RoutineName,
                               int const BCount,
-                              Array1D_string const &Alphas,
+                              Array1D_string &Alphas,
                               Array1D_string const &cAlphaFields,
                               int const NumAlphas,
                               Array1D_int &NodeNums,
@@ -2458,8 +2458,8 @@ namespace BranchInputManager {
             std::string FoundBranchName = "";
             if (present(CompType) && present(CompName)) {
                 for (CpN = 1; CpN <= state.dataBranchInputManager->Branch(BrN).NumOfComponents; ++CpN) {
-                    if (!Util::SameString(CompType(), state.dataBranchInputManager->Branch(BrN).Component(CpN).CType) ||
-                        !Util::SameString(CompName(), state.dataBranchInputManager->Branch(BrN).Component(CpN).Name)) {
+                    if (!Util::SameString(state.dataBranchInputManager->Branch(BrN).Component(CpN).CType, CompType()) ||
+                        !Util::SameString(state.dataBranchInputManager->Branch(BrN).Component(CpN).Name, CompName())) {
                         continue;
                     }
                     FoundBranchName = state.dataBranchInputManager->Branch(BrN).Name;

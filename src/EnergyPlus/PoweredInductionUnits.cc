@@ -1179,10 +1179,10 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
             }
         } else {
             CheckZoneSizing(state, thisPIU.UnitType, thisPIU.Name);
-            if (Util::SameString(HCoilNamesUC[static_cast<int>(thisPIU.HCoilType)], "Coil:Heating:Water")) {
+            if (HCoilNamesUC[static_cast<int>(thisPIU.HCoilType)] == "COIL:HEATING:WATER") {
 
-                int const CoilWaterInletNode = GetCoilWaterInletNode(state, "Coil:Heating:Water", thisPIU.HCoil, ErrorsFound);
-                int const CoilWaterOutletNode = GetCoilWaterOutletNode(state, "Coil:Heating:Water", thisPIU.HCoil, ErrorsFound);
+                int const CoilWaterInletNode = GetCoilWaterInletNode(state, thisPIU.HCoil, "Coil:Heating:Water", ErrorsFound);
+                int const CoilWaterOutletNode = GetCoilWaterOutletNode(state, thisPIU.HCoil, "Coil:Heating:Water", ErrorsFound);
 
                 // Autosized maximum hot water flow for reporting
                 Real64 MaxVolHotWaterFlowDes = 0.0;
@@ -1271,10 +1271,10 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
                     state, thisPIU.UnitType, thisPIU.Name, "User-Specified Maximum Reheat Steam Flow Rate [m3/s]", thisPIU.MaxVolHotWaterFlow);
             }
         } else {
-            if (Util::SameString(HCoilNames[static_cast<int>(thisPIU.HCoilType)], "Coil:Heating:Steam")) {
+            if (HCoilNames[static_cast<int>(thisPIU.HCoilType)] == "Coil:Heating:Steam") {
 
-                int const CoilSteamInletNode = GetCoilSteamInletNode(state, "Coil:Heating:Steam", thisPIU.HCoil, ErrorsFound);
-                int const CoilSteamOutletNode = GetCoilSteamOutletNode(state, "Coil:Heating:Steam", thisPIU.HCoil, ErrorsFound);
+                int const CoilSteamInletNode = GetCoilSteamInletNode(state, thisPIU.HCoil, "Coil:Heating:Steam", ErrorsFound);
+                int const CoilSteamOutletNode = GetCoilSteamOutletNode(state, thisPIU.HCoil, "Coil:Heating:Steam", ErrorsFound);
                 Real64 MaxVolHotSteamFlowDes = 0.0; // Autosized maximum hot steam flow for reporting
 
                 if (IsAutoSize) {

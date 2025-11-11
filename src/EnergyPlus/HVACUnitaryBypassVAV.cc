@@ -1366,13 +1366,13 @@ namespace HVACUnitaryBypassVAV {
                         ShowFatalError(state, "InitCBVAV: Program terminated for previous conditions.");
                     }
 
-                    cBVAV.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", cBVAV.HeatCoilName, ErrorsFound);
+                    cBVAV.MaxHeatCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, cBVAV.HeatCoilName, "Coil:Heating:Water", ErrorsFound);
 
                     if (cBVAV.MaxHeatCoilFluidFlow > 0.0) {
                         Real64 FluidDensity =
                             state.dataPlnt->PlantLoop(cBVAV.plantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                         cBVAV.MaxHeatCoilFluidFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", cBVAV.HeatCoilName, ErrorsFound) * FluidDensity;
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, cBVAV.HeatCoilName, "Coil:Heating:Water", ErrorsFound) * FluidDensity;
                     }
 
                 } else if (cBVAV.HeatCoilType == HVAC::CoilType::HeatingSteam) {
@@ -1460,7 +1460,7 @@ namespace HVACUnitaryBypassVAV {
                     if (cBVAV.HeatCoilType == HVAC::CoilType::HeatingWater) {
                         WaterCoils::SimulateWaterCoilComponents(state, cBVAV.HeatCoilName, FirstHVACIteration, cBVAV.HeatCoilIndex);
                         ErrorFlag = false;
-                        Real64 CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", cBVAV.HeatCoilName, ErrorFlag);
+                        Real64 CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, cBVAV.HeatCoilName, "Coil:Heating:Water", ErrorFlag);
                         if (ErrorFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", "AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass", cBVAV.Name));
                         }

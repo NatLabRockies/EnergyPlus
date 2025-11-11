@@ -1316,10 +1316,10 @@ void ScanForReports(EnergyPlusData &state,
     switch (rptName) {
     case ReportName::Constructions: {
         if (present(ReportKey)) {
-            if (Util::SameString(ReportKey(), "Constructions")) {
+            if (equali(ReportKey(), "Constructions")) {
                 DoReport = state.dataGeneral->Constructions;
             }
-            if (Util::SameString(ReportKey(), "Materials")) {
+            if (equali(ReportKey(), "Materials")) {
                 DoReport = state.dataGeneral->Materials;
             }
         }

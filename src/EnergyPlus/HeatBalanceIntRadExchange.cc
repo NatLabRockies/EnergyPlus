@@ -1160,7 +1160,7 @@ namespace HeatBalanceIntRadExchange {
             bool enclMatchFound = false;
             for (int enclosureNum = 1; enclosureNum <= state.dataViewFactor->NumOfRadiantEnclosures; ++enclosureNum) {
                 auto &thisEnclosure = state.dataViewFactor->EnclRadInfo(enclosureNum);
-                if (Util::SameString(thisSpaceOrSpaceListName, thisEnclosure.Name)) {
+                if (Util::SameString(thisEnclosure.Name, thisSpaceOrSpaceListName)) {
                     // View factor space name matches enclosure name
                     enclMatchFound = true;
                     break;

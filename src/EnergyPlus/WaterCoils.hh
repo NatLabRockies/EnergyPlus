@@ -417,33 +417,39 @@ namespace WaterCoils {
     void CheckWaterCoilSchedule(EnergyPlusData &state, std::string_view CompName, Real64 &Value, int &CompIndex);
 
     Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
-                                   std::string_view CoilType,   // must match coil types in this module
+                                   std::string &CoilType,   // must match coil types in this module
                                    std::string const &CoilName, // must match coil names for the coil type
                                    bool &ErrorsFound            // set to true if problem
     );
 
     int GetCoilInletNode(EnergyPlusData &state,
-                         std::string_view CoilType,   // must match coil types in this module
+                         std::string &CoilType,   // must match coil types in this module
                          std::string const &CoilName, // must match coil names for the coil type
                          bool &ErrorsFound            // set to true if problem
     );
 
     int GetCoilOutletNode(EnergyPlusData &state,
-                          std::string_view CoilType,   // must match coil types in this module
+                          std::string &CoilType,   // must match coil types in this module
                           std::string const &CoilName, // must match coil names for the coil type
                           bool &ErrorsFound            // set to true if problem
     );
 
     int GetCoilWaterInletNode(EnergyPlusData &state,
-                              std::string_view CoilType,   // must match coil types in this module
+                              std::string &CoilType,   // must match coil types in this module
                               std::string const &CoilName, // must match coil names for the coil type
                               bool &ErrorsFound            // set to true if problem
     );
 
     int GetCoilWaterOutletNode(EnergyPlusData &state,
-                               std::string_view CoilType,   // must match coil types in this module
+                               std::string &CoilType,   // must match coil types in this module
                                std::string const &CoilName, // must match coil names for the coil type
                                bool &ErrorsFound            // set to true if problem
+    );
+
+    int GetCoilInletNodeConstCoil(EnergyPlusData &state,
+                                  std::string_view CoilType,   // must match coil types in this module
+                                  std::string const &CoilName, // must match coil names for the coil type
+                                  bool &ErrorsFound            // set to true if problem
     );
 
     void SetCoilDesFlow(EnergyPlusData &state,
@@ -454,7 +460,7 @@ namespace WaterCoils {
     );
 
     Real64 GetWaterCoilDesAirFlow(EnergyPlusData &state,
-                                  std::string const &CoilType, // must match coil types in this module
+                                  std::string &CoilType, // must match coil types in this module
                                   std::string const &CoilName, // must match coil names for the coil type
                                   bool &ErrorsFound            // set to true if problem
     );
@@ -504,7 +510,7 @@ namespace WaterCoils {
     );
 
     Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
-                                            std::string const &CoilType, // must match coil types in this module
+                                            std::string &CoilType, // must match coil types in this module
                                             std::string const &CoilName, // must match coil names for the coil type
                                             bool &ErrorsFound            // set to true if problem
     );

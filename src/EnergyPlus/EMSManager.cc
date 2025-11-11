@@ -2169,8 +2169,8 @@ void SetupEMSInternalVariable(
     bool FoundDuplicate = false;
 
     for (int InternalVarAvailNum = 1; InternalVarAvailNum <= state.dataRuntimeLang->numEMSInternalVarsAvailable; ++InternalVarAvailNum) {
-        if ((Util::SameString(cDataTypeName, state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).DataTypeName)) &&
-            (Util::SameString(cUniqueIDName, state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).UniqueIDName))) {
+        if ((Util::SameString(state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).DataTypeName, cDataTypeName)) &&
+            (Util::SameString(state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).UniqueIDName, cUniqueIDName))) {
             FoundDuplicate = true;
             break;
         }
@@ -2218,8 +2218,8 @@ void SetupEMSInternalVariable(
     bool FoundDuplicate = false;
 
     for (int InternalVarAvailNum = 1; InternalVarAvailNum <= state.dataRuntimeLang->numEMSInternalVarsAvailable; ++InternalVarAvailNum) {
-        if ((Util::SameString(cDataTypeName, state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).DataTypeName)) &&
-            (Util::SameString(cUniqueIDName, state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).UniqueIDName))) {
+        if ((Util::SameString(state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).DataTypeName, cDataTypeName)) &&
+            (Util::SameString(state.dataRuntimeLang->EMSInternalVarsAvailable(InternalVarAvailNum).UniqueIDName, cUniqueIDName))) {
             FoundDuplicate = true;
             break;
         }

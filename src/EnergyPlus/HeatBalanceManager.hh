@@ -114,7 +114,7 @@ namespace HeatBalanceManager {
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
-                         Array1D_string const &cAlphaArgs,
+                         Array1D_string &cAlphaArgs,
                          int const NumAlphas,
                          Array1D<Real64> const &rNumericArgs,
                          int const NumNumbers,

@@ -2068,7 +2068,7 @@ void InitializePredefinedMonthlyTitles(EnergyPlusData &state)
                               NumMonthlyReports));
     } else {
         for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
-            if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
+            if (!Util::SameString(ort->namedMonthly(xcount).title, MonthlyNamedReports(xcount))) {
                 ShowSevereError(state,
                                 "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
                 ShowContinueError(state, format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
@@ -7201,7 +7201,7 @@ void WriteMonthlyTables(EnergyPlusData &state)
                             format("{} [{}]", ort->MonthlyColumns(curCol).varName, Constant::unitNames[(int)ort->MonthlyColumns(curCol).units]);
                         LookupSItoIP(state, varNameWithUnits, indexUnitConv, curUnits);
                         GetUnitConversion(state, indexUnitConv, curConversionFactor, state.dataOutRptTab->curConversionOffset, curUnits);
-                    } else if (Util::SameString(Constant::unitNames[(int)ort->MonthlyColumns(curCol).units], "J")) {
+                    } else if (Constant::unitNames[(int)ort->MonthlyColumns(curCol).units] == "J") {
                         curUnits = energyUnitsString;
                         curConversionFactor = energyUnitsConversionFactor;
                         state.dataOutRptTab->curConversionOffset = 0.0;

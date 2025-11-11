@@ -137,9 +137,9 @@ namespace GeneratorFuelSupply {
 
                 ErrorObjectHeader eoh{routineName, cCurrentModuleObject, AlphArray(1)};
                 state.dataGenerator->FuelSupply(FuelSupNum).Name = AlphArray(1);
-                if (Util::SameString("TemperatureFromAirNode", AlphArray(2))) {
+                if (Util::SameString(AlphArray(2) , "TemperatureFromAirNode")) {
                     state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempFromNode;
-                } else if (Util::SameString("Scheduled", AlphArray(2))) {
+                } else if (Util::SameString(AlphArray(2), "Scheduled")) {
                     state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempSchedule;
                 } else {
                     ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), AlphArray(2)));

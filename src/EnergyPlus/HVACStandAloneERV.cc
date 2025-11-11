@@ -1543,7 +1543,7 @@ void ReportStandAloneERV(EnergyPlusData &state, int const StandAloneERVNum) // n
 //        Utility subroutines/functions for the HeatingCoil Module
 
 Real64 GetSupplyAirFlowRate(EnergyPlusData &state,
-                            std::string const &ERVType,     // must be "ZoneHVAC:EnergyRecoveryVentilator"
+                            std::string &ERVType,     // must be "ZoneHVAC:EnergyRecoveryVentilator"
                             std::string const &ERVCtrlName, // must match a controller name in the ERV data structure
                             bool &ErrorsFound               // set to true if problem
 )
@@ -1699,7 +1699,7 @@ int getEqIndex(EnergyPlusData &state, std::string_view CompName)
     }
 
     for (int StandAloneERVNum = 1; StandAloneERVNum <= state.dataHVACStandAloneERV->NumStandAloneERVs; StandAloneERVNum++) {
-        if (Util::SameString(CompName, state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).Name)) {
+        if (Util::SameString(state.dataHVACStandAloneERV->StandAloneERV(StandAloneERVNum).Name, CompName)) {
             return StandAloneERVNum;
         }
     }

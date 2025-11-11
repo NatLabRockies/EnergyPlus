@@ -2426,7 +2426,7 @@ namespace CondenserLoopTowers {
             // Design water flow rate is assumed to be 3 gpm per ton (SI equivalent 5.382E-8 m3/s per watt)
             this->DesignWaterFlowRate = 5.382e-8 * this->TowerNominalCapacity;
             tmpDesignWaterFlowRate = this->DesignWaterFlowRate;
-            if (Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], "CoolingTower:SingleSpeed")) {
+            if (DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)] == "CoolingTower:SingleSpeed") {
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                     BaseSizer::reportSizerOutput(state,
                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
@@ -2441,7 +2441,7 @@ namespace CondenserLoopTowers {
                                                  "Initial Design Water Flow Rate based on tower nominal capacity [m3/s]",
                                                  this->DesignWaterFlowRate);
                 }
-            } else if (Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], "CoolingTower:TwoSpeed")) {
+            } else if (DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)] == "CoolingTower:TwoSpeed") {
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                     BaseSizer::reportSizerOutput(state,
                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
@@ -2938,7 +2938,7 @@ namespace CondenserLoopTowers {
         }
 
         if (this->PerformanceInputMethod_Num == PIM::NominalCapacity &&
-            Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], "CoolingTower:TwoSpeed")) {
+            (DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)] == "CoolingTower:TwoSpeed")) {
             if (this->DesignWaterFlowRate >= HVAC::SmallWaterVolFlow && this->TowerLowSpeedNomCap > 0.0) {
 
                 // nominal capacity doesn't include compressor heat; predefined factor was 1.25 W heat rejection per W of evap cooling but now is a
@@ -3103,7 +3103,7 @@ namespace CondenserLoopTowers {
 
         // calibrate variable speed tower model based on user input by finding calibration water flow rate ratio that
         // yields an approach temperature that matches user input
-        if (Util::SameString(DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], "CoolingTower:VariableSpeed")) {
+        if (DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)] == "CoolingTower:VariableSpeed") {
 
             //   check range for water flow rate ratio (make sure RegulaFalsi converges)
             Real64 MaxWaterFlowRateRatio = 0.5; // maximum water flow rate ratio which yields desired approach temp

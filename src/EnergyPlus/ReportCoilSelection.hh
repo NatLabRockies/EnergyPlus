@@ -415,10 +415,10 @@ public: // methods
 
     static std::string getTimeText(EnergyPlusData &state, int const timeStepAtPeak);
 
-    bool isCompTypeFan(std::string const &compType // string component type, input object class name
+    bool isCompTypeFan(std::string &compType // string component type, input object class name
     );
 
-    bool isCompTypeCoil(std::string const &compType // string component type, input object class name
+    bool isCompTypeCoil(std::string &compType // string component type, input object class name
     );
 
     void setZoneLatentLoadCoolingIdealPeak(int const zoneIndex, Real64 const zoneCoolingLatentLoad);

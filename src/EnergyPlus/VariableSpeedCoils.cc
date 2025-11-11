@@ -802,7 +802,7 @@ namespace VariableSpeedCoils {
                 }
 
                 cFieldName = "Condenser Type"; // cAlphaFields(6)
-                std::string const condenserType = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_type");
+                std::string condenserType = s_ip->getAlphaFieldValue(fields, schemaProps, "condenser_type");
                 if ((Util::SameString(condenserType, "AirCooled")) || cFieldName.empty()) {
                     varSpeedCoil.CondenserType = DataHeatBalance::RefrigCondenserType::Air;
                 } else if (Util::SameString(condenserType, "EvaporativelyCooled")) {
@@ -6808,7 +6808,7 @@ namespace VariableSpeedCoils {
     }
 
     Real64 GetCoilCapacityVariableSpeed(EnergyPlusData &state,
-                                        std::string const &CoilType, // must match coil types in this module
+                                        std::string &CoilType, // must match coil types in this module
                                         std::string const &CoilName, // must match coil names for the coil type
                                         bool &ErrorsFound            // set to true if problem
     )
@@ -6898,7 +6898,7 @@ namespace VariableSpeedCoils {
     }
 
     Real64 GetCoilAirFlowRateVariableSpeed(EnergyPlusData &state,
-                                           std::string const &CoilType, // must match coil types in this module
+                                           std::string &CoilType, // must match coil types in this module
                                            std::string const &CoilName, // must match coil names for the coil type
                                            bool &ErrorsFound            // set to true if problem
     )

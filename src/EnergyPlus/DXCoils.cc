@@ -15351,7 +15351,7 @@ GetDXCoilName(EnergyPlusData &state, int &DXCoilIndex, bool &ErrorsFound, std::s
 }
 
 Real64 GetCoilCapacity(EnergyPlusData &state,
-                       std::string const &CoilType, // must match coil types in this module
+                       std::string &CoilType, // must match coil types in this module
                        std::string const &CoilName, // must match coil names for the coil type
                        bool &ErrorsFound            // set to true if problem
 )
@@ -15780,7 +15780,7 @@ int GetHPCoolingCoilIndex(EnergyPlusData &state,
     for (WhichComp = 1; WhichComp <= state.dataBranchNodeConnections->NumCompSets; ++WhichComp) {
 
         if (HeatingCoilTypeNum != state.dataBranchNodeConnections->CompSets(WhichComp).ComponentObjectType ||
-            !Util::SameString(HeatingCoilName, state.dataBranchNodeConnections->CompSets(WhichComp).CName)) {
+            !Util::SameString(state.dataBranchNodeConnections->CompSets(WhichComp).CName, HeatingCoilName)) {
             continue;
         }
         CompSetsParentType = state.dataBranchNodeConnections->CompSets(WhichComp).ParentObjectType;

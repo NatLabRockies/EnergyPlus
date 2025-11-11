@@ -415,7 +415,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the Heating Coil Hot water Inlet or control Node number
                     errFlag = false;
-                    desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                    desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
@@ -423,7 +423,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the Regeneration Heating Coil hot water max volume flow rate
                     errFlag = false;
-                    desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                    desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
@@ -431,7 +431,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the Regeneration Heating Coil Inlet Node
                     errFlag = false;
-                    int RegenCoilAirInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                    int RegenCoilAirInletNode = WaterCoils::GetCoilInletNodeConstCoil(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                     desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
@@ -440,7 +440,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the Regeneration Heating Coil Outlet Node
                     errFlag = false;
-                    int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                    int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                     desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
@@ -465,7 +465,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the regeneration Heating Coil steam inlet node number
                     errFlag = false;
-                    desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", RegenCoilName, errFlag);
+                    desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, RegenCoilName, "Coil:Heating:Steam", errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
@@ -912,7 +912,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the Heating Coil Hot water Inlet or control Node number
                         errFlag = false;
-                        desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                        desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
@@ -920,7 +920,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the Regeneration Heating Coil hot water max volume flow rate
                         errFlag = false;
-                        desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                        desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
@@ -928,7 +928,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the Regeneration Heating Coil Inlet Node
                         errFlag = false;
-                        int RegenCoilAirInletNode = WaterCoils::GetCoilInletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                        int RegenCoilAirInletNode = WaterCoils::GetCoilInletNodeConstCoil(state, "Coil:Heating:Water", RegenCoilName, errFlag);
                         desicDehum.RegenCoilInletNode = RegenCoilAirInletNode;
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
@@ -937,7 +937,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the Regeneration Heating Coil Outlet Node
                         errFlag = false;
-                        int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", RegenCoilName, errFlag);
+                        int RegenCoilAirOutletNode = WaterCoils::GetCoilOutletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
                         desicDehum.RegenCoilOutletNode = RegenCoilAirOutletNode;
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
@@ -974,7 +974,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the regeneration Heating Coil steam inlet node number
                         errFlag = false;
-                        desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, "Coil:Heating:Steam", RegenCoilName, errFlag);
+                        desicDehum.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, RegenCoilName, "Coil:Heating:Steam", errFlag);
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;
@@ -1662,7 +1662,7 @@ namespace DesiccantDehumidifiers {
 
                     ErrorFlag = false;
                     desicDehum.MaxCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", desicDehum.RegenCoilName, ErrorFlag);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, desicDehum.RegenCoilName, "Coil:Heating:Water", ErrorFlag);
                     if (desicDehum.MaxCoilFluidFlow > 0.0) {
                         Real64 FluidDensity =
                             state.dataPlnt->PlantLoop(desicDehum.plantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, initCBVAV);
@@ -1770,7 +1770,7 @@ namespace DesiccantDehumidifiers {
                             WaterCoils::SimulateWaterCoilComponents(state, desicDehum.RegenCoilName, FirstHVACIteration, desicDehum.RegenCoilIndex);
                             ErrorFlag = false;
                             Real64 CoilMaxVolFlowRate =
-                                WaterCoils::GetCoilMaxWaterFlowRate(state, "Coil:Heating:Water", desicDehum.RegenCoilName, ErrorFlag);
+                                WaterCoils::GetCoilMaxWaterFlowRate(state, desicDehum.RegenCoilName, "Coil:Heating:Water", ErrorFlag);
                             // if (ErrorFlag) {
                             //    ErrorsFound = true;
                             //}

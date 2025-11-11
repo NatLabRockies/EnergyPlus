@@ -667,10 +667,29 @@ namespace Util {
         return ResultString;
     }
 
-    constexpr bool SameString(std::string_view const s, std::string_view const t)
+    /// <summary>
+    /// Case insensitive search
+    /// </summary>
+    /// <param name="s">First string</param>
+    /// <param name="t">Second String</param>
+    /// <param name="replaceString">If they match, but have different cases, then replace the first string with the second so later checks are faster</param>
+    /// <returns>true if they are equal each other, false if they are not</returns>
+    constexpr bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
     {
-        // case insensitive comparison
-        return equali(s, t);
+        // case sensitive comparison (fastest)
+        if (s == t) {
+            return true;
+        // case insensitive comparison if the strings are the same size
+        } else if (s.size() == t.size() && equali(s, t)) {
+            // change the original second string so next time this is faster
+            if (replaceString) {
+                // t is passed by value so s should now point to a new string pointer vs directly pointing to s's string pointer which could lead to odd results
+                s = t;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     template <typename InputIterator>

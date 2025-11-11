@@ -816,7 +816,7 @@ bool getDesuperHtrInput(EnergyPlusData &state)
         // Set up comp set for water side nodes (reverse inlet/outlet for water heater)
         BranchNodeConnections::SetUpCompSets(state, DesupHtr.Type, DesupHtr.Name, DesupHtr.TankType, DesupHtr.TankName, cAlphaArgs(6), cAlphaArgs(5));
 
-        std::string const heatSourceObjType = cAlphaArgs(9);
+        std::string &heatSourceObjType = cAlphaArgs(9);
 
         if ((Util::SameString(heatSourceObjType, "Refrigeration:Condenser:AirCooled")) ||
             (Util::SameString(heatSourceObjType, "Refrigeration:Condenser:EvaporativeCooled")) ||
@@ -4525,7 +4525,7 @@ void GetWaterThermalTankInput(EnergyPlusData &state)
                             //                     check that tank has lower priority than all other non-HPWH objects in Zone
                             //                     Equipment List
                             for (int EquipmentTypeNum = 1; EquipmentTypeNum <= zoneEquipList.NumOfEquipTypes; ++EquipmentTypeNum) {
-                                if (Util::SameString(zoneEquipList.EquipTypeName(EquipmentTypeNum), state.dataIPShortCut->cCurrentModuleObject)) {
+                                if (Util::SameString(state.dataIPShortCut->cCurrentModuleObject, zoneEquipList.EquipTypeName(EquipmentTypeNum))) {
                                     continue;
                                 }
                                 if (TankCoolingPriority > zoneEquipList.CoolingPriority(EquipmentTypeNum) ||

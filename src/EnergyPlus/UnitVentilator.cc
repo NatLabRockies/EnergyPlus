@@ -655,7 +655,7 @@ namespace UnitVentilator {
                                 unitVent.ColdControlNode =
                                     HVACHXAssistedCoolingCoil::GetCoilWaterInletNode(state, unitVent.CCoilTypeCh, unitVent.CCoilName, errFlag);
                                 unitVent.MaxVolColdWaterFlow = HVACHXAssistedCoolingCoil::GetCoilMaxWaterFlowRate(
-                                    state, "CoilSystem:Cooling:Water:HeatExchangerAssisted", unitVent.CCoilName, errFlag);
+                                    state, unitVent.CCoilName, "CoilSystem:Cooling:Water:HeatExchangerAssisted", errFlag);
                             }
                             // Other error checks should trap before it gets to this point in the code, but including just in case.
                             if (errFlag) {
@@ -1766,7 +1766,7 @@ namespace UnitVentilator {
                 } else {
                     CheckZoneSizing(state, state.dataUnitVentilators->cMO_UnitVentilator, unitVent.Name);
 
-                    CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, "Coil:Heating:Water", unitVent.HCoilName, ErrorsFound);
+                    CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, unitVent.HCoilName, "Coil:Heating:Water", ErrorsFound);
                     if (IsAutoSize) {
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "COIL:HEATING:WATER", unitVent.HCoilName, unitVent.HotControlNode, CoilWaterOutletNode, ErrorsFound);
@@ -1912,7 +1912,7 @@ namespace UnitVentilator {
                 } else {
                     CheckZoneSizing(state, state.dataUnitVentilators->cMO_UnitVentilator, unitVent.Name);
 
-                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, "Coil:Heating:Steam", unitVent.HCoilName, ErrorsFound);
+                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, unitVent.HCoilName, "Coil:Heating:Steam", ErrorsFound);
                     if (IsAutoSize) {
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "Coil:Heating:Steam", unitVent.HCoilName, unitVent.HotControlNode, CoilSteamOutletNode, ErrorsFound);
@@ -2282,11 +2282,11 @@ namespace UnitVentilator {
             } break;
             case HeatCoilType::Electric: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, "Coil:Heating:Electric", unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
+                    state, unitVent.HCoilName, "Coil:Heating:Electric", unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             case HeatCoilType::Gas: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, "Coil:Heating:Fuel", unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
+                    state, unitVent.HCoilName, "Coil:Heating:Fuel", unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             default: {
             } break;
