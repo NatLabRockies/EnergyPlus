@@ -10401,7 +10401,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_PredefinedTable_Standard62_1_N
     EXPECT_GT(state->dataOutRptPredefined->numReportName, 0);
     auto &reportNameArray = state->dataOutRptPredefined->reportName;
     auto it =
-        std::find_if(reportNameArray.begin(), reportNameArray.end(), [](const auto &rN) { return Util::SameString("Standard62.1Summary", rN.name); });
+        std::find_if(reportNameArray.begin(), reportNameArray.end(), [](const auto &rN) { return equali("Standard62.1Summary", rN.name); });
     EXPECT_FALSE(it != reportNameArray.end()); // Not found
 
     GetInputOutputTableSummaryReports(*state);
@@ -10435,7 +10435,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_PredefinedTable_Standard62_1_W
     EXPECT_GT(state->dataOutRptPredefined->numReportName, 0);
     auto &reportNameArray = state->dataOutRptPredefined->reportName;
     auto it =
-        std::find_if(reportNameArray.begin(), reportNameArray.end(), [](const auto &rN) { return Util::SameString("Standard62.1Summary", rN.name); });
+        std::find_if(reportNameArray.begin(), reportNameArray.end(), [](const auto &rN) { return equali("Standard62.1Summary", rN.name); });
     EXPECT_TRUE(it != reportNameArray.end());
     // EXPECT_TRUE(Util::FindItem("Standard62.1Summary", state->dataOutRptPredefined->reportName));
 

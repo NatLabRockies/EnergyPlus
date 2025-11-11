@@ -1023,7 +1023,7 @@ TEST_F(EnergyPlusFixture, Battery_LiIonNmc_Constructor)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
     ElectricStorage battery1{*state, "Battery1"};
-    ASSERT_TRUE(Util::SameString(battery1.name(), "Battery1"));
+    ASSERT_TRUE(equali(battery1.name(), "Battery1"));
 
     ASSERT_THROW(ElectricStorage battery2(*state, "Battery2"), EnergyPlus::FatalError);
     std::string const error_string = delimited_string(

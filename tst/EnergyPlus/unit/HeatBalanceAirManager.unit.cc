@@ -528,9 +528,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
     for (int itemNum = 0; itemNum <= numInstances - 1; ++itemNum) {
         auto &thisInfiltration = state->dataHeatBal->Infiltration[itemNum];
         auto &thisVentilation = state->dataHeatBal->Ventilation[itemNum];
-        EXPECT_TRUE(Util::SameString(infilNames[itemNum], thisInfiltration.Name));
+        EXPECT_TRUE(equali(infilNames[itemNum], thisInfiltration.Name));
         EXPECT_EQ(thisInfiltration.DesignLevel, flows[itemNum]);
-        EXPECT_TRUE(Util::SameString(ventNames[itemNum], thisVentilation.Name));
+        EXPECT_TRUE(equali(ventNames[itemNum], thisVentilation.Name));
         EXPECT_EQ(thisVentilation.DesignLevel, flows[itemNum]);
         EXPECT_EQ(thisInfiltration.ZonePtr, zoneNums[itemNum]);
         EXPECT_EQ(thisVentilation.ZonePtr, zoneNums[itemNum]);
@@ -962,9 +962,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
     for (int itemNum = 0; itemNum <= numInstances - 1; ++itemNum) {
         auto &thisMixing = state->dataHeatBal->Mixing[itemNum];
         auto &thisCrossMixing = state->dataHeatBal->CrossMixing[itemNum];
-        EXPECT_TRUE(Util::SameString(mixNames[itemNum], thisMixing.Name));
+        EXPECT_TRUE(equali(mixNames[itemNum], thisMixing.Name));
         EXPECT_EQ(thisMixing.DesignLevel, flows[itemNum]);
-        EXPECT_TRUE(Util::SameString(crossMixNames[itemNum], thisCrossMixing.Name));
+        EXPECT_TRUE(equali(crossMixNames[itemNum], thisCrossMixing.Name));
         EXPECT_EQ(thisCrossMixing.DesignLevel, flows[itemNum]);
         EXPECT_EQ(thisMixing.ZonePtr, zoneNums[itemNum]);
         EXPECT_EQ(thisCrossMixing.ZonePtr, zoneNums[itemNum]);
