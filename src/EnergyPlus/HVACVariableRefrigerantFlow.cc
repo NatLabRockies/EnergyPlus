@@ -3279,6 +3279,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
     }
 
     cCurrentModuleObject = "ZoneHVAC:TerminalUnit:VariableRefrigerantFlow";
+    std::string coilHeatingWater = "Coil:Heating:Water";
     for (int VRFTUNum = 1; VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU; ++VRFTUNum) {
 
         //     initialize local node number variables
@@ -4257,7 +4258,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                     // Get the supplemental heating coil water Inlet or control node number
                     errFlag = false;
                     thisVrfTU.SuppHeatCoilFluidInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, thisVrfTU.SuppHeatCoilName, "Coil:Heating:Water", errFlag);
+                        WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, thisVrfTU.SuppHeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, "Occurs in " + cCurrentModuleObject + " = " + thisVrfTU.Name);
                         ErrorsFound = true;

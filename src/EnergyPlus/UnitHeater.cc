@@ -934,11 +934,11 @@ namespace UnitHeater {
                     }
                 } else {
                     CheckZoneSizing(state, "ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name);
-
+                    std::string hotWaterCoilType = "Coil:Heating:Water";
                     int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(
-                        state, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, "Coil:Heating:Water", ErrorsFound);
+                        state, hotWaterCoilType, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(
-                        state, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, "Coil:Heating:Water", ErrorsFound);
+                        state, hotWaterCoilType, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         bool DoWaterCoilSizing = false; // if TRUE do water coil sizing calculation
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,

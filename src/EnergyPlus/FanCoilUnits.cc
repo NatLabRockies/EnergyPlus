@@ -1506,10 +1506,11 @@ namespace FanCoilUnits {
                             state, fanCoil.UnitType, fanCoil.Name, "User-Specified Maximum Hot Water Flow [m3/s]", fanCoil.MaxHotWaterVolFlow);
                     }
                 } else {
+                    std::string coilType = "Coil:Heating:Water";
                     state.dataFanCoilUnits->CoilWaterInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, fanCoil.HCoilName, "Coil:Heating:Water", ErrorsFound);
+                        WaterCoils::GetCoilWaterInletNode(state, coilType , fanCoil.HCoilName, ErrorsFound);
                     state.dataFanCoilUnits->CoilWaterOutletNode =
-                        WaterCoils::GetCoilWaterOutletNode(state, fanCoil.HCoilName, "Coil:Heating:Water", ErrorsFound);
+                        WaterCoils::GetCoilWaterOutletNode(state, coilType , fanCoil.HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,
                                                                                "Coil:Heating:Water",

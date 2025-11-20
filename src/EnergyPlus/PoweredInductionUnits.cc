@@ -1180,9 +1180,9 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
         } else {
             CheckZoneSizing(state, thisPIU.UnitType, thisPIU.Name);
             if (HCoilNamesUC[static_cast<int>(thisPIU.HCoilType)] == "COIL:HEATING:WATER") {
-
-                int const CoilWaterInletNode = GetCoilWaterInletNode(state, thisPIU.HCoil, "Coil:Heating:Water", ErrorsFound);
-                int const CoilWaterOutletNode = GetCoilWaterOutletNode(state, thisPIU.HCoil, "Coil:Heating:Water", ErrorsFound);
+                std::string hCoilType = "Coil:Heating:Water";
+                int const CoilWaterInletNode = GetCoilWaterInletNode(state, hCoilType, thisPIU.HCoil, ErrorsFound);
+                int const CoilWaterOutletNode = GetCoilWaterOutletNode(state, hCoilType, thisPIU.HCoil, ErrorsFound);
 
                 // Autosized maximum hot water flow for reporting
                 Real64 MaxVolHotWaterFlowDes = 0.0;
@@ -1272,9 +1272,9 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
             }
         } else {
             if (HCoilNames[static_cast<int>(thisPIU.HCoilType)] == "Coil:Heating:Steam") {
-
-                int const CoilSteamInletNode = GetCoilSteamInletNode(state, thisPIU.HCoil, "Coil:Heating:Steam", ErrorsFound);
-                int const CoilSteamOutletNode = GetCoilSteamOutletNode(state, thisPIU.HCoil, "Coil:Heating:Steam", ErrorsFound);
+                std::string hCoilType = "Coil:Heating:Steam";
+                int const CoilSteamInletNode = GetCoilSteamInletNode(state, hCoilType, thisPIU.HCoil, ErrorsFound);
+                int const CoilSteamOutletNode = GetCoilSteamOutletNode(state, hCoilType, thisPIU.HCoil, ErrorsFound);
                 Real64 MaxVolHotSteamFlowDes = 0.0; // Autosized maximum hot steam flow for reporting
 
                 if (IsAutoSize) {

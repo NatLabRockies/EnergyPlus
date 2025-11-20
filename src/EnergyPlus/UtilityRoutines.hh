@@ -441,10 +441,26 @@ namespace Util {
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
     // Container needs and operator[i] and elements need Name
-    inline int FindItemInList(std::string_view const String, Container const &ListOfItems, int const NumItems)
+    inline int FindItemInList(std::string_view const String, Container const &ListOfItems, int const NumItems, bool CaseInsensitive=false)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
             if (String == ListOfItems[i].Name) {
+                return int(i + 1); // 1-based return index
+            } else if (CaseInsensitive && equali(String, ListOfItems[i].Name)) {
+                return int(i + 1); // 1-based return index
+            }
+        }
+        return 0; // Not found
+    }
+
+    template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
+    // Container needs and operator[i] and elements need Name
+    inline int FindItemInListCaseInsensitive(std::string_view const String, Container const &ListOfItems, int const NumItems)
+    {
+        for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
+            if (String == ListOfItems[i].Name) {
+                return int(i + 1); // 1-based return index
+            } else if (equali(String, ListOfItems[i].Name)) {
                 return int(i + 1); // 1-based return index
             }
         }
@@ -456,6 +472,12 @@ namespace Util {
     inline int FindItemInList(std::string_view const String, Container const &ListOfItems)
     {
         return Util::FindItemInList(String, ListOfItems, ListOfItems.isize());
+    }
+
+    template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
+    inline int FindItemInListCaseInsensitive(std::string_view const String, Container const &ListOfItems)
+    {
+        return Util::FindItemInListCaseInsensitive(String, ListOfItems, ListOfItems.isize());
     }
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
@@ -674,24 +696,31 @@ namespace Util {
     /// <param name="t">Second String</param>
     /// <param name="replaceString">If they match, but have different cases, then replace the first string with the second so later checks are faster</param>
     /// <returns>true if they are equal each other, false if they are not</returns>
-    constexpr bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
+    inline bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
     {
         // case sensitive comparison (fastest)
         if (s == t) {
             return true;
         // case insensitive comparison if the strings are the same size
-        } else if (s.size() == t.size() && equali(s, t)) {
+        } else if (equali(s, t)) {
             // change the original second string so next time this is faster
             if (replaceString) {
-                // t is passed by value so s should now point to a new string pointer vs directly pointing to s's string pointer which could lead to odd results
-                s = t;
+                //std::cout << "Replacing string:" << s << " becomes " << t << std::endl;
+                s = t;//StrCopy(t);
+                //std::cout << "Done eplacing string:" << s << " becomes " << t << std::endl;
             }
             return true;
         } else {
             return false;
         }
     }
-
+    /*
+    std::string StrCopy(const std::string_view str2)
+    {
+        std::string tempStr(str2);
+        return tempStr;
+    }
+    */
     template <typename InputIterator>
     inline void VerifyName(EnergyPlusData &state,
                            InputIterator first,

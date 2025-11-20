@@ -276,6 +276,7 @@ namespace DesiccantDehumidifiers {
 
         // loop over solid desiccant dehumidifiers and load the input data
         std::string CurrentModuleObject = dehumidifierDesiccantNoFans;
+        std::string coilHeatingWater = "Coil:Heating:Water";
         for (int DesicDehumIndex = 1; DesicDehumIndex <= state.dataDesiccantDehumidifiers->NumSolidDesicDehums; ++DesicDehumIndex) {
             auto &desicDehum = state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumIndex);
 
@@ -415,7 +416,7 @@ namespace DesiccantDehumidifiers {
 
                     // Get the Heating Coil Hot water Inlet or control Node number
                     errFlag = false;
-                    desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
+                    desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, RegenCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                         ErrorsFound = true;
@@ -912,7 +913,7 @@ namespace DesiccantDehumidifiers {
 
                         // Get the Heating Coil Hot water Inlet or control Node number
                         errFlag = false;
-                        desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, RegenCoilName, "Coil:Heating:Water", errFlag);
+                        desicDehum.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, RegenCoilName, errFlag);
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, desicDehum.Name));
                             ErrorsFound = true;

@@ -400,7 +400,7 @@ namespace MixedAir {
                                    bool &ErrorsFound                     // If errors found in input
     );
 
-    void InitOutsideAirSys(EnergyPlusData &state, int const (OASysNum), int const AirLoopNum);
+    void InitOutsideAirSys(EnergyPlusData &state, int OASysNum, int AirLoopNum);
 
     void InitOAController(EnergyPlusData &state, int OAControllerNum, bool FirstHVACIteration, int AirLoopNum);
 

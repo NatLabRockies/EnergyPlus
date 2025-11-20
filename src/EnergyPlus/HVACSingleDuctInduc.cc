@@ -809,10 +809,14 @@ namespace HVACSingleDuctInduc {
 
                 if (Util::SameString(state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoilType, "Coil:Heating:Water")) {
 
-                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(
-                        state, state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoil, "Coil:Heating:Water", ErrorsFound);
-                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(
-                        state, state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoil, "Coil:Heating:Water", ErrorsFound);
+                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(state,
+                                                                               state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoilType,
+                                                                               state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoil,
+                                                                               ErrorsFound);
+                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state,
+                                                                                 state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoilType,
+                                                                                 state.dataHVACSingleDuctInduc->IndUnit(IUNum).HCoil,
+                                                                                 ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,
                                                                                "Coil:Heating:Water",

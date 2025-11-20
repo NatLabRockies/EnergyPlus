@@ -685,7 +685,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
 
         for (int CompNum = 1; CompNum <= state.dataZoneEquip->SupplyAirPath(PathNum).NumOfComponents; ++CompNum) {
 
-            if ((AlphArray(Counter) == "AIRLOOPHVAC:ZONESPLITTER") || (AlphArray(Counter) == "AIRLOOPHVAC:SUPPLYPLENUM")) {
+            if ((equali(AlphArray(Counter), "AIRLOOPHVAC:ZONESPLITTER")) || (equali(AlphArray(Counter), "AIRLOOPHVAC:SUPPLYPLENUM"))) {
 
                 state.dataZoneEquip->SupplyAirPath(PathNum).ComponentType(CompNum) = AlphArray(Counter);
                 state.dataZoneEquip->SupplyAirPath(PathNum).ComponentName(CompNum) = AlphArray(Counter + 1);

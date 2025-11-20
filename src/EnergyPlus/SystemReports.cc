@@ -2249,7 +2249,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
                 DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(
                     EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                                             state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf));
+                                             Util::makeUPPER(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf)));
                 std::string &NameOfComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                 // Get complete list of components for complex branches
                 if (BranchNodeConnections::IsParentObject(state, TypeOfComp, NameOfComp)) {
@@ -2307,7 +2307,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                     DataLoopNode::ConnectionObjectType TypeOfSubComp = static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumValue(
                         BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf));
+                        Util::makeUPPER(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf)));
                     std::string &NameOfSubComp =
                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).Name;
                     if (BranchNodeConnections::IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
@@ -2504,7 +2504,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
             std::string &TypeOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipTypeName(CompNum);
             std::string &NameOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipName(CompNum);
             DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
+                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(TypeOfComp)));
             BranchNodeConnections::GetComponentData(state,
                                                     TypeOfCompNum,
                                                     NameOfComp,
@@ -2613,7 +2613,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     std::string &TypeOfSubComp = thisEquipData.SubEquipData(SubCompNum).TypeOf;
                     std::string &NameOfSubComp = thisEquipData.SubEquipData(SubCompNum).Name;
                     DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                        EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                        EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(TypeOfSubComp)));
                     if (BranchNodeConnections::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
                         NumGrandChildren = BranchNodeConnections::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                         thisEquipData.SubEquipData(SubCompNum).NumSubSubEquip = NumGrandChildren;
@@ -2770,7 +2770,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         std::string &TypeOfComp = thisComp.TypeOf;
                         std::string &NameOfComp = thisComp.Name;
                         DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                            EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
+                            EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(TypeOfComp)));
                         // Get complete list of components for complex branches
                         if (BranchNodeConnections::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
 
@@ -2823,7 +2823,7 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             std::string &TypeOfSubComp = thisComp.SubComp(SubCompNum).TypeOf;
                             std::string NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
                             DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(TypeOfSubComp)));
                             if (BranchNodeConnections::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
                                 NumGrandChildren = BranchNodeConnections::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                                 SubCompTypes.allocate(NumGrandChildren);

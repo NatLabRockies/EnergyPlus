@@ -842,7 +842,7 @@ namespace HVACMultiSpeedHeatPump {
                     thisMSHP.HeatCoilName = Alphas(11);
                     // Get the Heating Coil water Inlet or control Node number
                     errFlag = false;
-                    thisMSHP.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, thisMSHP.HeatCoilName, "Coil:Heating:Water", errFlag);
+                    thisMSHP.CoilControlNode = WaterCoils::GetCoilWaterInletNode(state, Alphas(10), thisMSHP.HeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -1108,7 +1108,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the Heating Coil water Inlet or control Node number
                     errFlag = false;
-                    thisMSHP.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, thisMSHP.SuppHeatCoilName, "Coil:Heating:Water", errFlag);
+                    thisMSHP.SuppCoilControlNode = WaterCoils::GetCoilWaterInletNode(state, Alphas(14), thisMSHP.SuppHeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;

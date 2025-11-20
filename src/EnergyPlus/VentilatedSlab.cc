@@ -1983,9 +1983,9 @@ namespace VentilatedSlab {
                     }
                 } else { // Autosize or hard-size with sizing run
                     CheckZoneSizing(state, cMO_VentilatedSlab, ventSlab.Name);
-
-                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(state, ventSlab.heatingCoilName, "Coil:Heating:Water", ErrorsFound);
-                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, ventSlab.heatingCoilName, "Coil:Heating:Water", ErrorsFound);
+                    std::string coilType = "Coil:Heating:Water";
+                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(state, coilType, ventSlab.heatingCoilName, ErrorsFound);
+                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, coilType, ventSlab.heatingCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "Coil:Heating:Water", ventSlab.heatingCoilName, CoilWaterInletNode, CoilWaterOutletNode, ErrorsFound);

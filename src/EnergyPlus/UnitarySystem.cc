@@ -5129,10 +5129,10 @@ namespace UnitarySystems {
                     this->m_coolingCoilAvailSched =
                         WaterCoils::GetWaterCoilAvailSched(state, tempCoilType, HXCoilName, errFlag);
                     this->MaxCoolCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, HXCoilName, HVAC::cAllCoilTypes(ActualCoolCoilType), errFlag);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName,  errFlag);
                     // Get the Cooling Coil water Inlet Node number
                     this->CoolCoilFluidInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, HXCoilName, HVAC::cAllCoilTypes(ActualCoolCoilType), errFlag);
+                        WaterCoils::GetCoilWaterInletNode(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)),  HXCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", cCurrentModuleObject, thisObjectName));
                         errFlag = false;
@@ -7625,7 +7625,7 @@ namespace UnitarySystems {
                 // why is this cooling coil does not have a field for Design Air Vol Flow Rate
                 // set it "SupplyAirFlowRate" to avoid blank, which lead to fatal out during get input
                 static constexpr std::string_view loc_cooling_coil_object_type("COIL:COOLING:WATER:DETAILEDGEOMETRY");
-                if (loc_cooling_coil_object_type == thisSys.input_specs.cooling_coil_object_type) {
+                if (equali(loc_cooling_coil_object_type ,thisSys.input_specs.cooling_coil_object_type)) {
                     thisSys.input_specs.cooling_supply_air_flow_rate_method = Util::makeUPPER("SupplyAirFlowRate");
                     thisSys.input_specs.cooling_supply_air_flow_rate = DataSizing::AutoSize;
                 }

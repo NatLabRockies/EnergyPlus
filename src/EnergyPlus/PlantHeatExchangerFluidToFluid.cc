@@ -341,7 +341,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
                 ShowSevereEmptyField(state, eoh, cAlphaFieldNames(7), cAlphaArgs(7));
                 ErrorsFound = true;
             } else if ((state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatExchangeModelType =
-                            static_cast<FluidHXType>(getEnumValue(fluidHXTypeNamesUC, cAlphaArgs(7)))) == FluidHXType::Invalid) {
+                            static_cast<FluidHXType>(getEnumValue(fluidHXTypeNamesUC, Util::makeUPPER(cAlphaArgs(7))))) == FluidHXType::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFieldNames(7), cAlphaArgs(7));
                 ErrorsFound = true;
             }

@@ -303,7 +303,7 @@ namespace HVACHXAssistedCoolingCoil {
                 state, state.dataHVACAssistedCC->UniqueHXAssistedCoilNames, AlphArray(1), CurrentModuleObject, ErrorsFound);
 
             thisHXCoil.Name = AlphArray(1);
-            thisHXCoil.hxType = static_cast<HVAC::HXType>(getEnumValue(HVAC::hxTypeNamesUC, AlphArray(2)));
+            thisHXCoil.hxType = static_cast<HVAC::HXType>(getEnumValue(HVAC::hxTypeNamesUC, Util::makeUPPER(AlphArray(2))));
             thisHXCoil.HeatExchangerName = AlphArray(3);
 
             thisHXCoil.CoolingCoilType = AlphArray(4);
@@ -625,7 +625,7 @@ namespace HVACHXAssistedCoolingCoil {
 
             thisHXCoil.Name = AlphArray(1);
 
-            thisHXCoil.hxType = static_cast<HVAC::HXType>(getEnumValue(HVAC::hxTypeNamesUC, AlphArray(2)));
+            thisHXCoil.hxType = static_cast<HVAC::HXType>(getEnumValue(HVAC::hxTypeNamesUC, Util::makeUPPER(AlphArray(2))));
             if (thisHXCoil.hxType == HVAC::HXType::Desiccant_Balanced) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(2), AlphArray(2));
                 ErrorsFound = true;

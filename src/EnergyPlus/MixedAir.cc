@@ -2411,7 +2411,7 @@ void ProcessOAControllerInputs(EnergyPlusData &state,
 // Beginning Initialization Section of the Module
 //******************************************************************************
 
-void InitOutsideAirSys(EnergyPlusData &state, int const(OASysNum), int const AirLoopNum)
+void InitOutsideAirSys(EnergyPlusData &state, int OASysNum, int AirLoopNum)
 {
 
     // SUBROUTINE INFORMATION:

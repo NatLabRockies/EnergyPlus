@@ -6029,18 +6029,22 @@ int GetWaterCoilIndex(EnergyPlusData &state,
     }
 
     IndexNum = 0;
-    if (CoilType == "COIL:HEATING:WATER") {
-        IndexNum = Util::FindItemInList(CoilName, state.dataWaterCoils->WaterCoil);
-    } else if (CoilType == "COIL:COOLING:WATER") {
-        IndexNum = Util::FindItemInList(CoilName, state.dataWaterCoils->WaterCoil);
-    } else if (CoilType == "COIL:COOLING:WATER:DETAILEDGEOMETRY") {
-        IndexNum = Util::FindItemInList(CoilName, state.dataWaterCoils->WaterCoil);
+    if (equali(CoilType, "COIL:HEATING:WATER")) {
+        IndexNum = Util::FindItemInListCaseInsensitive(CoilName, state.dataWaterCoils->WaterCoil);
+    } else if (equali(CoilType, "COIL:COOLING:WATER")) {
+        IndexNum = Util::FindItemInListCaseInsensitive(CoilName, state.dataWaterCoils->WaterCoil);
+    } else if (equali(CoilType, "COIL:COOLING:WATER:DETAILEDGEOMETRY")) {
+        IndexNum = Util::FindItemInListCaseInsensitive(CoilName, state.dataWaterCoils->WaterCoil);
     } else {
         IndexNum = 0;
     }
 
     if (IndexNum == 0) {
         ShowSevereError(state, format("GetWaterCoilIndex: Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+        ShowSevereError(state, format("++++++++++++++GetWaterCoilIndex: Coil Count {}", state.dataWaterCoils->WaterCoil.isize()));
+        for (int i = 0; i < state.dataWaterCoils->WaterCoil.isize(); i++) {
+            ShowSevereError(state, format("-----------GetWaterCoilIndex: Available Name = \"{}\"", state.dataWaterCoils->WaterCoil[i].Name));
+        }
         ErrorsFound = true;
     }
 
@@ -6056,11 +6060,16 @@ int GetCompIndex(EnergyPlusData &state, CoilModel compType, std::string_view con
         state.dataWaterCoils->GetWaterCoilsInputFlag = false;
     }
 
-    int index = Util::FindItemInList(coilName, state.dataWaterCoils->WaterCoil);
+    int index = Util::FindItemInListCaseInsensitive(coilName, state.dataWaterCoils->WaterCoil);
 
     if (index == 0) { // may not find coil name
         ShowSevereError(state,
-                        format("GetWaterCoilIndex: Could not find CoilType = \"{}\" with Name = \"{}\"", CoilModelNamesUC[(int)compType], coilName));
+                        format("GetCompIndex: Could not find CoilType = \"{}\" with Name = \"{}\"", CoilModelNamesUC[(int)compType], coilName));
+        ShowSevereError(state,
+                        format("++++++++++++++GetCompIndex: Coil Count {}", state.dataWaterCoils->WaterCoil.isize()));
+        for (int i = 0; i < state.dataWaterCoils->WaterCoil.isize(); i++) {
+            ShowSevereError(state, format("-----------GetCompIndex: Available Name = \"{}\"", state.dataWaterCoils->WaterCoil[i].Name));
+        }
     }
     return index;
 }

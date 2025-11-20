@@ -505,6 +505,9 @@ namespace AirLoopHVACDOAS {
                 CurrentModuleObject = "AirLoopHVAC:OutdoorAirSystem:EquipmentList";
                 int CoolingCoilOrder = 0;
                 int FanOrder = 0;
+                std::string coilCoolingWater = "COIL:COOLING:WATER";
+                std::string coilHeatingWater = "Coil:Heating:Water";
+                std::string coilCoolingWaterDetailedGeometry = "Coil : Cooling : Water : DetailedGeometry";
                 for (int CompNum = 1; CompNum <= thisOutsideAirSys.NumComponents; ++CompNum) {
                     std::string &CompType = thisOutsideAirSys.ComponentType(CompNum);
                     std::string &CompName = thisOutsideAirSys.ComponentName(CompNum);
@@ -560,7 +563,7 @@ namespace AirLoopHVACDOAS {
                     case ValidEquipListType::CoilCoolingWater:
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
-                        thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, CompName, "COIL:COOLING:WATER", errorsFound);
+                        thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, coilCoolingWater, CompName, errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
@@ -576,7 +579,7 @@ namespace AirLoopHVACDOAS {
                     case ValidEquipListType::CoilHeatingWater:
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
-                        thisDOAS.HWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, CompName, "Coil:Heating:Water", errorsFound);
+                        thisDOAS.HWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, CompName, errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
@@ -596,8 +599,7 @@ namespace AirLoopHVACDOAS {
                     case ValidEquipListType::CoilCoolingWaterDetailedGeometry:
                         thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
                         thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
-                        thisDOAS.CWCtrlNodeNum =
-                            WaterCoils::GetCoilWaterInletNode(state, CompName, "Coil:Cooling:Water:DetailedGeometry", errorsFound);
+                        thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, coilCoolingWaterDetailedGeometry, CompName, errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
                         }
