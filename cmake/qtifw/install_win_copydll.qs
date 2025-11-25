@@ -28,7 +28,8 @@ function Component() {
       var systemTargetDir = installer.environmentVariable("SystemRoot").replace(/\//g, '\\');
 
       // Note: all dlls in ./bin/System are 32-bits
-      if(systemInfo.currentCpuArchitecture == "x86_64") {
+      var arch = systemInfo.currentCpuArchitecture;
+      if(arch == "x86_64" || arch == "arm64") {
         // This is where the 32-bit stuff is stored on 64-bit systems
         // (despite the name...)
         systemTargetDir += "\\SysWOW64";
