@@ -5,7 +5,7 @@ Single Zone VAV for Variable Speed Coils
 
  - Original Date: 08/04/2025
  - Revision Date: 08/04/2025
- 
+
 
 ## Justification for New Feature ##
 
@@ -73,12 +73,9 @@ No changes.
 ## Example File and Transition Changes ##
 
 - No transition is required.
-- A new example file will be provided to showcase this new feature. 
+- A new example file will be provided to showcase this new feature.
 
 ## References ##
 
 - [Application Guide Variable-Air-Volume for Rooftop Units, Johnson Controls](https://docs.johnsoncontrols.com/ductedsystems/r/Johnson-Controls/en-US/Johnson-Controls-Application-Guide-Variable-Air-Volume-for-Rooftop-Units/2024-05-24/Matching-RTU-capacity-to-the-load/Constant-Volume-CV-and-single-zone-VAV-SZVAV-Systems?section=kai1604403608065__benefits_of_szvav-fig_1)
 - [Understanding Single-Zone VAV Systems, Trane](https://www.trane.com/content/dam/Trane/Commercial/global/products-systems/education-training/engineers-newsletters/airside-design/admapn047en_0413.pdf)
-
-
-

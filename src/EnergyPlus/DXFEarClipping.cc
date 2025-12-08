@@ -121,11 +121,10 @@ namespace DXFEarClipping {
             if (m1 * m2 <= epsilon) {
                 InPolygon = true;
                 break;
-            } else {
-                costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
-                acosval = std::acos(costheta);
-                anglesum += acosval;
             }
+            costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
+            acosval = std::acos(costheta);
+            anglesum += acosval;
         }
 
         if (std::abs(anglesum - Constant::TwoPi) <= epsilon) {
@@ -502,10 +501,9 @@ namespace DXFEarClipping {
                 r_vertices(nrverts) = mvert;
                 rangles(nrverts) = ang;
                 continue;
-            } else {
-                ++ncverts;
-                c_vertices(ncverts) = mvert;
             }
+            ++ncverts;
+            c_vertices(ncverts) = mvert;
 
             // convex angle, see if it's an ear
             testtri(1) = vertex(svert);

@@ -73,15 +73,14 @@ Enter the annual escalation rate as a decimal. For a 1\% rate, enter the value 0
 An example of this object in an IDF:
 
 \begin{lstlisting}
-
 LifeCycleCost:RecurringCosts,
-      AnnualMaint,             !- Name
-      Maintenance,             !- Category
-      2000,                    !- Cost
-      ServicePeriod,           !- Start of Costs
-      0,                       !- Years from Start
-      0,                       !- Months from Start
-      1,                       !- Repeat Period Years
-      0,                       !- Repeat Period Months
-      0;                       !- Annual escalation rate
+  AnnualMaint,                !- Name
+  Maintenance,                !- Category
+  2000,                       !- Cost
+  ServicePeriod,              !- Start of Costs
+  0,                          !- Years from Start
+  0,                          !- Months from Start
+  1,                          !- Repeat Period Years
+  0,                          !- Repeat Period Months
+  0;                          !- Annual escalation rate
 \end{lstlisting}

@@ -178,6 +178,16 @@ Set MinimalShadowing = yes
 
 Setting to ``yes'' causes the audit file to include a line-by-line echoing of the input file which may be useful for debugging purposes. For versions 8.2 and earlier, the default behavior was to include the line-by-line echoing of the input file into the audit file but it was changed to not do this by default as a way to speed up the input processing portion of executing EnergyPlus. When not set to ``yes'', the audit file contains a reference on using the DisplayInputInAudit environment variable to see the line-by-line echoing of the input file.
 
+
+\subsubsection{BufferedErrFile: Only flush err file at the end}\label{displayinputinaudit-buffered-err-file}
+
+Setting to ``yes'' will cause EnergyPlus to wait until the simulation completes to flush the eplusout.err.
+The default behavior is to enable automatic flushing so you can see the output while the program is running, and it will capture the content up to a segfault if any.
+
+\begin{lstlisting}
+Set BufferedErrFile = yes
+\end{lstlisting}
+
 \subsubsection{Caution: Environment Variables}\label{caution-environment-variables}
 
 Some combinations will cause fatal errors from EnergyPlus -- \textbf{DDOnly} and \textbf{FullAnnualRun}, for example.~ \textbf{FullAnnualRun} and \textbf{NoWeatherFile} won't cause fatal errors from EnergyPlus but probably should from the script files.~ We welcome any suggestions for future environment variables.

@@ -55,18 +55,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # python 2/3 compatibility imports
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
 import csv
+import fnmatch
 import glob
 import io
+import os
+import re
 import sys
 from os import path
-import re
-import fnmatch
-import os
 
 # generates a csv summary of the output variables in E+
 # assumption: doesn't check for commented lines
@@ -98,7 +96,7 @@ def do_initial_line_trimming(working_line):
     working_line = working_line.strip()
     # cut the call to SetupOutputVariable off
     sov_index = working_line.index("SetupOutputVariable")
-    working_line = working_line[sov_index + 20:]
+    working_line = working_line[sov_index + 20 :]
     # cut the last 3 characters off
     working_line = working_line[:-2]
     return working_line
@@ -110,11 +108,11 @@ def get_level_zero_comma_locations(line):
     level_zero_comma_locations = []
     for char in line:
         current_char_location += 1
-        if char == ',' and current_parentheses_level == 0:
+        if char == "," and current_parentheses_level == 0:
             level_zero_comma_locations.append(current_char_location)
-        elif char == '(':
+        elif char == "(":
             current_parentheses_level += 1
-        elif char == ')':
+        elif char == ")":
             current_parentheses_level -= 1
             # print "Character: " + char + "; paren_level: " + str(current_parentheses_level)
             # print (char + " : " + str(level_zero_comma_locations) )
@@ -127,11 +125,11 @@ def get_arguments_based_on_comma_locations(line, comma_locations):
         comma_locations_length = len(comma_locations)
         for i in range(comma_locations_length + 1):
             if i == 0:
-                arguments.append(line[0:comma_locations[i]].strip())
+                arguments.append(line[0 : comma_locations[i]].strip())
             elif i == comma_locations_length:
-                arguments.append(line[comma_locations[i - 1] + 1:].strip())
+                arguments.append(line[comma_locations[i - 1] + 1 :].strip())
             else:
-                arguments.append(line[comma_locations[i - 1] + 1:comma_locations[i]].strip())
+                arguments.append(line[comma_locations[i - 1] + 1 : comma_locations[i]].strip())
         return arguments
     except:
         print(line)
@@ -140,21 +138,22 @@ def get_arguments_based_on_comma_locations(line, comma_locations):
 
 def process_variable_name_and_units(argument):
     # parse out data from the variable name first
-    first_bracket = argument.find('[')
+    first_bracket = argument.find("[")
     # variable_name = ""
     variable_units = ""
     if first_bracket == -1:
         variable_name = argument.strip()
     else:
         variable_name = argument[0:first_bracket].strip() + '"'
-        variable_units = argument[first_bracket + 1:-2].strip()
+        variable_units = argument[first_bracket + 1 : -2].strip()
     return variable_name, variable_units
 
 
 class OutputVariableCall:
     # constructor
-    def __init__(self, file_name, variable_name, units, variable_itself, index_type_key, variable_type_key,
-                 keyed_value):
+    def __init__(
+        self, file_name, variable_name, units, variable_itself, index_type_key, variable_type_key, keyed_value
+    ):
         self.file_name = file_name
         self.variable_name = variable_name
         self.units = units
@@ -167,30 +166,56 @@ class OutputVariableCall:
     @staticmethod
     def spew_header_to_csv(csv_file_object):
         csv_file_object.writerow(
-            ('Filename', 'Variable name', 'Units', 'Variable reference', 'Index type key',
-             'Variable type key', 'Keyed value'))
+            (
+                "Filename",
+                "Variable name",
+                "Units",
+                "Variable reference",
+                "Index type key",
+                "Variable type key",
+                "Keyed value",
+            )
+        )
 
     def spew_to_csv(self, csv_file_object):
         csv_file_object.writerow(
-            [self.file_name, self.variable_name, self.units, self.variable, self.index_type_key,
-             self.variable_type_key, self.keyed_value])
+            [
+                self.file_name,
+                self.variable_name,
+                self.units,
+                self.variable,
+                self.index_type_key,
+                self.variable_type_key,
+                self.keyed_value,
+            ]
+        )
 
     # markdown methods
     def spew_to_md(self, md_file_object):
         md_file_object.write("|")
-        md_file_object.write("|".join((str(x) for x in (self.variable_name, self.units, self.variable,
-                                                        self.index_type_key, self.variable_type_key,
-                                                        self.keyed_value))))
+        md_file_object.write(
+            "|".join(
+                (
+                    str(x)
+                    for x in (
+                        self.variable_name,
+                        self.units,
+                        self.variable,
+                        self.index_type_key,
+                        self.variable_type_key,
+                        self.keyed_value,
+                    )
+                )
+            )
+        )
         md_file_object.write("|")
         md_file_object.write("\n")
 
     def write_file_header(self, md_file_object):
         md_file_object.write("\n")
         md_file_object.write("## %s\n" % self.file_name)
-        md_file_object.write(
-            "|Variable name|Units|Variable reference|Index type key|Variable type key|Keyed value|\n")
-        md_file_object.write(
-            "|-------------|-----|------------------|--------------|-----------------|-----------|\n")
+        md_file_object.write("|Variable name|Units|Variable reference|Index type key|Variable type key|Keyed value|\n")
+        md_file_object.write("|-------------|-----|------------------|--------------|-----------------|-----------|\n")
 
 
 def main():
@@ -199,7 +224,7 @@ def main():
 
     files = []
     for root, _, filenames in os.walk(source_dir):
-        for filename in fnmatch.filter(filenames, '*.cc'):
+        for filename in fnmatch.filter(filenames, "*.cc"):
             files.append(os.path.join(root, filename))
 
     for this_file in files:
@@ -208,23 +233,23 @@ def main():
         if file_name == "OutputProcessor.cc":
             continue
 
-        with io.open(this_file, 'r', encoding='latin-1') as f:
+        with io.open(this_file, "r", encoding="latin-1") as f:
 
             file_contents = f.read()
 
             # first warn about commented lines
-            p = re.compile(r'//\s*SetupOutputVariable')
+            p = re.compile(r"//\s*SetupOutputVariable")
             matches = p.findall(file_contents)
 
             if len(matches) > 0:
                 print("File %s contains commented SetupOutputVariable calls; output may be flawed" % file_name)
 
-            p = re.compile(r'SetupOutputVariable\([^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^;]*;')
+            p = re.compile(r"SetupOutputVariable\([^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^;]*;")
             matches = p.findall(file_contents)
 
             for match in matches:
 
-                setup_call = match.replace('\n', '')
+                setup_call = match.replace("\n", "")
 
                 # trim off the leading/trailing stuff to just get args
                 working_line = do_initial_line_trimming(setup_call)
@@ -261,15 +286,22 @@ def main():
                     continue
 
                 # add to the array
-                this_o_v = OutputVariableCall(file_name, variable_name, variable_units,
-                                              actual_variable, index_type_key, variable_type_key, keyed_value)
+                this_o_v = OutputVariableCall(
+                    file_name,
+                    variable_name,
+                    variable_units,
+                    actual_variable,
+                    index_type_key,
+                    variable_type_key,
+                    keyed_value,
+                )
                 output_variables.append(this_o_v)
 
                 # print "Finished with file %s; %i calls processed so far" % (file_name, len(output_variables))
 
-    mode = 'w'
+    mode = "w"
     if sys.version_info.major < 3:
-        mode += 'b'
+        mode += "b"
 
     # output the data to csv
     with io.open(output_file, mode) as csv_file:

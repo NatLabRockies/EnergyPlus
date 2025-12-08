@@ -190,7 +190,8 @@ namespace Avail {
                 if (availStatus == Status::ForceOff) {
                     availMgr.availStatus = Status::ForceOff;
                     break; // Fans forced off takes precedence
-                } else if (availStatus == Status::CycleOnZoneFansOnly) {
+                }
+                if (availStatus == Status::CycleOnZoneFansOnly) {
                     availMgr.availStatus = Status::CycleOnZoneFansOnly; // zone fans only takes next precedence
                 } else if ((availStatus == Status::CycleOn) && (availMgr.availStatus == Status::NoAction)) {
                     availMgr.availStatus = Status::CycleOn; // cycle on is lowest precedence
@@ -276,7 +277,8 @@ namespace Avail {
                         if (availStatus == Status::ForceOff) {
                             zcam.availStatus = Status::ForceOff;
                             break; // Fans forced off takes precedence
-                        } else if ((availStatus == Status::CycleOn) && (zcam.availStatus == Status::NoAction)) {
+                        }
+                        if ((availStatus == Status::CycleOn) && (zcam.availStatus == Status::NoAction)) {
                             // cycle on is next precedence
                             zcam.availStatus = Status::CycleOn;
                         }
@@ -1375,7 +1377,7 @@ namespace Avail {
             } // End of Num Loop
 
         } else {
-            if (AvailabilityListName != "") {
+            if (!AvailabilityListName.empty()) {
                 ShowWarningError(state,
                                  format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
                                         "availability will be used.",
@@ -1446,7 +1448,7 @@ namespace Avail {
             } // End of Num Loop
 
         } else {
-            if (AvailabilityListName != "") {
+            if (!AvailabilityListName.empty()) {
                 ShowWarningError(state,
                                  format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
                                         "availability will be used.",

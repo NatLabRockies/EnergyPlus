@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout EnergyPlus
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: ${{ github.event.inputs.ref }}
 

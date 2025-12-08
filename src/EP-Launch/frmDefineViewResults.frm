@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmDefineViewResults 
+Begin VB.Form frmDefineViewResults
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Define Files to View"
    ClientHeight    =   6465
@@ -13,7 +13,7 @@ Begin VB.Form frmDefineViewResults
    ScaleWidth      =   4275
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.CommandButton cmdClose 
+   Begin VB.CommandButton cmdClose
       Caption         =   "Close"
       Height          =   375
       Left            =   2640
@@ -21,7 +21,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   6000
       Width           =   1455
    End
-   Begin VB.ListBox lstFilesToOpen 
+   Begin VB.ListBox lstFilesToOpen
       Height          =   5685
       Left            =   2160
       Style           =   1  'Checkbox
@@ -29,7 +29,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   120
       Width           =   1935
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 8"
       Height          =   375
       Index           =   7
@@ -38,7 +38,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   1560
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 7"
       Height          =   375
       Index           =   6
@@ -47,7 +47,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   1080
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 6"
       Height          =   375
       Index           =   5
@@ -56,7 +56,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   600
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 5"
       Height          =   375
       Index           =   4
@@ -65,7 +65,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   120
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 4"
       Height          =   375
       Index           =   3
@@ -74,7 +74,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   1560
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 3"
       Height          =   375
       Index           =   2
@@ -83,7 +83,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   1080
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 2"
       Height          =   375
       Index           =   1
@@ -92,7 +92,7 @@ Begin VB.Form frmDefineViewResults
       Top             =   600
       Width           =   855
    End
-   Begin VB.OptionButton optUserButton 
+   Begin VB.OptionButton optUserButton
       Caption         =   "Set 1"
       Height          =   375
       Index           =   0

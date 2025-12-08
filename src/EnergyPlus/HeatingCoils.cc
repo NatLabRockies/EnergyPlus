@@ -3361,14 +3361,12 @@ namespace HeatingCoils {
             int WhichCoil = Util::FindItem(CoilName, state.dataHeatingCoils->HeatingCoil);
             if (WhichCoil != 0) {
                 return state.dataHeatingCoils->HeatingCoil(WhichCoil).PLFCurveIndex;
-            } else {
-                ShowSevereError(state, format("GetHeatingCoilPLFCurveIndex: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-                ErrorsFound = true;
-                return 0;
             }
-        } else {
+            ShowSevereError(state, format("GetHeatingCoilPLFCurveIndex: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+            ErrorsFound = true;
             return 0;
         }
+        return 0;
     }
 
     int GetHeatingCoilNumberOfStages(EnergyPlusData &state,
@@ -3395,11 +3393,10 @@ namespace HeatingCoils {
         int WhichCoil = Util::FindItemInList(CoilName, state.dataHeatingCoils->HeatingCoil);
         if (WhichCoil != 0) {
             return state.dataHeatingCoils->HeatingCoil(WhichCoil).NumOfStages;
-        } else {
-            ShowSevereError(state, format("GetHeatingCoilNumberOfSpeeds: Invalid Heating Coil Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetHeatingCoilNumberOfSpeeds: Invalid Heating Coil Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return 0;
     }
 
     void SetHeatingCoilData(EnergyPlusData &state,

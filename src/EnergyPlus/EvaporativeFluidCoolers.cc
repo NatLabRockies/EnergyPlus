@@ -2309,7 +2309,8 @@ namespace EvaporativeFluidCoolers {
                     if (std::abs(this->OutletWaterTemp - OWTLowerLimit) <= 0.01) {
                         BypassFraction2 = bypassFraction;
                         break;
-                    } else if (this->OutletWaterTemp < OWTLowerLimit) {
+                    }
+                    if (this->OutletWaterTemp < OWTLowerLimit) {
                         // Set OutletWaterTemp = OWTLowerLimit, and use linear interpolation to calculate the bypassFraction
                         BypassFraction2 = BypassFractionPrev - (BypassFractionPrev - bypassFraction) * (OutletWaterTempPrev - OWTLowerLimit) /
                                                                    (OutletWaterTempPrev - this->OutletWaterTemp);
@@ -2321,9 +2322,9 @@ namespace EvaporativeFluidCoolers {
                             this->OutletWaterTemp = OutletWaterTempPrev;
                         }
                         break;
-                    } else {
-                        BypassFraction2 = (TempSetPoint - this->OutletWaterTemp) / (inletWaterTemp - this->OutletWaterTemp);
                     }
+                    BypassFraction2 = (TempSetPoint - this->OutletWaterTemp) / (inletWaterTemp - this->OutletWaterTemp);
+
                     // Compare two bypassFraction to determine when to stop
                     if (std::abs(BypassFraction2 - bypassFraction) <= BypassFractionThreshold) {
                         break;

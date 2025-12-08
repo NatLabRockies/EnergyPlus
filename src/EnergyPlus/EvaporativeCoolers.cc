@@ -4459,11 +4459,10 @@ int GetInletNodeNum(EnergyPlusData &state, std::string const &EvapCondName, bool
         Util::FindItemInList(EvapCondName, state.dataEvapCoolers->EvapCond, &EvapConditions::Name, state.dataEvapCoolers->NumEvapCool);
     if (WhichEvapCond != 0) {
         return state.dataEvapCoolers->EvapCond(WhichEvapCond).InletNode;
-    } else {
-        ShowSevereError(state, format("GetInletNodeNum: Could not find EvaporativeCooler = \"{}\"", EvapCondName));
-        ErrorsFound = true;
-        return 0;
     }
+    ShowSevereError(state, format("GetInletNodeNum: Could not find EvaporativeCooler = \"{}\"", EvapCondName));
+    ErrorsFound = true;
+    return 0;
 }
 
 int GetOutletNodeNum(EnergyPlusData &state, std::string const &EvapCondName, bool &ErrorsFound)
@@ -4484,11 +4483,10 @@ int GetOutletNodeNum(EnergyPlusData &state, std::string const &EvapCondName, boo
         Util::FindItemInList(EvapCondName, state.dataEvapCoolers->EvapCond, &EvapConditions::Name, state.dataEvapCoolers->NumEvapCool);
     if (WhichEvapCond != 0) {
         return state.dataEvapCoolers->EvapCond(WhichEvapCond).OutletNode;
-    } else {
-        ShowSevereError(state, format("GetOutletNodeNum: Could not find EvaporativeCooler = \"{}\"", EvapCondName));
-        ErrorsFound = true;
-        return 0;
     }
+    ShowSevereError(state, format("GetOutletNodeNum: Could not find EvaporativeCooler = \"{}\"", EvapCondName));
+    ErrorsFound = true;
+    return 0;
 }
 
 } // namespace EnergyPlus::EvaporativeCoolers

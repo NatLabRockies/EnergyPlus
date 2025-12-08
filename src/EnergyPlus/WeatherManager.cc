@@ -288,21 +288,22 @@ namespace Weather {
                                                                  ipsc->cAlphaFieldNames,
                                                                  ipsc->cNumericFieldNames);
 
-        ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, ""};
-
-        if (ipsc->lAlphaFieldBlanks(1)) {
-        } else if ((state.dataEnvrn->varyingLocationLatSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(1))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1));
-        }
+        std::string newName = Util::makeUPPER(ipsc->cAlphaArgs(1));
+        ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, newName};
 
         if (ipsc->lAlphaFieldBlanks(2)) {
-        } else if ((state.dataEnvrn->varyingLocationLongSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(2))) == nullptr) {
+        } else if ((state.dataEnvrn->varyingLocationLatSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(2))) == nullptr) {
             ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
         }
 
         if (ipsc->lAlphaFieldBlanks(3)) {
-        } else if ((state.dataEnvrn->varyingOrientationSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(3))) == nullptr) {
+        } else if ((state.dataEnvrn->varyingLocationLongSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(3))) == nullptr) {
             ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3));
+        }
+
+        if (ipsc->lAlphaFieldBlanks(4)) {
+        } else if ((state.dataEnvrn->varyingOrientationSched = Sched::GetSchedule(state, ipsc->cAlphaArgs(4))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(4), ipsc->cAlphaArgs(4));
         }
     }
 
@@ -1575,7 +1576,7 @@ namespace Weather {
                 ThisDay += 7;
             }
             ThisDay += 7 * (state.dataWeather->DST.EnDay - 1);
-            if (ThisDay >> state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.EnMon)) {
+            if ((ThisDay >> state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.EnMon)) != 0) {
                 ActEndMonth = 0; // Suppress uninitialized warning
                 ActEndDay = 0;   // Suppress uninitialized warning
                 ShowSevereError(state, format("{}Determining DST: DST End Date, Nth Day of Month, not enough Nths", RoutineName));
@@ -2818,10 +2819,9 @@ namespace Weather {
                                     state, "...WeatherFile does not allow Leap Years. HOLIDAYS/DAYLIGHT SAVINGS header must indicate \"Yes\".");
                             }
                             continue;
-                        } else {
-                            TryAgain = false;
-                            SkipThisDay = false;
                         }
+                        TryAgain = false;
+                        SkipThisDay = false;
 
                         if (thisEnviron.ActualWeather && state.dataEnvrn->CurrentYearIsLeapYear) {
                             if (WMonth == 3 && WDay == 1 && state.dataEnvrn->Month == 2 && state.dataEnvrn->DayOfMonth == 28) {
@@ -8590,9 +8590,8 @@ namespace Weather {
         // Could probably do some bounds checking here, but for now assume the month is in [1, 12]
         if (leapYear) {
             return daysbeforeleap[Month - 1] + Day;
-        } else {
-            return daysbefore[Month - 1] + Day;
         }
+        return daysbefore[Month - 1] + Day;
     }
 
     bool validMonthDay(int const month, int const day, int const leapYearAdd)
@@ -8680,27 +8679,28 @@ namespace Weather {
                                statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
-                } else if (lineAvg.find("Daily Avg") == std::string::npos) {
+                }
+                if (lineAvg.find("Daily Avg") == std::string::npos) {
                     ShowSevereError(state,
                                     format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have the 'Daily Avg' line in the Monthly "
                                            "Statistics for Dry Bulb temperatures.",
                                            statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
-                } else {
-                    int AnnualNumberOfDays = 0;
-                    for (int i = 1; i <= 12; ++i) {
-                        MonthlyAverageDryBulbTemp(i) = OutputReportTabular::StrToReal(OutputReportTabular::GetColumnUsingTabs(lineAvg, i + 2));
-                        AnnualDailyAverageDryBulbTempSum += MonthlyAverageDryBulbTemp(i) * state.dataWeather->EndDayOfMonth(i);
-                        MonthlyDailyDryBulbMin = min(MonthlyDailyDryBulbMin, MonthlyAverageDryBulbTemp(i));
-                        MonthlyDailyDryBulbMax = max(MonthlyDailyDryBulbMax, MonthlyAverageDryBulbTemp(i));
-                        AnnualNumberOfDays += state.dataWeather->EndDayOfMonth(i);
-                    }
-                    this->AnnualAvgOADryBulbTemp = AnnualDailyAverageDryBulbTempSum / AnnualNumberOfDays;
-                    this->MonthlyAvgOADryBulbTempMaxDiff = MonthlyDailyDryBulbMax - MonthlyDailyDryBulbMin;
-                    this->MonthlyDailyAverageDryBulbTemp = MonthlyAverageDryBulbTemp;
-                    this->OADryBulbWeatherDataProcessed = true;
                 }
+                int AnnualNumberOfDays = 0;
+                for (int i = 1; i <= 12; ++i) {
+                    MonthlyAverageDryBulbTemp(i) = OutputReportTabular::StrToReal(OutputReportTabular::GetColumnUsingTabs(lineAvg, i + 2));
+                    AnnualDailyAverageDryBulbTempSum += MonthlyAverageDryBulbTemp(i) * state.dataWeather->EndDayOfMonth(i);
+                    MonthlyDailyDryBulbMin = min(MonthlyDailyDryBulbMin, MonthlyAverageDryBulbTemp(i));
+                    MonthlyDailyDryBulbMax = max(MonthlyDailyDryBulbMax, MonthlyAverageDryBulbTemp(i));
+                    AnnualNumberOfDays += state.dataWeather->EndDayOfMonth(i);
+                }
+                this->AnnualAvgOADryBulbTemp = AnnualDailyAverageDryBulbTempSum / AnnualNumberOfDays;
+                this->MonthlyAvgOADryBulbTempMaxDiff = MonthlyDailyDryBulbMax - MonthlyDailyDryBulbMin;
+                this->MonthlyDailyAverageDryBulbTemp = MonthlyAverageDryBulbTemp;
+                this->OADryBulbWeatherDataProcessed = true;
+
             } else if (epwFileExists) {
                 auto epwFile = state.files.inputWeatherFilePath.try_open();
                 bool epwHasLeapYear(false);

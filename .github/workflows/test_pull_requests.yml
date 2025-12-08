@@ -38,7 +38,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup System
       id: setup-runner
@@ -138,7 +138,7 @@ jobs:
     # Checkout baseline, overrides the branch basically
     - name: Baseline Checkout
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: develop
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
@@ -182,7 +182,7 @@ jobs:
 
     - name: Checkout Branch again
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 

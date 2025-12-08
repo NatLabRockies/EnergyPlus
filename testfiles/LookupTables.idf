@@ -122,7 +122,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -2927,7 +2927,7 @@
     1.2,                     !- <none>
     1.3,                     !- <none>
     1.4,                     !- <none>
-    1.5;                     !- Extended Field
+    1.5;                     !- <none>
 
   Table:IndependentVariableList,
     FanEffRatioCurve_IndependentVariableList,  !- Name

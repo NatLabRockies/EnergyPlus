@@ -1194,7 +1194,8 @@ namespace Sched {
                     ShowSevereCustomAudit(state, eoh, "has missing days in its schedule pointers");
                     ErrorsFound = true;
                     break;
-                } else if (daysInYear[iDay] > 1) {
+                }
+                if (daysInYear[iDay] > 1) {
                     ShowSevereCustomAudit(state, eoh, "has overlapping days in its schedule pointers");
                     ErrorsFound = true;
                     break;
@@ -2429,7 +2430,7 @@ namespace Sched {
             ShowFatalError(state, format("LookUpScheduleValue called with thisHour={}", hr));
         }
 
-        int thisHr = hr + state.dataEnvrn->DSTIndicator * this->UseDaylightSaving;
+        int thisHr = hr + state.dataEnvrn->DSTIndicator * static_cast<int>(this->UseDaylightSaving);
 
         int thisDayOfYear = state.dataEnvrn->DayOfYear_Schedule;
         int thisDayOfWeek = state.dataEnvrn->DayOfWeek;
@@ -2906,7 +2907,8 @@ namespace Sched {
             ShowContinueError(state, format("Occurred in Day Schedule={}", DayScheduleName));
             ErrorsFound = true;
             return;
-        } else if (Pos == 0) {
+        }
+        if (Pos == 0) {
             RetHH = 0;
         } else {
             bool error = false;
@@ -2974,9 +2976,8 @@ namespace Sched {
     {
         if (minute != 0) {
             return (minute % numMinutesPerTimestep == 0);
-        } else {
-            return true;
         }
+        return true;
     }
 
     void ProcessForDayTypes(EnergyPlusData &state,
@@ -3179,6 +3180,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *daySched1 = this->dayScheds[1];
+        if (daySched1 == nullptr) {
+            return;
+        }
         if (!daySched1->isMinMaxSet) {
             daySched1->setMinMaxVals(state);
         }
@@ -3213,6 +3217,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *weekSched1 = this->weekScheds[1];
+        if (weekSched1 == nullptr) {
+            return;
+        }
         if (!weekSched1->isMinMaxSet) {
             weekSched1->setMinMaxVals(state);
         }

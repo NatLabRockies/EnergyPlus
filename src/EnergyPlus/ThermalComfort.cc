@@ -820,9 +820,8 @@ namespace ThermalComfort {
     {
         if (ActMet > 1) {
             return AirVel + 0.3 * (ActMet - 1);
-        } else {
-            return AirVel;
         }
+        return AirVel;
     }
 
     void GetThermalComfortInputsASHRAE(EnergyPlusData &state)

@@ -5,7 +5,7 @@
  - Original August 7, 2015
  - Add highlights from [NFP-LinkInfiltrationToHVAC.doc](https://github.com/NREL/EnergyPlusDevSupport/blob/master/DesignDocuments/Proposals/NFP-LinkInfiltrationToHVAC.doc)
 
- 
+
 ## Background
 ZoneAirMassFlowConservation was added in v8.2.0 via pull request [#4245](https://github.com/NREL/EnergyPlus/pull/4245). This PR touched 21 source files. Highlights:
 
@@ -27,7 +27,7 @@ ZoneAirMassFlowConservation was added in v8.2.0 via pull request [#4245](https:/
    - Added blocks of code to HeatBalanceAirManager::GetSimpleAirModelInputs to fill new ZoneMixingNum, ZoneReOrder and MassConservation data, and set up new output variables.
    - Added code to HeatBalanceManager::GetProjectControlData to process inputs for new ZoneAirMassFlowConservation object and do some related initializations
    - Added a check to force system re-simulation in SimAirServingZones
-if ( ZoneMassBalanceHVACReSim ) SysReSim = true; 
+if ( ZoneMassBalanceHVACReSim ) SysReSim = true;
    - Added initilization of AirLoopFlow.ZoneMixingFlow in ZoneEquipmentManager
    - Added checks in ZoneEquipmentManager::SimZoneEquipment to supress unbalanced flow warnings
    - Added code to ZoneEquipmentManager::CalcZoneMassBalance to calculate mixing and infiltration flow rates for mass conservation
@@ -36,7 +36,7 @@ if ( ZoneMassBalanceHVACReSim ) SysReSim = true;
 
 
 ## Approach
-Extend the ZoneAirMassFlowConservation feature by adding user inputs to control the maximum and minimum return air flow rate for each zone. The return air flow rate will be set based on user inputs and current system flow status, then the ZoneAirMassFlowConservation algorithm will make any necessary adjustments to mixing and infiltration flow rates.  In the extreme, this feature should make it possible to model a fully pressurized zone with zero return airflow and zero infiltration and incoming mixing flow rates. 
+Extend the ZoneAirMassFlowConservation feature by adding user inputs to control the maximum and minimum return air flow rate for each zone. The return air flow rate will be set based on user inputs and current system flow status, then the ZoneAirMassFlowConservation algorithm will make any necessary adjustments to mixing and infiltration flow rates.  In the extreme, this feature should make it possible to model a fully pressurized zone with zero return airflow and zero infiltration and incoming mixing flow rates.
 
 ## Proposed Input Changes
 
@@ -65,7 +65,7 @@ NEW FIELD --> AllZones;      !- Infiltration Balancing Zones [AllZones or Mixing
 ## Data Structures ##
 ```[C++]
 DataHeatBalance.hh
-	struct ZoneAirMassFlowConservation 
+	struct ZoneAirMassFlowConservation
 	{
 		// Members
 		bool EnforceZoneMassBalance;     // flag to enforce zone air mass conservation
@@ -147,7 +147,7 @@ DataZoneEquipment.hh
 ####HeatBalanceAirManager.cc
 * GetAirHeatBalanceInput
    * SetZoneMassConservationFlag
-      - Note: sets the zone mass conservation flag to true  
+      - Note: sets the zone mass conservation flag to true
 * GetSimpleAirModelInputs
    - Note: After processing simple airflow inputs (ZoneVentilation, ZoneInfiltration, etc.) there are several related loops (most of these should probably be separated out from this function?)
       - a loop gets pointers to the mixing objects serving source zones
@@ -235,5 +235,3 @@ This is within the IterAir loop in SimSelectedEquipment and it fires every time 
 https://github.com/NREL/EnergyPlusArchive/commit/c8c4ecb752714b44b8b15de074fad81d9139d685
 
 [ResetTerminalUnitFlowLimits](https://github.com/NREL/EnergyPlus/blame/develop/src/EnergyPlus/HVACManager.cc#L1613) resets all the terminal unit inlet node MassFlowRateMaxAvail (and Min) to the hard design flow rates without any regard to schedules or other things that may be varying.  This is find during FirstHVACIteration, but looks suspicious here.  This probably explains why I couldn't get the VAV terminal unit schedule to stick.  Note that IterAir is repeated up to six times (hardwired iteration limit) and then goes back up to the main HVAC iteration loop (HVACManagerIteration whcih is the one that has a user-controlled max that defaults to 20).
-
-

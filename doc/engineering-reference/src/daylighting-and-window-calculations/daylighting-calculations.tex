@@ -11,13 +11,13 @@ The daylighting calculation has three main steps:
     \emph{Daylight factors}, which are ratios of interior illuminance or luminance to exterior horizontal illuminance, are calculated and stored.
     The user specifies the coordinates of one or more reference points in each daylit zone.
     EnergyPlus then integrates over the area of each exterior window in the zone (or enclosure) to obtain the contribution of direct light from the window to the illuminance at the reference points,
-    and the contribution of light that reflects from the walls, floor and ceiling before reaching the reference points. 
-    
-    If a zone has surfaces with air boundaries (Construction:AirBoundary) 
-    then all of the surfaces within the grouped enclosure are included in the ``zone''. Each daylighting control and reference point 
+    and the contribution of light that reflects from the walls, floor and ceiling before reaching the reference points.
+
+    If a zone has surfaces with air boundaries (Construction:AirBoundary)
+    then all of the surfaces within the grouped enclosure are included in the ``zone''. Each daylighting control and reference point
     remains associated with a specific zone, but all windows (and other surfaces) within the grouped enclosure are seen by each reference point within the enclosure. For example if there is an air
     boundary between Zone A and Zone B, a daylighting reference point in Zone A will see all surfaces in both Zone A and Zone B directly.
-    
+
     Window luminance and window background luminance, which are used to determine glare, are also calculated.
     Taken into account are such factors as sky luminance distribution, window size and orientation, glazing transmittance, inside surface reflectances,
     sun control devices such as movable window shades, and external obstructions. Dividing daylight illuminance or luminance by exterior illuminance yields daylight factors.

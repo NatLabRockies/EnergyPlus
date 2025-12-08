@@ -39134,4 +39134,3 @@ Report:Table:Monthly,
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
        \note See instructions under AggregationType01
-

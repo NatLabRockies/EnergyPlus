@@ -23,32 +23,25 @@ Each fluid name must be identified by type - either \textbf{Refrigerant} or \tex
 An example of these statements in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:Name,
   R11,Refrigerant;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   R12,Refrigerant;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   R22,Refrigerant;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   NH3,Refrigerant;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   Steam,Refrigerant;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   SaltBrine, Glycol;
 
-
-  FluidProperties:Name,
+FluidProperties:Name,
   NewGlycol, Glycol;
 \end{lstlisting}
 
@@ -77,12 +70,13 @@ This field allows the user to specify the actual concentration of glycol being u
 An example of this statement in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:GlycolConcentration,
   EthGly25Percent, EthyleneGlycol, ,0.25;
-  FluidProperties:GlycolConcentration,
+
+FluidProperties:GlycolConcentration,
   ProGly40Percent, PropyleneGlycol, ,0.40;
-  FluidProperties:GlycolConcentration,
+
+FluidProperties:GlycolConcentration,
   HalfAndHalf, UserDefinedGlycolType, NewBrine, 0.5;
 \end{lstlisting}
 
@@ -103,7 +97,6 @@ These fields (up to 250) are the temperatures at which the data for the thermal 
 An example of this statement in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:Temperatures,
   R11Temperatures,
   -70,-65,-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,2,4,6,8,10,12,
@@ -141,9 +134,8 @@ These fields (up to 250) are the values of the thermal property specified in the
 An example of this statement in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:Saturated,
-  R11,Enthalpy,Fluid,R11Temperatures, ! Enthalpy in J/kg
+  R11,Enthalpy,Fluid,R11Temperatures,  !- Enthalpy in J/kg
   153580,154600,156310,158580,161300,164380,167740,171330,175100,179020,183060,
   187190,191400,195680,200000,201740,203490,205240,207000,208770,210530,212310,
   214080,215870,217650,219860,221230,223030,224830,226630,228860,230250,232060,
@@ -182,10 +174,9 @@ These fields (up to 250) are the values of the thermal property specified in the
 An example of this statement in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:Superheated,
-  R11,Density,SuperR11Temperatures, ! Density in kg/m^3
-  62000., !Pressure = 62000Pa
+  R11,Density,SuperR11Temperatures,  !- Density in kg/m^3
+  62000.,                     !- Pressure = 62000Pa
   0,0,0,0,0,0,0,0.0139,0.0134,0.0129,0.0124,0.012,0.0116,0.0112,0.0109,0.0105,
   0.0102,0.0099,0.0097,0.0094,0.0092,0.0089,0,0,0,0,0,0,0,0,0,0;
 \end{lstlisting}
@@ -223,10 +214,9 @@ These fields (up to 250) are the values of the thermal property specified in the
 An example of this statement in an input data file is:
 
 \begin{lstlisting}
-
 FluidProperties:Concentration,
-  NewGlycol,SpecificHeat ,GlycolTemperatures, ! Spec. heat in J/kg-K
-  0.8, ! Concentration
+  NewGlycol,SpecificHeat ,GlycolTemperatures,  !- Spec. heat in J/kg-K
+  0.8,                        !- Concentration
   2572,2600,2627,2655,2683,2710,2738,2766,2793,2821,2849,2876,2904,2931,2959,
   2987,3014,3042,3070,3097,3125,3153,3180,3208,3236,3263,3291,3319,3346,3374,
   3402,3429,3457;

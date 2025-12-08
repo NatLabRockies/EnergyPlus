@@ -294,7 +294,7 @@ int commonRun(EnergyPlus::EnergyPlusData &state)
     using namespace EnergyPlus;
 
     int errStatus = initErrorFile(state);
-    if (errStatus) {
+    if (errStatus != 0) {
         return errStatus;
     }
 
@@ -384,7 +384,7 @@ int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state)
                 ShowWarningMessage(state, "This will overwrite the native CSV output.");
             }
             int status = CommandLineInterface::runReadVarsESO(state);
-            if (status) {
+            if (status != 0) {
                 return status;
             }
         }
@@ -416,7 +416,7 @@ int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath
     // as possible and contain all "simulation" code in other modules and files.
     using namespace EnergyPlus;
     int status = initializeEnergyPlus(state, filepath);
-    if (status || state.dataGlobal->outputEpJSONConversionOnly) {
+    if ((status != 0) || state.dataGlobal->outputEpJSONConversionOnly) {
         return status;
     }
     try {
@@ -465,13 +465,14 @@ int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<
     int return_code = EnergyPlus::CommandLineInterface::ProcessArgs(state, args);
     if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::Failure)) {
         return return_code;
-    } else if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::SuccessButHelper)) {
+    }
+    if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::SuccessButHelper)) {
         // If it was "--version" or "--help", you do not want to continue trying to run the simulation, but do not want to indicate failure either
         return static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::Success);
     }
 
     int status = initializeAsLibrary(state);
-    if (status || state.dataGlobal->outputEpJSONConversionOnly) {
+    if ((status != 0) || state.dataGlobal->outputEpJSONConversionOnly) {
         return status;
     }
     try {
@@ -524,7 +525,6 @@ std::string CreateCurrentDateTimeString()
     date_and_time(datestring, _, _, value);
     if (!datestring.empty()) {
         return EnergyPlus::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
-    } else {
-        return " unknown date/time";
     }
+    return " unknown date/time";
 }

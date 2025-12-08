@@ -176,15 +176,15 @@ namespace FileSystem {
         // `p` now is absolute, but it isn't necessarily canonical.
         // If you have <filesystem>, you can use `fs::weakly_canonical`. <experimental/filesystem> does **not** have `weakly_canonical` though
         // This block resolves a canonical path, even if it doesn't exist (yet?) on disk.
-        for (fs::path::iterator it = p.begin(); it != p.end(); ++it) {
-            if (*it == fs::path("..")) {
+        for (const auto &it : p) {
+            if (it == fs::path("..")) {
                 if (fs::is_symlink(result) || (result.filename() == fs::path(".."))) {
-                    result /= *it;
+                    result /= it;
                 } else {
                     result = result.parent_path();
                 }
-            } else if (*it != fs::path(".")) {
-                result /= *it;
+            } else if (it != fs::path(".")) {
+                result /= it;
             }
         }
 

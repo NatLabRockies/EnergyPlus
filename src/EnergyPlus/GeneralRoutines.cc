@@ -284,7 +284,7 @@ void ControlCompOutput(EnergyPlusData &state,
                     ZoneController.CalculatedSetPoint = ZoneInterHalf.MaxFlow; // CR7253
                 }
                 // Set the Actuated node MassFlowRate with zero value
-                if (plantLoc.loopNum) { // this is a plant component
+                if (plantLoc.loopNum != 0) { // this is a plant component
                     PlantUtilities::SetActuatedBranchFlowRate(state,
                                                               ZoneController.CalculatedSetPoint,
                                                               ActuatedNode,
@@ -392,7 +392,7 @@ void ControlCompOutput(EnergyPlusData &state,
         }
 
         // Set the Actuated node MassFlowRate with the new value
-        if (plantLoc.loopNum) { // this is a plant component
+        if (plantLoc.loopNum != 0) { // this is a plant component
             PlantUtilities::SetActuatedBranchFlowRate(state,
                                                       ZoneController.CalculatedSetPoint,
                                                       ActuatedNode,
@@ -572,7 +572,8 @@ void ControlCompOutput(EnergyPlusData &state,
                                            "%",
                                            "%");
             break; // It will not converge this time
-        } else if (Iter > MaxIter * 2) {
+        }
+        if (Iter > MaxIter * 2) {
             break;
         }
 

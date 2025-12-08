@@ -60,8 +60,8 @@ class BadModel(Exception):
 
 class Auditor:
     def __init__(self, model):
-        self.model = model # The model
-        self.json = {} # JSON output dictionary
+        self.model = model  # The model
+        self.json = {}  # JSON output dictionary
 
     def audit(self, **kwargs):
         return True

@@ -61,10 +61,8 @@
 namespace EnergyPlus {
 
 AnnualFieldSet::AnnualFieldSet(std::string varName, AnnualFieldSet::AggregationKind kindOfAggregation, int numDigitsShown)
+    : m_variMeter(std::move(varName)), m_aggregate(kindOfAggregation), m_showDigits(numDigitsShown)
 {
-    m_variMeter = varName;
-    m_aggregate = kindOfAggregation;
-    m_showDigits = numDigitsShown;
 }
 
 int AnnualFieldSet::getVariableKeyCountandTypeFromFldSt(EnergyPlusData &state,
@@ -73,7 +71,7 @@ int AnnualFieldSet::getVariableKeyCountandTypeFromFldSt(EnergyPlusData &state,
                                                         OutputProcessor::TimeStepType &stepTypeVar,
                                                         Constant::Units &unitsVar)
 {
-    int numkeys;
+    int numkeys = 0;
     GetVariableKeyCountandType(
         state, m_variMeter, numkeys, typeVar, avgSumVar, stepTypeVar, unitsVar); // call outputprocessor routine with member variable
     return numkeys;

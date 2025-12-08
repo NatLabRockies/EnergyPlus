@@ -108,76 +108,86 @@
 # These are both pretty awful and need to be improved, and it would help if the
 # exclusions were uniform.
 
-import licensetext
 import argparse
+from pathlib import Path
 
-parser = argparse.ArgumentParser(description='Update the E+ license year.')
-parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                    default=False, help='operate verbosely')
-# Maybe next year
-#parser.add_argument('--update', dest='dryrun', action='store_false',
-#                    default=True, help='update the license year')
+import licensetext
+from base_hook import ROOT_DIR
 
-args = parser.parse_args()
-
-TOOL_NAME = 'license-update'
+TOOL_NAME = "license-update"
 dryrun = True
 
-#
 # Directories to check
-#
-cpp_dirs = ["./src/",
-            "./tst/EnergyPlus/"]
-python_dirs = ["./"]
+CPP_DIRS = [ROOT_DIR / "src", ROOT_DIR / "tst/EnergyPlus/"]
+PYTHON_DIRS = [ROOT_DIR]
 
-# Get the C++ current text
-current = licensetext.current()
-previous = licensetext.previous()
-
-# Create LICENSE.txt
-licensetxt = licensetext.merge_paragraphs(current)
-
-full_count = 0
-
-if not dryrun:
-    print('Writing out LICENSE.txt')
-    filename = "LICENSE.txt"
-    fp = open(filename, 'w')
-    fp.write(licensetxt)
-    fp.close()
-    full_count += 1
-else:
-    print('Skipping writing out LICENSE.txt')
+CPP_CURRENT_LICENSE = licensetext.current()
+CPP_PREVIOUS_LICENSE = licensetext.previous()
+PYTHON_CURRENT_LICENSE = licensetext.current_python()
+PYTHON_PREVIOUS_LICENSE = licensetext.previous_python()
 
 
+# Relative from ROOT_DIR patterns
+PYTHON_EXCLUDE_PATTERNS = [
+    r".*third_party.*",
+    r"^build.*",
+    r"^bin.*",
+    r".*readthedocs.*",
+    r".*venv.*",
+    r".*cmake-build-.*",
+    r".*colorize_cppcheck_results.py.*",
+    r".*__init__.py",
+]
 
-# Create C++ Replacer object
-replacer = licensetext.Replacer(previous, current, dryrun=dryrun)
 
-# Check C++ files
-for base in cpp_dirs:
-    replacer.visit(base)
+def write_root_license_txt(dryrun: bool) -> None:
+    # Create LICENSE.txt
+    licensetxt = licensetext.merge_paragraphs(CPP_CURRENT_LICENSE)
 
-print('\nC++ Summary')
-print(replacer.summary())
-full_count += len(replacer.replaced)
+    if not dryrun:
+        print("Writing out LICENSE.txt")
+        license_txt_path = ROOT_DIR / "LICENSE.txt"
+        license_txt_path.write_text(licensetxt)
+    else:
+        print("Skipping writing out LICENSE.txt")
 
-# Get the Python current text
-current = licensetext.current_python()
-previous = licensetext.previous_python()
 
-# Create Python Replacer object
-replacer = licensetext.Replacer(previous, current, extensions=['py'],
-                                dryrun=dryrun)
+def replace_cpp_repo(dryrun: bool, verbose: bool) -> int:
+    replacer = licensetext.Replacer(oldtext=CPP_PREVIOUS_LICENSE, newtext=CPP_CURRENT_LICENSE, dryrun=dryrun)
 
-# Check Python files
-patterns = [r'.*third_party.*', r'^\.(\\|/)build.*',
-            r'^\.(\\|/)bin.*', r'.*readthedocs.*',
-            r'.*venv.*', r'.*cmake-build-.*']
-for base in python_dirs:
-    replacer.visit(base, exclude_patterns=patterns)
+    # Check C++ files
+    for base in CPP_DIRS:
+        replacer.visit(base)
 
-print('\nPython Summary')
-print(replacer.summary(full_report=args.verbose))
-full_count += len(replacer.replaced)
-print('\nFull count of files: %d' % full_count)
+    print("\nC++ Summary")
+    print(replacer.summary(full_report=verbose))
+
+    return len(replacer.replaced)
+
+
+def replace_python_repo(dryrun: bool, verbose: bool) -> int:
+    replacer = licensetext.Replacer(
+        oldtext=PYTHON_PREVIOUS_LICENSE, newtext=PYTHON_CURRENT_LICENSE, extensions=["py"], dryrun=dryrun
+    )
+
+    # Check Python files
+    for base in PYTHON_DIRS:
+        replacer.visit(base, exclude_patterns=PYTHON_EXCLUDE_PATTERNS)
+
+    print("\nPython Summary")
+    print(replacer.summary(full_report=verbose))
+
+    return len(replacer.replaced)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Update the E+ license year.")
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="operate verbosely")
+    parser.add_argument("--update", dest="dryrun", action="store_false", default=True, help="update the license year")
+    args = parser.parse_args()
+
+    write_root_license_txt(dryrun=args.dryrun)
+
+    full_count = replace_cpp_repo(dryrun=args.dryrun, verbose=args.verbose)
+    full_count += replace_python_repo(dryrun=args.dryrun, verbose=args.verbose)
+    print("\nFull count of Replaced files: %d" % full_count)

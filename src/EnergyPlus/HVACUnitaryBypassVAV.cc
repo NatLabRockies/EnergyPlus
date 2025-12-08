@@ -3861,9 +3861,8 @@ namespace HVACUnitaryBypassVAV {
                             state, thiscBVAV.HeatCoilName, FirstHVACIteration, thiscBVAV.HeatCoilIndex, QCoilActual, thiscBVAV.fanOp);
                         if (HeatCoilLoad != 0.0) {
                             return (QCoilActual - HeatCoilLoad) / HeatCoilLoad;
-                        } else { // Autodesk:Return Condition added to assure return value is set
-                            return 0.0;
-                        }
+                        } // Autodesk:Return Condition added to assure return value is set
+                        return 0.0;
                     };
                     General::SolveRoot(state, ErrTolerance, SolveMaxIter, SolFlag, HotWaterMdot, f, MinWaterFlow, MaxHotWaterFlow);
                     if (SolFlag == -1) {

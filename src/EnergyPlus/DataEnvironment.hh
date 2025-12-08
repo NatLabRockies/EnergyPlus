@@ -151,7 +151,7 @@ struct EnvironmentData : BaseGlobalStruct
     Real64 EMSWindDirOverrideValue = 0.0;                       // EMS override value for outdoor air wind direction
     Real64 WindSpeed = 0.0;                                     // Current outdoor air wind speed
     bool EMSWindSpeedOverrideOn = false;                        // EMS flag for outdoor air wind speed
-    Real64 EMSWindSpeedOverrideValue = false;                   // EMS override value for outdoor air wind speed
+    Real64 EMSWindSpeedOverrideValue = 0.0;                     // EMS override value for outdoor air wind speed
     Real64 WaterMainsTemp = 0.0;                                // Current water mains temperature
     int Year = 0;                                               // Current calendar year of the simulation from the weather file
     int YearTomorrow = 0;                                       // Tomorrow's calendar year of the simulation

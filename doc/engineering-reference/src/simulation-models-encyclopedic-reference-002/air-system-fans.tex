@@ -4,7 +4,7 @@
 
 Four input objects (Fan:SystemModel, Fan:ConstantVolume, Fan:VariableVolume,
 and Fan:OnOff) provide models for fans -- the prime movers in most of the air
-loop and zonal air conditioning systems in EnergyPlus. The 
+loop and zonal air conditioning systems in EnergyPlus. The
 \emph{Fan:SystemModel} input object was added for version 8.7 with the intent
 that it provide a single versatile input object that could eventually replace
 Fan:ConstantVolume, Fan:VariableVolume, and Fan:OnOff. For these input objects,
@@ -50,7 +50,7 @@ The models must decide whether the fan is on or off. The primary on/off trigger 
 
 Generally the fan is a passive component: it accepts the mass flow on its inlet node, uses it in its calculations of energy consumption and temperature rise, and passes it to the outlet node. However the fan maximum and minimum airflow rates act as absolute limits on the airflow rate.
 
-For multi-speed fans, the parent object determines the fan speed ratio (i.e., the selected speed of the fan motor) and uses this value to determine flow rate and electric power consumption.  For a Fan:SystemModel operating with the Discrete choice for speed control, the fan model determines the faction of time spent at the discrete speeds that bound it and will produce the average flow requested by the parent object.  Then the fan electric power consumption is determined for each speed level and combined using a time-weighted average.  For a fan operating with Continuous speed control and a fan modeled with the Fan:OnOff object, the electric power is evaluated using the power ratio performance curve at the (average) flow fraction requested by the parent object. 
+For multi-speed fans, the parent object determines the fan speed ratio (i.e., the selected speed of the fan motor) and uses this value to determine flow rate and electric power consumption.  For a Fan:SystemModel operating with the Discrete choice for speed control, the fan model determines the faction of time spent at the discrete speeds that bound it and will produce the average flow requested by the parent object.  Then the fan electric power consumption is determined for each speed level and combined using a time-weighted average.  For a fan operating with Continuous speed control and a fan modeled with the Fan:OnOff object, the electric power is evaluated using the power ratio performance curve at the (average) flow fraction requested by the parent object.
 
 \subsubsection{Simulation}\label{simulation}
 
@@ -125,7 +125,7 @@ The determination of electric power consumed at a flow fraction depends on if th
 \emph{\textbf{Discrete Speed Control}}
 
 For the \emph{Fan:SystemModel} using discrete speed control, with the number of fan speeds set at 1, and the flow fraction is less than one, then the fan will be modeled as cycling between "off" and "on" over the timestep.  The time fraction is equal to the flow fraction so that:
- 
+
 \begin{equation}
 {RTF_{On}} = {f_{flow, cur}}
 \end{equation}
@@ -156,11 +156,11 @@ The electric power consumption is calculated using the design mass flow rates an
 {\dot Q_{tot,elec}} = {RTF_{x}} \cdot \left( \frac{\dot m_{design,x}\cdot \Delta P}{{e_{tot,x}}\cdot {\rho_{air}}}\right)  +  {RTF_{x+1}} \cdot \left( \frac{\dot m_{design,x+1}\cdot \Delta P}{{\varepsilon_{tot,x+1}}\cdot {\rho_{air}}}\right)
 \end{equation}
 
-The temperature of the air stream leaving the fan is calculated as above using this result for total power. 
+The temperature of the air stream leaving the fan is calculated as above using this result for total power.
 
 \emph{\textbf{Continuous Speed Control}}
 
-For the \emph{Fan:SystemModel} using Continuous speed control the flow fraction is used to evaluate the power performance modification factor which is defined in a separate curve or table.  
+For the \emph{Fan:SystemModel} using Continuous speed control the flow fraction is used to evaluate the power performance modification factor which is defined in a separate curve or table.
 
 \begin{equation}
 {f_{power,cur}} =  {func_{power curve}}({f_{flow,cur}})
@@ -425,13 +425,13 @@ For this specific fan, the coefficients are:
 % table 65
 \begin{longtable}[c]{@{}lllll@{}}
 \caption{Normalized Fan Efficiency Coefficients for Specific Backward-Curved Plenum Fan \label{table:normalized-fan-efficiency-coefficients-for}} \tabularnewline
-\toprule 
+\toprule
 Operating Region & a & b & c & d \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Normalized Fan Efficiency Coefficients for Specific Backward-Curved Plenum Fan} \tabularnewline
-\toprule 
+\toprule
 Operating Region & a & b & c & d \tabularnewline
 \midrule
 \endhead
@@ -464,7 +464,7 @@ To make use of the available data, the Stein and Hydeman linear correlation must
 For the fan, dimensionless flow (\(\varphi\)) can be defined as (ASHRAE 1993):
 
 \begin{equation}
-\varphi = \frac{{{Q_{fan}}}}{{{\omega_{fan}} \cdot D_{fan}^3}} 
+\varphi = \frac{{{Q_{fan}}}}{{{\omega_{fan}} \cdot D_{fan}^3}}
 \end{equation}
 
 where \(\omega_{fan}\) is the fan speed (rad/s). This parameter can be calculated for each operating point on the fan manufacturer's performance map that represents fan speed as a function of flow and fan pressure rise. To simplify the data representation to a single curve (as we have done for fan efficiency), one can plot normalized dimensionless flow (dimensionless flow divided by maximum dimensionless flow, (\(\varphi({x_{fan}}) / varphi_{max}\)) as a function of the log base 10 of the normalized Euler (\emph{Eu}) parameter (\emph{x\(_{fan}\)}). Figure~\ref{fig:example-normalized-dimensionless-flow-data} shows an example plot derived from the manufacturer's data in Figure~\ref{fig:example-fan-performance-maps-manufacturers}.
@@ -487,13 +487,13 @@ where \emph{A\(_{spd}\)}, \emph{B\(_{spd}\)}, \emph{C\(_{spd}\)}, \emph{D\(_{spd
 % table 66
 \begin{longtable}[c]{@{}llllll@{}}
 \caption{Dimensionless Flow Coefficients – Specific Backward-Curved Fan \label{table:dimensionless-flow-coefficients-specific}} \tabularnewline
-\toprule 
+\toprule
 Operating Region & A\(_{spd}\) & B\(_{spd}\) & C\(_{spd}\) & D\(_{spd}\) & E\(_{spd}\) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Dimensionless Flow Coefficients – Specific Backward-Curved Fan} \tabularnewline
-\toprule 
+\toprule
 Operating Region & A\(_{spd}\) & B\(_{spd}\) & C\(_{spd}\) & D\(_{spd}\) & E\(_{spd}\) \tabularnewline
 \midrule
 \endhead
@@ -508,13 +508,13 @@ For a generic centrifugal fan with backward-curved blades, the coefficients are:
 % table 67
 \begin{longtable}[c]{@{}llllll@{}}
 \caption{Dimensionless Flow Coefficients – Generic Backward-Curved Fan \label{table:dimensionless-flow-coefficients-generic}} \tabularnewline
-\toprule 
+\toprule
 Operating Region & A\(_{spd}\) & B\(_{spd}\) & C\(_{spd}\) & D\(_{spd}\) & E\(_{spd}\) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Dimensionless Flow Coefficients – Generic Backward-Curved Fan} \tabularnewline
-\toprule 
+\toprule
 Operating Region & A\(_{spd}\) & B\(_{spd}\) & C\(_{spd}\) & D\(_{spd}\) & E\(_{spd}\) \tabularnewline
 \midrule
 \endhead
@@ -539,7 +539,7 @@ With \(\varphi {x_{fan}}\) determined, the fan rotational speed (rad/s) is:
 Fan shaft torque (N∙m), which the belt drive must supply to the fan shaft, is then:
 
 \begin{equation}
-{\tau_{fan}} = \frac{{{H_{fan}}}}{{{\omega_{fan}}}} 
+{\tau_{fan}} = \frac{{{H_{fan}}}}{{{\omega_{fan}}}}
 \end{equation}
 
 The fraction of full-load driven torque for the belt (\(\tau_{fan} / \tau_{belt,max}\)), which is typically called ``belt load'', is thus \emph{\(\tau_{fan}\)} divided by the belt torque capacity (\(\tau_{belt,max}\)). For a particular belt type and cross-section, belt torque capacity can be determined from manufacturer's information such as a shaft speed versus power chart.
@@ -579,13 +579,13 @@ The quadratic polynomial curves in Figure~\ref{fig:belt-maximum-efficiency-vs.-f
 % table 68
 \begin{longtable}[c]{p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}}
 \caption{Belt Maximum Efficiency Curve Coefficients \label{table:belt-maximum-efficiency-curve-coefficients}} \tabularnewline
-\toprule 
+\toprule
 Efficiency Class (Loss) & \(c_1\) & \(c_2\) & \(c_3\) & \(c_4\) & \(c_5\) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Belt Maximum Efficiency Curve Coefficients} \tabularnewline
-\toprule 
+\toprule
 Efficiency Class (Loss) & \(c_1\) & \(c_2\) & \(c_3\) & \(c_4\) & \(c_5\) \tabularnewline
 \midrule
 \endhead
@@ -643,13 +643,13 @@ Belt input power (mechanical, W) at the motor shaft is:
 % table 69
 \begin{longtable}[l]{@{}llllll@{}}
 \caption{Belt Normalized Efficiency Curve Coefficients \label{table:belt-normalized-efficiency-curve-coefficients}} \tabularnewline
-\toprule 
+\toprule
 Belt Type & x\(_{belt,trans}\) & Region & a\(_{belt}\) & b\(_{belt}\) & c\(_{belt}\) \tabularnewline \midrule
 \midrule
 \endfirsthead
 
 \caption[]{Belt Normalized Efficiency Curve Coefficients} \tabularnewline
-\toprule 
+\toprule
 Belt Type & x\(_{belt,trans}\) & Region & a\(_{belt}\) & b\(_{belt}\) & c\(_{belt}\) \tabularnewline \midrule
 \midrule
 \endhead
@@ -691,13 +691,13 @@ The maximum motor efficiency curves in Figure~\ref{fig:maximum-motor-efficiency-
 % table 70
 \begin{longtable}[c]{@{}llll@{}}
 \caption{Motor Maximum Efficiency Curve Coefficients \label{table:motor-maximum-efficiency-curve-coefficients}} \tabularnewline
-\toprule 
+\toprule
 Case & \(a_{motor,max}\) & \(b_{motor,max}\) & \(c_{motor,max}\) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Motor Maximum Efficiency Curve Coefficients} \tabularnewline
-\toprule 
+\toprule
 Case & \(a_{motor,max}\) & \(b_{motor,max}\) & \(c_{motor,max}\) \tabularnewline
 \midrule
 \endhead
@@ -726,13 +726,13 @@ The example motor normalized efficiency curves (single rectangular hyperbola typ
 % table 71
 \begin{longtable}[c]{p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}p{1.0in}}
 \caption{Example Motor Normalized Efficiency Curve Coefficients \label{table:example-motor-normalized-efficiency-curve}} \tabularnewline
-\toprule 
+\toprule
 Poles & Motor Rated Output (hp) & Maximum Efficiency & a\(_{Plmotor}\) & b\(_{Plmotor}\) & c\(_{Plmotor}\) \tabularnewline \midrule
 \midrule
 \endfirsthead
 
 \caption[]{Example Motor Normalized Efficiency Curve Coefficients} \tabularnewline
-\toprule 
+\toprule
 Poles & Motor Rated Output (hp) & Maximum Efficiency & a\(_{Plmotor}\) & b\(_{Plmotor}\) & c\(_{Plmotor}\) \tabularnewline \midrule
 \midrule
 \endhead
@@ -786,13 +786,13 @@ Example coefficients derived from the DOE data as a function of the fraction of 
 % table 72
 \begin{longtable}[c]{@{}llll@{}}
 \caption{Example VFD Efficiency Curve Coefficients \label{table:example-vfd-efficiency-curve-coefficients}} \tabularnewline
-\toprule 
+\toprule
 VFD Rated Output Power (hp) & a\(_{vfd}\) & b\(_{vfd}\) & c\(_{vfd}\) \tabularnewline \midrule
 \midrule
 \endfirsthead
 
 \caption[]{Example VFD Efficiency Curve Coefficients} \tabularnewline
-\toprule 
+\toprule
 VFD Rated Output Power (hp) & a\(_{vfd}\) & b\(_{vfd}\) & c\(_{vfd}\) \tabularnewline \midrule
 \midrule
 \endhead
@@ -851,12 +851,12 @@ where:
 
 The FEI is reported for \emph{Fan:SystemModel}, \emph{Fan:ConstantVolume},\emph{Fan:OnOff}, \emph{Fan:VariableVolume}, and \emph{Fan:ZoneExhaust} objects. User defined Fan objects are used to simulate the actual fan electrical input power \(FEP_{act,i}\) at the design operating point. The reference fan electrical input power \(FEP_{ref,i}\) is calculated using the following method.
 
-Reference fan shaft power (\(H_{i,ref}\)) is calculated on a fan total pressure basis or a static pressure basis, depending on the category of the reference fan to calculate FEI. For all EnergyPlus fans (except) \emph{Fan:ComponentModel}) total pressure is defined. So the FEI is reportable only for limited category of fans that are calculated based on the fan total pressure, namely Centrifugal Housed, Centrifugal Inline, Centrifugal PRV Supply, Axial Inline, Laboratory Exhaust, Jet Fan and Circulating. 
+Reference fan shaft power (\(H_{i,ref}\)) is calculated on a fan total pressure basis or a static pressure basis, depending on the category of the reference fan to calculate FEI. For all EnergyPlus fans (except) \emph{Fan:ComponentModel}) total pressure is defined. So the FEI is reportable only for limited category of fans that are calculated based on the fan total pressure, namely Centrifugal Housed, Centrifugal Inline, Centrifugal PRV Supply, Axial Inline, Laboratory Exhaust, Jet Fan and Circulating.
 
 The reference fan concept is used to normalize the FEI calculation to a consistent power level independent of fan type, fan drive components or any regulatory requirements. The reference fan electrical input power is a function of airflow and fan pressure. The reference fan is defined as one that requires a certain reference fan shaft power, uses a V-belt drive, has a motor efficiency based on the IE3 level for a four-pole 60 Hz motor and does not have a speed control.
 
 \begin{equation}
-FEP_{ref,i}=H_{i,ref}(\frac{1}{\eta_{trans,ref}} )(\frac{1}{\eta_{mtr,ref}})(\frac{1}{\eta_{ctrl,ref}}) 
+FEP_{ref,i}=H_{i,ref}(\frac{1}{\eta_{trans,ref}} )(\frac{1}{\eta_{mtr,ref}})(\frac{1}{\eta_{ctrl,ref}})
 \label{eq:fep_calculation}
 \end{equation}
 
@@ -927,13 +927,13 @@ The reference fan motor efficiency is calculated according to Equation~\ref{eq:e
 % table 73
 \begin{longtable}[c]{p{1.0in}p{1.5in}p{1.5in}}
 \caption{Reference Motor Efficiency Coefficients \label{table:reference-motor-efficiency-coefficients}} \tabularnewline
-\toprule 
+\toprule
 Type & \(H_{t,ref}\)$<$185 kW ($<$250 BHP) & \(H_{t,ref}\)$\geq$185 kW ($\geq$250 BHP) \tabularnewline \midrule
 \midrule
 \endfirsthead
 
 \caption[]{Reference Motor Efficiency Coefficients} \tabularnewline
-\toprule 
+\toprule
 Type & \(H_{t,ref}\)$<$185 kW ($<$250 BHP) & \(H_{t,ref}\)$\geq$185 kW ($\geq$250 BHP) \tabularnewline \midrule
 \midrule
 \endhead

@@ -64,13 +64,13 @@ namespace ExhaustAirSystemManager {
     struct ExhaustAir
     {
         // Members
-        std::string Name = "";
+        std::string Name;
 
         Sched::Schedule *availSched = nullptr;
-        std::string ZoneMixerName = "";
+        std::string ZoneMixerName;
         int ZoneMixerIndex = 0;
         HVAC::FanType centralFanType = HVAC::FanType::Invalid;
-        std::string CentralFanName = "";
+        std::string CentralFanName;
         int CentralFanIndex = 0;
 
         bool SizingFlag = true;
@@ -96,11 +96,11 @@ namespace ExhaustAirSystemManager {
             Num
         };
 
-        std::string Name = "";
+        std::string Name;
 
         Sched::Schedule *availSched = nullptr;
 
-        std::string ZoneName = "";
+        std::string ZoneName;
         int ZoneNum = 0;
         int ControlledZoneNum = 0;
 
@@ -110,7 +110,7 @@ namespace ExhaustAirSystemManager {
         Real64 DesignExhaustFlowRate = 0.0;
         FlowControlType FlowControlOption = FlowControlType::Scheduled;
         Sched::Schedule *exhaustFlowFractionSched = nullptr;
-        std::string SupplyNodeOrNodelistName = "";
+        std::string SupplyNodeOrNodelistName;
         int SupplyNodeOrNodelistNum = 0; // may not need this one
         Sched::Schedule *minZoneTempLimitSched = nullptr;
         Sched::Schedule *minExhFlowFracSched = nullptr;

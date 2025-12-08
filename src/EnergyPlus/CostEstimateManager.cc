@@ -163,10 +163,9 @@ namespace CostEstimateManager {
         if (NumLineItems == 0) {
             state.dataCostEstimateManager->DoCostEstimate = false;
             return;
-        } else {
-            state.dataCostEstimateManager->DoCostEstimate = true;
-            //    WriteTabularFiles = .TRUE.
         }
+        state.dataCostEstimateManager->DoCostEstimate = true;
+        //    WriteTabularFiles = .TRUE.
 
         if (!allocated(state.dataCostEstimateManager->CostLineItem)) {
             state.dataCostEstimateManager->CostLineItem.allocate(NumLineItems);

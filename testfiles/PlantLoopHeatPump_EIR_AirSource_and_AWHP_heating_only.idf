@@ -9,7 +9,7 @@
 ! System:   None.
 ! Plant:    The heating loop is served by air-to-water heat pump.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -176,8 +176,7 @@
     ,                        !- Plant Loop Demand Calculation Scheme
     ,                        !- Common Pipe Simulation
     ,                        !- Pressure Simulation Type
-    ,                        !- Loop Circulation Time {minutes}
-    HotWater;                !- Water Loop Type
+    ;                        !- Loop Circulation Time {minutes}
 
   Sizing:Plant,
     Heating Coil Load Loop,  !- Plant or Condenser Loop Name
@@ -493,31 +492,29 @@
 
   Output:Variable,*,Heat Pump Source Side Mass Flow Rate in Heating Mode,detailed;
 
-  Output:Variable,*,Heat Pump Number Of Heating Unit On,detailed;
+  Output:Variable,*,Heat Pump Number Of Heating Unit On,detailed;  !- HVAC Average []
 
-  Output:Variable,*,Heat Pump Crankcase Heater Electricity Rate,detailed;
+  Output:Variable,*,Heat Pump Crankcase Heater Electricity Rate,detailed;  !- HVAC Average [W]
 
-  Output:Variable,*,Heat Pump Crankcase Heater Electricity Energy,detailed;
+  Output:Variable,*,Heat Pump Crankcase Heater Electricity Energy,detailed;  !- HVAC Sum [W]
 
-  Output:Variable,*,Heat Pump Heating COP,detailed;
+  Output:Variable,*,Heat Pump Heating COP,detailed;  !- HVAC Average []
 
-  Output:Variable,*,Heat Pump Total Heating Rate,detailed;
+  Output:Variable,*,Heat Pump Total Heating Rate,detailed;  !- HVAC Average []
 
-  Output:Variable,*,Site Outdoor Air Drybulb Temperature,detailed;
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,detailed;  !- Zone Average [C]
 
-  Output:Variable,*,Heat Pump Defrost Electricity Rate,detailed;
+  Output:Variable,*,Heat Pump Defrost Electricity Rate,detailed;  !- HVAC Average [W]
 
-  Output:Variable,*,Heat Pump Defrost Electricity Energy,detailed;
+  Output:Variable,*,Heat Pump Defrost Electricity Energy,detailed;  !- HVAC Sum [J]
 
-  Output:Variable,Heating Coil Load Loop,Plant Supply Side Heating Demand Rate,detailed;
+  Output:Variable,Heating Coil Load Loop,Plant Supply Side Heating Demand Rate,detailed;  !- HVAC Average [W]
 
-  Output:Variable,*,Plant Load Profile Heat Transfer Rate,detailed;
+  Output:Variable,*,Plant Load Profile Heat Transfer Rate,detailed;  !- HVAC Average [W]
 
-  Output:Variable,*,Heat Pump Speed Level in Heating Mode,detailed;
+  Output:Variable,*,Heat Pump Speed Level in Heating Mode,detailed;  !- HVAC Average []
 
-  Output:Variable,*,Heat Pump Speed Ratio in Heating Mode,detailed;
-
-  Output:Variable,*,Operating Model Output Heating,detailed;
+  Output:Variable,*,Heat Pump Speed Ratio in Heating Mode,detailed;  !- HVAC Average []
 
   Output:Variable,*,EMS Defrost Flag,detailed;
 
@@ -528,8 +525,6 @@
   Output:Variable,*,Heat Pump Defrost Electricity Rate,detailed;
 
   Output:Variable,*,Outdoor Temp,detailed;
-
-  Output:Variable,*,DefrostTimerInternal,detailed;
 
   OutputControl:Table:Style,
     HTML;                    !- Column Separator

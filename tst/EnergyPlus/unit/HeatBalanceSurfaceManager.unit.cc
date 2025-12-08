@@ -5910,7 +5910,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestTDDSurfWinHeatGain)
     state->dataSurfaceGeometry->SinZoneRelNorth(2) = std::sin(-state->dataHeatBal->Zone(2).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
-    int const HoursInDay(24);
+    int constexpr HoursInDay(24);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
         state->dataSurface->SurfSunCosHourly(hour) = 0.0;
@@ -8653,7 +8653,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_UpdateThermalHistoriesIZSurf
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfQdotRadSolarInRepPerAreaCalc)
 {
-    Real64 const diffTol = 0.0000000001;
+    Real64 constexpr diffTol = 0.0000000001;
     Real64 expectedResult;
 
     state->dataHeatBal->Zone.allocate(1);

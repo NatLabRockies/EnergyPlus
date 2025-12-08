@@ -41,7 +41,7 @@
 ! ***GENERAL SIMULATION PARAMETERS***
 ! Number of Zones: 5
 
-  Version,25.2;
+  Version,26.1;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation
@@ -4391,12 +4391,12 @@
     .33200,                  !- <none>
     .41550,                  !- <none>
     .49900,                  !- <none>
-    .58250,                  !- Extended Field
-    .66600,                  !- Extended Field
-    .74950,                  !- Extended Field
-    .83300,                  !- Extended Field
-    .91650,                  !- Extended Field
-    1.00000;                 !- Extended Field
+    .58250,                  !- <none>
+    .66600,                  !- <none>
+    .74950,                  !- <none>
+    .83300,                  !- <none>
+    .91650,                  !- <none>
+    1.00000;                 !- <none>
 
   Table:IndependentVariableList,
     ChargeOnly-Cap-fT_IndependentVariableList,  !- Name
@@ -4695,12 +4695,12 @@
     .33200,                  !- <none>
     .41550,                  !- <none>
     .49900,                  !- <none>
-    .58250,                  !- Extended Field
-    .66600,                  !- Extended Field
-    .74950,                  !- Extended Field
-    .83300,                  !- Extended Field
-    .91650,                  !- Extended Field
-    1.00000;                 !- Extended Field
+    .58250,                  !- <none>
+    .66600,                  !- <none>
+    .74950,                  !- <none>
+    .83300,                  !- <none>
+    .91650,                  !- <none>
+    1.00000;                 !- <none>
 
   Table:IndependentVariableList,
     ChargeOnly-EIR-fT_IndependentVariableList,  !- Name
@@ -5276,12 +5276,12 @@
     0.3320,                  !- <none>
     0.4155,                  !- <none>
     0.4990,                  !- <none>
-    0.5825,                  !- Extended Field
-    0.6660,                  !- Extended Field
-    0.7495,                  !- Extended Field
-    0.8330,                  !- Extended Field
-    0.9165,                  !- Extended Field
-    1.0000;                  !- Extended Field
+    0.5825,                  !- <none>
+    0.6660,                  !- <none>
+    0.7495,                  !- <none>
+    0.8330,                  !- <none>
+    0.9165,                  !- <none>
+    1.0000;                  !- <none>
 
   Table:IndependentVariableList,
     CoolCharge-Charge-Cap-fT_IndependentVariableList,  !- Name
@@ -5826,12 +5826,12 @@
     0.3320,                  !- <none>
     0.4155,                  !- <none>
     0.4990,                  !- <none>
-    0.5825,                  !- Extended Field
-    0.6660,                  !- Extended Field
-    0.7495,                  !- Extended Field
-    0.8330,                  !- Extended Field
-    0.9165,                  !- Extended Field
-    1.0000;                  !- Extended Field
+    0.5825,                  !- <none>
+    0.6660,                  !- <none>
+    0.7495,                  !- <none>
+    0.8330,                  !- <none>
+    0.9165,                  !- <none>
+    1.0000;                  !- <none>
 
   Table:IndependentVariableList,
     CoolCharge-Charge-EIR-fT_IndependentVariableList,  !- Name

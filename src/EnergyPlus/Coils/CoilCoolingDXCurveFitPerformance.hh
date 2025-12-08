@@ -149,27 +149,24 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
     {
         if (mode != HVAC::CoilMode::Normal) {
             return alternateMode.speeds.back().RatedAirMassFlowRate;
-        } else {
-            return normalMode.speeds.back().RatedAirMassFlowRate;
         }
+        return normalMode.speeds.back().RatedAirMassFlowRate;
     }
 
     Real64 ratedAirMassFlowRateMinSpeed(EnergyPlusData &, HVAC::CoilMode const mode) override
     {
         if (mode != HVAC::CoilMode::Normal) {
             return alternateMode.speeds.front().RatedAirMassFlowRate;
-        } else {
-            return normalMode.speeds.front().RatedAirMassFlowRate;
         }
+        return normalMode.speeds.front().RatedAirMassFlowRate;
     }
 
     Real64 ratedCondAirMassFlowRateNomSpeed(EnergyPlusData &, HVAC::CoilMode const mode) override
     {
         if (mode != HVAC::CoilMode::Normal) {
             return alternateMode.speeds[alternateMode.nominalSpeedIndex].RatedCondAirMassFlowRate;
-        } else {
-            return normalMode.speeds[normalMode.nominalSpeedIndex].RatedCondAirMassFlowRate;
         }
+        return normalMode.speeds[normalMode.nominalSpeedIndex].RatedCondAirMassFlowRate;
     }
 
     Real64 ratedEvapAirMassFlowRate(EnergyPlusData &) override
@@ -191,9 +188,8 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
     {
         if (mode != HVAC::CoilMode::Normal) {
             return alternateMode.speeds[alternateMode.nominalSpeedIndex].indexCapFT;
-        } else {
-            return normalMode.speeds[normalMode.nominalSpeedIndex].indexCapFT;
         }
+        return normalMode.speeds[normalMode.nominalSpeedIndex].indexCapFT;
     }
 
     bool subcoolReheatFlag() override

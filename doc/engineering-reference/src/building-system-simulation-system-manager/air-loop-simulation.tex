@@ -6,7 +6,7 @@ A complete simulation of each primary air system -- zone equipment air loop is d
 \item
   If this is the first simulation this system time-step, just call \emph{ManageAirLoops} (simulates the primary air systems) and \emph{ManageZoneEquipment} (simulates the zone equipment sets) once and quit. This initial pass is simulated with full design air flow rates and allows the zone equipment to set the flow rates for each zone that will meet the zone loads.
 \item
-  Otherwise loop over primary air systems and zone equipment sets until the temperatures, flow rates, enthalpies, humidity ratios etc. agree to within tolerance at each primary air system -- zone equipment gap. 
+  Otherwise loop over primary air systems and zone equipment sets until the temperatures, flow rates, enthalpies, humidity ratios etc. agree to within tolerance at each primary air system -- zone equipment gap.
 \end{itemize}
 
 \begin{lstlisting}
@@ -64,12 +64,12 @@ The logical flags \emph{SimAirLoops} and \emph{SimZoneEquipment} are used to sig
 
 
 \begin{longtable}[c]{@{}ll@{}}
-\toprule 
+\toprule
 Quantities & Tolerances \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Quantities & Tolerances \tabularnewline
 \midrule
 \endhead

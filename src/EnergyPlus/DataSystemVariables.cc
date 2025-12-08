@@ -112,6 +112,8 @@ namespace DataSystemVariables {
 
     constexpr const char *ciForceTimeStepEnvVar("CI_FORCE_TIME_STEP"); // environment var forcing 30 minute time steps on CI for efficiency
 
+    constexpr const char *cBufferedErrFileEnvVar("BufferedErrFile"); // environment var to enable buffered eplusout.err
+
     fs::path CheckForActualFilePath(EnergyPlusData &state,
                                     fs::path const &originalInputFilePath, // path (or filename only) as input for object
                                     const std::string &contextString       //
@@ -175,20 +177,19 @@ namespace DataSystemVariables {
                 print(state.files.audit, "found ({})={}\n", pathsToCheck[i].second, FileSystem::getAbsolutePath(foundFilePath));
 
                 return foundFilePath;
-            } else {
-                std::pair<fs::path, std::string> currentPath(FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(pathsToCheck[i].first)),
-                                                             pathsToCheck[i].second);
-                bool found = false;
-                for (auto const &path : pathsChecked) {
-                    if (path.first == currentPath.first) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    pathsChecked.push_back(currentPath);
-                }
-                print(state.files.audit, "not found ({})={}\n", pathsToCheck[i].second, FileSystem::getAbsolutePath(pathsToCheck[i].first));
             }
+            std::pair<fs::path, std::string> currentPath(FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(pathsToCheck[i].first)),
+                                                         pathsToCheck[i].second);
+            bool found = false;
+            for (auto const &path : pathsChecked) {
+                if (path.first == currentPath.first) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                pathsChecked.push_back(currentPath);
+            }
+            print(state.files.audit, "not found ({})={}\n", pathsToCheck[i].second, FileSystem::getAbsolutePath(pathsToCheck[i].first));
         }
 
         // If we get here, we didn't find the file
@@ -352,6 +353,11 @@ namespace DataSystemVariables {
         get_environment_variable(ciForceTimeStepEnvVar, cEnvValue);
         if (!cEnvValue.empty()) {
             state.dataSysVars->ciForceTimeStep = env_var_on(cEnvValue); // Yes or True
+        }
+
+        get_environment_variable(cBufferedErrFileEnvVar, cEnvValue);
+        if (!cEnvValue.empty()) {
+            state.dataSysVars->BufferedErrFileEnvVar = env_var_on(cEnvValue); // Yes or True
         }
     }
 

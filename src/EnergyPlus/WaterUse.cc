@@ -160,7 +160,8 @@ namespace WaterUse {
 
                 if (waterConnection.TempError < Tolerance) {
                     break;
-                } else if (NumIteration > MaxIterations) {
+                }
+                if (NumIteration > MaxIterations) {
                     if (!state.dataGlobal->WarmupFlag) {
                         if (waterConnection.MaxIterationsErrorIndex == 0) {
                             ShowWarningError(state,
@@ -257,7 +258,8 @@ namespace WaterUse {
 
             if (this->TempError < Tolerance) {
                 break;
-            } else if (NumIteration > MaxIterations) {
+            }
+            if (NumIteration > MaxIterations) {
                 if (!state.dataGlobal->WarmupFlag) {
                     if (this->MaxIterationsErrorIndex == 0) {
                         ShowWarningError(state, format("WaterUse:Connections = {}:  Heat recovery temperature did not converge", this->Name));
@@ -555,7 +557,7 @@ namespace WaterUse {
             // set logical if either hot water temp or target temp schedule are missing (will use cold water otherwise)
             // if a connections object is used then don't need to hot temp schedule
             waterEquipment.allowHotControl =
-                (waterEquipment.targetTempSched != nullptr && waterEquipment.hotTempSched != nullptr) || waterEquipment.Connections;
+                (waterEquipment.targetTempSched != nullptr && waterEquipment.hotTempSched != nullptr) || (waterEquipment.Connections != 0);
         }
     }
 

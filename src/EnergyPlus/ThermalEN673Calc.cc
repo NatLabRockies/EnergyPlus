@@ -362,38 +362,107 @@ namespace ThermalEN673Calc {
             theta(1) = ufactor * (tind - tout) / hout + tout;
             theta(2) = tind - ufactor * (tind - tout) / hin;
             return;
-        } else {
-            if (tind > tout) {
-                // dr...linear interpolation for gas conductance coefficients
-                if (tilt == 0.0) {
-                    A = 0.16;
-                    n = 0.28;
-                } else if ((tilt > 0.0) && (tilt < 45.0)) {
-                    linint(0.0, 45.0, 0.16, 0.1, tilt, A);
-                    linint(0.0, 45.0, 0.28, 0.31, tilt, n);
-                } else if (tilt == 45.0) {
-                    A = 0.10;
-                    n = 0.31;
-                } else if ((tilt > 45.0) && (tilt < 90.0)) {
-                    linint(45.0, 90.0, 0.1, 0.035, tilt, A);
-                    linint(45.0, 90.0, 0.31, 0.38, tilt, n);
-                } else if (tilt == 90) {
-                    A = 0.035;
-                    n = 0.38;
-                } // tilt
+        }
+        if (tind > tout) {
+            // dr...linear interpolation for gas conductance coefficients
+            if (tilt == 0.0) {
+                A = 0.16;
+                n = 0.28;
+            } else if ((tilt > 0.0) && (tilt < 45.0)) {
+                linint(0.0, 45.0, 0.16, 0.1, tilt, A);
+                linint(0.0, 45.0, 0.28, 0.31, tilt, n);
+            } else if (tilt == 45.0) {
+                A = 0.10;
+                n = 0.31;
+            } else if ((tilt > 45.0) && (tilt < 90.0)) {
+                linint(45.0, 90.0, 0.1, 0.035, tilt, A);
+                linint(45.0, 90.0, 0.31, 0.38, tilt, n);
+            } else if (tilt == 90) {
+                A = 0.035;
+                n = 0.38;
+            } // tilt
 
-                // c   gas constants
-                //    open(unit=18,  file='gas.dbg',  status='unknown', position='APPEND',
-                //  2            form='formatted', iostat=nperr)
-                //    write(18,*) 'New calc'
+            // c   gas constants
+            //    open(unit=18,  file='gas.dbg',  status='unknown', position='APPEND',
+            //  2            form='formatted', iostat=nperr)
+            //    write(18,*) 'New calc'
+            for (i = 1; i <= nlayer - 1; ++i) {
+                // 22222  format('Gas #', I3, ' : Dens=', F9.7, ' Visc=', F12.9, ' Cond=', F9.7, ' Cp=', F9.7)
+                //   write(18, 22222) iprop(i+1, j), tempDens, gvis(iprop(i+1,j), 1), gcon(iprop(i+1,j), 1), gcp(iprop(i+1,j), 1)
+                dT(i) = 15.0 / (nlayer - 1); // set initial temperature distribution
+                for (j = 1; j <= nmix(i + 1); ++j) {
+                    ipropg(j) = iprop(i + 1, j);
+                    frctg(j) = frct(i + 1, j);
+                }
+                GASSES90(state,
+                         Tm,
+                         ipropg,
+                         frctg,
+                         presure(i + 1),
+                         nmix(i + 1),
+                         xwght,
+                         xgcon,
+                         xgvis,
+                         xgcp,
+                         con,
+                         visc,
+                         dens,
+                         cp,
+                         pr,
+                         standard,
+                         nperr,
+                         ErrorMessage);
+                Gr(i) = (Constant::Gravity * pow_3(gap(i)) * dT(i) * pow_2(dens)) / (Tm * pow_2(visc));
+                Ra(i) = Gr(i) * pr;
+                Nu(i) = A * std::pow(Ra(i), n);
+                if (Nu(i) < 1.0) {
+                    Nu(i) = 1.0;
+                }
+                hg(i) = Nu(i) * con / gap(i);
+            } // gaps
+        } else {
+            for (i = 1; i <= nlayer - 1; ++i) {
+                Nu(i) = 1.0;
+                hg(i) = Nu(i) * con / gap(i); // Autodesk:Uninit con was uninitialized
+            }
+        }
+        for (i = 1; i <= nlayer - 1; ++i) {
+            hr(i) = 4.0 * Constant::StefanBoltzmann * std::pow(1.0 / emis(2 * i) + 1.0 / emis(2 * i + 1) - 1.0, -1.0) * pow_3(Tm);
+            hs(i) = hg(i) + hr(i);
+            rs(2 * i + 1) = 1.0 / hs(i); // Thermal resistance of each gap
+            sumRs += rs(2 * i + 1);
+        }
+        //    write(18,*) '------'
+        //    close(18)
+
+        ufactor = 1.0 / (1.0 / hin + 1.0 / hout + sumRs + Rg);
+        theta(1) = ufactor * (tind - tout) / hout + tout;
+        theta(2 * nlayer) = tind - ufactor * (tind - tout) / hin;
+        for (i = 2; i <= nlayer; ++i) {
+            theta(2 * i - 2) = ufactor * (tind - tout) * thick(1) / scon(1) + theta(2 * i - 3);
+            theta(2 * i - 1) = ufactor * (tind - tout) / hs(i - 1) + theta(2 * i - 2);
+        } // end of first iteration
+
+        // bi More iterations:
+        while (true) {
+            sumRsold = sumRs;
+            sumRs = 0.0;
+
+            if ((standard == TARCOGGassesParams::Stdrd::EN673) && (nlayer == 2)) {
+                return; // If EN673 declared values path and glazing has 2 layers, end calculations and return
+            }
+            if (tind > tout) {
                 for (i = 1; i <= nlayer - 1; ++i) {
-                    // 22222  format('Gas #', I3, ' : Dens=', F9.7, ' Visc=', F12.9, ' Cond=', F9.7, ' Cp=', F9.7)
-                    //   write(18, 22222) iprop(i+1, j), tempDens, gvis(iprop(i+1,j), 1), gcon(iprop(i+1,j), 1), gcp(iprop(i+1,j), 1)
-                    dT(i) = 15.0 / (nlayer - 1); // set initial temperature distribution
+                    dT(i) = 15.0 * (1.0 / hs(i)) / sumRsold; // updated temperature distribution
+                    if (standard == TARCOGGassesParams::Stdrd::EN673) {
+                        Tm = 283.0;
+                    } else {
+                        Tm = (theta(2 * i) + theta(2 * i + 1)) / 2.0;
+                    }
                     for (j = 1; j <= nmix(i + 1); ++j) {
                         ipropg(j) = iprop(i + 1, j);
                         frctg(j) = frct(i + 1, j);
-                    }
+                    } // j, gas mix
                     GASSES90(state,
                              Tm,
                              ipropg,
@@ -419,105 +488,34 @@ namespace ThermalEN673Calc {
                         Nu(i) = 1.0;
                     }
                     hg(i) = Nu(i) * con / gap(i);
-                } // gaps
+                } // i, gaps
             } else {
                 for (i = 1; i <= nlayer - 1; ++i) {
                     Nu(i) = 1.0;
-                    hg(i) = Nu(i) * con / gap(i); // Autodesk:Uninit con was uninitialized
+                    hg(i) = Nu(i) * con / gap(i); // Autodesk:Uninit con was possibly uninitialized
                 }
-            }
+            } // tind > tout
+
             for (i = 1; i <= nlayer - 1; ++i) {
-                hr(i) = 4.0 * Constant::StefanBoltzmann * std::pow(1.0 / emis(2 * i) + 1.0 / emis(2 * i + 1) - 1.0, -1.0) * pow_3(Tm);
+                //      hr(i) = 4 * sigma * (1/emis(2*i) + 1/emis(2*i+1) - 1)**(-1) * Tm**3
                 hs(i) = hg(i) + hr(i);
                 rs(2 * i + 1) = 1.0 / hs(i); // Thermal resistance of each gap
                 sumRs += rs(2 * i + 1);
             }
-            //    write(18,*) '------'
-            //    close(18)
-
             ufactor = 1.0 / (1.0 / hin + 1.0 / hout + sumRs + Rg);
             theta(1) = ufactor * (tind - tout) / hout + tout;
             theta(2 * nlayer) = tind - ufactor * (tind - tout) / hin;
             for (i = 2; i <= nlayer; ++i) {
                 theta(2 * i - 2) = ufactor * (tind - tout) * thick(1) / scon(1) + theta(2 * i - 3);
                 theta(2 * i - 1) = ufactor * (tind - tout) / hs(i - 1) + theta(2 * i - 2);
-            } // end of first iteration
-
-            // bi More iterations:
-            while (true) {
-                sumRsold = sumRs;
-                sumRs = 0.0;
-
-                if ((standard == TARCOGGassesParams::Stdrd::EN673) && (nlayer == 2)) {
-                    return; // If EN673 declared values path and glazing has 2 layers, end calculations and return
-                } else {
-                    if (tind > tout) {
-                        for (i = 1; i <= nlayer - 1; ++i) {
-                            dT(i) = 15.0 * (1.0 / hs(i)) / sumRsold; // updated temperature distribution
-                            if (standard == TARCOGGassesParams::Stdrd::EN673) {
-                                Tm = 283.0;
-                            } else {
-                                Tm = (theta(2 * i) + theta(2 * i + 1)) / 2.0;
-                            }
-                            for (j = 1; j <= nmix(i + 1); ++j) {
-                                ipropg(j) = iprop(i + 1, j);
-                                frctg(j) = frct(i + 1, j);
-                            } // j, gas mix
-                            GASSES90(state,
-                                     Tm,
-                                     ipropg,
-                                     frctg,
-                                     presure(i + 1),
-                                     nmix(i + 1),
-                                     xwght,
-                                     xgcon,
-                                     xgvis,
-                                     xgcp,
-                                     con,
-                                     visc,
-                                     dens,
-                                     cp,
-                                     pr,
-                                     standard,
-                                     nperr,
-                                     ErrorMessage);
-                            Gr(i) = (Constant::Gravity * pow_3(gap(i)) * dT(i) * pow_2(dens)) / (Tm * pow_2(visc));
-                            Ra(i) = Gr(i) * pr;
-                            Nu(i) = A * std::pow(Ra(i), n);
-                            if (Nu(i) < 1.0) {
-                                Nu(i) = 1.0;
-                            }
-                            hg(i) = Nu(i) * con / gap(i);
-                        } // i, gaps
-                    } else {
-                        for (i = 1; i <= nlayer - 1; ++i) {
-                            Nu(i) = 1.0;
-                            hg(i) = Nu(i) * con / gap(i); // Autodesk:Uninit con was possibly uninitialized
-                        }
-                    } // tind > tout
-                }
-
-                for (i = 1; i <= nlayer - 1; ++i) {
-                    //      hr(i) = 4 * sigma * (1/emis(2*i) + 1/emis(2*i+1) - 1)**(-1) * Tm**3
-                    hs(i) = hg(i) + hr(i);
-                    rs(2 * i + 1) = 1.0 / hs(i); // Thermal resistance of each gap
-                    sumRs += rs(2 * i + 1);
-                }
-                ufactor = 1.0 / (1.0 / hin + 1.0 / hout + sumRs + Rg);
-                theta(1) = ufactor * (tind - tout) / hout + tout;
-                theta(2 * nlayer) = tind - ufactor * (tind - tout) / hin;
-                for (i = 2; i <= nlayer; ++i) {
-                    theta(2 * i - 2) = ufactor * (tind - tout) * thick(1) / scon(1) + theta(2 * i - 3);
-                    theta(2 * i - 1) = ufactor * (tind - tout) / hs(i - 1) + theta(2 * i - 2);
-                }
-                ++iter; // end of next iteration
-                diff = std::abs(sumRs - sumRsold);
-                // bi: perhaps we should also limit No. of iterations?
-                if (diff < eps) {
-                    break; // tolerance was met - exit loop
-                }
-            } // remaining iterations
-        }
+            }
+            ++iter; // end of next iteration
+            diff = std::abs(sumRs - sumRsold);
+            // bi: perhaps we should also limit No. of iterations?
+            if (diff < eps) {
+                break; // tolerance was met - exit loop
+            }
+        } // remaining iterations
 
         // dr...END OF ITERATIONS
     }

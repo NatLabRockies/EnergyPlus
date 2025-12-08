@@ -56,7 +56,7 @@ Real64 CoolingWaterNumofTubesPerRowSizer::size(EnergyPlusData &state, Real64 _or
     }
     this->preSize(state, _originalValue);
 
-    if (!this->wasAutoSized && (this->dataPltSizCoolNum == 0 || this->plantSizData.size() == 0)) {
+    if (!this->wasAutoSized && (this->dataPltSizCoolNum == 0 || this->plantSizData.empty())) {
         this->autoSizedValue = _originalValue;
     } else if (!this->wasAutoSized && this->dataPltSizCoolNum <= (int)this->plantSizData.size()) {
         // result will be integerized external to this routine , add 0.5 to existing calc to round the result

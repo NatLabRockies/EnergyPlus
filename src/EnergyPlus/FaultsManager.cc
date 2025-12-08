@@ -54,7 +54,6 @@
 #include <EnergyPlus/CondenserLoopTowers.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/EvaporativeCoolers.hh>
 #include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/FaultsManager.hh>
@@ -749,16 +748,18 @@ namespace FaultsManager {
                     state.dataBoilers->getBoilerInputFlag = false;
                 }
                 // Check the boiler name and boiler type
-                int BoilerNum = Util::FindItemInList(faultsBoilerFouling.BoilerName, state.dataBoilers->Boiler);
-                if (BoilerNum <= 0) {
+                auto boiler_it = std::find_if(state.dataBoilers->Boiler.begin(), state.dataBoilers->Boiler.end(), [&](const auto &b) {
+                    return b.Name == faultsBoilerFouling.BoilerName;
+                });
+                if (boiler_it == state.dataBoilers->Boiler.end()) {
                     ShowSevereError(
                         state,
                         format("{} = \"{}\" invalid {} = \"{}\" not found.", cFaultCurrentObject, cAlphaArgs(1), cAlphaFieldNames(5), cAlphaArgs(5)));
                     state.dataFaultsMgr->ErrorsFound = true;
                 } else {
                     // Link the boiler with the fault model
-                    state.dataBoilers->Boiler(BoilerNum).FaultyBoilerFoulingFlag = true;
-                    state.dataBoilers->Boiler(BoilerNum).FaultyBoilerFoulingIndex = jFault_BoilerFouling;
+                    boiler_it->FaultyBoilerFoulingFlag = true;
+                    boiler_it->FaultyBoilerFoulingIndex = jFault_BoilerFouling;
                 }
             }
         }

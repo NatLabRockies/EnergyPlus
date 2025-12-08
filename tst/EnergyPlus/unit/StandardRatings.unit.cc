@@ -58,15 +58,12 @@
 #include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DXCoils.hh>
-// #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/StandardRatings.hh>
 #include <EnergyPlus/VariableSpeedCoils.hh>
-#include <EnergyPlus/WaterToAirHeatPumpSimple.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::StandardRatings;
@@ -123,7 +120,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest)
     Coil.FuelType = Constant::eFuel::Electricity;
     Coil.RegionNum = 4;
     Coil.OATempCompressorOn = -5.0;
-    Coil.OATempCompressorOnOffBlank = "true";
+    Coil.OATempCompressorOnOffBlank = true;
 
     auto *curve1 = Curve::AddCurve(*state, "PTHPHeatingCAPFT");
     curve1->curveType = CurveType::Cubic;
@@ -304,7 +301,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest_PositiveCurve)
     Coil.FuelType = Constant::eFuel::Electricity;
     Coil.RegionNum = 4;
     Coil.OATempCompressorOn = -5.0;
-    Coil.OATempCompressorOnOffBlank = "true";
+    Coil.OATempCompressorOnOffBlank = true;
 
     auto *curve1 = Curve::AddCurve(*state, "PTHPHeatingCAPFT");
     curve1->curveType = CurveType::Cubic;
@@ -475,7 +472,7 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCoilCurveTest2023)
     Coil.FuelType = Constant::eFuel::Electricity;
     Coil.RegionNum = 4; //
     Coil.OATempCompressorOn = -5.0;
-    Coil.OATempCompressorOnOffBlank = "true";
+    Coil.OATempCompressorOnOffBlank = true;
 
     auto *curve1 = AddCurve(*state, "PTHPHeatingCAPFT"); // Simpl_HPACHeatCapFT_Cubic
     curve1->curveType = CurveType::Cubic;

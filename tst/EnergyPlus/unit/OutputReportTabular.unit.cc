@@ -194,13 +194,13 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_digitsAferDecimal)
 TEST_F(EnergyPlusFixture, OutputReportTabularTest_splitCommaString)
 {
     std::vector<std::string> actual;
-    actual.push_back("part1");
+    actual.emplace_back("part1");
     EXPECT_EQ(actual, splitCommaString("part1"));
-    actual.push_back("part2");
+    actual.emplace_back("part2");
     EXPECT_EQ(actual, splitCommaString("part1,part2"));
     EXPECT_EQ(actual, splitCommaString(" part1,part2 "));
     EXPECT_EQ(actual, splitCommaString(" part1 , part2 "));
-    actual.push_back("part3");
+    actual.emplace_back("part3");
     EXPECT_EQ(actual, splitCommaString("part1,part2,part3"));
     EXPECT_EQ(actual, splitCommaString(" part1 , part2 , part3 "));
 }
@@ -209,12 +209,12 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_stringJoinDelimiter)
 {
     std::vector<std::string> original;
     EXPECT_EQ("", stringJoinDelimiter(original, ";"));
-    original.push_back("part1");
+    original.emplace_back("part1");
     EXPECT_EQ("part1", stringJoinDelimiter(original, ";"));
-    original.push_back("part2");
+    original.emplace_back("part2");
     EXPECT_EQ("part1;part2", stringJoinDelimiter(original, ";"));
     EXPECT_EQ("part1 ; part2", stringJoinDelimiter(original, " ; "));
-    original.push_back("part3");
+    original.emplace_back("part3");
     EXPECT_EQ("part1;part2;part3", stringJoinDelimiter(original, ";"));
     EXPECT_EQ("part1 ; part2 ; part3", stringJoinDelimiter(original, " ; "));
 }
@@ -473,7 +473,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_GetColumnUsingTabs)
     }
 
     {
-        std::string inString = "";
+        std::string inString;
         EXPECT_EQ("", GetColumnUsingTabs(inString, 1));
         EXPECT_EQ("", GetColumnUsingTabs(inString, 2));
     }
@@ -8592,9 +8592,9 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_8317_ValidateOutputTableMon
 
     InitializeOutput(*state);
 
-    std::string endUseSub("");
-    std::string const zoneName("");
-    std::string const spaceType("");
+    std::string endUseSub;
+    std::string const zoneName;
+    std::string const spaceType;
 
     // AttachMeters(*state, Constant::Units::J, resource, sovEndUseCat, endUseSub, sovGroup, zoneName, spaceType, -1);
     Meter *meter1 = new Meter("NATURALGAS:FACILITY");
@@ -11265,7 +11265,7 @@ TEST_F(SQLiteFixture, WriteVeriSumSpaceTables_Test)
 TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,23.1;
+  Version,26.1;
 
   Timestep,4;
 
@@ -12109,7 +12109,7 @@ TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 TEST_F(SQLiteFixture, UpdateSizing_EndSysSizingCalc)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,23.1;
+  Version,26.1;
 
   Timestep,4;
 

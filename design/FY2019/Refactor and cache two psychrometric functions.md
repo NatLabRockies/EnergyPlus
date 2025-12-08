@@ -4,7 +4,7 @@ Xuan Luo, Tianzhen Hong
 
 Lawrence Berkeley National Laboratory
 
-July 25, 2019 
+July 25, 2019
 
 ## Justification for Feature Update
 

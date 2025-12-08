@@ -909,7 +909,7 @@ namespace Fluid {
                 continue;
             }
 
-            if (refrig->satTempArrayName != "" && refrig->satTempArrayName != Alphas(4)) {
+            if (!refrig->satTempArrayName.empty() && refrig->satTempArrayName != Alphas(4)) {
                 ShowSevereCustom(state, eoh, "Saturated temperature arrays are not the same for different properties");
                 ErrorsFound = true;
                 continue;
@@ -1007,7 +1007,7 @@ namespace Fluid {
         for (auto const *refrig : df->refrigs) {
 
             ErrorObjectHeader eoh{routineName, CurrentModuleObject, refrig->Name};
-            if (refrig->PsValues.size() == 0) {
+            if (refrig->PsValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Gas/Fluid Saturation Pressure found. Need properties with {}="Pressure" and {}="FluidGas".)",
@@ -1016,7 +1016,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->HfValues.size() == 0) {
+            if (refrig->HfValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="Fluid".)",
@@ -1025,7 +1025,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->HfgValues.size() == 0) {
+            if (refrig->HfgValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Gas/Fluid Enthalpy found. Need properties with {}="Enthalpy" and {}="FluidGas".)",
@@ -1034,7 +1034,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->CpfValues.size() == 0) {
+            if (refrig->CpfValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="Fluid".)",
@@ -1043,7 +1043,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->CpfgValues.size() == 0) {
+            if (refrig->CpfgValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Gas/Fluid Specific Heat found. Need properties with {}="SpecificHeat" and {}="FluidGas".)",
@@ -1052,7 +1052,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->RhofValues.size() == 0) {
+            if (refrig->RhofValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Fluid Density found. Need properties with {}="Density" and {}="Fluid".)",
@@ -1061,7 +1061,7 @@ namespace Fluid {
                 ErrorsFound = true;
             }
 
-            if (refrig->RhofgValues.size() == 0) {
+            if (refrig->RhofgValues.empty()) {
                 ShowSevereCustom(state,
                                  eoh,
                                  format(R"(No Saturated Gas/Fluid Density found. Need properties with {}="Density" and {}="FluidGas".)",
@@ -1124,7 +1124,7 @@ namespace Fluid {
                 continue;
             }
 
-            if (refrig->supTempArrayName != "" && refrig->supTempArrayName != Alphas(3)) {
+            if (!refrig->supTempArrayName.empty() && refrig->supTempArrayName != Alphas(3)) {
                 ShowSevereCustom(state, eoh, "Saturated temperature arrays are not the same for different properties");
                 ErrorsFound = true;
                 continue;
@@ -1430,7 +1430,7 @@ namespace Fluid {
 
             // Can temperatue and pressure points be different for different properties?  Why is this allowed?
             if (Alphas(2) == "SPECIFICHEAT") {
-                if (glycolRaw->CpTempArrayName != "" && glycolRaw->CpTempArrayName != Alphas(3)) {
+                if (!glycolRaw->CpTempArrayName.empty() && glycolRaw->CpTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
                                      format("All specific heat data for the same glycol must use the same temperature list"
@@ -1449,7 +1449,7 @@ namespace Fluid {
                 glycolRaw->CpDataPresent = true;
 
             } else if (Alphas(2) == "DENSITY") {
-                if (glycolRaw->RhoTempArrayName != "" && glycolRaw->RhoTempArrayName != Alphas(3)) {
+                if (!glycolRaw->RhoTempArrayName.empty() && glycolRaw->RhoTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
                                      format("All density data for the same glycol must use the same temperature list"
@@ -1468,7 +1468,7 @@ namespace Fluid {
                 glycolRaw->RhoDataPresent = true;
 
             } else if (Alphas(2) == "CONDUCTIVITY") {
-                if (glycolRaw->CondTempArrayName != "" && glycolRaw->CondTempArrayName != Alphas(3)) {
+                if (!glycolRaw->CondTempArrayName.empty() && glycolRaw->CondTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
                                      format("All conductivity data for the same glycol must use the same temperature list"
@@ -1487,7 +1487,7 @@ namespace Fluid {
                 glycolRaw->CondDataPresent = true;
 
             } else if (Alphas(2) == "VISCOSITY") {
-                if (glycolRaw->ViscTempArrayName != "" && glycolRaw->ViscTempArrayName != Alphas(3)) {
+                if (!glycolRaw->ViscTempArrayName.empty() && glycolRaw->ViscTempArrayName != Alphas(3)) {
                     ShowSevereCustom(state,
                                      eoh,
                                      format("All conductivity data for the same glycol must use the same temperature list"
@@ -4147,8 +4147,8 @@ namespace Fluid {
                     "{C}");
             }
             return this->CpValues(this->CpLowTempIndex);
-
-        } else if (Temp > this->CpHighTempValue) { // Temperature too high
+        }
+        if (Temp > this->CpHighTempValue) { // Temperature too high
             if (!state.dataGlobal->WarmupFlag) {
                 df->glycolErrorLimits[(int)GlycolError::SpecHeatHigh] = ++this->errors[(int)GlycolError::SpecHeatHigh].count;
                 if (df->glycolErrorLimits[(int)GlycolError::SpecHeatHigh] <= df->GlycolErrorLimitTest) {
@@ -4171,23 +4171,22 @@ namespace Fluid {
             }
             return this->CpValues(this->CpHighTempIndex);
 
-        } else { // Temperature somewhere between the lowest and highest value
+        } // Temperature somewhere between the lowest and highest value
 #ifdef PERFORMANCE_OPT
-            if (Temp < this->CpTemps(this->LoCpTempIdxLast) || Temp > this->CpTemps(this->LoCpTempIdxLast + 1)) {
-                this->LoCpTempIdxLast = FindArrayIndex(Temp, this->CpTemps, 1, this->NumCpTempPoints);
-            }
-            return this->CpValues(this->LoCpTempIdxLast) + (Temp - this->CpTemps(this->LoCpTempIdxLast)) * this->CpTempRatios(this->LoCpTempIdxLast);
-#else  // !PERFORMANCE_OPT
-            assert(this->CpTemps.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
-            int beg(1), end(this->CpTemps.isize()); // 1-based indexing
-            assert(end > 0);
-            while (beg + 1 < end) {
-                int mid = ((beg + end) >> 1); // bit shifting is faster than /2
-                (Temp > this->CpTemps(mid) ? beg : end) = mid;
-            } // Invariant: glycol_CpTemps[beg] <= Temperature <= glycol_CpTemps[end]
-            return GetInterpValue(Temp, this->CpTemps(beg), this->CpTemps(end), this->CpValues(beg), this->CpValues(end));
-#endif // PERFORMANCE_OPT
+        if (Temp < this->CpTemps(this->LoCpTempIdxLast) || Temp > this->CpTemps(this->LoCpTempIdxLast + 1)) {
+            this->LoCpTempIdxLast = FindArrayIndex(Temp, this->CpTemps, 1, this->NumCpTempPoints);
         }
+        return this->CpValues(this->LoCpTempIdxLast) + (Temp - this->CpTemps(this->LoCpTempIdxLast)) * this->CpTempRatios(this->LoCpTempIdxLast);
+#else  // !PERFORMANCE_OPT
+        assert(this->CpTemps.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
+        int beg(1), end(this->CpTemps.isize()); // 1-based indexing
+        assert(end > 0);
+        while (beg + 1 < end) {
+            int mid = ((beg + end) >> 1); // bit shifting is faster than /2
+            (Temp > this->CpTemps(mid) ? beg : end) = mid;
+        } // Invariant: glycol_CpTemps[beg] <= Temperature <= glycol_CpTemps[end]
+        return GetInterpValue(Temp, this->CpTemps(beg), this->CpTemps(end), this->CpValues(beg), this->CpValues(end));
+#endif // PERFORMANCE_OPT
     }
 #ifdef GET_OUT
     Real64 GetSpecificHeatGlycol(EnergyPlusData &state,
@@ -4739,9 +4738,8 @@ namespace Fluid {
         auto &df = state.dataFluid;
         if (Idx > 0 && Idx <= df->glycols.isize()) {
             return df->glycols(Idx)->Name;
-        } else { // return blank - error checking in calling procedure
-            return "";
-        }
+        } // return blank - error checking in calling procedure
+        return "";
     }
 
     //*****************************************************************************
@@ -4785,19 +4783,17 @@ namespace Fluid {
         size_type beg(LowBound - l);
         if (Value < Array[beg]) {
             return 0;
-        } else {
-            size_type end(UpperBound - l);
-            if (Value > Array[end]) {
-                return UpperBound;
-            } else { // Binary search
-                size_type mid;
-                while (beg + 1 < end) {
-                    mid = ((beg + end) >> 1);
-                    (Value > Array[mid] ? beg : end) = mid;
-                }
-                return l + beg;
-            }
         }
+        size_type end(UpperBound - l);
+        if (Value > Array[end]) {
+            return UpperBound;
+        } // Binary search
+        size_type mid;
+        while (beg + 1 < end) {
+            mid = ((beg + end) >> 1);
+            (Value > Array[mid] ? beg : end) = mid;
+        }
+        return l + beg;
     }
 
     int FindArrayIndex(Real64 const Value,          // Value to be placed/found within the array of values
@@ -4832,19 +4828,17 @@ namespace Fluid {
         assert(Array.l() > 0);  // Returning 0 for Value smaller than lowest doesn't make sense if l() <= 0
         if (Value < Array[0]) {
             return 0;
-        } else {
-            size_type end(Array.size() - 1u);
-            if (Value > Array[end]) {
-                return Array.u();
-            } else { // Binary search
-                size_type beg(0), mid;
-                while (beg + 1 < end) {
-                    mid = ((beg + end) >> 1);
-                    (Value > Array[mid] ? beg : end) = mid;
-                }
-                return Array.l() + beg;
-            }
         }
+        size_type end(Array.size() - 1u);
+        if (Value > Array[end]) {
+            return Array.u();
+        } // Binary search
+        size_type beg(0), mid;
+        while (beg + 1 < end) {
+            mid = ((beg + end) >> 1);
+            (Value > Array[mid] ? beg : end) = mid;
+        }
+        return Array.l() + beg;
     }
 
     //*****************************************************************************

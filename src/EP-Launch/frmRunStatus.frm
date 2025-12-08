@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmRunStatus 
+Begin VB.Form frmRunStatus
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "EnergyPlus Run Status"
    ClientHeight    =   3600
@@ -13,14 +13,14 @@ Begin VB.Form frmRunStatus
    ScaleWidth      =   13860
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.ListBox lstStatus 
+   Begin VB.ListBox lstStatus
       Height          =   2790
       Left            =   840
       TabIndex        =   2
       Top             =   120
       Width           =   12855
    End
-   Begin VB.PictureBox Picture1 
+   Begin VB.PictureBox Picture1
       BorderStyle     =   0  'None
       Height          =   615
       Left            =   240
@@ -31,7 +31,7 @@ Begin VB.Form frmRunStatus
       Top             =   120
       Width           =   495
    End
-   Begin VB.CommandButton OKButton 
+   Begin VB.CommandButton OKButton
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375

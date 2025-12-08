@@ -71,7 +71,6 @@ The name of the HVAC system node to which the unit sends its secondary outlet ai
 An IDF example:
 
 \begin{lstlisting}
-
 HeatExchanger:AirToAir:FlatPlate,
   OA Heat Recovery 1,         !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
@@ -84,10 +83,10 @@ HeatExchanger:AirToAir:FlatPlate,
   0.4333,                     !- Nominal Secondary Air Flow Rate {m3/s}
   20.0,                       !- Nominal Secondary Air Inlet Temperature {C}
   0.0,                        !- Nominal Electric Power {W}
-  Desiccant Process Outlet Node,   !- Supply Air Inlet Node Name
-  Heat Recovery Outlet Node,   !- Supply Air Outlet Node Name
-  Relief Air Outlet Node,   !- Secondary Air Inlet Node Name
-  Heat Recovery Secondary Outlet Node;   !- Secondary Air Outlet Node Name
+  Desiccant Process Outlet Node,  !- Supply Air Inlet Node Name
+  Heat Recovery Outlet Node,  !- Supply Air Outlet Node Name
+  Relief Air Outlet Node,     !- Secondary Air Inlet Node Name
+  Heat Recovery Secondary Outlet Node;  !- Secondary Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-014}
@@ -397,7 +396,6 @@ This optional input allows the user to specify a curve that determines the value
 Following is an example input for this heat exchanger object:
 
 \begin{lstlisting}
-
 HeatExchanger:AirToAir:SensibleAndLatent,
   OA Heat Recovery 1,         !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
@@ -410,10 +408,10 @@ HeatExchanger:AirToAir:SensibleAndLatent,
   .68,                        !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
   .81,                        !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
   .73,                        !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
-  Outside Air Inlet Node Preheated,   !- Supply Air Inlet Node Name
+  Outside Air Inlet Node Preheated,  !- Supply Air Inlet Node Name
   Heat Recovery Outlet Node,  !- Supply Air Outlet Node Name
   Relief Air Outlet Node,     !- Exhaust Air Inlet Node Name
-  Heat Recovery Secondary Outlet Node,   !- Exhaust Air Outlet Node Name
+  Heat Recovery Secondary Outlet Node,  !- Exhaust Air Outlet Node Name
   200.0,                      !- Nominal Electric Power {W}
   No,                         !- Supply Air Outlet Temperature Control
   Plate,                      !- Heat Exchanger Type
@@ -594,16 +592,15 @@ This input denotes whether the heat exchanger unit is locked out (heat exchanger
 Following is an example input for this heat exchanger object:
 
 \begin{lstlisting}
-
 HeatExchanger:Desiccant:BalancedFlow,
-  Desiccant Heat Exchanger 1,                 !- Name
-  OfficeHeatCoolAvail,                               !- Availability Schedule Name
-  DXSystem 1 Mixed Air Node,                   !- Regeneration Air Inlet Node Name
-  DX Cooling Coil Air Inlet Node,         !- Regeneration Air Outlet Node Name
-  DX Cooling Coil Air Outlet Node,       !- Process Air Inlet Node Name
-  DXSystem 1 Fan Air Inlet Node,           !- Process Air Outlet Node Name
-  HeatExchanger:Desiccant:BalancedFlow:PerformanceDataType1, !- Heat Exchanger Performance Object Type
-  HXDesPerf1;                                                 !- Heat Exchanger Performance Name
+  Desiccant Heat Exchanger 1, !- Name
+  OfficeHeatCoolAvail,        !- Availability Schedule Name
+  DXSystem 1 Mixed Air Node,  !- Regeneration Air Inlet Node Name
+  DX Cooling Coil Air Inlet Node,  !- Regeneration Air Outlet Node Name
+  DX Cooling Coil Air Outlet Node,  !- Process Air Inlet Node Name
+  DXSystem 1 Fan Air Inlet Node,  !- Process Air Outlet Node Name
+  HeatExchanger:Desiccant:BalancedFlow:PerformanceDataType1,  !- Heat Exchanger Performance Object Type
+  HXDesPerf1;                 !- Heat Exchanger Performance Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-010}
@@ -968,62 +965,59 @@ The maximum relative humidity of the process inlet air for the humidity ratio eq
 Following is an example input for this heat exchanger performance data type object:
 
 \begin{lstlisting}
-
 HeatExchanger:Desiccant:BalancedFlow:PerformanceDataType1,
-  HXDesPerf1,         !- Name
-  1.05,                     !- Nominal Air Flow Rate {m3/s}
-  3.25,                     !- Nominal Air Face Velocity {m/s}
-  50.0,                     !- Nominal Electric Power {W}
-  -2.53636E+00,     !- Temperature Equation Coefficient 1
-  2.13247E+01,       !- Temperature Equation Coefficient 2
-  9.23308E-01,       !- Temperature Equation Coefficient 3
-  9.43276E+02,       !- Temperature Equation Coefficient 4
-  -5.92367E+01,     !- Temperature Equation Coefficient 5
-  -4.27465E-02,     !- Temperature Equation Coefficient 6
-  1.12204E+02,       !- Temperature Equation Coefficient 7
-  7.78252E-01,       !- Temperature Equation Coefficient 8
-
-
-  0.007143,             !- Minimum Regeneration Inlet Air Humidity Ratio for Temperature Equation
-  0.024286,             !- Maximum Regeneration Inlet Air Humidity Ratio for Temperature Equation
-  46.111110,           !- Minimum Regeneration Inlet Air Temperature for Temperature Equation {C}
-  46.111112,           !- Maximum Regeneration Inlet Air Temperature for Temperature Equation {C}
-  0.005000,             !- Minimum Process Inlet Air Humidity Ratio for Temperature Equation
-  0.015714,             !- Maximum Process Inlet Air Humidity Ratio for Temperature Equation
-  4.583333,             !- Minimum Process Inlet Air Temperature for Temperature Equation {C}
-  21.83333,             !- Maximum Process Inlet Air Temperature for Temperature Equation {C}
-  2.286,                   !- Minimum Regeneration Air Velocity for Temperature Equation {m/s}
-  4.826,                   !- Maximum Regeneration Air Velocity for Temperature Equation {m/s}
-  35.0,                     !- Minimum Regeneration Outlet Air Temperature for Temperature Equation {C}
-  50.0,                     !- Maximum Regeneration Outlet Air Temperature for Temperature Equation {C}
-  5.0,                       !- Minimum Regeneration Inlet Air Relative Humidity for Temperature Equation {percent}
-  45.0,                     !- Maximum Regeneration Inlet Air Relative Humidity for Temperature Equation {percent}
-  80.0,                     !- Minimum Process Inlet Air Relative Humidity for Temperature Equation {percent}
-  100.0,                   !- Maximum Process Inlet Air Relative Humidity for Temperature Equation {percent}
-  -2.25547E+01,     !- Humidity Ratio Equation Coefficient 1
-  9.76839E-01,       !- Humidity Ratio Equation Coefficient 2
-  4.89176E-01,       !- Humidity Ratio Equation Coefficient 3
-  -6.30019E-02,     !- Humidity Ratio Equation Coefficient 4
-  1.20773E-02,       !- Humidity Ratio Equation Coefficient 5
-  5.17134E-05,       !- Humidity Ratio Equation Coefficient 6
-  4.94917E-02,       !- Humidity Ratio Equation Coefficient 7
-  -2.59417E-04,     !- Humidity Ratio Equation Coefficient 8
-  0.007143,             !- Minimum Regeneration Inlet Air Humidity Ratio for Humidity Ratio Equation
-  0.024286,             !- Maximum Regeneration Inlet Air Humidity Ratio for Humidity Ratio Equation
-  46.111110,           !- Minimum Regeneration Inlet Air Temperature for Humidity Ratio Equation {C}
-  46.111112,           !- Maximum Regeneration Inlet Air Temperature for Humidity Ratio Equation {C}
-  0.005000,             !- Minimum Process Inlet Air Humidity Ratio for Humidity Ratio Equation
-  0.015714,             !- Maximum Process Inlet Air Humidity Ratio for Humidity Ratio Equation
-  4.583333,             !- Minimum Process Inlet Air Temperature for Humidity Ratio Equation {C}
-  21.83333,             !- Maximum Process Inlet Air Temperature for Humidity Ratio Equation {C}
-  2.286,                   !- Minimum Regeneration Air Velocity for Humidity Ratio Equation {m/s}
-  4.826,                   !- Maximum Regeneration Air Velocity for Humidity Ratio Equation {m/s}
-  0.007914,             !- Minimum Regeneration Outlet Air Humidity Ratio for Humidity Ratio Equation
-  0.026279,             !- Maximum Regeneration Outlet Air Humidity Ratio for Humidity Ratio Equation
-  5.0,                 !- Minimum Regeneration Inlet Air Relative Humidity for Humidity Ratio Equation {%}
-  45.0,               !- Maximum Regeneration Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
-  80.0,                   !- Minimum Process Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
-  100.0;                 !- Maximum Process Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
+  HXDesPerf1,                 !- Name
+  1.05,                       !- Nominal Air Flow Rate {m3/s}
+  3.25,                       !- Nominal Air Face Velocity {m/s}
+  50.0,                       !- Nominal Electric Power {W}
+  -2.53636E+00,               !- Temperature Equation Coefficient 1
+  2.13247E+01,                !- Temperature Equation Coefficient 2
+  9.23308E-01,                !- Temperature Equation Coefficient 3
+  9.43276E+02,                !- Temperature Equation Coefficient 4
+  -5.92367E+01,               !- Temperature Equation Coefficient 5
+  -4.27465E-02,               !- Temperature Equation Coefficient 6
+  1.12204E+02,                !- Temperature Equation Coefficient 7
+  7.78252E-01,                !- Temperature Equation Coefficient 8
+  0.007143,                   !- Minimum Regeneration Inlet Air Humidity Ratio for Temperature Equation
+  0.024286,                   !- Maximum Regeneration Inlet Air Humidity Ratio for Temperature Equation
+  46.111110,                  !- Minimum Regeneration Inlet Air Temperature for Temperature Equation {C}
+  46.111112,                  !- Maximum Regeneration Inlet Air Temperature for Temperature Equation {C}
+  0.005000,                   !- Minimum Process Inlet Air Humidity Ratio for Temperature Equation
+  0.015714,                   !- Maximum Process Inlet Air Humidity Ratio for Temperature Equation
+  4.583333,                   !- Minimum Process Inlet Air Temperature for Temperature Equation {C}
+  21.83333,                   !- Maximum Process Inlet Air Temperature for Temperature Equation {C}
+  2.286,                      !- Minimum Regeneration Air Velocity for Temperature Equation {m/s}
+  4.826,                      !- Maximum Regeneration Air Velocity for Temperature Equation {m/s}
+  35.0,                       !- Minimum Regeneration Outlet Air Temperature for Temperature Equation {C}
+  50.0,                       !- Maximum Regeneration Outlet Air Temperature for Temperature Equation {C}
+  5.0,                        !- Minimum Regeneration Inlet Air Relative Humidity for Temperature Equation {percent}
+  45.0,                       !- Maximum Regeneration Inlet Air Relative Humidity for Temperature Equation {percent}
+  80.0,                       !- Minimum Process Inlet Air Relative Humidity for Temperature Equation {percent}
+  100.0,                      !- Maximum Process Inlet Air Relative Humidity for Temperature Equation {percent}
+  -2.25547E+01,               !- Humidity Ratio Equation Coefficient 1
+  9.76839E-01,                !- Humidity Ratio Equation Coefficient 2
+  4.89176E-01,                !- Humidity Ratio Equation Coefficient 3
+  -6.30019E-02,               !- Humidity Ratio Equation Coefficient 4
+  1.20773E-02,                !- Humidity Ratio Equation Coefficient 5
+  5.17134E-05,                !- Humidity Ratio Equation Coefficient 6
+  4.94917E-02,                !- Humidity Ratio Equation Coefficient 7
+  -2.59417E-04,               !- Humidity Ratio Equation Coefficient 8
+  0.007143,                   !- Minimum Regeneration Inlet Air Humidity Ratio for Humidity Ratio Equation
+  0.024286,                   !- Maximum Regeneration Inlet Air Humidity Ratio for Humidity Ratio Equation
+  46.111110,                  !- Minimum Regeneration Inlet Air Temperature for Humidity Ratio Equation {C}
+  46.111112,                  !- Maximum Regeneration Inlet Air Temperature for Humidity Ratio Equation {C}
+  0.005000,                   !- Minimum Process Inlet Air Humidity Ratio for Humidity Ratio Equation
+  0.015714,                   !- Maximum Process Inlet Air Humidity Ratio for Humidity Ratio Equation
+  4.583333,                   !- Minimum Process Inlet Air Temperature for Humidity Ratio Equation {C}
+  21.83333,                   !- Maximum Process Inlet Air Temperature for Humidity Ratio Equation {C}
+  2.286,                      !- Minimum Regeneration Air Velocity for Humidity Ratio Equation {m/s}
+  4.826,                      !- Maximum Regeneration Air Velocity for Humidity Ratio Equation {m/s}
+  0.007914,                   !- Minimum Regeneration Outlet Air Humidity Ratio for Humidity Ratio Equation
+  0.026279,                   !- Maximum Regeneration Outlet Air Humidity Ratio for Humidity Ratio Equation
+  5.0,                        !- Minimum Regeneration Inlet Air Relative Humidity for Humidity Ratio Equation {%}
+  45.0,                       !- Maximum Regeneration Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
+  80.0,                       !- Minimum Process Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
+  100.0;                      !- Maximum Process Inlet Air Relative Humidity for Humidity Ratio Equation {percent}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-008}

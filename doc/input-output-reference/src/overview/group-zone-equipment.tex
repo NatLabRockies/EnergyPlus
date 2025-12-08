@@ -57,7 +57,7 @@ The ZoneHVAC:AirDistributionUnit object gives further information on what air lo
 \item
   \hyperref[airterminaldualductvavoutdoorair]{AirTerminal:DualDuct:VAV:OutdoorAir}
 \item
-  \hyperref[airterminalsingleductconstantvolumereheat]{AirTerminal:SingleDuct:ConstantVolume:Reheat}  
+  \hyperref[airterminalsingleductconstantvolumereheat]{AirTerminal:SingleDuct:ConstantVolume:Reheat}
 \item
   \hyperref[airterminalsingleductconstantvolumenoreheat]{AirTerminal:SingleDuct:ConstantVolume:NoReheat}
 \item
@@ -173,20 +173,19 @@ This output is the amount of outdoor air entering the zone. This is the average 
 Two example IDF excerpts (one with duct leakage, one without):
 
 \begin{lstlisting}
+ZoneHVAC:AirDistributionUnit,
+  SPACE1-1 ATU,               !- Air Distribution Unit Name
+  SPACE1-1 In Node,           !- Air Dist Unit Outlet Node Name
+  AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
+  SPACE1-1 VAV Reheat;        !- Component Name 1
 
 ZoneHVAC:AirDistributionUnit,
-      SPACE1-1 ATU,            !- Air Distribution Unit Name
-      SPACE1-1 In Node,        !- Air Dist Unit Outlet Node Name
-      AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
-      SPACE1-1 VAV Reheat;     !- Component Name 1
-
-  ZoneHVAC:AirDistributionUnit,
-      SPACE4-1 ATU,            !- Air Distribution Unit Name
-      SPACE4-1 In Node,        !- Air Dist Unit Outlet Node Name
-      AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
-      SPACE4-1 VAV Reheat,     !- Component Name 1
-      0.05,                    !- upstream nominal leakage fraction
-      0.07;                    !- downstream constant leakage fraction
+  SPACE4-1 ATU,               !- Air Distribution Unit Name
+  SPACE4-1 In Node,           !- Air Dist Unit Outlet Node Name
+  AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
+  SPACE4-1 VAV Reheat,        !- Component Name 1
+  0.05,                       !- upstream nominal leakage fraction
+  0.07;                       !- downstream constant leakage fraction
 \end{lstlisting}
 
 \subsection{ZoneHVAC:EquipmentConnections}\label{zonehvacequipmentconnections}
@@ -232,17 +231,16 @@ The name of a node or list of nodes (\hyperref[nodelist]{NodeList}) that is used
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneHVAC:EquipmentConnections,
-      ZONE3-1,               !- Zone Name
-      ZONE3-1 Eq,            !- Zone Conditioning Equipment List Name
-      ZONE3-1 In Nodes,      !- Zone Air Inlet Node or NodeList Name
-      ,                      !- Zone Air Exhaust Node or NodeList Name
-      ZONE3-1 Node,          !- Zone Air Node Name
-      ZONE3-1 Out Node,      !- Zone Return Air Node or NodeList Name
-      ,                      !- Zone Return Air Node or NodeList Name
-      ,                      !- Zone Return Air Node 1 Flow Rate Fraction Schedule Name
-      ;                      !- Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name
+  ZONE3-1,                    !- Zone Name
+  ZONE3-1 Eq,                 !- Zone Conditioning Equipment List Name
+  ZONE3-1 In Nodes,           !- Zone Air Inlet Node or NodeList Name
+  ,                           !- Zone Air Exhaust Node or NodeList Name
+  ZONE3-1 Node,               !- Zone Air Node Name
+  ZONE3-1 Out Node,           !- Zone Return Air Node or NodeList Name
+  ,                           !- Zone Return Air Node or NodeList Name
+  ,                           !- Zone Return Air Node 1 Flow Rate Fraction Schedule Name
+  ;                           !- Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name
 \end{lstlisting}
 
 
@@ -356,33 +354,31 @@ References a schedule that specifies the fraction of the remaining heating load 
 Examples of this statement in an IDF are:
 
 \begin{lstlisting}
+ZoneHVAC:EquipmentList,
+  Zone1Equipment,             !- Name
+  SequentialLoad,             !- Load Distribution Scheme
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+  Zone1TermReheat,            !- Zone Equipment 1 Name
+  1,                          !- Zone Equipment 1 Cooling Sequence
+  1,                          !- Zone Equipment 1 Heating or No-Load Sequence
+  ,                           !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+  ;                           !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
 
-    ZoneHVAC:EquipmentList,
-      Zone1Equipment,                !- Name
-      SequentialLoad,                !- Load Distribution Scheme
-      ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
-      Zone1TermReheat,               !- Zone Equipment 1 Name
-      1,                             !- Zone Equipment 1 Cooling Sequence
-      1,                             !- Zone Equipment 1 Heating or No-Load Sequence
-      ,                              !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
-      ;                              !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
-
-
-    ZoneHVAC:EquipmentList,
-      Zone1Equipment,                !- Name
-      SequentialLoad,                !- Load Distribution Scheme
-      ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
-      Zone1TermReheat,               !- Zone Equipment 1 Name
-      1,                             !- Zone Equipment 1 Cooling Sequence
-      1,                             !- Zone Equipment 1 Heating or No-Load Sequence
-      0.5,                           !- Zone Equipment 1 Sequential Cooling Fraction
-      0.5,                           !- Zone Equipment 1 Sequential Heating Fraction
-      ZoneHVAC:WaterToAirHeatPump,   !- Zone Equipment 2 Object Type
-      Zone1WTAHP,                    !- Zone Equipment 2 Name
-      2,                             !- Zone Equipment 2 Cooling Sequence
-      2,                             !- Zone Equipment 2 Heating or No-Load Sequence
-      0.5,                           !- Zone Equipment 2 Sequential Cooling Fraction
-      0.5;                           !- Zone Equipment 2 Sequential Heating Fraction
+ZoneHVAC:EquipmentList,
+  Zone1Equipment,             !- Name
+  SequentialLoad,             !- Load Distribution Scheme
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+  Zone1TermReheat,            !- Zone Equipment 1 Name
+  1,                          !- Zone Equipment 1 Cooling Sequence
+  1,                          !- Zone Equipment 1 Heating or No-Load Sequence
+  0.5,                        !- Zone Equipment 1 Sequential Cooling Fraction
+  0.5,                        !- Zone Equipment 1 Sequential Heating Fraction
+  ZoneHVAC:WaterToAirHeatPump,!- Zone Equipment 2 Object Type
+  Zone1WTAHP,                 !- Zone Equipment 2 Name
+  2,                          !- Zone Equipment 2 Cooling Sequence
+  2,                          !- Zone Equipment 2 Heating or No-Load Sequence
+  0.5,                        !- Zone Equipment 2 Sequential Cooling Fraction
+  0.5;                        !- Zone Equipment 2 Sequential Heating Fraction
 \end{lstlisting}
 
 \subsection{SpaceHVAC:EquipmentConnections}\label{spacehvacequipmentconnections}
@@ -430,15 +426,14 @@ The name of a node or list of nodes (\hyperref[nodelist]{NodeList}) that is used
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 SpaceHVAC:EquipmentConnections,
-      SPACE3-1,              !- Space Name
-      SPACE3-1 In Nodes,     !- Space Air Inlet Node or NodeList Name
-      ,                      !- Space Air Exhaust Node or NodeList Name
-      SPACE3-1 Node,         !- Space Air Node Name
-      SPACE3-1 Out Node,     !- Space Return Air Node or NodeList Name
-      ,                      !- Space Return Air Node 1 Flow Rate Fraction Schedule Name
-      ;                      !- Space Return Air Node 1 Flow Rate Basis Node or NodeList Name
+  SPACE3-1,                   !- Space Name
+  SPACE3-1 In Nodes,          !- Space Air Inlet Node or NodeList Name
+  ,                           !- Space Air Exhaust Node or NodeList Name
+  SPACE3-1 Node,              !- Space Air Node Name
+  SPACE3-1 Out Node,          !- Space Return Air Node or NodeList Name
+  ,                           !- Space Return Air Node 1 Flow Rate Fraction Schedule Name
+  ;                           !- Space Return Air Node 1 Flow Rate Basis Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SpaceHVAC:ZoneEquipmentSplitter}\label{spacehvaczoneequipmentsplitter}
@@ -479,7 +474,7 @@ The method used to control this piece of zone equipment.
        \item[Maximum] satisfies the thermostat in the connected spaces with the highest deviation from setpoint
        \item[Ideal] ignores the Space Output Fractions and distributes the output to match the current space sensible loads.
 \end{description}
- 
+
 \paragraph{Field: Control Space Name}\label{field-seqsplitter-control-space-name}
 
 Name of the space which controls this piece of zone equipment (i.e. the space where the thermostat is located). Only used with SingleSpace thermostat control method.
@@ -505,25 +500,24 @@ Not used for non-airflow zone equipment.
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 SpaceHVAC:ZoneEquipmentSplitter,
-    Zone 5 ATU Space Splitter,  !- Name
-    Zone 5,                  !- Zone Name
-    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment Object Type
-    Zone 5 ATU,              !- Zone Equipment Name
-    Zone 5 In Node,          !- Zone Equipment Outlet Node Name
-    Ideal,                   !- Thermostat Control Method
-    ,                        !- Control Space Name
-    ,                        !- Space Fraction Method
-    Space 5 Office,          !- Space 1 Name
-    0.6,                     !- Space 1 Fraction {dimensionless}
-    Space 5 Office In Node,  !- Space 1 Supply Node Name
-    Space 5 Conference,      !- Space 2 Name
-    0.2,                     !- Space 2 Fraction {dimensionless}
-    Space 5 Conference In Node,  !- Space 2 Supply Node Name
-    Zone 5-Remainder,        !- Space 3 Name
-    0.2,                     !- Space 3 Fraction {dimensionless}
-    Zone 5-Remainder In Node;  !- Space 3 Supply Node Name
+  Zone 5 ATU Space Splitter,  !- Name
+  Zone 5,                     !- Zone Name
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment Object Type
+  Zone 5 ATU,                 !- Zone Equipment Name
+  Zone 5 In Node,             !- Zone Equipment Outlet Node Name
+  Ideal,                      !- Thermostat Control Method
+  ,                           !- Control Space Name
+  ,                           !- Space Fraction Method
+  Space 5 Office,             !- Space 1 Name
+  0.6,                        !- Space 1 Fraction {dimensionless}
+  Space 5 Office In Node,     !- Space 1 Supply Node Name
+  Space 5 Conference,         !- Space 2 Name
+  0.2,                        !- Space 2 Fraction {dimensionless}
+  Space 5 Conference In Node, !- Space 2 Supply Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  0.2,                        !- Space 3 Fraction {dimensionless}
+  Zone 5-Remainder In Node;   !- Space 3 Supply Node Name
 \end{lstlisting}
 
 \subsection{SpaceHVAC:ZoneEquipmentMixer}\label{spacehvaczoneequipmentmixer}
@@ -564,21 +558,20 @@ The name of a \hyperref[spacehvacequipmentconnections]{SpaceHVAC:EquipmentConnec
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 SpaceHVAC:ZoneEquipmentMixer,
-    Zone 5 ATU Space Mixer,  !- Name
-    Zone 5,                  !- Zone Name
-    Zone 5 In Node,          !- Zone Equipment Inlet Node Name
-    ,                        !- Space Fraction Method
-    Space 5 Office,          !- Space 1 Name
-    0.6,                     !- Space 1 Fraction {dimensionless}
-    Space 5 Office In Node,  !- Space 1 Node Name
-    Space 5 Conference,      !- Space 2 Name
-    0.2,                     !- Space 2 Fraction {dimensionless}
-    Space 5 Conference In Node,  !- Space 2 Node Name
-    Zone 5-Remainder,        !- Space 3 Name
-    0.2,                     !- Space 3 Fraction {dimensionless}
-    Zone 5-Remainder In Node;  !- Space 3 Node Name
+  Zone 5 ATU Space Mixer,     !- Name
+  Zone 5,                     !- Zone Name
+  Zone 5 In Node,             !- Zone Equipment Inlet Node Name
+  ,                           !- Space Fraction Method
+  Space 5 Office,             !- Space 1 Name
+  0.6,                        !- Space 1 Fraction {dimensionless}
+  Space 5 Office In Node,     !- Space 1 Node Name
+  Space 5 Conference,         !- Space 2 Name
+  0.2,                        !- Space 2 Fraction {dimensionless}
+  Space 5 Conference In Node, !- Space 2 Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  0.2,                        !- Space 3 Fraction {dimensionless}
+  Zone 5-Remainder In Node;   !- Space 3 Node Name
 \end{lstlisting}
 
 \subsection{SpaceHVAC:ZoneReturnMixer}\label{spacehvaczonereturnmixer}
@@ -610,16 +603,14 @@ The name of a \hyperref[spacehvacequipmentconnections]{SpaceHVAC:EquipmentConnec
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
-  SpaceHVAC:ZoneReturnMixer,
-    Zone 5 Return Mixer,     !- Name
-    Zone 5,                  !- Zone Name
-    Zone 5 Out Node,         !- Zone Return Air Node Name
-    Space 5 Office,          !- Space 1 Name
-    Space 5 Office Return Node,  !- Space 1 Return Air Node Name
-    Space 5 Conference,      !- Space 2 Name
-    Space 5 Conference Return Node,  !- Space 2 Return Air Node Name
-    Zone 5-Remainder,        !- Space 3 Name
-    Zone 5-Remainder Return Node;  !- Space 3 Return Air Node Name
+SpaceHVAC:ZoneReturnMixer,
+  Zone 5 Return Mixer,        !- Name
+  Zone 5,                     !- Zone Name
+  Zone 5 Out Node,            !- Zone Return Air Node Name
+  Space 5 Office,             !- Space 1 Name
+  Space 5 Office Return Node, !- Space 1 Return Air Node Name
+  Space 5 Conference,         !- Space 2 Name
+  Space 5 Conference Return Node,  !- Space 2 Return Air Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  Zone 5-Remainder Return Node;  !- Space 3 Return Air Node Name
 \end{lstlisting}
-

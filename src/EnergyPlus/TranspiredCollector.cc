@@ -1984,7 +1984,8 @@ namespace TranspiredCollector {
 
         if (Tso > Tsi) {                                  // window heated from above
             return 1.0 + (gnu90 - 1.0) * std::sin(tiltr); // eq. 53
-        } else if (Tilt >= 60.0) {
+        }
+        if (Tilt >= 60.0) {
             Real64 g = 0.5 * std::pow(1.0 + std::pow(Ra / 3160.0, 20.6), -0.1);     // eq. 47
             Real64 gnu601a = 1.0 + pow_7(0.0936 * std::pow(Ra, 0.314) / (1.0 + g)); // eq. 45
             Real64 gnu601 = std::pow(gnu601a, 0.142857);
@@ -1995,15 +1996,14 @@ namespace TranspiredCollector {
 
             // linear interpolation for layers inclined at angles between 60 and 90 deg
             return ((90.0 - Tilt) * gnu60 + (Tilt - 60.0) * gnu90) / 30.0;
-        } else { // eq. 42
-            Real64 cra = Ra * std::cos(tiltr);
-            Real64 a = 1.0 - 1708.0 / cra;
-            Real64 b = std::pow(cra / 5830.0, 0.33333) - 1.0;
-            Real64 gnua = (std::abs(a) + a) / 2.0;
-            Real64 gnub = (std::abs(b) + b) / 2.0;
-            Real64 ang = 1708.0 * std::pow(std::sin(1.8 * tiltr), 1.6);
-            return 1.0 + 1.44 * gnua * (1.0 - ang / cra) + gnub;
-        }
+        } // eq. 42
+        Real64 cra = Ra * std::cos(tiltr);
+        Real64 a = 1.0 - 1708.0 / cra;
+        Real64 b = std::pow(cra / 5830.0, 0.33333) - 1.0;
+        Real64 gnua = (std::abs(a) + a) / 2.0;
+        Real64 gnub = (std::abs(b) + b) / 2.0;
+        Real64 ang = 1708.0 * std::pow(std::sin(1.8 * tiltr), 1.6);
+        return 1.0 + 1.44 * gnua * (1.0 - ang / cra) + gnub;
     }
 
 } // namespace TranspiredCollector

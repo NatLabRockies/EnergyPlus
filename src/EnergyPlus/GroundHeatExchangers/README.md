@@ -2,7 +2,7 @@
 
 The code in this source directory used to live in a single source file called "GroundHeatExchangers.cc".
 This file contained an ever growing amount of classes and functions, and it was getting difficult to maintain.
-So it was split up into a few useful files.  
+So it was split up into a few useful files.
 The ultimate goal is roughly one class per file, but there are some very small classes that don't justify their own file.
 
 Here is some historical and reference information about the ground heat exchangers simulated in this code:
@@ -17,7 +17,7 @@ Here is some historical and reference information about the ground heat exchange
 ## Purpose and Methodology
 The module contains the data structures and routines to simulate the operation of vertical closed-loop ground heat exchangers (GLHE) typically used in low temperature geothermal heat pump systems.
 
-The borehole and fluid temperatures are calculated from the response to the current heat transfer rate and the response to the history of past applied heat pulses. 
+The borehole and fluid temperatures are calculated from the response to the current heat transfer rate and the response to the history of past applied heat pulses.
 The response to each pulse is calculated from a nondimensionalized response function, or G-function, that is specific to the given borehole field arrangement, depth and spacing.
 The data defining this function is read from input.
 The heat pulse histories need to be recorded over an extended period (months).

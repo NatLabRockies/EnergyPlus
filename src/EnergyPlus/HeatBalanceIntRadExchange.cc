@@ -589,7 +589,7 @@ namespace HeatBalanceIntRadExchange {
             if (state.dataHeatBalIntRadExchg->CarrollMethod) {
 
                 // User View Factors cannot be used with Carroll method.
-                if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ZoneProperty:UserViewFactors:BySurfaceName")) {
+                if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ZoneProperty:UserViewFactors:BySurfaceName") != 0) {
                     ShowWarningError(state, "ZoneProperty:UserViewFactors:BySurfaceName objects have been defined, however View");
                     ShowContinueError(state, "  Factors are not used when Zone Radiant Exchange Algorithm is set to CarrollMRT.");
                 }
@@ -1253,13 +1253,12 @@ namespace HeatBalanceIntRadExchange {
                     }
                     if (anySpaceNotFound) {
                         continue; // On to the next enclosure
-                    } else {
-                        enclMatchFound = true;
-                        // If matching SpaceList or ZoneList or Zone found, set the radiant and solar enclosure names to match
-                        thisEnclosure.Name = thisSpaceOrSpaceListName;
-                        state.dataViewFactor->EnclSolInfo(enclosureNum).Name = thisSpaceOrSpaceListName;
-                        break; // We're done with radiant enclosures
                     }
+                    enclMatchFound = true;
+                    // If matching SpaceList or ZoneList or Zone found, set the radiant and solar enclosure names to match
+                    thisEnclosure.Name = thisSpaceOrSpaceListName;
+                    state.dataViewFactor->EnclSolInfo(enclosureNum).Name = thisSpaceOrSpaceListName;
+                    break; // We're done with radiant enclosures
                 }
             }
             if (!enclMatchFound) {

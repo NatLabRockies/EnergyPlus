@@ -61,6 +61,7 @@
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/IOFiles.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -2495,6 +2496,50 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     // change the tolerance and check the result, issue 5626 fix subtracts tolerance
     state->dataPlantHXFluidToFluid->FluidHX(1).TempControlTol = 1.5;
     state->dataPlantHXFluidToFluid->FluidHX(1).initialize(*state);
+}
+
+TEST_F(EnergyPlusFixture, PlantHXFluidToFluid_HeatTransferMeteringEndUseType)
+{
+    std::string const idf_objects = R"IDF(
+
+        HeatExchanger:FluidToFluid,
+          Water Side Economizer,                        !- Name
+          ,                                             !- Availability Schedule Name
+          WaterSide Economizer Condenser Inlet Node,    !- Loop Demand Side Inlet Node Name
+          WaterSide Economizer Condenser Outlet Node,   !- Loop Demand Side Outlet Node Name
+          autosize,                                     !- Loop Demand Side Design Flow Rate {m3/s}
+          CW Pump Outlet Node,                          !- Loop Supply Side Inlet Node Name
+          WaterSide Economizer Outlet Node,             !- Loop Supply Side Outlet Node Name
+          autosize,                                     !- Loop Supply Side Design Flow Rate {m3/s}
+          ParallelFlow,                                 !- Heat Exchange Model Type
+          autosize,                                     !- Heat Exchanger U-Factor Times Area Value {W/K}
+          CoolingSetpointModulated,                     !- Control Type
+          WaterSide Economizer Outlet Node,             !- Heat Exchanger Setpoint Node Name
+          1.0,                                          !- Minimum Temperature Difference to Activate Heat Exchanger {deltaC}
+          HeatRecovery;                                 !- Heat Transfer Metering End Use Type
+
+    )IDF";
+
+    EXPECT_FALSE(process_idf(idf_objects, false));
+    std::string const expected_error =
+        "   ** Severe  ** <root>[HeatExchanger:FluidToFluid][Water Side Economizer][heat_transfer_metering_end_use_type] - "
+        "\"HeatRecovery\" - Failed to match against any enum values.\n";
+    compare_err_stream(expected_error, true);
+
+    std::string_view const invalidEndUse = "HeatRecovery";
+    std::array<std::string, 5> const validEndUses = {
+        "FreeCooling", "HeatRejection", "HeatRecoveryForCooling", "HeatRecoveryForHeating", "LoopToLoop"};
+
+    for (std::string validEndUse : validEndUses) {
+        state->dataInputProcessing->clear_state();
+
+        std::string idf_objects_copy(idf_objects);
+        size_t const index = idf_objects_copy.find(invalidEndUse, 0);
+        idf_objects_copy.replace(index, invalidEndUse.length(), validEndUse);
+
+        EXPECT_TRUE(process_idf(idf_objects_copy, false));
+        compare_err_stream("", true);
+    }
 }
 
 } // namespace EnergyPlus

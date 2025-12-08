@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmFind 
+Begin VB.Form frmFind
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Find Class"
    ClientHeight    =   1140
@@ -12,14 +12,14 @@ Begin VB.Form frmFind
    ScaleHeight     =   1140
    ScaleWidth      =   6840
    ShowInTaskbar   =   0   'False
-   Begin VB.TextBox txtFindInput 
+   Begin VB.TextBox txtFindInput
       Height          =   285
       Left            =   1440
       TabIndex        =   3
       Top             =   120
       Width           =   3975
    End
-   Begin VB.CommandButton OKButton 
+   Begin VB.CommandButton OKButton
       Caption         =   "Find"
       Default         =   -1  'True
       Height          =   375
@@ -28,7 +28,7 @@ Begin VB.Form frmFind
       Top             =   120
       Width           =   1215
    End
-   Begin VB.CommandButton CancelButton 
+   Begin VB.CommandButton CancelButton
       Cancel          =   -1  'True
       Caption         =   "Cancel"
       Height          =   375
@@ -37,7 +37,7 @@ Begin VB.Form frmFind
       Top             =   600
       Width           =   1215
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Find What:"
       Height          =   255
       Left            =   135
@@ -70,15 +70,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

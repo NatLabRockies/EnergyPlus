@@ -523,13 +523,13 @@ Figure~\ref{fig:flow-rates-at-different-pressure-differences} demonstrates possi
 % table 49
 \begin{longtable}[c]{p{1.5in}p{4.5in}}
 \caption{Legend Description \label{table:legend-description}} \tabularnewline
-\toprule 
+\toprule
 Legend & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Legend Description} \tabularnewline
-\toprule 
+\toprule
 Legend & Description \tabularnewline
 \midrule
 \endhead
@@ -744,7 +744,7 @@ where:
 \\
 $\sigma$ &= Steffan-Boltzmann constant [W/m\(^{2}\)-K\(^{4}\)] \\
 $T_d$ &= Duct surface temperature [C] \\
-$T_s$ &= Zone surface temperature [C] \\ 
+$T_s$ &= Zone surface temperature [C] \\
 $\epsilon_d$ &= Duct grey body emissivity [-] \\
 $\epsilon_s$ &= Zone surface grey body emissivity [-] \\
 $A_d$ &= Duct surface area [m\(^{2}\)] \\
@@ -1053,7 +1053,7 @@ ambient air. This scales with $U_L$.\label{ss-shear-mech}
 \end{enumerate}
 
 Our model therefore views the flow rate as comprising contributions from each of these
-as appropriate, i.e. 
+as appropriate, i.e.
 \begin{equation}
 Q'=\left[a_p |\Delta c_p |+a_\sigma \sigma_{\Delta c_p} \right]^{1/2}+a_s U_L'
 \end{equation}
@@ -1080,7 +1080,7 @@ approximate a greater number by just two.
 Figure \ref{fig:ss-plan-view-two-openings} shows the geometry of this case in plan view.
 The two openings are a distance $s$ apart in a fa\c{c}ade of width WB whose normal has
 azimuthal angle $\varphi_n$. The wind azimuthal direction is $\varphi_w$, so that its
-direction relative to the fa\c{c}ade is 
+direction relative to the fa\c{c}ade is
 \begin{equation}
 \theta=\varphi_w-\varphi_n.
 \end{equation}
@@ -1137,7 +1137,7 @@ That is, to a first approximation the pressure difference mean and standard devi
 
 The formulae for the components are as follows.
 \begin{equation}\label{eqn:ss-first-formula}
-\Pi(\theta) = 
+\Pi(\theta) =
 \begin{cases}
 0.44\operatorname{sgn}(\theta)\sin(2.67|\theta|),& |\theta| \leq \theta_0 \\
 -0.69 \operatorname{sgn}(\theta)\sin(288-1.6|\theta|),& \theta_0\leq|\theta|\leq\ang{180}.
@@ -1177,7 +1177,7 @@ Combining with the previous results we have
 The flow Q is defined to be positive when opening \#1 is the inlet and opening \#2 is the outlet. Since $\Delta p$ is defined as $p_1-p_2$, this can occur when $\Delta c_p > 0$, which in turn corresponds to certain relative wind angles, i.e.
 \begin{equation}
 \begin{gathered}
-Q < 0\ \text{otherwise}\\ 			
+Q < 0\ \text{otherwise}\\
 Q > 0\ \text{if}\ \ang{0} < \theta < \theta_0\ \text{or}\  \ang{-180} < \theta < -\theta_0
 \end{gathered}
 \end{equation}
@@ -1266,13 +1266,13 @@ Note: the pressure coefficient $\Delta c_{p,12}^{E+}$ refers to the difference i
 \subsubsection{Testing/Validation/Data Source(s)}
 The SS model was developed using wind tunnel pressure and flow rate data acquired by CPP Wind Engineering \& Air Quality Consultants, who carried out two series of tests: (a) Closed Box tests, with a sealed building, to obtain pressure and velocity data and (b) Ventilation tests, with one or two apertures open, to obtain flow rate data. See Linden et al. (2013) for full details.
 
-Each experimental configuration consisted of a cuboidal building with or without a set of blocks representing nearby buildings. 
+Each experimental configuration consisted of a cuboidal building with or without a set of blocks representing nearby buildings.
 
 \begin{itemize}
 \item Building: either 2-story, with WB = 47.5 cm, DB = 19.3 cm, HB = 9.9 cm, or 4-story, with HB = 19.8 cm. The model has a nominal scale of 1:70 (based on earlier tests).
 \item Environment: building either isolated or at center of a 3 x 3 array of equal-sized blocks, which were of same aspect ratio and either low (2-story height) or high (4-story height), and with either narrow spacing (approximately 0.5WB between blocks) or wide spacing (approximately WB), giving a total of 5 different environments.
 \item Approach flow: suburban boundary layer, approximately 10 m/s at 1 m height. The model was mounted on a turntable allowing any desired wind direction to be used. Increments of $\ang{11.25}$ and $\ang{22.5}$ were used for the Closed Box and Ventilation runs, respectively.
-\item Room and openings: the building envelope contained a second-floor room of dimensions WRM = 45.9 cm, DRM = 17.7 cm and HRM = 5.0 cm. A total of 15 opening positions were available, distributed around the room. These were sealed for the Closed Box tests but opened in various combinations for the Ventilation runs. 
+\item Room and openings: the building envelope contained a second-floor room of dimensions WRM = 45.9 cm, DRM = 17.7 cm and HRM = 5.0 cm. A total of 15 opening positions were available, distributed around the room. These were sealed for the Closed Box tests but opened in various combinations for the Ventilation runs.
 \item Sensors: 56 pressure transducers, arranged around the opening positions, including 32 at mid-opening height, recorded static pressure, while hot film sensors at 6 different positions recorded flow speed near the surface. For Ventilation runs the decay in concentration of a tracer was measured at two locations inside the room.
 \end{itemize}
 
@@ -1282,7 +1282,7 @@ The data used to develop the model consisted of 6 scenarios: 3 building/environm
 \item 4-story isolated building
 \item 2-story building with low, widely-spaced blocks
 \end{itemize}
-combined with 2 choices of opening position on the South (long) fa\c{c}ade, namely wide separation ($s' = 0.75$) and medium separation ($s' = 0.32$). 
+combined with 2 choices of opening position on the South (long) fa\c{c}ade, namely wide separation ($s' = 0.75$) and medium separation ($s' = 0.32$).
 
 \subsection{Occupant Ventilation Control}\label{occupant-ventilation-control}
 
@@ -1450,11 +1450,11 @@ Pressure control is achieved by varying either zone exhaust fan flow rate in a c
 
 1. The AirflowNetwork model will run twice with zero and maximum flow rates for either the controlled zone exhaust fan or relief air flow rate. The controlled zone pressures are the return values.
 
-	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief node will produce the minimum zone pressure. 
+	In general, the zero flow rate of either exhaust fan or relief node will generate the maximum zone pressure, while the maximum flow rate of either exhaust fan or relief node will produce the minimum zone pressure.
 
-2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan or relief node flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate or outdoor air flow rate, then the AirflowNetwork model will use root solver to find a solution with calculated zone exhaust fan flow rate or relief node flow rate. Otherwise, the pressure setpoint will not be met. 
+2. If the setpoint pressure is between the maximum zone pressure caused by zero exhaust fan or relief node flow rate and the minimum zone pressure caused by maximum exhaust fan flow rate or outdoor air flow rate, then the AirflowNetwork model will use root solver to find a solution with calculated zone exhaust fan flow rate or relief node flow rate. Otherwise, the pressure setpoint will not be met.
 
-3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust or outdoor flow rate will be forced. 
+3. If both maximum and minimum pressures are higher than the setpoint, the maximum exhaust or outdoor flow rate will be forced.
 
 4. If both maximum and minimum pressures are lower than the setpoint, then zero flow rate will be forced.
 
@@ -1467,10 +1467,10 @@ There are two methods used to size duct diameter and cross section area by assum
 The cross section area (A) is calculated below
 
 \begin{equation}
-A =  \frac{Q}{V} 
+A =  \frac{Q}{V}
 \end{equation}
 
-where 
+where
 
 \begin{tabular}{lp{0.7\linewidth}}
 \\
@@ -1483,7 +1483,7 @@ $V $ &= Maximum velocity {m/s}\\
 The duct diameter is calculated as
 
 \begin{equation}
-D = \sqrt{\frac{4Q}{V \pi } } 
+D = \sqrt{\frac{4Q}{V \pi } }
 \end{equation}
 
 where
@@ -1502,7 +1502,7 @@ $V $ &= Maximum velocity {m/s}\\
 The total pressure loss across a duct may be expressed as
 
 \begin{equation}
-\Delta P =  \big( P_{1} +  \rho  \frac{V_{1}^2}{2}  )  - \big( P_{2} +  \rho  \frac{V_{2}^2}{2}  ) +  \rho g(z_{1} - z_{2} ) 
+\Delta P =  \big( P_{1} +  \rho  \frac{V_{1}^2}{2}  )  - \big( P_{2} +  \rho  \frac{V_{2}^2}{2}  ) +  \rho g(z_{1} - z_{2} )
 \end{equation}
 
 where
@@ -1518,12 +1518,12 @@ $z_1, z_2$ &= Entry and exit elevations {m}\\
 \\
 \end{tabular}
 
-When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing. 
+When entry and exit velocities and elevations are the same, the total pressure difference is equal to the static pressure difference. The assumption will be used for duct sizing.
 
 The total pressure loss in either a truck or a branch can be calculated using Darcy-Weisbach Equation (Eq. 34 in Chapter 21, 2017 ASHRAE HOF)
 
 \begin{equation}
-\Delta P =  \big( \frac{ f L}{D} +  \Sigma C ) *  \frac{ \rho  V^{2} }{2}  
+\Delta P =  \big( \frac{ f L}{D} +  \Sigma C ) *  \frac{ \rho  V^{2} }{2}
 \end{equation}
 
 where
@@ -1542,7 +1542,7 @@ $C$ &= Local loss coefficient for all ducts {dimensionless}\\
 where the friction factor can be represented by Colebrrook's equation:
 
 \begin{equation}
-\frac{1}{\sqrt{f}} = -2 log\big( \frac{ \varepsilon }{3.7 D} +  \frac{2.51}{Re\sqrt{f}}) 
+\frac{1}{\sqrt{f}} = -2 log\big( \frac{ \varepsilon }{3.7 D} +  \frac{2.51}{Re\sqrt{f}})
 \end{equation}
 
 where
@@ -1569,7 +1569,7 @@ The cross section area
 A = \frac{D^2 * \pi}{4}
 \end{equation}
 
-When ΔP given, and the relationship between D and V is also given, there is only a single unknown D. The value can be obtained through iteration. 
+When ΔP given, and the relationship between D and V is also given, there is only a single unknown D. The value can be obtained through iteration.
 
 \subsection{References}\label{afn-references}
 
@@ -1589,7 +1589,7 @@ Dols, W. S. and G. N. Walton. 2002. ``CONTAMW 2.0 User Manual,'' NISTIR 6921, Na
 
 Holmes, J. D. 1986. Wind Loads on low-rise buildings: The structural and environmental effects of wind on buildings and structures, Chapter 12, Faculty of Engineering, Monash University, Melbourne, Australia.
 
-Linden, P., D. Banks, N. Daish, M. Fountain, G. Gross, A. Honnekeri, M. Pigman, R. Thomas, K. Adams, 
+Linden, P., D. Banks, N. Daish, M. Fountain, G. Gross, A. Honnekeri, M. Pigman, R. Thomas, K. Adams,
 S. Brunswick, S. Dutton, R. Gerard, P. Haves, M. Hovanec, P. Switenki, Y. Zhai, E. Arens, G. Carrilho da Gra\c{c}a, W. Fisk, F. Gillan, M. Hill, T. Lawton, G. Szakats, and H. Zhang. 2016. ``Natural Ventilation for Energy Savings in California Commercial Buildings,'' CEC-500-2016-039, California Energy Commission.
 
 Marais, J. M. and C. Teichmann, ``Window Simulation Methods Required for Manual Window Ventilated Buildings,'' Fifth German-Austrian IBPSA Conference, September 22-24, 2014, RWTH Aachen University, Germany.
@@ -1636,4 +1636,3 @@ The calculation procedure is provided below. In order to eliminate internal iter
 Note:
 
 The return conduction and leak losses are not part of system loads. The impact is the temperature and moisture change at the AirLoopHVAC inlet node. The HVAC system in an AirLoopHVAC uses changed inlet conditions to cover the return conduction and leakage impact.
-

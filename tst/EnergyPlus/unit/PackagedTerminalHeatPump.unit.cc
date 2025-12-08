@@ -1347,7 +1347,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
 {
 
     std::string const idf_objects = delimited_string({
-        "  Version,9.4;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    No,                     !- Do Zone Sizing Calculation",
@@ -3877,7 +3877,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(state->dataGlobal->NumOfZones);
     state->dataZoneEnergyDemand->CurDeadBandOrSetback.allocate(state->dataGlobal->NumOfZones);
     state->dataZoneEnergyDemand->DeadBandOrSetback.allocate(state->dataGlobal->NumOfZones);
-    state->dataZoneEnergyDemand->DeadBandOrSetback = 0.0;
+    state->dataZoneEnergyDemand->DeadBandOrSetback = false;
 
     state->dataEnvrn->OutDryBulbTemp = 30.0;
     state->dataEnvrn->OutHumRat = 0.0015;

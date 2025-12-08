@@ -133,36 +133,36 @@ This field is used to directly enter the line item quantity. The units should co
 Some examples of this object in an IDF:
 
 \begin{lstlisting}
+ComponentCost:LineItem,
+  PSZ Equipment from scaling, !- Name
+  ,                           !- Type
+  Coil:DX,                    !- Line Item Type
+  ACDXCoil ZN1,               !- Item Name
+  ,                           !- Object End Use Key
+  ,                           !- Cost per Each {$}
+  ,                           !- Cost per Area {$/m2}
+  ,                           !- Cost per Unit of Output Capacity {$/kW}
+  82.5;                       !- Cost per Unit of Output Capacity per COP {$/kW}
 
-  ComponentCost:LineItem,
-     PSZ Equipment from scaling , !- Name
-     ,                            !- Type
-     Coil:DX,                     !- Line Item Type
-     ACDXCoil ZN1 ,               !- Item Name
-     ,                            !- Object End Use Key
-     ,                            !- Cost per Each {$}
-     ,                            !- Cost per Area {$/m2}
-     ,                            !- Cost per Unit of Output Capacity {$/kW}
-     82.5;                   !- Cost per Unit of Output Capacity per COP {$/kW}
+ComponentCost:LineItem,
+  Lighting Equip: ZN2_E_Space_1,  !- Name
+  ,                           !- Type
+  Lights,                     !- Line Item Type
+  ZN2_E_Space_1,              !- Item Name
+  ,                           !- Object End Use Key
+  ,                           !- Cost per Each {$}
+  ,                           !- Cost per Area {$/m2}
+  3300.000;                   !- Cost per Unit of Output Capacity {$/kW}
 
-
-    ComponentCost:LineItem,
-      Lighting Equip: ZN2_E_Space_1, ,
-      Lights,!- Line Item Type
-      ZN2_E_Space_1, ,
-      ,!- Cost per Each {$}
-      ,!- Cost per Area {$/m2}
-      3300.000;!- Cost per Unit of Output Capacity {$/kW}
-
-
-
-
-    ComponentCost:LineItem, DL controls: ZN4_W_Space_1, ,
-      Daylighting:Detailed, !- Line Item Type
-      ZN4_W_Space_1, ,!- Item Name
-      125.000, !- Cost per Each {$}
-      ,!- Cost per Area {$/m2}
-      ;!- Cost per Unit of Output Capacity {$/kW}
+ComponentCost:LineItem,
+  DL controls: ZN4_W_Space_1,  !- Name
+  ,                           !- Type
+  Daylighting:Detailed,       !- Line Item Type
+  ZN4_W_Space_1,              !- Item Name
+  ,                           !- Object End Use Key
+  125.000,                    !- Cost per Each {$}
+  ,                           !- Cost per Area {$/m2}
+  ;                           !- Cost per Unit of Output Capacity {$/kW}
 \end{lstlisting}
 
 \subsection{ComponentCost:Adjustments}\label{componentcostadjustments}
@@ -203,13 +203,13 @@ An example of this object in an IDF is:
 
 \begin{lstlisting}
 ComponentCost:Adjustments,
-            467, !- Miscellaneous Cost per Conditioned Area
-           0.07, !- Design and Engineering Fees
-           0.07, !- Contractor Fee
-           0.10, !- Contingency
-           0.04, !- Permits, Bonding and Insurance
-           0.015,!- Commissioning Fee
-          1.136; !- Regional Adjustment Factor
+  467,                        !- Miscellaneous Cost per Conditioned Area
+  0.07,                       !- Design and Engineering Fees
+  0.07,                       !- Contractor Fee
+  0.10,                       !- Contingency
+  0.04,                       !- Permits, Bonding and Insurance
+  0.015,                      !- Commissioning Fee
+  1.136;                      !- Regional Adjustment Factor
 \end{lstlisting}
 
 \subsection{ComponentCost:Reference}\label{componentcostreference}
@@ -253,16 +253,15 @@ This optional field can be used to enter an adjustment factor to account for reg
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 ComponentCost:Reference,
-    683060.000, !- Reference Building Line Item Costs {$}
-    467.0, !- Reference Building Miscellaneous Cost per Conditioned Area {$/m2}
-    0.060, !- Reference Building Design and Engineering Fees {dimensionless}
-    0.070, !- Reference Building Contractor Fee {dimensionless}
-    0.100, !- Reference Building Contingency
-    0.04,  !- Reference Building Permits, Bonding and Insurance {dimensionless}
-    0.0075,!- Reference Building Commissioning Fee {dimensionless}
-    1.136; !- Reference Building Regional Adjustment Factor {dimensionless}
+  683060.000,                 !- Reference Building Line Item Costs {$}
+  467.0,                      !- Reference Building Miscellaneous Cost per Conditioned Area {$/m2}
+  0.060,                      !- Reference Building Design and Engineering Fees {dimensionless}
+  0.070,                      !- Reference Building Contractor Fee {dimensionless}
+  0.100,                      !- Reference Building Contingency
+  0.04,                       !- Reference Building Permits, Bonding and Insurance {dimensionless}
+  0.0075,                     !- Reference Building Commissioning Fee {dimensionless}
+  1.136;                      !- Reference Building Regional Adjustment Factor {dimensionless}
 \end{lstlisting}
 
 \subsection{Economics Cost Estimate Reporting}\label{economics-cost-estimate-reporting}

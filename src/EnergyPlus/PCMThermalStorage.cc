@@ -47,17 +47,23 @@
 
 // PCM Thermal Storage Module - PCMThermalStorage.cc
 
-#include "PCMThermalStorage.hh"
+// C++ Headers
+#include <algorithm>
+
+// EnergyPlus Headers
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/HeatBalFiniteDiffManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/PCMThermalStorage.hh>
 #include <EnergyPlus/PhaseChangeModeling/HysteresisModel.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
@@ -65,8 +71,6 @@
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-
-#include <algorithm> // for std::max used in autosizing
 
 namespace EnergyPlus {
 namespace PCMStorage {
@@ -133,7 +137,15 @@ namespace PCMStorage {
             EnergyPlus::PCMStorage::RegisterPCMStorageOutputVariables(state);
             this->MyPlantScanFlag = false;
         }
-        Real64 rho = 998.2;
+        Real64 temp = state.dataLoopNodes->Node(this->UseSideInletNode).Temp;
+
+        // get the water fluid property object
+        EnergyPlus::Fluid::GlycolProps *rhoUseProps = this->usePlantLoc.loop->glycol;
+        double rhoUse = rhoUseProps->getDensity(state, temp, "PCMStorageData::Calculate");
+
+        EnergyPlus::Fluid::GlycolProps *rhoPlantProps = this->sourcePlantLoc.loop->glycol;
+        double rhoPlant = rhoPlantProps->getDensity(state, temp, "PCMStorageData::Calculate");
+
         // At the beginning of each new environment (e.g. design day) perform one-time initializations.
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag) {
             // Determine design flow rates when the user has requested autosizing (indicated by a value <= 0).
@@ -146,7 +158,7 @@ namespace PCMStorage {
                     initMassFlow = state.dataLoopNodes->Node(this->UseSideInletNode).MassFlowRate;
                 }
                 if (initMassFlow > 0.0) {
-                    this->UseSideDesignFlowRate = initMassFlow / rho;
+                    this->UseSideDesignFlowRate = initMassFlow / rhoUse;
                 } else if (this->PlantSideDesignFlowRate > 0.0) {
                     this->UseSideDesignFlowRate = this->PlantSideDesignFlowRate;
                 } else {
@@ -160,15 +172,15 @@ namespace PCMStorage {
                     initMassFlow = state.dataLoopNodes->Node(this->PlantSideInletNode).MassFlowRate;
                 }
                 if (initMassFlow > 0.0) {
-                    this->PlantSideDesignFlowRate = initMassFlow / rho;
+                    this->PlantSideDesignFlowRate = initMassFlow / rhoPlant;
                 } else {
                     // If nothing else is known use the use side design flow rate as the plant side design flow rate.
                     this->PlantSideDesignFlowRate = this->UseSideDesignFlowRate;
                 }
             }
             // Convert design volumetric flow rates (m3/s) to mass flow rates (kg/s).
-            this->UseSideMassFlowRate = this->UseSideDesignFlowRate * rho;
-            this->PlantSideMassFlowRate = this->PlantSideDesignFlowRate * rho;
+            this->UseSideMassFlowRate = this->UseSideDesignFlowRate * rhoUse;
+            this->PlantSideMassFlowRate = this->PlantSideDesignFlowRate * rhoPlant;
 
             // If the tank capacity has been set to zero or negative (autosize request), estimate a capacity.
             // The estimate here is based on storing one hour of flow on the larger of the use side or plant side.
@@ -241,7 +253,13 @@ namespace PCMStorage {
         // Real64 avail = this->AvailabilitySchedule->getCurrentVal();
         Real64 dt_seconds = state.dataHVACGlobal->TimeStepSys * 3600.0;
 
-        Real64 CpWater = 4180.0; // J/kg-C
+        Real64 temp = state.dataLoopNodes->Node(this->UseSideInletNode).Temp;
+
+        EnergyPlus::Fluid::GlycolProps *cpUseProps = this->usePlantLoc.loop->glycol;
+        Real64 CpWaterUse = cpUseProps->getSpecificHeat(state, temp, "PCMStorageData::Calculate"); // J/kg-C
+
+        EnergyPlus::Fluid::GlycolProps *cpPlantProps = this->sourcePlantLoc.loop->glycol;
+        Real64 CpWaterPlant = cpPlantProps->getSpecificHeat(state, temp, "PCMStorageData::Calculate"); // J/kg-C
         // Real64 massFlowUse = useInlet.MassFlowRate;
         // Real64 massFlowPlant = plantInlet.MassFlowRate;
 
@@ -263,10 +281,9 @@ namespace PCMStorage {
 
         // Real64 useheatTransfer = massFlowUse * CpWater * deltaTUse;       // Heat to Water Heater
         // Real64 plantheatTransfer = massFlowPlant * CpWater * deltaTPlant; // Heat to PCM Tank
-        HeatLossRate_W = HeatLossRate;
 
         // Calculate tank temperature from stored energy
-        if (this->PCMmat) {
+        if (this->PCMmat != nullptr) {
             Real64 targetEnthalpy = EnergyStored / TankCapacity;
             Real64 Tlow = this->PCMmat->peakTempMelting - 30.0;
             Real64 Thigh = this->PCMmat->peakTempMelting + 30.0;
@@ -335,11 +352,11 @@ namespace PCMStorage {
 
         // Recompute heat-transfer rates using the requested flows (W)
         // (deltaTUse/deltaTPlant were computed above; keep your existing outlet temp calcs)
-        Real64 useheatTransfer_req = mUseReq * CpWater * (useInlet.Temp - useOutletTemp);
-        Real64 plantheatTransfer_req = mPlantReq * CpWater * (plantInlet.Temp - plantOutletTemp);
+        Real64 useheatTransfer_req = mUseReq * CpWaterUse * (useInlet.Temp - useOutletTemp);
+        Real64 plantheatTransfer_req = mPlantReq * CpWaterPlant * (plantInlet.Temp - plantOutletTemp);
 
         // Only one side should contribute per timestep by construction; but compute net formally:
-        Real64 netPowerW = plantheatTransfer_req + useheatTransfer_req - HeatLossRate_W;
+        Real64 netPowerW = plantheatTransfer_req + useheatTransfer_req - HeatLossRate;
 
         // Update stored energy (J)
         EnergyStored += netPowerW * dt_seconds;
@@ -368,7 +385,7 @@ namespace PCMStorage {
         SetupOutputVariable(state,
                             "Thermal Energy Storage Heat Loss Rate",
                             Constant::Units::W,
-                            PCM.HeatLossRate_W,
+                            PCM.HeatLossRate,
                             EnergyPlus::OutputProcessor::TimeStepType::System,
                             EnergyPlus::OutputProcessor::StoreType::Average,
                             PCM.Name);

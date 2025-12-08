@@ -1058,10 +1058,10 @@ namespace DataSizing {
         int NumTimeStepsInAvg = 1;                        // number of zone timesteps in the averaging window for coincident plant flow
         int SizingFactorOption = 0;                       // option for what sizing factor to apply
         // Calculated
-        Real64 DesVolFlowRate = 0.0; // loop design flow rate in m3/s
-        bool VolFlowSizingDone = 0;  // flag to indicate when this loop has finished sizing flow rate
-        Real64 PlantSizFac = 0.0;    // hold the loop and pump sizing factor
-        Real64 DesCapacity = 0.0;    // final capacity in W
+        Real64 DesVolFlowRate = 0.0;    // loop design flow rate in m3/s
+        bool VolFlowSizingDone = false; // flag to indicate when this loop has finished sizing flow rate
+        Real64 PlantSizFac = 0.0;       // hold the loop and pump sizing factor
+        Real64 DesCapacity = 0.0;       // final capacity in W
     };
 
     // based on ZoneSizingData but only have member variables that are related to the CheckSum/

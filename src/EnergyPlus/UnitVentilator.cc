@@ -2577,11 +2577,10 @@ namespace UnitVentilator {
                                 auto f = [&state, UnitVentNum, FirstHVACIteration, fanOp](Real64 const PartLoadRatio) {
                                     Real64 QUnitOut = 0.0; // heating/Cooling provided by unit ventilator [watts]
                                     CalcUnitVentilatorComponents(state, UnitVentNum, FirstHVACIteration, QUnitOut, fanOp, PartLoadRatio);
-                                    if (state.dataUnitVentilators->QZnReq) {
+                                    if (state.dataUnitVentilators->QZnReq != 0.0) {
                                         return (QUnitOut - state.dataUnitVentilators->QZnReq) / state.dataUnitVentilators->QZnReq;
-                                    } else {
-                                        return 0.0;
                                     }
+                                    return 0.0;
                                 };
                                 General::SolveRoot(state, 0.001, MaxIter, SolFlag, PartLoadFrac, f, 0.0, 1.0);
                             }
@@ -2812,7 +2811,7 @@ namespace UnitVentilator {
 
                                     // Convert parameters to usable variables
                                     CalcUnitVentilatorComponents(state, UnitVentNum, FirstHVACIteration, QUnitOut, fanOp, PartLoadRatio);
-                                    if (state.dataUnitVentilators->QZnReq) {
+                                    if (state.dataUnitVentilators->QZnReq != 0.0) {
                                         return (QUnitOut - state.dataUnitVentilators->QZnReq) / state.dataUnitVentilators->QZnReq;
                                     }
                                     return 0.0;

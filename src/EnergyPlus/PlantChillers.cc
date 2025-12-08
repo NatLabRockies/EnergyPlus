@@ -2111,9 +2111,8 @@ namespace PlantChillers {
                 return false;
             }
             return true;
-        } else {
-            return true;
         }
+        return true;
     }
 
     EngineDrivenChillerSpecs *EngineDrivenChillerSpecs::factory(EnergyPlusData &state, std::string const &chillerName)
@@ -7534,9 +7533,8 @@ namespace PlantChillers {
                 return false;
             }
             return true;
-        } else {
-            return true;
         }
+        return true;
     }
 
 } // namespace PlantChillers

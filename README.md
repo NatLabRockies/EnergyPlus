@@ -15,27 +15,26 @@ This is the EnergyPlus Development Repository.  EnergyPlus™ is a whole buildin
 
 ## Testing
 
-[![](https://github.com/NREL/EnergyPlus/workflows/Custom%20Check/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/custom_check.yml) 
-[![](https://github.com/NREL/EnergyPlus/workflows/Documentation/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/documentation.yml) 
-[![](https://github.com/NREL/EnergyPlus/workflows/CppCheck/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/cppcheck.yml)
+[![](https://github.com/NREL/EnergyPlus/workflows/Code%20Integrity/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/test_code_integrity.yml)
+[![](https://github.com/NREL/EnergyPlus/workflows/Documentation/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/build_documentation.yml)
 
 Every commit and every release of EnergyPlus undergoes rigorous testing.
 The testing consists of building EnergyPlus, of course, then there are unit tests, integration tests, API tests, and regression tests.
 Since 2014, most of the testing has been performed by our bots ([Tik-Tok](https://github.com/nrel-bot), [Gort](https://github.com/nrel-bot-2), and [Marvin](https://github.com/nrel-bot-3)), using a fork of the [Decent CI](https://github.com/lefticus/decent_ci) continuous integration system.
-We are now adapting our efforts to use the Github Actions system to handle more of our testing processes.
+We are now adapting our efforts to use the GitHub Actions system to handle more of our testing processes.
 In the meantime, while Decent CI is still handling the regression and bulkier testing, results from Decent CI are still available on the testing [dashboard](https://myoldmopar.github.io/EnergyPlusBuildResults/).
 
 ## Releases
 
-[![](https://github.com/NREL/EnergyPlus/workflows/Windows%20Releases/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/windows_release.yml) 
-[![](https://github.com/NREL/EnergyPlus/workflows/Mac%20Releases/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/mac_release.yml) 
+[![](https://github.com/NREL/EnergyPlus/workflows/Windows%20Releases/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/windows_release.yml)
+[![](https://github.com/NREL/EnergyPlus/workflows/Mac%20Releases/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/mac_release.yml)
 [![](https://github.com/NREL/EnergyPlus/workflows/Linux%20Releases/badge.svg)](https://github.com/NREL/EnergyPlus/actions/workflows/linux_release.yml)
 
 EnergyPlus is released twice annually, usually in March and September.
 It is recommended all use of EnergyPlus in production workflows use these formal, public releases.
 Iteration **(pre-)releases** may be created during a development cycle, however users should generally avoid these, as input syntax may change which won't be supported by the major release version transition tools, and could require manual intervention to remedy.
 If an interim release is intended for active use by users, such as a bug-fix-only or performance-only re-release, it will be clearly specified on the release notes and a public announcement will accompany this type of release.
-Our releases are now built by Github Actions.
+Our releases are now built by GitHub Actions.
 
 ## Core Documentation
 
@@ -65,4 +64,4 @@ If you are interested in contributing, please start there, but feel free to reac
 ## Building EnergyPlus
 
 A detailed description of compiling EnergyPlus on multiple platforms is available on the [wiki](https://github.com/NREL/EnergyPlus/wiki/Building-EnergyPlus).
-Also, as we are adapting to using Github Actions, the recipes for building EnergyPlus can be found in our [workflow files](https://github.com/NREL/EnergyPlus/tree/develop/.github/workflows).
+Also, as we are adapting to using GitHub Actions, the recipes for building EnergyPlus can be found in our [workflow files](https://github.com/NREL/EnergyPlus/tree/develop/.github/workflows).

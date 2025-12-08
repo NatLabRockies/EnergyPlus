@@ -53,8 +53,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_int, c_char_p, c_void_p, CFUNCTYPE
+from ctypes import CFUNCTYPE, c_char_p, c_int, c_void_p, cdll
 from types import FunctionType
+
 from pyenergyplus.common import RealEP
 
 # CFUNCTYPE wrapped Python callbacks need to be kept in memory explicitly, otherwise GC takes it
@@ -310,7 +311,9 @@ class Psychrometrics:
         self.api.psyTdpFnTdbTwbPb.argtypes = [c_void_p, RealEP, RealEP, RealEP]
         self.api.psyTdpFnTdbTwbPb.restype = RealEP
 
-    def density(self, state: c_void_p, barometric_pressure: float, dry_bulb_temp: float, humidity_ratio: float) -> float:
+    def density(
+        self, state: c_void_p, barometric_pressure: float, dry_bulb_temp: float, humidity_ratio: float
+    ) -> float:
         """
         Returns the psychrometric density at the specified conditions.
 
@@ -353,7 +356,9 @@ class Psychrometrics:
         """
         return self.api.psyHFnTdbW(state, dry_bulb_temp, humidity_ratio)
 
-    def enthalpy_b(self, state: c_void_p, dry_bulb_temp: float, relative_humidity_fraction: float, barometric_pressure: float) -> float:
+    def enthalpy_b(
+        self, state: c_void_p, dry_bulb_temp: float, relative_humidity_fraction: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric enthalpy at the specified conditions.
 
@@ -386,7 +391,9 @@ class Psychrometrics:
         """
         return self.api.psyTdbFnHW(state, enthalpy, humidity_ratio)
 
-    def vapor_density(self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float) -> float:
+    def vapor_density(
+        self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric vapor density at the specified conditions.
 
@@ -409,7 +416,9 @@ class Psychrometrics:
         """
         return self.api.psyRhFnTdbRhov(state, dry_bulb_temp, vapor_density)
 
-    def relative_humidity_b(self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float) -> float:
+    def relative_humidity_b(
+        self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric relative humidity at the specified conditions.
 
@@ -421,7 +430,9 @@ class Psychrometrics:
         """
         return self.api.psyRhFnTdbWPb(state, dry_bulb_temp, humidity_ratio, barometric_pressure)
 
-    def wet_bulb(self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float) -> float:
+    def wet_bulb(
+        self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric wet bulb temperature at the specified conditions.
 
@@ -433,7 +444,9 @@ class Psychrometrics:
         """
         return self.api.psyTwbFnTdbWPb(state, dry_bulb_temp, humidity_ratio, barometric_pressure)
 
-    def specific_volume(self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float) -> float:
+    def specific_volume(
+        self, state: c_void_p, dry_bulb_temp: float, humidity_ratio: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric specific volume at the specified conditions.
 
@@ -499,8 +512,9 @@ class Psychrometrics:
         """
         return self.api.psyWFnTdpPb(state, dew_point_temp, barometric_pressure)
 
-    def humidity_ratio_c(self, state: c_void_p, dry_bulb_temp: float, relative_humidity_fraction: float,
-                         barometric_pressure: float) -> float:
+    def humidity_ratio_c(
+        self, state: c_void_p, dry_bulb_temp: float, relative_humidity_fraction: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric humidity ratio at the specified conditions.
 
@@ -512,7 +526,9 @@ class Psychrometrics:
         """
         return self.api.psyWFnTdbRhPb(state, dry_bulb_temp, relative_humidity_fraction, barometric_pressure)
 
-    def humidity_ratio_d(self, state: c_void_p, dry_bulb_temp: float, wet_bulb_temp: float, barometric_pressure: float) -> float:
+    def humidity_ratio_d(
+        self, state: c_void_p, dry_bulb_temp: float, wet_bulb_temp: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric humidity ratio at the specified conditions.
 
@@ -535,7 +551,9 @@ class Psychrometrics:
         """
         return self.api.psyTdpFnWPb(state, humidity_ratio, barometric_pressure)
 
-    def dew_point_b(self, state: c_void_p, dry_bulb_temp: float, wet_bulb_temp: float, barometric_pressure: float) -> float:
+    def dew_point_b(
+        self, state: c_void_p, dry_bulb_temp: float, wet_bulb_temp: float, barometric_pressure: float
+    ) -> float:
         """
         Returns the psychrometric dew point temperature at the specified conditions.
 
@@ -565,7 +583,10 @@ class EnergyPlusVersion:
         :return: EnergyPlus version, as major.minor.patch-build
         """
         return "%s.%s.%s-%s" % (
-            self.ep_version_major, self.ep_version_minor, self.ep_version_patch, self.ep_version_build
+            self.ep_version_major,
+            self.ep_version_minor,
+            self.ep_version_patch,
+            self.ep_version_build,
         )
 
 
@@ -610,7 +631,7 @@ class Functional:
         """
         self.initialize(state)
         if isinstance(glycol_name, str):
-            glycol_name = glycol_name.encode('utf-8')
+            glycol_name = glycol_name.encode("utf-8")
         return Glycol(state, self.api, glycol_name)
 
     def refrigerant(self, state: c_void_p, refrigerant_name: str) -> Refrigerant:
@@ -623,7 +644,7 @@ class Functional:
         """
         self.initialize(state)
         if isinstance(refrigerant_name, str):
-            refrigerant_name = refrigerant_name.encode('utf-8')
+            refrigerant_name = refrigerant_name.encode("utf-8")
         return Refrigerant(state, self.api, refrigerant_name)
 
     def psychrometrics(self, state: c_void_p) -> Psychrometrics:

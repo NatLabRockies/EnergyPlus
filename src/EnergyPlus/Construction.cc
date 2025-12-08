@@ -1966,7 +1966,7 @@ void ConstructionProps::reportLayers(EnergyPlusData &state)
 {
     // Report the layers for each opaque construction in predefined tabular report
     // J. Glazer March 2024
-    if (state.dataOutRptPredefined->pdchOpqConsLayCol.size() > 0) {
+    if (!state.dataOutRptPredefined->pdchOpqConsLayCol.empty()) {
         for (int i = 1; i <= this->TotLayers; ++i) {
             int layerIndex = this->LayerPoint(i);
             auto const *mat = state.dataMaterial->materials(layerIndex);
@@ -2021,14 +2021,14 @@ Real64 ConstructionProps::setUserTemperatureLocationPerpendicular(EnergyPlusData
         ShowWarningError(state, "ConstructionProperty:InternalHeatSource has a perpendicular temperature location parameter that is less than zero.");
         ShowContinueError(state, format("Construction={} has this error.  The parameter has been reset to 0.", this->Name));
         return 0.0;
-    } else if (userValue > 1.0) {
+    }
+    if (userValue > 1.0) {
         ShowWarningError(state,
                          "ConstructionProperty:InternalHeatSource has a perpendicular temperature location parameter that is greater than one.");
         ShowContinueError(state, format("Construction={} has this error.  The parameter has been reset to 1.", this->Name));
         return 1.0;
-    } else { // Valid value between 0 and 1
-        return userValue;
-    }
+    } // Valid value between 0 and 1
+    return userValue;
 }
 
 void ConstructionProps::setNodeSourceAndUserTemp(Array1D_int &Nodes)

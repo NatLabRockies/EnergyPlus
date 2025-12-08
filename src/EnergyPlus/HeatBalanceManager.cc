@@ -1341,7 +1341,7 @@ namespace HeatBalanceManager {
         static constexpr std::string_view routineName = "GetConstructData";
 
         // If UniqueConstructionNames size, then input has already been gotten
-        if (state.dataHeatBalMgr->UniqueConstructNames.size()) {
+        if (!state.dataHeatBalMgr->UniqueConstructNames.empty()) {
             return;
         }
 
@@ -1752,7 +1752,7 @@ namespace HeatBalanceManager {
             // frame or divider.)
 
             fs::path window5DataFilePath;
-            if (ConstructAlphas(1) == "") {
+            if (ConstructAlphas(1).empty()) {
                 window5DataFilePath = state.dataStrGlobals->CurrentWorkingFolder / "Window5DataFile.dat";
             } else {
                 window5DataFilePath = ConstructAlphas(1);

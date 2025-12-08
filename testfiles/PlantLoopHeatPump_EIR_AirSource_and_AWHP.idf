@@ -8,7 +8,7 @@
 ! System:   None.
 ! Plant:    Both the heating loop and the cooling loop served by air-to-water heat pump.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -218,8 +218,7 @@
     ,                        !- Plant Loop Demand Calculation Scheme
     ,                        !- Common Pipe Simulation
     ,                        !- Pressure Simulation Type
-    ,                        !- Loop Circulation Time {minutes}
-    HotWater;                !- Water Loop Type
+    ;                        !- Loop Circulation Time {minutes}
 
   SetpointManager:Scheduled,
     Heating Coil Load Loop Setpoint Manager,  !- Name
@@ -566,8 +565,7 @@
     ,                        !- Plant Loop Demand Calculation Scheme
     ,                        !- Common Pipe Simulation
     ,                        !- Pressure Simulation Type
-    ,                        !- Loop Circulation Time {minutes}
-    ChilledWater;            !- Water Loop Type
+    ;                        !- Loop Circulation Time {minutes}
 
   SetpointManager:Scheduled,
     Cooling Coil Load Loop Setpoint Manager,  !- Name

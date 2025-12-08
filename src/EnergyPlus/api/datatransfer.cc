@@ -487,9 +487,9 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
-        if (theActuator.RealValue) {
+        if (theActuator.RealValue != nullptr) {
             *theActuator.RealValue = value;
-        } else if (theActuator.IntValue) {
+        } else if (theActuator.IntValue != nullptr) {
             *theActuator.IntValue = static_cast<int>(std::lround(value));
         } else {
             // follow protocol from EMS manager, where 1.0 is true, 0.0 is false, and anything else is also false
@@ -516,10 +516,10 @@ Real64 getActuatorValue(EnergyPlusState state, const int handle)
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
-        if (theActuator.RealValue) {
+        if (theActuator.RealValue != nullptr) {
             return *theActuator.RealValue;
         }
-        if (theActuator.IntValue) {
+        if (theActuator.IntValue != nullptr) {
             return static_cast<float>(*theActuator.IntValue);
         }
         // follow protocol from EMS manager, where 1.0 is true, 0.0 is false, and anything else is also false

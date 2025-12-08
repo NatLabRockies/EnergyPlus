@@ -5,4 +5,4 @@ frmNewQueue = 124, 453, 1674, 1356, , 416, 416, 1966, 1319, C
 frmRunStatus = 0, 0, 0, 0, C, 442, 442, 1992, 1345, C
 frmOptions = 0, 0, 0, 0, C, 0, 0, 1550, 903, C
 frmDefineViewResults = 0, 0, 0, 0, C, 26, 26, 1576, 929, C
-MainModule = 78, 78, 1628, 981, 
+MainModule = 78, 78, 1628, 981,

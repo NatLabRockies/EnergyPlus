@@ -142,28 +142,29 @@ void GasAbsorberSpecs::simulate(
         if (compInletNodeNum == this->ChillReturnNodeNum) { // Operate as chiller
             brIdentity = DataPlant::BrLoopType::Chiller;
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
+        }
+        if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
             brIdentity = DataPlant::BrLoopType::Heater;
             break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
             brIdentity = DataPlant::BrLoopType::Condenser;
             break;
-        } else {
-            brIdentity = DataPlant::BrLoopType::NoMatch;
         }
+        brIdentity = DataPlant::BrLoopType::NoMatch;
     }
 
     if (brIdentity == DataPlant::BrLoopType::Chiller) {
         // Calculate Node Values
         // Calculate Equipment and Update Variables
-        this->InCoolingMode = RunFlag != 0;
+        this->InCoolingMode = RunFlag != false;
         this->initialize(state);
         this->calculateChiller(state, CurLoad);
         this->updateCoolRecords(state, CurLoad, RunFlag);
     } else if (brIdentity == DataPlant::BrLoopType::Heater) {
         // Calculate Node Values
         // Calculate Equipment and Update Variables
-        this->InHeatingMode = RunFlag != 0;
+        this->InHeatingMode = RunFlag != false;
         this->initialize(state);
         this->calculateHeater(state, CurLoad, RunFlag);
         this->updateHeatRecords(state, CurLoad, RunFlag);
@@ -206,22 +207,23 @@ void GasAbsorberSpecs::getDesignCapacities(
             OptLoad = this->NomCoolingCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
+        }
+        if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
             Real64 Sim_HeatCap = this->NomCoolingCap * this->NomHeatCoolRatio;
             MinLoad = Sim_HeatCap * this->MinPartLoadRat;
             MaxLoad = Sim_HeatCap * this->MaxPartLoadRat;
             OptLoad = Sim_HeatCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
             MinLoad = 0.0;
             MaxLoad = 0.0;
             OptLoad = 0.0;
             matchfound = true;
             break;
-        } else {
-            matchfound = false;
         }
+        matchfound = false;
     }
 
     if (!matchfound) {

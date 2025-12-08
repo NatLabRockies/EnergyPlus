@@ -1728,10 +1728,8 @@ namespace FuelCellElectricGenerator {
                 Pel = 0.0;
                 this->FCPM.Pel = 0.0;
                 return;
-            } else {
-
-                this->FCPM.Pel = Pel;
             }
+            this->FCPM.Pel = Pel;
 
             // Calculation Step 3. Determine Air rate
 

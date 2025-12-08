@@ -3,19 +3,19 @@
 % table 36
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Window Heat Balance Calculations \label{table:c++-variables-used-in-window-heat-balance}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Window Heat Balance Calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
 
 N & Number of glass layers & - & nlayer \tabularnewline
-$\alpha$ & Stefan-Boltzmann constant & ~ & sigma \tabularnewline 
+$\alpha$ & Stefan-Boltzmann constant & ~ & sigma \tabularnewline
 $\varepsilon$\(_{i}\) & Emissivity of face i & - & emis \tabularnewline
 k\(_{i}\) & Conductance of glass layer i & W/m\(^{2}\)-K & scon \tabularnewline
 h\(_{o}\), h\(_{i}\) & Outside, inside air film convective conductance & W/m\(^{2}\)-K & hcout, hcout \tabularnewline
@@ -228,13 +228,13 @@ The value of the inside face temperature, \({\theta_{2N}}\), determined in this 
 % table 37
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Edge of Glass calculations \label{table:c++-variables-used-in-edge-of-glass}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Edge of Glass calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
@@ -396,13 +396,13 @@ For the zone heat balance calculation the inside surface temperature of the fram
 % table 38
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Window/Frame and Divider calculations \label{table:c++-variables-used-in-windowframe}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Window/Frame and Divider calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
@@ -1011,20 +1011,20 @@ The quantities \emph{h\(_{cv}\)} and \emph{T\(_{gap}\)} depend on the airflow ve
 The heat balance equation for the shading layer surface facing the gap is:
 
 \begin{equation}
-\frac{E_i \tau_{sh} \rho_4 \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} + 
+\frac{E_i \tau_{sh} \rho_4 \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} +
   \frac{\sigma \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} \left[
     \varepsilon_4 \theta_4^4 - \theta_5^4 (
-      1 - \rho_4( 
+      1 - \rho_4(
         \varepsilon_{sh} + \rho_{sh}
       )
     )
-  \right] + 
+  \right] +
   k_{sh} \left(
     \theta_6 - \theta_5
-  \right) + 
+  \right) +
   h_{cv} \left(
     T_{gap} - \theta_5
-  \right) + 
+  \right) +
   S_{sh,1} = 0
 \end{equation}
 
@@ -1131,7 +1131,7 @@ If T\(_{gap}\) \textgreater{} T\(_{gap,in}\):
 \begin{equation}
   \begin{array}{rl}
     A_{eq,in}  & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) \\
-    A_{eq,out} & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) 
+    A_{eq,out} & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right)
   \end{array}
 \end{equation}
 
@@ -1140,7 +1140,7 @@ If T\(_{gap}\) \(\leq\) T\(_{gap,in}\):
 \begin{equation}
   \begin{array}{rl}
     A_{eq,in}  & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) \\
-    A_{eq,out} & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) 
+    A_{eq,out} & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right)
   \end{array}
 \end{equation}
 
@@ -1289,7 +1289,7 @@ A_s & = d_{gap}W
 \label{eq:OpennesCalcs}
 \end{equation}
 
-Where $\rho$ is the fluid density, $v$ s the fluid velocity, $Z_{in/out}$ is the pressure loss factor of the cavity, As is the cross-section area of the cavity, $d_{gap}$ is the glass-to-shade cavity depth, $d_{surface}$ is the openness fraction (0 - 1), W is the window width, H is the window height, $A_{eq}$, is the equivalent inlet/outlet area of the cavity, and Al, Ar, Atop, Abot, Ah are the areas of the left, right, top, bottom, and front surface ventilation gaps respectively. 
+Where $\rho$ is the fluid density, $v$ s the fluid velocity, $Z_{in/out}$ is the pressure loss factor of the cavity, As is the cross-section area of the cavity, $d_{gap}$ is the glass-to-shade cavity depth, $d_{surface}$ is the openness fraction (0 - 1), W is the window width, H is the window height, $A_{eq}$, is the equivalent inlet/outlet area of the cavity, and Al, Ar, Atop, Abot, Ah are the areas of the left, right, top, bottom, and front surface ventilation gaps respectively.
 
 The set of equations~\ref{eq:OpennesCalcs} include an inherent minimum of pressure loss coefficient, Z, when the calculated inlet or outlet area, $A_{eq}$, equals 5/3 the cross section area, As. This limits the validity of the model to $A_{eq}$ less than 5/3 of As. Figure~\ref{fig:PressureLossFacor} illustrates this minimum with a surface map of calculated Z values (log(Z) plotted to show contours) over a range of $A_{eq}$ based on a 1m x 1m window. Figure~\ref{fig:PressureLossFacor} shows a slice of the surface plot at a typical $d_{gap} = 15 mm$. Window surface area, Aw, is typically one to two orders of magnitude larger than the cross-section area, As. This means that $A_{eq}$ exceeds As at relatively low surface openness. For a typical glass-to-shade gap, $d_{gap} = 15mm$, the local minimum in Z, and in turn valid openness range of the algorithm, occurs at an openness of $d_{surface} \cong 0.1$.
 
@@ -1300,7 +1300,7 @@ The set of equations~\ref{eq:OpennesCalcs} include an inherent minimum of pressu
 \end{figure}
 
 \subsubsection{Screen Heat Flux}
-To improve the simulation correlation, correlation coefficients are proposed to the five ventilated layer opening parameters defined in ISO 15099; $A_h$, $A_{top}$, $A_{bot}$, $A_l$, and $A_r$. This model includes two correlation constants, C1 and C2 that are determined based on regression analysis of the measured dataset. An additional two constants, C3 and C4, are also optimized and used to correlate the to left/right and top/bottom gaps respectively as shown in Equations~\ref{eq:ScreenCorrelations}. 
+To improve the simulation correlation, correlation coefficients are proposed to the five ventilated layer opening parameters defined in ISO 15099; $A_h$, $A_{top}$, $A_{bot}$, $A_l$, and $A_r$. This model includes two correlation constants, C1 and C2 that are determined based on regression analysis of the measured dataset. An additional two constants, C3 and C4, are also optimized and used to correlate the to left/right and top/bottom gaps respectively as shown in Equations~\ref{eq:ScreenCorrelations}.
 
 \begin{equation}
 \begin{array}{rl}
@@ -1314,7 +1314,7 @@ A_{t,b}^* & = C_4 \cdot A_{t,b}
 Where correlation constants are:
 
 \begin{tabular}{ l c }
-	\hline	
+	\hline
 	Coefficient & Value \\
 	\hline
 	\hline
@@ -1322,8 +1322,8 @@ Where correlation constants are:
 	$C_2$ & 1.20 \\
 	$C_3$ & 1 \\
 	$C_4$ & 1 \\
-	\hline  
-	
+	\hline
+
 \end{tabular}
 
 \subsubsection{Horizontal Louvered Blind}
@@ -1349,7 +1349,7 @@ where $t^*$ and $k^*$ are the revised layer thickness and equivalent conductivit
 Where correlation constants are:
 
 \begin{tabular}{ l c c }
-	\hline	
+	\hline
 	Coefficient & Horizontal Blinds & Vertical Blinds \\
 	\hline
 	\hline
@@ -1357,8 +1357,8 @@ Where correlation constants are:
 	$D_2$ & -0.63 & -0.00 \\
 	$D_3$ & 0.53 & 0.270 \\
 	$D_4$ & 0.043 & 0.012 \\
-	\hline  
-	
+	\hline
+
 \end{tabular}
 
 \subsection{Heat Balance Equations for Between-Glass Shading Device}\label{heat-balance-equations-for-between-glass-shading-device}
@@ -2501,7 +2501,7 @@ The off-normal properties of roller-blind are determined from solar properties o
 \end{equation}
 
 \begin{equation}
-b = \left\{ 
+b = \left\{
     \begin{array}{lc}
       0.133 \cdot \left( \rm{\tau}^{str} + 0.003 \right)^{-0.467} &\text{if} \left( 0 \le \rm{\tau}^{str} \le 0.33 \right) \\
       0.33 \cdot \left( 1 - \rm{\tau}^{str} \right)               &\text{if} \left( 0.33 < \rm{\tau}^{str} \le 1 \right)

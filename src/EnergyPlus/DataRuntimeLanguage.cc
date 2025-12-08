@@ -137,7 +137,7 @@ namespace DataRuntimeLanguage {
             errFlag = true;
             ErrorsFound = true;
         }
-        if ((cFieldValue.length() > 0) && (is_any_of(cFieldValue[0], InvalidStartCharacters))) {
+        if ((!cFieldValue.empty()) && (is_any_of(cFieldValue[0], InvalidStartCharacters))) {
             ShowSevereError(state, format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
             ShowContinueError(state, format("...{}; Names used as EMS variables cannot start with numeric characters.", cFieldName));
             errFlag = true;

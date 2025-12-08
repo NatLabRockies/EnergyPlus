@@ -1197,11 +1197,11 @@ Real64 IS_F(EnergyPlusData &state,
 
     if (OPT == state.dataWindowEquivalentLayer->hipRHO) {
         return RHO_BD;
-    } else if (OPT == state.dataWindowEquivalentLayer->hipTAU) {
-        return TAU_BB + TAU_BD;
-    } else {
-        return -1.0;
     }
+    if (OPT == state.dataWindowEquivalentLayer->hipTAU) {
+        return TAU_BB + TAU_BD;
+    }
+    return -1.0;
 }
 
 void IS_BEAM(EnergyPlusData &state,
@@ -1277,9 +1277,8 @@ Real64 IS_OPENNESS(Real64 const D, // wire diameter
 
     if (S > 0.0) {
         return pow_2(max(S - D, 0.0) / S);
-    } else {
-        return 0.0;
     }
+    return 0.0;
 }
 
 Real64 IS_DSRATIO(Real64 const OPENNESS) // openness
@@ -1291,9 +1290,8 @@ Real64 IS_DSRATIO(Real64 const OPENNESS) // openness
 
     if (OPENNESS > 0.0) {
         return 1.0 - min(std::sqrt(OPENNESS), 1.0);
-    } else {
-        return 0.0;
     }
+    return 0.0;
 }
 
 void FM_DIFF(EnergyPlusData &state,
@@ -1370,11 +1368,11 @@ Real64 FM_F(EnergyPlusData &state,
 
     if (Opt == state.dataWindowEquivalentLayer->hipRHO) {
         return RHO_BD;
-    } else if (Opt == state.dataWindowEquivalentLayer->hipTAU) {
-        return TAU_BB + TAU_BD;
-    } else {
-        return -1.0;
     }
+    if (Opt == state.dataWindowEquivalentLayer->hipTAU) {
+        return TAU_BB + TAU_BD;
+    }
+    return -1.0;
 }
 
 void FM_BEAM(EnergyPlusData &state,
@@ -3618,10 +3616,9 @@ Real64 VB_SLAT_RADIUS_RATIO(Real64 const W, // slat tip-to-tip (chord) width (an
     if (C <= 0.0 || W <= 0.0) {
         // it is flat
         return 0.0;
-    } else {
-        Real64 CX = min(C, W / 2.001);
-        return 2.0 * W * CX / (CX * CX + W * W / 4);
     }
+    Real64 CX = min(C, W / 2.001);
+    return 2.0 * W * CX / (CX * CX + W * W / 4);
 }
 
 void VB_SOL46_CURVE(EnergyPlusData const &state,
@@ -5814,11 +5811,11 @@ Real64 FNU(Real64 const RA) // Rayleigh number
     Real64 const ARA(std::abs(RA));
     if (ARA <= 10000.0) {
         return 1.0 + 1.75967e-10 * std::pow(ARA, 2.2984755);
-    } else if (ARA <= 50000.0) {
-        return 0.028154 * std::pow(ARA, 0.413993);
-    } else {
-        return 0.0673838 * std::pow(ARA, 1.0 / 3.0);
     }
+    if (ARA <= 50000.0) {
+        return 0.028154 * std::pow(ARA, 0.413993);
+    }
+    return 0.0673838 * std::pow(ARA, 1.0 / 3.0);
 }
 
 Real64 HConvGap(CFSGAP const &G, // gap
@@ -6186,9 +6183,8 @@ Real64 ConvectionFactor(CFSLAYER const &L) // window layer
         // horiz VB: enhanced convection at +/- 45 due to "pumping"
         Real64 SlatADeg = min(90.0, std::abs(L.PHI_DEG));
         return 1.0 + 0.2 * std::sin(2.0 * SlatADeg);
-    } else {
-        return 1.0;
     }
+    return 1.0;
 }
 
 bool CFSUFactor(EnergyPlusData &state,
@@ -7893,9 +7889,8 @@ bool FEQX(Real64 const a, // values to compare, fractional tolerance
     Real64 d = std::abs(a - b);
     if (d < tolAbsX) {
         return true;
-    } else {
-        return (2.0 * d / (std::abs(a) + std::abs(b))) < tolF;
     }
+    return (2.0 * d / (std::abs(a) + std::abs(b))) < tolF;
 }
 
 Real64 TRadC(Real64 const J,    // radiosity, W/m2

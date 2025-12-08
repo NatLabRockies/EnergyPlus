@@ -457,7 +457,7 @@ End
 	#tag Event
 		Sub Close()
 		  call saveAllSettings
-		  
+
 		End Sub
 	#tag EndEvent
 
@@ -466,7 +466,7 @@ End
 		  call GetAllSettings
 		  call GetIDDFileName
 		  call ProcessCommandLine
-		  
+
 		End Sub
 	#tag EndEvent
 
@@ -484,16 +484,16 @@ End
 		    newFileName = origFileName
 		  end if
 		  return newFileName
-		  
-		  
-		  
+
+
+
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub CreateDXFfromIDFfile(IDFfileName as String, supressDXFviewing as Boolean)
 		  Soft Declare Sub CreateDXFFile Lib "EPlusDrw.dll" (fileIDD As cString, fileIDDLen As Int32, fileName As cString, ileNameLen As Int32, option As cString, OptionLen As Int32, strError As cString, errstrLen As Int32, byRef ErrorFlag As Int16)
-		  
+
 		  dim cIDFfileName as String
 		  dim cIDDFileName as String
 		  dim returnedError as String
@@ -557,8 +557,8 @@ End
 		  me.MouseCursor = system.Cursors.StandardPointer
 		exception err
 		  MsgBox err.message
-		  
-		  
+
+
 		End Sub
 	#tag EndMethod
 
@@ -579,7 +579,7 @@ End
 		  'Soft Declare Sub TestMultiStringBool Lib "TestDLL.dll" (fileIDD as CString, fileName as CString, optionStr as CString,  errorStr as CString, lenOfFileIDD as Int32, lenOfFileName as Int32, lenOfOpt as Int32,  lenOfError as Int32,flgErr as Int16)
 		  Soft Declare Sub TestMultiStringBool Lib "TestDLL.dll" (flgErr as Integer,fileIDD as CString, fileName as CString, optionStr as CString,  errorStr as CString, lenOfFileIDD as Int32, lenOfFileName as Int32, lenOfOpt as Int32,  lenOfError as Int32)
 		  Soft Declare Sub TestMultiStringInt Lib "TestDLL.dll" (fileIDD as CString, fileName as CString, optionStr as CString,  errorStr as CString, byref flgErr as Int16,lenOfFileIDD as Int32, lenOfFileName as Int32, lenOfOpt as Int32,  lenOfError as Int32)
-		  
+
 		  dim testInt as Int16
 		  dim cIDFfileName as String
 		  dim cIDDFileName as String
@@ -611,11 +611,11 @@ End
 		    'try
 		    call testBlank
 		    msgbox "testblank done"
-		    
+
 		    'testInt = 267
 		    'call testIt(testInt)
 		    'MsgBox str(testInt)
-		    
+
 		    'call CreateDXFFile(cIDDFileName,len(cIDDFileName),cIDFfileName,len(cIDFfileName),polygonActionString,len(polygonActionString),returnedError,len(returnedError),flagOfError)
 		    'call CreateDXFFile(cIDDFileName,cIDFfileName,polygonActionString,returnedError,flagOfError)
 		    'catch err as
@@ -633,8 +633,8 @@ End
 		  end if
 		exception err
 		  MsgBox err.message
-		  
-		  
+
+
 		End Sub
 	#tag EndMethod
 
@@ -711,7 +711,7 @@ End
 		    wend
 		    SourceStream.Close
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -857,8 +857,8 @@ End
 		    end if
 		    Quit 'if using command line do not open the GUI instead just exit the program
 		  end if
-		  
-		  
+
+
 		End Sub
 	#tag EndMethod
 
@@ -872,7 +872,7 @@ End
 		    s = s + " "
 		  next i
 		  Return s
-		  
+
 		End Function
 	#tag EndMethod
 
@@ -882,7 +882,7 @@ End
 		  dim curLine as string = ""
 		  dim listFolder as FolderItem
 		  dim listFile as FolderItem
-		  
+
 		  listFolder = SpecialFolder.ApplicationData
 		  listFile = listFolder.child("EPDrawGUIsettings.txt")
 		  outStream = listFile.CreateTextFile
@@ -914,14 +914,14 @@ End
 		  end if
 		  outStream.WriteLine curLine
 		  outStream.Close
-		  
+
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub ViewDXFfile(inFile as FolderItem)
 		  dim dxfv as FolderItem
-		  
+
 		  if inFile <>nil then
 		    if DXFViewerApp<>"" then
 		      try
@@ -938,7 +938,7 @@ End
 		      inFile.Launch
 		    end if
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -989,9 +989,9 @@ End
 		    'msgbox lastInputDirectory
 		    'MsgBox app.ExecutableFile.AbsolutePath
 		  end if
-		  
-		  
-		  
+
+
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1034,8 +1034,8 @@ End
 		  dxfType.Extensions = "dxf"
 		  f = GetOpenFolderItem(dxfType)
 		  call viewdxffile(f)
-		  
-		  
+
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1051,8 +1051,8 @@ End
 		  if f<>nil then
 		    DXFViewerApp = f.AbsolutePath
 		  end if
-		  
-		  
+
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents

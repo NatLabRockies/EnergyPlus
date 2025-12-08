@@ -106,7 +106,7 @@
 ! End SimMetaData
 ! Number of Zones: 130
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -242,9 +242,6 @@
   RunPeriodControl:DaylightSavingTime,
     2nd Sunday in March,     !- Start Date
     1st Sunday in November;  !- End Date
-
-!  VERSION,
-!    3.1;                    !- Version Identifier
 
   Site:Location,
     USA IL-CHICAGO-OHARE,    !- Name
@@ -4813,7 +4810,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Floor 1 Elevator Heat Pump Heat Coil,  !- Name
-    ,                        !- Availability Schedule Name
+    ,                                      !- Availability Schedule Name
     Floor 1 Elevator Heat Pump Heat Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Elevator Heat Pump Heat Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -5922,7 +5919,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Floor 1 Food Storage Heat Pump Cool Coil,  !- Name
-    ,                        !- Availability Schedule Name
+    ,                                          !- Availability Schedule Name
     Floor 1 Food Storage Heat Pump Cool Coil Water Inlet Node,  !- Water Inlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Water Outlet Node,  !- Water Outlet Node Name
     Floor 1 Food Storage Heat Pump Cool Coil Air Inlet Node,  !- Air Inlet Node Name

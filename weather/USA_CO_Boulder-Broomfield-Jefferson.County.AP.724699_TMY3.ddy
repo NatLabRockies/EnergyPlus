@@ -2,7 +2,7 @@
  ! Wind Speeds follow the indicated design conditions rather than traditional values (6.7 m/s heating, 3.35 m/s cooling)
  ! No special attempts at re-creating or determining missing data parts (e.g. Wind speed or direction)
  ! are done.  Therefore, you should look at the data and fill in any incorrect values as you desire.
-  
+
  Site:Location,
   Broomfield Jeffco  Boulder_CO_USA Design_Conditions,     !- Location Name
       40.13,     !- Latitude {N+ S-}

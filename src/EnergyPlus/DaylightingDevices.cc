@@ -876,7 +876,7 @@ namespace Dayltg {
                 }
 
                 // Get inside shelf heat transfer surface (optional)
-                if (ipsc->cAlphaArgs(3) != "") {
+                if (!ipsc->cAlphaArgs(3).empty()) {
                     SurfNum = Util::FindItemInList(ipsc->cAlphaArgs(3), state.dataSurface->Surface);
 
                     if (SurfNum == 0) {
@@ -908,7 +908,7 @@ namespace Dayltg {
                 }
 
                 // Get outside shelf attached shading surface (optional)
-                if (ipsc->cAlphaArgs(4) != "") {
+                if (!ipsc->cAlphaArgs(4).empty()) {
                     SurfNum = Util::FindItemInList(ipsc->cAlphaArgs(4), state.dataSurface->Surface);
 
                     if (SurfNum == 0) {
@@ -946,7 +946,7 @@ namespace Dayltg {
 
                         int ConstrNum = 0;
                         // Get outside shelf construction (required if outside shelf is specified)
-                        if (ipsc->cAlphaArgs(5) != "") {
+                        if (!ipsc->cAlphaArgs(5).empty()) {
                             ConstrNum = Util::FindItemInList(ipsc->cAlphaArgs(5), state.dataConstruction->Construct);
 
                             if (ConstrNum == 0) {

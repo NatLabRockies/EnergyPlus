@@ -137,9 +137,8 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
             if (IsNotOK) {
                 if (IsBlank) {
                     continue;
-                } else {
-                    Alphas(1) = Alphas(1) + "--dup";
                 }
+                Alphas(1) = Alphas(1) + "--dup";
             }
             ++BCount;
 
@@ -303,9 +302,8 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
             if (IsNotOK) {
                 if (IsBlank) {
                     continue;
-                } else {
-                    Alphas(1) = Alphas(1) + "--dup";
                 }
+                Alphas(1) = Alphas(1) + "--dup";
             }
             ++BCount;
 

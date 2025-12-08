@@ -30463,7 +30463,7 @@ DO iZone = 1, numCompactWaterAirHP
   CALL WriteComment('21.11C (70F) entering air dry-bulb temperature and 21.11C (70F) entering water temperature')
   CALL CreateNewObj('Coil:Heating:WaterToAirHeatPump:EquationFit')
   CALL AddToObjFld('Name', base + wahpNameOff,' WAHP Heating Coil')
-  CALL AddToObjStr('Availability Schedule Name','')   
+  CALL AddToObjStr('Availability Schedule Name','')
   CALL AddToObjFld('Water Inlet Node Name', base + wahpNameOff,' WAHP Heating Water Inlet Node')
   CALL AddToObjFld('Water Outlet Node Name', base + wahpNameOff,' WAHP Heating Water Outlet Node')
   CALL AddToObjFld('Air Inlet Node Name', base + wahpNameOff,' WAHP Cooling Coil Outlet')

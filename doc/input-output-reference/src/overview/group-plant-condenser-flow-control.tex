@@ -45,14 +45,13 @@ This field should contain the name of the node that is the outlet for the pump t
 This object is demonstrated in the example file called SolarCollectorFlatPlateWater.idf. An example of this object is:
 
 \begin{lstlisting}
-
 TemperingValve,
-          DHW Anti-Scald Diverter,
-          DHW Anti-Scald Inlet Node, ! Inlet Node Name
-          DHW Anti-Scald Outlet Node, ! Outlet Node Name
-          SHW Storage Tank Use Outlet Node, ! Stream 2 Source Node Name
-          DHW Instantaneous Boost Outlet Node, ! Temperature Setpoint Node Name
-          DHW Use Side Pump Outlet;  ! pump outlet node
+  DHW Anti-Scald Diverter,
+  DHW Anti-Scald Inlet Node,  !- Inlet Node Name
+  DHW Anti-Scald Outlet Node, !- Outlet Node Name
+  SHW Storage Tank Use Outlet Node,  !- Stream 2 Source Node Name
+  DHW Instantaneous Boost Outlet Node,  !- Temperature Setpoint Node Name
+  DHW Use Side Pump Outlet;   !- pump outlet node
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-023}

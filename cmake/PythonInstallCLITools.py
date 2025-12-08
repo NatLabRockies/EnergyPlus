@@ -75,7 +75,7 @@ def install_packages(python_lib_dir: Path):
         return
 
     to_install = [f"{n}=={v}" for n, v in pkgs_to_install.items()]
-    
+
     is_windows = platform.system() == "Windows"
     is_arm = platform.machine().lower() in ("arm64", "aarch64")
     if "ghedesigner" in pkgs_to_install and is_windows and is_arm:

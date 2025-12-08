@@ -88,9 +88,8 @@ namespace ResultsFramework {
         auto const last = s.find_last_not_of(' ');
         if ((first == std::string::npos) || (last == std::string::npos)) {
             return std::string{};
-        } else {
-            return std::string{s.substr(first, last - first + 1)};
         }
+        return std::string{s.substr(first, last - first + 1)};
     }
 
     // Class SimInfo
@@ -621,8 +620,8 @@ namespace ResultsFramework {
         json cols = json::array();
         json rows;
 
-        for (size_t col = 0; col < ColHeaders.size(); ++col) {
-            cols.push_back(ColHeaders[col]);
+        for (const auto &ColHeader : ColHeaders) {
+            cols.push_back(ColHeader);
         }
 
         for (size_t row = 0; row < RowHeaders.size(); ++row) {

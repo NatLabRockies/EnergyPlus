@@ -69,7 +69,7 @@ namespace RoomAir {
     struct DefineLinearModelNode
     {
         // Members
-        std::string AirNodeName = "";                                   // Name of air nodes
+        std::string AirNodeName;                                        // Name of air nodes
         RoomAir::AirNodeType ClassType = RoomAir::AirNodeType::Invalid; // Type of air nodes
         Real64 Height = 0.0;                                            // Z coordinates [m] node's Control Vol. center
         Real64 Temp = 0.0;                                              // Surface temperature BC

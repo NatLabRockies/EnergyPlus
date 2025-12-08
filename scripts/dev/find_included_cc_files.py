@@ -54,49 +54,67 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import json
-import os
-import io  # For Python 2 compat
-import sys
+from collections import Counter
+from pathlib import Path
 
-dirs_to_search = [os.path.join('src', 'EnergyPlus'), os.path.join('tst', 'EnergyPlus', 'unit')]
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-repo_root = os.path.abspath(os.path.join(current_script_dir, '..', '..'))
-full_path_dirs_to_search = [os.path.join(repo_root, d) for d in dirs_to_search]
+from base_hook import (
+    SRC_DIR,
+    TST_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
 
-num_issues_found = 0
+DIRS_TO_SEARCH = [SRC_DIR, TST_DIR / "unit"]
+EXTENSIONS = {".hh", ".cc"}
 
-for this_root in full_path_dirs_to_search:
-    for root, dirs, filenames in os.walk(this_root):
-        for filename in filenames:
-            if len(filename) < 3:
-                continue
-            if not filename[-3:] in ['.cc', '.hh']:
-                continue
-            file_path = os.path.join(root, filename)
-            relative_file_path = os.path.relpath(file_path, repo_root)
-            try:
-                with io.open(file_path, encoding='utf-8', errors='strict') as f_idf:
-                    idf_text = f_idf.read()
-                    line_num = 0
-                    for line in idf_text.split('\n'):
-                        line_num += 1
-                        line = line.strip()
-                        if '#include' in line and '<' in line and '>' in line:
-                            include_token = line.split('<')[1].split('>')[0].strip()
-                            if '.cc' in include_token:
-                                ci_msg = {'tool': 'find_included_cc_files',
-                                          'filename': filename,
-                                          'file': relative_file_path,
-                                          'line': line_num,
-                                          'messagetype': 'error',
-                                          'message': ("Found included CC file: '{}'".format(line))
-                                          }
-                                print(json.dumps(ci_msg))
-                                num_issues_found += 1
-            except Exception:
-                # don't do anything, there are reasons this is ok to fail
-                print("XCE")
 
-if num_issues_found > 0:
-    sys.exit(1)
+def check_included_cc_files(filepath: Path) -> list[LogMessage]:
+    """Check a single file for included .cc files."""
+    lines = filepath.read_text(encoding="utf-8", errors="strict").splitlines()
+
+    log_messages: list[LogMessage] = []
+
+    for line_num, line in enumerate(lines, start=1):
+        line = line.strip()
+        if "#include" in line and "<" in line and ">" in line:
+            include_token = line.split("<")[1].split(">")[0].strip()
+            if ".cc" in include_token:
+                log_messages.append(
+                    ErrorMessage(
+                        tool="find_included_cc_files",
+                        filepath=filepath,
+                        line_number=line_num,
+                        line=line,
+                        message=f"Found included CC file: '{line}'",
+                    )
+                )
+    return log_messages
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Find Included CC files")
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and any(f.is_relative_to(d) for d in DIRS_TO_SEARCH)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        for d in DIRS_TO_SEARCH:
+            files += collect_files(base_dir=d, extensions=EXTENSIONS, recursive=True, dirs_to_skip=[])
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    errors_list_of_lists = parallel_apply(func=check_included_cc_files, filepaths=files)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

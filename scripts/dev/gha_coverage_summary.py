@@ -65,12 +65,13 @@
 #   functions......: 19.6% (2224 of 11327 functions)
 
 from pathlib import Path
-cover_input = Path.cwd() / 'cover.txt'
-lines = cover_input.read_text().strip().split('\n')
-line_coverage = lines[-2].strip().split(':')[1].strip()
-line_percent = line_coverage.split(' ')[0]
-function_coverage = lines[-1].strip().split(':')[1].strip()
-cover_output = Path.cwd() / 'cover.md'
+
+cover_input = Path.cwd() / "cover.txt"
+lines = cover_input.read_text().strip().split("\n")
+line_coverage = lines[-2].strip().split(":")[1].strip()
+line_percent = line_coverage.split(" ")[0]
+function_coverage = lines[-1].strip().split(":")[1].strip()
+cover_output = Path.cwd() / "cover.md"
 content = f"""
 <details>
   <summary>Coverage Summary - {line_percent} of lines - Download Coverage Artifact for Full Details</summary>

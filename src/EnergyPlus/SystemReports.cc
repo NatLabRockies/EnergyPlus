@@ -4779,9 +4779,8 @@ void ReportAirLoopConnections(EnergyPlusData &state)
         const auto oaSysExists = [&]() {
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysExists) {
                 return "Yes";
-            } else {
-                return "No";
             }
+            return "No";
         }();
 
         print(state.files.bnd,

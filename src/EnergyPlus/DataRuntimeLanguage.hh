@@ -450,8 +450,8 @@ namespace DataRuntimeLanguage {
     {
         // Members
         // structure for operators and functions, used to look up information about each operator or function
-        std::string_view symbol = ""; // string representation of operator or function (for reporting)
-        int numOperands = 0;          // count of operands or function arguments.
+        std::string_view symbol; // string representation of operator or function (for reporting)
+        int numOperands = 0;     // count of operands or function arguments.
     };
 
     static constexpr std::array<std::string_view, (int)ErlFunc::Num> ErlFuncNamesUC = {

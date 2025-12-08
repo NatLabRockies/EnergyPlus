@@ -26,7 +26,7 @@
 ! Floor Area:              232.25 m2
 ! Number of Stories:       1
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -580,8 +580,8 @@
     26.55556,                !- <none>
     29.33333,                !- <none>
     32.11111,                !- <none>
-    34.88889,                !- Extended Field
-    50.00000;                !- Extended Field
+    34.88889,                !- <none>
+    50.00000;                !- <none>
 
   Table:IndependentVariableList,
     Liebert Econophase EIR Func T_IndependentVariableList,  !- Name

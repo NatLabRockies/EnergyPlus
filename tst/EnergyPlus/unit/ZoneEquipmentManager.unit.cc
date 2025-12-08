@@ -3054,7 +3054,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneMassBalance_wAdjustInfiltrati
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.0;
     state->dataEnvrn->OutBaroPress = 100000.0;
@@ -3290,7 +3290,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustReturnOnly)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -3543,7 +3543,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustReturnThenMixing)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -3808,7 +3808,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustMixingThenReturn)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment, DataHeatBalance::InfiltrationFlow::Adjust);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -4113,7 +4113,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wSourceAndReceivingZone)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -4925,7 +4925,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_SizeZoneEquipment_DOASLoadTest)
 TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 {
     std::string_view constexpr idf_objects = R"IDF(
-	
+
 	  ZoneHVAC:AirDistributionUnit,
 		ADU CV HW Rht,           !- Name
 		Node 5,                  !- Air Distribution Unit Outlet Node Name
@@ -4946,7 +4946,7 @@ TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 		0,                       !- Minimum Hot Water or Steam Flow Rate {m3/s}
 		0.001,                   !- Convergence Tolerance
 		50;                      !- Maximum Reheat Air Temperature {C}
-	
+
       ZoneHVAC:AirDistributionUnit,
         ADU VAV Rht,             !- Name
         Node 5,                  !- Air Distribution Unit Outlet Node Name

@@ -76,7 +76,7 @@ This field is used to indicate the kind of units that may be associated with the
 Several IDF Examples will illustrate the use:
 
 \begin{lstlisting}
-ScheduleTypeLimits,Any Number;  ! Not limited
+ScheduleTypeLimits,Any Number;  !- Not limited
 ScheduleTypeLimits,Fraction, 0.0 , 1.0 ,CONTINUOUS;
 ScheduleTypeLimits,Temperature,-60,200,CONTINUOUS;
 ScheduleTypeLimits,Control Type,0,4,DISCRETE;
@@ -152,11 +152,11 @@ And an example of use:
 
 \begin{lstlisting}
 Schedule:Day:Interval,
-  dd winter rel humidity, !- Name
-  Percent,                !- Schedule Type Limits Name
-  No,                     !- Interpolate to Timestep
-  until: 24:00,           !- Time 1
-  74;                     !- Value Until Time 1
+  dd winter rel humidity,     !- Name
+  Percent,                    !- Schedule Type Limits Name
+  No,                         !- Interpolate to Timestep
+  until: 24:00,               !- Time 1
+  74;                         !- Value Until Time 1
 \end{lstlisting}
 
 \subsection{Schedule:Day:List}\label{scheduledaylist}
@@ -195,12 +195,12 @@ For example:
 
 \begin{lstlisting}
 Schedule:Day:List,
-  Myschedule, ! name
-  Fraction,   ! Schedule type
-  No,         ! Interpolate value
-  30,         ! Minutes per item
-  0.0,        ! from 00:01 to 00:30
-  0.5,        ! from 00:31 to 01:00
+  Myschedule,                 !- name
+  Fraction,                   !- Schedule type
+  No,                         !- Interpolate value
+  30,                         !- Minutes per item
+  0.0,                        !- from 00:01 to 00:30
+  0.5,                        !- from 00:31 to 01:00
   <snipped>
 \end{lstlisting}
 
@@ -376,20 +376,20 @@ And, some IDF examples:
 
 \begin{lstlisting}
 Schedule:Compact,
-  POFF,       !- Name
-  Fraction,   !- Schedule Type Limits Name
+  POFF,                       !- Name
+  Fraction,                   !- Schedule Type Limits Name
   Through: 4/30,
   For: AllDays,
   Until: 24:00, 1.0,
   Through: 12/31,
   For: Weekdays,
-    Until: 7:00,   .1,
-    Until: 17:00, 1.0,
-    Until: 24:00,  .1,
+  Until: 7:00,   .1,
+  Until: 17:00, 1.0,
+  Until: 24:00,  .1,
   For: Weekends Holidays,
-    Until: 24:00,  .1,
+  Until: 24:00,  .1,
   For: AllOtherDays,
-    Until: 24:00,  .1;
+  Until: 24:00,  .1;
 
 ! Schedule Continuous
 Schedule:Compact,
@@ -397,7 +397,7 @@ Schedule:Compact,
   on/off,
   Through: 12/31,
   For: AllDays,
-    Until: 24:00, 1.0;
+  Until: 24:00, 1.0;
 
 ! Schedule Daytime Ventilation
 Schedule:Compact,
@@ -405,15 +405,15 @@ Schedule:Compact,
   Fraction,
   Through: 12/31,
   For: Weekdays SummerDesignDay,
-    Until: 08:00, 0.0,
-    Until: 18:00, 1.0,
-    Until: 24:00, 0.0,
+  Until: 08:00, 0.0,
+  Until: 18:00, 1.0,
+  Until: 24:00, 0.0,
   For: Weekends WinterDesignDay,
-    Until: 10:00, 0.0,
-    Until: 16:00, 1.0,
-    Until: 24:00, 0.0,
+  Until: 10:00, 0.0,
+  Until: 16:00, 1.0,
+  Until: 24:00, 0.0,
   For: Holidays AllOtherDays,
-    Until: 24:00, 0.0;
+  Until: 24:00, 0.0;
 \end{lstlisting}
 
 \subsection{Schedule:Constant}\label{scheduleconstant}
@@ -438,16 +438,16 @@ An IDF example:
 
 \begin{lstlisting}
 Schedule:Constant,
-  AlwaysOn,     !- Name
-  On/Off,       !- Schedule Type Limits Name
-  1.0;          !- Hourly Value
+  AlwaysOn,                   !- Name
+  On/Off,                     !- Schedule Type Limits Name
+  1.0;                        !- Hourly Value
 
 ScheduleTypeLimits,
-  On/Off,       !- Name
-  0,            !- Lower Limit Value
-  1,            !- Upper Limit Value
-  DISCRETE,     !- Numeric Type
-  Availability; !- Unit Type
+  On/Off,                     !- Name
+  0,                          !- Lower Limit Value
+  1,                          !- Upper Limit Value
+  DISCRETE,                   !- Numeric Type
+  Availability;               !- Unit Type
 \end{lstlisting}
 
 \subsection{Schedule:File}\label{schedulefile}
@@ -504,59 +504,59 @@ Here is an IDF example:
 
 \begin{lstlisting}
 Schedule:File,
-  elecTDVfromCZ01res, !- Name
-  Any Number,         !- ScheduleType
-  TDV_kBtu_CTZ01.csv, !- Name of File
-  2,                  !- Column Number
-  4,                  !- Rows to Skip at Top
-  8760,               !- Number of Hours of Data
-  Comma;              !- Column Separator
+  elecTDVfromCZ01res,         !- Name
+  Any Number,                 !- ScheduleType
+  TDV_kBtu_CTZ01.csv,         !- Name of File
+  2,                          !- Column Number
+  4,                          !- Rows to Skip at Top
+  8760,                       !- Number of Hours of Data
+  Comma;                      !- Column Separator
 \end{lstlisting}
 
 or with a relational path:
 
 \begin{lstlisting}
 Schedule:File,
-  elecTDVfromCZ01res, !- Name
-  Any Number,         !- ScheduleType
+  elecTDVfromCZ01res,         !- Name
+  Any Number,                 !- ScheduleType
   DataSets\TDV\TDV_kBtu_CTZ01.csv,  !- Name of File
-  2,                  !- Column Number
-  4;                  !- Rows to Skip at Top
+  2,                          !- Column Number
+  4;                          !- Rows to Skip at Top
 \end{lstlisting}
 
 A sub-hourly indication. Note that this is identical to an hourly file because there are 60 minutes per item -- the number of hours defaults to 8760 and the column separator defaults to a comma. If the number of minutes per item had been, say, 15, then the file would need to contain 8760*4 or 35,040 rows for this item.
 
 \begin{lstlisting}
 Schedule:File,
-  elecTDVfromCZ06com, !- Name
-  Any Number,         !- Schedule Type Limits Name
-  DataSets\TDV\TDV_2008_kBtu_CTZ06.csv, !- File Name
-  1,                  !- Column Number
-  4,                  !- Rows to Skip at Top
-  ,                   !- Number of Hours of Data
-  ,                   !- Column Separator
-  ,                   !- Interpolate to Timestep
-  60;                 !- Minutes per Item
+  elecTDVfromCZ06com,         !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  DataSets\TDV\TDV_2008_kBtu_CTZ06.csv,  !- File Name
+  1,                          !- Column Number
+  4,                          !- Rows to Skip at Top
+  ,                           !- Number of Hours of Data
+  ,                           !- Column Separator
+  ,                           !- Interpolate to Timestep
+  60;                         !- Minutes per Item
 \end{lstlisting}
 
 \paragraph{Field: Adjust Schedule for Daylight Savings}\label{adjust-schedule-for-daylight-savings-1}
 
-This field indicates whether or not to shift the schedule forward an hour during daylight savings time. If ``Yes'' the schedule skips forward an hour in the CSV on the ``spring forward'' day and repeats an hour on the ``fall back'' day. If  ``No'', the schedule is read and applied in standard time, without adjusting for daylight savings time (\textbf{\hyperref[runperiodcontroldaylightsavingtime]{RunPeriodControl:DaylightSavingTime}}). This indicator is defaulted to ``Yes'' if no input is provided. 
+This field indicates whether or not to shift the schedule forward an hour during daylight savings time. If ``Yes'' the schedule skips forward an hour in the CSV on the ``spring forward'' day and repeats an hour on the ``fall back'' day. If  ``No'', the schedule is read and applied in standard time, without adjusting for daylight savings time (\textbf{\hyperref[runperiodcontroldaylightsavingtime]{RunPeriodControl:DaylightSavingTime}}). This indicator is defaulted to ``Yes'' if no input is provided.
 
 Here is an IDF example:
 
 \begin{lstlisting}
-	Schedule:File,
-	TestName,	!- Name
-	Any Number,	!- Schedule Type Limits Name
-	schedulefile.csv, !- File Name
-	2,		!- Column Number
-	1,		!- Rows to Skip at Top
-	8760,		!- Number of Hours of Data
-	Comma,		!- Column Separator
-	No,		!- Interpolate to Timestep
-	60,		!- Minutes per Item
-	No;		!- Adjust Schedule for Daylight Savings
+Schedule:File,
+  TestName,                   !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  schedulefile.csv,           !- File Name
+  2,                          !- Column Number
+  1,                          !- Rows to Skip at Top
+  8760,                       !- Number of Hours of Data
+  Comma,                      !- Column Separator
+  No,                         !- Interpolate to Timestep
+  60,                         !- Minutes per Item
+  No;                         !- Adjust Schedule for Daylight Savings
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-031}
@@ -566,6 +566,7 @@ An optional report can be used to gain the values described in the previous Sche
 \begin{lstlisting}
 ! will give them on hourly increments (day schedule resolution)
 Output:Schedules, Hourly;
+
 ! will give them at the timestep of the simulation
 Output:Schedules, Timestep;
 \end{lstlisting}
@@ -612,5 +613,5 @@ Here is an IDF example:
 
 \begin{lstlisting}
 Schedule:File,
-  eplusshading.csv;   !- Name of File
+  eplusshading.csv;           !- Name of File
 \end{lstlisting}

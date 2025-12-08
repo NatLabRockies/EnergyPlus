@@ -1,19 +1,19 @@
-Airflow Network Modeling Changes for Polygonal Windows Support 
+Airflow Network Modeling Changes for Polygonal Windows Support
 ================
 
 **Lixing Gu**
 
 **Florida Solar Energy Center**
 
- - Nov. 21, 2016, First revision of Design Document 
- - Nov. 17, 2016, Third Edition Design Document 
- - Nov. 10, 2016, Second Edition 
+ - Nov. 21, 2016, First revision of Design Document
+ - Nov. 17, 2016, Third Edition Design Document
+ - Nov. 10, 2016, Second Edition
  - Original version on Oct. 28, 2016
- 
+
 
 ## Justification for New Feature ##
 
-The AirflowNetowrk model currently implemented in EnergyPlus is used to accurately predict simulation conditions based on a pressure-network. This capability allows users to carefully define the pressure components in their building, and use this to resolve flow rates. However, the model is able to handle a rectangular windows well and unable to handle polygonal windows correctly, because the existing opening airflow calculation is based on a rectangular window. Due to more and more uses of polygonal windows from users, it is needed to enhance the model capability to allow the model to handle polygonal windows properly by converting a polygonal opening into an equivalent rectangular shape, so that existing algorithm can be applied. 
+The AirflowNetowrk model currently implemented in EnergyPlus is used to accurately predict simulation conditions based on a pressure-network. This capability allows users to carefully define the pressure components in their building, and use this to resolve flow rates. However, the model is able to handle a rectangular windows well and unable to handle polygonal windows correctly, because the existing opening airflow calculation is based on a rectangular window. Due to more and more uses of polygonal windows from users, it is needed to enhance the model capability to allow the model to handle polygonal windows properly by converting a polygonal opening into an equivalent rectangular shape, so that existing algorithm can be applied.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -52,13 +52,13 @@ E-mail communication between Mike and Gu
 
 Github communication between Jason, Edwin, and Gu
 
-1.  
-jasondegraw  4 days ago   National Renewable Energy Laboratory member 
+1.
+jasondegraw  4 days ago   National Renewable Energy Laboratory member
 
 Is there another way to input the aspect ratio? Wouldn't this limit models to a single non-rectangular window aspect ratio?
 
- 
-Myoldmopar  3 days ago   National Renewable Energy Laboratory member 
+
+Myoldmopar  3 days ago   National Renewable Energy Laboratory member
 
 @lgu1234 I like the effort here to possibly reuse a previous field. But I don't like the idea of applying a plan-aspect-ratio to an elevation-aspect-ratio. If you want to leave this as a choice field, I'd like this:
 •Field 1: Input Type ◦Option 1: Hardwired Aspect Ratio
@@ -68,34 +68,34 @@ Myoldmopar  3 days ago   National Renewable Energy Laboratory member
 
 Where the user can enter a fixed aspect ratio, or one will be created with the same height as the polygonal window, or the parent surface's aspect ratio is used. I don't know how valid option 3 is, but it certainly has to be a better assumption that just using the building's plan-view aspect ratio across the board.
 
- 
-lgu1234  40 minutes ago   National Renewable Energy Laboratory member 
+
+lgu1234  40 minutes ago   National Renewable Energy Laboratory member
 
 @Myoldmopar I like your suggestion to have 3 options. I am going to revise the NFP.
 
 2.
 
- 
-jasondegraw  4 days ago   National Renewable Energy Laboratory member 
+
+jasondegraw  4 days ago   National Renewable Energy Laboratory member
 
 Should this be "Height"?
 
- 
-lgu1234  an hour ago   National Renewable Energy Laboratory member 
+
+lgu1234  an hour ago   National Renewable Energy Laboratory member
 
 @jasondegraw You are right. I am going to make a change.
 
 ###More communications
 
-More communications are available in GitHub: https://github.com/NREL/EnergyPlus/pull/5924 
+More communications are available in GitHub: https://github.com/NREL/EnergyPlus/pull/5924
 
 ## Overview ##
 
-In order to allow the AirflowNetwork model to handle polygonal windows, an equivalent rectangular shape will be used with the same area and user input choices. The choices include Aspect Ratio from user input, Height Based, and Parent Surface Aspect Ratio. The same height is preferred as a default choice, since the airflow rate calculation is heavily dependent on height.     
+In order to allow the AirflowNetwork model to handle polygonal windows, an equivalent rectangular shape will be used with the same area and user input choices. The choices include Aspect Ratio from user input, Height Based, and Parent Surface Aspect Ratio. The same height is preferred as a default choice, since the airflow rate calculation is heavily dependent on height.
 
 ## Approach ##
 
-A new optional field will be added as "Equivalent Rectangular Shape Choice" in the AirflowNetwork:MultiZone:Surface object. The allowed choice will be "Aspect Ratio from Input", "Height Based" or "Parent Surface Aspect Ratio". Since one of choices is enough to define the equivalent rectangular window, these choices are interlocked. The default choice is Height Based, because the same height will generate the same equivalent flows. 
+A new optional field will be added as "Equivalent Rectangular Shape Choice" in the AirflowNetwork:MultiZone:Surface object. The allowed choice will be "Aspect Ratio from Input", "Height Based" or "Parent Surface Aspect Ratio". Since one of choices is enough to define the equivalent rectangular window, these choices are interlocked. The default choice is Height Based, because the same height will generate the same equivalent flows.
 
 ## Testing/Validation/Data Sources ##
 
@@ -105,11 +105,11 @@ The equivalent shape will be reported and checked to ensure that the shape conve
 
 The AirflowNetwork:MultiZone:Surface object will be modified by adding an optional field to allow user to enter a choice how the equivalent shape is created. This field is required when a polygonal shape is input.
 
-Additions to the documentation are noted as **<span style="color:red;">bold red</span>** non-blocked insertions at the appropriate location throughout the Input Output Reference. 
+Additions to the documentation are noted as **<span style="color:red;">bold red</span>** non-blocked insertions at the appropriate location throughout the Input Output Reference.
 
 Removal sections are noted as **<span style="color:blue;">bold blue</span>**.
 
-It should be pointed out that since this section is extracted from Input Output Reference directly with the format of Latex, it may not be shown correctly in the Markdown format. In order to keep the same format in the E+ documentation, the LaText format is kept. 
+It should be pointed out that since this section is extracted from Input Output Reference directly with the format of Latex, it may not be shown correctly in the Markdown format. In order to keep the same format in the E+ documentation, the LaText format is kept.
 
 
 \subsection{AirflowNetwork:MultiZone:Surface}\label{airflownetworkmultizonesurface}
@@ -181,7 +181,7 @@ The AirflowNetwork model uses a combination of factors to determine the actual o
 
 If, in addition, the window is in a thermal zone for which opening modulation has been specified (ref: AirflowNetwork:MultiZone:Zone) and the multiplication factor due to modulation is 0.3 in a particular timestep, then the actual opening factor that timestep = 0.3x0.75 = 0.225 and the actual opening area that timestep = 0.3x0.9 = 0.27 m\(^{2}\).
 
-If this linkage is associated with an AirflowNetwork:MultiZone:Surface:Crack object, the following crack air flow equation is used. 
+If this linkage is associated with an AirflowNetwork:MultiZone:Surface:Crack object, the following crack air flow equation is used.
 
 \begin{equation}
 Q = \left( Crack\;Factor \right) * C_T * C_Q \left( \Delta P \right)^{n}
@@ -298,7 +298,7 @@ This field is applied to a non-rectangular window or door. The equivalent surfac
 
 **<span style="color:red;">
 This field applies only if Equivalent Rectangular Shape Choice = UserDefinedAspectRatio. This value must be greater than zero, with the default being 1.0. </span>**
-   
+
 IDF examples are provided below:
 
 \begin{lstlisting}
@@ -346,7 +346,7 @@ AirflowNetwork:MultiZone:Surface,
 
 A new optional field of "Equivalent Rectangular Shape Choice" is added as the last field to give a user a choice to select which method is used to define the equivalent rectangular shape.
 
-Revisions to the IDD are noted as **<span style="color:red;">bold red</span>** non-blocked insertions at the appropriate location throughout the input data dictionary description. 
+Revisions to the IDD are noted as **<span style="color:red;">bold red</span>** non-blocked insertions at the appropriate location throughout the input data dictionary description.
 
 	AirflowNetwork:MultiZone:Surface,
       \min-fields 4
@@ -470,11 +470,11 @@ Revisions to the IDD are noted as **<span style="color:red;">bold red</span>** n
       \Key UserDefinedAspectRatio
       \default PolygonHeight
       \note This field is applied to a non-rectangular window or door. The equivalent shape has
-      \note the same area as a polygonal window or door. 
+      \note the same area as a polygonal window or door.
 
 **<span style="color:red;">
   	N7; \field Equivalent Rectangle Aspect Ratio </span>**
-       \note This field is used when UserDefinedAspectRatio is entered in the Equivalent 
+       \note This field is used when UserDefinedAspectRatio is entered in the Equivalent
        \note Rectangular Method field.
        \units dimensionless
        \type real
@@ -499,7 +499,7 @@ NA
 
 No transition.
 
-An existing example file will be modified to show such capability. A potential candidate file is AirflowNetwork3zVent.idf. 
+An existing example file will be modified to show such capability. A potential candidate file is AirflowNetwork3zVent.idf.
 
 ## References ##
 
@@ -509,7 +509,7 @@ NA
 
 This new feature will revise several modules: DataAirflowNetwork, and AirflowNetworkBalanceManager.
 
-The revision of DataAirflowNetwork is to add 3 members in the struct MultizoneSurfaceProp to handle new fields for polygonal surfaces. The revision of AirflowNetworkBalanceManager will involve GetInput to read new fields of the AirflowNetwork:MultiZone:Surface object, and calculate equivalent width and height for polygonal surfaces. 
+The revision of DataAirflowNetwork is to add 3 members in the struct MultizoneSurfaceProp to handle new fields for polygonal surfaces. The revision of AirflowNetworkBalanceManager will involve GetInput to read new fields of the AirflowNetwork:MultiZone:Surface object, and calculate equivalent width and height for polygonal surfaces.
 
 ### AirflowNetworkBalanceManager
 
@@ -529,7 +529,7 @@ If ( Rectangular ) Then
 
 	Existing operation
 
-Else 
+Else
 
 	Reading new fileds
 	If blank, then
@@ -574,11 +574,11 @@ Here are actions for special cases:
 1. Horizontal surface
 
 When PolygonHeight is entered, it is obvious that this choice is not valid. The BaseSurfaceAspectRatio is automatically selected as a first replacement. If the base surface is not rectangular, the default value of UserDefinedAspectRatio will be used to calculate equivalent width and height. A warning will be issued with DisplayExtraWarnings = true.
-  
+
 2. None-rectangular base surface
 
-When BaseSurfaceAspectRatio is entered and base surface is not rectangular, PolygonHeight will be automatically selected first. If PolygonHeight is not applied, the default value of UserDefinedAspectRatio will be used to calculate equivalent width and height. A warning will be issued with DisplayExtraWarnings = true. 
- 
+When BaseSurfaceAspectRatio is entered and base surface is not rectangular, PolygonHeight will be automatically selected first. If PolygonHeight is not applied, the default value of UserDefinedAspectRatio will be used to calculate equivalent width and height. A warning will be issued with DisplayExtraWarnings = true.
+
 
 ### DataAirflowNetwork
 
@@ -588,5 +588,4 @@ Add 3 members with default values to handle new fields
 
 		bool NonRectangular( false ); // True if this surface is not rectangular
 		int EquivRecMethod( 1 ); // Equivalent Rectangle Method input: 1 Height; 2 Base surface aspect ratio; 3 User input aspect ratio
-		Real64 EquivRecUserAspectRatio( 1.0 ); // user input value when EquivRecMethod = 3 
- 
+		Real64 EquivRecUserAspectRatio( 1.0 ); // user input value when EquivRecMethod = 3

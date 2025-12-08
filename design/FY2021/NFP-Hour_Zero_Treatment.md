@@ -11,7 +11,7 @@ Adding input option for Hour Zero weather data treatment
 
 This topic deals with how the first few sub-hourly weather data should be used. Currently in the code, Hr 1 and Hr 24 data was used as the base for the interpolation for the first hour time steps. However, intrinsically, there is no phsyical connection between Hr 1 and Hr 24 weather data, which can be observed in many other weather files (e.g. Chicago ORD airport 725300, a similar large Hr 1 and Hr 24 difference can be observed). To a user’s point view, this is might also a little bit difficult to interprete the first few time step output weather data , without knowing the reported values actually show the interpolated results with the data from Hour 1 and Hour 24.
 
-There were also a little bit of history that this setting had changed back and forth a few time in the past. Here we proposed to add options to allow both these two options. They shoudl differ minimally for most simulations. However, it would allow the user to choose to use a "natural" way of using Hr 1 data for Hr 0 in the interpolation. 
+There were also a little bit of history that this setting had changed back and forth a few time in the past. Here we proposed to add options to allow both these two options. They shoudl differ minimally for most simulations. However, it would allow the user to choose to use a "natural" way of using Hr 1 data for Hr 0 in the interpolation.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -19,7 +19,7 @@ There were also a little bit of history that this setting had changed back and f
 
 ## Overview ##
 
-The proposal seeks to add an input to allow for the choice of using Hr 1 or Hr 24 for the first sub-hour timesteps' interpolation of weather data. 
+The proposal seeks to add an input to allow for the choice of using Hr 1 or Hr 24 for the first sub-hour timesteps' interpolation of weather data.
 
 ## Approach ##
 
@@ -30,19 +30,19 @@ Original:
 RunPeriod,
        \memo Specify a range of dates and other parameters for a simulation.
        \memo Multiple run periods may be input, but they may not overlap.
-	...	   
+	...
   A8;  \field Treat Weather as Actual
        \type choice
        \key Yes
        \key No
        \default No
-	  
-Proposed: 
+
+Proposed:
 
 RunPeriod,
        \memo Specify a range of dates and other parameters for a simulation.
        \memo Multiple run periods may be input, but they may not overlap.
-	...	   
+	...
   A8,  \field Treat Weather as Actual
        \type choice
        \key Yes
@@ -56,11 +56,11 @@ RunPeriod,
        \key Hour24
        \default Hour24
 
-This approach will allow the user both ways of treating the first step. It would allow the users to select and try different methods based on their simulation needs. 
+This approach will allow the user both ways of treating the first step. It would allow the users to select and try different methods based on their simulation needs.
 
 ## Testing/Validation/Data Sources ##
 
-Test units will be developed to check the correct implementation of 1). the new input processing; and 2) the corresponding methods. 
+Test units will be developed to check the correct implementation of 1). the new input processing; and 2) the corresponding methods.
 
 ## Input Output Reference Documentation ##
 
@@ -76,10 +76,10 @@ No change.
 
 ## Engineering Reference ##
 
-TBD: Likely no change would be required.  
+TBD: Likely no change would be required.
 
 ## Example File and Transition Changes ##
 
-New example file is not needed. 
+New example file is not needed.
 
 ## References ##

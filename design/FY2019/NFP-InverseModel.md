@@ -4,7 +4,7 @@ Han Li, Tianzhen Hong, Xuan Luo
 
 Lawrence Berkeley National Laboratory
 
-December 6, 2018 
+December 6, 2018
 
 
 Justification for Feature Update
@@ -102,7 +102,7 @@ of zone loads and air system output equals the change in energy stored
 in the zone. The infiltration airflow rate, m<sub>inf</sub>, changes for
 different conditions depending on outdoor temperature, wind speed, and
 HVAC system operations. The energy provided from systems to the zone is
-represented as Q<sub>sys</sub>. 
+represented as Q<sub>sys</sub>.
 
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20%5Crho_%7Bair%7DV_z%20C_%7Bp%7D%5Cfrac%20%7BdT_z%7D%20%7Bdt%7D%20%3D%20%5CSigma%7BQ_%7Bin%7D%7D&plus;%5CSigma%7Bh_i%20A_i%20%28T_%7Bsi%7D-T_z%29%7D%20&plus;%20%5CSigma%7Bm_%7Bzi%7DC_p%28T_%7Bzi%7D-T_z%29%7D%20&plus;%20m_%7Binf%7DC_p%28T_o%20-%20T_z%29%20&plus;%20m_%7Bsys%7DC_p%28T_%7Bsys%7D%20-%20T_z%29%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%282%29)
 
@@ -214,7 +214,7 @@ infiltration when the HVAC system is off.
 ### Solving Infiltration with Temperature
 
 Equation(2) can be re-written with the third-order backward
-approximation: 
+approximation:
 
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20C_z%5Cfrac%20%7B%5Cfrac%7B11%7D%7B6%7DT_%7Bz%7D%5E%7Bt%7D-3T_%7Bz%7D%5E%7Bt-%5Cdelta%20t%7D&plus;%5Cfrac%7B3%7D%7B2%7DT_%7Bz%7D%5E%7Bt-2%5Cdelta%20t%7D-%5Cfrac%7B1%7D%7B3%7DT_%7Bz%7D%5E%7Bt-3%5Cdelta%20t%7D%7D%20%7B%5Cdelta%20t%7D%20%3D%20RHS%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%285%29)
 
@@ -229,7 +229,7 @@ Then the infiltration mass flow rate can be solved:
 ### Solving Infiltration with Humidity Ratio
 
 Equation(3) can be re-written with the third-order backward
-approximation: 
+approximation:
 
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20C_%7Bwz%7D%5Cfrac%20%7B%5Cfrac%7B11%7D%7B6%7DW_%7Bz%7D%5E%7Bt%7D-3W_%7Bz%7D%5E%7Bt-%5Cdelta%20t%7D&plus;%5Cfrac%7B3%7D%7B2%7DW_%7Bz%7D%5E%7Bt-2%5Cdelta%20t%7D-%5Cfrac%7B1%7D%7B3%7DW_%7Bz%7D%5E%7Bt-3%5Cdelta%20t%7D%7D%20%7B%5Cdelta%20t%7D%20%3D%20RHS%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%288%29)
 
@@ -245,11 +245,11 @@ Then the infiltration mass flow rate can be solved:
 ### Solving Infiltration with CO<sub>2</sub> Concentration
 
 Equation(4) can be re-written with the third-order backward
-approximation: 
+approximation:
 
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20C_%7BCO_%7B2%7Dz%7D%5Cfrac%20%7B%5Cfrac%7B11%7D%7B6%7DC_%7Bz%7D%5E%7Bt%7D-3C_%7Bz%7D%5E%7Bt-%5Cdelta%20t%7D&plus;%5Cfrac%7B3%7D%7B2%7DC_%7Bz%7D%5E%7Bt-2%5Cdelta%20t%7D-%5Cfrac%7B1%7D%7B3%7DC_%7Bz%7D%5E%7Bt-3%5Cdelta%20t%7D%7D%20%7B%5Cdelta%20t%7D%20%3D%20RHS%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2811%29)
 
-Where: 
+Where:
 
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20RHS%20%3D%20%5CSigma%7Bkg_%7Bmass_%7Bsched%7D%7D%7D%5Ctimes%2010%5E%7B6%7D%20&plus;%20%5CSigma%7Bm_%7Bzi%7D%28C_%7Bzi%7D-C_z%29%7D%20m_%7Binf%7D%20%28C_o%20-%20C_z%29%20&plus;%20%5C%5Cm_%7Bsys%7D%20%28C_%7Bsys%7D%20-%20C_z%29%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2812%29)
 
@@ -279,7 +279,7 @@ The sum of internal sensible heat gains from people is:
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20%5CSigma%7BQ_%7Bpeople%7D%7D%20%3D%20%5CSigma%7BQ_%7Bin%7D%7D%20-%20%5CSigma%7BQ_%7Bothers%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2815%29)
 
 Finally, the number of people could be solved:
-  
+
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20N%20%3D%20%5Cfrac%20%7B%5CSigma%7BQ_%7Bpeople%7D%7D%7D%7BQ_%7Bsingle%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2816%29)
 
 
@@ -297,7 +297,7 @@ The sum of internal moisture gains from people is:
 ![Diagram](https://latex.codecogs.com/svg.latex?%5Cdpi%7B150%7D%20%5CSigma%7Bkg_%7Bmass_%7Bsched-people%7D%7D%7D%20%3D%20%5CSigma%7Bkg_%7Bmass_%7Bsched%7D%7D%7D%20-%20%5CSigma%7Bkg_%7Bmass_%7Bsched-others%7D%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2818%29)
 
 Finally, the number of people could be solved:
-  
+
 ![Diagram](https://latex.codecogs.com/gif.latex?N%20%3D%20%5Cfrac%20%7B%5CSigma%7Bkg_%7Bmass_%7Bsched-people%7D%7D%7D%7D%7Bkg_%7Bmass_%7Bsingle%7D%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2819%29)
 
 Where: <br />
@@ -314,7 +314,7 @@ The sum of internal CO<sub>2</sub> gains from people is:
 ![Diagram](https://latex.codecogs.com/gif.latex?%5CSigma%7Bkg_%7Bmass_%7Bsched-people%7D%7D%7D%20%3D%20%5CSigma%7Bkg_%7Bmass_%7Bsched%7D%7D%7D%20-%20%5CSigma%7Bkg_%7Bmass_%7Bsched-others%7D%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2821%29)
 
 Finally, the number of people could be solved:
-  
+
 ![Diagram](https://latex.codecogs.com/gif.latex?N%20%3D%20%5Cfrac%20%7B%5CSigma%7Bkg_%7Bmass_%7Bsched-people%7D%7D%7D%7D%7Bkg_%7Bmass_%7Bsingle%7D%7D%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%20Eq.%2822%29)
 
 Where: <br />
@@ -363,9 +363,9 @@ defines inputs for the new hybrid modeling algorithms for individual
 zones.
 
     HybridModel:Zone,
-           \memo Zones with measured data of indoor air temperature, humidity ratio, and 
+           \memo Zones with measured data of indoor air temperature, humidity ratio, and
            CO2 concentration, and a range of dates.
-           \memo If the range of temperature measurement dates includes a leap day, the 
+           \memo If the range of temperature measurement dates includes a leap day, the
            weather data should include a leap day.
     A1 ,   \field Name
            \required-field
@@ -381,7 +381,7 @@ zones.
            \key Yes
            \default No
     A4 ,   \field Calculate Zone Air Infiltration Rate
-           \note Use measured zone air parameters (temperature, humidity ratio, or 
+           \note Use measured zone air parameters (temperature, humidity ratio, or
            CO2 concentration) to calculate zone air infiltration rate.
            \note At least one measured parameter should be provided.
            \type choice

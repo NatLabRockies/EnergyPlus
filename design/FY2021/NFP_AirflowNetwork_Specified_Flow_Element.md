@@ -8,7 +8,7 @@ Original Date: January 31, 2021
 
 ## Justification for New Feature ##
 AirflowNetwork does not currently have a constant flow element linkage, which limits the degree to which
-certain elements (including supply/exhaust fans and infiltration) can be connected to AirflowNetwork.  
+certain elements (including supply/exhaust fans and infiltration) can be connected to AirflowNetwork.
 
 ## Overview ##
 AirflowNetwork has a number of ways to represent unintentional flows between zones, but no good way to
@@ -33,7 +33,7 @@ The constant flow with specified flow will return 1, and the Jacobian values are
 ## Approach ##
 This feature will be added through the execution of these subtasks:
 
-  * Create two new airflow elements SpecifiedVolumeFlow and SpecifiedMassFlow 
+  * Create two new airflow elements SpecifiedVolumeFlow and SpecifiedMassFlow
   * Create a new input object AirflowNetwork:MultiZone:SpecifiedFlowRate
   * Create necessary inputs to allow users to incorporate this element into models
   * Create unit tests and documentation

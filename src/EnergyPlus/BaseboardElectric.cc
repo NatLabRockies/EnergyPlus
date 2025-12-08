@@ -205,9 +205,7 @@ namespace BaseboardElectric {
                                                                          s_ipsc->cAlphaFieldNames,
                                                                          s_ipsc->cNumericFieldNames);
 
-                baseboard->baseboards(ConvElecBBNum).FieldNames.allocate(NumNums);
-                baseboard->baseboards(ConvElecBBNum).FieldNames = "";
-                baseboard->baseboards(ConvElecBBNum).FieldNames = s_ipsc->cNumericFieldNames;
+                baseboard->baseboards(ConvElecBBNum).FieldNames.assign(s_ipsc->cNumericFieldNames.begin(), s_ipsc->cNumericFieldNames.end());
 
                 ErrorObjectHeader eoh{routineName, cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -425,7 +423,7 @@ namespace BaseboardElectric {
             state.dataSize->DataZoneNumber = baseboard.ZonePtr;
             int SizingMethod = HVAC::HeatingCapacitySizing;
             int FieldNum = 1;
-            std::string const SizingString = format("{} [W]", baseboard.FieldNames(FieldNum));
+            std::string const SizingString = format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
             int CapSizingMethod = baseboard.HeatingCapMethod;
             ZoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
             if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

@@ -5,7 +5,7 @@ Variable Speed DX Coil Enhancements
 
  - 11/18/2016, first draft
  - 2/13/2017, revised to reflect unitary system changes
- 
+
 
 ## Justification for New Feature ##
 
@@ -17,7 +17,7 @@ N/A
 
 ## Overview ##
 
-This project aims to add Coil:Cooling:DX:VariableSpeed (and Coil:Heating:DX:VariableSpeed in one case) to the following IDF objects: 
+This project aims to add Coil:Cooling:DX:VariableSpeed (and Coil:Heating:DX:VariableSpeed in one case) to the following IDF objects:
 
     - Coil:Heating:Desuperheater
     - Coil:WaterHeating:Desuperheater
@@ -30,7 +30,7 @@ Although the model inputs will now allow for the VS DX coil models, in some case
 
 ## Approach ##
 
-Modify individual parent models to add support for the VS air source DX coil types.  Implementation will not attempt major refactoring of all the different parent models but will work within the existing patterns.  Source code will be modified to revise get input, coil information processing, and coil simulation calls, etc.  in the following source code files: 
+Modify individual parent models to add support for the VS air source DX coil types.  Implementation will not attempt major refactoring of all the different parent models but will work within the existing patterns.  Source code will be modified to revise get input, coil information processing, and coil simulation calls, etc.  in the following source code files:
 
     - HeatingCoils.cc ( air heating desuperheater )
     - WaterThermalTanks.cc ( water heating desuperheater )
@@ -38,7 +38,7 @@ Modify individual parent models to add support for the VS air source DX coil typ
     - WindowAC.cc ( window air conditioner )
     - HVACUnitaryBypassVAV.cc ( change over bypass packaged systems )
     - DesiccantDehumidifiers.cc ( desiccant system with coordinated control and desuperheater regen heat options from upstream DX coil)
-    
+
 Create test files using AirLoopHVAC:UnitarySystem with setpoint-based control that run Coil:Cooling:DX:VariableSpeed and Coil:Heating:DX:VariableSpeed and fix any problems. Create variations using Coil:Heating:Desuperheater and CoilSystem:Cooling:DX:HeatExchangerAssisted and fix any problems found related to using VS coil models in HeatRecovery.cc and HVACUnitarySystem.cc.
 
 ## Testing/Validation/Data Sources ##
@@ -56,14 +56,14 @@ The input changes are summarized by the following IDD changes:
   - in Coil:Cooling:DX:VariableSpeed
 	add  \reference DesuperHeatingCoilSources to Name field.  Will get used by name field object-list in Coil:Heating:Desuperheater and Coil:WaterHeating:Desuperheater.
 
-  - in Coil:Heating:Desuperheater, 
+  - in Coil:Heating:Desuperheater,
 	input field called Heating Source Object Type, add \key Coil:Cooling:DX:VariableSpeed
 
-  - in Coil:WaterHeating:Desuperheater, 
+  - in Coil:WaterHeating:Desuperheater,
 	input field called Heating Source Object Type, add \key Coil:Cooling:DX:VariableSpeed
 
-  - in CoilSystem:Cooling:DX:HeatExchangerAssisted, 
-	input field called Cooling Coil Object Type, add \key Coil:Cooling:DX:VariableSpeed. 
+  - in CoilSystem:Cooling:DX:HeatExchangerAssisted,
+	input field called Cooling Coil Object Type, add \key Coil:Cooling:DX:VariableSpeed.
 	input field called Cooling Coil Name, add \object-list CoolingCoilsDXVariableSpeed
 
   - in ZoneHVAC:WindowAirConditioner,
@@ -84,11 +84,11 @@ The input changes are summarized by the following IDD changes:
 
 ## Outputs Description ##
 
-No new outputs. 
+No new outputs.
 
 ## Engineering Reference ##
 
-No new models, just connecting existing models together. 
+No new models, just connecting existing models together.
 
 ## Example File and Transition Changes ##
 
@@ -102,7 +102,4 @@ WindowACAirToAir.idf
 
 ## References ##
 
-none. 
-
-
-
+none.

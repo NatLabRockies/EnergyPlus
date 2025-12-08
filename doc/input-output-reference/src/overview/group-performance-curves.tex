@@ -77,27 +77,25 @@ This field is used to indicate the kind of units that may be associated with the
 Following is an example input:
 
 \begin{lstlisting}
-
 Curve:Linear,
-  Curve-Linear, ! name
-  -1, ! Coefficient1 Constant
-  2, ! Coefficient2 x
-  0.0, ! min curve output
-  1.0; ! max curve output
+  Curve-Linear,               !- name
+  -1,                         !- Coefficient1 Constant
+  2,                          !- Coefficient2 x
+  0.0,                        !- min curve output
+  1.0;                        !- max curve output
 \end{lstlisting}
 
 The following is another example, as might be applied in the \hyperref[fancomponentmodel]{Fan:ComponentModel} to characterize duct static pressure reset (using a constant duct static pressure set point of 248.84 Pa in this case):
 
 \begin{lstlisting}
-
 Curve:Linear,
-  DiagnosticSPR, ! Curve Name f = C1 + C2\*x
-  248.84, ! Coefficient1 Constant [Pa]
-  0., ! Coefficient 2 Press/Flow [Pa-s/m3]
-  0., ! Minimum Value of x (Qfan) [m3/s]
-  100., ! Maximum Value of x (Qfan) [m3/s]
-  62.5, ! Minimum Curve Output [Pa]
-  248.84; ! Maximum Curve Output [Pa]
+  DiagnosticSPR,              !- Curve Name f = C1 + C2\*x
+  248.84,                     !- Coefficient1 Constant [Pa]
+  0.,                         !- Coefficient 2 Press/Flow [Pa-s/m3]
+  0.,                         !- Minimum Value of x (Qfan) [m3/s]
+  100.,                       !- Maximum Value of x (Qfan) [m3/s]
+  62.5,                       !- Minimum Curve Output [Pa]
+  248.84;                     !- Maximum Curve Output [Pa]
 \end{lstlisting}
 
 \subsection{Curve:QuadLinear}\label{curvequadlinear}
@@ -259,60 +257,59 @@ This field is used to indicate the kind of units that may be associated with the
 Below are an example inputs for QuadLinear Curves.
 
 \begin{lstlisting}
-
 CURVE:QUADLINEAR,
-  MinDsnWBCurveName, ! Curve Name
-  -3.3333,           ! CoefficientC1
-  0.0,               ! CoefficientC2
-  38.9,              ! CoefficientC3
-  0.,                ! CoefficientC4
-  0.,                ! CoefficientC5
-  -30.,              ! Minimum Value of w
-  40.,               ! Maximum Value of w
-  0.,                ! Minimum Value of x
-  1.,                ! Maximum Value of x
-  10.,               ! Minimum Value of y
-  8.,                ! Maximum Value of y
-  1. E-8,            ! Minimum Value of z
-  8. E-8,            ! Maximum Value of z
-  0.,                ! Minimum Curve Output
-  38.;               ! Maximum Curve Output
+  MinDsnWBCurveName,          !- Curve Name
+  -3.3333,                    !- CoefficientC1
+  0.0,                        !- CoefficientC2
+  38.9,                       !- CoefficientC3
+  0.,                         !- CoefficientC4
+  0.,                         !- CoefficientC5
+  -30.,                       !- Minimum Value of w
+  40.,                        !- Maximum Value of w
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  10.,                        !- Minimum Value of y
+  8.,                         !- Maximum Value of y
+  1. E-8,                     !- Minimum Value of z
+  8. E-8,                     !- Maximum Value of z
+  0.,                         !- Minimum Curve Output
+  38.;                        !- Maximum Curve Output
 
-  Curve:QuadLinear,
-  MinActWBCurveName, ! Curve Name
-  -8.3333,           ! CoefficientC1
-  2.0,               ! CoefficientC2
-  5.5556.,           ! CoefficientC3
-  -1.0,              ! CoefficientC4
-  0.,                ! CoefficientC5
-  0.,                ! Minimum Value of w
-  38.,               ! Maximum Value of w
-  0.,                ! Minimum Value of x
-  1.,                ! Maximum Value of x
-  10.,               ! Minimum Value of y
-  38.,               ! Maximum Value of y
-  1. E-8,            ! Minimum Value of z
-  8. E-8,            ! Maximum Value of z
-  0.,                ! Minimum Curve Output
-  43.;               ! Maximum Curve Output
+Curve:QuadLinear,
+  MinActWBCurveName,          !- Curve Name
+  -8.3333,                    !- CoefficientC1
+  2.0,                        !- CoefficientC2
+  5.5556.,                    !- CoefficientC3
+  -1.0,                       !- CoefficientC4
+  0.,                         !- CoefficientC5
+  0.,                         !- Minimum Value of w
+  38.,                        !- Maximum Value of w
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  10.,                        !- Minimum Value of y
+  38.,                        !- Maximum Value of y
+  1. E-8,                     !- Minimum Value of z
+  8. E-8,                     !- Maximum Value of z
+  0.,                         !- Minimum Curve Output
+  43.;                        !- Maximum Curve Output
 
-  Curve:QuadLinear,
-  OptCondEntCurveName, ! Curve Name
-  12.2711,             ! CoefficientC1
-  0.80,                ! CoefficientC2
-  6.6667,              ! CoefficientC3
-  -0.266,              ! CoefficientC4
-  -6193484.,           ! CoefficientC5
-  0.,                  ! Minimum Value of w
-  38.,                 ! Maximum Value of w
-  0.,                  ! Minimum Value of x
-  1.,                  ! Maximum Value of x
-  10.,                 ! Minimum Value of y
-  38.,                 ! Maximum Value of y
-  1. E-8,              ! Minimum Value of z
-  8. E-8,              ! Maximum Value of z
-  0.,                  ! Minimum Curve Output
-  32.;                 ! Maximum Curve Output
+Curve:QuadLinear,
+  OptCondEntCurveName,        !- Curve Name
+  12.2711,                    !- CoefficientC1
+  0.80,                       !- CoefficientC2
+  6.6667,                     !- CoefficientC3
+  -0.266,                     !- CoefficientC4
+  -6193484.,                  !- CoefficientC5
+  0.,                         !- Minimum Value of w
+  38.,                        !- Maximum Value of w
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  10.,                        !- Minimum Value of y
+  38.,                        !- Maximum Value of y
+  1. E-8,                     !- Minimum Value of z
+  8. E-8,                     !- Maximum Value of z
+  0.,                         !- Minimum Curve Output
+  32.;                        !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:QuintLinear}\label{curvequintlinear}
@@ -507,27 +504,26 @@ This field is used to indicate the kind of units that may be associated with the
 Below are an example inputs for QuintLinear Curves.
 
 \begin{lstlisting}
-
 CURVE:QUINTLINEAR,
-  CoolSensCapCurve,        ! Curve Name
-  -5.462690012,            ! CoefficientC1
-  17.95968138,             ! CoefficientC2
-  -11.87818402,            ! CoefficientC3
-  -0.980163419,            ! CoefficientC4
-  0.767285761,             ! CoefficientC5
-  0.0,                     ! CoefficientC6
-  -100,                    ! Minimum Value of v
-  100,                     ! Maximum Value of v
-  -100,                    ! Minimum Value of w
-  100,                     ! Maximum Value of w
-  -100,                    ! Minimum Value of x
-  100,                     ! Maximum Value of x
-  0,                       ! Minimum Value of y
-  100,                     ! Maximum Value of y
-  0,                       ! Minimum Value of z
-  100,                     ! Maximum Value of z
-  0,                       ! Minimum Curve Output
-  38;                      ! Maximum Curve Output
+  CoolSensCapCurve,           !- Curve Name
+  -5.462690012,               !- CoefficientC1
+  17.95968138,                !- CoefficientC2
+  -11.87818402,               !- CoefficientC3
+  -0.980163419,               !- CoefficientC4
+  0.767285761,                !- CoefficientC5
+  0.0,                        !- CoefficientC6
+  -100,                       !- Minimum Value of v
+  100,                        !- Maximum Value of v
+  -100,                       !- Minimum Value of w
+  100,                        !- Maximum Value of w
+  -100,                       !- Minimum Value of x
+  100,                        !- Maximum Value of x
+  0,                          !- Minimum Value of y
+  100,                        !- Maximum Value of y
+  0,                          !- Minimum Value of z
+  100,                        !- Maximum Value of z
+  0,                          !- Minimum Curve Output
+  38;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:Quadratic}\label{curvequadratic}
@@ -607,14 +603,13 @@ This field is used to indicate the kind of units that may be associated with the
 Following is an example input.
 
 \begin{lstlisting}
-
 Curve:Quadratic,
-  WindACCBFFFF, ! name
-  -2.277,       ! Coefficient1 Constant
-  5.2114,       ! Coefficient2 x
-  -1.9344,      ! Coefficient3 x\*\*2
-  0.0,          ! Minimum Value of x
-  1.0;          ! Maximum Value of x
+  WindACCBFFFF,               !- name
+  -2.277,                     !- Coefficient1 Constant
+  5.2114,                     !- Coefficient2 x
+  -1.9344,                    !- Coefficient3 x\*\*2
+  0.0,                        !- Minimum Value of x
+  1.0;                        !- Maximum Value of x
 \end{lstlisting}
 
 \subsection{Curve:Cubic}\label{curvecubic}
@@ -698,15 +693,14 @@ This field is used to indicate the kind of units that may be associated with the
 Following is an input example.
 
 \begin{lstlisting}
-
 Curve:Cubic,
-  WindACEIRFPLF, ! name
-  .00000273404,  ! Coefficient1 Constant
-  1.05259,       ! Coefficient2 x
-  -.0552087,     ! Coefficient3 x**2
-  .00262236,     ! Coefficient4
-  0.0,           ! min
-  1.1;           ! max
+  WindACEIRFPLF,              !- name
+  .00000273404,               !- Coefficient1 Constant
+  1.05259,                    !- Coefficient2 x
+  -.0552087,                  !- Coefficient3 x**2
+  .00262236,                  !- Coefficient4
+  0.0,                        !- min
+  1.1;                        !- max
 \end{lstlisting}
 
 \subsection{Curve:Quartic}\label{curvequartic}
@@ -794,33 +788,31 @@ This field is used to indicate the kind of units that may be associated with the
 Following is an input example.
 
 \begin{lstlisting}
-
 Curve:Quartic,
-  BGSeries60,                                 !- y = -611.41x4 + 192.68x3 - 88.843x2 + 4.7634x + 5.5656
-  5.5656,                                         !- Constant
-  4.7634,                                         !- 1st coefficient
-  -88.843,                                       !- 2nd coefficient
-  192.68,                                         !- 3rd coefficient
-  -611.41,                                       !- 4th coefficient
-  0.0,                                               !- Min Phi Value
-  0.2412;                                         !- Max Phi Value
+  BGSeries60,                 !- y = -611.41x4 + 192.68x3 - 88.843x2 + 4.7634x + 5.5656
+  5.5656,                     !- Constant
+  4.7634,                     !- 1st coefficient
+  -88.843,                    !- 2nd coefficient
+  192.68,                     !- 3rd coefficient
+  -611.41,                    !- 4th coefficient
+  0.0,                        !- Min Phi Value
+  0.2412;                     !- Max Phi Value
 \end{lstlisting}
 
 The following is another example, as might be applied in the \hyperref[fancomponentmodel]{Fan:ComponentModel} to characterize belt maximum efficiency (using a medium efficiency belt in this case):
 
 \begin{lstlisting}
-
 Curve:Quartic,
-  BeltMaxEffMedium,                               ! Curve Name
-  -0.09504,                                               ! CoefficientC1
-  0.03415,                                                 ! CoefficientC2
-  -0.008897,                                             ! CoefficientC3
-  0.001159,                                               ! CoefficientC4
-  -0.00006132,                                         ! CoefficientC5
-  -1.2,                                                       ! Minimum Value of x
-  6.2,                                                         ! Maximum Value of x
-  -4.6,                                                       ! Minimum Curve Output
-  0.;                                                           ! Maximum Curve Output
+  BeltMaxEffMedium,           !- Curve Name
+  -0.09504,                   !- CoefficientC1
+  0.03415,                    !- CoefficientC2
+  -0.008897,                  !- CoefficientC3
+  0.001159,                   !- CoefficientC4
+  -0.00006132,                !- CoefficientC5
+  -1.2,                       !- Minimum Value of x
+  6.2,                        !- Maximum Value of x
+  -4.6,                       !- Minimum Curve Output
+  0.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:Exponent}\label{curveexponent}
@@ -900,17 +892,16 @@ This field is used to indicate the kind of units that may be associated with the
 Following is an input example.
 
 \begin{lstlisting}
-
 Curve:Exponent,
-  !     Curve = C1 + C2\*x\*\*C3, x = fan speed ratio
-  FanPowerExponentCurve, !- Name
-  0.0,                                     !- Coefficient1 Constant
-  1.0,                                     !- Coefficient2 Constant
-  3.0,                                     !- Coefficient3 Constant
-  0.0,                                     !- Minimum Value of x
-  1.5,                                     !- Maximum Value of x
-  0.1,                                     !- Minimum Curve Output
-  1.5;                                     !- Maximum Curve Output
+!     Curve = C1 + C2\*x\*\*C3, x = fan speed ratio
+  FanPowerExponentCurve,      !- Name
+  0.0,                        !- Coefficient1 Constant
+  1.0,                        !- Coefficient2 Constant
+  3.0,                        !- Coefficient3 Constant
+  0.0,                        !- Minimum Value of x
+  1.5,                        !- Maximum Value of x
+  0.1,                        !- Minimum Curve Output
+  1.5;                        !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:Bicubic}\label{curvebicubic}
@@ -1045,23 +1036,22 @@ This field is used to indicate the kind of units that may be associated with the
 Below is an example input.
 
 \begin{lstlisting}
-
 Curve:Bicubic,
-  Main Chiller EIRFPLR,             !- Name
-  7.086284E-02,                             !- Coefficient1 Constant
-  2.787561E-03,                             !- Coefficient2 x
-  -8.917038E-06,                             !- Coefficient3 x\*\*2
-  2.309734E-01,                             !- Coefficient4 y
-  1.250442E+00,                             !- Coefficient5 y\*\*2
-  -2.161029E-03,                             !- Coefficient6 x\*y
-  0.000000E+00,                             !- Coefficient7 x\*\*3
-  -5.630094E-01,                             !- Coefficient8 y\*\*3
-  0.000000E+00,                             !- Coefficient9 x\*\*2\*y
-  0.000000E+00,                             !- Coefficient10 x\*y\*\*2
-  20.33,                                           !- Minimum Value of x
-  35.00,                                           !- Maximum Value of x
-  0.25,                                             !- Minimum Value of y
-  1.01;                                             !- Maximum Value of y
+  Main Chiller EIRFPLR,       !- Name
+  7.086284E-02,               !- Coefficient1 Constant
+  2.787561E-03,               !- Coefficient2 x
+  -8.917038E-06,              !- Coefficient3 x\*\*2
+  2.309734E-01,               !- Coefficient4 y
+  1.250442E+00,               !- Coefficient5 y\*\*2
+  -2.161029E-03,              !- Coefficient6 x\*y
+  0.000000E+00,               !- Coefficient7 x\*\*3
+  -5.630094E-01,              !- Coefficient8 y\*\*3
+  0.000000E+00,               !- Coefficient9 x\*\*2\*y
+  0.000000E+00,               !- Coefficient10 x\*y\*\*2
+  20.33,                      !- Minimum Value of x
+  35.00,                      !- Maximum Value of x
+  0.25,                       !- Minimum Value of y
+  1.01;                       !- Maximum Value of y
 \end{lstlisting}
 
 \subsection{Curve:Biquadratic}\label{curvebiquadratic}
@@ -1180,17 +1170,16 @@ This field is used to indicate the kind of units that may be associated with the
 Below is an example input.
 
 \begin{lstlisting}
-
 Curve:Biquadratic,
-  WindACCoolCapFT, ! name
-  0.942587793,     ! Coefficient1 Constant
-  0.009543347,     ! Coefficient2 x
-  0.000683770,     ! Coefficient3 x\*\*2
-  -0.011042676,    ! Coefficient4 y
-  0.000005249,     ! Coefficient5 y\*\*2
-  -0.000009720,    ! Coefficient6 x\*y
-  15., 22.,        ! min and max of first independent variable
-  29., 47.;        ! min and max of second independent variable
+  WindACCoolCapFT,            !- name
+  0.942587793,                !- Coefficient1 Constant
+  0.009543347,                !- Coefficient2 x
+  0.000683770,                !- Coefficient3 x\*\*2
+  -0.011042676,               !- Coefficient4 y
+  0.000005249,                !- Coefficient5 y\*\*2
+  -0.000009720,               !- Coefficient6 x\*y
+  15., 22.,                   !- min and max of first independent variable
+  29., 47.;                   !- min and max of second independent variable
 \end{lstlisting}
 
 \subsection{Curve:CubicLinear}\label{curvecubiclinear}
@@ -1264,24 +1253,23 @@ This field is used to indicate the kind of units that may be associated with the
 An example input for the CubicLinear equation form is shown below.
 
 \begin{lstlisting}
-
 Curve:CubicLinear,
-  InsideMeltIceDischarging, !- Name
-  0.108734675,              !- Coefficient1 Constant
-  -0.989874286,             !- Coefficient2 x
-  0.696303562,              !- Coefficient3 x**2
-  -0.134945307,             !- Coefficient4 x**3
-  1.724007415,              !- Coefficient5 y
-  -1.094020457,             !- Coefficient6 y*x
-  0.25,                     !- Minimum Value of x
-  1,                        !- Maximum Value of x
-  0.69,                     !- Minimum Value of y
-  1.26,                     !- Maximum Value of y
-  0.0926,                   !- Minimum Curve Output
-  0.4938,                   !- Maximum Curve Output
-  Dimensionless,            !- Input Unit Type for X
-  Dimensionless,            !- Input Unit Type for Y
-  Dimensionless,            !- Output Unit Type
+  InsideMeltIceDischarging,   !- Name
+  0.108734675,                !- Coefficient1 Constant
+  -0.989874286,               !- Coefficient2 x
+  0.696303562,                !- Coefficient3 x**2
+  -0.134945307,               !- Coefficient4 x**3
+  1.724007415,                !- Coefficient5 y
+  -1.094020457,               !- Coefficient6 y*x
+  0.25,                       !- Minimum Value of x
+  1,                          !- Maximum Value of x
+  0.69,                       !- Minimum Value of y
+  1.26,                       !- Maximum Value of y
+  0.0926,                     !- Minimum Curve Output
+  0.4938,                     !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless,              !- Input Unit Type for Y
+  Dimensionless,              !- Output Unit Type
 \end{lstlisting}
 
 \subsection{Curve:ChillerPartLoadWithLift}\label{curvechillerpartloadwithlift}
@@ -1409,33 +1397,32 @@ This field is used to indicate the kind of units that may be associated with the
 Below is an example input:
 
 \begin{lstlisting}
-
 Curve:ChillerPartLoadWithLift,
-  EIRFPLR,        !- Name
-  0.093291598,        !- Coefficient1 Constant
-  -0.234322952,       !- Coefficient2 x
-  0.426950368,        !- Coefficient3 x**2
-  0.188624721,        !- Coefficient4 y
-  -0.608010978,       !- Coefficient5 y**2
-  0.992031248,        !- Coefficient6 x*y
-  0.000000E+00,       !- Coefficient7 x**3
-  0.502338322,        !- Coefficient8 y**3
-  0.000000E+00,       !- Coefficient9 x**2*y
-  0.000000E+00,       !- Coefficient 10 x*y**2
-  -0.360902326,       !- Coefficient 11 x**2*y**2
-  -0.097978985,       !- Coefficient 12 z*y**3
-  0.2562,             !- Minimum Value of x
-  1.0365,             !- Maximum Value of x
-  0.1,                !- Minimum Value of y
-  1,                  !- Maximum Value of y
-  -0.035,             !- Minimum Value of z
-  0.3144,             !- Maximum Value of z
-  ,                   !- Minimum Curve Output
-  ,                   !- Maximum Curve Output
-  Dimensionless,      !- Input Unit Type for x
-  Dimensionless,      !- Input Unit Type for y
-  Dimensionless,      !- Input Unit Type for z
-  Dimensionless;      !- Output Unit Type
+  EIRFPLR,                    !- Name
+  0.093291598,                !- Coefficient1 Constant
+  -0.234322952,               !- Coefficient2 x
+  0.426950368,                !- Coefficient3 x**2
+  0.188624721,                !- Coefficient4 y
+  -0.608010978,               !- Coefficient5 y**2
+  0.992031248,                !- Coefficient6 x*y
+  0.000000E+00,               !- Coefficient7 x**3
+  0.502338322,                !- Coefficient8 y**3
+  0.000000E+00,               !- Coefficient9 x**2*y
+  0.000000E+00,               !- Coefficient 10 x*y**2
+  -0.360902326,               !- Coefficient 11 x**2*y**2
+  -0.097978985,               !- Coefficient 12 z*y**3
+  0.2562,                     !- Minimum Value of x
+  1.0365,                     !- Maximum Value of x
+  0.1,                        !- Minimum Value of y
+  1,                          !- Maximum Value of y
+  -0.035,                     !- Minimum Value of z
+  0.3144,                     !- Maximum Value of z
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for x
+  Dimensionless,              !- Input Unit Type for y
+  Dimensionless,              !- Input Unit Type for z
+  Dimensionless;              !- Output Unit Type
 \end{lstlisting}
 
 \subsection{Curve:QuadraticLinear}\label{curvequadraticlinear}
@@ -1554,19 +1541,18 @@ This field is used to indicate the kind of units that may be associated with the
 Below is an example input.
 
 \begin{lstlisting}
-
 Curve:QuadraticLinear,
-  DischargeCurve, !- Curve Name
-  0.0,            !- Coefficient1 Constant
-  0.09,           !- Coefficient2 x
-  -0.15,          !- Coefficient3 x\*\*2
-  0.612,          !- Coefficient4 y
-  -0.324,         !- Coefficient5 x\*y
-  -0.216,         !-Coefficient6 x\*\*2\*y
-  0.0,            !- Minimum Value of x
-  1.0,            !- Maximum Value of x
-  0.0,            !- Minimum Value of y
-  9.9;            !- Maximum Value of y
+  DischargeCurve,             !- Curve Name
+  0.0,                        !- Coefficient1 Constant
+  0.09,                       !- Coefficient2 x
+  -0.15,                      !- Coefficient3 x\*\*2
+  0.612,                      !- Coefficient4 y
+  -0.324,                     !- Coefficient5 x\*y
+  -0.216,                     !- Coefficient6 x\*\*2\*y
+  0.0,                        !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  0.0,                        !- Minimum Value of y
+  9.9;                        !- Maximum Value of y
 \end{lstlisting}
 
 \subsection{Curve:Triquadratic}\label{curvetriquadratic}
@@ -1844,14 +1830,13 @@ In the curve outputs for this object:
 Following is an input example.
 
 \begin{lstlisting}
-
 Curve:Functional:PressureDrop,
-  PressureMinorAndFriction,!- Name
-  0.05,                                       !- Diameter
-  53.8,                                       !- Minor Loss Coefficient
-  200,                                         !- Length
-  ,                                               !- Roughness
-  0.008;                                     !- Fixed Friction Factor
+  PressureMinorAndFriction,   !- Name
+  0.05,                       !- Diameter
+  53.8,                       !- Minor Loss Coefficient
+  200,                        !- Length
+  ,                           !- Roughness
+  0.008;                      !- Fixed Friction Factor
 \end{lstlisting}
 
 \subsection{Curve:FanPressureRise}\label{curvefanpressurerise}
@@ -1921,19 +1906,18 @@ The optional numeric maximum allowable value of the evaluated curve (Pa). Values
 The following is an input example describing the fan total pressure rise for a VAV system with a constant non-zero duct static pressure set point (the set point is described separately; see the \hyperref[curvelinear]{Curve:Linear} object for a related example):
 
 \begin{lstlisting}
-
 Curve:FanPressureRise,
-  VSD Example,                   ! Curve Name f = C1*Qfan**2+C2*Qfan+C3*Qfan*(Psm-Po)**0.5+C4*(Psm-Po) with Po = 0
-  1446.75833497653,         ! CoefficientC1 Alpha [Pa s2/m6]
-  0.,                                     ! CoefficientC2 Beta [Pa s/m3]
-  0.,                                     ! CoefficientC3 Gamma [Pa0.5 s/m3]
-  1.,                                     ! CoefficientC4 Delta [-]
-  0.,                                     ! Minimum Value of Qfan [m3/s]
-  100.,                                 ! Maximum Value of Qfan [m3/s]
-  62.5,                                 ! Minimum Value of Psm [Pa]
-  300.,                                 ! Maximum Value of Psm [Pa]
-  0.;                                     ! Minimum Curve Output [Pa]
-  5000.;                               ! Maximum Curve Output [Pa]
+  VSD Example,                !- Curve Name f = C1*Qfan**2+C2*Qfan+C3*Qfan*(Psm-Po)**0.5+C4*(Psm-Po) with Po = 0
+  1446.75833497653,           !- CoefficientC1 Alpha [Pa s2/m6]
+  0.,                         !- CoefficientC2 Beta [Pa s/m3]
+  0.,                         !- CoefficientC3 Gamma [Pa0.5 s/m3]
+  1.,                         !- CoefficientC4 Delta [-]
+  0.,                         !- Minimum Value of Qfan [m3/s]
+  100.,                       !- Maximum Value of Qfan [m3/s]
+  62.5,                       !- Minimum Value of Psm [Pa]
+  300.,                       !- Maximum Value of Psm [Pa]
+  0.,                         !- Minimum Curve Output [Pa]
+  5000.;                      !- Maximum Curve Output [Pa]
 \end{lstlisting}
 
 \subsection{Curve:ExponentialSkewNormal}\label{curveexponentialskewnormal}
@@ -2001,29 +1985,27 @@ This optional field is provided for future purposes so that the IDF Editor could
 The following are input examples describing the normalized fan efficiency for the normal (non-stall) and stall operating regions of a backward-curved airfoil centrifugal fan:
 
 \begin{lstlisting}
+Curve:ExponentialSkewNormal,
+  FanEff120CPLANormal,        !- Curve Name
+  0.072613,                   !- CoefficientC1 Afan
+  0.833213,                   !- CoefficientC2 Bfan
+  0.,                         !- CoefficientC3 Cfan
+  0.013911,                   !- CoefficientC4 Dfan
+  -4.,                        !- Minimum Value of x
+  5.,                         !- Maximum Value of x
+  0.1,                        !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 
 Curve:ExponentialSkewNormal,
-  FanEff120CPLANormal,                         ! Curve Name
-  0.072613,                                               ! CoefficientC1 Afan
-  0.833213,                                               ! CoefficientC2 Bfan
-  0.,                                                           ! CoefficientC3 Cfan
-  0.013911,                                               ! CoefficientC4 Dfan
-  -4.,                                                         ! Minimum Value of x
-  5.,                                                           ! Maximum Value of x
-  0.1,                                                         ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
-
-
-  Curve:ExponentialSkewNormal,
-  FanEff120CPLAStall,                           ! Curve Name
-  -1.674931,                                             ! CoefficientC1 Afan
-  1.980182,                                               ! CoefficientC2 Bfan
-  0.,                                                           ! CoefficientC3 Cfan
-  1.844950,                                               ! CoefficientC4 Dfan
-  -4.,                                                         ! Minimum Value of x
-  5.,                                                           ! Maximum Value of x
-  0.1,                                                         ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+  FanEff120CPLAStall,         !- Curve Name
+  -1.674931,                  !- CoefficientC1 Afan
+  1.980182,                   !- CoefficientC2 Bfan
+  0.,                         !- CoefficientC3 Cfan
+  1.844950,                   !- CoefficientC4 Dfan
+  -4.,                        !- Minimum Value of x
+  5.,                         !- Maximum Value of x
+  0.1,                        !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:Sigmoid}\label{curvesigmoid}
@@ -2087,30 +2069,29 @@ This optional field is provided for future purposes so that the IDF Editor could
 The following are input examples describing the normalized dimensionless flow for normal (non-stall) and stall operating regions of a backward-curved airfoil centrifugal fan:
 
 \begin{lstlisting}
+Curve:Sigmoid,
+  FanDimFlowNormal,           !- Curve Name
+  0.,                         !- CoefficientC1 Aspd
+  1.001423,                   !- CoefficientC2 Bspd
+  0.123935,                   !- CoefficientC3 Cspd
+  -0.476026,                  !- CoefficientC4 Dspd
+  1.,                         !- CoefficientC5 Espd
+  -4.,                        !- Minimum Value of x
+  5.,                         !- Maximum Value of x
+  0.05,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 
 Curve:Sigmoid,
-  FanDimFlowNormal,                               ! Curve Name
-  0.,                                                           ! CoefficientC1 Aspd
-  1.001423,                                               ! CoefficientC2 Bspd
-  0.123935,                                               ! CoefficientC3 Cspd
-  -0.476026,                                             ! CoefficientC4 Dspd
-  1.,                                                           ! CoefficientC5 Espd
-  -4.,                                                         ! Minimum Value of x
-  5.,                                                           ! Maximum Value of x
-  0.05,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
-
-  Curve:Sigmoid,
-  FanDimFlowStall,                                 ! Curve Name
-  0.,                                                           ! CoefficientC1 Aspd
-  5.924993,                                               ! CoefficientC2 Bspd
-  -1.91636,                                               ! CoefficientC3 Cspd
-  -0.851779,                                             ! CoefficientC4 Dspd
-  1.,                                                           ! CoefficientC5 Espd
-  -4.,                                                         ! Minimum Value of x
-  5.,                                                           ! Maximum Value of x
-  0.05,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+  FanDimFlowStall,            !- Curve Name
+  0.,                         !- CoefficientC1 Aspd
+  5.924993,                   !- CoefficientC2 Bspd
+  -1.91636,                   !- CoefficientC3 Cspd
+  -0.851779,                  !- CoefficientC4 Dspd
+  1.,                         !- CoefficientC5 Espd
+  -4.,                        !- Minimum Value of x
+  5.,                         !- Maximum Value of x
+  0.05,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:RectangularHyperbola1}\label{curverectangularhyperbola1}
@@ -2164,16 +2145,15 @@ This optional field is provided for future purposes so that the IDF Editor could
 The following is an input example describing the maximum efficiency variation for a mid- or average-efficiency type of motor:
 
 \begin{lstlisting}
-
 Curve:RectangularHyperbola1,
-  MotorMaxEffAvg,                                   ! Curve Name
-  0.29228,                                                 ! CoefficientC1
-  3.368739,                                               ! CoefficientC2
-  0.762471,                                               ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  7.6,                                                         ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+  MotorMaxEffAvg,             !- Curve Name
+  0.29228,                    !- CoefficientC1
+  3.368739,                   !- CoefficientC2
+  0.762471,                   !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  7.6,                        !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:RectangularHyperbola2}\label{curverectangularhyperbola2}
@@ -2227,46 +2207,45 @@ This optional field is provided for future purposes so that the IDF Editor could
 The following are input examples describing part-load efficiency variations for a medium efficiency type of V-belt (Regions 1 and 3), for a mid- or average-efficiency nominal 25 hp 4-pole motor, and a nominal 30 hp VFD:
 
 \begin{lstlisting}
+Curve:RectangularHyperbola2,
+  BeltPartLoadRegion1,        !- Curve Name
+  0.920797,                   !- CoefficientC1
+  0.0262686,                  !- CoefficientC2
+  0.151594,                   !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 
 Curve:RectangularHyperbola2,
-  BeltPartLoadRegion1,                         ! Curve Name
-  0.920797,                                               ! CoefficientC1
-  0.0262686,                                             ! CoefficientC2
-  0.151594,                                               ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  1.,                                                           ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+  BeltPartLoadRegion3,        !- Curve Name
+  1.037778,                   !- CoefficientC1
+  0.0103068,                  !- CoefficientC2
+  -0.0268146,                 !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 
-  Curve:RectangularHyperbola2,
-  BeltPartLoadRegion3,                         ! Curve Name
-  1.037778,                                               ! CoefficientC1
-  0.0103068,                                             ! CoefficientC2
-  -0.0268146,                                           ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  1.,                                                           ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+Curve:RectangularHyperbola2,
+  MotorPartLoad,              !- Curve Name
+  1.137209,                   !- CoefficientC1
+  0.0502359,                  !- CoefficientC2
+  -0.0891503,                 !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 
-  Curve:RectangularHyperbola2,
-  MotorPartLoad,                                     ! Curve Name
-  1.137209,                                               ! CoefficientC1
-  0.0502359,                                             ! CoefficientC2
-  -0.0891503,                                           ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  1.,                                                           ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
-
-  Curve:RectangularHyperbola2,
-  VFDPartLoad,                                         ! Curve Name
-  0.987405,                                               ! CoefficientC1
-  0.0155361,                                             ! CoefficientC2
-  -0.0059365,                                           ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  1.,                                                           ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+Curve:RectangularHyperbola2,
+  VFDPartLoad,                !- Curve Name
+  0.987405,                   !- CoefficientC1
+  0.0155361,                  !- CoefficientC2
+  -0.0059365,                 !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:ExponentialDecay}\label{curveexponentialdecay}
@@ -2322,16 +2301,15 @@ This optional field is provided for future purposes so that the IDF Editor could
 The following is an input example describing the part-load efficiency variation for a medium efficiency type of V-belt (Region 2):
 
 \begin{lstlisting}
-
 Curve:ExponentialDecay,
-  BeltPartLoadRegion2,                         ! Curve Name
-  1.011965,                                               ! CoefficientC1
-  -0.339038,                                             ! CoefficientC2
-  -3.43626,                                               ! CoefficientC3
-  0.,                                                           ! Minimum Value of x
-  1.,                                                           ! Maximum Value of x
-  0.01,                                                       ! Minimum Curve Output
-  1.;                                                           ! Maximum Curve Output
+  BeltPartLoadRegion2,        !- Curve Name
+  1.011965,                   !- CoefficientC1
+  -0.339038,                  !- CoefficientC2
+  -3.43626,                   !- CoefficientC3
+  0.,                         !- Minimum Value of x
+  1.,                         !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.;                         !- Maximum Curve Output
 \end{lstlisting}
 
 \subsection{Curve:DoubleExponentialDecay}\label{curvedoubleexponentialdecay}
@@ -2395,16 +2373,15 @@ The optional field is provided for future purposes so that the IDF Editor could 
 An example input of the Curve:DoubleExponentialDecay input is:
 
 \begin{lstlisting}
-
 Curve:DoubleExponentialDecay,
-  BatteryCycleCurve,         !- Name
-  1380,                                   !- Coefficient1 C1
-  6834,                                   !- Coefficient2 C2
-  -8.75,                                 !- Coefficient3 C3
-  6747,                                   !- Coefficient4 C4
-  -6.22,                                 !- Coefficient5 C5
-  0,                                         !- Minimum Value of x
-  1.0;                                     !- Maximum Value of x
+  BatteryCycleCurve,          !- Name
+  1380,                       !- Coefficient1 C1
+  6834,                       !- Coefficient2 C2
+  -8.75,                      !- Coefficient3 C3
+  6747,                       !- Coefficient4 C4
+  -6.22,                      !- Coefficient5 C5
+  0,                          !- Minimum Value of x
+  1.0;                        !- Maximum Value of x
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-021}

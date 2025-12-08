@@ -55,9 +55,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from os import path
-from sys import argv, exit
-
 from pathlib import Path
+from sys import argv, exit
 
 workspace = argv[1]
 matrix_os = argv[2]
@@ -86,7 +85,7 @@ fixed_up_contents = f"""
  - [Download Regressions]({artifact_url})
 """
 
-with open(summary_output_js_file, 'w') as js:
+with open(summary_output_js_file, "w") as js:
     js_contents = f"""
 module.exports = ({{github, context}}) => {{
     github.rest.issues.createComment({{

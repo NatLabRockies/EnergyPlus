@@ -1489,10 +1489,10 @@ void FillPredefinedTablesForSetPointManagers(EnergyPlusData &state)
             std::vector<std::string> namesOfNodes;
             std::vector<std::string> namesOfLoops;
             PlantLocation plantLoc;
-            for (std::size_t i = 0; i < spm->ctrlNodeNums.size(); ++i) {
-                namesOfNodes.push_back(state.dataLoopNodes->NodeID(spm->ctrlNodeNums[i]));
+            for (int ctrlNodeNum : spm->ctrlNodeNums) {
+                namesOfNodes.push_back(state.dataLoopNodes->NodeID(ctrlNodeNum));
                 int dummy = 0;
-                PlantUtilities::ScanPlantLoopsForNodeNum(state, routineName, spm->ctrlNodeNums[i], plantLoc, dummy, false);
+                PlantUtilities::ScanPlantLoopsForNodeNum(state, routineName, ctrlNodeNum, plantLoc, dummy, false);
                 if (plantLoc.loopNum > 0) {
                     namesOfLoops.push_back(plantLoc.loop->Name);
                 }
@@ -1853,8 +1853,10 @@ void InitSetPointManagers(EnergyPlusData &state)
                                     LookForFan = true;
                                 }
                                 if (LookForFan) {
-                                    if (Util::SameString(comp.TypeOf, "Fan:ConstantVolume") || Util::SameString(comp.TypeOf, "Fan:VariableVolume") ||
-                                        Util::SameString(comp.TypeOf, "Fan:OnOff") || Util::SameString(comp.TypeOf, "Fan:ComponentModel")) {
+                                    if (comp.CompType_Num == SimAirServingZones::CompType::Fan_ComponentModel ||
+                                        comp.CompType_Num == SimAirServingZones::CompType::Fan_Simple_CV ||
+                                        comp.CompType_Num == SimAirServingZones::CompType::Fan_Simple_VAV ||
+                                        comp.CompType_Num == SimAirServingZones::CompType::Fan_System_Object) {
                                         FanNodeIn = comp.NodeNumIn;
                                         FanNodeOut = comp.NodeNumOut;
                                         break;
@@ -1863,10 +1865,12 @@ void InitSetPointManagers(EnergyPlusData &state)
                             }
                         } // for (BranchNum)
                     } else {
-                        for (auto &branch : primaryAirSystem.Branch) {
-                            for (auto &comp : branch.Comp) {
-                                if (Util::SameString(comp.TypeOf, "Fan:ConstantVolume") || Util::SameString(comp.TypeOf, "Fan:VariableVolume") ||
-                                    Util::SameString(comp.TypeOf, "Fan:OnOff") || Util::SameString(comp.TypeOf, "Fan:ComponentModel")) {
+                        for (auto const &branch : primaryAirSystem.Branch) {
+                            for (auto const &comp : branch.Comp) {
+                                if (comp.CompType_Num == SimAirServingZones::CompType::Fan_ComponentModel ||
+                                    comp.CompType_Num == SimAirServingZones::CompType::Fan_Simple_CV ||
+                                    comp.CompType_Num == SimAirServingZones::CompType::Fan_Simple_VAV ||
+                                    comp.CompType_Num == SimAirServingZones::CompType::Fan_System_Object) {
                                     FanNodeIn = comp.NodeNumIn;
                                     FanNodeOut = comp.NodeNumOut;
                                 }
@@ -4086,13 +4090,14 @@ Real64 interpSetPoint(Real64 const LowVal, Real64 const HighVal, Real64 const Re
 {
     if (LowVal >= HighVal) {
         return 0.5 * (SetptAtLowVal + SetptAtHighVal);
-    } else if (RefVal <= LowVal) {
-        return SetptAtLowVal;
-    } else if (RefVal >= HighVal) {
-        return SetptAtHighVal;
-    } else {
-        return SetptAtLowVal - ((RefVal - LowVal) / (HighVal - LowVal)) * (SetptAtLowVal - SetptAtHighVal);
     }
+    if (RefVal <= LowVal) {
+        return SetptAtLowVal;
+    }
+    if (RefVal >= HighVal) {
+        return SetptAtHighVal;
+    }
+    return SetptAtLowVal - ((RefVal - LowVal) / (HighVal - LowVal)) * (SetptAtLowVal - SetptAtHighVal);
 }
 
 void UpdateSetPointManagers(EnergyPlusData &state)

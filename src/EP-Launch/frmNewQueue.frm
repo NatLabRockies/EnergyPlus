@@ -1,7 +1,7 @@
 VERSION 5.00
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
-Begin VB.Form frmNewQueue 
+Begin VB.Form frmNewQueue
    BorderStyle     =   1  'Fixed Single
    Caption         =   "New Group of Simulations"
    ClientHeight    =   5400
@@ -14,9 +14,9 @@ Begin VB.Form frmNewQueue
    ScaleHeight     =   5400
    ScaleWidth      =   11865
    StartUpPosition =   1  'CenterOwner
-   Begin VB.Frame frameStep4 
+   Begin VB.Frame frameStep4
       Caption         =   "Step 4 of 5 - Output File Locations"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   12
          Charset         =   0
@@ -30,7 +30,7 @@ Begin VB.Form frmNewQueue
       TabIndex        =   9
       Top             =   120
       Width           =   11655
-      Begin VB.TextBox Text2 
+      Begin VB.TextBox Text2
          BackColor       =   &H8000000F&
          BorderStyle     =   0  'None
          Height          =   855
@@ -42,7 +42,7 @@ Begin VB.Form frmNewQueue
          Top             =   2280
          Width           =   2415
       End
-      Begin VB.ComboBox comboRepeatIMF 
+      Begin VB.ComboBox comboRepeatIMF
          Height          =   315
          ItemData        =   "frmNewQueue.frx":0069
          Left            =   3000
@@ -52,7 +52,7 @@ Begin VB.Form frmNewQueue
          Top             =   3000
          Width           =   855
       End
-      Begin VB.TextBox textUserDefinedSpec 
+      Begin VB.TextBox textUserDefinedSpec
          Height          =   285
          Left            =   840
          TabIndex        =   14
@@ -60,7 +60,7 @@ Begin VB.Form frmNewQueue
          Top             =   2520
          Width           =   4455
       End
-      Begin VB.OptionButton optionUserDefLoc 
+      Begin VB.OptionButton optionUserDefLoc
          Caption         =   "User Defined Location"
          Height          =   255
          Left            =   360
@@ -68,7 +68,7 @@ Begin VB.Form frmNewQueue
          Top             =   1320
          Width           =   8535
       End
-      Begin VB.OptionButton optionOriginalLoc 
+      Begin VB.OptionButton optionOriginalLoc
          Caption         =   "Original Input File Location"
          Height          =   255
          Left            =   360
@@ -77,7 +77,7 @@ Begin VB.Form frmNewQueue
          Value           =   -1  'True
          Width           =   7575
       End
-      Begin VB.TextBox Text1 
+      Begin VB.TextBox Text1
          BackColor       =   &H8000000F&
          BorderStyle     =   0  'None
          Height          =   855
@@ -89,7 +89,7 @@ Begin VB.Form frmNewQueue
          Top             =   2280
          Width           =   2535
       End
-      Begin VB.Label lblPreview 
+      Begin VB.Label lblPreview
          BorderStyle     =   1  'Fixed Single
          Caption         =   "Label5"
          Height          =   255
@@ -98,7 +98,7 @@ Begin VB.Form frmNewQueue
          Top             =   4200
          Width           =   11415
       End
-      Begin VB.Label Label5 
+      Begin VB.Label Label5
          Caption         =   "Preview of Output File Location"
          Height          =   255
          Left            =   120
@@ -106,7 +106,7 @@ Begin VB.Form frmNewQueue
          Top             =   3960
          Width           =   4575
       End
-      Begin VB.Label Label4 
+      Begin VB.Label Label4
          Caption         =   "Repeat IMF File Simulations "
          Height          =   255
          Left            =   840
@@ -114,7 +114,7 @@ Begin VB.Form frmNewQueue
          Top             =   3000
          Width           =   2055
       End
-      Begin VB.Label Label3 
+      Begin VB.Label Label3
          Caption         =   "Location"
          Height          =   255
          Left            =   840
@@ -122,7 +122,7 @@ Begin VB.Form frmNewQueue
          Top             =   2280
          Width           =   975
       End
-      Begin VB.Label Label2 
+      Begin VB.Label Label2
          Caption         =   $"frmNewQueue.frx":00B6
          Height          =   615
          Left            =   720
@@ -130,7 +130,7 @@ Begin VB.Form frmNewQueue
          Top             =   1560
          Width           =   10680
       End
-      Begin VB.Label Label1 
+      Begin VB.Label Label1
          Caption         =   $"frmNewQueue.frx":0256
          Height          =   615
          Left            =   720
@@ -139,9 +139,9 @@ Begin VB.Form frmNewQueue
          Width           =   10680
       End
    End
-   Begin VB.Frame frameStep1 
+   Begin VB.Frame frameStep1
       Caption         =   "Step 1and 2 of 5 - Select ----- Files"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   12
          Charset         =   0
@@ -155,7 +155,7 @@ Begin VB.Form frmNewQueue
       TabIndex        =   2
       Top             =   120
       Width           =   11655
-      Begin VB.CommandButton cmdToggle 
+      Begin VB.CommandButton cmdToggle
          Caption         =   "Toggle All"
          Height          =   315
          Left            =   240
@@ -163,7 +163,7 @@ Begin VB.Form frmNewQueue
          Top             =   4140
          Width           =   1095
       End
-      Begin VB.CommandButton cmdSelectPath 
+      Begin VB.CommandButton cmdSelectPath
          Caption         =   "Path.."
          Height          =   255
          Left            =   10680
@@ -171,7 +171,7 @@ Begin VB.Form frmNewQueue
          Top             =   480
          Width           =   855
       End
-      Begin VB.ListBox lstOfFiles 
+      Begin VB.ListBox lstOfFiles
          Height          =   3210
          Left            =   120
          Sorted          =   -1  'True
@@ -180,7 +180,7 @@ Begin VB.Form frmNewQueue
          Top             =   840
          Width           =   11415
       End
-      Begin VB.Label lblPath 
+      Begin VB.Label lblPath
          BorderStyle     =   1  'Fixed Single
          Caption         =   "Label1"
          Height          =   255
@@ -190,9 +190,9 @@ Begin VB.Form frmNewQueue
          Width           =   10455
       End
    End
-   Begin VB.Frame frameStep3 
+   Begin VB.Frame frameStep3
       Caption         =   "Step 3 of 5 - Review Simulations"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   12
          Charset         =   0
@@ -206,7 +206,7 @@ Begin VB.Form frmNewQueue
       TabIndex        =   1
       Top             =   120
       Width           =   11655
-      Begin VB.CommandButton cmdDelete 
+      Begin VB.CommandButton cmdDelete
          Caption         =   "Delete Simulation"
          Height          =   375
          Left            =   2160
@@ -214,7 +214,7 @@ Begin VB.Form frmNewQueue
          Top             =   4080
          Width           =   1695
       End
-      Begin VB.CommandButton cmdMore 
+      Begin VB.CommandButton cmdMore
          Caption         =   "Add More Simulations"
          Height          =   375
          Left            =   240
@@ -222,7 +222,7 @@ Begin VB.Form frmNewQueue
          Top             =   4080
          Width           =   1815
       End
-      Begin VSFlex7LCtl.VSFlexGrid gridReview 
+      Begin VSFlex7LCtl.VSFlexGrid gridReview
          Height          =   3615
          Left            =   120
          TabIndex        =   6
@@ -234,7 +234,7 @@ Begin VB.Form frmNewQueue
          Appearance      =   1
          BorderStyle     =   1
          Enabled         =   -1  'True
-         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851}
             Name            =   "MS Sans Serif"
             Size            =   8.25
             Charset         =   0
@@ -314,14 +314,14 @@ Begin VB.Form frmNewQueue
          WallPaperAlignment=   9
       End
    End
-   Begin MSComDlg.CommonDialog dialogOpenSave 
+   Begin MSComDlg.CommonDialog dialogOpenSave
       Left            =   1080
       Top             =   4800
       _ExtentX        =   847
       _ExtentY        =   847
       _Version        =   393216
    End
-   Begin VB.CommandButton cmdNext 
+   Begin VB.CommandButton cmdNext
       Caption         =   "Next >>"
       Height          =   375
       Left            =   10440

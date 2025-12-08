@@ -3613,24 +3613,6 @@ namespace VentilatedSlab {
                     if (((state.dataVentilatedSlab->OperatingMode == HeatingMode) && (state.dataHeatBalFanSys->QRadSysSource(SurfNum) <= 0.0)) ||
                         ((state.dataVentilatedSlab->OperatingMode == CoolingMode) && (state.dataHeatBalFanSys->QRadSysSource(SurfNum) >= 0.0))) {
 
-                        // IF (.not. WarmupFlag) THEN
-                        //   TempComparisonErrorCount = TempComparisonErrorCount + 1
-                        //   IF (TempComparisonErrorCount <= NumOfVentSlabs) THEN
-                        //     CALL ShowWarningError(state, 'Radaint Heat exchange is negative in Heating Mode or posive in Cooling Mode')
-                        //     CALL ShowContinueError(state, 'Flow to the following ventilated slab will be shut-off to avoid heating in cooling mode
-                        //     or cooling &
-                        //                             in heating mode')
-                        //     CALL ShowContinueError(state, 'Ventilated Slab Name = '//TRIM(VentSlab(Item)%Name))
-                        //     CALL ShowContinueError(state, 'All node temperature are reset at the ventilated slab surface temperature = '// &
-                        //                            RoundSigDigits(TH(VentSlab(Item)%SurfacePtr(RadSurfNum),1,2),2))
-                        //     CALL ShowContinueErrorTimeStamp(state, ' ')
-                        //   ELSE
-                        //     CALL ShowRecurringWarningErrorAtEnd(state, 'Ventilated Slab ['//TRIM(VentSlab(Item)%Name)//  &
-                        //                  '] Temperature Comparison Error shut-off occurrence continues.',  &
-                        //                  VentSlab(Item)%CondErrCount)
-                        //   END IF
-                        // END IF
-
                         state.dataLoopNodes->Node(SlabInNode).MassFlowRate = 0.0;
                         state.dataLoopNodes->Node(FanOutletNode).MassFlowRate = 0.0;
                         state.dataLoopNodes->Node(OAInletNode).MassFlowRate = 0.0;
@@ -3648,7 +3630,6 @@ namespace VentilatedSlab {
                             }
 
                             if (ventSlab.SysConfg == VentilatedSlabConfig::SlabOnly) {
-                                //            state.dataLoopNodes->Node(Returnairnode)%Temp = MAT(Zonenum)
                                 state.dataLoopNodes->Node(ReturnAirNode).Temp =
                                     state.dataHeatBalSurf->SurfInsideTempHist(1)(ventSlab.SurfacePtr(RadSurfNum));
                                 state.dataLoopNodes->Node(FanOutletNode).Temp = state.dataLoopNodes->Node(ReturnAirNode).Temp;

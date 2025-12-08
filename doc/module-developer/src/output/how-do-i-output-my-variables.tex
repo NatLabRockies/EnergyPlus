@@ -8,10 +8,10 @@ For you the call is:
 
 \begin{lstlisting}
 
-SetupOutputVariable(VariableName, VariableUnit, ActualVariable, IndexTypeKey, VariableTypeKey, 
+SetupOutputVariable(VariableName, VariableUnit, ActualVariable, IndexTypeKey, VariableTypeKey,
   KeyedValue,ReportFreq, ResourceTypeKey,EndUseKey,GroupKey)
-  
-  
+
+
 \end{lstlisting}
 
 
@@ -19,32 +19,32 @@ Interface statements allow for the same call to be used for either real or integ
 
 \begin{lstlisting}
 
-SetupOutputVariable( "Site Outdoor Air Drybulb Temperature", OutputProcessor::Unit::C, OutDryBulbTemp, 
+SetupOutputVariable( "Site Outdoor Air Drybulb Temperature", OutputProcessor::Unit::C, OutDryBulbTemp,
   "Zone", "Average", "Environment" );
-  
-SetupOutputVariable( "Zone Mean Air Temperature", OutputProcessor::Unit::C, ZnAirRpt( Loop ).MeanAirTemp, 
+
+SetupOutputVariable( "Zone Mean Air Temperature", OutputProcessor::Unit::C, ZnAirRpt( Loop ).MeanAirTemp,
   "Zone", "Average", Zone( Loop ).Name );
-  
-SetupOutputVariable( "Fan Coil Heating Energy", OutputProcessor::Unit::J, 
+
+SetupOutputVariable( "Fan Coil Heating Energy", OutputProcessor::Unit::J,
   FanCoil( FanCoilNum ).HeatEnergy, "System", "Sum", FanCoil( FanCoilNum ).Name );
-  
+
 SetupOutputVariable( "Zone Dehumidifier Electric Energy", OutputProcessor::Unit::J,
-  ZoneDehumid( ZoneDehumidIndex ).ElecConsumption, "System", "Sum", 
+  ZoneDehumid( ZoneDehumidIndex ).ElecConsumption, "System", "Sum",
   ZoneDehumid( ZoneDehumidIndex ).Name,_, "Electric", "COOLING", _, "System" );
-  
+
 \end{lstlisting}
 
 
 % table 4
 \begin{longtable}[c]{p{1.5in}p{4.5in}}
 \caption{SetupOutputVariable Arguments \label{table:setupoutputvariable-arguments}} \tabularnewline
-\toprule 
+\toprule
 SetupOutput Variable Arguments & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{SetupOutputVariable Arguments} \tabularnewline
-\toprule 
+\toprule
 SetupOutput Variable Arguments & Description \tabularnewline
 \midrule
 \endhead
@@ -66,5 +66,3 @@ GroupKey & Meter Super Group Key; an optional argument used when the variable is
 As described in the \emph{Input Output Reference}, not all variables may be available in any particular simulation.~ Only those variables that will have values generated will be available for reporting.~ In the IDF, you can include a ``Output:VariableDictionary,regular;'' command that will produce the eplusout.rdd file containing all the variables with their IndexTypeKeys.~ This list can be used to tailor the requests for values in the OutputFileStandard.
 
 This variable dictionary is separated into two pieces: regular reporting variables and meter variables.~ It can also be sorted by name (ascending).
-
-

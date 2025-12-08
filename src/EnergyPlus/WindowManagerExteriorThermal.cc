@@ -539,7 +539,7 @@ namespace Window {
         Real64 transThermalBack = 0.0;
         Real64 thickness = 0.0;
         Real64 conductivity = 0.0;
-        Real64 createOpenness = false;
+        bool createOpenness = false;
         Real64 Atop = 0.0;
         Real64 Abot = 0.0;
         Real64 Aleft = 0.0;

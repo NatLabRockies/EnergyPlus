@@ -431,7 +431,7 @@ namespace PVWatts {
             int sscErrType;
             float time;
             int i = 0;
-            while ((errtext = ssc_module_log(pvwattsModule_, i++, &sscErrType, &time))) {
+            while ((errtext = ssc_module_log(pvwattsModule_, i++, &sscErrType, &time)) != nullptr) {
                 std::string err("PVWatts: ");
                 switch (sscErrType) {
                 case SSC_WARNING:

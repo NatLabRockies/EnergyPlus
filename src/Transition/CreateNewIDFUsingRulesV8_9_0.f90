@@ -1389,7 +1389,7 @@ END SUBROUTINE CreateNewIDFUsingRules
 SUBROUTINE FixFuelTypes(InOutArg)
   USE InputProcessor, ONLY: SameString
   CHARACTER(len=*), INTENT(INOUT) :: InOutArg
-      
+
   IF (SameString( InOutArg, 'Electric' )) THEN
     InOutArg = 'Electricity'
   ELSE IF (SameString( InOutArg, 'Elec' )) THEN

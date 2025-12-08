@@ -59,6 +59,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataAirSystems.hh>
+#include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -8054,6 +8055,178 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test2)
 )EIO";
 
     EXPECT_TRUE(compare_eio_stream(htg_coil_eio_output, true));
+}
+
+TEST_F(EnergyPlusFixture, InitDXCoil_GetHPCoolingCoilIndex)
+{
+    std::string_view constexpr idf_objects = R"IDF(
+
+      AirLoopHVAC:UnitarySystem,
+        Heat Pump 1,                      !- Name
+        Load,                             !- Control Type
+        East Zone,                        !- Controlling Zone or Thermostat Location
+        ,                                 !- Dehumidification Control Type
+        ,                                 !- Availability Schedule Name
+        Mixed Air Node,                   !- Air Inlet Node Name
+        Air Loop Outlet Node,             !- Air Outlet Node Name
+        Fan:SystemModel,                  !- Supply Fan Object Type
+        Supply Fan 1,                     !- Supply Fan Name
+        BlowThrough,                      !- Fan Placement
+        ,                                 !- Supply Air Fan Operating Mode Schedule Name
+        Coil:Heating:DX:SingleSpeed,      !- Heating Coil Object Type
+        Heating Coil 1,                   !- Heating Coil Name
+        ,                                 !- DX Heating Coil Sizing Ratio
+        Coil:Cooling:DX:VariableSpeed,    !- Cooling Coil Object Type
+        Cooling Coil 1,                   !- Cooling Coil Name
+        ,                                 !- Use DOAS DX Cooling Coil
+        ,                                 !- Minimum Supply Air Temperature {C}
+        ,                                 !- Latent Load Control
+        ,                                 !- Supplemental Heating Coil Object Type
+        ,                                 !- Supplemental Heating Coil Name
+        SupplyAirFlowRate,                !- Cooling Supply Air Flow Rate Method
+        autosize,                         !- Cooling Supply Air Flow Rate {m3/s}
+        ,                                 !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
+        ,                                 !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate
+        ,                                 !- Cooling Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+        SupplyAirFlowRate,                !- Heating Supply Air Flow Rate Method
+        autosize,                         !- Heating Supply Air Flow Rate {m3/s}
+        ,                                 !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
+        ,                                 !- Heating Fraction of Autosized Heating Supply Air Flow Rate
+        ,                                 !- Heating Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+        SupplyAirFlowRate,                !- No Load Supply Air Flow Rate Method
+        autosize,                         !- No Load Supply Air Flow Rate {m3/s}
+        ,                                 !- No Load Supply Air Flow Rate Per Floor Area {m3/s-m2}
+        ,                                 !- No Load Fraction of Autosized Cooling Supply Air Flow Rate
+        ,                                 !- No Load Fraction of Autosized Heating Supply Air Flow Rate
+        ,                                 !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation {m3/s-W}
+        ,                                 !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation {m3/s-W}
+        No,                               !- No Load Supply Air Flow Rate Control Set To Low Speed
+        autosize,                         !- Maximum Supply Air Temperature {C}
+        21;                               !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+      Fan:SystemModel,
+        Supply Fan 1,                     !- Name
+        ,                                 !- Availability Schedule Name
+        Mixed Air Node,                   !- Air Inlet Node Name
+        DX Cooling Coil Air Inlet Node,   !- Air Outlet Node Name
+        AUTOSIZE,                         !- Design Maximum Air Flow Rate {m3/s}
+        Discrete,                         !- Speed Control Method
+        0.0,                              !- Electric Power Minimum Flow Rate Fraction
+        300.0,                            !- Design Pressure Rise {Pa}
+        0.9,                              !- Motor Efficiency
+        1.0,                              !- Motor In Air Stream Fraction
+        AUTOSIZE,                         !- Design Electric Power Consumption {W}
+        TotalEfficiencyAndPressure,       !- Design Power Sizing Method
+        ,                                 !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+        ,                                 !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+        0.7;                              !- Fan Total Efficiency
+
+      Coil:Cooling:DX:VariableSpeed,
+        Cooling Coil 1,                   !- Name
+        ,                                 !- Availability Schedule Name
+        DX Cooling Coil Air Inlet Node,   !- Indoor Air Inlet Node Name
+        Heating Coil Air Inlet Node,      !- Indoor Air Outlet Node Name
+        2,                                !- Number of Speeds {dimensionless}
+        2,                                !- Nominal Speed Level {dimensionless}
+        27219.40,                         !- Gross Rated Total Cooling Capacity At Selected Nominal Speed Level {W}
+        1.45,                             !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
+        ,                                 !- Nominal Time for Condensate to Begin Leaving the Coil {s}
+        ,                                 !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+        ,                                 !- Maximum Cycling Rate {cycles/hr}
+        ,                                 !- Latent Capacity Time Constant {s}
+        ,                                 !- Fan Delay Time {s}
+        Dummy Curve,                      !- Energy Part Load Fraction Curve Name
+        ,                                 !- Condenser Air Inlet Node Name
+        ,                                 !- Condenser Type
+        ,                                 !- Evaporative Condenser Pump Rated Power Consumption {W}
+        75.00,                            !- Crankcase Heater Capacity {W}
+        ,                                 !- Crankcase Heater Capacity Function of Temperature Curve Name
+        10.00,                            !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
+        ,                                 !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+        ,                                 !- Supply Water Storage Tank Name
+        ,                                 !- Condensate Collection Water Storage Tank Name
+        ,                                 !- Basin Heater Capacity {W/K}
+        ,                                 !- Basin Heater Setpoint Temperature {C}
+        ,                                 !- Basin Heater Operating Schedule Name
+        19554.1,                          !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
+        0.730,                            !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
+        3.899,                            !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
+        1.0572,                           !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
+        ,                                 !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+        ,                                 !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+        ,                                 !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
+        ,                                 !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
+        Dummy Curve,                      !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
+        Dummy Curve,                      !- Speed 1 Total Cooling Capacity Function of Air Flow Fraction Curve Name
+        Dummy Curve,                      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+        Dummy Curve,                      !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
+        27219.4,                          !- Speed 2 Reference Unit Gross Rated Total Cooling Capacity {W}
+        0.730,                            !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
+        4.105,                            !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
+        1.4523,                           !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
+        ,                                 !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+        ,                                 !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+        ,                                 !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
+        ,                                 !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
+        Dummy Curve,                      !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
+        Dummy Curve,                      !- Speed 2 Total Cooling Capacity Function of Air Flow Fraction Curve Name
+        Dummy Curve,                      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+        Dummy Curve;                      !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
+
+      Coil:Heating:DX:SingleSpeed,
+        Heating Coil 1,                   !- Name
+        ,                                 !- Availability Schedule Name
+        autosize,                         !- Gross Rated Heating Capacity {W}
+        2.75,                             !- Gross Rated Heating COP {W/W}
+        autosize,                         !- Rated Air Flow Rate {m3/s}
+        ,                                 !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+        934.4,                            !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+        Heating Coil Air Inlet Node,      !- Air Inlet Node Name
+        SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
+        Dummy Curve,                      !- Heating Capacity Function of Temperature Curve Name
+        Dummy Curve,                      !- Heating Capacity Function of Flow Fraction Curve Name
+        Dummy Curve,                      !- Energy Input Ratio Function of Temperature Curve Name
+        Dummy Curve,                      !- Energy Input Ratio Function of Flow Fraction Curve Name
+        Dummy Curve,                      !- Part Load Fraction Correlation Curve Name
+        ,                                 !- Defrost Energy Input Ratio Function of Temperature Curve Name
+        -8.0,                             !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+        ,                                 !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
+        5.0,                              !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
+        200.0,                            !- Crankcase Heater Capacity {W}
+        ,                                 !- Crankcase Heater Capacity Function of Temperature Curve Name
+        10.0,                             !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
+        Resistive,                        !- Defrost Strategy
+        TIMED,                            !- Defrost Control
+        0.166667,                         !- Defrost Time Period Fraction
+        autosize,                         !- Resistive Defrost Heater Capacity {W}
+        ,                                 !- Region number for calculating HSPF
+        ,                                 !- Evaporator Air Inlet Node Name
+        ,                                 !- Zone Name for Evaporator Placement
+        ,                                 !- Secondary Coil Air Flow Rate {m3/s}
+        ;                                 !- Secondary Coil Fan Flow Scaling Factor {m3/s}
+
+      Curve:Quadratic,
+        Dummy Curve,                      !- Name
+        0.8,                              !- Coefficient1 Constant
+        0.2,                              !- Coefficient2 x
+        0.0,                              !- Coefficient3 x**2
+        0.5,                              !- Minimum Value of x
+        1.5;                              !- Maximum Value of x
+
+    )IDF";
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    GetDXCoils(*state);
+    state->dataGlobal->SysSizingCalc = true;
+    state->dataBranchNodeConnections->CompSets(1).ParentObjectType = EnergyPlus::DataLoopNode::ConnectionObjectType::AirLoopHVACUnitarySystem;
+    InitDXCoil(*state, 1);
+
+    // since there is no companion cooling coil of the correct type, the FindCompanionUpStreamCoil flag for calling into GetHPCoolingCoilIndex should
+    // be set to false and the CompanionUpstreamDXCoil index should be set to 0
+    EXPECT_FALSE(state->dataDXCoils->DXCoil(1).FindCompanionUpStreamCoil);
+    EXPECT_EQ(state->dataDXCoils->DXCoil(1).CompanionUpstreamDXCoil, 0);
 }
 
 } // namespace EnergyPlus

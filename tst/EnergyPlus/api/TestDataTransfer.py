@@ -54,6 +54,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+
 from pyenergyplus.api import EnergyPlusAPI
 
 one_time = True
@@ -177,4 +178,4 @@ return_code = api.runtime.run_energyplus(state, sys.argv[1:])
 if return_code != 0:
     raise RuntimeError("E+ Simulation failed to run")
 if not ok:
-    raise RuntimeError('DataTransfer failed') from exception
+    raise RuntimeError("DataTransfer failed") from exception

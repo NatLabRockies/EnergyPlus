@@ -452,7 +452,7 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                     if (this->oaSysFlag || this->airLoopSysFlag ||
                         this->finalSysSizing(this->curSysNum).CoolingCapMethod == DataSizing::CapacityPerFloorArea ||
                         (this->finalSysSizing(this->curSysNum).CoolingCapMethod == DataSizing::CoolingDesignCapacity &&
-                         this->finalSysSizing(this->curSysNum).CoolingTotalCapacity)) {
+                         (this->finalSysSizing(this->curSysNum).CoolingTotalCapacity != 0.0))) {
                         ShowContinueError(state,
                                           format("...Capacity passed by parent object to size child component = {:.2T} [W]", this->autoSizedValue));
                     } else {
@@ -496,15 +496,15 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                     RatedVolFlowPerRatedTotCap = DesVolFlow / this->autoSizedValue;
                 }
                 if (RatedVolFlowPerRatedTotCap < HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
-                    if (!this->dataEMSOverride && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
+                    if (!this->dataEMSOverrideON && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
                         ShowWarningError(state, this->callingRoutine + ' ' + this->compType + ' ' + this->compName);
                         ShowContinueError(
                             state, "..." + this->sizingString + " will be limited by the minimum rated volume flow per rated total capacity ratio.");
-                        ShowContinueError(state, format("...DX coil volume flow rate (m3/s ) = {:.6T}", DesVolFlow));
-                        ShowContinueError(state, format("...Requested capacity (W ) = {:.3T}", this->autoSizedValue));
-                        ShowContinueError(state, format("...Requested flow/capacity ratio (m3/s/W ) = {:.3T}", RatedVolFlowPerRatedTotCap));
+                        ShowContinueError(state, format("...DX coil volume flow rate [m3/s] = {:.6T}", DesVolFlow));
+                        ShowContinueError(state, format("...Requested capacity [W] = {:.3T}", this->autoSizedValue));
+                        ShowContinueError(state, format("...Requested flow/capacity ratio [m3/s/W] = {:.3T}", RatedVolFlowPerRatedTotCap));
                         ShowContinueError(state,
-                                          format("...Minimum flow/capacity ratio (m3/s/W ) = {:.3T}",
+                                          format("...Minimum flow/capacity ratio [m3/s/W] = {:.3T}",
                                                  HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]));
                     }
 
@@ -512,19 +512,19 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                                            this->autoSizedValue; // set DX Coil Capacity Increase Ratio from Too Low Flow/Capacity Ratio
                     this->autoSizedValue = DesVolFlow / HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
 
-                    if (!this->dataEMSOverride && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
-                        ShowContinueError(state, format("...Adjusted capacity ( W ) = {:.3T}", this->autoSizedValue));
+                    if (!this->dataEMSOverrideON && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
+                        ShowContinueError(state, format("...Adjusted capacity [W] = {:.3T}", this->autoSizedValue));
                     }
                 } else if (RatedVolFlowPerRatedTotCap > HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
-                    if (!this->dataEMSOverride && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
+                    if (!this->dataEMSOverrideON && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
                         ShowWarningError(state, this->callingRoutine + ' ' + this->compType + ' ' + this->compName);
                         ShowContinueError(
                             state, "..." + this->sizingString + " will be limited by the maximum rated volume flow per rated total capacity ratio.");
-                        ShowContinueError(state, format("...DX coil volume flow rate ( m3/s ) = {:.6T}", DesVolFlow));
-                        ShowContinueError(state, format("...Requested capacity ( W ) = {:.3T}", this->autoSizedValue));
-                        ShowContinueError(state, format("...Requested flow/capacity ratio ( m3/s/W ) = {:.3T}", RatedVolFlowPerRatedTotCap));
+                        ShowContinueError(state, format("...DX coil volume flow rate [m3/s] = {:.6T}", DesVolFlow));
+                        ShowContinueError(state, format("...Requested capacity [W] = {:.3T}", this->autoSizedValue));
+                        ShowContinueError(state, format("...Requested flow/capacity ratio [m3/s/W] = {:.3T}", RatedVolFlowPerRatedTotCap));
                         ShowContinueError(state,
-                                          format("...Maximum flow/capacity ratio ( m3/s/W ) = {:.3T}",
+                                          format("...Maximum flow/capacity ratio [m3/s/W] = {:.3T}",
                                                  HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]));
                     }
 
@@ -532,8 +532,8 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                                            this->autoSizedValue; // set DX Coil Capacity Decrease Ratio from Too High Flow/Capacity Ratio
                     this->autoSizedValue = DesVolFlow / HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
 
-                    if (!this->dataEMSOverride && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
-                        ShowContinueError(state, format("...Adjusted capacity ( W ) = {:.3T}", this->autoSizedValue));
+                    if (!this->dataEMSOverrideON && state.dataGlobal->DisplayExtraWarnings && this->printWarningFlag) {
+                        ShowContinueError(state, format("...Adjusted capacity [W] = {:.3T}", this->autoSizedValue));
                     }
                 }
             }

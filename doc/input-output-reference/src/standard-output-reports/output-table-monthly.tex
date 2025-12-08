@@ -55,14 +55,13 @@ The advanced aggregation types are described below. These aggregation types rely
 The VariableOrMeterName and AggregationType fields may be repeated for each column desired in the monthly report. These two fields define each column of the report.  These fields are extensible, so additional pairs of these fields can be added to the end of this object.  An example of this object follows.
 
 \begin{lstlisting}
-
 Output:Table:Monthly,
-    Building Monthly Cooling Load Report,               ! Name
-    3,                                                  ! Digits After Decimal
-    Zone Air System Sensible Cooling Energy,                   ! Variable or Meter 1 Name
-    SumOrAverage,                                       ! Aggregation Type for Variable or Meter 1
-    Zone Air System Sensible Cooling Energy,                   ! Variable or Meter 2 Name
-    Maximum,                                            ! Aggregation Type for Variable or Meter 2
-    Site Outdoor Air Drybulb Temperature,                                   ! Variable or Meter 3 Name
-    ValueWhenMaxMin;                                    ! Aggregation Type for Variable or Meter 3
+  Building Monthly Cooling Load Report,  !- Name
+  3,                          !- Digits After Decimal
+  Zone Air System Sensible Cooling Energy,  !- Variable or Meter 1 Name
+  SumOrAverage,               !- Aggregation Type for Variable or Meter 1
+  Zone Air System Sensible Cooling Energy,  !- Variable or Meter 2 Name
+  Maximum,                    !- Aggregation Type for Variable or Meter 2
+  Site Outdoor Air Drybulb Temperature,  !- Variable or Meter 3 Name
+  ValueWhenMaxMin;            !- Aggregation Type for Variable or Meter 3
 \end{lstlisting}

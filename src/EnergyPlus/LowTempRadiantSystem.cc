@@ -5069,9 +5069,8 @@ namespace LowTempRadiantSystem {
                                     "C");
                             }
                             break; // outer do loop
-                        } else {   // (First iteration--reset loop required temperature and try again to avoid condensation)
-                            state.dataLowTempRadSys->LoopReqTemp = DewPointTemp + ConstantFlowDesignDataObject.CondDewPtDeltaT;
-                        }
+                        } // (First iteration--reset loop required temperature and try again to avoid condensation)
+                        state.dataLowTempRadSys->LoopReqTemp = DewPointTemp + ConstantFlowDesignDataObject.CondDewPtDeltaT;
                     }
                 }
             }
@@ -5532,12 +5531,11 @@ namespace LowTempRadiantSystem {
         Real64 temperatureDifference = std::abs(offTemperature - controlTemperature);
         if (temperatureDifference <= 0.0) {
             return 0.0; // No temperature difference--turn things off (set to zero); technically shouldn't happen
-        } else if (throttlingRange < 0.001) {
-            return 1.0; // Throttling range is essentially zero and there is a temperature difference--turn it full on
-        } else {
-            // Temperature difference is non-zero and less than the throttling range--calculate the operation fraction, but limit to a maximum of 1.0
-            return min(temperatureDifference / throttlingRange, 1.0);
         }
+        if (throttlingRange < 0.001) {
+            return 1.0; // Throttling range is essentially zero and there is a temperature difference--turn it full on
+        } // Temperature difference is non-zero and less than the throttling range--calculate the operation fraction, but limit to a maximum of 1.0
+        return min(temperatureDifference / throttlingRange, 1.0);
     }
 
     Real64 RadiantSystemBaseData::setOffTemperatureLowTemperatureRadiantSystem(EnergyPlusData &state,

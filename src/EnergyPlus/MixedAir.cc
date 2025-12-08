@@ -1763,7 +1763,10 @@ void GetOAControllerInputs(EnergyPlusData &state)
             "Name,DSZAD Name");
         print(state.files.eio, "{}\n", Format_700);
         for (auto const &ventMech : state.dataMixedAir->VentilationMechanical) {
-            print(state.files.eio, " Controller:MechanicalVentilation,{},{},", ventMech.Name, ventMech.availSched ? ventMech.availSched->Name : "");
+            print(state.files.eio,
+                  " Controller:MechanicalVentilation,{},{},",
+                  ventMech.Name,
+                  (ventMech.availSched != nullptr) ? ventMech.availSched->Name : "");
 
             print(state.files.eio, format("{},", yesNoNames[(int)ventMech.DCVFlag]));
 
@@ -5285,7 +5288,7 @@ bool CheckForControllerWaterCoil(EnergyPlusData &state,
         state.dataMixedAir->GetOASysInputFlag = false;
     }
 
-    int OnControllerList = false;
+    bool OnControllerList = false;
 
     for (int Num = 1; Num <= state.dataMixedAir->NumControllerLists; ++Num) {
         for (int CompNum = 1; CompNum <= state.dataMixedAir->ControllerLists(Num).NumControllers; ++CompNum) {
@@ -5331,7 +5334,7 @@ void CheckControllerLists(EnergyPlusData &state, bool &ErrFound)
 
     int NumControllers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
     int NumAirLoop = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, AirLoopObject);
-    std::string_view AirLoopName = "";
+    std::string_view AirLoopName;
 
     for (int Item = 1; Item <= NumControllers; ++Item) {
 

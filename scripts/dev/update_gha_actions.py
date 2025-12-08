@@ -117,11 +117,11 @@ def get_replacements(uses: Set[str], latests: dict[str, Version]) -> dict[str, s
     for use in uses:
         action, version = use.split("@")
         assert action in latests, f"{action} not found in latests: {latests}"
-        replacement_v = None
+        replacement_v: str = ""
         if "." in version:
-            replacement_v = latests[action]
+            replacement_v = str(latests[action])
         else:
-            replacement_v = latests[action].major
+            replacement_v = str(latests[action].major)
         replacement = f"{action}@v{replacement_v}"
         if replacement == use:
             print(f"No updates found for {use}")

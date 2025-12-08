@@ -279,7 +279,7 @@ public:
 TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestListAllDataInCSV)
 {
 
-    std::string const idf_objects = delimited_string({"Version, 9.3.0;"});
+    std::string const idf_objects = delimited_string({"Version,", DataStringGlobals::MatchVersion + ";"});
     ASSERT_TRUE(process_idf(idf_objects, false)); // this had to be here or I was getting a strange segfault during a JSON string dtor
 
     // first off, the function should return, even if there isn't anything meaningful in it (it will have headers)

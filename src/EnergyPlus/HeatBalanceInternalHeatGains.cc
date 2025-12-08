@@ -157,37 +157,37 @@ void SetupSpaceInternalGain(EnergyPlusData &state,
     thisIntGain.device(thisIntGain.numberOfDevices).spaceGainFrac = spaceGainFraction;
 
     // note pointer assignments in code below!
-    if (ConvectionGainRate) {
+    if (ConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = ConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirConvectionGainRate) {
+    if (ReturnAirConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = ReturnAirConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ThermalRadiationGainRate) {
+    if (ThermalRadiationGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = ThermalRadiationGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (LatentGainRate) {
+    if (LatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = LatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirLatentGainRate) {
+    if (ReturnAirLatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = ReturnAirLatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (CarbonDioxideGainRate) {
+    if (CarbonDioxideGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = CarbonDioxideGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (GenericContamGainRate) {
+    if (GenericContamGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = GenericContamGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = &state.dataHeatBal->zeroPointerVal;

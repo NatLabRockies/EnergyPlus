@@ -240,9 +240,8 @@ namespace General {
     {
         if (denominator == 0.0) {
             return 0.0;
-        } else {
-            return std::exp(numerator / denominator);
         }
+        return std::exp(numerator / denominator);
     }
 } // namespace General
 

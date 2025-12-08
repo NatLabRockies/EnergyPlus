@@ -14,7 +14,7 @@
 ! System:   None.
 ! Plant:    Plant loop with one WaterHeater:Stratified object with heat pump water heating connected to two water use equipment
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Water Heater DHW Plant Loop Example,  !- Name

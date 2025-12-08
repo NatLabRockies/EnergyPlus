@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form crashMessage 
+Begin VB.Form crashMessage
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   " "
    ClientHeight    =   8100
@@ -14,7 +14,7 @@ Begin VB.Form crashMessage
    ScaleWidth      =   6630
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.PictureBox Picture2 
+   Begin VB.PictureBox Picture2
       AutoSize        =   -1  'True
       BorderStyle     =   0  'None
       Height          =   480
@@ -26,7 +26,7 @@ Begin VB.Form crashMessage
       Top             =   240
       Width           =   480
    End
-   Begin VB.PictureBox Picture1 
+   Begin VB.PictureBox Picture1
       AutoSize        =   -1  'True
       BorderStyle     =   0  'None
       Height          =   480
@@ -38,7 +38,7 @@ Begin VB.Form crashMessage
       Top             =   240
       Width           =   480
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375
@@ -47,7 +47,7 @@ Begin VB.Form crashMessage
       Top             =   7680
       Width           =   1455
    End
-   Begin VB.Label Label4 
+   Begin VB.Label Label4
       Caption         =   $"crashMessage.frx":0884
       Height          =   855
       Left            =   240
@@ -56,15 +56,15 @@ Begin VB.Form crashMessage
       Width           =   6135
       WordWrap        =   -1  'True
    End
-   Begin VB.Line Line4 
+   Begin VB.Line Line4
       X1              =   120
       X2              =   6600
       Y1              =   3600
       Y2              =   3600
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Check the EnergyPlus Installation"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -79,7 +79,7 @@ Begin VB.Form crashMessage
       Top             =   3360
       Width           =   4455
    End
-   Begin VB.Label Label6 
+   Begin VB.Label Label6
       Caption         =   "You are using version: "
       Height          =   255
       Left            =   240
@@ -87,15 +87,15 @@ Begin VB.Form crashMessage
       Top             =   2520
       Width           =   4215
    End
-   Begin VB.Line Line3 
+   Begin VB.Line Line3
       X1              =   120
       X2              =   6480
       Y1              =   6600
       Y2              =   6600
    End
-   Begin VB.Label Label10 
+   Begin VB.Label Label10
       Caption         =   "Check for System Messages"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -110,21 +110,21 @@ Begin VB.Form crashMessage
       Top             =   6360
       Width           =   2535
    End
-   Begin VB.Line Line2 
+   Begin VB.Line Line2
       X1              =   120
       X2              =   6480
       Y1              =   4920
       Y2              =   4920
    End
-   Begin VB.Line Line1 
+   Begin VB.Line Line1
       X1              =   120
       X2              =   6480
       Y1              =   1200
       Y2              =   1200
    End
-   Begin VB.Label Label9 
+   Begin VB.Label Label9
       Caption         =   "About the Crash"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -139,9 +139,9 @@ Begin VB.Form crashMessage
       Top             =   4680
       Width           =   2535
    End
-   Begin VB.Label Label8 
+   Begin VB.Label Label8
       Caption         =   "Crash Data"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -156,7 +156,7 @@ Begin VB.Form crashMessage
       Top             =   960
       Width           =   2535
    End
-   Begin VB.Label Label5 
+   Begin VB.Label Label5
       Caption         =   $"crashMessage.frx":09A6
       Height          =   735
       Left            =   240
@@ -165,7 +165,7 @@ Begin VB.Form crashMessage
       Width           =   6135
       WordWrap        =   -1  'True
    End
-   Begin VB.Label Label7 
+   Begin VB.Label Label7
       Caption         =   $"crashMessage.frx":0A5D
       Height          =   1215
       Left            =   240
@@ -174,7 +174,7 @@ Begin VB.Form crashMessage
       Width           =   6135
       WordWrap        =   -1  'True
    End
-   Begin VB.Label lblEnergyPlusVersion 
+   Begin VB.Label lblEnergyPlusVersion
       Caption         =   "    lblEnergyPlusVersion"
       Height          =   255
       Left            =   240
@@ -182,7 +182,7 @@ Begin VB.Form crashMessage
       Top             =   2880
       Width           =   6375
    End
-   Begin VB.Label lblInputFile 
+   Begin VB.Label lblInputFile
       Caption         =   $"crashMessage.frx":0C10
       Height          =   735
       Left            =   480
@@ -190,7 +190,7 @@ Begin VB.Form crashMessage
       Top             =   1680
       Width           =   5895
    End
-   Begin VB.Label Label3 
+   Begin VB.Label Label3
       Caption         =   "The active EnergyPlus input file is named:"
       Height          =   255
       Left            =   240
@@ -198,10 +198,10 @@ Begin VB.Form crashMessage
       Top             =   1320
       Width           =   4215
    End
-   Begin VB.Label Label2 
+   Begin VB.Label Label2
       Alignment       =   2  'Center
       Caption         =   "EnergyPlus Crashed"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   9.75
          Charset         =   0

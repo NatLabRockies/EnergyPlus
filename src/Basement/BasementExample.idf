@@ -1,39 +1,39 @@
 ! Minneapolis Test Cases
 SimParameters,
   0.1,     ! [F: Multiplier for the ADI solution: 0<F<1.0,
-           !         typically 0.1 (0.5 for high k 
-  15;       ! [IYRS: Maximum number of iterations: typically 25-30 
+           !         typically 0.1 (0.5 for high k
+  15;       ! [IYRS: Maximum number of iterations: typically 25-30
 !
-MatlProps, 
+MatlProps,
   6,       ! [NMAT: Number of materials in this domain, UP TO 6]
   2242.6, 2242.6, 311.66, 1500.0, 2000.0, 448.5,!  [RHO(1-6): Matl density (Fndn wall, Floor Slab, Ceiling,
                                                 !      Soil, Gravel, Wood), kg/m^3, ]
-  880.0, 880.0, 1513.0, 840.0, 720.0, 1630.0,!       [CP(1-6): Specific Heat: J/kg-K, 
-  1.402, 1.402, 0.093, 0.5, 1.9, 0.119;  !       [TCON(1-6): Conductivity: W/m-K 
+  880.0, 880.0, 1513.0, 840.0, 720.0, 1630.0,!       [CP(1-6): Specific Heat: J/kg-K,
+  1.402, 1.402, 0.093, 0.5, 1.9, 0.119;  !       [TCON(1-6): Conductivity: W/m-K
 !
 Insulation,
   5.0,  ! [REXT: R Value of any exterior insulation, K/(W/m^2)]
   TRUE; ! [INSFULL: Flag: Is the wall fully insulated? TRUE/FALSE]
 !
-SurfaceProps, 
+SurfaceProps,
   .16, .40, ! [ALBEDO: Surface albedo array, .16 .40]
   .94, .86, ! [EPSLN: Surface emissivity No Snow/ Snow .94 .86]
   6.0, 0.25, ! [VEGHT: Surface roughness NS/S, cm, 6.0, 0.25]
   TRUE;! [PET: Flag, Potential evapotranspiration on? T/F]
 !               Typically, PET is True
 !
-BldgData, 
-  .2, ! [DWALL: Wall thickness, m, .2]      
+BldgData,
+  .2, ! [DWALL: Wall thickness, m, .2]
   .1, ! [DSLAB: Floor slab thickness, m, 0.1]
   .3, ! [DGRAVXY: Width of gravel pit beside footing, m, 0.3]
   .2, ! [DGRAVZN: Gravel depth above the floor slab, m, 0.2]
   .1;! [DGRAVZP: Gravel depth below the floor slab, m, 0.1]
-!  
+!
 Interior,
   TRUE, ! [COND: Flag: Is the basement conditioned? TRUE/FALSE]
 !      [HIN: Indoor convective heat transfer coefficients, W/m^2-K
 !       Convection Only: 1)Q Downward 2)Q Upward 3)Q Horizontal
-!       Conv and Radiation: 4)Q Downward 5)Q Upward 6)Q Horizontal] 
+!       Conv and Radiation: 4)Q Downward 5)Q Upward 6)Q Horizontal]
   0.92, !Q Downward Convection Only
   4.04, !Q Upward Convection Only
   3.08, !Q HorizontalConvection Only
@@ -41,16 +41,16 @@ Interior,
   9.26, !Q Upward Conv and Radiation
   8.29;!Q Horizontal Conv and Radiation
 !
-EquivSlab, 
+EquivSlab,
   15.0, ! [APRatio: The area to perimeter ratio for this slab: m]
 !
-  TRUE;! [EquivSizing: Flag: Will the dimensions of an equivalent 
-!             slab be calculated (TRUE) or will the dimensions be 
+  TRUE;! [EquivSizing: Flag: Will the dimensions of an equivalent
+!             slab be calculated (TRUE) or will the dimensions be
 !              input directly? (FALSE)]
-!             Only advanced special simulations should use FALSE. 
-! 
+!             Only advanced special simulations should use FALSE.
+!
 EquivAutoGrid,   ! NOTE: EquivAutoGrid necessary when EquivSizing=TRUE
-!                This is the normal case. 
+!                This is the normal case.
 ! If the modelled building is not a rectangle or square, Equivalent
 ! sizing MUST be used to get accurate results
 !
@@ -71,6 +71,6 @@ ComBldg, !  Commercial building
 20.,  !  Sep Ave basement temp
 20.,  !  Oct Ave basement temp
 20.,  !  Nov Ave basement temp
-20.,  !  Dec Ave basement temp 
-0.0;  !  Daily variation Sine Wave amplitude 
+20.,  !  Dec Ave basement temp
+0.0;  !  Daily variation Sine Wave amplitude
 

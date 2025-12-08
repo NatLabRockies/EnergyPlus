@@ -3085,9 +3085,8 @@ namespace WaterToAirHeatPumpSimple {
         if (state.dataWaterToAirHeatPumpSimple->SourceSideMassFlowRate <= 0.0 || LoadSideFullMassFlowRate <= 0.0) {
             simpleWatertoAirHP.SimFlag = false;
             return;
-        } else {
-            simpleWatertoAirHP.SimFlag = true;
         }
+        simpleWatertoAirHP.SimFlag = true;
 
         if (compressorOp == HVAC::CompressorOp::Off) {
             simpleWatertoAirHP.SimFlag = false;
@@ -3384,9 +3383,8 @@ namespace WaterToAirHeatPumpSimple {
         if (state.dataWaterToAirHeatPumpSimple->SourceSideMassFlowRate <= 0.0 || LoadSideFullMassFlowRate <= 0.0) {
             simpleWatertoAirHP.SimFlag = false;
             return;
-        } else {
-            simpleWatertoAirHP.SimFlag = true;
         }
+        simpleWatertoAirHP.SimFlag = true;
 
         if (compressorOp == HVAC::CompressorOp::Off) {
             simpleWatertoAirHP.SimFlag = false;

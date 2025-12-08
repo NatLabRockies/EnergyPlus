@@ -876,7 +876,7 @@ void GetAirPathData(EnergyPlusData &state)
         SplitterExists = false;
         MixerExists = false;
 
-        if (ConnectorListName != std::string()) {
+        if (!ConnectorListName.empty()) {
             ConListNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "ConnectorList", ConnectorListName);
             if (ConListNum > 0) {
                 state.dataInputProcessing->inputProcessor->getObjectItem(
@@ -1021,7 +1021,7 @@ void GetAirPathData(EnergyPlusData &state)
         }
 
         NumControllers = 0;
-        if (ControllerListName != std::string()) { // If not blank, then must be there and valid
+        if (!ControllerListName.empty()) { // If not blank, then must be there and valid
             // Loop through the controller lists until you find the one attached to this primary air system
             ControllerListNum = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, "AirLoopHVAC:ControllerList", ControllerListName);
             if (ControllerListNum > 0) {
@@ -1645,7 +1645,7 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
                 // unit on that zone is connected to that supply air path.
 
                 for (int SupAirPathOutNodeNum = 1; SupAirPathOutNodeNum <= NumSupAirPathOutNodes; ++SupAirPathOutNodeNum) {
-                    int FoundSupPathZoneConnect = false;
+                    bool FoundSupPathZoneConnect = false;
                     // loop over all controlled zones.
                     for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
                         if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
@@ -7491,7 +7491,7 @@ Real64 GetHeatingSATempForSizing(EnergyPlusData &state, int const IndexAirLoop /
 
         ReheatCoilInTempForSizing = CalcSysSizing(IndexAirLoop).HeatSupTemp;
 
-    } else if ((PrimaryAirSystems(IndexAirLoop).NumOAHeatCoils > 0) || (PrimaryAirSystems(IndexAirLoop).NumOAHXs)) {
+    } else if ((PrimaryAirSystems(IndexAirLoop).NumOAHeatCoils > 0) || ((PrimaryAirSystems(IndexAirLoop).NumOAHXs) != 0)) {
         // Case: No central heating coils, but preheating coils or OA heat-exchangers exist
 
         if (FinalSysSizing(IndexAirLoop).DesHeatVolFlow > 0) {
@@ -7554,7 +7554,7 @@ Real64 GetHeatingSATempHumRatForSizing(EnergyPlusData &state, int const IndexAir
 
         ReheatCoilInHumRatForSizing = state.dataSize->CalcSysSizing(IndexAirLoop).HeatSupHumRat;
 
-    } else if ((PrimaryAirSystems(IndexAirLoop).NumOAHeatCoils > 0) || (PrimaryAirSystems(IndexAirLoop).NumOAHXs)) {
+    } else if ((PrimaryAirSystems(IndexAirLoop).NumOAHeatCoils > 0) || ((PrimaryAirSystems(IndexAirLoop).NumOAHXs) != 0)) {
         // Case: No central heating coils, but preheating coils or OA heat-exchangers exist
 
         if (FinalSysSizing(IndexAirLoop).DesHeatVolFlow > 0) {

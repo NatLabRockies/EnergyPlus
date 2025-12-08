@@ -4842,10 +4842,12 @@ void CalcIBesselFunc(Real64 const BessFuncArg, int const BessFuncOrd, Real64 &IB
     if (BessFuncOrd < 0) {
         ErrorCode = 1;
         return;
-    } else if (BessFuncArg < 0.0) {
+    }
+    if (BessFuncArg < 0.0) {
         ErrorCode = 2;
         return;
-    } else if (BessFuncArg > 12.0 && BessFuncArg > BessFuncOrd) {
+    }
+    if (BessFuncArg > 12.0 && BessFuncArg > BessFuncOrd) {
         if (BessFuncArg > 90.0) {
             ErrorCode = 4;
             IBessFunc = 1.0e30;
@@ -4954,10 +4956,12 @@ void CalcKBesselFunc(Real64 const BessFuncArg, int const BessFuncOrd, Real64 &KB
     if (BessFuncOrd < 0.0) {
         ErrorCode = 1;
         return;
-    } else if (BessFuncArg <= 0.0) {
+    }
+    if (BessFuncArg <= 0.0) {
         ErrorCode = 2;
         return;
-    } else if (BessFuncArg > 85.0) {
+    }
+    if (BessFuncArg > 85.0) {
         ErrorCode = 3;
         KBessFunc = 0.0;
         return;

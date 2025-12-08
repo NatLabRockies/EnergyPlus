@@ -870,9 +870,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_cache_PsyTwbFnTdbWPb
@@ -947,9 +946,8 @@ namespace Psychrometrics {
             }
 #endif
             return 0.83; // Fix Was inside the ifdef
-        } else {
-            return V;
         }
+        return V;
     }
 
 #ifdef EP_psych_errors
@@ -995,9 +993,8 @@ namespace Psychrometrics {
             }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_cache_PsyPsatFnTemp
@@ -1210,9 +1207,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1268,9 +1264,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1330,9 +1325,8 @@ namespace Psychrometrics {
             }
 #endif
             return W1;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1388,9 +1382,8 @@ namespace Psychrometrics {
             }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1462,9 +1455,8 @@ namespace Psychrometrics {
             PsyWFnTdbTwbPb_humidity_error(state, TDB, TWB, PB, W, CalledFrom);
 #endif
             return PsyWFnTdbRhPb(state, TDB, 0.0001, PB, CalledFrom);
-        } else {
-            return W;
         }
+        return W;
     }
 
     inline Real64 PsyHFnTdbRhPb(EnergyPlusData &state,
@@ -1601,9 +1593,8 @@ namespace Psychrometrics {
             }
 #endif
             return TWB;
-        } else {
-            return TDP;
         }
+        return TDP;
     }
 
     inline Real64 F6(Real64 const X, Real64 const A0, Real64 const A1, Real64 const A2, Real64 const A3, Real64 const A4, Real64 const A5)

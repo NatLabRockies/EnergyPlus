@@ -8,7 +8,7 @@
 ! Title5= VisualDOE 5.0.0
 ! \group Simulation Parameters
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Green Design Tools,      !- Name

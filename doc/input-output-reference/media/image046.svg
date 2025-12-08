@@ -17,44 +17,44 @@
 	<line fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" x1="230.507" y1="127" x2="230.543" y2="153"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="233.542,151.996 230.55,158 227.542,152.004 233.542,151.996 	"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="227.509,128.005 230.5,122 233.509,127.996 227.509,128.005 	"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" x1="201.8" y1="33.4" x2="230.992" y2="70.184"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="232.72,67.536 234.1,74.1 228.021,71.265 232.72,67.536 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#CC3300" points="201.2,25.31 198.665,23.914 200.471,21.631 
-		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43 
-		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988 
-		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#CC3300" points="201.2,25.31 198.665,23.914 200.471,21.631
+		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43
+		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988
+		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189
 		195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31 201.2,25.31 	"/>
-	<polygon fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-miterlimit="8" points="201.2,25.31 
-		198.665,23.914 200.471,21.631 197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 
-		190.206,18.237 187.925,16.43 187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 
-		184.535,26.736 182.729,28.988 185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 
-		192.994,32.381 195.275,34.189 195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31 
+	<polygon fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-miterlimit="8" points="201.2,25.31
+		198.665,23.914 200.471,21.631 197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7
+		190.206,18.237 187.925,16.43 187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31
+		184.535,26.736 182.729,28.988 185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95
+		192.994,32.381 195.275,34.189 195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31
 		201.2,25.31 	"/>
 	<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF99" d="M184.902,24.333c0-3.167,2.563-5.735,5.724-5.735
 		c3.162,0,5.725,2.568,5.725,5.735s-2.563,5.735-5.725,5.735C187.465,30.068,184.902,27.5,184.902,24.333L184.902,24.333z"/>
 	<path fill="none" stroke="#000000" stroke-width="0.1201" stroke-linejoin="round" stroke-miterlimit="10" d="M184.902,24.333
 		c0-3.167,2.563-5.735,5.724-5.735c3.162,0,5.725,2.568,5.725,5.735s-2.563,5.735-5.725,5.735
 		C187.465,30.068,184.902,27.5,184.902,24.333L184.902,24.333z"/>
-	
+
 		<path fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
 		M184.902,24.333c0-3.167,2.563-5.735,5.724-5.735c3.162,0,5.725,2.568,5.725,5.735s-2.563,5.735-5.725,5.735
 		C187.465,30.068,184.902,27.5,184.902,24.333L184.902,24.333z"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FF0000" points="201.2,25.31 198.665,23.914 200.471,21.631 
-		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43 
-		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988 
-		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FF0000" points="201.2,25.31 198.665,23.914 200.471,21.631
+		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43
+		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988
+		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189
 		195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31 201.2,25.31 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FF0000" points="201.2,25.31 198.665,23.914 200.471,21.631 
-		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43 
-		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988 
-		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FF0000" points="201.2,25.31 198.665,23.914 200.471,21.631
+		197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 190.206,18.237 187.925,16.43
+		187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 184.535,26.736 182.729,28.988
+		185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 192.994,32.381 195.275,34.189
 		195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31 201.2,25.31 	"/>
-	<polygon fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-miterlimit="8" points="201.2,25.31 
-		198.665,23.914 200.471,21.631 197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7 
-		190.206,18.237 187.925,16.43 187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31 
-		184.535,26.736 182.729,28.988 185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95 
-		192.994,32.381 195.275,34.189 195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31 
+	<polygon fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-miterlimit="8" points="201.2,25.31
+		198.665,23.914 200.471,21.631 197.588,21.313 198.38,18.522 195.592,19.315 195.275,16.43 192.994,18.237 191.6,15.7
+		190.206,18.237 187.925,16.43 187.608,19.315 184.82,18.522 185.612,21.313 182.729,21.631 184.535,23.914 182,25.31
+		184.535,26.736 182.729,28.988 185.612,29.337 184.82,32.128 187.608,31.303 187.925,34.189 190.206,32.381 191.6,34.95
+		192.994,32.381 195.275,34.189 195.592,31.303 198.38,32.128 197.588,29.337 200.471,28.988 198.665,26.736 201.2,25.31
 		201.2,25.31 	"/>
 	<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" d="M185.936,25.405c0-3.167,2.563-5.735,5.724-5.735
 		s5.724,2.568,5.724,5.735s-2.563,5.735-5.724,5.735S185.936,28.572,185.936,25.405L185.936,25.405z"/>
@@ -63,13 +63,13 @@
 		z"/>
 	<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" d="M185.936,25.405c0-3.167,2.563-5.735,5.724-5.735
 		s5.724,2.568,5.724,5.735s-2.563,5.735-5.724,5.735S185.936,28.572,185.936,25.405L185.936,25.405z"/>
-	
+
 		<path fill="none" stroke="#000000" stroke-width="0.1201" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
 		M185.936,25.405c0-3.167,2.563-5.735,5.724-5.735s5.724,2.568,5.724,5.735s-2.563,5.735-5.724,5.735S185.936,28.572,185.936,25.405
 		L185.936,25.405z"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.75" stroke-linejoin="round" stroke-miterlimit="10" x1="197.4" y1="58.4" x2="219.15" y2="58.45"/>
-	
+
 		<image overflow="visible" width="163" height="81" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAABcCAYAAAAYlOXCAAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFdJREFUeNrswQEBAAAAgiD/r25I
 QAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -81,33 +81,33 @@ AAAAAAAA8GoCDAD77AABeZS38gAAAABJRU5ErkJggg==" transform="matrix(0.12 0 0 0.12 21
 		c8.474-6.689,16.95-13.378,26.361-16.147c9.412-2.77,19.762-1.619,30.144-0.478"/>
 	<path fill="none" stroke="#C00000" stroke-width="1.5" stroke-linejoin="round" stroke-miterlimit="10" d="M229.833,83.149
 		c8.475-6.689,16.95-13.378,26.362-16.147c9.412-2.77,19.761-1.619,30.144-0.478"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" x1="235.896" y1="159.637" x2="282.804" y2="145.813"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="282.693,148.975 287.6,144.4 280.996,143.219 282.693,148.975 	"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="236.008,156.477 231.1,161.051 237.703,162.232 236.008,156.477 	"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.25" stroke-linejoin="round" stroke-miterlimit="10" x1="260.7" y1="64.55" x2="308.95" y2="50"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.25" stroke-linejoin="round" stroke-miterlimit="10" x1="263.7" y1="74.4" x2="311.95" y2="59.85"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" x1="298.7" y1="26.65" x2="302.656" y2="41.42"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="305.296,39.679 303.95,46.25 299.5,41.23 305.296,39.679 	"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" x1="311.95" y1="83.15" x2="307.26" y2="65.875"/>
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="304.627,67.626 305.95,61.05 310.417,66.055 304.627,67.626 	"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.75" stroke-linejoin="round" stroke-miterlimit="10" x1="230.3" y1="122.15" x2="230.35" y2="122.2"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.25" stroke-linejoin="round" stroke-miterlimit="10" x1="233.35" y1="123.5" x2="282.3" y2="123.551"/>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="0.25" stroke-linejoin="round" stroke-miterlimit="10" x1="276.55" y1="106.5" x2="233.35" y2="123.15"/>
 	<path fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" d="M268.602,110.822 M268.602,110.822
 		c1.186,1.646,1.898,4.159,1.898,6.859c0,1.632-0.262,3.23-0.756,4.618"/>
-	<polyline fill="none" stroke="#000000" stroke-linecap="round" stroke-miterlimit="10" points="270.738,116.955 268.598,110.818 
+	<polyline fill="none" stroke="#000000" stroke-linecap="round" stroke-miterlimit="10" points="270.738,116.955 268.598,110.818
 		274.463,113.619 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" points="249.788,149.15 273.589,149.15 273.589,168.65 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" points="249.788,149.15 273.589,149.15 273.589,168.65
 		249.788,168.65 249.788,149.15 	"/>
-	
+
 		<image overflow="visible" width="194" height="98" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAGdJREFUeNrswTEBAAAAwqD1T20M
 H6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -137,7 +137,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBjAgwAOPMAAZCbwNUAAAAASUVORK5CYII=" transform="mat
 		<g clip-path="url(#SVGID_6_)">
 		</g>
 	</g>
-	
+
 		<image overflow="visible" width="173" height="125" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAACFCAYAAAAZ3Gk5AAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHlJREFUeNrswQENAAAAwqD3T20P
 BxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -175,7 +175,7 @@ SUVORK5CYII=" transform="matrix(0.12 0 0 0.12 206.5801 134.9404)">
 		<g clip-path="url(#SVGID_10_)">
 		</g>
 	</g>
-	
+
 		<image overflow="visible" width="215" height="94" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAABkCAYAAABwzlcRAAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHJJREFUeNrswTEBAAAAwqD1T20H
 b6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -209,7 +209,7 @@ gg==" transform="matrix(0.12 0 0 0.12 310.7402 47.7002)">
 		<g clip-path="url(#SVGID_14_)">
 		</g>
 	</g>
-	
+
 		<image overflow="visible" width="171" height="140" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAACWCAYAAACcnhkMAAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAIRJREFUeNrswYEAAAAAw6D5U1/h
 AFUBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -244,7 +244,7 @@ jQABS8tB7gAAAABJRU5ErkJggg==" transform="matrix(0.12 0 0 0.12 273.9004 104.3398)
 		<g clip-path="url(#SVGID_18_)">
 		</g>
 	</g>
-	
+
 		<image overflow="visible" width="215" height="103" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAABsCAYAAACcndV8AAAACXBIWXMAAFxGAABcRgEUlENBAAAA
 GXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHhJREFUeNrswYEAAAAAw6D5U1/h
 AFUBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA

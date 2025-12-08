@@ -74,7 +74,7 @@ void DisplayString(EnergyPlusData &state, std::string const &String) // String t
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     // na
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(String);
     }
     if (state.dataGlobal->messageCallback) {
@@ -102,7 +102,7 @@ void DisplayString(EnergyPlusData &state, char const *String) // String to be di
     // PURPOSE OF THIS SUBROUTINE:
     // This subroutine provides a call to display strings during program execution.
 
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(String);
     }
     if (state.dataGlobal->messageCallback) {
@@ -140,7 +140,7 @@ void DisplayNumberAndString(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     std::stringstream sstm;
     sstm << String << ' ' << Number;
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(sstm.str());
     }
     if (state.dataGlobal->messageCallback) {
@@ -185,7 +185,7 @@ void DisplaySimDaysProgress(EnergyPlusData &state,
         percent = 0;
     }
 
-    if (state.dataGlobal->fProgressPtr) {
+    if (state.dataGlobal->fProgressPtr != nullptr) {
         state.dataGlobal->fProgressPtr(percent);
     }
     if (state.dataGlobal->progressCallback) {

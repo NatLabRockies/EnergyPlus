@@ -472,8 +472,8 @@ void ElectricPowerServiceManager::reinitAtBeginEnvironment()
 
 void ElectricPowerServiceManager::verifyCustomMetersElecPowerMgr(EnergyPlusData &state)
 {
-    for (std::size_t loop = 0; loop < elecLoadCenterObjs.size(); ++loop) {
-        elecLoadCenterObjs[loop]->setupLoadCenterMeterIndices(state);
+    for (const auto &elecLoadCenterObj : elecLoadCenterObjs) {
+        elecLoadCenterObj->setupLoadCenterMeterIndices(state);
     }
 }
 
@@ -3574,20 +3574,18 @@ Real64 checkUserEfficiencyInput(EnergyPlusData &state, Real64 userInputValue, bo
             ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the charge efficiency.");
             errorsFound = true;
             return minChargeEfficiency;
-        } else {
-            return userInputValue;
         }
-    } else { // discharging
-        if (userInputValue < minDischargeEfficiency) {
-            ShowSevereError(
-                state, format("ElectricStorage discharge efficiency was too low.  This occurred for electric storage unit named {}", deviceName));
-            ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the discharge efficiency.");
-            errorsFound = true;
-            return minDischargeEfficiency;
-        } else {
-            return userInputValue;
-        }
+        return userInputValue;
+
+    } // discharging
+    if (userInputValue < minDischargeEfficiency) {
+        ShowSevereError(state,
+                        format("ElectricStorage discharge efficiency was too low.  This occurred for electric storage unit named {}", deviceName));
+        ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the discharge efficiency.");
+        errorsFound = true;
+        return minDischargeEfficiency;
     }
+    return userInputValue;
 }
 
 void checkChargeDischargeVoltageCurves(

@@ -102,7 +102,8 @@ void CsvParser::skip_rows(std::string_view csv, size_t &index)
         token = next_token(csv, index);
         if (token == Token::FILE_END) {
             break;
-        } else if (token == Token::LINE_END) {
+        }
+        if (token == Token::LINE_END) {
             ++rows_skipped;
             if (rows_skipped == rows_to_skip) {
                 break;
@@ -126,7 +127,8 @@ int CsvParser::find_number_columns(std::string_view csv, size_t &index)
         token = next_token(csv, save_index);
         if (token == Token::FILE_END) {
             break;
-        } else if (token == Token::DELIMITER) {
+        }
+        if (token == Token::DELIMITER) {
             ++num_columns;
         } else if (token == Token::LINE_END) {
             // Catch a trailing comma, such as Shading files from E+ 22.2.0 and below
@@ -170,28 +172,27 @@ json CsvParser::parse_csv(std::string_view csv, size_t &index)
     while (true) {
         if (index == csv_size) {
             break;
-        } else {
-            if (check_first_row) {
-                // Parse the header first, it could have an extra '()' for shading in 22.2.0 and below
-                if (has_header) {
-                    parse_header(csv, index, header);
-                }
-                int num_columns = find_number_columns(csv, index);
-                check_first_row = false;
+        }
+        if (check_first_row) {
+            // Parse the header first, it could have an extra '()' for shading in 22.2.0 and below
+            if (has_header) {
+                parse_header(csv, index, header);
+            }
+            int num_columns = find_number_columns(csv, index);
+            check_first_row = false;
 
-                for (int i = 0; i < num_columns; ++i) {
-                    auto arr = std::vector<json>(); // (THIS_AUTO_OK)
-                    arr.reserve(reservedSize);
-                    columns.push_back(std::move(arr));
-                }
-
-                continue;
+            for (int i = 0; i < num_columns; ++i) {
+                auto arr = std::vector<json>(); // (THIS_AUTO_OK)
+                arr.reserve(reservedSize);
+                columns.push_back(std::move(arr));
             }
 
-            parse_line(csv, index, columns);
-            if (!success) {
-                break; // Bail early
-            }
+            continue;
+        }
+
+        parse_line(csv, index, columns);
+        if (!success) {
+            break; // Bail early
         }
     }
 
@@ -207,7 +208,8 @@ void CsvParser::parse_header(std::string_view csv, size_t &index, json &header)
         if (token == Token::LINE_END || token == Token::FILE_END) {
             next_token(csv, index);
             return;
-        } else if (token == Token::DELIMITER) {
+        }
+        if (token == Token::DELIMITER) {
             next_token(csv, index);
         } else {
             header.push_back(parse_value(csv, index));
@@ -277,7 +279,8 @@ void CsvParser::parse_line(std::string_view csv, size_t &index, json &columns)
             }
             next_token(csv, index);
             return;
-        } else if (token == Token::DELIMITER) {
+        }
+        if (token == Token::DELIMITER) {
             next_token(csv, index);
             token = look_ahead(csv, index);
             if (token == Token::DELIMITER) {
@@ -345,7 +348,8 @@ json CsvParser::parse_value(std::string_view csv, size_t &index)
     auto result = fast_float::from_chars(value.data() + plus_sign, value.data() + value.size(), val); // (AUTO_OK_OBJ)
     if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
         return rtrim(value);
-    } else if (result.ptr != value_end) {
+    }
+    if (result.ptr != value_end) {
         auto const initial_ptr = result.ptr; // (THIS_AUTO_OK)
         while (delimiter != ' ' && result.ptr != value_end) {
             if (*result.ptr != ' ') {
@@ -389,7 +393,8 @@ CsvParser::Token CsvParser::next_token(std::string_view csv, size_t &index)
     if (c == delimiter) {
         increment_both_index(index, index_into_cur_line);
         return Token::DELIMITER;
-    } else if (c == '\n') {
+    }
+    if (c == '\n') {
         increment_both_index(index, cur_line_num);
         beginning_of_line_index = index;
         index_into_cur_line = 0;
@@ -409,7 +414,8 @@ std::string_view CsvParser::rtrim(std::string_view str)
     if (index == std::string::npos) {
         str.remove_suffix(str.size());
         return str;
-    } else if (index + 1 < str.length()) {
+    }
+    if (index + 1 < str.length()) {
         return str.substr(0, index + 1);
     }
     return str;
@@ -433,8 +439,7 @@ void CsvParser::eat_whitespace(std::string_view csv, size_t &index)
         if ((delimiter != ' ' && csv[index] == ' ') || (delimiter != '\t' && csv[index] == '\t') || csv[index] == '\r') {
             increment_both_index(index, index_into_cur_line);
             continue;
-        } else {
-            return;
         }
+        return;
     }
 }

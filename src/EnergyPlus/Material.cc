@@ -595,7 +595,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowSevereCustom(state, eoh, format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(14)));
         }
 
-        if (s_ipsc->cAlphaArgs(4) == "") {
+        if (s_ipsc->cAlphaArgs(4).empty()) {
             mat->SolarDiffusing = false;
         } else {
             BooleanSwitch answer = getYesNoValue(s_ipsc->cAlphaArgs(4));
@@ -838,7 +838,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowSevereCustom(state, eoh, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(7)));
         }
 
-        if (s_ipsc->cAlphaArgs(2) == "") {
+        if (s_ipsc->cAlphaArgs(2).empty()) {
             mat->SolarDiffusing = false;
         } else if (s_ipsc->cAlphaArgs(2) == "YES") {
             mat->SolarDiffusing = true;

@@ -212,7 +212,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
       ,                                    !- Dedicated Chilled Water Return Recovery HeatPump Name
       ,                                    !- Dedicated Hot Water Return Recovery HeatPump Name
       1.0;                                 !-  Dedicated Recovery Heat Pump Control Load Capacity Factor
-    
+
       PlantEquipmentOperation:CoolingLoad,
         Two AWHP Cooling Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -221,7 +221,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         50000,                             !- Load Range 2 Lower Limit {W}
         10000000000000,                    !- Load Range 2 Upper Limit {W}
         Two AWHP Cooling Equipment List;   !- Range 2 Equipment List Name
-  
+
       PlantEquipmentOperation:HeatingLoad,
         Two AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -230,13 +230,13 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         100000,                            !- Load Range 2 Lower Limit {W}
         10000000000000,                    !- Load Range 2 Upper Limit {W}
         Two AWHP Heating Equipment List;   !- Range 2 Equipment List Name
-    
+
       PlantEquipmentOperation:CoolingLoad,
         One AWHP Cooling Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
         10000000000000000,                 !- Load Range 1 Upper Limit {W}
         One AWHP Cooling Equipment List;   !- Range 1 Equipment List Name
-    
+
       PlantEquipmentOperation:HeatingLoad,
         One AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -247,25 +247,25 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         One AWHP Heating Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 1 Object Type
         AWHP_2 Heating Side;               !- Equipment 1 Name
-  
+
       PlantEquipmentList,
         One AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side;               !- Equipment 1 Name
-    
+
       PlantEquipmentList,
         Two AWHP Heating Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 1 Object Type
         AWHP_1 Heating Side,               !- Equipment 1 Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 2 Object Type
-        AWHP_2 Heating Side;               !- Equipment 2 Name    
+        AWHP_2 Heating Side;               !- Equipment 2 Name
 
       PlantEquipmentList,
         Two AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side,               !- Equipment 1 Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 2 Object Type
-        AWHP_2 Cooling Side;               !- Equipment 2 Name  
+        AWHP_2 Cooling Side;               !- Equipment 2 Name
 
       ZoneList,
         This Zone List,                    !- Name
@@ -481,12 +481,12 @@ TEST_F(DistributeEquipOpTest, SupervisoryControlLogicForAirSourcePlantsTest)
         0.0,                               !- Load Range 1 Lower Limit {W}
         10000000000000000,                 !- Load Range 1 Upper Limit {W}
         One AWHP Cooling Equipment List;   !- Range 1 Equipment List Name
-  
+
       PlantEquipmentList,
         One AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side;               !- Equipment 1 Name
-    
+
       PlantEquipmentOperation:HeatingLoad,
         One AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}

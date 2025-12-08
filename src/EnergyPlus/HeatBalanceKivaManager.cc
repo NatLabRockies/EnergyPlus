@@ -79,12 +79,12 @@ namespace EnergyPlus::HeatBalanceKivaManager {
 
 void kivaErrorCallback(const int messageType, const std::string message, void *contextPtr)
 {
-    if (!contextPtr) {
+    if (contextPtr == nullptr) {
         throw FatalError(format("Unhandled Kiva Error: {}", message));
     }
     std::string fullMessage;
     std::pair<EnergyPlusData *, std::string> contextPair = *(std::pair<EnergyPlusData *, std::string> *)contextPtr;
-    if (contextPair.second.size() > 0) {
+    if (!contextPair.second.empty()) {
         fullMessage = format("{}: {}", contextPair.second, message);
     } else {
         fullMessage = format("Kiva: {}", message);
@@ -737,8 +737,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
             }
 
             Kiva::Polygon floorPolygon;
-            for (std::size_t i = 0; i < surface.Vertex.size(); ++i) {
-                auto const &v = surface.Vertex[i];
+            for (const auto &v : surface.Vertex) {
                 floorPolygon.outer().push_back(Kiva::Point(v.x, v.y));
                 if (!userSetExposedPerimeter) {
                     isExposedPerimeter.push_back(true);

@@ -2092,3 +2092,44 @@ TEST_F(EnergyPlusFixture, ScheduleCompact_MissingDayTypes)
     ASSERT_NO_THROW(sch->getHrTsVal(*state, 7, 4));
     EXPECT_NEAR(0.0, sch->getHrTsVal(*state, 7, 4), 0.000001);
 }
+
+TEST_F(EnergyPlusFixture, ScheduleCompact_MissingValues)
+{
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Fraction,                !- Name",
+        "  0,                       !- Lower Limit Value",
+        "  1,                       !- Upper Limit Value",
+        "  Continuous,              !- Numeric Type",
+        "  Percent;                 !- Unit Type",
+
+        "Schedule:Compact,",
+        "  OccSched,                !- Name",
+        "  Fraction,                !- Schedule Type Limits Name",
+        "  ,                        !- Field 1",
+        "  ,                        !- Field 2",
+        "  ;                        !- Field 3",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    auto &s_glob = state->dataGlobal;
+
+    s_glob->TimeStepsInHour = 4;    // must initialize this to get schedules initialized
+    s_glob->MinutesInTimeStep = 15; // must initialize this to get schedules initialized
+    s_glob->TimeStepZone = 0.25;
+    s_glob->TimeStepZoneSec = s_glob->TimeStepZone * Constant::rSecsInHour;
+    state->dataEnvrn->CurrentYearIsLeapYear = false;
+
+    EXPECT_THROW(state->init_state(*state), EnergyPlus::FatalError); // read schedules
+
+    const std::string expected_error = delimited_string({"   ** Severe  ** ProcessScheduleInput: Schedule:Compact = OCCSCHED",
+                                                         "   **   ~~~   ** Expecting \"Through:\" date, instead found entry=",
+                                                         "   ** Severe  ** ProcessScheduleInput: Schedule:Compact = OCCSCHED",
+                                                         "   **   ~~~   ** has missing days in its schedule pointers",
+                                                         "   **  Fatal  ** ProcessScheduleInput: Preceding Errors cause termination.",
+                                                         "   ...Summary of Errors that led to program termination:",
+                                                         "   ..... Reference severe error count=2",
+                                                         "   ..... Last severe error=ProcessScheduleInput: Schedule:Compact = OCCSCHED"});
+
+    compare_err_stream(expected_error);
+}

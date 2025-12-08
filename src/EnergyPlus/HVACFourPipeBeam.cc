@@ -493,10 +493,9 @@ namespace FourPipeBeam {
         if (found && !ErrorsFound) {
             state.dataFourPipeBeam->FourPipeBeams.push_back(thisBeam);
             return thisBeam;
-        } else {
-            ShowFatalError(state, format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
-            return nullptr;
         }
+        ShowFatalError(state, format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
+        return nullptr;
     }
 
     int HVACFourPipeBeam::getAirLoopNum()
@@ -853,9 +852,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotZoneReq != 0.0) {
                         return ((this->qDotZoneReq - this->qDotTotalDelivered) / this->qDotZoneReq);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 int SolFlag = 0;
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, mDotAirSolutionCooling, f, minFlow, maxFlowCool);
@@ -927,9 +925,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotZoneReq != 0.0) {
                         return ((this->qDotZoneReq - this->qDotTotalDelivered) / this->qDotZoneReq);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 int SolFlag = 0;
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, mDotAirSolutionHeating, f, 0.0, maxFlowHeat);
@@ -1125,9 +1122,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotBeamCoolingMax != 0.0) {
                         return (((this->qDotZoneToCoolSetPt - this->qDotSystemAir) - this->qDotBeamCooling) / this->qDotBeamCoolingMax);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, this->mDotCW, f, 0.0, this->mDotDesignCW);
                 if (SolFlag == -1) {
@@ -1140,12 +1136,11 @@ namespace FourPipeBeam {
                 this->calc(state);
                 NonAirSysOutput = this->qDotBeamCooling;
                 return;
-            } else { // can run flat out without overcooling, which we just did
-                NonAirSysOutput = this->qDotBeamCooling;
-                return;
-            }
-
-        } else if (qDotBeamReq > HVAC::SmallLoad && this->heatingAvailable) { // beam heating needed
+            } // can run flat out without overcooling, which we just did
+            NonAirSysOutput = this->qDotBeamCooling;
+            return;
+        }
+        if (qDotBeamReq > HVAC::SmallLoad && this->heatingAvailable) { // beam heating needed
             // first calc with max hot water flow
             this->mDotCW = 0.0;
             if (this->beamCoolingPresent) {
@@ -1164,9 +1159,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotBeamHeatingMax != 0.0) {
                         return (((this->qDotZoneToHeatSetPt - this->qDotSystemAir) - this->qDotBeamHeating) / this->qDotBeamHeatingMax);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, this->mDotHW, f, 0.0, this->mDotDesignHW);
                 if (SolFlag == -1) {
@@ -1180,27 +1174,24 @@ namespace FourPipeBeam {
                 NonAirSysOutput = this->qDotBeamHeating;
                 return;
 
-            } else { // can run flat out without overheating, which we just did
-                NonAirSysOutput = this->qDotBeamHeating;
-                return;
-            }
-
-        } else {
-            this->mDotHW = 0.0;
-            if (this->beamHeatingPresent) {
-                SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
-            }
-            this->hWTempOut = this->hWTempIn;
-            // assume if there is still flow that unit has an internal bypass and convector does not still heat
-            this->mDotCW = 0.0;
-            this->cWTempOut = this->cWTempIn;
-            if (this->beamCoolingPresent) {
-                SetComponentFlowRate(state, this->mDotCW, this->cWInNodeNum, this->cWOutNodeNum, this->cWplantLoc);
-            }
-            // assume if there is still flow that unit has an internal bypass and convector does not still cool
-            // don't even need to run calc
+            } // can run flat out without overheating, which we just did
+            NonAirSysOutput = this->qDotBeamHeating;
             return;
         }
+        this->mDotHW = 0.0;
+        if (this->beamHeatingPresent) {
+            SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
+        }
+        this->hWTempOut = this->hWTempIn;
+        // assume if there is still flow that unit has an internal bypass and convector does not still heat
+        this->mDotCW = 0.0;
+        this->cWTempOut = this->cWTempIn;
+        if (this->beamCoolingPresent) {
+            SetComponentFlowRate(state, this->mDotCW, this->cWInNodeNum, this->cWOutNodeNum, this->cWplantLoc);
+        }
+        // assume if there is still flow that unit has an internal bypass and convector does not still cool
+        // don't even need to run calc
+        return;
     }
 
     void HVACFourPipeBeam::calc(EnergyPlusData &state)

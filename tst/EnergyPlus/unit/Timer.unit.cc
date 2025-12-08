@@ -67,7 +67,7 @@ TEST_F(EnergyPlusFixture, Timer_ticktock)
     // I still want it exercised regularly, so I am going to let CI
     // just wrap it up early and pass.  This test has spent most of its
     // life DISABLE_d anyway, so this is a net improvement.
-    if (std::getenv("CI")) {
+    if (std::getenv("CI") != nullptr) {
         return;
     }
 

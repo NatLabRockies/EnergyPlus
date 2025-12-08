@@ -419,6 +419,78 @@ TEST_F(EnergyPlusFixture, InfiltrationObjectLevelReport)
                 0.000001); // zone level reporting matches object level
     EXPECT_NEAR(ZnAirRpt(4).InfilVdotStdDensity, infiltration(5).InfilVdotStdDensity,
                 0.000001); // zone level reporting matches object level
+
+    // test ZoneList reporting
+    state->dataHeatBal->ZoneListSNLoadHeatEnergy.allocate(1);
+    state->dataHeatBal->ZoneListSNLoadCoolEnergy.allocate(1);
+    state->dataHeatBal->ZoneListSNLoadHeatRate.allocate(1);
+    state->dataHeatBal->ZoneListSNLoadCoolRate.allocate(1);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(2);
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(1.0, state->dataHeatBal->Zone(1).Multiplier);
+    EXPECT_EQ(1.0, state->dataHeatBal->Zone(2).Multiplier);
+    EXPECT_EQ(1, state->dataHeatBal->ZoneList(1).Zone(1));
+    EXPECT_EQ(2, state->dataHeatBal->ZoneList(1).Zone(2));
+    EXPECT_EQ(0.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1));
+    EXPECT_EQ(0.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1));
+    EXPECT_EQ(0.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));
+    EXPECT_EQ(0.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));
+
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).airSysCoolRate = 100.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).airSysCoolEnergy = 200.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).airSysHeatRate = 150.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).airSysHeatEnergy = 300.0;
+
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(1.0, state->dataHeatBal->Zone(1).Multiplier);
+    EXPECT_EQ(1.0, state->dataHeatBal->Zone(2).Multiplier);
+    EXPECT_EQ(1, state->dataHeatBal->ZoneList(1).Zone(1));
+    EXPECT_EQ(2, state->dataHeatBal->ZoneList(1).Zone(2));
+    EXPECT_EQ(100.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));   // 1 * 100 + 1 * 0
+    EXPECT_EQ(200.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1)); // 1 * 200 + 1 * 0
+    EXPECT_EQ(150.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));   // 1 * 150 + 1 * 0
+    EXPECT_EQ(300.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1)); // 1 * 300 + 1 * 0
+    EXPECT_EQ(0.0, state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysCoolRate);
+    EXPECT_EQ(0.0, state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysCoolEnergy);
+    EXPECT_EQ(0.0, state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysHeatRate);
+    EXPECT_EQ(0.0, state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysHeatEnergy);
+
+    state->dataHeatBal->Zone(1).Multiplier = 2;
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(200.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));   // 2 * 100 + 1 * 0
+    EXPECT_EQ(400.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1)); // 2 * 200 + 1 * 0
+    EXPECT_EQ(300.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));   // 2 * 150 + 1 * 0
+    EXPECT_EQ(600.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1)); // 2 * 300 + 1 * 0
+
+    // switch the zone index order in the ZoneList
+    state->dataHeatBal->ZoneList(1).Zone(1) = 2;
+    state->dataHeatBal->ZoneList(1).Zone(2) = 1;
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(200.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));   // 2 * 100 + 1 * 0
+    EXPECT_EQ(400.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1)); // 2 * 200 + 1 * 0
+    EXPECT_EQ(300.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));   // 2 * 150 + 1 * 0
+    EXPECT_EQ(600.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1)); // 2 * 300 + 1 * 0
+
+    // zone 2 has a multiplier of 1
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysCoolRate = 100.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysCoolEnergy = 100.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysHeatRate = 100.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).airSysHeatEnergy = 100.0;
+
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(300.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));   // 2 * 100 + 1 * 100
+    EXPECT_EQ(500.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1)); // 2 * 200 + 1 * 100
+    EXPECT_EQ(400.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));   // 2 * 150 + 1 * 100
+    EXPECT_EQ(700.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1)); // 2 * 300 + 1 * 100
+
+    // switch zone multipliers
+    state->dataHeatBal->Zone(1).Multiplier = 1;
+    state->dataHeatBal->Zone(2).Multiplier = 2;
+    UpdateZoneListAndGroupLoads(*state);
+    EXPECT_EQ(300.0, state->dataHeatBal->ZoneListSNLoadCoolRate(1));   // 1 * 100 + 2 * 100
+    EXPECT_EQ(400.0, state->dataHeatBal->ZoneListSNLoadCoolEnergy(1)); // 1 * 200 + 2 * 100
+    EXPECT_EQ(350.0, state->dataHeatBal->ZoneListSNLoadHeatRate(1));   // 1 * 150 + 2 * 100
+    EXPECT_EQ(500.0, state->dataHeatBal->ZoneListSNLoadHeatEnergy(1)); // 1 * 300 + 2 * 100
 }
 
 TEST_F(EnergyPlusFixture, InfiltrationReportTest)

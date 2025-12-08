@@ -1256,13 +1256,12 @@ namespace HVACHXAssistedCoolingCoil {
         if (WhichCoil != 0) {
             // coil does not have capacity in input so mine information from DX cooling coil
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).HXAssistedCoilType_Num;
-        } else {
-            if (PrintWarning) {
-                ShowSevereError(state, format("GetCoilGroupTypeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            }
-            ErrorsFound = true;
-            return 0;
         }
+        if (PrintWarning) {
+            ShowSevereError(state, format("GetCoilGroupTypeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        }
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetCoilObjectTypeNum(EnergyPlusData &state,
@@ -1297,13 +1296,12 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).CoolingCoilType_Num;
-        } else {
-            if (PrintWarning) {
-                ShowSevereError(state, format("GetCoilObjectTypeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            }
-            ErrorsFound = true;
-            return 0;
         }
+        if (PrintWarning) {
+            ShowSevereError(state, format("GetCoilObjectTypeNum: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        }
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetCoilInletNode(EnergyPlusData &state,
@@ -1337,11 +1335,10 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).HXAssistedCoilInletNodeNum;
-        } else {
-            ShowSevereError(state, format("GetCoilInletNode: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetCoilInletNode: Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetCoilWaterInletNode(EnergyPlusData &state,
@@ -1435,11 +1432,10 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).HXAssistedCoilOutletNodeNum;
-        } else {
-            ShowSevereError(state, format("GetCoilOutletNode: Could not find Coil, Type=\"{}\" Name=\"{}", CoilType, CoilName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetCoilOutletNode: Could not find Coil, Type=\"{}\" Name=\"{}", CoilType, CoilName));
+        ErrorsFound = true;
+        return 0;
     }
 
     std::string GetHXDXCoilType(EnergyPlusData &state,
@@ -1473,11 +1469,10 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).CoolingCoilType;
-        } else {
-            ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return "";
         }
+        ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return "";
     }
 
     std::string GetHXDXCoilName(EnergyPlusData &state,
@@ -1511,11 +1506,10 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).CoolingCoilName;
-        } else {
-            ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return "";
         }
+        ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return "";
     }
 
     int GetActualDXCoilIndex(EnergyPlusData &state,
@@ -1550,11 +1544,10 @@ namespace HVACHXAssistedCoolingCoil {
         if (WhichCoil != 0) {
             // this should be the index to the DX cooling coil object, not the HXAssisted object
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).CoolingCoilIndex;
-        } else {
-            ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return 0;
     }
 
     std::string GetHXCoilType(EnergyPlusData &state,
@@ -1588,11 +1581,10 @@ namespace HVACHXAssistedCoolingCoil {
 
         if (WhichCoil != 0) {
             return state.dataHVACAssistedCC->HXAssistedCoil(WhichCoil).CoolingCoilType;
-        } else {
-            ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
-            ErrorsFound = true;
-            return "";
         }
+        ShowSevereError(state, format("Could not find Coil, Type=\"{}\" Name=\"{}\"", CoilType, CoilName));
+        ErrorsFound = true;
+        return "";
     }
 
     void GetHXCoilTypeAndName(EnergyPlusData &state,

@@ -48,9 +48,6 @@
 #ifndef BaseboardElectric_hh_INCLUDED
 #define BaseboardElectric_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
@@ -86,7 +83,7 @@ namespace BaseboardElectric {
         Real64 ScaledHeatingCapacity = 0.0; // - scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
         bool MySizeFlag = true;
         bool CheckEquipName = true;
-        Array1D_string FieldNames;
+        std::vector<std::string> FieldNames;
     };
 
     void SimElectricBaseboard(EnergyPlusData &state, std::string const &EquipName, int const ControlledZoneNum, Real64 &PowerMet, int &CompIndex);

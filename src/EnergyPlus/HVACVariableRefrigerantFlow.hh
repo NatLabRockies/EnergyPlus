@@ -123,10 +123,9 @@ namespace HVACVariableRefrigerantFlow {
     {
         if (i == 1) {
             return "AirConditioner:VariableRefrigerantFlow";
-        } else {
-            assert(false);
-            return "";
         }
+        assert(false);
+        return "";
     }
 
     // Flag for hex operation

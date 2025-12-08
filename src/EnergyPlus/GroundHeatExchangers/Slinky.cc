@@ -424,15 +424,12 @@ GLHESlinky::nearFieldResponseFunction(int const m, int const n, int const m1, in
         Real64 errFunc2 = std::erfc(0.5 * sqrtDistDepth / sqrtAlphaT);
 
         return errFunc1 / distance1 - errFunc2 / sqrtDistDepth;
-
-    } else {
-
-        Real64 distance2 = distanceToFictRing(m, n, m1, n1, eta, theta);
-        Real64 errFunc1 = std::erfc(0.5 * distance1 / sqrtAlphaT);
-        Real64 errFunc2 = std::erfc(0.5 * distance2 / sqrtAlphaT);
-
-        return errFunc1 / distance1 - errFunc2 / distance2;
     }
+    Real64 distance2 = distanceToFictRing(m, n, m1, n1, eta, theta);
+    Real64 errFunc1 = std::erfc(0.5 * distance1 / sqrtAlphaT);
+    Real64 errFunc2 = std::erfc(0.5 * distance2 / sqrtAlphaT);
+
+    return errFunc1 / distance1 - errFunc2 / distance2;
 }
 
 //******************************************************************************
@@ -486,17 +483,14 @@ Real64 GLHESlinky::distance(int const m, int const n, int const m1, int const n1
     if (!verticalConfig) {
 
         return 0.5 * std::sqrt(pow_2(x - xIn) + pow_2(y - yIn)) + 0.5 * std::sqrt(pow_2(x - xOut) + pow_2(y - yOut));
-
-    } else {
-
-        Real64 z = this->Z0 + sin_theta * (this->coilDiameter / 2.0);
-
-        Real64 zIn = this->Z0 + sin_eta * (this->coilDiameter / 2.0 - this->pipe.outRadius);
-        Real64 zOut = this->Z0 + sin_eta * (this->coilDiameter / 2.0 + this->pipe.outRadius);
-
-        return 0.5 * std::sqrt(pow_2(x - xIn) + pow_2(this->Y0(m1) - this->Y0(m)) + pow_2(z - zIn)) +
-               0.5 * std::sqrt(pow_2(x - xOut) + pow_2(this->Y0(m1) - this->Y0(m)) + pow_2(z - zOut));
     }
+    Real64 z = this->Z0 + sin_theta * (this->coilDiameter / 2.0);
+
+    Real64 zIn = this->Z0 + sin_eta * (this->coilDiameter / 2.0 - this->pipe.outRadius);
+    Real64 zOut = this->Z0 + sin_eta * (this->coilDiameter / 2.0 + this->pipe.outRadius);
+
+    return 0.5 * std::sqrt(pow_2(x - xIn) + pow_2(this->Y0(m1) - this->Y0(m)) + pow_2(z - zIn)) +
+           0.5 * std::sqrt(pow_2(x - xOut) + pow_2(this->Y0(m1) - this->Y0(m)) + pow_2(z - zOut));
 }
 
 //******************************************************************************

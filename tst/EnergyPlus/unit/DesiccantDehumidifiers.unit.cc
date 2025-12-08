@@ -89,7 +89,7 @@ namespace EnergyPlus {
 TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -2912,7 +2912,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
 TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -4099,7 +4099,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
 TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -5532,7 +5532,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
 
     // this unit test is derived from DesiccantDehum_OnPrimaryAirSystemTest but uses a VS dx coil instead
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);

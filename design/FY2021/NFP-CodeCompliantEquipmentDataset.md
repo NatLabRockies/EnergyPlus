@@ -3,7 +3,7 @@ Code Compliant Equipment Dataset
 
 Jeremy Lerond, Aowabin Rahman, Jian Zhang, Reid Hart, Michael Rosenberg, PNNL
 
- - 09/07/2021 
+ - 09/07/2021
 
 ## Justification for New Feature ##
 EnergyPlus requires modelers to select sets of performance curves to describe the part load performance of modeled HVAC equipment. While full load efficiency metrics can often be used as a direct input in models, performance curves dictate what the part load efficiency metric of a modeled piece of equipment is at different part load operating conditions.
@@ -57,9 +57,5 @@ N/A
 ## References ##
 * ASHRAE. 2021. BSR/ASHRAE Standard 205P Representation of Performance Data for HVAC&R and Other Facility Equipment (PPR3). Atlanta: ASHRAE.
 * California Univ., Berkeley. Lawrence Berkeley Lab., Washington, DC. Department of Energy, and NM. Los Alamos National Lab. 1981. "DOE-2 Engineers Manual (Version 2.1A)." Technical Report.
-* Drury B. Crawley, Curtis O. Pedersen, Linda K. Lawrie, Frederick C. Winkelmann. 2000. EnergyPlus: Energy Simulation Program. 
+* Drury B. Crawley, Curtis O. Pedersen, Linda K. Lawrie, Frederick C. Winkelmann. 2000. EnergyPlus: Energy Simulation Program.
 * Lerond, Jeremy. 2019. "Algorithmically Generated Chiller Performance Curves for Building Energy Simulation." ASHRAE Transaction. Atlanta: ASHRAE. 93-95.
-
-
-
-

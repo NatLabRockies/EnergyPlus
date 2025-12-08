@@ -2233,7 +2233,8 @@ namespace BranchInputManager {
                 FoundPlantLoopNum = Num;
                 MatchedPlantLoop = true;
                 break;
-            } else if (Alphas(12) == BranchListName) {
+            }
+            if (Alphas(12) == BranchListName) {
                 FoundPlantLoopName = Alphas(1);
                 FoundSupplyDemand = "Demand";
                 FoundVolFlowRate = Numbers(3);
@@ -2291,7 +2292,8 @@ namespace BranchInputManager {
                 FoundCondLoopNum = Num;
                 MatchedCondLoop = true;
                 break;
-            } else if (Alphas(12) == BranchListName) {
+            }
+            if (Alphas(12) == BranchListName) {
                 FoundCondLoopName = Alphas(1);
                 FoundSupplyDemand = "Demand";
                 FoundVolFlowRate = Numbers(3);
@@ -2455,7 +2457,7 @@ namespace BranchInputManager {
         NeverFound = true;
         for (BrN = 1; BrN <= (int)state.dataBranchInputManager->Branch.size(); ++BrN) {
             int Found = 0;
-            std::string FoundBranchName = "";
+            std::string FoundBranchName;
             if (present(CompType) && present(CompName)) {
                 for (CpN = 1; CpN <= state.dataBranchInputManager->Branch(BrN).NumOfComponents; ++CpN) {
                     if (!Util::SameString(state.dataBranchInputManager->Branch(BrN).Component(CpN).CType, CompType()) ||

@@ -1254,7 +1254,7 @@ namespace DataSurfaces {
     {
         // Members
         int WhichSurface = 0;                // Which surface number this is applied to
-        std::string SurfaceName = "";        // Which surface (name)
+        std::string SurfaceName;             // Which surface (name)
         Convect::OverrideType overrideType = // Override type, 1=value, 2=schedule, 3=model, 4=user curve
             Convect::OverrideType::Invalid;
         Real64 OverrideValue = 0.0;                            // User specified value

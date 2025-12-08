@@ -5254,9 +5254,8 @@ void CalcZoneMassBalance(EnergyPlusData &state, bool const FirstHVACIteration)
             if (totalResidual < ConvergenceTolerance) {
                 state.dataHVACGlobal->ZoneMassBalanceHVACReSim = false;
                 break;
-            } else {
-                state.dataHVACGlobal->ZoneMassBalanceHVACReSim = true;
             }
+            state.dataHVACGlobal->ZoneMassBalanceHVACReSim = true;
         }
         if (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
             break;

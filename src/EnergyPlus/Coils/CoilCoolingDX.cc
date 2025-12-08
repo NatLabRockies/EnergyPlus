@@ -87,7 +87,8 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
 
     if (findPerformanceSubclass(state, a205_object_name, performance_object_name)) {
         return std::make_shared<CoilCoolingDX205Performance>(state, performance_object_name);
-    } else if (findPerformanceSubclass(state, curve_fit_object_name, performance_object_name)) {
+    }
+    if (findPerformanceSubclass(state, curve_fit_object_name, performance_object_name)) {
         return std::make_shared<CoilCoolingDXCurveFitPerformance>(state, performance_object_name);
     }
 

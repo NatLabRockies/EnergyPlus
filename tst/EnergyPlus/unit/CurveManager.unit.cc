@@ -720,8 +720,8 @@ TEST_F(EnergyPlusFixture, CSV_CarriageReturns_Handling)
     TestArray = testTableFile.getArray(*state, std::make_pair(col, row));
     EXPECT_EQ(TestArray.size(), expected_length);
 
-    for (std::size_t i = 0; i < TestArray.size(); i++) {
-        EXPECT_FALSE(std::isnan(TestArray[i]));
+    for (double i : TestArray) {
+        EXPECT_FALSE(std::isnan(i));
     }
 }
 

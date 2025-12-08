@@ -432,17 +432,17 @@ namespace OutputReportTabular {
     struct CompLoadTablesType
     {
         // members
-        int desDayNum = 0;              // design day number
-        int timeStepMax = 0;            // times step of the day that the maximum occurs
-        Array2D<Real64> cells;          // main component table results (column, row)
-        Array2D_bool cellUsed;          // flag if the cell is used for the table of results (column, row)
-        std::string peakDateHrMin = ""; // string containing peak timestamp
-        Real64 outsideDryBulb = 0.0;    // outside dry bulb temperature at peak
-        Real64 outsideWetBulb = 0.0;    // outside wet bulb temperature at peak
-        Real64 outsideHumRatio = 0.0;   // outside humidity ratio at peak
-        Real64 zoneDryBulb = 0.0;       // zone dry bulb temperature at peak
-        Real64 zoneRelHum = 0.0;        // zone relative humidity at peak
-        Real64 zoneHumRatio = 0.0;      // zone humidity ratio at peak
+        int desDayNum = 0;            // design day number
+        int timeStepMax = 0;          // times step of the day that the maximum occurs
+        Array2D<Real64> cells;        // main component table results (column, row)
+        Array2D_bool cellUsed;        // flag if the cell is used for the table of results (column, row)
+        std::string peakDateHrMin;    // string containing peak timestamp
+        Real64 outsideDryBulb = 0.0;  // outside dry bulb temperature at peak
+        Real64 outsideWetBulb = 0.0;  // outside wet bulb temperature at peak
+        Real64 outsideHumRatio = 0.0; // outside humidity ratio at peak
+        Real64 zoneDryBulb = 0.0;     // zone dry bulb temperature at peak
+        Real64 zoneRelHum = 0.0;      // zone relative humidity at peak
+        Real64 zoneHumRatio = 0.0;    // zone humidity ratio at peak
 
         Real64 supAirTemp = 0.0;     // supply air temperature
         Real64 mixAirTemp = 0.0;     // mixed air temperature

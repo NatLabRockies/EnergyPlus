@@ -318,7 +318,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
     state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:MYTH", state->dataOutputProcessor->meters.size() - 1);
 
     std::vector<AnnualTable> annualTables;
-    annualTables.push_back(AnnualTable(*state, "PEAK ELECTRICITY ANNUAL MYTH REPORT", "", ""));
+    annualTables.emplace_back(*state, "PEAK ELECTRICITY ANNUAL MYTH REPORT", "", "");
     annualTables.back().addFieldSet("HEATING:MYTH:VARIABLE", AnnualFieldSet::AggregationKind::hoursPositive, 2);
     annualTables.back().addFieldSet("ELECTRICITY:MYTH", AnnualFieldSet::AggregationKind::maximumDuringHoursShown, 2);
     annualTables.back().setupGathering(*state);

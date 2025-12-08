@@ -189,7 +189,7 @@ public:
     void ResolveDesignFlowRate(EnergyPlusData &state, int const HVACSizingIterCount);
 
 private:
-    std::string name = "";                // name of analysis object
+    std::string name;                     // name of analysis object
     Real64 newAdjustedMassFlowRate = 0.0; // with sizing factor included...
     Real64 newFoundMassFlowRate = 0.0;
     Real64 significantNormalizedChange = 0.005; // criteria for if sizing algorithm yield a change large enough worth making another pass.

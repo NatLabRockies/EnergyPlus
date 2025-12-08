@@ -176,8 +176,8 @@ namespace Weather {
     struct EnvironmentData
     {
         // Members
-        std::string Title = "";                                         // Environment name
-        std::string cKindOfEnvrn = "";                                  // kind of environment
+        std::string Title;                                              // Environment name
+        std::string cKindOfEnvrn;                                       // kind of environment
         Constant::KindOfSim KindOfEnvrn = Constant::KindOfSim::Invalid; // Type of environment (see Parameters for KindOfSim in DataGlobals)
         int DesignDayNum = 0;                                           // index in DesignDay structure and DesignDayInput
         int RunPeriodDesignNum = 0;                                     // for WeatherFileDays, index in  RunPeriodDesign and RunPeriodDesignInput
@@ -225,7 +225,7 @@ namespace Weather {
     struct DesignDayData
     {
         // Members
-        std::string Title = "";                                          // Environment name
+        std::string Title;                                               // Environment name
         Real64 MaxDryBulb = 0.0;                                         // Maximum Dry-Bulb Temperature (C)
         Real64 DailyDBRange = 0.0;                                       // Daily Temperature Range (deltaC)
         Real64 HumIndValue = 0.0;                                        // Humidity Indicating Value at Max Dry-bulb Temperature
@@ -257,8 +257,8 @@ namespace Weather {
 
     struct ReportPeriodData
     {
-        std::string title = "";
-        std::string reportName = "";
+        std::string title;
+        std::string reportName;
         int startYear = 2017;
         int startMonth = 1;
         int startDay = 1;
@@ -321,7 +321,7 @@ namespace Weather {
     struct SpecialDayData
     {
         // Members
-        std::string Name = "";                 // Name
+        std::string Name;                      // Name
         DateType dateType = DateType::Invalid; // Date type as read in from IDF
         int Month = 0;                         // Start Month
         int Day = 0;                           // Start Day of month or Count for DateTypes=NthDayOfMonth
@@ -338,9 +338,9 @@ namespace Weather {
     struct DataPeriodData
     {
         // Members
-        std::string Name = "";      // DataPeriod Title
-        std::string DayOfWeek = ""; // Start Day of Week for DataPeriod
-        int NumYearsData = 1;       // Number of years for which data is present in EPW.
+        std::string Name;      // DataPeriod Title
+        std::string DayOfWeek; // Start Day of Week for DataPeriod
+        int NumYearsData = 1;  // Number of years for which data is present in EPW.
         int WeekDay = 0;
         int StMon = 0;
         int StDay = 0;
@@ -398,14 +398,14 @@ namespace Weather {
     struct TypicalExtremeData
     {
         // Members
-        std::string Title = "";       // Environment name
-        std::string ShortTitle = "";  // Environment name
-        std::string MatchValue = "";  // String to be matched for input/running these periods for design.
-        std::string MatchValue1 = ""; // String to be also matched (synonym)
-        std::string MatchValue2 = ""; // String to be also matched (synonym)
-        std::string TEType = "";      // Typical or Extreme
-        int TotalDays = 0;            // Number of days in environment
-        int StartJDay = 0;            // Day of year of first day of environment
+        std::string Title;       // Environment name
+        std::string ShortTitle;  // Environment name
+        std::string MatchValue;  // String to be matched for input/running these periods for design.
+        std::string MatchValue1; // String to be also matched (synonym)
+        std::string MatchValue2; // String to be also matched (synonym)
+        std::string TEType;      // Typical or Extreme
+        int TotalDays = 0;       // Number of days in environment
+        int StartJDay = 0;       // Day of year of first day of environment
         int StartMonth = 0;
         int StartDay = 0;
         int EndMonth = 0;
@@ -416,7 +416,7 @@ namespace Weather {
     struct WeatherProperties
     {
         // Members
-        std::string Name = "";  // Reference Name
+        std::string Name;       // Reference Name
         bool IsSchedule = true; // Default is using Schedule
         SkyTempModel skyTempModel = SkyTempModel::ClarkAllen;
         Sched::DayOrYearSchedule *sched = nullptr; // schedule when used
@@ -426,7 +426,7 @@ namespace Weather {
 
     struct UnderwaterBoundary
     {
-        std::string Name = "";
+        std::string Name;
         Real64 distanceFromLeadingEdge = 0.0;
         int OSCMIndex = 0;
         Sched::Schedule *waterTempSched = nullptr;
@@ -782,9 +782,9 @@ struct WeatherManagerData : BaseGlobalStruct
     int YearOfSim = 1;                           // The Present year of Simulation.
     int NumDaysInYear = 365;                     // TODO: removed const from this until leap year behavior is reviewed
     int EnvironmentReportNbr = 0;                // Report number for the environment stamp
-    std::string EnvironmentReportChr = "";       // Report number for the environment stamp (character -- for printing)
+    std::string EnvironmentReportChr;            // Report number for the environment stamp (character -- for printing)
     bool WeatherFileExists = false;              // Set to true if a weather file exists
-    std::string LocationTitle = "";              // Location Title from input File
+    std::string LocationTitle;                   // Location Title from input File
     bool LocationGathered = false;               // flag to show if Location exists on Input File (we assume one is there and correct on weather file)
     bool keepUserSiteLocationDefinition = false; // flag based on user input to set whether to keep the user site location definition (true)
                                                  // or override with the site information given on weather file (false/default)
@@ -927,7 +927,7 @@ struct WeatherManagerData : BaseGlobalStruct
     Real64 IsRainThreshold = 0.8; // precipitation threshold (mm) for timestep IsRain (divided later by NumOfTimeStepInHour)
 
     // ProcessEPWHeader static vars
-    std::string EPWHeaderTitle = "";
+    std::string EPWHeaderTitle;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

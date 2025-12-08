@@ -35,9 +35,9 @@ to account for phase change energy accurately. The implicit formulation for an
 internal node is shown in the equation below.
 
 \begin{equation}
-C_p \rho \Delta x \frac{T_i^{j+1}-T_i^j}{\Delta t} = 
+C_p \rho \Delta x \frac{T_i^{j+1}-T_i^j}{\Delta t} =
      \frac{1}{2}\left(k_W\frac{T_{i+1}^{j+1}-T_{i}^{j+1}}{\Delta x} +
-                      k_E\frac{T_{i-1}^{j+1}-T_{i}^{j+1}}{\Delta x} + 
+                      k_E\frac{T_{i-1}^{j+1}-T_{i}^{j+1}}{\Delta x} +
                       k_W\frac{T_{i+1}^{j}-T_{i}^{j}}{\Delta x} +
                       k_E\frac{T_{i-1}^{j}-T_{i}^{j}}{\Delta x}\right)
 \label{eq:InternalNodeImplicitEquation}
@@ -47,7 +47,7 @@ where:
 \begin{wherelist}
 \item[T] node temperature
 \item[\Delta t] calculation time step
-\item[\Delta x] finite difference layer thickness (always less 
+\item[\Delta x] finite difference layer thickness (always less
 than construction layer thickness)
 \item[C_p] specific heat of material
 \item[k_W] thermal conductivity for interface between node $i$ and node $i+1$
@@ -250,7 +250,7 @@ EnergyPlus uses a linear interpolation between nodal points.
 %\thickmuskip=0mu
 %\nulldelimiterspace=0pt
 %\scriptspace=0pt
-C_p\rho\Delta x\frac{T_i^{j + 1} - T_i^j}{\Delta t} = 
+C_p\rho\Delta x\frac{T_i^{j + 1} - T_i^j}{\Delta t} =
 \frac{1}{2}\left[ \left( k_W\frac{T_{i + 1}^{j + 1} - T_i^{j + 1}}{\Delta x}
                        + k_E\frac{T_{i - 1}^{j + 1} - T_i^{j + 1}}{\Delta x}
                  \right)
@@ -364,7 +364,7 @@ T\textsubscript{$i+1$,old}}{\Delta t} \\
 where:
 \begin{wherelist}
 \item[\text{HeatCap1}_i] heat capacitance associated with a given outer half-node
-\item[\text{HeatCap2}_i] heat capacitance associated with a given inner half-node 
+\item[\text{HeatCap2}_i] heat capacitance associated with a given inner half-node
 \item[\text{QDreport}_i] CondFD Surface Heat Flux Node \textless{} i
 \textgreater{}
 \item[\text{QSource}_i] internal source heat flux at node $i$

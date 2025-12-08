@@ -1205,9 +1205,8 @@ namespace WaterToAirHeatPump {
             (heatPump.availSched->getCurrentVal() <= 0.0)) {
             heatPump.SimFlag = false;
             return;
-        } else {
-            heatPump.SimFlag = true;
         }
+        heatPump.SimFlag = true;
 
         if (compressorOp == HVAC::CompressorOp::Off) {
             heatPump.SimFlag = false;
@@ -1661,9 +1660,8 @@ namespace WaterToAirHeatPump {
             (heatPump.availSched->getCurrentVal() <= 0.0)) {
             heatPump.SimFlag = false;
             return;
-        } else {
-            heatPump.SimFlag = true;
         }
+        heatPump.SimFlag = true;
 
         if (compressorOp == HVAC::CompressorOp::Off) {
             heatPump.SimFlag = false;

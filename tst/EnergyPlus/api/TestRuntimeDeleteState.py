@@ -54,12 +54,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+
 from pyenergyplus.api import EnergyPlusAPI
+
 
 def progress_handler(progress: int) -> None:
     if 49 < progress < 51:
         print("HALFWAY THERE!!")
         sys.stdout.flush()
+
 
 api = EnergyPlusAPI()
 state = api.state_manager.new_state()

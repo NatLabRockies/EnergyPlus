@@ -62,10 +62,10 @@ An example idf entry follows
 
 \begin{lstlisting}
 RoomAirModelType,
-  MOD1,                             !- Room-Air Model Name
-  ZONE ONE,                         !- Zone Name
-  ThreeNodeDisplacementVentilation, !- Room-Air Modeling Type
-  Direct;                           !- Air Temperature Coupling Strategy
+  MOD1,                       !- Room-Air Model Name
+  ZONE ONE,                   !- Zone Name
+  ThreeNodeDisplacementVentilation,  !- Room-Air Modeling Type
+  Direct;                     !- Air Temperature Coupling Strategy
 \end{lstlisting}
 
 \subsection{RoomAir:TemperaturePattern:UserDefined}\label{roomairtemperaturepatternuserdefined}
@@ -98,10 +98,10 @@ An example of this object is
 
 \begin{lstlisting}
 RoomAir:TemperaturePattern:UserDefined,
-  Ground Floor South Air Temp Controls,  ! Name
-  ZN2_S_1,                              ! Zone Name
-  Always_on,                            ! Availability Schedule Name
-  Roomair Pattern 1;                    ! Pattern Control Schedule Name
+  Ground Floor South Air Temp Controls,  !- Name
+  ZN2_S_1,                    !- Zone Name
+  Always_on,                  !- Availability Schedule Name
+  Roomair Pattern 1;          !- Pattern Control Schedule Name
 \end{lstlisting}
 
 \subsection{RoomAir:TemperaturePattern:ConstantGradient}\label{roomairtemperaturepatternconstantgradient}
@@ -142,12 +142,12 @@ An example of this object is:
 
 \begin{lstlisting}
 RoomAir:TemperaturePattern:ConstantGradient,
-  half C per Meter,     ! Name
-  10005,                ! Control Integer for Pattern Control Schedule Name
-  0.0,                  ! Thermostat Offset (Temp at thermostat- Mean Air Temp) [C]
-  1.0,                  ! Return Air Offset (Tleaving - Mean Air Temp )  [C]
-  1.0,                  ! Exhaust Air Offset (Texhaust - Mean Air Temp)  [C]
-  0.5;                  ! Temperature Gradient [K/m]
+  half C per Meter,           !- Name
+  10005,                      !- Control Integer for Pattern Control Schedule Name
+  0.0,                        !- Thermostat Offset (Temp at thermostat- Mean Air Temp) [C]
+  1.0,                        !- Return Air Offset (Tleaving - Mean Air Temp )  [C]
+  1.0,                        !- Exhaust Air Offset (Texhaust - Mean Air Temp)  [C]
+  0.5;                        !- Temperature Gradient [K/m]
 \end{lstlisting}
 
 \subsection{RoomAir:TemperaturePattern:TwoGradient}\label{roomairtemperaturepatterntwogradient}
@@ -218,18 +218,18 @@ An example of this object follows. This pattern will apply no gradient (effectiv
 
 \begin{lstlisting}
 RoomAir:TemperaturePattern:TwoGradient,
-  Mixed to one C per M by Zone DB, ! Name
-  2002,                   ! Control Integer for Pattern Control Schedule
-  1.1,                    ! Thermostat Height meters
-  4.5,                    ! Return Air Height
-  3.5,                    ! Exhaust Air Height
-  0.0,                    ! Temperature Gradient Lower Bound K/m
-  1.0,                    ! Temperature Gradient Upper  Bound K/m
-  ZoneDrybulbTemperature, ! Gradient Interpolation Mode
-  26.0,                   ! Upper Temperature [C]
-  22.5,                   ! Lower Temperature [C]
-  ,                       ! Upper Heat Rate [W]
-  ;                       ! Lower Heat Rate [W]
+  Mixed to one C per M by Zone DB,  !- Name
+  2002,                       !- Control Integer for Pattern Control Schedule
+  1.1,                        !- Thermostat Height meters
+  4.5,                        !- Return Air Height
+  3.5,                        !- Exhaust Air Height
+  0.0,                        !- Temperature Gradient Lower Bound K/m
+  1.0,                        !- Temperature Gradient Upper  Bound K/m
+  ZoneDrybulbTemperature,     !- Gradient Interpolation Mode
+  26.0,                       !- Upper Temperature [C]
+  22.5,                       !- Lower Temperature [C]
+  ,                           !- Upper Heat Rate [W]
+  ;                           !- Lower Heat Rate [W]
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{roomairtemperaturepatterntwogradient-outputs}
@@ -296,23 +296,23 @@ This object is extensible, so additional pairs of these last two fields of this 
 
 \begin{lstlisting}
 RoomAir:TemperaturePattern:NondimensionalHeight,
-  Rough UFAD Approx,    ! Name
-  3001,                 ! Control Integer for Pattern Control Schedule
-                        ! note reference this entry in Schedule
-  -1.0 ,                ! Thermostat Offset
-  1.5 ,                 ! Return Air Offset (Tleaving - Mean Air Temp ) deg C
-  1.75,                 ! Exhaust Air Offset (Texhaust - Mean Air Temp) deg C
-  0.05,  -1.8,          ! pair 1 (Zeta , DeltaTai)
-  0.1,   -1.7,          ! pair 2 (Zeta , DeltaTai)
-  0.2,   -0.8,          ! pair 3 (Zeta , DeltaTai)
-  0.3,   -0.2,          ! pair 4 (Zeta , DeltaTai)
-  0.4,    0.5,          ! pair 5 (Zeta , DeltaTai)
-  0.5,    0.8,          ! pair 6 (Zeta , DeltaTai)
-  0.6,    1.2,          ! pair 7 (Zeta , DeltaTai)
-  0.7,    1.4,          ! pair 8 (Zeta , DeltaTai)
-  0.8,    1.4,          ! pair 9 (Zeta , DeltaTai)
-  0.9,   1.42,          ! pair 10 (Zeta , DeltaTai)
-  0.95,  1.44;          ! pair 11 (Zeta , DeltaTai)
+  Rough UFAD Approx,          !- Name
+  3001,                       !- Control Integer for Pattern Control Schedule
+                              !- note reference this entry in Schedule
+  -1.0,                       !- Thermostat Offset
+  1.5,                        !- Return Air Offset (Tleaving - Mean Air Temp ) deg C
+  1.75,                       !- Exhaust Air Offset (Texhaust - Mean Air Temp) deg C
+  0.05,  -1.8,                !- pair 1 (Zeta , DeltaTai)
+  0.1,   -1.7,                !- pair 2 (Zeta , DeltaTai)
+  0.2,   -0.8,                !- pair 3 (Zeta , DeltaTai)
+  0.3,   -0.2,                !- pair 4 (Zeta , DeltaTai)
+  0.4,    0.5,                !- pair 5 (Zeta , DeltaTai)
+  0.5,    0.8,                !- pair 6 (Zeta , DeltaTai)
+  0.6,    1.2,                !- pair 7 (Zeta , DeltaTai)
+  0.7,    1.4,                !- pair 8 (Zeta , DeltaTai)
+  0.8,    1.4,                !- pair 9 (Zeta , DeltaTai)
+  0.9,   1.42,                !- pair 10 (Zeta , DeltaTai)
+  0.95,  1.44;                !- pair 11 (Zeta , DeltaTai)
 \end{lstlisting}
 
 \subsection{RoomAir:TemperaturePattern:SurfaceMapping}\label{roomairtemperaturepatternsurfacemapping}
@@ -360,22 +360,21 @@ DeltaT\(_{ai}\) is the temperature difference between the air temperature adjace
 This object is extensible, so additional pairs of fields of these types can be added to the end of this object.  An example of this object, which might be used to elevate temperatures near west windows in the afternoon, is:
 
 \begin{lstlisting}
-
 RoomAir:TemperaturePattern:SurfaceMapping,
-    GroundFloor SW Corner Hot Near West Wall, ! Name
-    4001, ! Control Integer for Pattern Control Schedule Name
-    0.0, ! Thermostat Offset(Temp at thermostat- Mean Air Temp)
-    0.0, ! Return Air Offset  deg C
-    0.0, ! Exhaust Air Offset
-    ZN1_SW_1:W_ExtWall:1 ,  0.8,  ! pair 1 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:2 ,  0.9,  ! pair 2 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:3 ,  1.0,  ! pair 3 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:4,   1.1,  ! pair 4 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:5,   1.3,  ! pair 5 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:6,   1.5,  ! pair 6 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:7,   1.7,  ! pair 7 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:8,   2.1,  ! pair 8 (Surface Name , DeltaTai)
-    ZN1_SW_1:W_ExtWall:9,   2.4 ; ! pair 8 (Surface Name , DeltaTai)
+  GroundFloor SW Corner Hot Near West Wall,  !- Name
+  4001,                       !- Control Integer for Pattern Control Schedule Name
+  0.0,                        !- Thermostat Offset(Temp at thermostat- Mean Air Temp)
+  0.0,                        !- Return Air Offset  deg C
+  0.0,                        !- Exhaust Air Offset
+  ZN1_SW_1:W_ExtWall:1 ,  0.8,!- pair 1 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:2 ,  0.9,!- pair 2 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:3 ,  1.0,!- pair 3 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:4,   1.1,!- pair 4 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:5,   1.3,!- pair 5 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:6,   1.5,!- pair 6 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:7,   1.7,!- pair 7 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:8,   2.1,!- pair 8 (Surface Name , DeltaTai)
+  ZN1_SW_1:W_ExtWall:9,   2.4;!- pair 8 (Surface Name , DeltaTai)
 \end{lstlisting}
 
 \subsection{RoomAir:Node}\label{roomairnode}
@@ -419,14 +418,13 @@ These remaining alpha fields indicate the names of the surfaces (Ref: Surface) t
 An IDF example:
 
 \begin{lstlisting}
-
 RoomAir:Node,
-      WESTZN:FLOORAIR,    !- Node Name
-      Floor,      !- Node Type
-      WEST ZONE,  !- Name of Zone to Which the Air Node Belongs
-      0.1,        !- Height of Nodal Control Volume Center {m}
-      WESTZN:FLOOR:LEFF,  !- surface name
-      WESTZN:FLOOR:RIGHT; !- surface name
+  WESTZN:FLOORAIR,            !- Node Name
+  Floor,                      !- Node Type
+  WEST ZONE,                  !- Name of Zone to Which the Air Node Belongs
+  0.1,                        !- Height of Nodal Control Volume Center {m}
+  WESTZN:FLOOR:LEFF,          !- surface name
+  WESTZN:FLOOR:RIGHT;         !- surface name
 \end{lstlisting}
 
 \subsection{RoomAirSettings:OneNodeDisplacementVentilation}\label{roomairsettingsonenodedisplacementventilation}
@@ -451,9 +449,9 @@ An IDF example:
 
 \begin{lstlisting}
 RoomAirSettings:OneNodeDisplacementVentilation,
-      WEST ZONE,  !- Zone Name
-      0.1,  !- Fraction of internal loads from the convective Floor Air
-      0.1;  !- Fraction of internal loads from the Infiltration Air
+  WEST ZONE,                  !- Zone Name
+  0.1,                        !- Fraction of internal loads from the convective Floor Air
+  0.1;                        !- Fraction of internal loads from the Infiltration Air
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{roomairsettingsonenodedisplacementventilation-outputs}
@@ -552,14 +550,13 @@ The value should be greater than or equal to zero and is in units of degrees Cen
 An example input:
 
 \begin{lstlisting}
-
 RoomAirSettings:ThreeNodeDisplacementVentilation,
-      ZONE ONE,  !- Zone Name
-      Constant - .2,  !- Gain Distribution Schedule Name
-       1,  !- Number of Plumes per Occupant
-        ,  !- Thermostat Height
-        ,  !- Comfort Height
-      .3;  !- Temp. Difference Threshold for Displacement Ventilation
+  ZONE ONE,                   !- Zone Name
+  Constant - .2,              !- Gain Distribution Schedule Name
+  1,                          !- Number of Plumes per Occupant
+  ,                           !- Thermostat Height
+  ,                           !- Comfort Height
+  .3;                         !- Temp. Difference Threshold for Displacement Ventilation
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{roomairsettingsthreenodedisplacementventilation-outputs}
@@ -819,29 +816,28 @@ The coefficient E in the formula: Kc = A*Gamma**B + C + D*Gamma + E*Gamma**2. Ga
 An example input is:
 
 \begin{lstlisting}
+RoomAirModelType,
+  SPACE5-1 RoomAir Model,     !- Name
+  SPACE5-1,                   !- Zone Name
+  UnderFloorAirDistributionInterior,  !- Room-Air Modeling Type
+  DIRECT;                     !- Air Temperature Coupling Strategy
 
-  RoomAirModelType,
-      SPACE5-1 RoomAir Model,  !- Name
-      SPACE5-1,                !- Zone Name
-      UnderFloorAirDistributionInterior,  !- Room-Air Modeling Type
-      DIRECT;                  !- Air Temperature Coupling Strategy
-
-  RoomAirSettings:UnderFloorAirDistributionInterior,
-      SPACE5-1,                !- Zone Name
-      Autocalculate,           !- Number of Diffusers
-      Autocalculate,           !- Power per Plume
-      Autocalculate,           !- Design Effective Area of Diffuser {m2}
-      Autocalculate,           !- Diffuser Slot Angle from Vertical {deg}
-      ,                        !- Thermostat Height {m}
-      ,                        !- Comfort Height {m}
-      0.001,         !- Temperature Difference Threshold for Reporting {deltaC}
-      Swirl,                   !- Diffuser Type
-      1.7,                     !- Transition Height {m}
-      Autocalculate,           !- Coefficient A
-      Autocalculate,           !- Coefficient B
-      Autocalculate,           !- Coefficient C
-      Autocalculate,           !- Coefficient D
-     Autocalculate;           !- Coefficient E
+RoomAirSettings:UnderFloorAirDistributionInterior,
+  SPACE5-1,                   !- Zone Name
+  Autocalculate,              !- Number of Diffusers
+  Autocalculate,              !- Power per Plume
+  Autocalculate,              !- Design Effective Area of Diffuser {m2}
+  Autocalculate,              !- Diffuser Slot Angle from Vertical {deg}
+  ,                           !- Thermostat Height {m}
+  ,                           !- Comfort Height {m}
+  0.001,                      !- Temperature Difference Threshold for Reporting {deltaC}
+  Swirl,                      !- Diffuser Type
+  1.7,                        !- Transition Height {m}
+  Autocalculate,              !- Coefficient A
+  Autocalculate,              !- Coefficient B
+  Autocalculate,              !- Coefficient C
+  Autocalculate,              !- Coefficient D
+  Autocalculate;              !- Coefficient E
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{roomairsettingsunderfloorairdistributioninterior-outputs}
@@ -996,21 +992,21 @@ An example input is:
 
 \begin{lstlisting}
 RoomAirSettings:UnderFloorAirDistributionExterior,
-      SPACE1-1,                !- Zone Name
-      Autocalculate,           !- Number of Diffusers per Zone
-      Autocalculate,           !- Power per Plume
-      Autocalculate,           !- Design Effective Area of Diffuser {m2}
-      Autocalculate,           !- Diffuser Slot Angle from Vertical {deg}
-      ,                        !- Thermostat Height {m}
-      ,                        !- Comfort Height {m}
-      0.001,                   !- Temperature Difference Threshold for Reporting {deltaC}
-      LinearBarGrille,         !- Diffuser Type
-      1.7,                     !- Transition Height {m}
-      Autocalculate,           !- Coefficient A
-      Autocalculate,           !- Coefficient B
-      Autocalculate,           !- Coefficient C
-      Autocalculate,           !- Coefficient D
-      Autocalculate;           !- Coefficient E
+  SPACE1-1,                   !- Zone Name
+  Autocalculate,              !- Number of Diffusers per Zone
+  Autocalculate,              !- Power per Plume
+  Autocalculate,              !- Design Effective Area of Diffuser {m2}
+  Autocalculate,              !- Diffuser Slot Angle from Vertical {deg}
+  ,                           !- Thermostat Height {m}
+  ,                           !- Comfort Height {m}
+  0.001,                      !- Temperature Difference Threshold for Reporting {deltaC}
+  LinearBarGrille,            !- Diffuser Type
+  1.7,                        !- Transition Height {m}
+  Autocalculate,              !- Coefficient A
+  Autocalculate,              !- Coefficient B
+  Autocalculate,              !- Coefficient C
+  Autocalculate,              !- Coefficient D
+  Autocalculate;              !- Coefficient E
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{roomairsettingsunderfloorairdistributionexterior-outputs}
@@ -1136,18 +1132,17 @@ The name of a \hyperref[roomairnodeairflownetwork]{RoomAir:Node:AirflowNetwork} 
 An IDF example input is:
 
 \begin{lstlisting}
-
 RoomAirSettings:AirflowNetwork,
-  NORTH_ZONE,     !- Name
-  NORTH_ZONE,              !- Zone Name
-  RoomAir Schedule,        !- Availability Schedule Name
-  NORTH_ZONE,              !- Control Point RoomAir:Node Name
-  LeftUpper,               !- RoomAir:Node:AirflowNetwork 1 Name
-  CentralUpper,            !- RoomAir:Node:AirflowNetwork 2 Name
-  NORTH_ZONE,              !- RoomAir:Node:AirflowNetwork 3 Name
-  LeftMiddle,              !- RoomAir:Node:AirflowNetwork 4 Name
-  LeftLower,               !- RoomAir:Node:AirflowNetwork 5 Name
-  CentralLower;            !- RoomAir:Node:AirflowNetwork 6 Name
+  NORTH_ZONE,                 !- Name
+  NORTH_ZONE,                 !- Zone Name
+  RoomAir Schedule,           !- Availability Schedule Name
+  NORTH_ZONE,                 !- Control Point RoomAir:Node Name
+  LeftUpper,                  !- RoomAir:Node:AirflowNetwork 1 Name
+  CentralUpper,               !- RoomAir:Node:AirflowNetwork 2 Name
+  NORTH_ZONE,                 !- RoomAir:Node:AirflowNetwork 3 Name
+  LeftMiddle,                 !- RoomAir:Node:AirflowNetwork 4 Name
+  LeftLower,                  !- RoomAir:Node:AirflowNetwork 5 Name
+  CentralLower;               !- RoomAir:Node:AirflowNetwork 6 Name
 \end{lstlisting}
 
 \subsection{RoomAir:Node:AirflowNetwork}\label{roomairnodeairflownetwork}
@@ -1182,12 +1177,12 @@ The field specifies a name to provide a list of HVAC equipment, including AirLoo
 
 \begin{lstlisting}
 RoomAir:Node:AirflowNetwork,
-  LeftUpper,         !- Name
-  NORTH_ZONE,        !- Zone Name
-  0.15,              !- Fraction of Zone Air Volume
-  Surface_18_T_List, !- RoomAir:Node:AirflowNetwork:AdjacentSurfaceList Name
-  LeftUpper_Gain,    !- RoomAir:Node:AirflowNetwork:InternalGains Name
-  LeftUpper_HVAC;    !- RoomAir:Node:AirflowNetwork:HVACEquipment Name
+  LeftUpper,                  !- Name
+  NORTH_ZONE,                 !- Zone Name
+  0.15,                       !- Fraction of Zone Air Volume
+  Surface_18_T_List,          !- RoomAir:Node:AirflowNetwork:AdjacentSurfaceList Name
+  LeftUpper_Gain,             !- RoomAir:Node:AirflowNetwork:InternalGains Name
+  LeftUpper_HVAC;             !- RoomAir:Node:AirflowNetwork:HVACEquipment Name
 \end{lstlisting}
 
 \subsection{RoomAir:Node:AirflowNetwork:AdjacentSurfaceList}\label{roomairnodeairflownetworkadjacentsurfacelist}
@@ -1203,10 +1198,9 @@ This is a unique character string associated with this instance of the Room\-Air
 The field specifies a surface name. This object is extensible, so additional fields of this type can be added to the end of this object.
 
 \begin{lstlisting}
-
 RoomAir:Node:AirflowNetwork:AdjacentSurfaceList,
-  Surface_18_T_List, !- Name
-  Surface_18_T;      !- Surface 1 Name
+  Surface_18_T_List,          !- Name
+  Surface_18_T;               !- Surface 1 Name
 \end{lstlisting}
 
 \subsection{RoomAir:Node:AirflowNetwork:InternalGains}\label{roomairnodeairflownetworkinternalgains}
@@ -1235,16 +1229,16 @@ This object is extensible, so additional groups of these last three fields can b
 
 \begin{lstlisting}
 RoomAir:Node:AirflowNetwork:InternalGains,
-  CentralUpper_Gain,    !- Name
-  People,               !- Internal Gain Object 1 Type
-  NORTH_ZONE People,    !- Internal Gain Object 1 Name
-  0.15,                 !- Fraction of Gains to Node 1
-  Lights,               !- Internal Gain Object 2 Type
-  NORTH_ZONE Lights,    !- Internal Gain Object 2 Name
-  0.15,                 !- Fraction of Gains to Node 2
-  ElectricEquipment,    !- Internal Gain Object 3 Type
-  NORTH_ZONE Equip,     !- Internal Gain Object 3 Name
-  0.15;                 !- Fraction of Gains to Node 3
+  CentralUpper_Gain,          !- Name
+  People,                     !- Internal Gain Object 1 Type
+  NORTH_ZONE People,          !- Internal Gain Object 1 Name
+  0.15,                       !- Fraction of Gains to Node 1
+  Lights,                     !- Internal Gain Object 2 Type
+  NORTH_ZONE Lights,          !- Internal Gain Object 2 Name
+  0.15,                       !- Fraction of Gains to Node 2
+  ElectricEquipment,          !- Internal Gain Object 3 Type
+  NORTH_ZONE Equip,           !- Internal Gain Object 3 Name
+  0.15;                       !- Fraction of Gains to Node 3
 \end{lstlisting}
 
 \subsection{RoomAir:Node:AirflowNetwork:HVACEquipment}\label{roomairnodeairflownetworkhvacequipment}
@@ -1276,13 +1270,12 @@ The field specifies a fraction of return air from the particular equipment to th
 This object is extensible, so additional groups fields of these last four fields can be added to the end of this object.
 
 \begin{lstlisting}
-
 RoomAir:Node:AirflowNetwork:HVACEquipment,
-  CentralUpper_HVAC,        !- Name
-  ZoneHVAC:PackagedTerminalAirConditioner, !- ZoneHVAC or Air Terminal Equipment Object Type 1
-  NORTH_ZONE PTAC,       !- ZoneHVAC or Air Terminal Equipment Object Name 1
-  0.14,                   !- Fraction of Output or Supply Air from HVAC Equipment 1
-  0.14;                   !- Fraction of Input or Return Air to HVAC Equipment 1
+  CentralUpper_HVAC,          !- Name
+  ZoneHVAC:PackagedTerminalAirConditioner,  !- ZoneHVAC or Air Terminal Equipment Object Type 1
+  NORTH_ZONE PTAC,            !- ZoneHVAC or Air Terminal Equipment Object Name 1
+  0.14,                       !- Fraction of Output or Supply Air from HVAC Equipment 1
+  0.14;                       !- Fraction of Input or Return Air to HVAC Equipment 1
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-023}

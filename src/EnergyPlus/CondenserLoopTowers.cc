@@ -4588,7 +4588,8 @@ namespace CondenserLoopTowers {
                             if (std::abs(this->OutletWaterTemp - OWTLowerLimit) <= 0.01) {
                                 BypassFraction2 = bypassFraction;
                                 break;
-                            } else if (this->OutletWaterTemp < OWTLowerLimit) {
+                            }
+                            if (this->OutletWaterTemp < OWTLowerLimit) {
                                 // Set OutletWaterTemp = OWTLowerLimit, and use linear interpolation to calculate the bypassFraction
                                 BypassFraction2 = BypassFractionPrev - (BypassFractionPrev - bypassFraction) * (OutletWaterTempPrev - OWTLowerLimit) /
                                                                            (OutletWaterTempPrev - this->OutletWaterTemp);
@@ -4600,9 +4601,8 @@ namespace CondenserLoopTowers {
                                     this->OutletWaterTemp = OutletWaterTempPrev;
                                 }
                                 break;
-                            } else {
-                                BypassFraction2 = (TempSetPoint - this->OutletWaterTemp) / (this->InletWaterTemp - this->OutletWaterTemp);
                             }
+                            BypassFraction2 = (TempSetPoint - this->OutletWaterTemp) / (this->InletWaterTemp - this->OutletWaterTemp);
 
                             // Compare two BypassFraction to determine when to stop
                             if (std::abs(BypassFraction2 - bypassFraction) <= BypassFractionThreshold) {
@@ -5309,7 +5309,8 @@ namespace CondenserLoopTowers {
             CalcBasinHeaterPower(
                 state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
             return;
-        } else if (this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance || (MyLoad > HVAC::SmallLoad)) {
+        }
+        if (this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance || (MyLoad > HVAC::SmallLoad)) {
             // for multiple cells, we assume that it's a common basin
             CalcBasinHeaterPower(
                 state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
@@ -5711,24 +5712,22 @@ namespace CondenserLoopTowers {
                    this->Coeff[24] * Tr * Tr * FlowFactor * FlowFactor + this->Coeff[25] * Twb * Tr * Tr * FlowFactor * FlowFactor +
                    this->Coeff[26] * Twb * Twb * Tr * Tr * FlowFactor * FlowFactor;
 
-        } else { // empirical model is CoolTools format
-            //     the CoolTools model actually uses PctFanPower = AirFlowRatio^3 as an input to the model
-            Real64 PctAirFlow = pow_3(airFlowRatioLocal);
-            return this->Coeff[0] + this->Coeff[1] * PctAirFlow + this->Coeff[2] * PctAirFlow * PctAirFlow +
-                   this->Coeff[3] * PctAirFlow * PctAirFlow * PctAirFlow + this->Coeff[4] * PctWaterFlow +
-                   this->Coeff[5] * PctAirFlow * PctWaterFlow + this->Coeff[6] * PctAirFlow * PctAirFlow * PctWaterFlow +
-                   this->Coeff[7] * PctWaterFlow * PctWaterFlow + this->Coeff[8] * PctAirFlow * PctWaterFlow * PctWaterFlow +
-                   this->Coeff[9] * PctWaterFlow * PctWaterFlow * PctWaterFlow + this->Coeff[10] * Twb + this->Coeff[11] * PctAirFlow * Twb +
-                   this->Coeff[12] * PctAirFlow * PctAirFlow * Twb + this->Coeff[13] * PctWaterFlow * Twb +
-                   this->Coeff[14] * PctAirFlow * PctWaterFlow * Twb + this->Coeff[15] * PctWaterFlow * PctWaterFlow * Twb +
-                   this->Coeff[16] * Twb * Twb + this->Coeff[17] * PctAirFlow * Twb * Twb + this->Coeff[18] * PctWaterFlow * Twb * Twb +
-                   this->Coeff[19] * Twb * Twb * Twb + this->Coeff[20] * Tr + this->Coeff[21] * PctAirFlow * Tr +
-                   this->Coeff[22] * PctAirFlow * PctAirFlow * Tr + this->Coeff[23] * PctWaterFlow * Tr +
-                   this->Coeff[24] * PctAirFlow * PctWaterFlow * Tr + this->Coeff[25] * PctWaterFlow * PctWaterFlow * Tr +
-                   this->Coeff[26] * Twb * Tr + this->Coeff[27] * PctAirFlow * Twb * Tr + this->Coeff[28] * PctWaterFlow * Twb * Tr +
-                   this->Coeff[29] * Twb * Twb * Tr + this->Coeff[30] * Tr * Tr + this->Coeff[31] * PctAirFlow * Tr * Tr +
-                   this->Coeff[32] * PctWaterFlow * Tr * Tr + this->Coeff[33] * Twb * Tr * Tr + this->Coeff[34] * Tr * Tr * Tr;
-        }
+        } // empirical model is CoolTools format
+        //     the CoolTools model actually uses PctFanPower = AirFlowRatio^3 as an input to the model
+        Real64 PctAirFlow = pow_3(airFlowRatioLocal);
+        return this->Coeff[0] + this->Coeff[1] * PctAirFlow + this->Coeff[2] * PctAirFlow * PctAirFlow +
+               this->Coeff[3] * PctAirFlow * PctAirFlow * PctAirFlow + this->Coeff[4] * PctWaterFlow + this->Coeff[5] * PctAirFlow * PctWaterFlow +
+               this->Coeff[6] * PctAirFlow * PctAirFlow * PctWaterFlow + this->Coeff[7] * PctWaterFlow * PctWaterFlow +
+               this->Coeff[8] * PctAirFlow * PctWaterFlow * PctWaterFlow + this->Coeff[9] * PctWaterFlow * PctWaterFlow * PctWaterFlow +
+               this->Coeff[10] * Twb + this->Coeff[11] * PctAirFlow * Twb + this->Coeff[12] * PctAirFlow * PctAirFlow * Twb +
+               this->Coeff[13] * PctWaterFlow * Twb + this->Coeff[14] * PctAirFlow * PctWaterFlow * Twb +
+               this->Coeff[15] * PctWaterFlow * PctWaterFlow * Twb + this->Coeff[16] * Twb * Twb + this->Coeff[17] * PctAirFlow * Twb * Twb +
+               this->Coeff[18] * PctWaterFlow * Twb * Twb + this->Coeff[19] * Twb * Twb * Twb + this->Coeff[20] * Tr +
+               this->Coeff[21] * PctAirFlow * Tr + this->Coeff[22] * PctAirFlow * PctAirFlow * Tr + this->Coeff[23] * PctWaterFlow * Tr +
+               this->Coeff[24] * PctAirFlow * PctWaterFlow * Tr + this->Coeff[25] * PctWaterFlow * PctWaterFlow * Tr + this->Coeff[26] * Twb * Tr +
+               this->Coeff[27] * PctAirFlow * Twb * Tr + this->Coeff[28] * PctWaterFlow * Twb * Tr + this->Coeff[29] * Twb * Twb * Tr +
+               this->Coeff[30] * Tr * Tr + this->Coeff[31] * PctAirFlow * Tr * Tr + this->Coeff[32] * PctWaterFlow * Tr * Tr +
+               this->Coeff[33] * Twb * Tr * Tr + this->Coeff[34] * Tr * Tr * Tr;
     }
 
     void CoolingTower::checkModelBounds(EnergyPlusData &state,

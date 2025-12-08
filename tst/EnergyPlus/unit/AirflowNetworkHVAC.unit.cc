@@ -2190,7 +2190,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestPressureStat)
         state->afn->DisSysCompReliefAirData(1).OutletNode = 5;
     }
     state->afn->AirflowNetworkNodeData(3).AirLoopNum = 1;
-    state->afn->AirflowNetworkLinkageData(46).AirLoopNum = 1;
+    state->afn->AirflowNetworkLinkageData(29).AirLoopNum = 1;
 
     state->dataAirLoop->AirLoopAFNInfo.allocate(1);
     //    state->dataAirLoop->LoopOnOffFanPartLoadRatio.allocate(1);
@@ -5984,6 +5984,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
     }
 
     state->afn->AirflowNetworkNodeData(3).AirLoopNum = 1;
+    state->afn->AirflowNetworkLinkageData(33).AirLoopNum = 1;
+    state->afn->AirflowNetworkLinkageData(37).AirLoopNum = 1;
+    state->afn->AirflowNetworkLinkageData(54).AirLoopNum = 1;
     state->afn->AirflowNetworkLinkageData(51).AirLoopNum = 1;
     state->afn->AirflowNetworkLinkageData(52).AirLoopNum = 1;
     state->afn->AirflowNetworkLinkageData(66).AirLoopNum = 2;
@@ -6002,10 +6005,10 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
     state->afn->calculate_balance();
 
     // Check mass flow rate
-    EXPECT_NEAR(1.40, state->afn->AirflowNetworkLinkSimu(42).FLOW, 0.0001);
-    EXPECT_NEAR(0.52, state->afn->AirflowNetworkLinkSimu(67).FLOW, 0.0001);
-    EXPECT_NEAR(0.2795108, state->afn->AirflowNetworkLinkSimu(51).FLOW, 0.0001);
-    EXPECT_NEAR(0.1095108, state->afn->AirflowNetworkLinkSimu(66).FLOW, 0.0001);
+    EXPECT_NEAR(1.40, state->afn->AirflowNetworkLinkSimu(24).FLOW, 0.0001);
+    EXPECT_NEAR(0.52, state->afn->AirflowNetworkLinkSimu(29).FLOW, 0.0001);
+    EXPECT_NEAR(0.2795108, state->afn->AirflowNetworkLinkSimu(52).FLOW, 0.0001);
+    EXPECT_NEAR(0.1095108, state->afn->AirflowNetworkLinkSimu(33).FLOW, 0.0001);
     EXPECT_NEAR(0.1005046, state->afn->AirflowNetworkLinkSimu(15).FLOW, 0.0001);
 
     state->afn->AirflowNetworkFanActivated = false;
@@ -12080,8 +12083,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestIntraZoneLinkageZoneIndex)
 
     std::string const idf_objects = delimited_string({
 
-        "Version,",
-        "    9.5;                     !- Version Identifier",
+        "Version," + DataStringGlobals::MatchVersion + ";",
 
         "SimulationControl,",
         "    Yes,                     !- Do Zone Sizing Calculation",
@@ -16818,7 +16820,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
     EXPECT_NEAR(state->afn->DisSysCompDuctData(6).A, 0.214498, 0.0001);
     // Return trunk
     EXPECT_NEAR(state->afn->DisSysCompDuctData(3).hydraulicDiameter, 0.653543, 0.0001);
-    EXPECT_NEAR(state->afn->DisSysCompDuctData(3).A, 0.335458, 0.0001);
+    EXPECT_NEAR(state->afn->DisSysCompDuctData(3).A, 0.335459, 0.0001);
 }
 
 TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
@@ -16954,7 +16956,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_ZoneOrderTest)
 
     // Unit test for #10238
     std::string const idf_objects = delimited_string({
-        "  Version,23.2;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  GlobalGeometryRules,",
         "    LowerLeftCorner,         !- Starting Vertex Position",

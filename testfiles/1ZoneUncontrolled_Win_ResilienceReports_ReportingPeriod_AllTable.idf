@@ -89,7 +89,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -716,8 +716,8 @@
     VisualResilienceSummary; !- Report 5 Name
 
   Output:Table:ReportPeriod,
-    AllResilienceReportTimeWinter,  !- Name,
-    AllResilienceSummaries,  !- Report Name,
+    AllResilienceReportTimeWinter,  !- Name
+    AllResilienceSummaries,  !- Report Name
     ,                        !- Begin Year
     2,                       !- Begin Month
     1,                       !- Begin Day of Month

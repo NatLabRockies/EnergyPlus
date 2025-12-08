@@ -220,8 +220,8 @@ private:
             return cmp < 0;
         }
 
-        std::string objectType = "";
-        std::string objectName = "";
+        std::string objectType;
+        std::string objectName;
     };
 
     struct ObjectCache

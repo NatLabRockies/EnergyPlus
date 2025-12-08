@@ -1687,7 +1687,7 @@ namespace HeatRecovery {
             OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerCoolAirFlow, this->Name, "N/A");
         }
 
-        std::string_view loopName = "";
+        std::string_view loopName;
 
         if ((state.dataSize->CurSysNum > 0) && (state.dataSize->CurSysNum <= state.dataHVACGlobal->NumPrimaryAirSys)) {
             loopName = state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).Name;
@@ -3147,9 +3147,8 @@ namespace HeatRecovery {
 
         if (std::abs(b) < SMALL) {
             return a / sign(SMALL, b);
-        } else {
-            return a / b;
         }
+        return a / b;
     }
 
     Real64 CalculateEpsFromNTUandZ(EnergyPlusData &state,
@@ -4898,11 +4897,10 @@ namespace HeatRecovery {
         int const WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).SupInletNode;
-        } else {
-            ShowSevereError(state, format("GetSupplyInletNode: Could not find heat exchanger = \"{}\"", HXName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetSupplyInletNode: Could not find heat exchanger = \"{}\"", HXName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetSupplyOutletNode(EnergyPlusData &state,
@@ -4930,11 +4928,10 @@ namespace HeatRecovery {
         int const WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).SupOutletNode;
-        } else {
-            ShowSevereError(state, format("GetSupplyOutletNode: Could not find heat exchanger = \"{}\"", HXName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetSupplyOutletNode: Could not find heat exchanger = \"{}\"", HXName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetSecondaryInletNode(EnergyPlusData &state,
@@ -4962,11 +4959,10 @@ namespace HeatRecovery {
         int const WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).SecInletNode;
-        } else {
-            ShowSevereError(state, format("GetSecondaryInletNode: Could not find heat exchanger = \"{}\"", HXName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetSecondaryInletNode: Could not find heat exchanger = \"{}\"", HXName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetSecondaryOutletNode(EnergyPlusData &state,
@@ -4994,11 +4990,10 @@ namespace HeatRecovery {
         int const WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).SecOutletNode;
-        } else {
-            ShowSevereError(state, format("GetSecondaryOutletNode: Could not find heat exchanger = \"{}\"", HXName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetSecondaryOutletNode: Could not find heat exchanger = \"{}\"", HXName));
+        ErrorsFound = true;
+        return 0;
     }
 
     Real64 GetSupplyAirFlowRate(EnergyPlusData &state,
@@ -5026,12 +5021,11 @@ namespace HeatRecovery {
         int const WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).NomSupAirVolFlow;
-        } else {
-            ShowSevereError(state, format("GetSupplyAirFlowRate: Could not find heat exchanger = \"{}\"", HXName));
-            ShowContinueError(state, "... Supply Air Flow Rate returned as 0.");
-            ErrorsFound = true;
-            return 0.0;
         }
+        ShowSevereError(state, format("GetSupplyAirFlowRate: Could not find heat exchanger = \"{}\"", HXName));
+        ShowContinueError(state, "... Supply Air Flow Rate returned as 0.");
+        ErrorsFound = true;
+        return 0.0;
     }
 
     HVAC::HXType GetHeatExchangerObjectTypeNum(EnergyPlusData &state,
@@ -5060,11 +5054,10 @@ namespace HeatRecovery {
         WhichHX = Util::FindItemInList(HXName, state.dataHeatRecovery->ExchCond);
         if (WhichHX != 0) {
             return state.dataHeatRecovery->ExchCond(WhichHX).type;
-        } else {
-            ShowSevereError(state, format("GetHeatExchangerObjectTypeNum: Could not find heat exchanger = \"{}\"", HXName));
-            ErrorsFound = true;
-            return HVAC::HXType::Invalid;
         }
+        ShowSevereError(state, format("GetHeatExchangerObjectTypeNum: Could not find heat exchanger = \"{}\"", HXName));
+        ErrorsFound = true;
+        return HVAC::HXType::Invalid;
     }
 
 } // namespace HeatRecovery

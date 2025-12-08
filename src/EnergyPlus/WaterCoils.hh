@@ -156,7 +156,7 @@ namespace WaterCoils {
         // END calculated parameters for detailed flat fin coil
         // Design Input Variables to the Design Detailed Simple inputs model
         Real64 DesInletWaterTemp;   // Entering water temperature at Design(C)
-        Real64 DesAirVolFlowRate;   // Entering Air Volume Flow Rate Design( m3/s)
+        Real64 DesAirVolFlowRate;   // Entering Air Volume Flow Rate Design (m3/s)
         Real64 DesInletAirTemp;     // Entering air dry bulb temperature at Design(C)
         Real64 DesInletAirHumRat;   // Entering air humidity ratio at design conditions
         Real64 DesTotWaterCoilLoad; // Total heat transfer rate at Design(Watt)
@@ -243,8 +243,7 @@ namespace WaterCoils {
               CondensateTankSupplyARRID(0), CondensateVdot(0.0), CondensateVol(0.0), CoilPerfInpMeth(0), FaultyCoilFoulingFlag(false),
               FaultyCoilFoulingIndex(0), FaultyCoilFoulingFactor(0.0), OriginalUACoilVariable(0.0), OriginalUACoilExternal(0.0),
               OriginalUACoilInternal(0.0), DesiccantRegenerationCoil(false), DesiccantDehumNum(0), DesignWaterDeltaTemp(0.0),
-              UseDesignWaterDeltaTemp(false), ControllerName(""), ControllerIndex(0), reportCoilFinalSizes(true), AirLoopDOASFlag(false),
-              heatRecoveryCoil(false)
+              UseDesignWaterDeltaTemp(false), ControllerIndex(0), reportCoilFinalSizes(true), AirLoopDOASFlag(false), heatRecoveryCoil(false)
         {
         }
     };

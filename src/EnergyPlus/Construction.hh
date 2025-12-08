@@ -143,6 +143,7 @@ namespace Construction {
         // the Material structure; LayerPoint(i)=j->Material(j)%Name,etc
         bool IsUsed = false;              // Marked true when the construction is used
         bool IsUsedCTF = false;           // Mark true when the construction is used for a surface with CTF calculations
+        bool IsCondFD = false;            // Mark true when SurfaceProperty:HeatTransferAlgorithm:Construction is set to ConductionFiniteDifference
         Real64 InsideAbsorpVis = 0.0;     // Inside Layer visible absorptance of an opaque surface; not used for windows.
         Real64 OutsideAbsorpVis = 0.0;    // Outside Layer visible absorptance of an opaque surface; not used for windows.
         Real64 InsideAbsorpSolar = 0.0;   // Inside Layer solar absorptance of an opaque surface; not used for windows.

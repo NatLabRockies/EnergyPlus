@@ -2052,9 +2052,8 @@ namespace SteamCoils {
             ShowSevereError(state, format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
             return CoilControlType::Invalid;
-        } else {
-            return state.dataSteamCoils->SteamCoil(CoilIndex).TypeOfCoil;
         }
+        return state.dataSteamCoils->SteamCoil(CoilIndex).TypeOfCoil;
     }
 
     int GetSteamCoilControlNodeNum(EnergyPlusData &state,

@@ -1804,8 +1804,8 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
     // Get RPM value for reporting as output
     // RPM is calculated using pump affinity laws for rotation speed
     if (thisPumpPlant.UsePressureForPumpCalcs && thisPump.HasVFD) {
-        RotSpeed_Min = thisPump.VFD.minRPMSched ? thisPump.VFD.minRPMSched->getCurrentVal() : 0.0;
-        RotSpeed_Max = thisPump.VFD.maxRPMSched ? thisPump.VFD.maxRPMSched->getCurrentVal() : 0.0;
+        RotSpeed_Min = (thisPump.VFD.minRPMSched != nullptr) ? thisPump.VFD.minRPMSched->getCurrentVal() : 0.0;
+        RotSpeed_Max = (thisPump.VFD.maxRPMSched != nullptr) ? thisPump.VFD.maxRPMSched->getCurrentVal() : 0.0;
         if (thisPump.PumpMassFlowRateMaxRPM < DataBranchAirLoopPlant::MassFlowTolerance ||
             thisPump.PumpMassFlowRateMinRPM < DataBranchAirLoopPlant::MassFlowTolerance) {
             thisPump.VFD.PumpActualRPM = 0.0;

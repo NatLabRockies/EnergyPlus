@@ -70,10 +70,10 @@ int main(int argc, char *argv[])
     if (argc < 2) {
         std::cout << "Call this with a path to run EnergyPlus as the only argument" << std::endl;
         return EXIT_FAILURE;
-    } else {
-        status = RunEnergyPlus(*state, argv[1]);
-        stateDelete(reinterpret_cast<EnergyPlusState>(state));
     }
+    status = RunEnergyPlus(*state, argv[1]);
+    stateDelete(reinterpret_cast<EnergyPlusState>(state));
+
     if (!std::cin.good()) {
         std::cin.clear();
     }

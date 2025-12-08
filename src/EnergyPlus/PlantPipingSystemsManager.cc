@@ -1453,9 +1453,8 @@ namespace PlantPipingSystemsManager {
 
         if ((MaterialThickness <= 0.0) || (state.dataMaterial->materials(MaterialNum)->ROnly)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     void SiteGroundDomainNoMassMatError(EnergyPlusData &state,
@@ -2521,8 +2520,8 @@ namespace PlantPipingSystemsManager {
         Real64 const MaxLimit = this->SimControls.MaximumTemperatureLimit;
         Real64 const MinLimit = this->SimControls.MinimumTemperatureLimit;
 
-        for (std::size_t i = 0, e = this->Cells.size(); i < e; ++i) {
-            double const Temperature(this->Cells[i].Temperature);
+        for (const auto &Cell : this->Cells) {
+            double const Temperature(Cell.Temperature);
             if ((Temperature > MaxLimit) || (Temperature < MinLimit)) {
                 return true;
             }
@@ -3589,7 +3588,7 @@ namespace PlantPipingSystemsManager {
                     }
 
                     // if we were found on a pipe circuit, get some things for convenience
-                    if (circuitReference) {
+                    if (circuitReference != nullptr) {
                         if (circuitReference->HasInsulation) {
                             InsulationThickness = circuitReference->InsulationSize.thickness();
                         }
@@ -3939,13 +3938,15 @@ namespace PlantPipingSystemsManager {
 
         if (dir == RegionType::XDirection) {
             return this->Mesh.X.RegionMeshCount;
-        } else if (dir == RegionType::YDirection) {
-            return this->Mesh.Y.RegionMeshCount;
-        } else if (dir == RegionType::ZDirection) {
-            return this->Mesh.Z.RegionMeshCount;
-        } else {
-            return 1; // it's either a mesh region (X,Y,ZDirection), or it is some form of partition -- so 1
         }
+        if (dir == RegionType::YDirection) {
+            return this->Mesh.Y.RegionMeshCount;
+        }
+        if (dir == RegionType::ZDirection) {
+            return this->Mesh.Z.RegionMeshCount;
+        }
+        return 1; // it's either a mesh region (X,Y,ZDirection), or it is some form of partition -- so 1
+
         return 0;
     }
 
@@ -5579,7 +5580,7 @@ namespace PlantPipingSystemsManager {
                         for (auto &soilCell : cell.PipeCellData.Soil) {
                             soilCell.Properties = this->GroundProperties;
                         }
-                        if (thisCircuit) {
+                        if (thisCircuit != nullptr) {
                             cell.PipeCellData.Pipe.Properties = thisCircuit->PipeProperties;
                             if (thisCircuit->HasInsulation) {
                                 cell.PipeCellData.Insulation.Properties = thisCircuit->InsulationProperties;
@@ -5668,7 +5669,7 @@ namespace PlantPipingSystemsManager {
                         cell.PipeCellData.Pipe.Temperature = ThisCellTemp;
                         cell.PipeCellData.Pipe.Temperature_PrevIteration = ThisCellTemp;
                         cell.PipeCellData.Pipe.Temperature_PrevTimeStep = ThisCellTemp;
-                        if (thisCircuit) {
+                        if (thisCircuit != nullptr) {
                             if (thisCircuit->HasInsulation) {
                                 cell.PipeCellData.Insulation.Temperature = ThisCellTemp;
                                 cell.PipeCellData.Insulation.Temperature_PrevIteration = ThisCellTemp;

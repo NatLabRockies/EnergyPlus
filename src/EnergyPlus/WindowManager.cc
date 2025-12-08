@@ -2059,9 +2059,8 @@ namespace Window {
             if (xin <= x[i - 1]) {
                 if (i - 1 == 0) {
                     return y[0];
-                } else {
-                    return y[i - 2] + (y[i - 1] - y[i - 2]) * (xin - x[i - 2]) / (x[i - 1] - x[i - 2]);
                 }
+                return y[i - 2] + (y[i - 1] - y[i - 2]) * (xin - x[i - 2]) / (x[i - 1] - x[i - 2]);
             }
         }
 

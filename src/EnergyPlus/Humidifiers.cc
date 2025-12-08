@@ -1401,11 +1401,10 @@ namespace Humidifiers {
         int WhichHumidifier = Util::FindItemInList(HumidifierName, state.dataHumidifiers->Humidifier);
         if (WhichHumidifier != 0) {
             return state.dataHumidifiers->Humidifier(WhichHumidifier).AirOutNode;
-        } else {
-            ShowSevereError(state, format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
+        ErrorsFound = true;
+        return 0;
     }
 
 } // namespace Humidifiers

@@ -150,6 +150,7 @@ struct SystemVarsData : BaseGlobalStruct
     int iNominalTotSurfaces = 0;
     bool Threading = false;
     bool ciForceTimeStep = false;
+    bool BufferedErrFileEnvVar = false;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

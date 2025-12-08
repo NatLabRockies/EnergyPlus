@@ -88,7 +88,7 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
 
     std::string const idf_objects = delimited_string({
 
-        "  Version,9.3;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    NO,                      !- Do Zone Sizing Calculation",

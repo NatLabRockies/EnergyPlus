@@ -262,8 +262,7 @@ namespace BaseboardRadiator {
                 ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
                 auto &thisBaseboard = state.dataBaseboardRadiator->baseboards(ConvHWBaseboardNum);
-                thisBaseboard.FieldNames.allocate(NumNums);
-                thisBaseboard.FieldNames = s_ipsc->cNumericFieldNames;
+                thisBaseboard.FieldNames.assign(s_ipsc->cNumericFieldNames.begin(), s_ipsc->cNumericFieldNames.end());
 
                 // ErrorsFound will be set to True if problem was found, left untouched otherwise
                 VerifyUniqueBaseboardName(
@@ -607,7 +606,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = format("{} [W]", this->FieldNames(FieldNum));
+                    std::string const SizingString = format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
@@ -717,7 +716,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = format("{} [W]", this->FieldNames(FieldNum));
+                    std::string const SizingString = format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

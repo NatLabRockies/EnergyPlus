@@ -1446,9 +1446,8 @@ namespace UnitHeater {
                             // Calculate residual based on output calculation flag
                             if (state.dataUnitHeaters->QZnReq != 0.0) {
                                 return (QUnitOut - state.dataUnitHeaters->QZnReq) / state.dataUnitHeaters->QZnReq;
-                            } else {
-                                return 0.0;
                             }
+                            return 0.0;
                         };
 
                         // Tolerance is in fraction of load, MaxIter = 30, SolFalg = # of iterations or error as appropriate

@@ -77,7 +77,7 @@ namespace PCMStorage {
         Real64 FreezingTemp = 0.0;                       // C
         Real64 LatentHeat = 0.0;                         // J/kg (typically from PCMmat)
         Real64 SpecificHeat = 0.0;                       // J/kg-K (backup if needed)
-        Real64 Effectiveness = 0.9;                      // HX effectiveness (optional input)
+        static constexpr Real64 Effectiveness = 0.9;     // HX effectiveness (optional input)
 
         // Plant loop connection info
         EnergyPlus::PlantLocation sourcePlantLoc;

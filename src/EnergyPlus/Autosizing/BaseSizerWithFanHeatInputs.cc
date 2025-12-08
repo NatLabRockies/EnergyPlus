@@ -86,10 +86,9 @@ Real64 BaseSizerWithFanHeatInputs::calcFanDesHeatGain(Real64 const &airVolFlow)
     }
     if (this->fanCompModel) {
         return this->fanShaftPow + (this->motInPower - this->fanShaftPow) * this->motInAirFrac;
-    } else {
-        Real64 const fanPowerTot = (airVolFlow * this->deltaP) / this->totEff;
-        return this->motEff * fanPowerTot + (fanPowerTot - this->motEff * fanPowerTot) * this->motInAirFrac;
     }
+    Real64 const fanPowerTot = (airVolFlow * this->deltaP) / this->totEff;
+    return this->motEff * fanPowerTot + (fanPowerTot - this->motEff * fanPowerTot) * this->motInAirFrac;
 }
 
 void BaseSizerWithFanHeatInputs::getFanInputsForDesHeatGain(EnergyPlusData &state,

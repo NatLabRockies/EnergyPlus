@@ -13,7 +13,7 @@
   - Being able to tie together multiple simulation engines and keep E+ in sync (out of scope for this -- improved mechanization)
   - Being able to easily deploy and embed E+ into workflows (out of scope for this -- pip install)
   - Being able to create reusable functionality (I already did this one)
-  - Odd nature of hardwired discrete EMS integer values (that's here!) 
+  - Odd nature of hardwired discrete EMS integer values (that's here!)
   - Cannot actuate User-Defined Components with callback functions, only with Python-Plugins (that's here too!)
 
 ## Problem Statement

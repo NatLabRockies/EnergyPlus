@@ -604,30 +604,27 @@ Real64 GLHEVert::doubleIntegral(std::shared_ptr<GLHEVertSingle> const &bh_i, std
         }
 
         return (bh_i->dl_ii / 3.0) * sum_f;
+    }
+    Real64 sum_f = 0;
+    int i = 0;
+    int const lastIndex = static_cast<int>(bh_i->pointLocations_i.size() - 1u);
+    for (auto const &thisPoint : bh_i->pointLocations_i) {
 
-    } else {
+        Real64 f = integral(thisPoint, bh_j, currTime);
 
-        Real64 sum_f = 0;
-        int i = 0;
-        int const lastIndex = static_cast<int>(bh_i->pointLocations_i.size() - 1u);
-        for (auto const &thisPoint : bh_i->pointLocations_i) {
-
-            Real64 f = integral(thisPoint, bh_j, currTime);
-
-            // Integrate using Simpson's
-            if (i == 0 || i == lastIndex) {
-                sum_f += f;
-            } else if (isEven(i)) {
-                sum_f += 2 * f;
-            } else {
-                sum_f += 4 * f;
-            }
-
-            ++i;
+        // Integrate using Simpson's
+        if (i == 0 || i == lastIndex) {
+            sum_f += f;
+        } else if (isEven(i)) {
+            sum_f += 2 * f;
+        } else {
+            sum_f += 4 * f;
         }
 
-        return (bh_i->dl_i / 3.0) * sum_f;
+        ++i;
     }
+
+    return (bh_i->dl_i / 3.0) * sum_f;
 }
 
 void GLHEVert::calcLongTimestepGFunctions(EnergyPlusData &state) const

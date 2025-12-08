@@ -601,7 +601,7 @@ namespace InternalHeatGains {
                                     state.dataHeatBal->AnyThermalComfortAnkleDraftModel = true;
                                     usingThermalComfort = true;
 
-                                } else if (thermalComfortType == "") { // Blank input field--just ignore this
+                                } else if (thermalComfortType.empty()) { // Blank input field--just ignore this
 
                                 } else { // An invalid keyword was entered--warn but ignore
                                     if (Item1 == 1) {
@@ -2780,7 +2780,7 @@ namespace InternalHeatGains {
                 } else {
                     print(state.files.eio, "N/A,");
                 }
-                print(state.files.eio, "{},", people.workEffSched ? people.workEffSched->Name : "");
+                print(state.files.eio, "{},", (people.workEffSched != nullptr) ? people.workEffSched->Name : "");
 
                 print(state.files.eio, clothingTypeEIOStrings[(int)people.clothingType]);
 
@@ -2790,8 +2790,8 @@ namespace InternalHeatGains {
                     print(state.files.eio, "N/A,");
                 }
 
-                print(state.files.eio, "{},", people.clothingSched ? people.clothingSched->Name : "");
-                print(state.files.eio, "{},", people.airVelocitySched ? people.airVelocitySched->Name : "");
+                print(state.files.eio, "{},", (people.clothingSched != nullptr) ? people.clothingSched->Name : "");
+                print(state.files.eio, "{},", (people.airVelocitySched != nullptr) ? people.airVelocitySched->Name : "");
 
                 print(state.files.eio, "{},", yesNoNames[(int)people.Fanger]);
                 print(state.files.eio, "{},", yesNoNames[(int)people.Pierce]);
@@ -8715,9 +8715,8 @@ namespace InternalHeatGains {
                 (state.dataHeatBal->spaceIntGainDevices(spaceNum).device(DeviceNum).CompType == intGainType)) {
                 DeviceIndex = DeviceNum;
                 break;
-            } else {
-                DeviceIndex = -1;
             }
+            DeviceIndex = -1;
         }
         return DeviceIndex;
     }

@@ -467,7 +467,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRejection;
             } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForCooling;
-            } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
+            } else if (endUseCat == "HEATRECOVERYFORHEATING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForHeating;
             } else if (endUseCat == "LOOPTOLOOP") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::LoopToLoop;
@@ -2026,8 +2026,8 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
     auto &supplyCoilData = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate;
     std::vector<Real64> supplyFlowData;
     supplyFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
-    for (size_t i = 0; i < supplyFlowData.size(); ++i) {
-        supplyFlowData[i] = 0.0;
+    for (double &i : supplyFlowData) {
+        i = 0.0;
     }
     if (supplyCompSize > 0) {
         for (size_t comp = 0; comp < supplyCoilData.size(); ++comp) {
@@ -2054,8 +2054,8 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
         // if the supply side of the HX contains a TES system then copy demand side coil data to supply side so TES can size on the whole load
         std::vector<Real64> demandFlowData;
         demandFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
-        for (size_t i = 0; i < demandFlowData.size(); ++i) {
-            demandFlowData[i] = 0.0;
+        for (double &i : demandFlowData) {
+            i = 0.0;
         }
         if (demandCompSize > 0) {
             for (size_t comp = 0; comp < demandCoilData.size(); ++comp) {

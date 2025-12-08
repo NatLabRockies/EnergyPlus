@@ -571,41 +571,40 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         this->LoadSideWaterOutletTemp = this->LoadSideWaterInletTemp;
         this->SourceSideWaterOutletTemp = this->SourceSideWaterInletTemp;
         return; // if heat pump is not running return without simulation, power, Q already zeroed in init
-    } else {    // the heat pump must run, request design flow
+    } // the heat pump must run, request design flow
 
-        this->LoadSideWaterMassFlowRate = this->LoadSideDesignMassFlow;
+    this->LoadSideWaterMassFlowRate = this->LoadSideDesignMassFlow;
+    PlantUtilities::SetComponentFlowRate(
+        state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
+
+    this->SourceSideWaterMassFlowRate = this->SourceSideDesignMassFlow;
+    PlantUtilities::SetComponentFlowRate(
+        state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
+    // if there's no flow, turn the "heat pump off"
+    if (this->LoadSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance ||
+        this->SourceSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
+        this->LoadSideWaterMassFlowRate = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
-
-        this->SourceSideWaterMassFlowRate = this->SourceSideDesignMassFlow;
+        this->SourceSideWaterMassFlowRate = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
-        // if there's no flow, turn the "heat pump off"
-        if (this->LoadSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance ||
-            this->SourceSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
-            this->LoadSideWaterMassFlowRate = 0.0;
-            PlantUtilities::SetComponentFlowRate(
-                state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
-            this->SourceSideWaterMassFlowRate = 0.0;
-            PlantUtilities::SetComponentFlowRate(
-                state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
-            PlantUtilities::PullCompInterconnectTrigger(state,
-                                                        this->LoadPlantLoc,
-                                                        this->CondMassFlowIndex,
-                                                        this->SourcePlantLoc,
-                                                        DataPlant::CriteriaType::MassFlowRate,
-                                                        this->SourceSideWaterMassFlowRate);
-            this->LoadSideWaterOutletTemp = this->LoadSideWaterInletTemp;
-            this->SourceSideWaterOutletTemp = this->SourceSideWaterInletTemp;
-            return;
-        }
         PlantUtilities::PullCompInterconnectTrigger(state,
                                                     this->LoadPlantLoc,
                                                     this->CondMassFlowIndex,
                                                     this->SourcePlantLoc,
                                                     DataPlant::CriteriaType::MassFlowRate,
                                                     this->SourceSideWaterMassFlowRate);
+        this->LoadSideWaterOutletTemp = this->LoadSideWaterInletTemp;
+        this->SourceSideWaterOutletTemp = this->SourceSideWaterInletTemp;
+        return;
     }
+    PlantUtilities::PullCompInterconnectTrigger(state,
+                                                this->LoadPlantLoc,
+                                                this->CondMassFlowIndex,
+                                                this->SourcePlantLoc,
+                                                DataPlant::CriteriaType::MassFlowRate,
+                                                this->SourceSideWaterMassFlowRate);
 
     //***********BEGIN CALCULATION****************
     // initialize the source and load side heat transfer rates for the simulation

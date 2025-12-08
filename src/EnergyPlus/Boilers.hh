@@ -50,9 +50,6 @@
 
 #include <array>
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
@@ -191,7 +188,7 @@ namespace Boilers {
 struct BoilersData : BaseGlobalStruct
 {
     bool getBoilerInputFlag = true;
-    Array1D<Boilers::BoilerSpecs> Boiler;
+    std::vector<Boilers::BoilerSpecs> Boiler;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

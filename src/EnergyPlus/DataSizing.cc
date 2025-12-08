@@ -478,7 +478,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     // Reset to avoid chance that second zone equipment will size using these variables set by first zone equipment to be sized
     if (curZoneEqNum > 0) {
 
-        if (state.dataSize->ZoneEqSizing.size() == 0) {
+        if (state.dataSize->ZoneEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -505,7 +505,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
 
     if (curSysNum > 0) {
 
-        if (state.dataSize->UnitarySysEqSizing.size() == 0) {
+        if (state.dataSize->UnitarySysEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -652,23 +652,21 @@ calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
         // This is a simple DesignSpecification:OutdoorAir
         return thisDSOA.calcOAFlowRate(
             state, ActualZoneNum, UseOccSchFlag, UseMinOASchFlag, PerPersonNotSet, MaxOAVolFlowFlag, spaceNum, calcIAQMethods);
-    } else {
-        // This is a DesignSpecification:OutdoorAir:SpaceList
-        for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
-            if ((spaceNum == 0) || ((spaceNum > 0) && (spaceNum == thisDSOA.dsoaSpaceIndexes(dsoaCount)))) {
-                totOAFlowRate += state.dataSize->OARequirements(thisDSOA.dsoaIndexes(dsoaCount))
-                                     .calcOAFlowRate(state,
-                                                     ActualZoneNum,
-                                                     UseOccSchFlag,
-                                                     UseMinOASchFlag,
-                                                     PerPersonNotSet,
-                                                     MaxOAVolFlowFlag,
-                                                     thisDSOA.dsoaSpaceIndexes(dsoaCount),
-                                                     calcIAQMethods);
-            }
+    } // This is a DesignSpecification:OutdoorAir:SpaceList
+    for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
+        if ((spaceNum == 0) || ((spaceNum > 0) && (spaceNum == thisDSOA.dsoaSpaceIndexes(dsoaCount)))) {
+            totOAFlowRate += state.dataSize->OARequirements(thisDSOA.dsoaIndexes(dsoaCount))
+                                 .calcOAFlowRate(state,
+                                                 ActualZoneNum,
+                                                 UseOccSchFlag,
+                                                 UseMinOASchFlag,
+                                                 PerPersonNotSet,
+                                                 MaxOAVolFlowFlag,
+                                                 thisDSOA.dsoaSpaceIndexes(dsoaCount),
+                                                 calcIAQMethods);
         }
-        return totOAFlowRate;
     }
+    return totOAFlowRate;
 }
 
 void setHeatPumpSize(EnergyPlusData &state, Real64 &coolingCap, Real64 &heatingCap, Real64 const sizingRatio)

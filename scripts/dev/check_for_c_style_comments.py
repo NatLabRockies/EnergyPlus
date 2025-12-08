@@ -53,31 +53,65 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from json import dumps
+from collections import Counter
 from pathlib import Path
-from sys import exit
 
-dirs = [
-    Path(__file__).resolve().parent.parent.parent / 'src' / 'EnergyPlus',
-    Path(__file__).resolve().parent.parent.parent / 'tst' / 'EnergyPlus' / 'unit'
-]
-total_c_comments = 0
-for d in dirs:
-    for p in d.glob("**/*"):
-        if p.is_file() and str(p.name).endswith('.cc') or str(p.name).endswith('.hh'):
-            file_lines = p.open(encoding='utf-8', errors='ignore').readlines()
-            for line_number, li in enumerate(file_lines, start=1):
-                remaining_line = li.strip()
-                if '//' in li:
-                    index = li.index('//')
-                    remaining_line = li[:index]
-                if '/*' in remaining_line:
-                    total_c_comments += 1
-                    print(dumps({
-                        "tool": "check_for_c_style_comments",
-                        "filename": str(p.relative_to(d)), "file": str(p.relative_to(d)),
-                        "line": line_number, "messagetype": "error", "message": "Found C Style Comment in Codebase"
-                    }))
+from base_hook import (
+    SRC_DIR,
+    TST_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
 
-if total_c_comments > 0:
-    exit(1)
+DIRS_TO_SEARCH = [SRC_DIR, TST_DIR / "unit"]
+EXTENSIONS = {".hh", ".cc"}
+
+
+def check_for_c_style_comment(filepath: Path) -> list[LogMessage]:
+    """Check a single file for C style comments."""
+    lines = filepath.read_text(encoding="utf-8").splitlines()[75:82]
+
+    log_messages: list[LogMessage] = []
+
+    for line_num, line in enumerate(lines, start=1):
+        line = line.strip().split("//")[0]  # Remove single line comments
+        if "/*" in line:
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_c_style_comments",
+                    filepath=filepath,
+                    line_number=line_num,
+                    line=line,
+                    message="Found C Style Comment in Codebase",
+                )
+            )
+    return log_messages
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="Check for C style comments")
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and any(f.is_relative_to(d) for d in DIRS_TO_SEARCH)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = []
+        for d in DIRS_TO_SEARCH:
+            files += collect_files(base_dir=d, extensions=EXTENSIONS, recursive=True, dirs_to_skip=[])
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    errors_list_of_lists = parallel_apply(func=check_for_c_style_comment, filepaths=files)
+    log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

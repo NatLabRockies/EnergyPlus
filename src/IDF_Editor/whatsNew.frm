@@ -1,12 +1,12 @@
 VERSION 5.00
-Begin VB.Form frmWhatsNew 
+Begin VB.Form frmWhatsNew
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "New Features of IDF Editor"
    ClientHeight    =   8280
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   10905
-   BeginProperty Font 
+   BeginProperty Font
       Name            =   "MS Sans Serif"
       Size            =   9.75
       Charset         =   0
@@ -22,8 +22,8 @@ Begin VB.Form frmWhatsNew
    ScaleWidth      =   10905
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.TextBox txtWhatsNew 
-      BeginProperty Font 
+   Begin VB.TextBox txtWhatsNew
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   9.75
          Charset         =   0
@@ -41,9 +41,9 @@ Begin VB.Form frmWhatsNew
       Top             =   120
       Width           =   10695
    End
-   Begin VB.CommandButton cmdClose 
+   Begin VB.CommandButton cmdClose
       Caption         =   "Close"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -58,9 +58,9 @@ Begin VB.Form frmWhatsNew
       Top             =   7800
       Width           =   1455
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "This dialog box is shown at start up one time and then can be found under HELP .. WHATS NEW"
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -100,7 +100,7 @@ t = t & "New Features of IDF Editor Version 1.49" & vbCrLf
 t = t & "-------------------------------------------------------------------------------" & vbCrLf
 t = t & "In EDIT .. VALIDITY CHECK now have an option to IGNORE MACROS which will not perform validity checking on fields that contain characters " _
       & "typically used for macros:  # [ @ $ = " & vbCrLf & vbCrLf
-      
+
 t = t & "Allow multiple objects to be duplicated or deleted at the same time when multiple columns are selected." & vbCrLf & vbCrLf
 
 t = t & "New Features of IDF Editor Version 1.48" & vbCrLf
@@ -121,7 +121,7 @@ t = t & "New Features of IDF Editor Version 1.42" & vbCrLf
 t = t & "-------------------------------------------------------------------------------" & vbCrLf
 t = t & "Added new menu item VIEW .. USE NODE NAME EDITOR to enable or disable the Edit or Select Node Name dialog box. When it is " _
       & "disabled the node name can be edited directly in the cell." & vbCrLf & vbCrLf
-      
+
 t = t & "New Features of IDF Editor Version 1.40" & vbCrLf
 t = t & "-------------------------------------------------------------------------------" & vbCrLf
 t = t & "Added the new EDIT .. SEARCH AND REPLACE dialog to search and replace values in a file. This function is especially useful when changing " _
@@ -159,7 +159,7 @@ t = t & "An alternative method to quickly navigate the CLASS LIST is to use VIEW
       & "faster." & vbCrLf & vbCrLf
 t = t & "To change the order that objects are saved in the IDF file choose FILE .. SAVE OPTIONS. This option allows " _
       & "the original order of objects in a file to be preserved." & vbCrLf & vbCrLf
-      
+
 
 
 

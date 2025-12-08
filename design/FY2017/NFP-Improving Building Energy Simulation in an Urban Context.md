@@ -11,17 +11,17 @@ Improving Building Energy Simulation in an Urban Context
 **Revision 3: July 26, 2017**
 
 
-# Justification for New Feature 
+# Justification for New Feature
 
-Building energy efficiency is getting greater attention in urban planning and city GHG emissions reduction. Energy performance in buildings affects the development of energy standards and policies that address energy-related issues at urban scales. In an urban context, the urban climate and microclimate can strongly affect the building energy demand. The urban microclimate is determined by (i) local air velocity, temperature and humidity; (ii) solar irradiation and specular and diffuse reflections; (iii) surface temperatures of building and ground, and the respective long-wave radiation exchange, also with the sky. As more urban context data related to the basic building information, mutual shading, and microclimate are collected and synthesized in the GIS platforms, allowing the community to city scale building energy modeling and simulation, the simulation engine itself also requires enhancements in terms of accuracy and performance to suit simulations in an urban context. 
+Building energy efficiency is getting greater attention in urban planning and city GHG emissions reduction. Energy performance in buildings affects the development of energy standards and policies that address energy-related issues at urban scales. In an urban context, the urban climate and microclimate can strongly affect the building energy demand. The urban microclimate is determined by (i) local air velocity, temperature and humidity; (ii) solar irradiation and specular and diffuse reflections; (iii) surface temperatures of building and ground, and the respective long-wave radiation exchange, also with the sky. As more urban context data related to the basic building information, mutual shading, and microclimate are collected and synthesized in the GIS platforms, allowing the community to city scale building energy modeling and simulation, the simulation engine itself also requires enhancements in terms of accuracy and performance to suit simulations in an urban context.
 
-We propose enhancements in several areas to improve the use of EnergyPlus for urban scale building energy modeling and simulation, including (1) external shading, (2) heat exchange between buildings, (3) urban micro-climate. The proposed enhancement intends to enable external links of EnergyPlus simulations to support importing local environmental data from external calculations.  
+We propose enhancements in several areas to improve the use of EnergyPlus for urban scale building energy modeling and simulation, including (1) external shading, (2) heat exchange between buildings, (3) urban micro-climate. The proposed enhancement intends to enable external links of EnergyPlus simulations to support importing local environmental data from external calculations.
 
 # Team Discussion so far
 
 The EnergyPlus development team has provided constructive comments on methodology and implementation details over several rounds of discussions, as summarized in the Email Comments. A conference call was conducted on July 13, 2017, to discuss the NFP focusing on the design of IDD objects and consistency of implementation.
 
-# Overview 
+# Overview
 
 Urban energy modeling is an emerging field that seeks to model a group of buildings and the surrounding urban context. As justified, we propose this new feature to focus on three tasks.
 
@@ -29,11 +29,11 @@ Urban energy modeling is an emerging field that seeks to model a group of buildi
 
 Solar shading affects energy use in a building by reducing the solar heat gains received by opaque surfaces or the transmitted and absorbed solar radiation of windows. External shading also influences daylighting level in a room and the view to the exterior. Accurate calculation of solar shading on building exterior surfaces is of great importance in whole building energy simulation. Modeling a building in the urban context may involve many shading surfaces from adjacent buildings for a target building, which can significantly slow down EnergyPlus simulations due to the currently implemented shading calculation algorithms. Furthermore, for urban building energy simulation which involves many buildings, there can be more efficient ways to do the shading calculations than the current way of doing shading calculations for every building separately in EnergyPlus. There is also the potential of using GPU and other parallel computing techniques for building shading calculations.
 
-Various simulation tools, such as Radiance and Daysim, employing state-of-the-art ray-tracing simulation techniques, can be used to pre-calculate the shading fractions for each exterior building surface. However, in the current implementation, EnergyPlus doesn’t allow overriding exterior shading calculations with external data either by EMS or co-simulation interface. Considering a large amount of information and the complexity of calculating the dynamic shading in EnergyPlus, allowing this external input would enable a huge potential to speed up EnergyPlus in urban-scale simulations. Another benefit is to enable reusing the shading results for parametric runs which usually do not change external shading. Adding this feature to EnergyPlus would also allow OpenStudio to run radiance simulations before the EnergyPlus simulation and to reuse the radiance calculations for shading. 
+Various simulation tools, such as Radiance and Daysim, employing state-of-the-art ray-tracing simulation techniques, can be used to pre-calculate the shading fractions for each exterior building surface. However, in the current implementation, EnergyPlus doesn’t allow overriding exterior shading calculations with external data either by EMS or co-simulation interface. Considering a large amount of information and the complexity of calculating the dynamic shading in EnergyPlus, allowing this external input would enable a huge potential to speed up EnergyPlus in urban-scale simulations. Another benefit is to enable reusing the shading results for parametric runs which usually do not change external shading. Adding this feature to EnergyPlus would also allow OpenStudio to run radiance simulations before the EnergyPlus simulation and to reuse the radiance calculations for shading.
 
 ### Task 2 - Modeling Long-wave Radiant Heat Exchange between Buildings
 
-Heat exchange between buildings is one key factor in understanding energy flows at the urban scale, including the long-wave radiant heat exchange between exterior surfaces of buildings, and between exterior surfaces of buildings and shades. However, these heat exchanges are over-simplified in EnergyPlus, causing potential under or over-estimate of exterior surface temperature. In EnergyPlus, the long-wave radiant heat exchange for a surface is calculated through the summation of the long-wave radiation gain from the ground, sky, and air (Figure 1). A major assumption of this approach is that the modeled building's surfaces and those of adjacent buildings are at a uniform temperature and the long-wave radiant exchange is negligible – an oversimplification in an urban context where urban canyon effect can be significant. 
+Heat exchange between buildings is one key factor in understanding energy flows at the urban scale, including the long-wave radiant heat exchange between exterior surfaces of buildings, and between exterior surfaces of buildings and shades. However, these heat exchanges are over-simplified in EnergyPlus, causing potential under or over-estimate of exterior surface temperature. In EnergyPlus, the long-wave radiant heat exchange for a surface is calculated through the summation of the long-wave radiation gain from the ground, sky, and air (Figure 1). A major assumption of this approach is that the modeled building's surfaces and those of adjacent buildings are at a uniform temperature and the long-wave radiant exchange is negligible – an oversimplification in an urban context where urban canyon effect can be significant.
 
 ![LWR](EnergyPlusCurrentLWR.png)
 
@@ -45,7 +45,7 @@ Computational Fluid Dynamic (CFD) tools, simulating urban micro-climate, would n
 
 ### Task 3 - Enhancement for Simulation using Urban Microclimate Conditions
 
-The microclimate around a building, established through the interactions with other buildings or the natural environment, is a significant factor influencing building energy consumption. On the one hand, the energy consumption of urban buildings is affected by the surrounding microclimate which differs from standard weather data, and the mutual obstructions between buildings which decrease sunlight and wind potentials for internal solar gains and passive cooling. On the other hand, the building construction itself affects both outdoor and indoor microclimate. As Figure 2 shows, the building model in EnergyPlus serves as the boundary condition in the urban atmosphere model, and the building exchanges mass (air flow) and heat with the surrounding environment, including exhaust air from fans, DX condensing units, cooling towers, boilers, etc. 
+The microclimate around a building, established through the interactions with other buildings or the natural environment, is a significant factor influencing building energy consumption. On the one hand, the energy consumption of urban buildings is affected by the surrounding microclimate which differs from standard weather data, and the mutual obstructions between buildings which decrease sunlight and wind potentials for internal solar gains and passive cooling. On the other hand, the building construction itself affects both outdoor and indoor microclimate. As Figure 2 shows, the building model in EnergyPlus serves as the boundary condition in the urban atmosphere model, and the building exchanges mass (air flow) and heat with the surrounding environment, including exhaust air from fans, DX condensing units, cooling towers, boilers, etc.
 
 ![EplusUrban](EnergyPlusUrbanClimate.png)
 
@@ -53,9 +53,9 @@ The microclimate around a building, established through the interactions with ot
 
 The current implementation of EnergyPlus assumes a default vertical temperature gradient. It does not provide a direct link to allow data exchange with urban microclimate models to override local environmental data at the zone and surface levels, such as the outdoor air temperature, humidity, wind speed and direction. We propose to modify the existing implementation of External Node in EnergyPlus to allow inputs and outputs of these local environmental variables. This would enable the co-simulation of the interaction between buildings and the urban micro-climate using Schedule inputs or EMS actuators.
 
-Please note this new feature proposal enables the local outdoor air conditions used for the calculations of heat and mass balances at the exterior surfaces and zones level, as well as for the air system calculations (e.g., outdoor air entering the AHUs). 
+Please note this new feature proposal enables the local outdoor air conditions used for the calculations of heat and mass balances at the exterior surfaces and zones level, as well as for the air system calculations (e.g., outdoor air entering the AHUs).
 
-# Approaches 
+# Approaches
 
 Throughout the EnergyPlus implementation, we could extend external links to support importing local environmental data from external calculations at surface and zone levels. To allow this, we would add a new surface property object **SurfaceProperty:LocalEnvironment** to the EnergyPlus IDD file, which links to a surface object **Surface:Detailed**. We would also add a zone property **ZoneProperty:LocalEnvironment** which links to a zone object. The surface and zone property objects can be defined when there’s a need to calculate local environmental data externally and import them into the simulation to override existing environmental data, including external solar shading fractions, local air velocity, temperature and humidity, and surrounding surface temperatures and view factors.
 
@@ -82,7 +82,7 @@ Throughout the EnergyPlus implementation, we could extend external links to supp
 	       \type object-list
 	       \object-list OutdoorAirNodeNames
 	       \note Enter the name of an OutdoorAir:Node object
-	
+
 	ZoneProperty:LocalEnvironment
 	   A1, \field Name
 	       \required-field
@@ -112,7 +112,7 @@ The third new field A6, **External Shading Results File Name**, specifies the na
 It should be noted that the surface external shading fraction (*SunlitFrac*) we are overwriting accounts for the shading of both direct and sky diffuse solar radiation caused by all exterior shadowing surfaces. In this case, shadow patterns on exterior surfaces caused by detached shading, side-fins, overhangs, and exterior surfaces of all zones are overwritten. The interior shading devices, such as window shades and blinds, should be further calculated and applied after the importing.
 
 	Modified existing IDD object:
-	
+
 	ShadowCalculation,
 	       \unique-object
 	       \memo This object is used to control details of the solar, shading, and daylighting models
@@ -144,9 +144,9 @@ As the **SurfaceProperty:LocalEnvironment** object points to **Schedule:File** o
 
 ### (2)	Surrounding surface properties for long-wave radiation calculation between buildings
 
-Apart from long-wave radiation from sky and ground currently considered in EnergyPlus, for building energy modeling at a community or city scale with multiple buildings, the long-wave radiation from other building surfaces should also be considered (Figure 3). 
+Apart from long-wave radiation from sky and ground currently considered in EnergyPlus, for building energy modeling at a community or city scale with multiple buildings, the long-wave radiation from other building surfaces should also be considered (Figure 3).
 
-![ProposedLWR](EnergyPlusProposedLWR.png) 
+![ProposedLWR](EnergyPlusProposedLWR.png)
 
 ***Figure 3 Long-wave radiation calculation considering surrounding surfaces***
 
@@ -176,10 +176,10 @@ F<sub>g</sub>=View factor of the ground,
 
 Note that $$F_{sky}+ F_{s1}+⋯+ F_{sn}+ F_{g}=1$$
 
-However, to avoid the complexity of iteratively calculating the long-wave radiation between building surfaces, we would simplify the case by using the pre-calculated surface temperature at the last time step for the current time step surface heat balance calculation. Considering the temperature of building exterior surfaces would not change too much between the last and current time steps, this simplification may sacrifice accuracy to a certain degree but significantly improve the computing performance. To enable this, in *Energy+.idd*, we would add an object **SurfaceProperty:SurroundingSurfaces** to define the properties of the surrounding surfaces. The property object declares a list of single surrounding surfaces which has a name, a field of view factor, and another field **Temperature Schedule Name** referencing a schedule containing the temperature of the surrounding surface, which can be overwritten at each time step in EnergyPlus run time through co-simulation. View factors are assumed to be constant values. View factors are assumed to be constant values. 
+However, to avoid the complexity of iteratively calculating the long-wave radiation between building surfaces, we would simplify the case by using the pre-calculated surface temperature at the last time step for the current time step surface heat balance calculation. Considering the temperature of building exterior surfaces would not change too much between the last and current time steps, this simplification may sacrifice accuracy to a certain degree but significantly improve the computing performance. To enable this, in *Energy+.idd*, we would add an object **SurfaceProperty:SurroundingSurfaces** to define the properties of the surrounding surfaces. The property object declares a list of single surrounding surfaces which has a name, a field of view factor, and another field **Temperature Schedule Name** referencing a schedule containing the temperature of the surrounding surface, which can be overwritten at each time step in EnergyPlus run time through co-simulation. View factors are assumed to be constant values. View factors are assumed to be constant values.
 
 We will add an EMS actuator for the surrounding surface temperature to enable overwriting in run time.
-	
+
 	New IDD objects proposed:
 
 	SurfaceProperty:SurroundingSurfaces
@@ -210,9 +210,9 @@ We will add an EMS actuator for the surrounding surface temperature to enable ov
 	       \object-list ScheduleNames
 	       \note Schedule values are real numbers, -100.0 to 100.0, units C
 	       \note optional
-	   A2, \field Surrounding Surface 1 Name   
+	   A2, \field Surrounding Surface 1 Name
 	       \required-field
-	       \type alpha 
+	       \type alpha
 	   N5, \field Surrounding Surface 1 View Factor
 	       \required-field
 	       \minimum 0.0
@@ -223,11 +223,11 @@ We will add an EMS actuator for the surrounding surface temperature to enable ov
 	       \type object-list
 	       \object-list ScheduleNames
 	       \note Schedule values are real numbers, -100.0 to 100.0, units C
-		… 
+		…
 
 ### (3)	Local Outdoor Air Node for co-simulation with urban micro-climate
 
-We propose to modify the current outdoor air node object **OutdoorAir:Node** to EnergyPlus IDD to enable the optional schedule inputs of local ambient air conditions, including dry-bulb temperature, wet-bulb temperature, wind velocity, and wind direction. We also propose to make the schedule variables as new EMS actuators that can be set up for overriding the environmental variables. 
+We propose to modify the current outdoor air node object **OutdoorAir:Node** to EnergyPlus IDD to enable the optional schedule inputs of local ambient air conditions, including dry-bulb temperature, wet-bulb temperature, wind velocity, and wind direction. We also propose to make the schedule variables as new EMS actuators that can be set up for overriding the environmental variables.
 
 New IDD object proposed:
 
@@ -251,7 +251,7 @@ New IDD object proposed:
 	    A2 , \field Drybulb Temperature Schedule Name
 	         \type object-list
 	         \object-list ScheduleNames
-	         \note Schedule values are real numbers, -100.0 to 100.0, units C 
+	         \note Schedule values are real numbers, -100.0 to 100.0, units C
 	    A3 , \field Wetbulb Schedule Name
 	         \type object-list
 	         \object-list ScheduleNames
@@ -260,7 +260,7 @@ New IDD object proposed:
 	         \type object-list
 	         \object-list ScheduleNames
 	         \note Schedule values are real numbers, 0.0 to 40.0, units m/s
-	    A5 ; \field Wind Direction Schedule Name 
+	    A5 ; \field Wind Direction Schedule Name
 	         \type object-list
 	         \object-list ScheduleNames
 	         \note Schedule values are real numbers, 0.0 to 360.0, units degree
@@ -268,19 +268,19 @@ New IDD object proposed:
 Since each surface and zone property can be linked to a local outdoor air node, this implementation enables the use of local ambient air conditions at arbitrary nodes or coordinates for co-simulation (Figure 4).
 
 
-![LocalNode](EnergyPlusLocalAirNode.png) 
+![LocalNode](EnergyPlusLocalAirNode.png)
 
 ***Figure 4 Local ambient air conditions at zone and surface level***
 
-The overwritten schedules would be used in the EnergyPlus calculations for: 
+The overwritten schedules would be used in the EnergyPlus calculations for:
 
 #### (i)	Convection coefficients used in the exterior surface heat balance
 
-Currently, the subroutine to calculate exterior surface heat balance determines the outside convection coefficient for a particular surface based on surface properties, surface level outdoor dry-bulb temperature, humidity ratio and wind speed. However, the current implementation still uses the global wind direction. We propose to add the Surface Outdoor Air Wind Direction [degree] as a new report variable at the surface level and to use the local wind direction for calculation. If the user declares a local outdoor air node to overwrite the surface level environmental data, the convection coefficients would be calculated based on the local outdoor air node data accordingly. 
+Currently, the subroutine to calculate exterior surface heat balance determines the outside convection coefficient for a particular surface based on surface properties, surface level outdoor dry-bulb temperature, humidity ratio and wind speed. However, the current implementation still uses the global wind direction. We propose to add the Surface Outdoor Air Wind Direction [degree] as a new report variable at the surface level and to use the local wind direction for calculation. If the user declares a local outdoor air node to overwrite the surface level environmental data, the convection coefficients would be calculated based on the local outdoor air node data accordingly.
 
 #### (ii)	Zone air infiltration and simple ventilation
 
-The zone infiltration and ventilation are currently calculated within the subroutine which calculates the air component of the heat balance at the zone level. The current implementation uses global barometric pressure, air temperature, and humidity ratio to calculate zone infiltration, and uses global outdoor air temperature, humidity ratio, enthalpy, wind speed and direction to calculate zone ventilation. We propose to use the zone level environmental variables in these subroutines. If the user declares a local outdoor air node to overwrite zone level environmental data, the corresponding global variables used in the subroutines would be overwritten accordingly. 
+The zone infiltration and ventilation are currently calculated within the subroutine which calculates the air component of the heat balance at the zone level. The current implementation uses global barometric pressure, air temperature, and humidity ratio to calculate zone infiltration, and uses global outdoor air temperature, humidity ratio, enthalpy, wind speed and direction to calculate zone ventilation. We propose to use the zone level environmental variables in these subroutines. If the user declares a local outdoor air node to overwrite zone level environmental data, the corresponding global variables used in the subroutines would be overwritten accordingly.
 
 #### (iii)	External air nodes used in the AirFlowNetwork
 
@@ -307,9 +307,9 @@ During initialization, the global outdoor wind pressure is either explicitly def
 
 Moreover, EMS actuators have already been set for the listed five variables in the current implementation:
 
-	Surface,Outdoor Air Dryblub Temperature [C] 
-	Surface,Outdoor Air Humidity Ratio [kgWater/kgDryAir] 
-	Surface,Outdoor Air Wind Speed [m/s] 
+	Surface,Outdoor Air Dryblub Temperature [C]
+	Surface,Outdoor Air Humidity Ratio [kgWater/kgDryAir]
+	Surface,Outdoor Air Wind Speed [m/s]
 	Node,Outdoor Air Drybulb Temperature [C]
 	Node,Outdoor Air Wetbulb Temperature [C]
 

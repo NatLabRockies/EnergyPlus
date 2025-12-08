@@ -2,7 +2,7 @@ VERSION 5.00
 Object = "{48E59290-9880-11CF-9754-00AA00C00908}#1.0#0"; "MSINET.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
-Begin VB.Form eplUI 
+Begin VB.Form eplUI
    BorderStyle     =   1  'Fixed Single
    Caption         =   "EP-Launch"
    ClientHeight    =   7455
@@ -15,7 +15,7 @@ Begin VB.Form eplUI
    ScaleHeight     =   7455
    ScaleWidth      =   8835
    StartUpPosition =   1  'CenterOwner
-   Begin VB.Frame frameUtility 
+   Begin VB.Frame frameUtility
       BorderStyle     =   0  'None
       Caption         =   "Frame1"
       Height          =   6255
@@ -23,7 +23,7 @@ Begin VB.Form eplUI
       TabIndex        =   28
       Top             =   480
       Width           =   8295
-      Begin VB.CommandButton cmdUtilityOutput6 
+      Begin VB.CommandButton cmdUtilityOutput6
          Caption         =   "Open 6"
          Height          =   375
          Left            =   3960
@@ -31,7 +31,7 @@ Begin VB.Form eplUI
          Top             =   4680
          Width           =   1785
       End
-      Begin VB.CommandButton cmdUtilityOutput5 
+      Begin VB.CommandButton cmdUtilityOutput5
          Caption         =   "Open 5"
          Height          =   375
          Left            =   2040
@@ -39,7 +39,7 @@ Begin VB.Form eplUI
          Top             =   4680
          Width           =   1785
       End
-      Begin VB.CommandButton cmdUtilityOutput4 
+      Begin VB.CommandButton cmdUtilityOutput4
          Caption         =   "Open 4"
          Height          =   375
          Left            =   120
@@ -47,7 +47,7 @@ Begin VB.Form eplUI
          Top             =   4680
          Width           =   1785
       End
-      Begin VB.CommandButton cmdUtilityOutput3 
+      Begin VB.CommandButton cmdUtilityOutput3
          Caption         =   "Open 3"
          Height          =   375
          Left            =   3960
@@ -55,7 +55,7 @@ Begin VB.Form eplUI
          Top             =   4200
          Width           =   1785
       End
-      Begin VB.CommandButton cmdUtilityOutput2 
+      Begin VB.CommandButton cmdUtilityOutput2
          Caption         =   "Open 2"
          Height          =   375
          Left            =   2040
@@ -63,7 +63,7 @@ Begin VB.Form eplUI
          Top             =   4200
          Width           =   1785
       End
-      Begin VB.ComboBox cmbUtility 
+      Begin VB.ComboBox cmbUtility
          Height          =   315
          Left            =   600
          Style           =   2  'Dropdown List
@@ -71,14 +71,14 @@ Begin VB.Form eplUI
          Top             =   120
          Width           =   1815
       End
-      Begin VB.Frame frameUtilityWeather 
+      Begin VB.Frame frameUtilityWeather
          Caption         =   "Weather File"
          Height          =   1215
          Left            =   120
          TabIndex        =   36
          Top             =   2880
          Width           =   8175
-         Begin VB.CommandButton cmdUtilityWeatherBrowse 
+         Begin VB.CommandButton cmdUtilityWeatherBrowse
             Caption         =   "Browse.."
             Height          =   375
             Left            =   240
@@ -86,7 +86,7 @@ Begin VB.Form eplUI
             Top             =   720
             Width           =   1215
          End
-         Begin VB.Label lblUtilityWeatherFile 
+         Begin VB.Label lblUtilityWeatherFile
             Caption         =   "<file path>\<file name>"
             Height          =   495
             Left            =   120
@@ -95,14 +95,14 @@ Begin VB.Form eplUI
             Width           =   7935
          End
       End
-      Begin VB.Frame frameUtilityInput 
+      Begin VB.Frame frameUtilityInput
          Caption         =   "Input File"
          Height          =   1215
          Left            =   120
          TabIndex        =   33
          Top             =   1560
          Width           =   8175
-         Begin VB.CommandButton cmdUtilityIDFEdit 
+         Begin VB.CommandButton cmdUtilityIDFEdit
             Caption         =   "Edit - IDF Editor"
             Height          =   375
             Left            =   6720
@@ -110,7 +110,7 @@ Begin VB.Form eplUI
             Top             =   720
             Width           =   1335
          End
-         Begin VB.CommandButton cmdUtilityTextEdit 
+         Begin VB.CommandButton cmdUtilityTextEdit
             Caption         =   "Edit - Text Editor"
             Height          =   375
             Left            =   5280
@@ -118,7 +118,7 @@ Begin VB.Form eplUI
             Top             =   720
             Width           =   1335
          End
-         Begin VB.CommandButton cmdUtilityInputBrowse 
+         Begin VB.CommandButton cmdUtilityInputBrowse
             Caption         =   "Browse.."
             Height          =   375
             Left            =   240
@@ -126,7 +126,7 @@ Begin VB.Form eplUI
             Top             =   720
             Width           =   1215
          End
-         Begin VB.Label lblUtilityInputFile 
+         Begin VB.Label lblUtilityInputFile
             Caption         =   "<file path>\<file name>"
             Height          =   495
             Left            =   120
@@ -135,14 +135,14 @@ Begin VB.Form eplUI
             Width           =   7935
          End
       End
-      Begin VB.Frame frameUtilityAbout 
+      Begin VB.Frame frameUtilityAbout
          Caption         =   "About"
          Height          =   975
          Left            =   120
          TabIndex        =   32
          Top             =   480
          Width           =   8175
-         Begin VB.Label lblUtilityAbout 
+         Begin VB.Label lblUtilityAbout
             Caption         =   "lt"
             Height          =   615
             Left            =   120
@@ -152,7 +152,7 @@ Begin VB.Form eplUI
             WordWrap        =   -1  'True
          End
       End
-      Begin VB.CommandButton cmdUtilityOutput1 
+      Begin VB.CommandButton cmdUtilityOutput1
          Caption         =   "Open 1"
          Height          =   375
          Left            =   120
@@ -160,7 +160,7 @@ Begin VB.Form eplUI
          Top             =   4200
          Width           =   1785
       End
-      Begin VB.CommandButton cmdUtilityRun 
+      Begin VB.CommandButton cmdUtilityRun
          Caption         =   "Run Utility"
          Height          =   375
          Left            =   6000
@@ -168,7 +168,7 @@ Begin VB.Form eplUI
          Top             =   4200
          Width           =   2175
       End
-      Begin VB.Label Label2 
+      Begin VB.Label Label2
          Caption         =   "Utility"
          Height          =   255
          Left            =   120
@@ -177,7 +177,7 @@ Begin VB.Form eplUI
          Width           =   495
       End
    End
-   Begin VB.Frame frameSingle 
+   Begin VB.Frame frameSingle
       BorderStyle     =   0  'None
       Caption         =   "frameSingle"
       Height          =   6255
@@ -185,12 +185,12 @@ Begin VB.Form eplUI
       TabIndex        =   1
       Top             =   480
       Width           =   8295
-      Begin VB.Timer queueTimer 
+      Begin VB.Timer queueTimer
          Interval        =   500
          Left            =   4920
          Top             =   5760
       End
-      Begin VB.CommandButton cmdSimulate 
+      Begin VB.CommandButton cmdSimulate
          Caption         =   "Simulate..."
          Height          =   375
          Left            =   6720
@@ -198,21 +198,21 @@ Begin VB.Form eplUI
          Top             =   5880
          Width           =   1575
       End
-      Begin VB.Frame frameView 
+      Begin VB.Frame frameView
          Caption         =   "View Results"
          Height          =   2775
          Left            =   0
          TabIndex        =   12
          Top             =   3000
          Width           =   8295
-         Begin VB.Frame frameViewAllOut 
+         Begin VB.Frame frameViewAllOut
             BorderStyle     =   0  'None
             Height          =   2175
             Left            =   600
             TabIndex        =   53
             Top             =   360
             Width           =   7455
-            Begin VB.CommandButton cmdSpSZ 
+            Begin VB.CommandButton cmdSpSZ
                Caption         =   "SpSZ"
                Height          =   255
                Left            =   6360
@@ -221,7 +221,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   1020
             End
-            Begin VB.CommandButton cmdPerfLogCSV 
+            Begin VB.CommandButton cmdPerfLogCSV
                Caption         =   "PerfLog.csv"
                Height          =   255
                Left            =   6360
@@ -230,7 +230,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   1020
             End
-            Begin VB.CommandButton cmdTblXML 
+            Begin VB.CommandButton cmdTblXML
                Caption         =   "Table XML"
                Height          =   255
                Left            =   6360
@@ -239,7 +239,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   1020
             End
-            Begin VB.CommandButton cmdSlabErr 
+            Begin VB.CommandButton cmdSlabErr
                Caption         =   "Slab Err"
                Height          =   255
                Left            =   5280
@@ -248,7 +248,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdSlab 
+            Begin VB.CommandButton cmdSlab
                Caption         =   "Slab"
                Height          =   255
                Left            =   5280
@@ -257,7 +257,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdSlabOut 
+            Begin VB.CommandButton cmdSlabOut
                Caption         =   "Slab Out"
                Height          =   255
                Left            =   5280
@@ -266,7 +266,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdBsmtCSV 
+            Begin VB.CommandButton cmdBsmtCSV
                Caption         =   "Bsmt CSV"
                Height          =   255
                Left            =   6360
@@ -275,7 +275,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   1020
             End
-            Begin VB.CommandButton cmdBsmtAudit 
+            Begin VB.CommandButton cmdBsmtAudit
                Caption         =   "Bsmt Audit"
                Height          =   255
                Left            =   5280
@@ -284,7 +284,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdBsmt 
+            Begin VB.CommandButton cmdBsmt
                Caption         =   "Bsmt"
                Height          =   255
                Left            =   5280
@@ -293,7 +293,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdBsmtOut 
+            Begin VB.CommandButton cmdBsmtOut
                Caption         =   "Bsmt Out"
                Height          =   255
                Left            =   5280
@@ -302,7 +302,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdMain 
+            Begin VB.CommandButton cmdMain
                Caption         =   "Variables"
                Height          =   255
                Left            =   0
@@ -311,7 +311,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdERR 
+            Begin VB.CommandButton cmdERR
                Caption         =   "Errors"
                Height          =   255
                Left            =   960
@@ -320,7 +320,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdTable 
+            Begin VB.CommandButton cmdTable
                Caption         =   "Tables"
                Height          =   255
                Left            =   0
@@ -329,7 +329,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdESO 
+            Begin VB.CommandButton cmdESO
                Caption         =   "ESO"
                Height          =   255
                Left            =   4320
@@ -338,7 +338,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdRDD 
+            Begin VB.CommandButton cmdRDD
                Caption         =   "RDD"
                Height          =   255
                Left            =   960
@@ -347,7 +347,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdEIO 
+            Begin VB.CommandButton cmdEIO
                Caption         =   "EIO"
                Height          =   255
                Left            =   0
@@ -356,7 +356,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdBND 
+            Begin VB.CommandButton cmdBND
                Caption         =   "BND"
                Height          =   255
                Left            =   4320
@@ -365,7 +365,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdMTR 
+            Begin VB.CommandButton cmdMTR
                Caption         =   "MTR"
                Height          =   255
                Left            =   4320
@@ -374,7 +374,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdMTD 
+            Begin VB.CommandButton cmdMTD
                Caption         =   "MTD"
                Height          =   255
                Left            =   960
@@ -383,7 +383,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdMeter 
+            Begin VB.CommandButton cmdMeter
                Caption         =   "Meters"
                Height          =   255
                Left            =   0
@@ -392,7 +392,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdZSZ 
+            Begin VB.CommandButton cmdZSZ
                Caption         =   "ZSZ"
                Height          =   255
                Left            =   960
@@ -401,7 +401,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdSSZ 
+            Begin VB.CommandButton cmdSSZ
                Caption         =   "SSZ"
                Height          =   255
                Left            =   960
@@ -410,7 +410,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdAudit 
+            Begin VB.CommandButton cmdAudit
                Caption         =   "Audit"
                Height          =   255
                Left            =   3120
@@ -419,7 +419,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdSLN 
+            Begin VB.CommandButton cmdSLN
                Caption         =   "SLN"
                Height          =   255
                Left            =   4320
@@ -428,7 +428,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdDBG 
+            Begin VB.CommandButton cmdDBG
                Caption         =   "DBG"
                Height          =   255
                Left            =   4320
@@ -437,7 +437,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdSVG 
+            Begin VB.CommandButton cmdSVG
                Caption         =   "SVG"
                Height          =   255
                Left            =   0
@@ -446,7 +446,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdEPMIDF 
+            Begin VB.CommandButton cmdEPMIDF
                Caption         =   "EPMIDF"
                Height          =   255
                Left            =   2160
@@ -455,7 +455,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdEPMDET 
+            Begin VB.CommandButton cmdEPMDET
                Caption         =   "EPMDET"
                Height          =   255
                Left            =   2160
@@ -464,7 +464,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdEXPIDF 
+            Begin VB.CommandButton cmdEXPIDF
                Caption         =   "EXPIDF"
                Height          =   255
                Left            =   2160
@@ -473,7 +473,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdMAP 
+            Begin VB.CommandButton cmdMAP
                Caption         =   "MAP"
                Height          =   255
                Left            =   2160
@@ -482,7 +482,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdDXF 
+            Begin VB.CommandButton cmdDXF
                Caption         =   "DXF"
                Height          =   255
                Left            =   0
@@ -491,7 +491,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdIN 
+            Begin VB.CommandButton cmdIN
                Caption         =   "DE IN"
                Height          =   255
                Left            =   2160
@@ -500,7 +500,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdOUT 
+            Begin VB.CommandButton cmdOUT
                Caption         =   "DE OUT"
                Height          =   255
                Left            =   2160
@@ -509,7 +509,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdELDMP 
+            Begin VB.CommandButton cmdELDMP
                Caption         =   "ELDMP"
                Height          =   255
                Left            =   3120
@@ -518,7 +518,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   900
             End
-            Begin VB.CommandButton cmdDFDMP 
+            Begin VB.CommandButton cmdDFDMP
                Caption         =   "DFDMP"
                Height          =   255
                Left            =   3120
@@ -527,7 +527,7 @@ Begin VB.Form eplUI
                Top             =   360
                Width           =   900
             End
-            Begin VB.CommandButton cmdScreen 
+            Begin VB.CommandButton cmdScreen
                Caption         =   "Screen"
                Height          =   255
                Left            =   3120
@@ -536,7 +536,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdSHD 
+            Begin VB.CommandButton cmdSHD
                Caption         =   "SHD"
                Height          =   255
                Left            =   3120
@@ -545,7 +545,7 @@ Begin VB.Form eplUI
                Top             =   1200
                Width           =   900
             End
-            Begin VB.CommandButton cmdVRML 
+            Begin VB.CommandButton cmdVRML
                Caption         =   "VRML"
                Height          =   255
                Left            =   3120
@@ -554,7 +554,7 @@ Begin VB.Form eplUI
                Top             =   1560
                Width           =   900
             End
-            Begin VB.CommandButton cmdMDD 
+            Begin VB.CommandButton cmdMDD
                Caption         =   "MDD"
                Height          =   255
                Left            =   960
@@ -563,7 +563,7 @@ Begin VB.Form eplUI
                Top             =   720
                Width           =   900
             End
-            Begin VB.CommandButton cmdProcCSV 
+            Begin VB.CommandButton cmdProcCSV
                Caption         =   "Proc CSV"
                Height          =   255
                Left            =   4320
@@ -572,7 +572,7 @@ Begin VB.Form eplUI
                Top             =   1920
                Width           =   900
             End
-            Begin VB.CommandButton cmdEDD 
+            Begin VB.CommandButton cmdEDD
                Caption         =   "EDD"
                Height          =   255
                Left            =   6360
@@ -582,14 +582,14 @@ Begin VB.Form eplUI
                Width           =   1020
             End
          End
-         Begin VB.Frame frameViewSelectOut 
+         Begin VB.Frame frameViewSelectOut
             BorderStyle     =   0  'None
             Height          =   2175
             Left            =   600
             TabIndex        =   48
             Top             =   360
             Width           =   7455
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 8"
                Height          =   375
                Index           =   7
@@ -598,7 +598,7 @@ Begin VB.Form eplUI
                Top             =   1440
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 7"
                Height          =   375
                Index           =   6
@@ -607,7 +607,7 @@ Begin VB.Form eplUI
                Top             =   960
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 6"
                Height          =   375
                Index           =   5
@@ -616,7 +616,7 @@ Begin VB.Form eplUI
                Top             =   480
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 5"
                Height          =   375
                Index           =   4
@@ -625,7 +625,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 4"
                Height          =   375
                Index           =   3
@@ -634,7 +634,7 @@ Begin VB.Form eplUI
                Top             =   1440
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 3"
                Height          =   375
                Index           =   2
@@ -643,7 +643,7 @@ Begin VB.Form eplUI
                Top             =   960
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 2"
                Height          =   375
                Index           =   1
@@ -652,7 +652,7 @@ Begin VB.Form eplUI
                Top             =   480
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewDefine 
+            Begin VB.CommandButton cmdViewDefine
                Caption         =   "Define.."
                Height          =   315
                Left            =   0
@@ -660,7 +660,7 @@ Begin VB.Form eplUI
                Top             =   1800
                Width           =   855
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Set 1"
                Height          =   375
                Index           =   0
@@ -669,7 +669,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "HTML"
                Height          =   375
                Index           =   11
@@ -678,7 +678,7 @@ Begin VB.Form eplUI
                Top             =   480
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Spreadsheets"
                Height          =   375
                Index           =   10
@@ -687,7 +687,7 @@ Begin VB.Form eplUI
                Top             =   480
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Drawing File"
                Height          =   375
                Index           =   9
@@ -696,7 +696,7 @@ Begin VB.Form eplUI
                Top             =   0
                Width           =   1700
             End
-            Begin VB.CommandButton cmdViewSet 
+            Begin VB.CommandButton cmdViewSet
                Caption         =   "Text Output Files"
                Height          =   375
                Index           =   8
@@ -706,7 +706,7 @@ Begin VB.Form eplUI
                Width           =   1700
             End
          End
-         Begin MSComctlLib.TabStrip tabViewResults 
+         Begin MSComctlLib.TabStrip tabViewResults
             Height          =   2415
             Left            =   120
             TabIndex        =   47
@@ -717,21 +717,21 @@ Begin VB.Form eplUI
             MultiRow        =   -1  'True
             Placement       =   2
             _Version        =   393216
-            BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628} 
+            BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628}
                NumTabs         =   2
-               BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+               BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628}
                   Caption         =   "Sets"
                   ImageVarType    =   2
                EndProperty
-               BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+               BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628}
                   Caption         =   "All"
                   ImageVarType    =   2
                EndProperty
             EndProperty
          End
-         Begin VB.Label lblViewResults 
+         Begin VB.Label lblViewResults
             Caption         =   "View Results"
-            BeginProperty Font 
+            BeginProperty Font
                Name            =   "MS Sans Serif"
                Size            =   8.25
                Charset         =   0
@@ -747,14 +747,14 @@ Begin VB.Form eplUI
             Width           =   1935
          End
       End
-      Begin VB.Frame frmInputFile 
+      Begin VB.Frame frmInputFile
          Caption         =   "Input File"
          Height          =   1335
          Left            =   0
          TabIndex        =   2
          Top             =   0
          Width           =   8295
-         Begin VB.ComboBox cmbInput 
+         Begin VB.ComboBox cmbInput
             Height          =   315
             Left            =   120
             Style           =   2  'Dropdown List
@@ -762,7 +762,7 @@ Begin VB.Form eplUI
             Top             =   360
             Width           =   8055
          End
-         Begin VB.CommandButton cmdInputBrowse 
+         Begin VB.CommandButton cmdInputBrowse
             Caption         =   "Browse..."
             Height          =   375
             Left            =   120
@@ -770,7 +770,7 @@ Begin VB.Form eplUI
             Top             =   840
             Width           =   1215
          End
-         Begin VB.CommandButton cmdInputEdit 
+         Begin VB.CommandButton cmdInputEdit
             Caption         =   "Edit - Text Editor"
             Height          =   375
             Left            =   4920
@@ -778,7 +778,7 @@ Begin VB.Form eplUI
             Top             =   840
             Width           =   1575
          End
-         Begin VB.CommandButton cmdIDFEdit 
+         Begin VB.CommandButton cmdIDFEdit
             Caption         =   "Edit - IDF Editor"
             Height          =   375
             Left            =   6600
@@ -787,9 +787,9 @@ Begin VB.Form eplUI
             Top             =   840
             Width           =   1575
          End
-         Begin VB.Label lblInputFile 
+         Begin VB.Label lblInputFile
             Caption         =   "Input File"
-            BeginProperty Font 
+            BeginProperty Font
                Name            =   "MS Sans Serif"
                Size            =   8.25
                Charset         =   0
@@ -805,21 +805,21 @@ Begin VB.Form eplUI
             Width           =   1935
          End
       End
-      Begin MSComDlg.CommonDialog CommonDialog1 
+      Begin MSComDlg.CommonDialog CommonDialog1
          Left            =   2520
          Top             =   5640
          _ExtentX        =   847
          _ExtentY        =   847
          _Version        =   393216
       End
-      Begin VB.Frame frmWeatherFile 
+      Begin VB.Frame frmWeatherFile
          Caption         =   "Weather File"
          Height          =   1335
          Left            =   0
          TabIndex        =   8
          Top             =   1560
          Width           =   8280
-         Begin VB.CommandButton cmdWeatherBrowse 
+         Begin VB.CommandButton cmdWeatherBrowse
             Caption         =   "Browse..."
             Height          =   375
             Left            =   120
@@ -827,7 +827,7 @@ Begin VB.Form eplUI
             Top             =   840
             Width           =   1215
          End
-         Begin VB.ComboBox cmbWeather 
+         Begin VB.ComboBox cmbWeather
             Height          =   315
             Left            =   120
             Style           =   2  'Dropdown List
@@ -835,9 +835,9 @@ Begin VB.Form eplUI
             Top             =   360
             Width           =   8025
          End
-         Begin VB.Label lblWeatherFile 
+         Begin VB.Label lblWeatherFile
             Caption         =   "Weather File"
-            BeginProperty Font 
+            BeginProperty Font
                Name            =   "MS Sans Serif"
                Size            =   8.25
                Charset         =   0
@@ -853,7 +853,7 @@ Begin VB.Form eplUI
             Width           =   1935
          End
       End
-      Begin VB.Image Image1 
+      Begin VB.Image Image1
          Height          =   600
          Left            =   3600
          Picture         =   "epl-ui.frx":08CA
@@ -862,7 +862,7 @@ Begin VB.Form eplUI
          Width           =   600
       End
    End
-   Begin VB.Frame frameGroup 
+   Begin VB.Frame frameGroup
       BorderStyle     =   0  'None
       Caption         =   "Frame1"
       Height          =   6255
@@ -870,14 +870,14 @@ Begin VB.Form eplUI
       TabIndex        =   15
       Top             =   480
       Width           =   8295
-      Begin VB.Frame frmGroupFile 
+      Begin VB.Frame frmGroupFile
          Caption         =   "Group File"
          Height          =   1935
          Left            =   0
          TabIndex        =   19
          Top             =   120
          Width           =   8295
-         Begin VB.CommandButton cmdNewGroup 
+         Begin VB.CommandButton cmdNewGroup
             Caption         =   "New Group..."
             Height          =   375
             Left            =   120
@@ -885,7 +885,7 @@ Begin VB.Form eplUI
             Top             =   360
             Width           =   1215
          End
-         Begin VB.ComboBox cmbGroup 
+         Begin VB.ComboBox cmbGroup
             Height          =   315
             Left            =   120
             Style           =   2  'Dropdown List
@@ -893,7 +893,7 @@ Begin VB.Form eplUI
             Top             =   960
             Width           =   8055
          End
-         Begin VB.CommandButton cmdGroupBrowse 
+         Begin VB.CommandButton cmdGroupBrowse
             Caption         =   "Browse..."
             Height          =   375
             Left            =   120
@@ -901,7 +901,7 @@ Begin VB.Form eplUI
             Top             =   1440
             Width           =   1215
          End
-         Begin VB.CommandButton cmdGroupEdit 
+         Begin VB.CommandButton cmdGroupEdit
             Caption         =   "Edit..."
             Height          =   375
             Left            =   6960
@@ -910,7 +910,7 @@ Begin VB.Form eplUI
             Width           =   1215
          End
       End
-      Begin VB.CommandButton cmdViewGroupError 
+      Begin VB.CommandButton cmdViewGroupError
          Caption         =   "View Group Error File..."
          Height          =   375
          Left            =   120
@@ -918,7 +918,7 @@ Begin VB.Form eplUI
          Top             =   2280
          Width           =   1935
       End
-      Begin VB.CommandButton cmdSimulateGroup 
+      Begin VB.CommandButton cmdSimulateGroup
          Caption         =   "Simulate Group..."
          Height          =   375
          Left            =   6600
@@ -927,7 +927,7 @@ Begin VB.Form eplUI
          Width           =   1575
       End
    End
-   Begin VB.Frame frameHistory 
+   Begin VB.Frame frameHistory
       BorderStyle     =   0  'None
       Caption         =   "Frame1"
       Height          =   6255
@@ -935,7 +935,7 @@ Begin VB.Form eplUI
       TabIndex        =   23
       Top             =   480
       Width           =   8295
-      Begin MSComctlLib.TreeView treeHistory 
+      Begin MSComctlLib.TreeView treeHistory
          Height          =   5655
          Left            =   120
          TabIndex        =   25
@@ -949,7 +949,7 @@ Begin VB.Form eplUI
          Style           =   7
          Appearance      =   1
       End
-      Begin VB.CommandButton cmdViewHistoryFile 
+      Begin VB.CommandButton cmdViewHistoryFile
          Caption         =   " View File ..."
          Height          =   375
          Left            =   3360
@@ -957,7 +957,7 @@ Begin VB.Form eplUI
          Top             =   5880
          Width           =   1575
       End
-      Begin VB.Label Label1 
+      Begin VB.Label Label1
          Caption         =   "Label1"
          Height          =   255
          Left            =   120
@@ -966,14 +966,14 @@ Begin VB.Form eplUI
          Width           =   975
       End
    End
-   Begin InetCtlsObjects.Inet Inet1 
+   Begin InetCtlsObjects.Inet Inet1
       Left            =   4800
       Top             =   6120
       _ExtentX        =   1005
       _ExtentY        =   1005
       _Version        =   393216
    End
-   Begin VB.CommandButton cmdExit 
+   Begin VB.CommandButton cmdExit
       Cancel          =   -1  'True
       Caption         =   "Exit"
       Height          =   375
@@ -982,7 +982,7 @@ Begin VB.Form eplUI
       Top             =   6960
       Width           =   1575
    End
-   Begin MSComctlLib.TabStrip tabMain 
+   Begin MSComctlLib.TabStrip tabMain
       Height          =   6735
       Left            =   60
       TabIndex        =   0
@@ -992,27 +992,27 @@ Begin VB.Form eplUI
       _ExtentY        =   11880
       MultiRow        =   -1  'True
       _Version        =   393216
-      BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628} 
+      BeginProperty Tabs {1EFB6598-857C-11D1-B16A-00C0F0283628}
          NumTabs         =   4
-         BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+         BeginProperty Tab1 {1EFB659A-857C-11D1-B16A-00C0F0283628}
             Caption         =   "Single Input File"
             ImageVarType    =   2
          EndProperty
-         BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+         BeginProperty Tab2 {1EFB659A-857C-11D1-B16A-00C0F0283628}
             Caption         =   "Group of Input Files"
             ImageVarType    =   2
          EndProperty
-         BeginProperty Tab3 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+         BeginProperty Tab3 {1EFB659A-857C-11D1-B16A-00C0F0283628}
             Caption         =   "History"
             ImageVarType    =   2
          EndProperty
-         BeginProperty Tab4 {1EFB659A-857C-11D1-B16A-00C0F0283628} 
+         BeginProperty Tab4 {1EFB659A-857C-11D1-B16A-00C0F0283628}
             Caption         =   "Utilities"
             ImageVarType    =   2
          EndProperty
       EndProperty
    End
-   Begin VB.Label lblCheckingUpdates 
+   Begin VB.Label lblCheckingUpdates
       Caption         =   "Checking for Updates"
       ForeColor       =   &H80000011&
       Height          =   375
@@ -1021,375 +1021,375 @@ Begin VB.Form eplUI
       Top             =   7080
       Width           =   3375
    End
-   Begin VB.Shape Shape1 
+   Begin VB.Shape Shape1
       Height          =   255
       Left            =   4680
       Top             =   120
       Width           =   615
    End
-   Begin VB.Label lblIDDVersion 
+   Begin VB.Label lblIDDVersion
       Height          =   255
       Left            =   240
       TabIndex        =   16
       Top             =   7080
       Width           =   6615
    End
-   Begin VB.Line Line1 
+   Begin VB.Line Line1
       X1              =   0
       X2              =   17640
       Y1              =   0
       Y2              =   0
    End
-   Begin VB.Menu mnuFile 
+   Begin VB.Menu mnuFile
       Caption         =   "&File"
-      Begin VB.Menu mnuFileIn 
+      Begin VB.Menu mnuFileIn
          Caption         =   "Select &Input File..."
       End
-      Begin VB.Menu mnuFileWeather 
+      Begin VB.Menu mnuFileWeather
          Caption         =   "Select &Weather File..."
       End
-      Begin VB.Menu mnuFileGroup 
+      Begin VB.Menu mnuFileGroup
          Caption         =   "Select &Group File..."
       End
-      Begin VB.Menu mnuSep 
+      Begin VB.Menu mnuSep
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileTransitionVersion 
+      Begin VB.Menu mnuFileTransitionVersion
          Caption         =   "Transition &Version..."
       End
-      Begin VB.Menu mnuFileSep4 
+      Begin VB.Menu mnuFileSep4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileNewGroup 
+      Begin VB.Menu mnuFileNewGroup
          Caption         =   "New Group..."
       End
-      Begin VB.Menu mnuFileSep3 
+      Begin VB.Menu mnuFileSep3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileSim 
+      Begin VB.Menu mnuFileSim
          Caption         =   "&Simulate Single File..."
       End
-      Begin VB.Menu mnuFileSimGroup 
+      Begin VB.Menu mnuFileSimGroup
          Caption         =   "S&imulate Group of Files..."
       End
-      Begin VB.Menu mnuFileSep2 
+      Begin VB.Menu mnuFileSep2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileStop 
+      Begin VB.Menu mnuFileStop
          Caption         =   "&Cancel Additional Simulations.."
          Shortcut        =   ^C
       End
-      Begin VB.Menu mnuFileExit 
+      Begin VB.Menu mnuFileExit
          Caption         =   "E&xit"
       End
    End
-   Begin VB.Menu mnuEdit 
+   Begin VB.Menu mnuEdit
       Caption         =   "&Edit"
-      Begin VB.Menu mnuEditUndo 
+      Begin VB.Menu mnuEditUndo
          Caption         =   "Undo"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuEditCut 
+      Begin VB.Menu mnuEditCut
          Caption         =   "Cut"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuEditCopy 
+      Begin VB.Menu mnuEditCopy
          Caption         =   "Copy"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuEditPaste 
+      Begin VB.Menu mnuEditPaste
          Caption         =   "Paste"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuEditSep 
+      Begin VB.Menu mnuEditSep
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditInputText 
+      Begin VB.Menu mnuEditInputText
          Caption         =   "Input with &Text Editor"
       End
-      Begin VB.Menu mnuEditIDF 
+      Begin VB.Menu mnuEditIDF
          Caption         =   "Input with &IDF Editor"
       End
-      Begin VB.Menu mnuEditWeather 
+      Begin VB.Menu mnuEditWeather
          Caption         =   "&Weather with Text Editor"
       End
-      Begin VB.Menu mnuEditPost 
+      Begin VB.Menu mnuEditPost
          Caption         =   "&Postprocessor Command"
       End
    End
-   Begin VB.Menu mnuView 
+   Begin VB.Menu mnuView
       Caption         =   "&View"
-      Begin VB.Menu mnuViewOut 
+      Begin VB.Menu mnuViewOut
          Caption         =   "Text &Output Files"
       End
-      Begin VB.Menu mnuViewDrawing 
+      Begin VB.Menu mnuViewDrawing
          Caption         =   "&Drawing Files"
       End
-      Begin VB.Menu mnuViewSpreadsheet 
+      Begin VB.Menu mnuViewSpreadsheet
          Caption         =   "&Spreadsheets"
       End
-      Begin VB.Menu viewHTMLfile 
+      Begin VB.Menu viewHTMLfile
          Caption         =   "&HTML File"
       End
-      Begin VB.Menu mnuViewGroup 
+      Begin VB.Menu mnuViewGroup
          Caption         =   "&Group File"
       End
-      Begin VB.Menu viewSelectedHistory 
+      Begin VB.Menu viewSelectedHistory
          Caption         =   "&Selected History File"
       End
-      Begin VB.Menu mnuViewSep0 
+      Begin VB.Menu mnuViewSep0
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewEEREIO 
+      Begin VB.Menu mnuViewEEREIO
          Caption         =   "&ERR/EIO/BND Output Files Only"
          Shortcut        =   {F2}
       End
-      Begin VB.Menu mnuViewSingleFile 
+      Begin VB.Menu mnuViewSingleFile
          Caption         =   "Sin&gle File"
-         Begin VB.Menu mnuViewCSV 
+         Begin VB.Menu mnuViewCSV
             Caption         =   "Variable"
             Shortcut        =   {F4}
          End
-         Begin VB.Menu mnuViewESO 
+         Begin VB.Menu mnuViewESO
             Caption         =   "ESO File"
             Shortcut        =   {F5}
          End
-         Begin VB.Menu mnuViewRDD 
+         Begin VB.Menu mnuViewRDD
             Caption         =   "RDD File"
             Shortcut        =   {F6}
          End
-         Begin VB.Menu mnuViewMDD 
+         Begin VB.Menu mnuViewMDD
             Caption         =   "MDD File"
             Shortcut        =   +^{F3}
          End
-         Begin VB.Menu mnuViewEIO 
+         Begin VB.Menu mnuViewEIO
             Caption         =   "EIO File"
             Shortcut        =   {F7}
          End
-         Begin VB.Menu mnuViewErr 
+         Begin VB.Menu mnuViewErr
             Caption         =   "ERR File"
             Shortcut        =   {F8}
          End
-         Begin VB.Menu mnuViewBND 
+         Begin VB.Menu mnuViewBND
             Caption         =   "BND File"
             Shortcut        =   {F9}
          End
-         Begin VB.Menu mnuViewMTR 
+         Begin VB.Menu mnuViewMTR
             Caption         =   "MTR File"
             Shortcut        =   {F11}
          End
-         Begin VB.Menu mnuViewMTD 
+         Begin VB.Menu mnuViewMTD
             Caption         =   "MTD File"
             Shortcut        =   {F12}
          End
-         Begin VB.Menu mnuViewMETER 
+         Begin VB.Menu mnuViewMETER
             Caption         =   "METER File"
             Shortcut        =   ^{F4}
          End
-         Begin VB.Menu mnuViewZSZ 
+         Begin VB.Menu mnuViewZSZ
             Caption         =   "ZSZ File"
             Shortcut        =   ^{F5}
          End
-         Begin VB.Menu mnuViewSSZ 
+         Begin VB.Menu mnuViewSSZ
             Caption         =   "SSZ File"
             Shortcut        =   ^{F6}
          End
-         Begin VB.Menu mnuViewSpSZ 
+         Begin VB.Menu mnuViewSpSZ
             Caption         =   "SpSZ File"
          End
-         Begin VB.Menu mnuViewPSZ 
+         Begin VB.Menu mnuViewPSZ
             Caption         =   "PSZ File"
          End
-         Begin VB.Menu mnuViewAUDIT 
+         Begin VB.Menu mnuViewAUDIT
             Caption         =   "AUDIT File"
             Shortcut        =   ^{F8}
          End
-         Begin VB.Menu mnuViewSLN 
+         Begin VB.Menu mnuViewSLN
             Caption         =   "SLN File"
             Shortcut        =   ^{F9}
          End
-         Begin VB.Menu mnuViewDBG 
+         Begin VB.Menu mnuViewDBG
             Caption         =   "DBG File"
             Shortcut        =   ^{F11}
          End
-         Begin VB.Menu mnuViewSHD 
+         Begin VB.Menu mnuViewSHD
             Caption         =   "SHD File"
             Shortcut        =   ^{F12}
          End
-         Begin VB.Menu mnuViewSVG 
+         Begin VB.Menu mnuViewSVG
             Caption         =   "HVAC Diagram-SVG"
             Shortcut        =   +{F4}
          End
-         Begin VB.Menu mnuViewEPMIDF 
+         Begin VB.Menu mnuViewEPMIDF
             Caption         =   "EPMIDF File"
             Shortcut        =   +{F5}
          End
-         Begin VB.Menu mnuViewEPMDET 
+         Begin VB.Menu mnuViewEPMDET
             Caption         =   "EPMDET File"
             Shortcut        =   +{F6}
          End
-         Begin VB.Menu mnuViewMAP 
+         Begin VB.Menu mnuViewMAP
             Caption         =   "MAP File"
             Shortcut        =   +{F7}
          End
-         Begin VB.Menu mnuViewTABLE 
+         Begin VB.Menu mnuViewTABLE
             Caption         =   "TABLE File"
             Shortcut        =   +{F8}
          End
-         Begin VB.Menu mnuViewVRML 
+         Begin VB.Menu mnuViewVRML
             Caption         =   "VRML File"
             Shortcut        =   +{F11}
          End
-         Begin VB.Menu mnuViewDXF 
+         Begin VB.Menu mnuViewDXF
             Caption         =   "DXF File"
             Shortcut        =   +{F12}
          End
-         Begin VB.Menu mnuViewDelightIN 
+         Begin VB.Menu mnuViewDelightIN
             Caption         =   "Delight IN"
             Shortcut        =   +^{F4}
          End
-         Begin VB.Menu mnuViewDelightOut 
+         Begin VB.Menu mnuViewDelightOut
             Caption         =   "Delight OUT"
             Shortcut        =   +^{F5}
          End
-         Begin VB.Menu mnuViewDelightELDMP 
+         Begin VB.Menu mnuViewDelightELDMP
             Caption         =   "Delight ELDMP"
             Shortcut        =   +^{F6}
          End
-         Begin VB.Menu mnuViewDelightDFDMP 
+         Begin VB.Menu mnuViewDelightDFDMP
             Caption         =   "Delight DFDMP"
             Shortcut        =   +^{F7}
          End
-         Begin VB.Menu mnuViewExpIDF 
+         Begin VB.Menu mnuViewExpIDF
             Caption         =   "EXPIDF File"
             Shortcut        =   +^{F8}
          End
-         Begin VB.Menu mnuViewErrGrp 
+         Begin VB.Menu mnuViewErrGrp
             Caption         =   "Group Error errgrp"
             Shortcut        =   +^{F9}
          End
-         Begin VB.Menu mnuViewVCpErr 
+         Begin VB.Menu mnuViewVCpErr
             Caption         =   "VCpErr"
             Shortcut        =   +^{F11}
          End
-         Begin VB.Menu mnuViewScreen 
+         Begin VB.Menu mnuViewScreen
             Caption         =   "Screen"
             Shortcut        =   +^{F12}
          End
-         Begin VB.Menu mnuViewProcCSV 
+         Begin VB.Menu mnuViewProcCSV
             Caption         =   "Proc CSV"
          End
-         Begin VB.Menu mnuViewEdd 
+         Begin VB.Menu mnuViewEdd
             Caption         =   "EDD File"
          End
-         Begin VB.Menu mnuViewBsmtOut 
+         Begin VB.Menu mnuViewBsmtOut
             Caption         =   "Bsmt Out"
          End
-         Begin VB.Menu mnuViewBsmt 
+         Begin VB.Menu mnuViewBsmt
             Caption         =   "Bsmt"
          End
-         Begin VB.Menu mnuViewBsmtAudit 
+         Begin VB.Menu mnuViewBsmtAudit
             Caption         =   "Bsmt Audit"
          End
-         Begin VB.Menu mnuViewBsmtCSV 
+         Begin VB.Menu mnuViewBsmtCSV
             Caption         =   "Bsmt CSV"
          End
-         Begin VB.Menu mnuViewSlabOut 
+         Begin VB.Menu mnuViewSlabOut
             Caption         =   "Slab Out"
          End
-         Begin VB.Menu mnuViewSlab 
+         Begin VB.Menu mnuViewSlab
             Caption         =   "Slab"
          End
-         Begin VB.Menu mnuViewSlabErr 
+         Begin VB.Menu mnuViewSlabErr
             Caption         =   "Slab Err"
          End
-         Begin VB.Menu mnuViewPerfLogCSV 
+         Begin VB.Menu mnuViewPerfLogCSV
             Caption         =   "PerfLog CSV"
          End
       End
-      Begin VB.Menu mnuViewSep6 
+      Begin VB.Menu mnuViewSep6
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewFolderInput 
+      Begin VB.Menu mnuViewFolderInput
          Caption         =   "Input File Folder"
       End
-      Begin VB.Menu mnuViewFolderWeather 
+      Begin VB.Menu mnuViewFolderWeather
          Caption         =   "Weather File Folder"
       End
-      Begin VB.Menu mnuViewFolderGroup 
+      Begin VB.Menu mnuViewFolderGroup
          Caption         =   "Group File Folder"
       End
-      Begin VB.Menu mnuViewSep1 
+      Begin VB.Menu mnuViewSep1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewOptions 
+      Begin VB.Menu mnuViewOptions
          Caption         =   "Options..."
       End
    End
-   Begin VB.Menu mnuHelp 
+   Begin VB.Menu mnuHelp
       Caption         =   "&Help"
-      Begin VB.Menu mnuHelpQuickstart 
+      Begin VB.Menu mnuHelpQuickstart
          Caption         =   "EnergyPlus QuickStart Webpage"
       End
-      Begin VB.Menu mnuHelpEssentials 
+      Begin VB.Menu mnuHelpEssentials
          Caption         =   "EnergyPlus Essentials"
       End
-      Begin VB.Menu mnuHelpIORef 
+      Begin VB.Menu mnuHelpIORef
          Caption         =   "EnergyPlus Input/Output Reference"
          Shortcut        =   {F1}
       End
-      Begin VB.Menu mnuHelpOutDetails 
+      Begin VB.Menu mnuHelpOutDetails
          Caption         =   "EnergyPlus Output Details and Examples"
       End
-      Begin VB.Menu mnuHelpEngRef 
+      Begin VB.Menu mnuHelpEngRef
          Caption         =   "EnergyPlus Engineering Reference"
       End
-      Begin VB.Menu mnuHelpSep2 
+      Begin VB.Menu mnuHelpSep2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpPlantAppl 
+      Begin VB.Menu mnuHelpPlantAppl
          Caption         =   "Plant Application Guide"
       End
-      Begin VB.Menu mnuHelpEMS 
+      Begin VB.Menu mnuHelpEMS
          Caption         =   "EMS Application Guide"
       End
-      Begin VB.Menu mnuHelpCompliance 
+      Begin VB.Menu mnuHelpCompliance
          Caption         =   "Using EnergyPlus for Compliance"
       End
-      Begin VB.Menu mnuHelpExtInterface 
+      Begin VB.Menu mnuHelpExtInterface
          Caption         =   "External Interface Application Guide"
       End
-      Begin VB.Menu mnuHelpSep3 
+      Begin VB.Menu mnuHelpSep3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpGettingStarted 
+      Begin VB.Menu mnuHelpGettingStarted
          Caption         =   "EnergyPlus Getting Started"
       End
-      Begin VB.Menu mnuHelpAuxProgs 
+      Begin VB.Menu mnuHelpAuxProgs
          Caption         =   "EnergyPlus Auxiliary Programs"
       End
-      Begin VB.Menu mnuHelpTips 
+      Begin VB.Menu mnuHelpTips
          Caption         =   "EnergyPlus Tips and Tricks"
       End
-      Begin VB.Menu mnuHelpAcknowledge 
+      Begin VB.Menu mnuHelpAcknowledge
          Caption         =   "EnergyPlus Acknowledgments"
       End
-      Begin VB.Menu mnuHelpDiv2 
+      Begin VB.Menu mnuHelpDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpCheckUpdates 
+      Begin VB.Menu mnuHelpCheckUpdates
          Caption         =   "Check for Updates..."
       End
-      Begin VB.Menu mnuHelpViewUpdateList 
+      Begin VB.Menu mnuHelpViewUpdateList
          Caption         =   "View Entire Update List on Web..."
       End
-      Begin VB.Menu mnuHelpDiv3 
+      Begin VB.Menu mnuHelpDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpEPL 
+      Begin VB.Menu mnuHelpEPL
          Caption         =   "Using EP-Launch Help..."
       End
-      Begin VB.Menu mnuHelpAbout 
+      Begin VB.Menu mnuHelpAbout
          Caption         =   "&About EP-Launch..."
       End
    End
@@ -1524,7 +1524,7 @@ Private Declare Function GetShortPathName Lib "kernel32.dll" Alias "GetShortPath
 ' The following code is from VBnet and is used for file associations
 '
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-' Copyright ©1996-2007 VBnet, Randy Birch, All Rights Reserved.
+' Copyright ï¿½1996-2007 VBnet, Randy Birch, All Rights Reserved.
 ' Some pages may also contain other copyrights by the author.
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Distribution: You can freely use this code in your own
@@ -1700,7 +1700,7 @@ Private Declare Function RegSetValueEx Lib "advapi32" Alias "RegSetValueExA" (By
       End Function
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-' Copyright ©1996-2007 VBnet, Randy Birch, All Rights Reserved.
+' Copyright ï¿½1996-2007 VBnet, Randy Birch, All Rights Reserved.
 ' Some pages may also contain other copyrights by the author.
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Distribution: You can freely use this code in your own
@@ -7169,7 +7169,7 @@ End Sub
 '     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 '     the specific language governing rights and limitations under the License.
 '
-'     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
+'     Copyright ï¿½ 1996-2014 GARD Analytics.  All rights reserved.
 '
 '     NOTICE: The U.S. Government is granted for itself and others acting on its
 '     behalf a paid-up, nonexclusive, irrevocable, worldwide license in this data to

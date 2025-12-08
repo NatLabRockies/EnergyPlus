@@ -254,7 +254,7 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         auto const *mat = dynamic_cast<const MaterialEMPD *>(s_mat->materials(constr.LayerPoint(constr.TotLayers)));
         // assert(mat != nullptr);
 
-        if (mat && mat->mu > 0.0 && surf.Zone > 0) {
+        if ((mat != nullptr) && mat->mu > 0.0 && surf.Zone > 0) {
             EMPDzone(surf.Zone) = true;
         } else {
             ++state.dataMoistureBalEMPD->ErrCount;

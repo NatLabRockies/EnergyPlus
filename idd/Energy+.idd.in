@@ -1538,7 +1538,7 @@ RunPeriodControl:DaylightSavingTime,
      \note  <number>/<number>  (month/day)
      \note  <number> <Month>
      \note  <Month> <number>
-     \note <Nth> <Weekday> in <Month)
+     \note <Nth> <Weekday> in <Month>
      \note Last <WeekDay> in <Month>
      \note <Month> can be January, February, March, April, May, June, July, August, September, October, November, December
      \note Months can be the first 3 letters of the month
@@ -57659,7 +57659,7 @@ Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
         \note Availability schedule name for this system. Schedule value > 0 means the system is available.
         \note If this field is blank, the system is always available.
         \type object-list
-        \object-list ScheduleNames      
+        \object-list ScheduleNames
    A3 , \field Compressor Type
         \required-field
         \type choice
@@ -60107,7 +60107,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
        \type object-list
-       \object-list ScheduleNames 
+       \object-list ScheduleNames
   N1,  \field Number of Speeds
        \units dimensionless
        \type integer
@@ -67863,49 +67863,49 @@ AirLoopHVAC:ControllerList,
        \required-field
        \type object-list
        \object-list AirLoopControllers
-  A4 , \field  Controller 2 Object Type
+  A4 , \field Controller 2 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A5 , \field Controller 2 Name
        \type object-list
        \object-list AirLoopControllers
-  A6 , \field  Controller 3 Object Type
+  A6 , \field Controller 3 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A7 , \field Controller 3 Name
        \type object-list
        \object-list AirLoopControllers
-  A8 , \field  Controller 4 Object Type
+  A8 , \field Controller 4 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A9 , \field Controller 4 Name
        \type object-list
        \object-list AirLoopControllers
-  A10, \field  Controller 5 Object Type
+  A10, \field Controller 5 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A11, \field Controller 5 Name
        \type object-list
        \object-list AirLoopControllers
-  A12, \field  Controller 6 Object Type
+  A12, \field Controller 6 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A13, \field Controller 6 Name
        \type object-list
        \object-list AirLoopControllers
-  A14, \field  Controller 7 Object Type
+  A14, \field Controller 7 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A15, \field Controller 7 Name
        \type object-list
        \object-list AirLoopControllers
-  A16, \field  Controller 8 Object Type
+  A16, \field Controller 8 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
@@ -81355,7 +81355,6 @@ HeatExchanger:FluidToFluid,
         \note This field controls end use reporting for heat transfer meters
         \type choice
         \key FreeCooling
-        \key HeatRecovery
         \key HeatRejection
         \key HeatRecoveryForCooling
         \key HeatRecoveryForHeating
@@ -83459,19 +83458,13 @@ PlantLoop,
         \key LoopFlowCorrection
         \key None
         \default None
-   N6,  \field Loop Circulation Time
+   N6;  \field Loop Circulation Time
         \note This field is only used to autocalculate the Plant Loop Volume.
         \note Loop Volume = Loop Circulation Time * Maximum Loop Flow Rate
         \type real
         \units minutes
         \minimum 0.0
         \default 2.0
-  A19;  \field Water Loop Type
-        \type choice
-        \key HotWater
-        \key ChilledWater
-        \key None
-        \default None
 
 CondenserLoop,
        \memo Defines a central plant condenser loop. CondenserLoop and PlantLoop are nearly
@@ -98582,7 +98575,11 @@ Table:IndependentVariable,
        \begin-extensible
   N7,  \field Value 2
        \type real
-  N8,N9,N10,N11,N12,N13,N14,N15,N16,N17,N18,N19,N20;
+  N8,N9,N10,N11,N12,N13,N14,N15,N16,N17,N18,N19,N20,N21,N22,N23,N24,N25,N26,N27,N28,N29,N30,  \note fields as indicated
+  N31,N32,N33,N34,N35,N36,N37,N38,N39,N40,N41,N42,N43,N44,N45,N46,N47,N48,N49,N50,  \note fields as indicated
+  N51,N52,N53,N54,N55,N56,N57,N58,N59,N60,N61,N62,N63,N64,N65,N66,N67,N68,N69,N70,  \note fields as indicated
+  N71,N72,N73,N74,N75,N76,N77,N78,N79,N80,N81,N82,N83,N84,N85,N86,N87,N88,N89,N90,  \note fields as indicated
+  N91,N92,N93,N94,N95,N96,N97,N98,N99,N100;  \note fields as indicated
 
 Table:IndependentVariableList,
        \memo A sorted list of independent variables used by one or more Table:Lookup

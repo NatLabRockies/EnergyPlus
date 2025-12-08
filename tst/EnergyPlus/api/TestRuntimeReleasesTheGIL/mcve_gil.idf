@@ -1,9 +1,6 @@
 ! The PythonPlugin referenced here has a broken import
 ! This is a test for #10842
 
-!  Version,
-!    25.2;                   !- Version Identifier
-
   Timestep,6;
 
   SimulationControl,

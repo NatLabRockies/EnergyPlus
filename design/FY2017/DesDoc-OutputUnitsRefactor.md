@@ -5,20 +5,20 @@ Design Document - Output Units Refactoring
 
  - June 1, 2017
  - June 20, 2017 - Answers to questions at end.
- 
+
 
 ## New Feature Proposal ##
 
-No new feature proposal was produced since this will not impact input or output and is purely a refactoring effort.  
+No new feature proposal was produced since this will not impact input or output and is purely a refactoring effort.
 
 ## Overview ##
 
-Refactor the SetUpOutputVariable call and all related functions, so that units are stored in a separate data field from the variable name, and passed as an integer or enum value instead of a string. The corresponding string in International System of Units (SI units), string in Imperial Units (IP units), and conversion shall all be predefined. 
+Refactor the SetUpOutputVariable call and all related functions, so that units are stored in a separate data field from the variable name, and passed as an integer or enum value instead of a string. The corresponding string in International System of Units (SI units), string in Imperial Units (IP units), and conversion shall all be predefined.
 
 The unit type designator may be implemented to have multiple "flavors" for the same unit (for example, Watts), such as electricW, refrigerationW, etc. for cases where there is more than one IP unit for a given SI unit.
 
 
-## Approach 
+## Approach
 
 Currently, SetupOutputVariable() has three functions with the following signatures:
 
@@ -77,7 +77,7 @@ In each case the VariableName string contains the units being used in brackets s
 - SetupOutputVariable( "ITE Air Mass Flow Rate [kg/s]", ...
 - SetupOutputVariable( "Contaminant Source or Sink CO2 Gain Volume Flow Rate [m3/s]", ...
 
-These will be changed to 
+These will be changed to
 
 - SetupOutputVariable( "Zone Total Internal Radiant Heating Energy", unitJ, ...
 - SetupOutputVariable( "ITE Air Mass Flow Rate", unitkg_s, ...
@@ -137,9 +137,9 @@ SetupOutputVariable(
 );
 ```
 
-The exact location of the inserted VariableUnit is still to be detemined. 
+The exact location of the inserted VariableUnit is still to be detemined.
 
-Overall in the EnergyPlus code, SetupOutputVariable is called over 3900 times so this conversion process will be performed using either search and replace using regular expressions in a text editor or using a custom Python script. 
+Overall in the EnergyPlus code, SetupOutputVariable is called over 3900 times so this conversion process will be performed using either search and replace using regular expressions in a text editor or using a custom Python script.
 
 Other functions that will change are:
 
@@ -403,7 +403,7 @@ An alternative enum list would be to use unit types rather than units.  From the
        \key Power
 ```
 
-This list would have to be grealy expanded but would work towards consistency between input and output.  
+This list would have to be grealy expanded but would work towards consistency between input and output.
 
 For the sake of completeness, the IDF Editor also has a long list of 155 unit conversions that are used to allow users to use IP units in IDF Editor and for the IDF produced be in SI. While it is separate code, perhaps the units themselves should be expressed consistently.
 
@@ -413,7 +413,7 @@ For the sake of completeness, the IDF Editor also has a long list of 155 unit co
 Given the large number of source code changes across so many files, the refactoring process will take three steps:
 
 - Make all SetupOutputVariable() calls consistent on a single line and with spaces before the bracket and make sure no changes are found with the units tests and regression tests.
-- Change the calls to SetupOutputVariable() but make the changes within that function as minimal as possible to see if any changes are with the unit tests and regression tests. 
+- Change the calls to SetupOutputVariable() but make the changes within that function as minimal as possible to see if any changes are with the unit tests and regression tests.
 - After no changes are detected, the SetupOutputVariable() functions and other functions will be refactored.
 
 The goal is to make small changes that will not show any diffs throughout the refactoring process.
@@ -441,7 +441,7 @@ Should units be expressed in unit types instead of units (Temperature, Volumetri
 
 - No, this would not be feasible for the wide variety of units used and might get more confusing. This could also be revisited in the future.
 
-Should units used in tabular reports be included in this change so there is a single set of units for all outputs? 
+Should units used in tabular reports be included in this change so there is a single set of units for all outputs?
 
 - Yes.
 
@@ -455,8 +455,4 @@ Is the three step implementation process reasonable?
 
 Should we provide an option to provide IP converted values directly from EnergyPlus to the  ESO and MTR (and thus the normal CSV files)?
 
-- We probably won't have enough time to take this on and we did it would need some discussion and an NFP. 
-
-
-
-
+- We probably won't have enough time to take this on and we did it would need some discussion and an NFP.

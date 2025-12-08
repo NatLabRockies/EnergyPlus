@@ -193,7 +193,7 @@
 !
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 
@@ -6379,9 +6379,9 @@
     -1.111,                  !- <none>
     -1.110,                  !- <none>
     1.666,                   !- <none>
-    4.44,                    !- Extended Field
-    7.222,                   !- Extended Field
-    10.;                     !- Extended Field
+    4.44,                    !- <none>
+    7.222,                   !- <none>
+    10.;                     !- <none>
 
   Table:IndependentVariable,
     ColmacCoilInc_IndependentVariable2,  !- Name

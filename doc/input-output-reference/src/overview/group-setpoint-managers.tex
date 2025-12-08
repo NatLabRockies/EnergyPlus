@@ -137,12 +137,11 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Following is an example of the input for a Scheduled Setpoint Manager.
 
 \begin{lstlisting}
-
 SetpointManager:Scheduled,
-  Supply Air Temp Manager 1,   !- Name
-  Temperature,                               !- Control Variable
-  Seasonal Reset Supply Air Temp Sch,   !- Schedule Name
-  VAV Sys 1 Outlet Node;           !- Setpoint Node or NodeList Name
+  Supply Air Temp Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  Seasonal Reset Supply Air Temp Sch,  !- Schedule Name
+  VAV Sys 1 Outlet Node;      !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:Scheduled:DualSetpoint}\label{setpointmanagerscheduleddualsetpoint}
@@ -174,13 +173,12 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Following is an example of the input for a SetpointManager:Scheduled:DualSetpoint object.
 
 \begin{lstlisting}
-
 SetpointManager:Scheduled:DualSetpoint,
-  Water Loop Setpoint Manager,       !- Name
-  Temperature,                                       !- Control Variable
-  Plant Loop High Temp Schedule,   !- High Setpoint Schedule Name
-  Plant Loop Low Temp Schedule,     !- Low Setpoint Schedule Name
-  Plant Supply Outlet Node;             !- Setpoint Node or NodeList Name
+  Water Loop Setpoint Manager,!- Name
+  Temperature,                !- Control Variable
+  Plant Loop High Temp Schedule,  !- High Setpoint Schedule Name
+  Plant Loop Low Temp Schedule,  !- Low Setpoint Schedule Name
+  Plant Supply Outlet Node;   !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:OutdoorAirReset}\label{setpointmanageroutdoorairreset}
@@ -253,19 +251,18 @@ The outdoor air high temperature in \(^{o}\)C for the second supply air temperat
 Below is an example of the input for an Outdoor Air Reset Setpoint Manager:
 
 \begin{lstlisting}
-
 SetpointManager:OutdoorAirReset,
-  Supply Air Temp Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  16.7,   !- Setpoint at Outdoor Low Temperature {C}
-  0.0,     !- Outdoor Low Temperature {C}
-  12.8,   !- Setpoint at Outdoor High Temperature {C}
-  32.0,   !- Outdoor High Temperature {C}
-  Supply Air Temp Nodes;   !- Setpoint Node or NodeList Name
+  Supply Air Temp Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  16.7,                       !- Setpoint at Outdoor Low Temperature {C}
+  0.0,                        !- Outdoor Low Temperature {C}
+  12.8,                       !- Setpoint at Outdoor High Temperature {C}
+  32.0,                       !- Outdoor High Temperature {C}
+  Supply Air Temp Nodes;      !- Setpoint Node or NodeList Name
 
-  NodeList,
-  Supply Air Temp Nodes, !- Name
-  Air Loop Outlet Node;   !- Node 1 Name
+NodeList,
+  Supply Air Temp Nodes,      !- Name
+  Air Loop Outlet Node;       !- Node 1 Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:Reheat}\label{setpointmanagersinglezonereheat}
@@ -309,22 +306,20 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example input for a SetpointManager:SingleZone:Reheat object.
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:Reheat,
-  Supply Air Temp Manager,   !- Name
-  Temperature,  !- Control Variable
-  13.,  !- Minimum Supply Air Temperature {C}
-  45.,  !- Maximum Supply Air Temperature {C}
-  NORTH ZONE,     !- Control Zone Name
-  Zone 3 Node,   !- Zone Node Name
-  Zone 3 Inlet Node,  !- Zone Inlet Node Name
-  Supply Air Temp Nodes;  !- Setpoint Node or NodeList Name
+  Supply Air Temp Manager,    !- Name
+  Temperature,                !- Control Variable
+  13.,                        !- Minimum Supply Air Temperature {C}
+  45.,                        !- Maximum Supply Air Temperature {C}
+  NORTH ZONE,                 !- Control Zone Name
+  Zone 3 Node,                !- Zone Node Name
+  Zone 3 Inlet Node,          !- Zone Inlet Node Name
+  Supply Air Temp Nodes;      !- Setpoint Node or NodeList Name
 
-
-  NodeList,
-  Supply Air Temp Nodes, !- Name
-  Heating Coil Air Inlet Node,   !- Node 1 Name
-  Air Loop Outlet Node; !- Node 2 Name
+NodeList,
+  Supply Air Temp Nodes,      !- Name
+  Heating Coil Air Inlet Node,!- Node 1 Name
+  Air Loop Outlet Node;       !- Node 2 Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:Heating}\label{setpointmanagersinglezoneheating}
@@ -368,16 +363,15 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example input for a SetpointManager:SingleZone:Heating object.
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:Heating,
-  Zone 1 Heating Supply Air Temp Manager,   !- Name
-  Temperature,                         !- Control Variable
-  7.22,                                       !- Minimum Supply Air Temperature {C}
-  45.,                                         !- Maximum Supply Air Temperature {C}
-  Zone 1,                                   !- Control Zone Name
-  Zone 1 Zone Node,               !- Zone Node Name
-  Zone 1 Supply Inlet,         !- Zone Inlet Node Name
-  Zone 1 Heating Coil Outlet;   !- Setpoint Node or NodeList Name
+  Zone 1 Heating Supply Air Temp Manager,  !- Name
+  Temperature,                !- Control Variable
+  7.22,                       !- Minimum Supply Air Temperature {C}
+  45.,                        !- Maximum Supply Air Temperature {C}
+  Zone 1,                     !- Control Zone Name
+  Zone 1 Zone Node,           !- Zone Node Name
+  Zone 1 Supply Inlet,        !- Zone Inlet Node Name
+  Zone 1 Heating Coil Outlet; !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:Cooling}\label{setpointmanagersinglezonecooling}
@@ -421,16 +415,15 @@ The name of a Node List object containing the names of the HVAC system nodes or 
 Below is an example input for a SetpointManager:SingleZone:Cooling object.
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:Cooling,
-  Zone 1 Cooling Supply Air Temp Manager,   !- Name
-  Temperature,                         !- Control Variable
-  7.22,                                       !- Minimum Supply Air Temperature {C}
-  45.,                                         !- Maximum Supply Air Temperature {C}
-  Zone 1,                                   !- Control Zone Name
-  Zone 1 Zone Node,               !- Zone Node Name
-  Zone 1 Supply Inlet,         !- Zone Inlet Node Name
-  Zone 1 Cooling Coil Outlet;   !- Setpoint Node or NodeList Name
+  Zone 1 Cooling Supply Air Temp Manager,  !- Name
+  Temperature,                !- Control Variable
+  7.22,                       !- Minimum Supply Air Temperature {C}
+  45.,                        !- Maximum Supply Air Temperature {C}
+  Zone 1,                     !- Control Zone Name
+  Zone 1 Zone Node,           !- Zone Node Name
+  Zone 1 Supply Inlet,        !- Zone Inlet Node Name
+  Zone 1 Cooling Coil Outlet; !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:Humidity:Minimum}\label{setpointmanagersinglezonehumidityminimum}
@@ -456,17 +449,15 @@ The name of the zone node for the humidity control zone (as specified in the obj
 An IDF example for this setpoint manager is shown below with the required humidistat:
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:Humidity:Minimum,
-  Zone Min Set Point Manager,  !- Name
-  Air Loop Outlet Node,        !- Setpoint Node or NodeList Name
-  Zone 2 Node;                 !- Control Zone Air Node Name
+  Zone Min Set Point Manager, !- Name
+  Air Loop Outlet Node,       !- Setpoint Node or NodeList Name
+  Zone 2 Node;                !- Control Zone Air Node Name
 
-
-  ZoneControl:Humidistat,
-  Zone 2 Humidistat,           !- Name
-  ZONE 2,                      !-Zone Name
-  Min rel Hum Set Sch2;        !- Humidifying Relative Humidity Setpoint Schedule Name
+ZoneControl:Humidistat,
+  Zone 2 Humidistat,          !- Name
+  ZONE 2,                     !- Zone Name
+  Min rel Hum Set Sch2;       !- Humidifying Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:Humidity:Maximum}\label{setpointmanagersinglezonehumiditymaximum}
@@ -494,36 +485,32 @@ The name of the zone air node for the humidity control zone (as specified in the
 An example of this object in an input data file (IDF), along with a temperature set point manager, humidistat, and a simple controller, is shown below:
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:Humidity:Maximum,
-  Zone Max Set Point Manager,           !- Name
-  VAV Sys 1 Outlet Node,                !- Setpoint Node or NodeList Name
-  Zone 2 Node;                          !-Control Zone Air Node Name
+  Zone Max Set Point Manager, !- Name
+  VAV Sys 1 Outlet Node,      !- Setpoint Node or NodeList Name
+  Zone 2 Node;                !- Control Zone Air Node Name
 
+SetpointManager:Scheduled,
+  Scheduled Set Point Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  Seasonal Reset Supply Air Temp Sch,  !- Schedule Name
+  VAV Sys 1 Outlet Node;      !- Setpoint Node or NodeList Name
 
-  SetpointManager:Scheduled,
-  Scheduled Set Point Manager 1,        !- Name
-  Temperature,                          !- Control Variable
-  Seasonal Reset Supply Air Temp Sch,   !- Schedule Name
-  VAV Sys 1 Outlet Node;                !- Setpoint Node or NodeList Name
+ZoneControl:Humidistat,
+  Zone 2 Humidistat,          !- Name
+  ZONE 2,                     !- Zone Name
+  Min rel Hum Set Sch2;       !- Humidifying Relative Humidity Setpoint Schedule Name
 
-
-  ZoneControl:Humidistat,
-  Zone 2 Humidistat,                    !-Name
-  ZONE 2,                               !- Zone Name
-  Min rel Hum Set Sch2;                 !- Humidifying Relative Humidity Setpoint Schedule Name
-
-
-  Controller:WaterCoil,
-  Central Cooling Coil Controller 1,    !- Name
-  TEMPandHUMRAT,                        !- Control Variable
-  Reverse,                              !- Action
-  FLOW,                                 !- Actuator Variable
-  VAV Sys 1 Outlet Node,                !- Sensor Node Name
-  Main Cooling Coil 1 Water Inlet Node, !- Actuator Node Name
-  0.002,                                !- Controller Convergence Tolerance {deltaC}
-  0.025,                                !- Maximum Actuated Flow {m3/s}
-  0.0;                                  !- Minimum Actuated Flow {m3/s}
+Controller:WaterCoil,
+  Central Cooling Coil Controller 1,  !- Name
+  TEMPandHUMRAT,              !- Control Variable
+  Reverse,                    !- Action
+  FLOW,                       !- Actuator Variable
+  VAV Sys 1 Outlet Node,      !- Sensor Node Name
+  Main Cooling Coil 1 Water Inlet Node,  !- Actuator Node Name
+  0.002,                      !- Controller Convergence Tolerance {deltaC}
+  0.025,                      !- Maximum Actuated Flow {m3/s}
+  0.0;                        !- Minimum Actuated Flow {m3/s}
 \end{lstlisting}
 
 \subsection{SetpointManager:MixedAir}\label{setpointmanagermixedair}
@@ -577,31 +564,29 @@ In order to prevent cooling coil freezing during economizer operation, the minim
 Below is an example input for a Mixed Air Setpoint Manager.
 
 \begin{lstlisting}
+SetpointManager:SingleZone:Reheat,  !- establishes the setpoint at the system outlet node
+  Supply Air Temp Manager,    !- Name
+  Temperature,                !- Control Variable
+  13.,                        !- Minimum Supply Air Temperature
+  45.,                        !- Maximum Supply Air Temperature
+  NORTH ZONE,                 !- Control Zone Name
+  Zone 3 Node,                !- Zone Node Name
+  Zone 3 Inlet Node,          !- Zone Inlet Node Name
+  Supply Air Temp Nodes;      !- Setpoint Node or NodeList Name
 
-SetpointManager:SingleZone:Reheat, ! establishes the setpoint at the system outlet node
-  Supply Air Temp Manager,   !- Name
-  Temperature,   !- Control Variable
-  13.,  !- Minimum Supply Air Temperature
-  45.,  !- Maximum Supply Air Temperature
-  NORTH ZONE,  !- Control Zone Name
-  Zone 3 Node,  !- Zone Node Name
-  Zone 3 Inlet Node,  !- Zone Inlet Node Name
-  Supply Air Temp Nodes;   !- Setpoint Node or NodeList Name
-
-
-  SetpointManager:MixedAir, ! uses the system outlet setpoint to establish the mixed air setpoint
+SetpointManager:MixedAir,     !- uses the system outlet setpoint to establish the mixed air setpoint
   Mixed Air Temp Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  Air Loop Outlet Node,                   !- Reference Setpoint Node Name
-  Heating Coil Air Outlet Node,   !- Fan Inlet Node Name
-  Air Loop Outlet Node,                   !- Fan Outlet Node Name
-  Mixed Air Nodes;                             !- Setpoint Node or NodeList Name
+  Temperature,                !- Control Variable
+  Air Loop Outlet Node,       !- Reference Setpoint Node Name
+  Heating Coil Air Outlet Node,  !- Fan Inlet Node Name
+  Air Loop Outlet Node,       !- Fan Outlet Node Name
+  Mixed Air Nodes;            !- Setpoint Node or NodeList Name
 
+NodeList, Supply Air Temp Nodes,
+  Air Loop Outlet Node;       !- Setpoint Nodes
 
-  NodeList, Supply Air Temp Nodes,
-  Air Loop Outlet Node; ! Setpoint Nodes
-  NodeList, Mixed Air Nodes,
-  Mixed Air Node; ! Setpoint Nodes
+NodeList, Mixed Air Nodes,
+  Mixed Air Node;             !- Setpoint Nodes
 \end{lstlisting}
 
 \subsection{SetpointManager:OutdoorAirPretreat}\label{setpointmanageroutdoorairpretreat}
@@ -673,19 +658,18 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example input for an Outdoor Air Pretreat Setpoint Manager.
 
 \begin{lstlisting}
-
 SetpointManager:OutdoorAirPretreat,
-  DXSystem 1 Desiccant Set Point Manager,   !- Name
+  DXSystem 1 Desiccant Set Point Manager,  !- Name
   MaximumHumidityRatio,       !- Control Variable
-  -99,                                         !- Minimum Setpoint Temperature {C}
-  99,                                           !- Maximum Setpoint Temperature {C}
-  0.00001,                                 !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  1.0,                                         !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  DXSystem 1 Fan Air Inlet Node,   !- Reference Setpoint Node Name
-  DXSystem 1 Mixed Air Node,           !- Mixed Air Stream Node Name
-  Heat Recovery Outlet Node,           !- Outdoor Air Stream Node Name
-  DXSystem 1 Air Loop Inlet Node, !- Return Air Stream Node Name
-  Desiccant Process Outlet Node;   !- Setpoint Node or NodeList Name
+  -99,                        !- Minimum Setpoint Temperature {C}
+  99,                         !- Maximum Setpoint Temperature {C}
+  0.00001,                    !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  1.0,                        !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  DXSystem 1 Fan Air Inlet Node,  !- Reference Setpoint Node Name
+  DXSystem 1 Mixed Air Node,  !- Mixed Air Stream Node Name
+  Heat Recovery Outlet Node,  !- Outdoor Air Stream Node Name
+  DXSystem 1 Air Loop Inlet Node,  !- Return Air Stream Node Name
+  Desiccant Process Outlet Node;  !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:Warmest}\label{setpointmanagerwarmest}
@@ -725,28 +709,25 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example input for a Warmest Setpoint Manager.
 
 \begin{lstlisting}
-
 SetpointManager:Warmest,
-  Supply Air Temperature Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  VAV Sys 1,   !- HVAC Air Loop Name
-  11.2,   !- Minimum Setpoint Temperature
-  16.,   !- Maximum Setpoint Temperature
-  MaximumTemperature,   !- Strategy
-  Supply Air Temp Nodes 1;   !- Setpoint Node or NodeList Name
+  Supply Air Temperature Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  11.2,                       !- Minimum Setpoint Temperature
+  16.,                        !- Maximum Setpoint Temperature
+  MaximumTemperature,         !- Strategy
+  Supply Air Temp Nodes 1;    !- Setpoint Node or NodeList Name
 
-
-  SetpointManager:MixedAir,
+SetpointManager:MixedAir,
   Mixed Air Temp Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  VAV Sys 1 Outlet Node,   !- Reference Setpoint Node Name
-  Main Heating Coil 1 Outlet Node,   !- Fan Inlet Node Name
-  VAV Sys 1 Outlet Node,   !- Fan Outlet Node Name
-  Mixed Air Node 1;             !- Setpoint Node or NodeList Name
+  Temperature,                !- Control Variable
+  VAV Sys 1 Outlet Node,      !- Reference Setpoint Node Name
+  Main Heating Coil 1 Outlet Node,  !- Fan Inlet Node Name
+  VAV Sys 1 Outlet Node,      !- Fan Outlet Node Name
+  Mixed Air Node 1;           !- Setpoint Node or NodeList Name
 
-
-  NodeList, Supply Air Temp Nodes 1,
-  VAV Sys 1 Outlet Node; ! Setpoint Node
+NodeList, Supply Air Temp Nodes 1,
+  VAV Sys 1 Outlet Node;      !- Setpoint Node
 \end{lstlisting}
 
 \subsection{SetpointManager:Coldest}\label{setpointmanagercoldest}
@@ -786,59 +767,53 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example input for a Coldest Setpoint Manager.
 
 \begin{lstlisting}
-
 Controller:Simple,
-  Central Cooling Coil Controller 1,   !- Name
-  Temperature,   !- Control Variable
-  Reverse,   !- Action
-  Flow,         !- Actuator Variable
-  VAV Sys 1 Cold Outlet Node,                       !- Sensor Node Name
-  Main Cooling Coil 1 Water Inlet Node,   !- Actuator Node Name
-  0.001,       !- Controller Convergence Tolerance {deltaC}
-  autosize, !- Maximum Actuated Flow {m3/s}
-  0.0;           !- Minimum Actuated Flow {m3/s}
+  Central Cooling Coil Controller 1,  !- Name
+  Temperature,                !- Control Variable
+  Reverse,                    !- Action
+  Flow,                       !- Actuator Variable
+  VAV Sys 1 Cold Outlet Node, !- Sensor Node Name
+  Main Cooling Coil 1 Water Inlet Node,  !- Actuator Node Name
+  0.001,                      !- Controller Convergence Tolerance {deltaC}
+  autosize,                   !- Maximum Actuated Flow {m3/s}
+  0.0;                        !- Minimum Actuated Flow {m3/s}
 
+Controller:WaterCoil,
+  Central Heating Coil Controller 1,  !- Name
+  Temperature,                !- Control Variable
+  Normal,                     !- Action
+  Flow,                       !- Actuator Variable
+  VAV Sys 1 Hot Outlet Node,  !- Sensor Node Name
+  Main Heating Coil 1 Water Inlet Node,  !- Actuator Node Name
+  0.001,                      !- Controller Convergence Tolerance {deltaC}
+  autosize,                   !- Maximum Actuated Flow {m3/s}
+  0.0;                        !- Minimum Actuated Flow {m3/s}
 
-  Controller:WaterCoil,
-  Central Heating Coil Controller 1,   !- Name
-  Temperature,   !- Control Variable
-  Normal,   !- Action
-  Flow,       !- Actuator Variable
-  VAV Sys 1 Hot Outlet Node,                         !- Sensor Node Name
-  Main Heating Coil 1 Water Inlet Node,   !- Actuator Node Name
-  0.001,         !- Controller Convergence Tolerance {deltaC}
-  autosize,   !- Maximum Actuated Flow {m3/s}
-  0.0;             !- Minimum Actuated Flow {m3/s}
+SetpointManager:Warmest,
+  Supply Air Temperature Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  11.2,                       !- Minimum Setpoint Temperature {C}
+  16.,                        !- Maximum Setpoint Temperature {C}
+  MaximumTemperature,         !- Strategy
+  Supply Air Temp Nodes 1;    !- Setpoint Node or NodeList Name
 
+NodeList,
+  Supply Air Temp Nodes 1,    !- Name
+  VAV Sys 1 Cold Outlet Node; !- Node 1 Name
 
-  SetpointManager:Warmest,
-  Supply Air Temperature Manager 1,   !- Name
-  Temperature,             !- Control Variable
-  VAV Sys 1,   !- HVAC Air Loop Name
-  11.2,             !- Minimum Setpoint Temperature {C}
-  16.,               !- Maximum Setpoint Temperature {C}
-  MaximumTemperature,             !- Strategy
-  Supply Air Temp Nodes 1;   !- Setpoint Node or NodeList Name
+SetpointManager:Coldest,
+  Supply Air Temperature Manager 2,  !- Name
+  Temperature,                !- Control Variable
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  25.,                        !- Minimum Setpoint Temperature {C}
+  50.,                        !- Maximum Setpoint Temperature {C}
+  MinimumTemperature,         !- Strategy
+  Supply Air Temp Nodes 2;    !- Setpoint Node or NodeList Name
 
-
-  NodeList,
-  Supply Air Temp Nodes 1,         !- Name
-  VAV Sys 1 Cold Outlet Node;   !- Node 1 Name
-
-
-  SetpointManager:Coldest,
-  Supply Air Temperature Manager 2,   !- Name
-  Temperature,             !- Control Variable
-  VAV Sys 1,   !- HVAC Air Loop Name
-  25.,               !- Minimum Setpoint Temperature {C}
-  50.,               !- Maximum Setpoint Temperature {C}
-  MinimumTemperature,             !- Strategy
-  Supply Air Temp Nodes 2;   !- Setpoint Node or NodeList Name
-
-
-  NodeList,
-  Supply Air Temp Nodes 2,       !- Name
-  VAV Sys 1 Hot Outlet Node;   !- Node 1 Name
+NodeList,
+  Supply Air Temp Nodes 2,    !- Name
+  VAV Sys 1 Hot Outlet Node;  !- Node 1 Name
 \end{lstlisting}
 
 \subsection{SetpointManager:ReturnAirBypassFlow}\label{setpointmanagerreturnairbypassflow}
@@ -868,12 +843,11 @@ The name of a schedule whose values are temperatures in \(^{o}\)C. The schedule 
 The following shows an example input for SetpointManager:ReturnAirBypassFlow.
 
 \begin{lstlisting}
-
 SetpointManager:ReturnAirBypassFlow,
-  RETURN AIR BYPASS Manager 1,   !- Name
-  Flow,   !- Control Variable
-  VAV Sys 1,   !- HVAC Air Loop Name
-  Seasonal Reset Supply Air Temp Sch;   !- Temperature Setpoint Schedule Name
+  RETURN AIR BYPASS Manager 1,!- Name
+  Flow,                       !- Control Variable
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  Seasonal Reset Supply Air Temp Sch;  !- Temperature Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:WarmestTemperatureFlow}\label{setpointmanagerwarmesttemperatureflow}
@@ -923,29 +897,26 @@ The minimum value of the ratio of the actual air flow rate to the maximum air fl
 Below is an example input for a \hyperref[setpointmanagerwarmest]{SetpointManager:Warmest}TemperatureFlow object.
 
 \begin{lstlisting}
-
 SetpointManager:WarmestTemperatureFlow,
-  Supply Air Temperature Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  VAV Sys 1,   !- HVAC Air Loop Name
-  11.2,   !- Minimum Setpoint Temperature
-  16.,     !- Maximum Setpoint Temperature
-  TemperatureFirst,   !- Strategy
-  Supply Air Temp Nodes 1,   !- Setpoint Node or NodeList Name
-  0.3;   !- Minimum Turndown Ratio
+  Supply Air Temperature Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  11.2,                       !- Minimum Setpoint Temperature
+  16.,                        !- Maximum Setpoint Temperature
+  TemperatureFirst,           !- Strategy
+  Supply Air Temp Nodes 1,    !- Setpoint Node or NodeList Name
+  0.3;                        !- Minimum Turndown Ratio
 
-
-  SetpointManager:MixedAir,
+SetpointManager:MixedAir,
   Mixed Air Temp Manager 1,   !- Name
-  Temperature,   !- Control Variable
-  VAV Sys 1 Outlet Node,   !- Reference Setpoint Node Name
-  Main Heating Coil 1 Outlet Node,   !- Fan Inlet Node Name
-  VAV Sys 1 Outlet Node,   !- Fan Outlet Node Name
-  Mixed Air Node 1;   !- Setpoint Node or NodeList Name
+  Temperature,                !- Control Variable
+  VAV Sys 1 Outlet Node,      !- Reference Setpoint Node Name
+  Main Heating Coil 1 Outlet Node,  !- Fan Inlet Node Name
+  VAV Sys 1 Outlet Node,      !- Fan Outlet Node Name
+  Mixed Air Node 1;           !- Setpoint Node or NodeList Name
 
-
-  NodeList, Supply Air Temp Nodes 1,
-  VAV Sys 1 Outlet Node; ! Set Point Node
+NodeList, Supply Air Temp Nodes 1,
+  VAV Sys 1 Outlet Node;      !- Set Point Node
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-032}
@@ -987,13 +958,12 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example of this object in an input file.
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:Cooling:Average,
-  Cooling Coil Air Sys Branch Set Point,   !- Name
-  Main Dual Duct Air Loop, !- HVAC Air Loop Name
-  12.0,                                       !- Minimum Setpoint Temperature {C}
-  22.0,                                       !- Maximum Setpoint Temperature {C}
-  Cooling Coil Supply Air Temp Nodes;   !- Setpoint Node or NodeList Name
+  Cooling Coil Air Sys Branch Set Point,  !- Name
+  Main Dual Duct Air Loop,    !- HVAC Air Loop Name
+  12.0,                       !- Minimum Setpoint Temperature {C}
+  22.0,                       !- Maximum Setpoint Temperature {C}
+  Cooling Coil Supply Air Temp Nodes;  !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:MultiZone:Heating:Average}\label{setpointmanagermultizoneheatingaverage}
@@ -1025,13 +995,12 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example of this object in an input file.
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:Heating:Average,
-  Heating Coil Air Sys Branch Set Point,   !- Name
-  Main Dual Duct Air Loop, !- HVAC Air Loop Name
-  24.0,                                       !- Minimum Setpoint Temperature {C}
-  41.0,                                       !- Maximum Setpoint Temperature {C}
-  Heating Coil Supply Air Temp Nodes;   !- Setpoint Node or NodeList Name
+  Heating Coil Air Sys Branch Set Point,  !- Name
+  Main Dual Duct Air Loop,    !- HVAC Air Loop Name
+  24.0,                       !- Minimum Setpoint Temperature {C}
+  41.0,                       !- Maximum Setpoint Temperature {C}
+  Heating Coil Supply Air Temp Nodes;  !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:MultiZone:MinimumHumidity:Average}\label{setpointmanagermultizoneminimumhumidityaverage}
@@ -1063,20 +1032,18 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An example of this object in an input data file (IDF), along with a humidistat object, is shown below.
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:MinimumHumidity:Average,
-  VAV_1 Humidifier HUMRAT setpoint, !- Name
-  VAV_1,                                                       !- HVAC Air Loop Name
-  0.003,                                                       !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  0.012,                                                       !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  VAV_1 Humidifier-Outlet Nodes List;           !- Setpoint Node or NodeList Name
+  VAV_1 Humidifier HUMRAT setpoint,  !- Name
+  VAV_1,                      !- HVAC Air Loop Name
+  0.003,                      !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  0.012,                      !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  VAV_1 Humidifier-Outlet Nodes List;  !- Setpoint Node or NodeList Name
 
-
-  ZoneControl:Humidistat,
-  ICU_NURSESTN_LOBBY_FLR_2 Humidistat,   !- Name
+ZoneControl:Humidistat,
+  ICU_NURSESTN_LOBBY_FLR_2 Humidistat,  !- Name
   ICU_NURSESTN_LOBBY_FLR_2,   !- Zone Name
-  MinRelHumSetSch,   !- Humidifying Relative Humidity Setpoint Schedule Name
-  MaxRelHumSetSch;   !- Dehumidifying Relative Humidity Setpoint Schedule Name
+  MinRelHumSetSch,            !- Humidifying Relative Humidity Setpoint Schedule Name
+  MaxRelHumSetSch;            !- Dehumidifying Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:MultiZone:MaximumHumidity:Average}\label{setpointmanagermultizonemaximumhumidityaverage}
@@ -1110,20 +1077,18 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An example of this object in an input data file (IDF), along with a humidistat object, is shown below:
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:MaximumHumidity:Average,
-  VAV_1_CoolC HUMRAT setpoint,           !- Name
-  VAV_1,                                                       !- HVAC Air Loop Name
-  0.005,                                                       !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  0.015,                                                       !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  VAV_1 DeHumidifier-Outlet Nodes List;       !- Setpoint Node or NodeList Name
+  VAV_1_CoolC HUMRAT setpoint,!- Name
+  VAV_1,                      !- HVAC Air Loop Name
+  0.005,                      !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  0.015,                      !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  VAV_1 DeHumidifier-Outlet Nodes List;  !- Setpoint Node or NodeList Name
 
-
-  ZoneControl:Humidistat,
-  ICU_NURSESTN_LOBBY_FLR_2 Humidistat,   !- Name
+ZoneControl:Humidistat,
+  ICU_NURSESTN_LOBBY_FLR_2 Humidistat,  !- Name
   ICU_NURSESTN_LOBBY_FLR_2,   !- Zone Name
-  MinRelHumSetSch,   !- Humidifying Relative Humidity Setpoint Schedule Name
-  MaxRelHumSetSch;   !- Dehumidifying Relative Humidity Setpoint Schedule Name
+  MinRelHumSetSch,            !- Humidifying Relative Humidity Setpoint Schedule Name
+  MaxRelHumSetSch;            !- Dehumidifying Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:MultiZone:Humidity:Minimum}\label{setpointmanagermultizonehumidityminimum}
@@ -1155,20 +1120,18 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An example of this object in an input data file (IDF), along with a humidistat object, is shown below.
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:Humidity:Minimum,
-  Main Humidifier setpoint Mgr,     !- Name
-  VAV Sys 1,                                           !- HVAC Air Loop Name
-  0.003,                                                   !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  0.015,                                                   !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  Main Humidifier Outlet Node;       !- Setpoint Node or NodeList Name
+  Main Humidifier setpoint Mgr,  !- Name
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  0.003,                      !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  0.015,                      !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  Main Humidifier Outlet Node;!- Setpoint Node or NodeList Name
 
-
-  ZoneControl:Humidistat,
-  Space5-1 Humidistat,         !- Name
-  SPACE5-1,                               !- Zone Name
+ZoneControl:Humidistat,
+  Space5-1 Humidistat,        !- Name
+  SPACE5-1,                   !- Zone Name
   HumidifyingHumSetSch,       !- Humidifying Relative Humidity Setpoint Schedule Name
-  DehumidifyingHumSetSch;   !- Dehumidifying Relative Humidity Setpoint Schedule Name
+  DehumidifyingHumSetSch;     !- Dehumidifying Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:MultiZone:Humidity:Maximum}\label{setpointmanagermultizonehumiditymaximum}
@@ -1202,18 +1165,16 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An example of this object in an input data file (IDF), along with a humidistat object, is shown below.
 
 \begin{lstlisting}
-
 SetpointManager:MultiZone:Humidity:Maximum,
-  Maximum Mzone HUMRAT setpoint,   !- Name
-  VAV Sys 1,                                           !- HVAC Air Loop Name
-  0.003,                                                   !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  0.015,                                                   !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
-  DeHumidifier-Outlet Nodes;           !- Setpoint Node or NodeList Name
+  Maximum Mzone HUMRAT setpoint,  !- Name
+  VAV Sys 1,                  !- HVAC Air Loop Name
+  0.003,                      !- Minimum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  0.015,                      !- Maximum Setpoint Humidity Ratio (kgWater/kgDryAir)
+  DeHumidifier-Outlet Nodes;  !- Setpoint Node or NodeList Name
 
-
-  ZoneControl:Humidistat,
-  Space5-1 Humidistat,         !- Name
-  SPACE5-1,                               !- Zone Name
+ZoneControl:Humidistat,
+  Space5-1 Humidistat,        !- Name
+  SPACE5-1,                   !- Zone Name
   HumidifyingHumSetSch,       !- Humidifying Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
@@ -1254,15 +1215,14 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An IDF example of use:
 
 \begin{lstlisting}
-
 SetpointManager:FollowOutdoorAirTemperature,
   MyCondenserControl,         !- Name
-  Temperature,                       !- Control Variable
-  OutdoorAirDryBulb,           !- Reference Temperature Type
-  0.5,                                       !- Offset Temperature Difference {deltaC}
-  200,                                       !- Maximum Setpoint Temperature {C}
-  21.1,                                     !- Minimum Setpoint Temperature {C}
-  CondSupplyOutletNode;     !- Setpoint Node or NodeList Name
+  Temperature,                !- Control Variable
+  OutdoorAirDryBulb,          !- Reference Temperature Type
+  0.5,                        !- Offset Temperature Difference {deltaC}
+  200,                        !- Maximum Setpoint Temperature {C}
+  21.1,                       !- Minimum Setpoint Temperature {C}
+  CondSupplyOutletNode;       !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:FollowSystemNodeTemperature}\label{setpointmanagerfollowsystemnodetemperature}
@@ -1306,16 +1266,15 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An IDF example of use:
 
 \begin{lstlisting}
-
 SetpointManager:FollowSystemNodeTemperature,
   MyCondenserControl,         !- Name
-  Temperature,                       !- Control Variable
-  MyOAinletNode,                   !- Reference Node Name
-  NodeDryBulb,                       !- Reference Temperature Type
-  0.5,                                       !- Offset Temperature Difference {deltaC}
-  200,                                       !- Maximum Setpoint Temperature {C}
-  24.0,                                     !- Minimum Setpoint Temperature {C}
-  CondSupplyOutletNode;     !- Setpoint Node or NodeList Name
+  Temperature,                !- Control Variable
+  MyOAinletNode,              !- Reference Node Name
+  NodeDryBulb,                !- Reference Temperature Type
+  0.5,                        !- Offset Temperature Difference {deltaC}
+  200,                        !- Maximum Setpoint Temperature {C}
+  24.0,                       !- Minimum Setpoint Temperature {C}
+  CondSupplyOutletNode;       !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:FollowGroundTemperature}\label{setpointmanagerfollowgroundtemperature}
@@ -1355,15 +1314,14 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 An IDF example of use:
 
 \begin{lstlisting}
-
 SetpointManager:FollowGroundTemperature,
-  MyCondenserControl,                   !- Name
-  Temperature,                                 !- Control Variable
-  Site:GroundTemperature:Deep, !- Reference Ground Temperature Object Type
-  1.5,                                                 !- Offset Temperature Difference {deltaC}
-  50.0,                                               !- Maximum Setpoint Temperature {C}
-  10.0,                                               !- Minimum Setpoint Temperature {C}
-  CondSupplyOutletNode;               !- Setpoint Node or NodeList Name
+  MyCondenserControl,         !- Name
+  Temperature,                !- Control Variable
+  Site:GroundTemperature:Deep,!- Reference Ground Temperature Object Type
+  1.5,                        !- Offset Temperature Difference {deltaC}
+  50.0,                       !- Maximum Setpoint Temperature {C}
+  10.0,                       !- Minimum Setpoint Temperature {C}
+  CondSupplyOutletNode;       !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:CondenserEnteringReset}\label{setpointmanagercondenserenteringreset}
@@ -1457,17 +1415,16 @@ This field defines the condenser node being controlled.
 Below is an example input for a CondenserEnteringReset Setpoint Manager.
 
 \begin{lstlisting}
-
 SetpointManager:CondenserEnteringReset,
-  Condenser Optimized Setpoint Manager,   !- Name
-  Temperature,                   !- Control Variable
-  DefaultCondEntSch,       !- Default Condenser Entering Water Temperature Schedule Name
-  MinDsnWBCurveName,       !- Minimum Design Wetbulb Temperature Curve Name
-  MinActWBCurveName,       !- Minimum Outside Air Wetbulb Temperature Curve Name
-  OptCondEntCurveName,   !- Optimized Cond Entering Water Temperature Curve Name
-  12,                                     !- Minimum Lift, C
-  32,                                     !- Maximum Condenser Entering Water Temp, C
-  25.56,                               !- Cooling Tower Design Inlet Air Wetbulb Temperature, C
+  Condenser Optimized Setpoint Manager,  !- Name
+  Temperature,                !- Control Variable
+  DefaultCondEntSch,          !- Default Condenser Entering Water Temperature Schedule Name
+  MinDsnWBCurveName,          !- Minimum Design Wetbulb Temperature Curve Name
+  MinActWBCurveName,          !- Minimum Outside Air Wetbulb Temperature Curve Name
+  OptCondEntCurveName,        !- Optimized Cond Entering Water Temperature Curve Name
+  12,                         !- Minimum Lift, C
+  32,                         !- Maximum Condenser Entering Water Temp, C
+  25.56,                      !- Cooling Tower Design Inlet Air Wetbulb Temperature, C
   Cond Water Setpoint Node;   !- Setpoint Node or Node List Name
 \end{lstlisting}
 
@@ -1500,12 +1457,11 @@ This field defines the condenser node being controlled.
 Below is an example input for a IdealCondenserEnteringReset Setpoint Manager.
 
 \begin{lstlisting}
-
 SetpointManager:CondenserEnteringReset:Ideal,
-  Condenser Optimized Setpoint Manager,   !- Name
-  Temperature,                   !- Control Variable
-  12,                                     !- Minimum Lift, C
-  32,                                     !- Maximum Condenser Entering Water Temp, C
+  Condenser Optimized Setpoint Manager,  !- Name
+  Temperature,                !- Control Variable
+  12,                         !- Minimum Lift, C
+  32,                         !- Maximum Condenser Entering Water Temp, C
   Cond Water Setpoint Node;   !- Setpoint Node or Node List Name
 \end{lstlisting}
 
@@ -1540,13 +1496,12 @@ This alpha field is the name of a \hyperref[nodelist]{NodeList} object containin
 An example input follows.
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:OneStageCooling,
-  ZSF2 cooling on_off , !- Name
-  -99.0 , !- Cooling Stage On Supply Air Setpoint Temperature
-  99.0 , !- Cooling Stage Off Supply Air Setpoint Temperature
-  ZSF2 , !- Control Zone Name
-  DX Cooling Coil 3 Outlet Node ; !- Setpoint Node or NodeList Name
+  ZSF2 cooling on_off,        !- Name
+  -99.0,                      !- Cooling Stage On Supply Air Setpoint Temperature
+  99.0,                       !- Cooling Stage Off Supply Air Setpoint Temperature
+  ZSF2,                       !- Control Zone Name
+  DX Cooling Coil 3 Outlet Node;  !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SingleZone:OneStageHeating}\label{setpointmanagersinglezoneonestageheating}
@@ -1578,13 +1533,12 @@ This alpha field is the name of a \hyperref[nodelist]{NodeList} object containin
 An example input follows.
 
 \begin{lstlisting}
-
 SetpointManager:SingleZone:OneStageHeating,
-  ZNF1 heating on_off , !- Name
-  99.0 , !- Heating Stage On Supply Air Setpoint Temperature
-  -99.0 , !- Heating Stage Off Supply Air Setpoint Temperature
-  ZNF1 , !- Control Zone Name
-  Main Heating Coil 2 Air Outlet Node ; !- Setpoint Node or NodeList Name
+  ZNF1 heating on_off,        !- Name
+  99.0,                       !- Heating Stage On Supply Air Setpoint Temperature
+  -99.0,                      !- Heating Stage Off Supply Air Setpoint Temperature
+  ZNF1,                       !- Control Zone Name
+  Main Heating Coil 2 Air Outlet Node;  !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:ReturnTemperature:ChilledWater}\label{setpointmanagerreturntemperaturechilledwater}
@@ -1630,45 +1584,44 @@ If the ``Return Temperature Setpoint Input Type'' field is ``scheduled'', this a
 An example idf input for a constant return reset setpoint manager is shown here:
 
 \begin{lstlisting}
-
 SetpointManager:ReturnTemperature:ChilledWater,
   Main Loop Setpoint Manager, !- Name
-  Supply Outlet Node,      !- Plant Loop Supply Outlet Node
-  Supply Inlet Node,       !- Plant Loop Supply Inlet Node
-  7.0,                     !- Minimum Supply Temperature Setpoint
-  10.0,                    !- Maximum Supply Temperature Setpoint
-  Constant,                !- Return Temperature Setpoint Input Type
-  12.0,                    !- Return Temperature Setpoint Constant Value
-  ;                        !- Return Temperature Setpoint Schedule Name
+  Supply Outlet Node,         !- Plant Loop Supply Outlet Node
+  Supply Inlet Node,          !- Plant Loop Supply Inlet Node
+  7.0,                        !- Minimum Supply Temperature Setpoint
+  10.0,                       !- Maximum Supply Temperature Setpoint
+  Constant,                   !- Return Temperature Setpoint Input Type
+  12.0,                       !- Return Temperature Setpoint Constant Value
+  ;                           !- Return Temperature Setpoint Schedule Name
 \end{lstlisting}
 
 Another example which uses the ``ReturnTemperatureSetpoint'' is shown here with the accompanying setpoint being used to set the setpoint on the return node:
 
 \begin{lstlisting}
-  SetpointManager:Scheduled,
-    Return Temperature Setpoint Manager,  !- Name
-    Temperature,             !- Control Variable
-    Return Temperature Sch,  !- Schedule Name
-    Supply Inlet Node;       !- Setpoint Node or NodeList Name
+SetpointManager:Scheduled,
+  Return Temperature Setpoint Manager,  !- Name
+  Temperature,                !- Control Variable
+  Return Temperature Sch,     !- Schedule Name
+  Supply Inlet Node;          !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \begin{lstlisting}
-  Schedule:Constant,
-    Return Temperature Sch,  !- Name
-    Any Number,              !- Schedule Limits
-    11.75;                   !- Value
+Schedule:Constant,
+  Return Temperature Sch,     !- Name
+  Any Number,                 !- Schedule Limits
+  11.75;                      !- Value
 \end{lstlisting}
 
 \begin{lstlisting}
-  SetpointManager:ReturnTemperature:ChilledWater,
-    Main Loop Setpoint Manager, !- Name
-    Supply Outlet Node,      !- Plant Loop Supply Outlet Node
-    Supply Inlet Node,       !- Plant Loop Supply Inlet Node
-    7.0,                     !- Minimum Supply Temperature Setpoint
-    10.0,                    !- Maximum Supply Temperature Setpoint
-    ReturnTemperatureSetpoint, !- Return Temperature Setpoint Input Type
-    ,                        !- Return Temperature Setpoint Constant Value
-    ;                        !- Return Temperature Setpoint Schedule Name
+SetpointManager:ReturnTemperature:ChilledWater,
+  Main Loop Setpoint Manager, !- Name
+  Supply Outlet Node,         !- Plant Loop Supply Outlet Node
+  Supply Inlet Node,          !- Plant Loop Supply Inlet Node
+  7.0,                        !- Minimum Supply Temperature Setpoint
+  10.0,                       !- Maximum Supply Temperature Setpoint
+  ReturnTemperatureSetpoint,  !- Return Temperature Setpoint Input Type
+  ,                           !- Return Temperature Setpoint Constant Value
+  ;                           !- Return Temperature Setpoint Schedule Name
 \end{lstlisting}
 
 \subsection{SetpointManager:ReturnTemperature:HotWater}\label{setpointmanagerreturntemperaturehotwater}
@@ -1714,25 +1667,24 @@ If the ``Return Temperature Setpoint Input Type'' field is ``scheduled'', this a
 An example idf input for a scheduled return reset setpoint manager is shown here:
 
 \begin{lstlisting}
-
 SetpointManager:ReturnTemperature:HotWater,
   Main Loop Setpoint Manager, !- Name
-  Supply Outlet Node,      !- Plant Loop Supply Outlet Node
-  Supply Inlet Node,       !- Plant Loop Supply Inlet Node
-  57.0,                    !- Minimum Supply Temperature Setpoint
-  60.0,                    !- Maximum Supply Temperature Setpoint
-  Scheduled,               !- Return Temperature Setpoint Input Type
-  ,                        !- Return Temperature Setpoint Constant Value
-  ReturnTempSchedule;      !- Return Temperature Setpoint Schedule Name
+  Supply Outlet Node,         !- Plant Loop Supply Outlet Node
+  Supply Inlet Node,          !- Plant Loop Supply Inlet Node
+  57.0,                       !- Minimum Supply Temperature Setpoint
+  60.0,                       !- Maximum Supply Temperature Setpoint
+  Scheduled,                  !- Return Temperature Setpoint Input Type
+  ,                           !- Return Temperature Setpoint Constant Value
+  ReturnTempSchedule;         !- Return Temperature Setpoint Schedule Name
 
-  Schedule:Compact,
-  ReturnTempSchedule,  !- Name
-  Any Number,              !- Schedule Type Limits Name
-  THROUGH: 12/31,          !- Field 1
-  FOR: AllDays,            !- Field 2
-  UNTIL: 12:00, 55,        !- Field 3
-  UNTIL: 17:00, 53,        !- Field 3
-  UNTIL: 24:00, 55;        !- Field 3
+Schedule:Compact,
+  ReturnTempSchedule,         !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  THROUGH: 12/31,             !- Field 1
+  FOR: AllDays,               !- Field 2
+  UNTIL: 12:00, 55,           !- Field 3
+  UNTIL: 17:00, 53,           !- Field 3
+  UNTIL: 24:00, 55;           !- Field 3
 \end{lstlisting}
 
 \subsection{SetpointManager:SystemNodeReset:Temperature}\label{setpointmanagersystemnoderesettemperature}
@@ -1783,16 +1735,15 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example, showing the inputs for SetpointManager:SystemNodeReset:Temperature.
 
 \begin{lstlisting}
-
 SetpointManager:SystemNodeReset:Temperature,
-  Supply Temp Manager,              !- Name
-  Temperature,                      !- Control Variable
-  16.7,                             !- Setpoint at Low Reference Temperature {C}
-  12.8,                             !- Setpoint at High Reference Temperature {C}
-  20.0,                             !- Low Reference Temperature {C}
-  23.3,                             !- High Reference Temperature {C}
-  Plenum-1 Out Node,                !- Reference Node Name
-  VAV Sys 1 Outlet Node;            !- Setpoint Node or NodeList Name
+  Supply Temp Manager,        !- Name
+  Temperature,                !- Control Variable
+  16.7,                       !- Setpoint at Low Reference Temperature {C}
+  12.8,                       !- Setpoint at High Reference Temperature {C}
+  20.0,                       !- Low Reference Temperature {C}
+  23.3,                       !- High Reference Temperature {C}
+  Plenum-1 Out Node,          !- Reference Node Name
+  VAV Sys 1 Outlet Node;      !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{SetpointManager:SystemNodeReset:Humidity}\label{setpointmanagersystemnoderesethumidity}
@@ -1843,14 +1794,13 @@ The name of a \hyperref[nodelist]{NodeList} object containing the names of the H
 Below is an example, showing the inputs for SetpointManager:SystemNodeReset:Humidity.
 
 \begin{lstlisting}
-
 SetpointManager:SystemNodeReset:Humidity,
-  Supply Humidity Manager,                !- Name
-  MaximumHumidityRatio,                   !- Control Variable
-  0.00924,                                !- Setpoint at Low Reference Humidity Ratio (kgWater/kgDryAir)
-  0.00600,                                !- Setpoint at High Reference Humidity Ratio (kgWater/kgDryAir)
-  0.00850,                                !- Low Reference Humidity Ratio (kgWater/kgDryAir)
-  0.01000,                                !- High Reference Humidity Ratio (kgWater/kgDryAir)
-  Plenum-1 Out Node,                      !- Reference Node Name
-  DOAS Cooling Coil Outlet;               !- Setpoint Node or NodeList Name
+  Supply Humidity Manager,    !- Name
+  MaximumHumidityRatio,       !- Control Variable
+  0.00924,                    !- Setpoint at Low Reference Humidity Ratio (kgWater/kgDryAir)
+  0.00600,                    !- Setpoint at High Reference Humidity Ratio (kgWater/kgDryAir)
+  0.00850,                    !- Low Reference Humidity Ratio (kgWater/kgDryAir)
+  0.01000,                    !- High Reference Humidity Ratio (kgWater/kgDryAir)
+  Plenum-1 Out Node,          !- Reference Node Name
+  DOAS Cooling Coil Outlet;   !- Setpoint Node or NodeList Name
 \end{lstlisting}

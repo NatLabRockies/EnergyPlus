@@ -1269,9 +1269,8 @@ Real64 FuncDetermineCoolantWaterExitTemp(Real64 const TcwIn,      // hot water i
 
     if (b * time < (-1.0 * Constant::MaxEXPArg)) {
         return -a / b;
-    } else {
-        return (TcwoutLast + a / b) * std::exp(b * time) - a / b;
     }
+    return (TcwoutLast + a / b) * std::exp(b * time) - a / b;
 }
 
 bool CheckMicroCHPThermalBalance(Real64 const NomHeatGen, // nominal heat generation rate for scaling

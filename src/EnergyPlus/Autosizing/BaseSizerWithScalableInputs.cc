@@ -111,7 +111,7 @@ void BaseSizerWithScalableInputs::initializeWithinEP(EnergyPlusData &state,
         }
     }
 
-    if (this->curZoneEqNum) {
+    if (this->curZoneEqNum != 0) {
         if (this->zoneHVACSizingIndex > 0) {
             int coolingSAFMethod = this->zoneHVACSizing(this->zoneHVACSizingIndex).CoolingSAFMethod;
             this->zoneAirFlowSizMethod = coolingSAFMethod;

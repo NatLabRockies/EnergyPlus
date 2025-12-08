@@ -55,30 +55,27 @@ Set to the minimum design water flow (m\(^{3}\)/sec) for the water coil, normall
 An example of this object in an IDF, along with appropriate setpoint managers, is shown below:
 
 \begin{lstlisting}
-
 Controller:WaterCoil,
-  Central Cooling Coil Controller 1,    !- Name
-  TemperatureAndHumidityRatio,          !- Control Variable
-  Reverse,                              !- Action
-  Flow,                                 !- Actuator Variable
-  VAV Sys 1 Outlet Node,                !- Sensor Node Name
-  Main Cooling Coil 1 Water Inlet Node, !- Actuator Node Name
-  0.002,                                !- Controller Convergence Tolerance {deltaC}
-  0.025,                                !- Maximum Actuated Flow {m3/s}
-  0.0;                                  !- Minimum Actuated Flow {m3/s}
+  Central Cooling Coil Controller 1,  !- Name
+  TemperatureAndHumidityRatio,!- Control Variable
+  Reverse,                    !- Action
+  Flow,                       !- Actuator Variable
+  VAV Sys 1 Outlet Node,      !- Sensor Node Name
+  Main Cooling Coil 1 Water Inlet Node,  !- Actuator Node Name
+  0.002,                      !- Controller Convergence Tolerance {deltaC}
+  0.025,                      !- Maximum Actuated Flow {m3/s}
+  0.0;                        !- Minimum Actuated Flow {m3/s}
 
+SetpointManager:SingleZone:Humidity:Maximum,
+  Zone Max Set Point Manager, !- Name
+  VAV Sys 1 Outlet Node,      !- Setpoint Node or NodeList Name
+  Zone 2 Node;                !- Control Zone Air Node Name
 
-  SetpointManager:SingleZone:Humidity:Maximum,
-  Zone Max Set Point Manager,           !- Name
-  VAV Sys 1 Outlet Node,                !- Setpoint Node or NodeList Name
-  Zone 2 Node;                          !- Control Zone Air Node Name
-
-
-  SetpointManager:Scheduled,
-  Scheduled Set Point Manager 1,        !- Name
-  Temperature,                          !- Control Variable
-  Seasonal Reset Supply Air Temp Sch,   !- Schedule Name
-  VAV Sys 1 Outlet Node;                !- Setpoint Node or NodeList Name
+SetpointManager:Scheduled,
+  Scheduled Set Point Manager 1,  !- Name
+  Temperature,                !- Control Variable
+  Seasonal Reset Supply Air Temp Sch,  !- Schedule Name
+  VAV Sys 1 Outlet Node;      !- Setpoint Node or NodeList Name
 \end{lstlisting}
 
 \subsection{Controller:OutdoorAir}\label{controlleroutdoorair}
@@ -300,43 +297,41 @@ An Example IDF specification:
 This input is only applicable when the controller is used on an air loop that includes an \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} with multiple cooling speeds. When modeling an \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} with multiple cooling speeds, (as specified in a [unitarysystemperformancemultispeed]{UnitarySystemPerformance:Multispeed}), \textbf{EconomizerFirst} runs the economizer at all speeds, all the way to the highest cooling speed before mechanical cooling is used to meet the load. \textbf{InterlockedWithMechanicalCooling} runs the economizer at the cooling speed chosen by the \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem}. Use \textbf{EconomizerFirst} to model typical economizer operation for multi-speed packaged single-zone equipment with sensible load control (\textbf{Control Type} input of the \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} should be set to \textbf{Load}) and \textbf{InterlockedWithMechanicalCooling} otherwise (default input). \textbf{EconomizerFirst} works with both continuously operating and cycling fans but the approach it uses to determine at which speed the system should run to meet the load is the same. At each timestep, the system flow rate is chosen based on the lowest speed available speed that can meet the load assuming economizer-only operation, the outdoor air fraction to meet the load the load is then calculated (limits imposed by other inputs of the controller are applied).
 
 \begin{lstlisting}
-
 Controller:OutdoorAir,
-  OA Controller 1,                 !- Name
-  Relief Air Outlet Node,   !- Relief Air Outlet Node Name
-  Outdoor Air Mixer Inlet Node,   !- Return Air Node Name
-  Mixed Air Node,                   !- Mixed Air Node Name
-  Outdoor Air Inlet Node,   !- Actuator Node Name
-  0.25,                                       !- Minimum Outdoor Air Flow Rate {m3/s}
-  1.6,                                         !- Maximum Outdoor Air Flow Rate {m3/s}
-  ElectronicEnthalpy,           !- Economizer Control Type
-  ModulateFlow,                       !- Economizer Control Action Type
-  23.,                                 !- Economizer Maximum Limit Dry-Bulb Temperature {C}
-  ,                                       !- Economizer Maximum Limit Enthalpy {J/kg}
-  13.5,                               !- Economizer Maximum Limit Dewpoint Temperature {C}
-  ElectronicEnthalpyCurveA,!- Electronic Enthalpy Limit Curve Name
-  14.,                                 !- Economizer Minimum Limit Dry-Bulb Temperature {C}
-  NoLockout,                             !- Lockout Type
-  FixedMinimum,                       !- Minimum Limit Type
-  OAFractionSched,                 !- Minimum Outdoor Air Schedule Name
-  ,                                               !- Minimum Fraction of Outdoor Air Schedule Name
-  ,                                               !- Maximum Fraction of Outdoor Air Schedule Name
-  ,                                               !- Mechanical Ventilation Controller Name
-  TimeOfDayEconomizerSch,   !- Time of Day Economizer Control Schedule Name
-  Yes,                                         !- High Humidity Control
-  EAST ZONE,                             !- Humidistat Control Zone Name
-  0.9,                                         !- High Humidity Outdoor Air Flow Ratio
-  Yes;           !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+  OA Controller 1,            !- Name
+  Relief Air Outlet Node,     !- Relief Air Outlet Node Name
+  Outdoor Air Mixer Inlet Node,  !- Return Air Node Name
+  Mixed Air Node,             !- Mixed Air Node Name
+  Outdoor Air Inlet Node,     !- Actuator Node Name
+  0.25,                       !- Minimum Outdoor Air Flow Rate {m3/s}
+  1.6,                        !- Maximum Outdoor Air Flow Rate {m3/s}
+  ElectronicEnthalpy,         !- Economizer Control Type
+  ModulateFlow,               !- Economizer Control Action Type
+  23.,                        !- Economizer Maximum Limit Dry-Bulb Temperature {C}
+  ,                           !- Economizer Maximum Limit Enthalpy {J/kg}
+  13.5,                       !- Economizer Maximum Limit Dewpoint Temperature {C}
+  ElectronicEnthalpyCurveA,   !- Electronic Enthalpy Limit Curve Name
+  14.,                        !- Economizer Minimum Limit Dry-Bulb Temperature {C}
+  NoLockout,                  !- Lockout Type
+  FixedMinimum,               !- Minimum Limit Type
+  OAFractionSched,            !- Minimum Outdoor Air Schedule Name
+  ,                           !- Minimum Fraction of Outdoor Air Schedule Name
+  ,                           !- Maximum Fraction of Outdoor Air Schedule Name
+  ,                           !- Mechanical Ventilation Controller Name
+  TimeOfDayEconomizerSch,     !- Time of Day Economizer Control Schedule Name
+  Yes,                        !- High Humidity Control
+  EAST ZONE,                  !- Humidistat Control Zone Name
+  0.9,                        !- High Humidity Outdoor Air Flow Ratio
+  Yes;                        !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
 
-
-  Curve:Cubic,
-  ElectronicEnthalpyCurveA,!- Name
-  0.01342704,                           !- Coefficient1 Constant
-  -0.00047892,                         !- Coefficient2 x
-  0.000053352,                         !- Coefficient3 x**2
-  -0.0000018103,                     !- Coefficient4 x**3
-  16.6,                                       !- Minimum Value of x
-  29.13;                                     !- Maximum Value of x
+Curve:Cubic,
+  ElectronicEnthalpyCurveA,   !- Name
+  0.01342704,                 !- Coefficient1 Constant
+  -0.00047892,                !- Coefficient2 x
+  0.000053352,                !- Coefficient3 x**2
+  -0.0000018103,              !- Coefficient4 x**3
+  16.6,                       !- Minimum Value of x
+  29.13;                      !- Maximum Value of x
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-005}
@@ -509,39 +504,38 @@ The actual outdoor air flow rate may be higher than the minimum if free cooling 
 An example input for this object is shown below:
 
 \begin{lstlisting}
-
 Controller:MechanicalVentilation,
-  VentObject,                             !- Name
-  VentSchedule,                         !- Availability Schedule Name
-  Standard62.1VentilationRateProcedure, !- System Outdoor Air Method
-  1.0,                                           !- Zone Maximum Outdoor Air Fraction
-  Resistive Zone,                     !- Zone 1 Name
-  DSOA1,                                       !- Design Specification Outdoor Air Object Name 1
-  DSZADO1,                                   !- Design Specification Zone Air Distribution Object Name 1
-  DCV Zone List,                       !- Zone 2 Name
-  DSO_ZList,                               !- Design Specification Outdoor Air Object Name 2
-  ;                                                !- Design Specification Zone Air Distribution Object Name 2
+  VentObject,                 !- Name
+  VentSchedule,               !- Availability Schedule Name
+  Standard62.1VentilationRateProcedure,  !- System Outdoor Air Method
+  1.0,                        !- Zone Maximum Outdoor Air Fraction
+  Resistive Zone,             !- Zone 1 Name
+  DSOA1,                      !- Design Specification Outdoor Air Object Name 1
+  DSZADO1,                    !- Design Specification Zone Air Distribution Object Name 1
+  DCV Zone List,              !- Zone 2 Name
+  DSO_ZList,                  !- Design Specification Outdoor Air Object Name 2
+  ;                           !- Design Specification Zone Air Distribution Object Name 2
 
-  ZoneList,
-  DCV Zone List,                       !- Zone List Name
-  East Zone,                               !- Zone Name 1
-  North Zone;                             !- Zone Name 2
+ZoneList,
+  DCV Zone List,              !- Zone List Name
+  East Zone,                  !- Zone Name 1
+  North Zone;                 !- Zone Name 2
 
-  DesignSpecification:OutdoorAir,
-  DSOA1,                                     !- Name
-  SUM,                                         !- Outdoor Air Method
-  0.00236,                                 !- Outdoor Air Flow per Person
-  0.000305,                               !- Outdoor Air Flow per Zone Floor Area
-  0.0,                                         !- Outdoor Air Flow per Zone
-  0.0,                                         !- Outdoor Air Flow Air Changes per Hour
-  ;                                               !- Outdoor Air Flow Rate Fraction Schedule Name
+DesignSpecification:OutdoorAir,
+  DSOA1,                      !- Name
+  SUM,                        !- Outdoor Air Method
+  0.00236,                    !- Outdoor Air Flow per Person
+  0.000305,                   !- Outdoor Air Flow per Zone Floor Area
+  0.0,                        !- Outdoor Air Flow per Zone
+  0.0,                        !- Outdoor Air Flow Air Changes per Hour
+  ;                           !- Outdoor Air Flow Rate Fraction Schedule Name
 
-  DesignSpecification:ZoneAirDistribution,
-  DSZADO1,                                 !- Name
-  1.2,                                         !- Zone Air Distribution Effectiveness in Cooling Mode
-  1.0,                                         !- Zone Air Distribution Effectiveness in Heating Mode
-  ,                                               !- Zone Air Distribution Effectiveness Schedule Name
-  0.3;                                         !- Zone Secondary Recirculation Fraction
+DesignSpecification:ZoneAirDistribution,
+  DSZADO1,                    !- Name
+  1.2,                        !- Zone Air Distribution Effectiveness in Cooling Mode
+  1.0,                        !- Zone Air Distribution Effectiveness in Heating Mode
+  ,                           !- Zone Air Distribution Effectiveness Schedule Name
+  0.3;                        !- Zone Secondary Recirculation Fraction
 \end{lstlisting}
 
 \subsection{ZoneHVAC:EnergyRecoveryVentilator:Controller}\label{zonehvacenergyrecoveryventilatorcontroller}
@@ -613,29 +607,27 @@ This optional choice field determines if high humidity control is activated base
 Following is an example input for this stand alone ERV controller object:
 
 \begin{lstlisting}
-
 ZoneHVAC:EnergyRecoveryVentilator:Controller,
-  ERV OA Controller 1,                       !- ERV controller name
-  19.,                                                       !- Temperature high limit {C}
-  14.,                                                       !- Temperature low limit {C}
-  ,                                                             !- Enthalpy high limit {J/kg}
-  15.55,                                                   !- dew point temperature limit (C)
-  ElectronicEnthalpyCurveA,             !- electronic enthalpy limit curve name
-  NoExhaustAirTemperatureLimit,     !- Exhaust air temperature limit
-  NoExhaustAirEnthalpyLimit,           !- Exhaust air enthalpy limit
-  OutsideAirFlowSchedule,                 !- Time of Day Economizer Flow Control Schedule Name
-  Yes,                                                       !- High Humidity Control Flag
-  East Zone,                                           !- Humidistat Control Zone Name
-  1.2,                                                       !- High Humidity Outdoor air Flow Ratio
-  Yes;                           !- Control High Indoor Humidity based on Outdoor Humidity Ratio
+  ERV OA Controller 1,        !- ERV controller name
+  19.,                        !- Temperature high limit {C}
+  14.,                        !- Temperature low limit {C}
+  ,                           !- Enthalpy high limit {J/kg}
+  15.55,                      !- dew point temperature limit (C)
+  ElectronicEnthalpyCurveA,   !- electronic enthalpy limit curve name
+  NoExhaustAirTemperatureLimit,  !- Exhaust air temperature limit
+  NoExhaustAirEnthalpyLimit,  !- Exhaust air enthalpy limit
+  OutsideAirFlowSchedule,     !- Time of Day Economizer Flow Control Schedule Name
+  Yes,                        !- High Humidity Control Flag
+  East Zone,                  !- Humidistat Control Zone Name
+  1.2,                        !- High Humidity Outdoor air Flow Ratio
+  Yes;                        !- Control High Indoor Humidity based on Outdoor Humidity Ratio
 
-
-  Curve:Cubic,
-  ElectronicEnthalpyCurveA, !- Name
-  0.01342704,                             !- Coefficient1 Constant
-  -0.00047892,                             !- Coefficient2 x
-  0.000053352,                           !- Coefficient3 x**2
-  -0.0000018103,                         !- Coefficient4 x**3
-  16.6,                                         !- Minimum Value of x
-  29.13;                                       !- Maximum Value of x
+Curve:Cubic,
+  ElectronicEnthalpyCurveA,   !- Name
+  0.01342704,                 !- Coefficient1 Constant
+  -0.00047892,                !- Coefficient2 x
+  0.000053352,                !- Coefficient3 x**2
+  -0.0000018103,              !- Coefficient4 x**3
+  16.6,                       !- Minimum Value of x
+  29.13;                      !- Maximum Value of x
 \end{lstlisting}

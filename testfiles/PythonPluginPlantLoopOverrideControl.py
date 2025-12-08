@@ -75,19 +75,16 @@ class TowerControl(EnergyPlusPlugin):
             # get variable handles if needed
             if self.need_to_get_handles:
                 self.outdoor_air_temp_handle = self.api.exchange.get_variable_handle(
-                    state,
-                    "Site Outdoor Air Drybulb Temperature",
-                    "Environment")
+                    state, "Site Outdoor Air Drybulb Temperature", "Environment"
+                )
 
-                self.chiller_condenser_loop_handle = self.api.exchange.get_actuator_handle(state,
-                                                                                           "Plant Loop Overall",
-                                                                                           "On/Off Supervisory",
-                                                                                           "Chiller Plant Condenser Loop")
+                self.chiller_condenser_loop_handle = self.api.exchange.get_actuator_handle(
+                    state, "Plant Loop Overall", "On/Off Supervisory", "Chiller Plant Condenser Loop"
+                )
 
-                self.chiller_cond_pump_handle = self.api.exchange.get_actuator_handle(state,
-                                                                                      "Pump",
-                                                                                      "Pump Mass Flow Rate",
-                                                                                      "Chiller Plant Cnd Circ Pump")
+                self.chiller_cond_pump_handle = self.api.exchange.get_actuator_handle(
+                    state, "Pump", "Pump Mass Flow Rate", "Chiller Plant Cnd Circ Pump"
+                )
 
                 self.pump_override_report_handle = self.api.exchange.get_global_handle(state, "PumpFlowOverrideReport")
 

@@ -314,8 +314,9 @@ namespace AirflowNetwork {
         int get_people_index(int const zoneNum, int ventCtrlNum, bool &errorFound);
         void hybrid_ventilation_control();
         void single_sided_Cps(std::vector<std::vector<Real64>> &valsByFacade, int numWindDirs = 36);
-        Real64 zone_OA_change_rate(int ZoneNum); // hybrid ventilation system controlled zone number
-        int get_airloop_number(int NodeNumber);  // Get air loop number for each distribution node and linkage
+        Real64 zone_OA_change_rate(int ZoneNum);  // hybrid ventilation system controlled zone number
+        int get_airloop_number(int NodeNumber);   // Get air loop number for each distribution node and linkage
+        void resolveAirLoopNum(bool &errorFound); // Resolve air loop number for all of the nodes that are linked together
         void SizeDucts();
         Real64 CalcDuctDiameter(Real64 hydraulicDiameter, Real64 DeltaP, Real64 MassFlowrate, Real64 TotalL, Real64 TotalLossCoe, Real64 MaxRough);
 

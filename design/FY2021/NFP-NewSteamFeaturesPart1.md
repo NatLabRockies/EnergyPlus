@@ -9,7 +9,7 @@ Implement steam features: Part 1
 ## Justification for New Feature ##
 
 It is common for university campuses and cities like New York to use steam to heat hot water loops. Often, steam energy is transferred at the building to a hot water system via a heat exchanger. Currently, EnergyPlus users can make both steam and hot water systems, but cannot link them together. This forces modelers to use HW boilers/systems to approximate the steam systems, which isn’t accurate and reduces confidence in the energy model. The request for a steam to water heat exchanger came from Bractlet. Also, there have been several upvotes on the new feature request regarding steam to water heat exchanger from EnergyPlus Github.
-In addition, the current EnergyPlus does not allow to use of district heating steam (except for `SteamEquipment`) and `LoadProfile:Plant` in a steam loop. 
+In addition, the current EnergyPlus does not allow to use of district heating steam (except for `SteamEquipment`) and `LoadProfile:Plant` in a steam loop.
 This PR enables EnergyPlus to simulate `DistrictHeatingSteam`, and `LoadProfile:Plant` in a steam loop. (`HeatExchanger:SteamToWater` is going to be available in Part 2.)
 
 ## E-mail and Conference Call Conclusions ##
@@ -53,7 +53,7 @@ These assumptions are applied to the new objects: `LoadProfile:Plant` in a steam
 ## Approach ##
 
 1. `LoadProfile:Plant` in a steam loop :
-The current LoadProfile:Plant calculates the outlet water temperature based on the inlet water temperature from the plant loop and user inputs for the scheduled plant load and the requested flow rate. 
+The current LoadProfile:Plant calculates the outlet water temperature based on the inlet water temperature from the plant loop and user inputs for the scheduled plant load and the requested flow rate.
 In the new LoadProfile:Plant, there are three additional input fields: Plant Loop Fluid Type (Water or steam); Degree of SubCooling (optional input for steam loop); and Degree of Loop SubCooling (optional input for steam loop). The new LoadProfile:Plant in a steam loop calculates the steam outlet mass flow rate based on the scheduled plant load and user inputs of degree of subcooling, because the inlet steam temperature and the outlet steam temperature before the steam trap are fixed to saturation temperature according to the assumption.
 
 2. `DistrictHeating:Steam` :
@@ -158,4 +158,3 @@ DistrictHeatingSteam,
 - Engineering Reference, EnergyPlus™ Version 22.1.0 Documentation
 - Çengel, Yunus A., Robert H. Turner, and John M. Cimbala. 2008. Fundamentals of thermal-fluid sciences. Boston: McGraw-Hill.
 - Rahul J. Chillar. 2005. Development and implementation of a steam loop in the building energy simulation program EnergyPlus. University of Illinois at Urbana-Champaign, Master Thesis
-

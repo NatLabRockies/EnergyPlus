@@ -104,9 +104,9 @@ namespace ChillerElectricASHRAE205 {
         int AmbientTempZone{0};           // Number of ambient zone around tank
         int AmbientTempOutsideAirNode{0}; // Number of outside air node
         Real64 AmbientTemp{0};
-        Real64 AmbientZoneGain{0};         // Internal gain to zone from losses (W)
-        Real64 AmbientZoneGainEnergy{0};   // Internal gain to zone from losses (J)
-        std::string EndUseSubcategory{""}; // identifier use for the end use subcategory
+        Real64 AmbientZoneGain{0};       // Internal gain to zone from losses (W)
+        Real64 AmbientZoneGainEnergy{0}; // Internal gain to zone from losses (J)
+        std::string EndUseSubcategory;   // identifier use for the end use subcategory
 
         // Default Constructor
         ASHRAE205ChillerSpecs() = default;

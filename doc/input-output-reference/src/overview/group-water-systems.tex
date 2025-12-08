@@ -102,32 +102,31 @@ Reference to the schedule object specifying the fraction of the maximum possible
 IDF examples:
 
 \begin{lstlisting}
+WaterUse:Equipment,
+  Landscaping,                !- Name
+  Landscaping,                !- End-Use Subcategory
+  0.003;                      !- Peak Flow Rate {m3/s}
 
 WaterUse:Equipment,
-  Landscaping,   !- Name
-  Landscaping,   !- End-Use Subcategory
-  0.003;               !- Peak Flow Rate {m3/s}
+  Dishwashing,                !- Name
+  Domestic Hot Water,         !- End-Use Subcategory
+  0.001,                      !- Peak Flow Rate {m3/s}
+  Dishwashing Schedule,       !- Flow Rate Fraction Schedule Name
+  Dishwashing Target Temp,    !- Target Temperature Schedule Name
+  Hot Water Temp,             !- Hot Water Supply Temperature Schedule Name
+  Mains Water;                !- Cold Water Supply Temperature Schedule Name
 
-  WaterUse:Equipment,
-  Dishwashing,   !- Name
-  Domestic Hot Water,   !- End-Use Subcategory
-  0.001,   !- Peak Flow Rate {m3/s}
-  Dishwashing Schedule,   !- Flow Rate Fraction Schedule Name
-  Dishwashing Target Temp,   !- Target Temperature Schedule Name
-  Hot Water Temp,   !- Hot Water Supply Temperature Schedule Name
-  Mains Water;   !- Cold Water Supply Temperature Schedule Name
-
-  WaterUse:Equipment,
-  Showers,   !- Name
-  Domestic Hot Water,   !- End-Use Subcategory
-  0.0002,   !- Peak Flow Rate {m3/s}
-  Shower Schedule,   !- Flow Rate Fraction Schedule Name
-  Shower Target Temp,   !- Target Temperature Schedule Name
-  Hot Water Temp,   !- Hot Water Supply Temperature Schedule Name
-  ,   !- Cold Water Supply Temperature Schedule Name
-  Shower Room,   !- Zone Name
-  Sensible Frac Schedule,   !- Sensible Fraction Schedule Name
-  Latent Frac Schedule;   !- Latent Fraction Schedule Name
+WaterUse:Equipment,
+  Showers,                    !- Name
+  Domestic Hot Water,         !- End-Use Subcategory
+  0.0002,                     !- Peak Flow Rate {m3/s}
+  Shower Schedule,            !- Flow Rate Fraction Schedule Name
+  Shower Target Temp,         !- Target Temperature Schedule Name
+  Hot Water Temp,             !- Hot Water Supply Temperature Schedule Name
+  ,                           !- Cold Water Supply Temperature Schedule Name
+  Shower Room,                !- Zone Name
+  Sensible Frac Schedule,     !- Sensible Fraction Schedule Name
+  Latent Frac Schedule;       !- Latent Fraction Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-041}
@@ -355,22 +354,21 @@ References to \hyperref[wateruseequipment]{WaterUse:Equipment} objects.
 IDF examples:
 
 \begin{lstlisting}
-
 WaterUse:Connections,
-  Domestic Water Uses,   !- Name
-  Water Eq Inlet Node,   !- Inlet Node Name
-  Water Eq Outlet Node, !- Outlet Node Name
-  Rainwater Storage,   !- Supply Water Storage Tank Name
-  Graywater Storage,   !- Reclamation Water Storage Tank Name
-  ,   !- Hot Water Supply Temperature Schedule Name
-  ,   !- Cold Water Supply Temperature Schedule Name
-  CounterFlow,   !- Drain Water Heat Exchanger Type
-  Plant,   !- Drain Water Heat Exchanger Destination
-  1500,   !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
-  Sinks,   !- Water Use Equipment 1 Name
-  Showers,   !- Water Use Equipment 2 Name
-  Dishwasher,   !-   Water Use Equipment 3 Name
-  Clotheswasher;   !- Water Use Equipment 4 Name
+  Domestic Water Uses,        !- Name
+  Water Eq Inlet Node,        !- Inlet Node Name
+  Water Eq Outlet Node,       !- Outlet Node Name
+  Rainwater Storage,          !- Supply Water Storage Tank Name
+  Graywater Storage,          !- Reclamation Water Storage Tank Name
+  ,                           !- Hot Water Supply Temperature Schedule Name
+  ,                           !- Cold Water Supply Temperature Schedule Name
+  CounterFlow,                !- Drain Water Heat Exchanger Type
+  Plant,                      !- Drain Water Heat Exchanger Destination
+  1500,                       !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
+  Sinks,                      !- Water Use Equipment 1 Name
+  Showers,                    !- Water Use Equipment 2 Name
+  Dishwasher,                 !- Water Use Equipment 3 Name
+  Clotheswasher;              !- Water Use Equipment 4 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-031}
@@ -597,28 +595,27 @@ Reserved for future zone thermal model.
 IDF examples:
 
 \begin{lstlisting}
-
 WaterUse:Storage,
-  Tower 2 water tank, !- Name
-  Tower water make up Holding tank, !- Water Quality Subcategory
-  30.0 , !- Maximum Capacity {m3}
-  10.0 , !- Initial Volume   {m3}
-  20.0, !- Design In Flow Rate {m3}
-  20.0, !- Design Out Flow Rate {m3}
-  ,   !- Overflow Destination
-  Mains, !- Type of Supply Controlled by Float Valve
-  8.0 , !- Float Valve On Capacity {m3}
-  10.0,   !- Float Valve Off Capacity {m3}
-  3.0, !- Backup Mains Capacity {m3}
-  ,   !- Other Tank Name
-  ScheduledTemperature , !- Water Thermal Mode
-  Water Tank Temp Sched , !- Water Temperature Schedule Name
-  , !- Ambient Temperature Indicator
-  , !- Ambient Temperature Schedule Name
-  , !- Zone Name
-  , !- Tank Surface Area {m2}
-  , !- Tank U Value {W/m2-K}
-  ; !- Tank Outside Surface Material Name
+  Tower 2 water tank,         !- Name
+  Tower water make up Holding tank,  !- Water Quality Subcategory
+  30.0,                       !- Maximum Capacity {m3}
+  10.0,                       !- Initial Volume   {m3}
+  20.0,                       !- Design In Flow Rate {m3}
+  20.0,                       !- Design Out Flow Rate {m3}
+  ,                           !- Overflow Destination
+  Mains,                      !- Type of Supply Controlled by Float Valve
+  8.0,                        !- Float Valve On Capacity {m3}
+  10.0,                       !- Float Valve Off Capacity {m3}
+  3.0,                        !- Backup Mains Capacity {m3}
+  ,                           !- Other Tank Name
+  ScheduledTemperature,       !- Water Thermal Mode
+  Water Tank Temp Sched,      !- Water Temperature Schedule Name
+  ,                           !- Ambient Temperature Indicator
+  ,                           !- Ambient Temperature Schedule Name
+  ,                           !- Zone Name
+  ,                           !- Tank Surface Area {m2}
+  ,                           !- Tank U Value {W/m2-K}
+  ;                           !- Tank Outside Surface Material Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-026}
@@ -725,18 +722,17 @@ A reference to the name of a surface object which will collect the rain. Typical
 IDF examples:
 
 \begin{lstlisting}
-
 WaterUse:RainCollector,
-  My Test Rain Collector ,!- Name
-  My Test Tank ,   !-   Storage Tank Name
-  CONSTANT,   !- Loss Factor Mode
-  0.9 ,   !- Collection Loss Factor
-  ,   !- Collection Loss Factor Schedule Name
-  1.0 ,   !- Maximum Collection Rate
-  SouthRoof ,   !- Collection Surface 1 Name
-  NorthRoof1,   !- Collection Surface 2 Name
-  NorthRoof3 ,   !- Collection Surface 3 Name
-  NorthRoof2 ;   !- Collection Surface 4 Name
+  My Test Rain Collector,     !- Name
+  My Test Tank,               !- Storage Tank Name
+  CONSTANT,                   !- Loss Factor Mode
+  0.9,                        !- Collection Loss Factor
+  ,                           !- Collection Loss Factor Schedule Name
+  1.0,                        !- Maximum Collection Rate
+  SouthRoof,                  !- Collection Surface 1 Name
+  NorthRoof1,                 !- Collection Surface 2 Name
+  NorthRoof3,                 !- Collection Surface 3 Name
+  NorthRoof2;                 !- Collection Surface 4 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-023}
@@ -813,20 +809,19 @@ Reserved for future use.
 An example input object:
 
 \begin{lstlisting}
-
 WaterUse:Well,
-  My Test Well,   !- Name
-  Tower 1 Water Tank,   !- Storage Tank Name
-  ,   !- Pump Depth
-  0.1,   !- Pump Rated Flow Rate {m3/s}
-  ,   !- Pump Rated Head {Pa}
-  120,   !- Pump Rated Power Consumption {W}
-  ,   !- Pump Efficiency
-  ,   !- Well Recovery Rate {m3/s}
-  ,   !- Nominal Well Storage Volume {m3}
-  ,   !- Water Table Depth Mode
-  ,   !- Water Table Depth
-  ;   !- Water Table Depth Schedule Name
+  My Test Well,               !- Name
+  Tower 1 Water Tank,         !- Storage Tank Name
+  ,                           !- Pump Depth
+  0.1,                        !- Pump Rated Flow Rate {m3/s}
+  ,                           !- Pump Rated Head {Pa}
+  120,                        !- Pump Rated Power Consumption {W}
+  ,                           !- Pump Efficiency
+  ,                           !- Well Recovery Rate {m3/s}
+  ,                           !- Nominal Well Storage Volume {m3}
+  ,                           !- Water Table Depth Mode
+  ,                           !- Water Table Depth
+  ;                           !- Water Table Depth Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-019}

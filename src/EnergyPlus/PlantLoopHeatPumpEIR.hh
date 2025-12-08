@@ -382,7 +382,7 @@ namespace EIRPlantLoopHeatPumps {
 
         // New additions for GAHP only
         Constant::eFuel fuelType = Constant::eFuel::Invalid; // Fuel type assignment
-        std::string endUseSubcat = "";
+        std::string endUseSubcat;
         DataPlant::FlowMode flowMode = DataPlant::FlowMode::Invalid;
         Real64 desSupplyTemp = 60.0;
         Real64 desTempLift = 11.1;
@@ -536,7 +536,11 @@ namespace EIRPlantLoopHeatPumps {
         void resetReportingVariables() override;
         Real64 calcCrankcaseHeaterPower(EnergyPlusData &state) const;
         void setUpEMS(EnergyPlusData &state) override;
-        static PlantComponent *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType hp_type, const std::string &hp_name);
+        static PlantComponent *factory(EnergyPlusData &state,
+                                       DataPlant::PlantEquipmentType &hp_type,
+                                       const std::string &hp_name,
+                                       int const inletNodeNum = 0,
+                                       int const outletNodeNum = 0);
         static void processInputForEIRPLHP(EnergyPlusData &state);
         void sizeLoadSide(EnergyPlusData &state);
     }; // HeatPumpAirToWater

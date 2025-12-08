@@ -1603,9 +1603,8 @@ namespace Photovoltaics {
                 YP = YB;
             }
             return;
-        } else {
-            return;
         }
+        return;
     }
 
     Real64 FUN(EnergyPlusData &state, Real64 const II, Real64 const VV, Real64 const IL, Real64 const IO, Real64 const RSER, Real64 const AA)

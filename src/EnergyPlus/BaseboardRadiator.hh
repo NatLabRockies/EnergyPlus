@@ -48,9 +48,6 @@
 #ifndef BaseboardRadiator_hh_INCLUDED
 #define BaseboardRadiator_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
@@ -93,7 +90,7 @@ namespace BaseboardRadiator {
         Real64 Power = 0.0;
         Real64 Energy = 0.0;
         PlantLocation plantLoc;
-        Array1D_string FieldNames;
+        std::vector<std::string> FieldNames;
         int HeatingCapMethod = 0; // - Method for water baseboard Radiator system heating capacity scaledsizing calculation (HeatingDesignCapacity,
                                   // CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)
         Real64 ScaledHeatingCapacity = 0.0; // -  water baseboard Radiator system scaled maximum heating capacity {W} or scalable variable of zone

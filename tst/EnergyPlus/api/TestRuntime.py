@@ -54,9 +54,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+
 from pyenergyplus.api import EnergyPlusAPI
 
 progressValue = 0
+
 
 def environment_handler(_state) -> None:
     print("OH HAI ENVIRONMENT")
@@ -77,7 +79,7 @@ def progress_handler(progress: int) -> None:
 
 
 def error_handler(severity: int, message: bytes) -> None:
-    if b'Warning' in message:
+    if b"Warning" in message:
         print("GOT A WARNING UH OH!")
         sys.stdout.flush()
 
@@ -94,7 +96,7 @@ v = api.runtime.run_energyplus(state, sys.argv[1:])
 if v != 0:
     print("EnergyPlus Failed!")
     sys.exit(1)
-assert(progressValue == 100)
+assert progressValue == 100
 
 print("MUTING CONSOLE OUTPUT")
 state2 = api.state_manager.new_state()
@@ -111,9 +113,13 @@ print("MUTED E+ RUN DONE")
 print("Attempting a run that kills EnergyPlus")
 state3 = api.state_manager.new_state()
 new_api = EnergyPlusAPI()
+
+
 def callback_that_kills(_state) -> None:
     print("Going to call stop_simulation!")
     api.runtime.stop_simulation(_state)
+
+
 api.runtime.callback_begin_system_timestep_before_predictor(state3, callback_that_kills)
 v = api.runtime.run_energyplus(state3, sys.argv[1:])
 if v != 0:

@@ -530,26 +530,26 @@ struct ScheduleManagerData : BaseGlobalStruct
         ScheduleInputProcessed = false;
         ScheduleFileShadingProcessed = false;
 
-        for (int i = 0; i < (int)scheduleTypes.size(); ++i) {
-            delete scheduleTypes[i];
+        for (auto &scheduleType : scheduleTypes) {
+            delete scheduleType;
         }
         scheduleTypes.clear(); // Allowed Schedule Types
         scheduleTypeMap.clear();
 
-        for (int i = 0; i < (int)schedules.size(); ++i) {
-            delete schedules[i];
+        for (auto &schedule : schedules) {
+            delete schedule;
         }
         schedules.clear(); // Schedule Storage
         scheduleMap.clear();
 
-        for (int i = 0; i < (int)daySchedules.size(); ++i) {
-            delete daySchedules[i];
+        for (auto &daySchedule : daySchedules) {
+            delete daySchedule;
         }
         daySchedules.clear();
         dayScheduleMap.clear();
 
-        for (int i = 0; i < (int)weekSchedules.size(); ++i) {
-            delete weekSchedules[i];
+        for (auto &weekSchedule : weekSchedules) {
+            delete weekSchedule;
         }
         weekSchedules.clear();
         weekScheduleMap.clear();

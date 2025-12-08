@@ -828,7 +828,7 @@ namespace Psychrometrics {
 
         if (W < 0.0) {
             if (state.dataPsychrometrics->ReportErrors && !state.dataGlobal->WarmupFlag) {
-                if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::WFnTdbTwbPb2) == 0]) {
+                if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::WFnTdbTwbPb2)] == 0) {
                     state.dataPsychrometrics->String = format(" Dry-Bulb= {:.2T} Wet-Bulb= {:.2T} Pressure= {:.2T}", TDB, TWB, PB);
                     ShowWarningMessage(state, "Calculated Humidity Ratio Invalid (PsyWFnTdbTwbPb)");
                     if (!CalledFrom.empty()) {

@@ -84,7 +84,7 @@ template <> struct formatter<PyStatus>
         if (PyStatus_IsError(status) != 0) {
             auto it = ctx.out();
             it = fmt::format_to(it, "Fatal Python error: ");
-            if (status.func) {
+            if (status.func != nullptr) {
                 it = fmt::format_to(it, "{}: ", status.func);
             }
             it = fmt::format_to(it, "{}", status.err_msg);
@@ -135,12 +135,12 @@ namespace Python {
         PyObject *pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
         Py_DECREF(pyth_module); // PyImport_Import returns a new reference, decrement it
 
-        if (pyth_func || PyCallable_Check(pyth_func)) {
+        if ((pyth_func != nullptr) || (PyCallable_Check(pyth_func) != 0)) {
 
             PyObject *pyth_val = PyObject_CallFunction(pyth_func, "OOO", exc_type, exc_value, exc_tb);
 
             // traceback.format_exception returns a list, so iterate on that
-            if (!pyth_val || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
+            if ((pyth_val == nullptr) || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
                 EnergyPlus::ShowContinueError(state, "In reportPythonError(), traceback.format_exception did not return a list.");
                 return;
             }
@@ -202,7 +202,7 @@ namespace Python {
         Py_DECREF(unicodeIncludePath);
 
         if (ret != 0) {
-            if (PyErr_Occurred()) {
+            if (PyErr_Occurred() != nullptr) {
                 reportPythonError(state);
             }
             EnergyPlus::ShowFatalError(state, format("ERROR adding \"{}\" to the sys.path in Python", includePath.generic_string()));

@@ -127,7 +127,7 @@ life-cycle of a building, from before schematic design all the way
 through the rest of the design process, and into the operation of the
 building
 
-The Design Process and BEM 
+The Design Process and BEM
 ---------------------------
 
 Building energy modeling can be used throughout the design process for a
@@ -365,7 +365,7 @@ documentation includes:
 -  Tips & Tricks for Using EnergyPlus: Contains short tips and tricks
    for using various parts of EnergyPlus.
 
-Example Files 
+Example Files
 --------------
 
 Many hundreds of example files come with EnergyPlus, and they are in the
@@ -381,10 +381,10 @@ that use that input object. It is possible that many other files also
 use a particular input object so if the first three files do not help, a
 text search of files in the ExampleFiles folder may find more.
 
-The EnergyPlus Ecosystem 
+The EnergyPlus Ecosystem
 =========================
 
-Current Interfaces 
+Current Interfaces
 -------------------
 
 EnergyPlus is often used directly using the text file input (IDF or
@@ -396,7 +396,7 @@ interfaces. To see a list, see the `BEST (Building Energy Software
 Tools) Directory <https://www.buildingenergysoftwaretools.com/>`__ that
 is operated by `IBPSA-USA <https://www.ibpsa.us/>`__.
 
-Approaches to Implement Measures 
+Approaches to Implement Measures
 ---------------------------------
 
 In the terminology used within the building energy modeling industry
@@ -449,7 +449,7 @@ A
 that describes various other approaches to scripting was written during
 the 2018 ASHRAE/IBPSA-USA Building Performance Conference and SimBuild.
 
-Parametric Analysis Tools 
+Parametric Analysis Tools
 --------------------------
 
 When just implementing a simple measure or even a series of measures is
@@ -463,7 +463,7 @@ the `BEST (Building Energy Software Tools)
 Directory <https://www.buildingenergysoftwaretools.com/>`__ that is
 operated by `IBPSA-USA <https://www.ibpsa.us/>`__.
 
-Weather Files 
+Weather Files
 --------------
 
 Weather files are available for many locations throughout the world.
@@ -487,9 +487,9 @@ where the simulation results are compared to actual utility bills or
 other measured data.
 
 .. figure:: media/WeatherFileLocations.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    EnergyPlus.net Weather File Locations
 
 Co-Simulation and Linked Software
@@ -541,7 +541,7 @@ implements three mechanisms to support co-simulation.
    best suited for control development. In this use case, the FMU will
    be used as a boundary condition for control’s development.
 
-Getting Help 
+Getting Help
 -------------
 
 Several resources are available for getting help when using EnergyPlus:
@@ -576,7 +576,7 @@ required, several sources are available:
 In addition, if you are using a graphical user interface, the vendor
 probably also provides training.
 
-Using EnergyPlus 
+Using EnergyPlus
 =================
 
 Installing EnergyPlus
@@ -706,9 +706,9 @@ different versions of EP-Launch currently part of the EnergyPlus system.
 The main screen of EP-Launch 2 is shown below:
 
 .. figure:: media/eplaunch2.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    EP-Launch 2
 
 It is a Windows program only. EP-Launch 2 is included in the EnergyPlus
@@ -720,9 +720,9 @@ the version number.
 In 2018, EP-Launch 3 was developed, and its main screen is shown below:
 
 .. figure:: media/eplaunch3.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    EP-Launch 3
 
 EP-Launch 3 is not part of the EnergyPlus installation package and needs
@@ -900,12 +900,12 @@ can be found in the Auxiliary Programs document under the “Creating
 Input Files” section.
 
 .. figure:: media/idfeditor.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    IDF Editor
 
-Run-Check-Edit Repeat 
+Run-Check-Edit Repeat
 ----------------------
 
 For most building energy modeling projects, whether assisting in early
@@ -1093,9 +1093,9 @@ The installation of EnergyPlus includes many different files in
 different folders:
 
 .. figure:: media/energyplusfolder.png
-   :align: center 
+   :align: center
    :width: 25%
-   
+
    EnergyPlus Installation Folders
 
 Many of these folders include valuable resources for using and learning
@@ -1263,9 +1263,9 @@ files are:
    AuxiliaryPrograms document.
 
 .. figure:: media/IDFVersionUpdater.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    IDFVersionUpdater
 
 -  EP-Launch 2 - The Windows-only program that comes with the EnergyPlus
@@ -1486,9 +1486,9 @@ great deal of flexibility exists in EnergyPlus to specify them.
    allows input specifically for shading.
 
 .. figure:: media/officeSchedules.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Various Office Schedules
 
 Other input objects in this input group allow specification of schedule
@@ -1547,9 +1547,9 @@ the most commonly used input objects.
    they can be specified in this input object.
 
 .. figure:: media/EnvelopeHierarchy.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Envelope Component Hierarchy
 
 A large variety of input objects in this group are not as commonly used
@@ -1600,9 +1600,9 @@ three dimensions. The X-axis points east, the Y-axis points north, and
 the Z-axis points up.
 
 .. figure:: media/coordinatesystem.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    EnergyPlus Coordinate System
 
 -  Zone - defines the name of the thermal zone as well as the ceiling
@@ -1744,9 +1744,9 @@ Other Related Input Objects
    glazed area. See the PurchAirWithDaylighting.idf example file.
 
 .. figure:: media/window_frame_and_divider.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    A window with frame and divider
 
 -  WindowProperty:AirflowControl - defines windows that have forced air
@@ -1772,7 +1772,7 @@ Other less common input objects include ZoneList and ZoneGroup that can
 be used when doing multi-story simulations and GeometryTransform which
 allows a building model to be stretched with just a few inputs.
 
-Internal Gains 
+Internal Gains
 ---------------
 
 Inside a building, people, appliances, office equipment, lighting, and
@@ -1837,7 +1837,7 @@ diffusion, or using a deposition velocity model. The input objects
 described in this section are further explained in the
 InputOutputReference under the heading “Group-Internal Gains.”
 
-Daylighting 
+Daylighting
 ------------
 
 Reducing the amount of powered lighting that is used when sufficient
@@ -1860,9 +1860,9 @@ objects but also extra guidance on how they should be applied. The
 PurchAirWithDaylighting.idf contains examples of these input objects.
 
 .. figure:: media/DaylightingContinuous.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Daylighting with Continuous Dimming
 
 Three different devices can be used with daylighting:
@@ -1922,9 +1922,9 @@ objects.
    environment.
 
 .. figure:: media/kiva-2d-elements.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Structural and insulation components of Foundation:Kiva input objects
 
 Input objects of interest in this group not related to Kiva include
@@ -2249,9 +2249,9 @@ definition of a node diagram or map. This is helpful for visualization
 of the entire system.
 
 .. figure:: media/NodeDiagram.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Example Node Diagram
 
 So that these loops are manageable and more clearly defined both in the
@@ -2302,9 +2302,9 @@ zone/air loop and a plant loop.
    also include a splitter, a mixer, and a bypass.
 
 .. figure:: media/HvacHeatLoop.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Detailed HVAC Heat Loop Line Diagram
 
 The following is a list of groups of input objects related to specifying
@@ -2620,9 +2620,9 @@ calculation of monthly and annual utility bills are as follows:
    structure.
 
 .. figure:: media/tariff-charges.png
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Hierarchy of Economic Charges
 
 The following two input objects are uncommon to use:

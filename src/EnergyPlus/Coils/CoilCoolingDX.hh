@@ -135,7 +135,7 @@ struct CoilCoolingDX
     int airLoopNum = 0; // Add for AFN compatibility, revisit at a later date
     int supplyFanIndex = 0;
     HVAC::FanType supplyFanType = HVAC::FanType::Invalid;
-    std::string supplyFanName = "";
+    std::string supplyFanName;
     bool subcoolReheatFlag = false; // Subcool reheat coil control
 
     // CoilCoolingDXCurveFitSpeed &normModeNomSpeed();

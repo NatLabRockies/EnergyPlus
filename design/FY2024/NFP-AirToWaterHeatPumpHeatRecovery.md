@@ -23,7 +23,7 @@ Modern air-to-water heat pumps for commercial applications often include heat re
   Brent: you may run into supply side temperature control problem if you have lower setpoint temperature than the temperature limits (e.g., HW Recovery).
 
   Bereket: may be we should check the minimum of these temperatures. This will be investigated during implementation.
-  
+
   Brent: are we going to use the same air source performance curves for heat recovery?
 
   Bereket: I have to think about it. Brent said he will check with Trane engineers for curves
@@ -33,7 +33,7 @@ Modern air-to-water heat pumps for commercial applications often include heat re
 
 ### Current Code ###
 
-The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode simulations. 
+The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode simulations.
 
 **- This enhancement allows simultaneous cooling and heating modes of operation for Air-to-Water Heat Pump model.
 
@@ -46,12 +46,12 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 
 *(2) Adds six new input fields to support heat recovery operation mode for each HeatPump:PlantLoop:EIR:* object.
 
-     Adds new heat recovery fluid inlet and outlet nodes: 
+     Adds new heat recovery fluid inlet and outlet nodes:
      New input fields `Heat Recovery Inlet Node Name` and `Heat Recovery Outlet Node Name` will be added to the `HeatPump:PlantLoop:EIR:Cooling` object.
 	 New input fields `Heat Recovery Inlet Node Name` and `Heat Recovery Outlet Node Name` will be added to the `HeatPump:PlantLoop:EIR:Heating` object.
-	 
+
      Adds heat recovery side reference water flow rate:
-	 New input field `Heat Recovery Reference Flow Rate` will be added to the `HeatPump:PlantLoop:EIR:Cooling` and `HeatPump:PlantLoop:EIR:Heating` objects.      
+	 New input field `Heat Recovery Reference Flow Rate` will be added to the `HeatPump:PlantLoop:EIR:Cooling` and `HeatPump:PlantLoop:EIR:Heating` objects.
 
 	 Adds heat recovery fluid temperature limits:
      New input field `Maximum Heat Recovery Outlet Temperature` will be added to the `HeatPump:PlantLoop:EIR:Cooling` object.
@@ -61,20 +61,20 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 	 New input field `Heat Recovery Capacity Modifier Function of Temperature Curve Name` will be added to the `HeatPump:PlantLoop:EIR:*` objects.
 	 New input field `Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name` will be added to the `HeatPump:PlantLoop:EIR:*` objects.
 
-		
+
 *(3) Adds new code that supports calculating the heat rate and outlet node fluid temperature of the heat recovery system
 
 	 Hot Water Recovery Rate Calculation:
 	 {CAPFT_Val} = CAPFT(T_lSide_Cool, T_hrSide_Heat)
-	 {Q_dot_{load,cool,avail}} = {Q_dot_{load,cool,ref}} * {CAPFT_Val}	 
+	 {Q_dot_{load,cool,avail}} = {Q_dot_{load,cool,ref}} * {CAPFT_Val}
 	 {Q_dot_{HR,heat,avail}} = {Q_dot_{load,cool,avail}} + {Power_{cool}}
-	 		
+
 	 Heat Recovery Outlet Node Fluid Temperature Calculation:
 	 {T_{HR,heat,out}} = {T_{HR,heat,in}} + {Q_dot_{HR,heat,avail}} / {{Cp_{heat}} * {m_dot_{HR,heat}}}
 
      Chilled Water Recovery Rate Calculation:
-	 {CAPFT_Val} = CAPFT(T_lSide_Heat, T_hrSide_Cool) 
-	 {Q_dot_{load,heat,avail}} = {Q_dot_{load,heat,ref}} * {CAPFT_Val} 
+	 {CAPFT_Val} = CAPFT(T_lSide_Heat, T_hrSide_Cool)
+	 {Q_dot_{load,heat,avail}} = {Q_dot_{load,heat,ref}} * {CAPFT_Val}
      {Q_dot_{HR,cool,avail}} = {Q_dot_{load,heat,avail}} - {Power_{heat}}
 
 	 Heat Recovery Outlet Node Fluid Temperature Calculation:
@@ -92,37 +92,37 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 	 {T_{HR,heat,in}}		 = hot water heat recovery inlet node temperature, C
 	 {T_{HR,heat,out}}		 = hot water heat recovery outlet node temperature, C
 	 {{Cp_{heat}} 		 	 = hot water specific heat capacity, J/kgK
-	 {m_dot_{HR,heat}}}		 = hot water heat recovery fluid mass flow rate, kg/s	 
+	 {m_dot_{HR,heat}}}		 = hot water heat recovery fluid mass flow rate, kg/s
 	 {T_{HR,cool,in}}		 = chilled water heat recovery inlet node temperature, C
 	 {T_{HR,cool,out}}		 = chilled water heat recovery outlet node temperature, C
 	 {{Cp_{cool}} 		 	 = chilled water specific heat capacity, J/kgK
 	 {m_dot_{HR,cool}}}		 = chilled water heat recovery fluid mass flow rate, kg/s
-	 T_lSide_Cool			 = chiller load side entering fluid temperature, C 
+	 T_lSide_Cool			 = chiller load side entering fluid temperature, C
 	 T_hrSide_Heat		 	 = chiller heat recovery side entering fluid temperature, C
-	 T_lSide_Heat			 = Heater load side entering fluid temperature, C 
+	 T_lSide_Heat			 = Heater load side entering fluid temperature, C
 	 T_hrSide_Cool			 = Heater heat recovery side entering fluid temperature, C
 
-	 
+
 *(4) Heat recovery operating mode simulation control.
-      
+
 	 ** the heat recovery mode operation is activated if heat recovery nodes are specified. **
-	 
-	 The heat recovery mode is essentially a passive operation. Hence, the HR delivered capacity is determined by the actual 
-	 capacity of the chiller or heater operation.  Thus, the actual HR rate delivered can be estimated using the chiller or 
+
+	 The heat recovery mode is essentially a passive operation. Hence, the HR delivered capacity is determined by the actual
+	 capacity of the chiller or heater operation.  Thus, the actual HR rate delivered can be estimated using the chiller or
 	 heater part-load ratio.
-	 
+
 	 Hot Water Heat Recovery:
 	 {Q_dot_{HR,heat,actual}} = {PLR_{cool}} * {Q_dot_{load,cool,avail}} + {Power_{cool}}
-	 
+
 	 * the available capacity must be prorated by the chiller PLR to get the delivered hot water recovery rate. *
 
-		 
+
 	 Chilled Water Heat Recovery:
 	 {Q_dot_{HR,cool,actual}} = {PLR_{heat}} * {Q_dot_{load,heat,avail}} - {Power_{heat}}
-	 
+
      * the available capacity must be prorated by the heater PLR to get the delivered chilled water recovery rate. *
-	 
-	 ** required to check the user specified temperature limit at the heat recovery outlet node is not violated. ** 
+
+	 ** required to check the user specified temperature limit at the heat recovery outlet node is not violated. **
 	 * if the user specified temperature limit are exceeded then reset the heat recovery outlet temperature to the limit. *
 	 * recalculate the heat recovery rate based on the temperature limit. *
 	 * need to investigate how to represent the net balance between the available and actual heat recovery rate. *
@@ -132,20 +132,20 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 	 {Q_dot_{HR,cool,actual}} = heat recovery actual cooling rate, W
 	 {PLR_{cool}}		 	  = chiller part-load ratio, -
 	 {PLR_{heat}}		 	  = heater part-load ratio, -
-	 
+
 *(5) Adds capacity and fluid flow rates sizing calculation for the heat recovery system.
 
-	 Heat Recovery Reference Capacities Sizing: 
+	 Heat Recovery Reference Capacities Sizing:
 	 Hot Water Heating Reference Capacity:
-	 {Q_dot_{HR,heat,ref}} = {Q_{ref,cool,coil}} * [1 + 1/{COP_cool}] 
- 
+	 {Q_dot_{HR,heat,ref}} = {Q_{ref,cool,coil}} * [1 + 1/{COP_cool}]
+
 	 Chilled Water Cooling Reference Capacity:
 	 {Q_dot_{HR,cool,ref}} = {Q_{ref,heat,coil}} * [1 - 1/{COP_heat}]
-	  
+
 	 Heat Recovery Fluid Flow Rates Sizing:
 	 Hot Water Recovery Design Flow Rate:
 	 {m_dot_{HR,design,heat}} = {Sizing_Factor_{cool}} * {Q_dot_{HR,heat,ref}} / [{Cp_{heat}} * {DeltaT_{heat}}]
-	 
+
 	 Chilled Water Recovery Design Flow Rate:
 	 {m_dot_{HR,design,cool}} = {Sizing_Factor_{heat}} * {Q_dot_{HR,cool,ref}} / [{Cp_{cool}} * {DeltaT_{cool}}]
 
@@ -162,9 +162,9 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 	 {Sizing_Factor_{heat}} = sizing factor of the heater (heat pump), (-)
 
     * sizing output variable *
-    
+
     * Design Size Heat Recovery Side Volume Flow Rate [m3/s] *
-	
+
 *(6) Schematic diagram of cooling and heating dominated heat recovery operating modes:
 
 ![chiller_with_heat_recovery](chiller_with_heat_recovery.png)
@@ -178,7 +178,7 @@ The existing Air-to-Water Heat Pump model supports heat-only and cool-only mode 
 ### Existing Object HeatPump:PlantLoop:EIR:Cooling ###
 
     * added four new input fields and increased the min-fields to 18 from 15 *
-	
+
 HeatPump:PlantLoop:EIR:Cooling,
         \memo An EIR formulated water to water heat pump model, cooling operation.
         \min-fields 18
@@ -354,7 +354,7 @@ HeatPump:PlantLoop:EIR:Cooling,
         \note curve = a + b*CWS + c*CWS**2 + d*ECT + e*ECT**2 + f*CWS*ECT
         \note CWS = supply (leaving) chilled water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
-		\note If this field is blank, the AWHP curve without heat recovery will be used		
+		\note If this field is blank, the AWHP curve without heat recovery will be used
 
 ### Existing Object HeatPump:PlantLoop:EIR:Heating ###
 
@@ -601,8 +601,8 @@ HeatPump:PlantLoop:EIR:Heating,
         \note curve = a + b*HWS + c*HWS**2 + d*ECT + e*ECT**2 + f*HWS*ECT
         \note HWS = supply (leaving) hot water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
-		\note If this field is blank, the AWHP curve without heat recovery will be used	
-		
+		\note If this field is blank, the AWHP curve without heat recovery will be used
+
 ## Testing/Validation/Data Source(s): ##
 
 Demonstrate that the air-to-water heat pump object supports heat recovery mode simulation. Unit tests will be added to demonstrate the new feature.
@@ -620,7 +620,7 @@ The EIR-formulated cooling model objects are described.
 
 ...
 
-* New input fields definition * 
+* New input fields definition *
 
 \paragraph{Field: Heat Recovery Inlet Node Name}\label{plhp_eir_cooling_inputs_heat_recovery_inlet_node}
 
@@ -645,7 +645,7 @@ This field is the name of a bivariate curve or table that defines an available c
 \paragraph{Field: Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name}\label{plhp_eir_cooling_inputs_heat_recovery_eirft}
 
 This field is the name of a bivariate curve or table that defines an EIR (1/COP) modifier as a function of the load side outlet temperature and the heat recovery side inlet temperature. The temperatures are in degrees Celsius when used in the function. The output of this function and the output of the EIR Modifier Function of PLR are multiplied by the reference EIR to get a current EIR when the unit is operating in heat recovery mode.
-		
+
 ### HeatPump:PlantLoop:EIR:Heating ##
 
 \subsection{HeatPump:PlantLoop:EIR:Heating}\label{plhp_eir_heating}
@@ -653,8 +653,8 @@ This field is the name of a bivariate curve or table that defines an EIR (1/COP)
 The EIR-formulated heating model objects are described.
 
 ...
-		
-* New input fields definition * 
+
+* New input fields definition *
 
 
 \paragraph{Field: Heat Recovery Inlet Node Name}\label{plhp_eir_heating_inputs_heat_recovery_inlet_node}
@@ -681,7 +681,7 @@ This field is the name of a bivariate curve or table that defines an available c
 
 This field is the name of a bivariate curve or table that defines an EIR (1/COP) modifier as a function of the load side outlet temperature and the heat recovery side inlet temperature. The temperatures are in degrees Celsius when used in the function. The output of this function and the output of the EIR Modifier Function of PLR are multiplied by the reference EIR to get a current EIR when the unit is operating in heat recovery mode.
 
-		
+
 ## Engineering Reference ##
 As needed.
 
@@ -722,7 +722,7 @@ This output variable represents the cumulative heat transfer across the heat rec
 \paragraph{Heat Pump Heat Recovery Heat Transfer Rate {[}W{]}}\label{water-to-water-heat-pump-heat-recovery-heat-transfer-rate-w}
 
 This output variable represents the heat transfer across the heat recovery coil. The values are calculated for each HVAC system time step being simulated, and the results are averaged for the time step being reported.
-   
+
 \paragraph{Heat Pump Heat Recovery Outlet Temperature {[}C{]}}\label{water-to-water-heat-pump-heat-recovery-outlet-temperature-c}
 
 This output variable represents the average fluid temperature leaving the heat recovery coil. The values are calculated for each HVAC system time step being simulated, and the results are averaged for the time step being reported.
@@ -746,20 +746,20 @@ NA
 The new feature may modify the following modules:
 
    ** PlantLoopHeatPumpEIR.cc, PlantLoopHeatPumpEIR.hh, EquiAndOperation.cc, PlantCondLoopOperation.cc **
-   
-   
+
+
 The following changes are required to implement the new feature
 
    PlantLoopHeatPumpEIR.hh,
 	** add the following new member variables **
-		 
+
 	   Module Member Variables:
 	   // simulation variables
 	   Real64 heatRecoveryInletTemp = 0.0;    // heat recovery fluid inlet node temperature
-	   Real64 heatRecoveryOutletTemp = 0.0;   // heat recovery fluid outlet node temperature 
+	   Real64 heatRecoveryOutletTemp = 0.0;   // heat recovery fluid outlet node temperature
        Real64 heatRecoveryRate = 0.0;         // heat recovery heat transfer rate
 	   Real64 heatRecoveryEnergy = 0.0;       // heat recovery heat transfer energy
-	
+
 	   // topology variables
 	   PlantLocation heatRecoveryPlantLoc;    // heat recovery plant loop location
 	   InOutNodePair heatRecoveryNodes;       // heat recovery inlet and outlet node pairs
@@ -768,16 +768,16 @@ The following changes are required to implement the new feature
 	   Real64 heatRecoveryDesignVolFlowRate = 0.0;
 	   bool heatRecoveryDesignVolFlowRateWasAutoSized = false;
 	   Real64 heatRecoveryDesignMassFlowRate = 0.0;
-	   Real64 heatRecoveryMassFlowRate = 0.0;   
+	   Real64 heatRecoveryMassFlowRate = 0.0;
 	   bool heatRecoveryIsActive = false;
 	   bool heatRecoveryAvailable = false;
 	   int heatRecoveryOperatingStatus = 0;
-		
-		
+
+
    EIRPlantLoopHeatPump::resetReportingVariables()
     ** reset the heat recovery new member variables **
     void EIRPlantLoopHeatPump::resetReportingVariables()
-    {   
+    {
 	 * reset new member variables of the heat recovery *
 
      `this->heatRecoveryRate = 0.0;`
@@ -787,53 +787,53 @@ The following changes are required to implement the new feature
 	 `this->heatRecoveryIsActive = false;`
 	 `this->heatRecoveryOperatingStatus = 0;`
     }
-	
-	
+
+
    Get Input Function:
    EIRPlantLoopHeatPump::processInputForEIRPLHP()
    	** Update the get input function to read the four new input fields **
-   
+
    EIRPlantLoopHeatPump::onInitLoopEquip()
-   
+
    New Sizing Functions:
-   EIRPlantLoopHeatPump::sizeHeatRecoveryASHP()   
+   EIRPlantLoopHeatPump::sizeHeatRecoveryASHP()
     ** add heat recovery sizing procedure to new sizeHeatRecoveryASHP() function **
 
     if (this->heatRecoveryAvailable) {
-	
+
     ** add sizing for `Heat Recovery Reference Flow Rate` new input field **
-	
-	   `*equations are described in the approach section above*` 
-    
+
+	   `*equations are described in the approach section above*`
+
 	}
-      
+
    Simulate and Calc Functions:
    EIRPlantLoopHeatPump::simulate()
-   
-    * set heat recovery inlet temperature * 
-    
+
+    * set heat recovery inlet temperature *
+
 	this->heatRecoveryInletTemp = state.dataLoopNodes->Node(this->heatRecoveryNodes.inlet).Temp;
-	
+
 	* init heat recovery plant loop flows *
-	
+
    EIRPlantLoopHeatPump::doPhysics()
-   
-	** Refactor defrost calculation part of the doPhysics() function ** 
-	
+
+	** Refactor defrost calculation part of the doPhysics() function **
+
 	* defrost calculation is used with air-source heat pump only *
 	EIRPlantLoopHeatPump::doDefrost()
 
 	* Create doDefrost() new function for defrost calculation. *
 	* Defrost is not required for Water-to-Water Heat Pump *
-   
-    ** Refactor available capacity calculation part of the doPhysics() function ** 
-	
+
+    ** Refactor available capacity calculation part of the doPhysics() function **
+
 	* create a new calcAvailableCapacity() functions for capacity calculation *
     * refactor the capacity modifier applied for dry-air as a source used with heating coil *
-	EIRPlantLoopHeatPump::calcAvailableCapacity()  
-   
+	EIRPlantLoopHeatPump::calcAvailableCapacity()
+
     ** Refactor curve checks part of the doPhysics() function *
-	
+
 	* create a new CurveCheck() functions that wraps the cruve checks *
 	EIRPlantLoopHeatPump::CapModFTCurveCheck()
     EIRPlantLoopHeatPump::EIRModCurveCheck()
@@ -841,88 +841,88 @@ The following changes are required to implement the new feature
     * create a new functions for load side, power and source side calcultion *
 	EIRPlantLoopHeatPump::calcLoadSideHeatTransfer()
 	EIRPlantLoopHeatPump::calcPowerUsage()
-	
+
 	* refactor source side heat transfer calculation for ASHP and WSHP *
 	EIRPlantLoopHeatPump::calcSourceSideHeatTransferWSHP()
 	EIRPlantLoopHeatPump::calcSourceSideHeatTransferASHP()
-	
+
 	* create a new function that updates report variables and nodes information *
 	EIRPlantLoopHeatPump::report()
-	
-	
+
+
     ** Refactor ASHP and WSHP part of the doPhysics function **
-	
+
 	* create one for ASHP and another for WSHP functions **
 
     * the existing dPhysics() function will be used as a wrapper function *
 
 	EIRPlantLoopHeatPump::doPhysicsWSHP()
 	EIRPlantLoopHeatPump::doPhysicsASHP()
-	
-    
+
+
 	** modify the new dPhysicsASHP() function to support heat recovery calculation **
-	
+
 	if (this->heatRecoveryIsActive) {
-	
+
 	   ** heat recovery loop connected **
-	   
+
 	   * do the heatrecovery side heat transfer calculation *
-	   	   
+
 	   * account for the HR effect on the load side heat transfer *
-	   
+
 	   * capacity modifier curve calculation must use HR entering temperature instead of outside air *
-	   
+
 	   * do the outlet temperature calculation *
-	   
+
 	   * check heat reovery outlet temperature limit *
-	   
+
 	   * calculate the heat recovery actual heat transfer rate if the temperature limit is exceeded *
-	   
+
 	   * report the balance heat recovery heat transfer rate *
-	   	   
+
 	} else {
-	  
+
 	  ** no heat recovery loop connected **
-	  
-	  * do the existing calculation *	  
-	
+
+	  * do the existing calculation *
+
 	}
-	
+
 
 	** Calculate heat recovery outlet temperature **
-    
+
 	if (this->heatRecoveryIsActive) {
-	
+
 	   * HR side outlet temperature calculation*
 
 	   * the load side heat transfer must include the effect of HR operation *
 
 	   * the effect of heat recovery operation on the Heat Pump is accounted for via performance curves *
-	   
+
 		 `this->sourceSideHeatTransfer = 0.0;`
 
 	} else {
-	
+
 	   * No HR, use existing source side outlet temperature calculation *
-	   
+
 	   * No HR, set the heat recovery mass flow rate to zero *`
 	       `this->heatRecoveryMassFlowRate = 0.0;`
-		   
+
        * No HR, set the heat recovery heat transfer rate to zero *`
 	       `this->heatRecoveryRate = 0.0;`
-	   
+
 	   * No HR, set the outlet temperature to the inlet temperature *`
            `this->heatRecoveryOutletTemp = this->heatRecoveryInletTemp;`
-	   
+
 	}
-   
-   
+
+
    EIRPlantLoopHeatPump::setOperatingFlowRatesASHP()
-   
+
    ** if heat recovery is active then set operating flow rate for heat recovery side **
 
     `* set heat recovery flow rates for ON and OFF modes *`
-	
+
     `this->heatRecoveryMassFlowRate = 0.0;`
     `if (!this->running) {`
 	    `* reset the HR flow to zero if the heat pump is off *`
@@ -940,9 +940,9 @@ The following changes are required to implement the new feature
     `}`
 
    EIRPlantLoopHeatPump::oneTimeInit()
-   
+
    ** add the following five new report variables for heat recovery **
-   
+
    `* Heat Pump Heat Recovery Mass Flow Rate *`
    `* Heat Pump Heat Recovery Heat Transfer Rate *`
    `* Heat Pump Heat Recovery Heat Transfer Energy *`

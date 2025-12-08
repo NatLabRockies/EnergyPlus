@@ -89,7 +89,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -719,8 +719,8 @@
     VisualResilienceSummary; !- Report 5 Name
 
   Output:Table:ReportPeriod,
-    ThermalResilienceReportTimeWinter,  !- Name,
-    ThermalResilienceSummary,!- Report Name,
+    ThermalResilienceReportTimeWinter,  !- Name
+    ThermalResilienceSummary,!- Report Name
     ,                        !- Begin Year
     1,                       !- Begin Month
     1,                       !- Begin Day of Month
@@ -731,8 +731,8 @@
     18;                      !- End Hour of Day
 
   Output:Table:ReportPeriod,
-    ThermalResilienceReportTimeSummer,  !- Name,
-    ThermalResilienceSummary,!- Report Name,
+    ThermalResilienceReportTimeSummer,  !- Name
+    ThermalResilienceSummary,!- Report Name
     ,                        !- Begin Year
     7,                       !- Begin Month
     1,                       !- Begin Day of Month
@@ -743,8 +743,8 @@
     18;                      !- End Hour of Day
 
   Output:Table:ReportPeriod,
-    CO2ResilienceReportTimeWinter,  !- Name,
-    CO2ResilienceSummary,    !- Report Name,
+    CO2ResilienceReportTimeWinter,  !- Name
+    CO2ResilienceSummary,    !- Report Name
     ,                        !- Begin Year
     1,                       !- Begin Month
     1,                       !- Begin Day of Month
@@ -755,8 +755,8 @@
     18;                      !- End Hour of Day
 
   Output:Table:ReportPeriod,
-    CO2ResilienceReportTimeSummer,  !- Name,
-    CO2ResilienceSummary,    !- Report Name,
+    CO2ResilienceReportTimeSummer,  !- Name
+    CO2ResilienceSummary,    !- Report Name
     ,                        !- Begin Year
     7,                       !- Begin Month
     1,                       !- Begin Day of Month
@@ -767,8 +767,8 @@
     18;                      !- End Hour of Day
 
   Output:Table:ReportPeriod,
-    VisualResilienceReportTimeWinter,  !- Name,
-    VisualResilienceSummary, !- Report Name,
+    VisualResilienceReportTimeWinter,  !- Name
+    VisualResilienceSummary, !- Report Name
     ,                        !- Begin Year
     1,                       !- Begin Month
     1,                       !- Begin Day of Month
@@ -779,8 +779,8 @@
     18;                      !- End Hour of Day
 
   Output:Table:ReportPeriod,
-    VisualResilienceReportTimeSummer,  !- Name,
-    VisualResilienceSummary, !- Report Name,
+    VisualResilienceReportTimeSummer,  !- Name
+    VisualResilienceSummary, !- Report Name
     ,                        !- Begin Year
     7,                       !- Begin Month
     1,                       !- Begin Day of Month

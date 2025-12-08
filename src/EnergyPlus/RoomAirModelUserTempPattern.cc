@@ -218,36 +218,36 @@ void CalcTempDistModel(EnergyPlusData &state, int const ZoneNum) // index number
 
         return;
 
-    } else { // choose pattern and call subroutine
+    } // choose pattern and call subroutine
 
-        int CurntPatternKey = patternZoneInfo.patternSched->getCurrentVal();
+    int CurntPatternKey = patternZoneInfo.patternSched->getCurrentVal();
 
-        int CurPatrnID = FindNumberInList(CurntPatternKey, state.dataRoomAir->AirPattern, &TemperaturePattern::PatrnID);
+    int CurPatrnID = FindNumberInList(CurntPatternKey, state.dataRoomAir->AirPattern, &TemperaturePattern::PatrnID);
 
-        if (CurPatrnID == 0) {
-            // throw error here ? way to test schedules before getting to this point?
-            ShowFatalError(state, format("User defined room air pattern index not found: {}", CurntPatternKey));
-            return;
-        }
+    if (CurPatrnID == 0) {
+        // throw error here ? way to test schedules before getting to this point?
+        ShowFatalError(state, format("User defined room air pattern index not found: {}", CurntPatternKey));
+        return;
+    }
 
-        switch (state.dataRoomAir->AirPattern(CurPatrnID).PatternMode) {
-        case UserDefinedPatternType::ConstGradTemp: {
-            FigureConstGradPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::TwoGradInterp: {
-            FigureTwoGradInterpPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::NonDimenHeight: {
-            FigureHeightPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::SurfMapTemp: {
-            FigureSurfMapPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        default: {
-            assert(false);
-        } break;
-        }
-    } // availability control construct
+    switch (state.dataRoomAir->AirPattern(CurPatrnID).PatternMode) {
+    case UserDefinedPatternType::ConstGradTemp: {
+        FigureConstGradPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::TwoGradInterp: {
+        FigureTwoGradInterpPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::NonDimenHeight: {
+        FigureHeightPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::SurfMapTemp: {
+        FigureSurfMapPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    default: {
+        assert(false);
+    } break;
+    }
+    // availability control construct
 }
 
 void FigureSurfMapPattern(EnergyPlusData &state, int const PattrnID, int const ZoneNum)
@@ -479,13 +479,14 @@ Real64 OutdoorDryBulbGrad(Real64 DryBulbTemp, // Zone(ZoneNum).OutDryBulbTemp
 {
     if (DryBulbTemp >= UpperBound) {
         return HiGradient;
-    } else if (DryBulbTemp <= LowerBound) {
-        return LowGradient;
-    } else if ((UpperBound - LowerBound) == 0.0) {
-        return LowGradient;
-    } else {
-        return LowGradient + ((DryBulbTemp - LowerBound) / (UpperBound - LowerBound)) * (HiGradient - LowGradient);
     }
+    if (DryBulbTemp <= LowerBound) {
+        return LowGradient;
+    }
+    if ((UpperBound - LowerBound) == 0.0) {
+        return LowGradient;
+    }
+    return LowGradient + ((DryBulbTemp - LowerBound) / (UpperBound - LowerBound)) * (HiGradient - LowGradient);
 }
 
 void FigureConstGradPattern(EnergyPlusData &state, int const PattrnID, int const ZoneNum)

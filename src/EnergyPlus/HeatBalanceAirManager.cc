@@ -3866,7 +3866,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         }
         TotInfilVentFlow(ZoneNum) += state.dataHeatBal->Infiltration(Loop).DesignLevel;
 
-        std::string infilInputObjectType = "";
+        std::string infilInputObjectType;
         switch (state.dataHeatBal->Infiltration(Loop).ModelType) {
         case DataHeatBalance::InfiltrationModelType::DesignFlowRate:
             infilInputObjectType = "ZoneInfiltration:DesignFlowRate";
@@ -3931,7 +3931,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         }
         TotInfilVentFlow(ZoneNum) += state.dataHeatBal->Ventilation(Loop).DesignLevel;
 
-        std::string ventInputObjectType = "";
+        std::string ventInputObjectType;
         switch (state.dataHeatBal->Ventilation(Loop).ModelType) {
         case DataHeatBalance::VentilationModelType::DesignFlowRate:
             ventInputObjectType = "ZoneVentilation:DesignFlowRate";

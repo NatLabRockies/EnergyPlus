@@ -103,7 +103,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Building,                !- Name
@@ -3509,6 +3509,7 @@
     0;                       !- Fraction Lost
 
   Schedule:Constant,AlwaysOn,Fraction,1;
+
 
   Output:Variable,*,Zone Air Temperature,detailed;
 
