@@ -224,7 +224,7 @@ namespace PlantChillers {
             thisChiller.ChillerType = DataPlant::PlantEquipmentType::Chiller_Electric;
 
             thisChiller.CondenserType = static_cast<DataPlant::CondenserType>(
-                getEnumValue(DataPlant::CondenserTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(2))));
+                getEnumValue(DataPlant::CondenserTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
             switch (thisChiller.CondenserType) {
             case DataPlant::CondenserType::AirCooled:
             case DataPlant::CondenserType::WaterCooled:

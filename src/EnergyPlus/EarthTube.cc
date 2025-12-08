@@ -276,7 +276,7 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
         if (s_ipsc->cAlphaArgs(3).empty()) {
             thisEarthTube.FanType = Ventilation::Natural;
         } else {
-            thisEarthTube.FanType = static_cast<Ventilation>(getEnumValue(ventilationNamesUC, s_ipsc->cAlphaArgs(3)));
+            thisEarthTube.FanType = static_cast<Ventilation>(getEnumValue(ventilationNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             if (thisEarthTube.FanType == Ventilation::Invalid) {
                 ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                 ErrorsFound = true;
@@ -384,7 +384,7 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
             ErrorsFound = true;
         }
 
-        SoilType soilType = static_cast<SoilType>(getEnumValue(soilTypeNamesUC, s_ipsc->cAlphaArgs(4)));
+        SoilType soilType = static_cast<SoilType>(getEnumValue(soilTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
         constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalDiffusivity = {0.0781056, 0.055728, 0.0445824, 0.024192};
         constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalConductivity = {2.42, 1.3, 0.865, 0.346};
         if (soilType == SoilType::Invalid) {
@@ -415,7 +415,7 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
         if (s_ipsc->cAlphaArgs(5).empty()) {
             thisEarthTube.ModelType = EarthTubeModelType::Basic;
         } else {
-            thisEarthTube.ModelType = static_cast<EarthTubeModelType>(getEnumValue(solutionTypeNamesUC, s_ipsc->cAlphaArgs(5)));
+            thisEarthTube.ModelType = static_cast<EarthTubeModelType>(getEnumValue(solutionTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(5))));
             if (thisEarthTube.ModelType == EarthTubeModelType::Invalid) {
                 ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
                 ErrorsFound = true;

@@ -3167,8 +3167,8 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         } else {
             CheckZoneSizing(state, this->sysType, this->SysName);
             if (Util::SameString(this->ReheatComp, "Coil:Heating:Steam")) {
-                state.dataSingleDuct->CoilSteamInletNodeSS = GetCoilSteamInletNode(state, this->ReheatName, "Coil:Heating:Steam", ErrorsFound);
-                state.dataSingleDuct->CoilSteamOutletNodeSS = GetCoilSteamOutletNode(state, this->ReheatName, "Coil:Heating:Steam", ErrorsFound);
+                state.dataSingleDuct->CoilSteamInletNodeSS = GetCoilSteamInletNode(state, this->ReheatComp, this->ReheatName, ErrorsFound);
+                state.dataSingleDuct->CoilSteamOutletNodeSS = GetCoilSteamOutletNode(state, this->ReheatComp, this->ReheatName, ErrorsFound);
                 if (IsAutoSize) {
                     PlantSizingErrorsFound = false;
                     PltSizHeatNum = MyPlantSizingIndex(state,
@@ -5057,7 +5057,7 @@ void GetATMixers(EnergyPlusData &state)
         Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound);
         state.dataSingleDuct->SysATMixer(ATMixerNum).Name = state.dataIPShortCut->cAlphaArgs(1);
 
-        atMixer.type = static_cast<HVAC::MixerType>(getEnumValue(HVAC::mixerTypeLocNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(7))));
+        atMixer.type = static_cast<HVAC::MixerType>(getEnumValue(HVAC::mixerTypeLocNamesUC, ipsc->cAlphaArgs(7)));
 
         if (state.dataIPShortCut->cAlphaArgs(2) == "ZONEHVAC:WATERTOAIRHEATPUMP") {
             state.dataSingleDuct->SysATMixer(ATMixerNum).ZoneHVACUnitType = 1;

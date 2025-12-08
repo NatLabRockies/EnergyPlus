@@ -4766,8 +4766,8 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
             }
             EXPECT_TRUE(Util::SameString(equipmentNames[0], "Baseboard Heat"));
             EXPECT_TRUE(Util::SameString(equipmentTypes[0], "ZoneHVAC:Baseboard:RadiantConvective:Electric"));
-            EXPECT_TRUE(Util::SameString(coolFracSchedNames[0], ""));
-            EXPECT_TRUE(Util::SameString(heatFracSchedNames[0], ""));
+            EXPECT_TRUE(coolFracSchedNames[0] == "");
+            EXPECT_TRUE(heatFracSchedNames[0] == "");
             EXPECT_EQ(coolSeqNums[0], 0);
             EXPECT_EQ(heatSeqNums[0], 3);
 
@@ -4781,8 +4781,8 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
 
             EXPECT_TRUE(Util::SameString(equipmentNames[2], "Exhaust Fan"));
             EXPECT_TRUE(Util::SameString(equipmentTypes[2], "Fan:ZoneExhaust"));
-            EXPECT_TRUE(Util::SameString(coolFracSchedNames[2], ""));
-            EXPECT_TRUE(Util::SameString(heatFracSchedNames[2], ""));
+            EXPECT_TRUE(coolFracSchedNames[2] == "");
+            EXPECT_TRUE(heatFracSchedNames[2] == "");
             EXPECT_EQ(coolSeqNums[2], 1);
             EXPECT_EQ(heatSeqNums[2], 1);
         }

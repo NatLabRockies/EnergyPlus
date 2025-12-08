@@ -204,7 +204,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             s_mat->materialMap.insert_or_assign(matNameUC, mat->Num);
 
             std::string roughness = s_ip->getAlphaFieldValue(objectFields, objectSchemaProps, "roughness");
-            mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(roughness)));
+            mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, roughness));
             mat->Thickness = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thickness");
             mat->Conductivity = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "conductivity");
             mat->Density = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "density");
@@ -279,7 +279,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->Num = s_mat->materials.isize();
         s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
 
-        mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
+        mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, s_ipsc->cAlphaArgs(2)));
 
         mat->Resistance = s_ipsc->rNumericArgs(1);
         mat->ROnly = true;
@@ -985,7 +985,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // Load the material derived type from the input data.
 
-        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
+        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, s_ipsc->cAlphaArgs(2)));
         matGas->Roughness = SurfaceRoughness::MediumRough;
 
         matGas->Thickness = s_ipsc->rNumericArgs(1);
@@ -1088,7 +1088,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // Load the material derived type from the input data.
 
-        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2)))); // Error check?
+        matGas->gases[0].type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, s_ipsc->cAlphaArgs(2))); // Error check?
 
         matGas->Roughness = SurfaceRoughness::MediumRough;
 
@@ -1102,7 +1102,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         if (!s_ipsc->lAlphaFieldBlanks(2)) {
             // Get gap vent type
-            matGas->gapVentType = static_cast<GapVentType>(getEnumValue(gapVentTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
+            matGas->gapVentType = static_cast<GapVentType>(getEnumValue(gapVentTypeNamesUC, s_ipsc->cAlphaArgs(3)));
         }
 
         if (gasType == GasType::Custom) {
@@ -1194,7 +1194,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matGas->numGases = NumGases;
         for (NumGas = 0; NumGas < NumGases; ++NumGas) {
             auto &gas = matGas->gases[NumGas];
-            gas.type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2 + NumGas))));
+            gas.type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, s_ipsc->cAlphaArgs(2 + NumGas)));
             if (gas.type == GasType::Invalid) {
                 ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1 + NumGas)));
                 // Error check?
@@ -1521,7 +1521,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         // Load the material derived type from the input data.
 
         matScreen->bmRefModel =
-            static_cast<ScreenBeamReflectanceModel>(getEnumValue(screenBeamReflectanceModelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
+            static_cast<ScreenBeamReflectanceModel>(getEnumValue(screenBeamReflectanceModelNamesUC, s_ipsc->cAlphaArgs(2)));
         if (matScreen->bmRefModel == ScreenBeamReflectanceModel::Invalid) {
             ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
@@ -2150,7 +2150,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         //  MaximizeSolar or BlockBeamSolar
         mat->slatAngleType = SlatAngleType::FixedSlatAngle;
         if (!s_ipsc->lAlphaFieldBlanks(3)) {
-            mat->slatAngleType = static_cast<SlatAngleType>(getEnumValue(slatAngleTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
+            mat->slatAngleType = static_cast<SlatAngleType>(getEnumValue(slatAngleTypeNamesUC, s_ipsc->cAlphaArgs(3)));
         }
         if (mat->SlatWidth < mat->SlatSeparation) {
             ShowWarningError(state, format("{}=\"{}\", Slat Separation/Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
@@ -2260,7 +2260,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // need to treat the A2 with is just the name of the soil(it is
         // not important)
-        mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
+        mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, s_ipsc->cAlphaArgs(3)));
 
         if (s_ipsc->lAlphaFieldBlanks(4)) {
             mat->calcMethod = EcoRoofCalcMethod::SchaapGenuchten;

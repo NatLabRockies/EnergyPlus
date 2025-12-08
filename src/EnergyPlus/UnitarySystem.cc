@@ -111,6 +111,10 @@ namespace UnitarySystems {
     int constexpr HeatingCoil = 1;
     int constexpr SuppHeatCoil = 2;
 
+    std::string coilHeatingWater = "Coil:Heating:Water";
+    std::string coilHeatingSteam = "Coil:Heating:Steam";
+
+
     static constexpr std::string_view blankString("");
     static const std::string blankStdString("");
 
@@ -696,19 +700,19 @@ namespace UnitarySystems {
                                            this->m_SuppHeatCoilName,
                                            this->m_MaxHeatAirVolFlow,
                                            state.dataUnitarySystems->initUnitarySystemsErrorsFound);
-
+                std::string coilHeatingWater = "Coil:Heating:Water";
                 if (state.dataUnitarySystems->initUnitarySystemsErrFlag) {
                     ShowFatalError(state, "InitUnitarySystems: Program terminated for previous conditions.");
                 }
                 this->m_MaxSuppCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(
-                    state, this->m_SuppHeatCoilName, "Coil:Heating:Water", state.dataUnitarySystems->initUnitarySystemsErrorsFound);
+                    state, coilHeatingWater, this->m_SuppHeatCoilName, state.dataUnitarySystems->initUnitarySystemsErrorsFound);
 
                 if (this->m_MaxSuppCoilFluidFlow > 0.0) {
                     Real64 rho =
                         state.dataPlnt->PlantLoop(this->m_SuppCoilPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
                     this->m_MaxSuppCoilFluidFlow =
                         WaterCoils::GetCoilMaxWaterFlowRate(
-                            state, this->m_SuppHeatCoilName, "Coil:Heating:Water", state.dataUnitarySystems->initUnitarySystemsErrorsFound) *
+                            state, coilHeatingWater, this->m_SuppHeatCoilName, state.dataUnitarySystems->initUnitarySystemsErrorsFound) *
                         rho;
                 }
                 // fill outlet node for coil
@@ -810,7 +814,7 @@ namespace UnitarySystems {
                     if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWater) {
                         WaterCoils::SimulateWaterCoilComponents(state, this->m_HeatingCoilName, FirstHVACIteration, this->m_HeatingCoilIndex);
                         Real64 CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(
-                            state, this->m_HeatingCoilName, "Coil:Heating:Water", state.dataUnitarySystems->initUnitarySystemsErrorsFound);
+                            state, coilHeatingWater, this->m_HeatingCoilName, state.dataUnitarySystems->initUnitarySystemsErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             Real64 rho = state.dataPlnt->PlantLoop(this->HeatCoilPlantLoc.loopNum)
                                              .glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
@@ -845,7 +849,7 @@ namespace UnitarySystems {
                         // If water coil max water flow rate is DataSizing::AutoSized, simulate once in order to mine max flow rate
                         WaterCoils::SimulateWaterCoilComponents(state, this->m_SuppHeatCoilName, FirstHVACIteration, this->m_SuppHeatCoilIndex);
                         Real64 CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(
-                            state, this->m_SuppHeatCoilName, "Coil:Heating:Water", state.dataUnitarySystems->initUnitarySystemsErrorsFound);
+                            state, coilHeatingWater, this->m_SuppHeatCoilName, state.dataUnitarySystems->initUnitarySystemsErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             Real64 rho = state.dataPlnt->PlantLoop(this->m_SuppCoilPlantLoc.loopNum)
                                              .glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
@@ -1033,7 +1037,7 @@ namespace UnitarySystems {
                     1.0,
                     state.dataUnitarySystems->initUnitarySystemsQActual); // QCoilReq, simulate any load > 0 to get max capacity of steam coil
                 this->m_DesignSuppHeatingCapacity = SteamCoils::GetCoilCapacity(
-                    state, this->m_SuppHeatCoilName, "Coil:Heating:Steam", state.dataUnitarySystems->initUnitarySystemsErrorsFound);
+                    state, coilHeatingSteam, this->m_SuppHeatCoilName, state.dataUnitarySystems->initUnitarySystemsErrorsFound);
 
             } // from IF(UnitarySystem(UnitarySysNum)%SuppHeatCoilType_Num == Coil_HeatingSteam) THEN
         } // from IF( FirstHVACIteration ) THEN
@@ -3715,7 +3719,7 @@ namespace UnitarySystems {
 
         std::string const &cCurrentModuleObject = input_data.system_type;
         DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(input_data.system_type)));
+            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, input_data.system_type));
         std::string const &thisObjectName = input_data.name;
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, thisObjectName};
@@ -3918,7 +3922,7 @@ namespace UnitarySystems {
 
         constexpr static std::array<std::string_view, static_cast<int>(UnitarySysCtrlType::Num)> UnitarySysCtrlTypeNamesUC = {
             "NONE", "LOAD", "SETPOINT", "SINGLEZONEVAV"};
-        this->m_ControlType = static_cast<UnitarySysCtrlType>(getEnumValue(UnitarySysCtrlTypeNamesUC, Util::makeUPPER(input_data.control_type)));
+        this->m_ControlType = static_cast<UnitarySysCtrlType>(getEnumValue(UnitarySysCtrlTypeNamesUC, input_data.control_type));
         if (this->m_ControlType == UnitarySysCtrlType::CCMASHRAE) {
             this->m_ValidASHRAECoolCoil = true;
             this->m_ValidASHRAEHeatCoil = true;
@@ -4357,7 +4361,7 @@ namespace UnitarySystems {
         std::string const &loc_m_FanName = input_data.supply_fan_name;
 
         if (!loc_m_FanName.empty() && !loc_fanType.empty()) {
-            this->m_FanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(loc_fanType)));
+            this->m_FanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, loc_fanType));
 
             this->m_FanIndex = Fans::GetFanIndex(state, loc_m_FanName);
             if (this->m_FanIndex == 0) {
@@ -4396,7 +4400,7 @@ namespace UnitarySystems {
             this->m_FanCompNotSetYet = false;
         }
 
-        this->m_FanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(input_data.fan_placement)));
+        this->m_FanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, input_data.fan_placement));
         if (this->m_FanPlace == HVAC::FanPlace::Invalid && this->m_FanExists) {
             ShowSevereError(state, format("{} = {}", cCurrentModuleObject, thisObjectName));
             ShowContinueError(state, format("Illegal Fan Placement = {}", input_data.fan_placement));
@@ -5475,7 +5479,7 @@ namespace UnitarySystems {
             this->m_CoolingCoilType_Num == HVAC::Coil_CoolingWaterToAirHPSimple) {
             if (!input_data.heat_pump_coil_water_flow_mode.empty()) {
                 this->m_WaterCyclingMode =
-                    static_cast<HVAC::WaterFlow>(getEnumValue(HVAC::waterFlowNamesUC, Util::makeUPPER(input_data.heat_pump_coil_water_flow_mode)));
+                    static_cast<HVAC::WaterFlow>(getEnumValue(HVAC::waterFlowNamesUC, input_data.heat_pump_coil_water_flow_mode));
             } else {
                 this->m_WaterCyclingMode = HVAC::WaterFlow::Cycling;
             }
@@ -5521,7 +5525,7 @@ namespace UnitarySystems {
                     ShowContinueError(state, "Variable DX Cooling Coil resets Use DOAS DX Cooling Coil = No and the simulation continues.");
                     this->m_ISHundredPercentDOASDXCoil = false;
                 }
-            } else if (Util::SameString(input_data.use_doas_dx_cooling_coil, "")) {
+            } else if (input_data.use_doas_dx_cooling_coil == "") {
                 this->m_ISHundredPercentDOASDXCoil = false;
             } else if (Util::SameString(input_data.use_doas_dx_cooling_coil, "No")) {
                 this->m_ISHundredPercentDOASDXCoil = false;
@@ -10469,7 +10473,7 @@ namespace UnitarySystems {
                     if (this->m_HeatingCoilType_Num == HVAC::Coil_HeatingWater) {
                         WaterCoils::SimulateWaterCoilComponents(state, this->m_HeatingCoilName, FirstHVACIteration, this->m_HeatingCoilIndex);
                         Real64 CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, this->m_HeatingCoilName, "Coil:Heating:Water", errorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, this->m_HeatingCoilName, errorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             Real64 rho = state.dataPlnt->PlantLoop(this->HeatCoilPlantLoc.loopNum)
                                              .glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
@@ -10502,7 +10506,7 @@ namespace UnitarySystems {
                         // IF water coil max water flow rate is DataSizing::AutoSized, simulate once in order to mine max flow rate
                         WaterCoils::SimulateWaterCoilComponents(state, this->m_SuppHeatCoilName, FirstHVACIteration, this->m_SuppHeatCoilIndex);
                         Real64 CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, this->m_SuppHeatCoilName, "Coil:Heating:Water", errorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, this->m_SuppHeatCoilName, errorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             Real64 rho = state.dataPlnt->PlantLoop(this->m_SuppCoilPlantLoc.loopNum)
                                              .glycol->getDensity(state, Constant::CWInitConvTemp, routineName);

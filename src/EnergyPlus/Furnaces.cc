@@ -169,6 +169,7 @@ namespace Furnaces {
     static constexpr std::string_view BlankString;
     std::string coilHeatingDxVariableSpeed = "COIL:HEATING:DX:VARIABLESPEED";
     std::string coilCoolingDxVariableSpeed = "Coil:Cooling:DX:VariableSpeed";
+    std::string coilHeatingWater = "Coil:Heating:Water";
 
     // Functions
 
@@ -962,7 +963,7 @@ namespace Furnaces {
             FanName = Alphas(8);
             errFlag = false;
 
-            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(7)));
+            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(7))));
             if (thisFurnace.fanType != HVAC::FanType::OnOff && thisFurnace.fanType != HVAC::FanType::Constant) {
                 ShowSevereError(state, format("{} = {}", CurrentModuleObject, Alphas(1)));
                 ShowContinueError(state, format("Illegal {} = {}", cAlphaFields(7), Alphas(7)));
@@ -1002,7 +1003,7 @@ namespace Furnaces {
                 }
             }
 
-            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(9)));
+            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(Alphas(9))));
             assert(thisFurnace.fanPlace != HVAC::FanPlace::Invalid);
 
             // Get coil data
@@ -1094,7 +1095,7 @@ namespace Furnaces {
 
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, HeatingCoilName, "Coil:Heating:Water", errFlag);
+                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
                     thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
@@ -1131,7 +1132,7 @@ namespace Furnaces {
 
                     // Get the Heating Coil steam inlet node number
                     errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, HeatingCoilName, "COIL:HEATING:STEAM", errFlag);
+                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -1498,7 +1499,7 @@ namespace Furnaces {
             // Get fan data
             FanName = Alphas(8);
 
-            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(7)));
+            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(7))));
 
             if (thisFurnace.fanType != HVAC::FanType::OnOff && thisFurnace.fanType != HVAC::FanType::Constant) {
                 ShowSevereError(state, format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -1539,7 +1540,7 @@ namespace Furnaces {
                 }
             }
 
-            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(9)));
+            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(Alphas(9))));
             assert(thisFurnace.fanPlace != HVAC::FanPlace::Invalid);
 
             // Get coil data
@@ -1678,7 +1679,7 @@ namespace Furnaces {
 
                     // Get the Heating Coil steam inlet node number
                     errFlag = false;
-                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, HeatingCoilName, "Coil:Heating:Steam", errFlag);
+                    thisFurnace.CoilControlNode = SteamCoils::GetCoilSteamInletNode(state, HeatingCoilType, HeatingCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -2793,7 +2794,7 @@ namespace Furnaces {
             // Get fan data
             FanName = Alphas(7);
 
-            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(6)));
+            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(6))));
 
             if (thisFurnace.fanType == HVAC::FanType::OnOff || thisFurnace.fanType == HVAC::FanType::Constant) {
 
@@ -3121,7 +3122,7 @@ namespace Furnaces {
 
                     // Get the ReHeat Coil Outlet Node
                     errFlag = false;
-                    SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, SuppHeatCoilName, "Coil:Heating:Water", errFlag);
+                    SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
                     thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
@@ -3156,7 +3157,7 @@ namespace Furnaces {
 
                     // Get the Heating Coil steam inlet node number
                     errFlag = false;
-                    thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, SuppHeatCoilName, "Coil:Heating:Steam", errFlag);
+                    thisFurnace.SuppCoilControlNode = SteamCoils::GetCoilSteamInletNode(state, SuppHeatCoilType, SuppHeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -3196,7 +3197,7 @@ namespace Furnaces {
                 ErrorsFound = true;
             } // IF (Furnace(FurnaceNum)%HeatingCoilType_Num == Coil_HeatingGasOrOtherFuel .OR. &, etc.
 
-            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(14)));
+            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(Alphas(14))));
             assert(thisFurnace.fanPlace != HVAC::FanPlace::Invalid);
 
             if (lAlphaBlanks(15)) {
@@ -3725,7 +3726,7 @@ namespace Furnaces {
             // Get fan data
             FanName = Alphas(7);
             errFlag = false;
-            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(6)));
+            thisFurnace.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(6))));
 
             if (thisFurnace.fanType != HVAC::FanType::OnOff) {
                 ShowSevereError(state, format("{} = {}", CurrentModuleObject, Alphas(1)));
@@ -3837,7 +3838,7 @@ namespace Furnaces {
 
             thisFurnace.WaterCyclingMode = (NumAlphas < 18 || lAlphaBlanks(18))
                                                ? HVAC::WaterFlow::Cycling
-                                               : static_cast<HVAC::WaterFlow>(getEnumValue(HVAC::waterFlowNamesUC, Util::makeUPPER(Alphas(18))));
+                                               : static_cast<HVAC::WaterFlow>(getEnumValue(HVAC::waterFlowNamesUC, Alphas(18)));
 
             // end get water flow mode info
             if (Alphas(8) == "COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT" && Alphas(10) == "COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT") {
@@ -4044,7 +4045,7 @@ namespace Furnaces {
                 }
             }
 
-            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(15)));
+            thisFurnace.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(Alphas(15))));
             assert(thisFurnace.fanPlace != HVAC::FanPlace::Invalid);
 
             if (lAlphaBlanks(16)) {
@@ -4825,7 +4826,7 @@ namespace Furnaces {
                         ShowFatalError(state, "InitFurnace: Program terminated for previous conditions.");
                     }
                     thisFurnace.MaxHeatCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, thisFurnace.HeatingCoilName, "Coil:Heating:Water", ErrorsFound);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.HeatingCoilName, ErrorsFound);
                     if (thisFurnace.MaxHeatCoilFluidFlow > 0.0) {
                         rho =
                             state.dataPlnt->PlantLoop(thisFurnace.plantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -4883,7 +4884,7 @@ namespace Furnaces {
                         ShowFatalError(state, "InitFurnace: Program terminated for previous conditions.");
                     }
                     thisFurnace.MaxSuppCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, thisFurnace.SuppHeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.SuppHeatCoilName, ErrorsFound);
                     if (thisFurnace.MaxSuppCoilFluidFlow > 0.0) {
                         rho = state.dataPlnt->PlantLoop(thisFurnace.SuppPlantLoc.loopNum)
                                   .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -4946,7 +4947,7 @@ namespace Furnaces {
                     if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWater) {
                         WaterCoils::SimulateWaterCoilComponents(state, thisFurnace.HeatingCoilName, FirstHVACIteration, thisFurnace.HeatingCoilIndex);
                         CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, thisFurnace.HeatingCoilName, "Coil:Heating:Water", ErrorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.HeatingCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(thisFurnace.plantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -4979,7 +4980,7 @@ namespace Furnaces {
                         WaterCoils::SimulateWaterCoilComponents(
                             state, thisFurnace.SuppHeatCoilName, FirstHVACIteration, thisFurnace.SuppHeatCoilIndex);
                         CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, thisFurnace.SuppHeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.SuppHeatCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(thisFurnace.SuppPlantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);

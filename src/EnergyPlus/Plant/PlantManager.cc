@@ -559,7 +559,7 @@ void GetPlantLoopData(EnergyPlusData &state)
                 } else {
                     this_loop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
                 }
-            } else if (Util::SameString(Alpha(16), "")) {
+            } else if (Alpha(16) == "") {
                 this_loop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
             } else {
                 ShowWarningError(state, std::string{RoutineName} + CurrentModuleObject + "=\"" + Alpha(1) + "\", Invalid choice.");
@@ -615,13 +615,13 @@ void GetPlantLoopData(EnergyPlusData &state)
         } else {
             PressSimAlphaIndex = 15;
         }
-        this_loop.TypeOfWaterLoop = static_cast<DataPlant::WaterLoopType>(getEnumValue(DataPlant::waterLoopTypeNamesUC, Util::makeUPPER(Alpha(19))));
+        this_loop.TypeOfWaterLoop = static_cast<DataPlant::WaterLoopType>(getEnumValue(DataPlant::waterLoopTypeNamesUC, Alpha(19)));
 
         if (NumAlphas >= PressSimAlphaIndex) {
             MatchedPressureString = false;
 
             this_loop.PressureSimType =
-                static_cast<DataPlant::PressSimType>(getEnumValue(PressureSimTypeNamesUC, Util::makeUPPER(Alpha(PressSimAlphaIndex))));
+                static_cast<DataPlant::PressSimType>(getEnumValue(PressureSimTypeNamesUC, Alpha(PressSimAlphaIndex)));
 
             switch (this_loop.PressureSimType) {
                 // Check all types
@@ -893,7 +893,7 @@ void GetPlantInput(EnergyPlusData &state)
                     this_comp.location = EnergyPlus::PlantLocation(LoopNum, LoopSideNum, BranchNum, CompNum);
                     PlantUtilities::SetPlantLocationLinks(state, this_comp.location);
 
-                    this_comp.Type = static_cast<PlantEquipmentType>(getEnumValue(PlantEquipTypeNamesUC, Util::makeUPPER(this_comp_type)));
+                    this_comp.Type = static_cast<PlantEquipmentType>(getEnumValue(PlantEquipTypeNamesUC, this_comp_type));
 
                     switch (this_comp.Type) {
                     case PlantEquipmentType::Pipe: {

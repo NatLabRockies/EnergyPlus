@@ -412,7 +412,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         switch (tariff.kindMtr) {
         case MeterType::Water: {
             // conversion factor
-            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, s_ipsc->cAlphaArgs(3)));
+            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             switch (tariff.convChoice) {
             case EconConv::USERDEF: {
                 tariff.energyConv = s_ipsc->rNumericArgs(1); // energy conversion factor
@@ -457,7 +457,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         case MeterType::ElecPurchased:
         case MeterType::ElecSurplusSold:
         case MeterType::ElecNet: {
-            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, s_ipsc->cAlphaArgs(3)));
+            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
 
             switch (tariff.convChoice) {
             case EconConv::USERDEF: {
@@ -507,7 +507,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
 
             // If it's a gas meter
         case MeterType::Gas: {
-            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, s_ipsc->cAlphaArgs(3)));
+            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             switch (tariff.convChoice) {
             case EconConv::USERDEF: {
                 tariff.energyConv = s_ipsc->rNumericArgs(1); // energy conversion factor
@@ -569,7 +569,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
             // It it's neither an electric, water or gas meter, we cannot accept volumetric units
             // because we cannot infer the heat content
         case MeterType::Other: {
-            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, s_ipsc->cAlphaArgs(3)));
+            tariff.convChoice = static_cast<EconConv>(getEnumValue(econConvNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             switch (tariff.convChoice) {
             case EconConv::USERDEF: {
                 tariff.energyConv = s_ipsc->rNumericArgs(1); // energy conversion factor
@@ -772,7 +772,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
 
         if (s_ipsc->lAlphaFieldBlanks(13)) {
             tariff.buyOrSell = BuySell::BuyFromUtility;
-        } else if ((tariff.buyOrSell = static_cast<BuySell>(getEnumValue(buySellNamesUC, s_ipsc->cAlphaArgs(13)))) == BuySell::Invalid) {
+        } else if ((tariff.buyOrSell = static_cast<BuySell>(getEnumValue(buySellNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(13))))) == BuySell::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(13), s_ipsc->cAlphaArgs(13));
             ErrorsFound = true;
         }
@@ -901,7 +901,7 @@ void GetInputEconomicsQualify(EnergyPlusData &state, bool &ErrorsFound) // true 
         qualify.thresholdPt =
             AssignVariablePt(state, s_ipsc->cAlphaArgs(5), isNotNumeric, varIsArgument, varNotYetDefined, ObjType::Invalid, 0, qualify.tariffIndx);
         // enumerated list of the kind of season
-        if ((qualify.season = static_cast<Season>(getEnumValue(seasonNamesUC, s_ipsc->cAlphaArgs(6)))) == Season::Invalid) {
+        if ((qualify.season = static_cast<Season>(getEnumValue(seasonNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))))) == Season::Invalid) {
             ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6), "Annual");
             qualify.season = Season::Annual;
         }
@@ -973,7 +973,7 @@ void GetInputEconomicsChargeSimple(EnergyPlusData &state, bool &ErrorsFound) // 
         chargeSimple.sourcePt =
             AssignVariablePt(state, s_ipsc->cAlphaArgs(3), true, varIsArgument, varNotYetDefined, ObjType::Invalid, 0, chargeSimple.tariffIndx);
         // enumerated list of the kind of season
-        chargeSimple.season = static_cast<Season>(getEnumValue(seasonNamesUC, s_ipsc->cAlphaArgs(4)));
+        chargeSimple.season = static_cast<Season>(getEnumValue(seasonNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
         if (chargeSimple.season == Season::Invalid) {
             ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "Annual");
             chargeSimple.season = Season::Annual;
@@ -1057,7 +1057,7 @@ void GetInputEconomicsChargeBlock(EnergyPlusData &state, bool &ErrorsFound) // t
         chargeBlock.sourcePt =
             AssignVariablePt(state, s_ipsc->cAlphaArgs(3), true, varIsArgument, varNotYetDefined, ObjType::Invalid, 0, chargeBlock.tariffIndx);
         // enumerated list of the kind of season
-        chargeBlock.season = static_cast<Season>(getEnumValue(seasonNamesUC, s_ipsc->cAlphaArgs(4)));
+        chargeBlock.season = static_cast<Season>(getEnumValue(seasonNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
         if (chargeBlock.season == Season::Invalid) {
             ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4), "Annual");
             chargeBlock.season = Season::Annual;
@@ -1182,12 +1182,12 @@ void GetInputEconomicsRatchet(EnergyPlusData &state, bool &ErrorsFound) // true 
         ratchet.adjustmentPt =
             AssignVariablePt(state, s_ipsc->cAlphaArgs(4), true, varIsArgument, varNotYetDefined, ObjType::Ratchet, iInObj, ratchet.tariffIndx);
         // seasons to and from
-        ratchet.seasonFrom = static_cast<Season>(getEnumValue(seasonNamesUC, s_ipsc->cAlphaArgs(5)));
+        ratchet.seasonFrom = static_cast<Season>(getEnumValue(seasonNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(5))));
         if (ratchet.seasonFrom == Season::Invalid) {
             ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "Annual");
             ratchet.seasonFrom = Season::Annual;
         }
-        ratchet.seasonTo = static_cast<Season>(getEnumValue(seasonNamesUC, s_ipsc->cAlphaArgs(6)));
+        ratchet.seasonTo = static_cast<Season>(getEnumValue(seasonNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))));
         if (ratchet.seasonTo == Season::Invalid) {
             ShowWarningInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(56), "Annual");
             ratchet.seasonTo = Season::Annual;
@@ -1252,7 +1252,7 @@ void GetInputEconomicsVariable(EnergyPlusData &state, bool &ErrorsFound) // true
         auto &econVar = s_econ->econVar(variablePt);
 
         // validate the kind of variable - not used internally except for validation
-        econVar.varUnitType = static_cast<VarUnitType>(getEnumValue(varUnitTypeNamesUC, s_ipsc->cAlphaArgs(3)));
+        econVar.varUnitType = static_cast<VarUnitType>(getEnumValue(varUnitTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
         if (econVar.varUnitType == VarUnitType::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
             ErrorsFound = true;
@@ -4720,7 +4720,7 @@ void selectTariff(EnergyPlusData &state)
             groupIndex(iTariff) = groupCount;
             // set all remaining matching items to the same index
             for (int kTariff = iTariff + 1; kTariff <= s_econ->numTariff; ++kTariff) {
-                if (Util::SameString(s_econ->tariff(kTariff).groupName, tariff.groupName)) {
+                if (equali(s_econ->tariff(kTariff).groupName, tariff.groupName)) {
                     groupIndex(kTariff) = groupCount;
                 }
             }

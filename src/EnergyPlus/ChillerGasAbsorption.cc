@@ -545,7 +545,7 @@ void GetGasAbsorberInput(EnergyPlusData &state)
         thisChiller.SizFac = s_ipsc->rNumericArgs(17);
 
         // Validate fuel type input
-        thisChiller.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, s_ipsc->cAlphaArgs(17)));
+        thisChiller.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(17))));
         if (thisChiller.FuelType == Constant::eFuel::Invalid) {
             ShowSevereError(state, format("{}=\"{}\", invalid value", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, format("Invalid {}={}", s_ipsc->cAlphaFieldNames(17), s_ipsc->cAlphaArgs(17)));

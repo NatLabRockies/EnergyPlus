@@ -441,7 +441,7 @@ namespace RoomAir {
             roomAirPattern.TwoGradPatrn.HiGradient = ipsc->rNumericArgs(6);
 
             roomAirPattern.TwoGradPatrn.InterpolationMode =
-                static_cast<UserDefinedPatternMode>(getEnumValue(userDefinedPatternModeNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(2))));
+                static_cast<UserDefinedPatternMode>(getEnumValue(userDefinedPatternModeNamesUC, ipsc->cAlphaArgs(2)));
             if (roomAirPattern.TwoGradPatrn.InterpolationMode == UserDefinedPatternMode::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;
@@ -703,7 +703,7 @@ namespace RoomAir {
                 airNode.SurfMask.allocate(NumOfSurfs);
             }
 
-            airNode.ClassType = static_cast<AirNodeType>(getEnumValue(airNodeTypeNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(2))));
+            airNode.ClassType = static_cast<AirNodeType>(getEnumValue(airNodeTypeNamesUC, ipsc->cAlphaArgs(2)));
             if (airNode.ClassType == AirNodeType::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;
@@ -1040,7 +1040,7 @@ namespace RoomAir {
                     ShowSevereEmptyField(state, eoh, ipsc->cAlphaFieldNames(3));
                     ErrorsFound = true;
                 }
-            } else if ((zoneCV.VforComfort = static_cast<Comfort>(getEnumValue(comfortNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(3))))) ==
+            } else if ((zoneCV.VforComfort = static_cast<Comfort>(getEnumValue(comfortNamesUC, ipsc->cAlphaArgs(3)))) ==
                        Comfort::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3));
                 ErrorsFound = true;
@@ -1157,7 +1157,7 @@ namespace RoomAir {
             }
 
             // 2nd alpha is diffuser type
-            zoneUI.DiffuserType = static_cast<Diffuser>(getEnumValue(diffuserNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(2))));
+            zoneUI.DiffuserType = static_cast<Diffuser>(getEnumValue(diffuserNamesUC, ipsc->cAlphaArgs(2)));
             if (zoneUI.DiffuserType == Diffuser::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;
@@ -1216,7 +1216,7 @@ namespace RoomAir {
                 state.dataRoomAir->IsZoneUFAD(zoneUE.ZonePtr) = true;
                 state.dataRoomAir->ZoneUFADPtr(zoneUE.ZonePtr) = Loop + state.dataRoomAir->TotUFADInt;
             }
-            zoneUE.DiffuserType = static_cast<Diffuser>(getEnumValue(diffuserNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(2))));
+            zoneUE.DiffuserType = static_cast<Diffuser>(getEnumValue(diffuserNamesUC, ipsc->cAlphaArgs(2)));
             if (zoneUE.DiffuserType == Diffuser::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;
@@ -1559,7 +1559,7 @@ namespace RoomAir {
                 for (int gainsLoop = 1; gainsLoop <= numInputGains; ++gainsLoop) {
                     auto &intGain = roomAFNZoneNode.IntGain(gainsLoop);
                     intGain.type = static_cast<DataHeatBalance::IntGainType>(
-                        getEnumValue(DataHeatBalance::IntGainTypeNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(gainsLoop * 2))));
+                        getEnumValue(DataHeatBalance::IntGainTypeNamesUC, ipsc->cAlphaArgs(gainsLoop * 2)));
 
                     if (intGain.type == DataHeatBalance::IntGainType::Invalid) {
                         ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(gainsLoop * 2), ipsc->cAlphaArgs(gainsLoop * 2));

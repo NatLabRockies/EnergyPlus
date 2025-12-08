@@ -3489,7 +3489,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
 
             thisZoneEvapUnit.FanName = Alphas(8);
 
-            thisZoneEvapUnit.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(7)));
+            thisZoneEvapUnit.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(7))));
             assert(thisZoneEvapUnit.fanType != HVAC::FanType::Invalid);
 
             thisZoneEvapUnit.FanIndex = Fans::GetFanIndex(state, thisZoneEvapUnit.FanName);
@@ -3511,7 +3511,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
 
             thisZoneEvapUnit.DesignAirVolumeFlowRate = Numbers(1);
 
-            thisZoneEvapUnit.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(9)));
+            thisZoneEvapUnit.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Util::makeUPPER(Alphas(9))));
             assert(thisZoneEvapUnit.fanPlace != HVAC::FanPlace::Invalid);
 
             // get the zone number served by the zoneHVAC evaporative cooler
@@ -3529,7 +3529,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
 
             constexpr std::array<std::string_view, static_cast<int>(ControlType::Num)> controlTypeNamesUC = {
                 "ZONETEMPERATUREDEADBANDONOFFCYCLING", "ZONECOOLINGLOADONOFFCYCLING", "ZONECOOLINGLOADVARIABLESPEEDFAN"};
-            thisZoneEvapUnit.ControlSchemeType = static_cast<ControlType>(getEnumValue(controlTypeNamesUC, Alphas(10)));
+            thisZoneEvapUnit.ControlSchemeType = static_cast<ControlType>(getEnumValue(controlTypeNamesUC, Util::makeUPPER(Alphas(10))));
             if (thisZoneEvapUnit.ControlSchemeType == ControlType::Invalid) {
                 ShowSevereError(state, format("{}=\"{}\" invalid data.", CurrentModuleObject, thisZoneEvapUnit.Name));
                 ShowContinueError(state, format("invalid choice found {}=\"{}\".", cAlphaFields(10), Alphas(10)));
@@ -3539,7 +3539,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
             thisZoneEvapUnit.ThrottlingRange = Numbers(2);
             thisZoneEvapUnit.ThresholdCoolingLoad = Numbers(3);
 
-            thisZoneEvapUnit.EvapCooler_1_Type_Num = static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Alphas(11)));
+            thisZoneEvapUnit.EvapCooler_1_Type_Num = static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Util::makeUPPER(Alphas(11))));
             if (thisZoneEvapUnit.EvapCooler_1_Type_Num != EvapCoolerType::Invalid) {
                 thisZoneEvapUnit.EvapCooler_1_ObjectClassName = evapCoolerTypeNames[static_cast<int>(thisZoneEvapUnit.EvapCooler_1_Type_Num)];
             } else {
@@ -3557,7 +3557,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
             }
 
             if (!lAlphaBlanks(13)) {
-                thisZoneEvapUnit.EvapCooler_2_Type_Num = static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Alphas(13)));
+                thisZoneEvapUnit.EvapCooler_2_Type_Num = static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Util::makeUPPER(Alphas(13))));
                 if (thisZoneEvapUnit.EvapCooler_2_Type_Num != EvapCoolerType::Invalid) {
                     thisZoneEvapUnit.EvapCooler_2_ObjectClassName = evapCoolerTypeNames[static_cast<int>(thisZoneEvapUnit.EvapCooler_2_Type_Num)];
                 } else {

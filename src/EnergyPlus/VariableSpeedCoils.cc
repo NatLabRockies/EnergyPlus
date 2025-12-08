@@ -1666,7 +1666,7 @@ namespace VariableSpeedCoils {
                 cFieldName = "Defrost Strategy"; // cAlphaFields(7)
                 std::string defrostStrategy = s_ip->getAlphaFieldValue(fields, schemaProps, "defrost_strategy");
                 varSpeedCoil.DefrostStrategy =
-                    static_cast<StandardRatings::DefrostStrat>(getEnumValue(StandardRatings::DefrostStratUC, Util::makeUPPER(defrostStrategy)));
+                    static_cast<StandardRatings::DefrostStrat>(getEnumValue(StandardRatings::DefrostStratUC, defrostStrategy));
                 if (varSpeedCoil.DefrostStrategy == StandardRatings::DefrostStrat::ReverseCycle) {
                     if (varSpeedCoil.DefrostEIRFT == 0) {
                         if (defrostEIRFTCurveName.empty()) {
@@ -1698,7 +1698,7 @@ namespace VariableSpeedCoils {
                 cFieldName = "Defrost Control"; // cAlphaFields(8)
                 std::string defrostControl = s_ip->getAlphaFieldValue(fields, schemaProps, "defrost_control");
                 varSpeedCoil.DefrostControl = static_cast<StandardRatings::HPdefrostControl>(
-                    getEnumValue(StandardRatings::HPdefrostControlUC, Util::makeUPPER(defrostControl)));
+                    getEnumValue(StandardRatings::HPdefrostControlUC, defrostControl));
                 if (varSpeedCoil.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
                     ShowSevereInvalidKey(state, eoh, cFieldName, defrostControl, "...valid values for this field are Timed or OnDemand.");
                     ErrorsFound = true;
@@ -2162,7 +2162,7 @@ namespace VariableSpeedCoils {
 
                 cFieldName = "Evaporator Air Temperature Type for Curve Objects";
                 fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "evaporator_air_temperature_type_for_curve_objects");
-                varSpeedCoil.InletAirTemperatureType = static_cast<HVAC::OATType>(getEnumValue(HVAC::oatTypeNamesUC, Util::makeUPPER(fieldValue)));
+                varSpeedCoil.InletAirTemperatureType = static_cast<HVAC::OATType>(getEnumValue(HVAC::oatTypeNamesUC, fieldValue));
                 if (varSpeedCoil.InletAirTemperatureType == HVAC::OATType::Invalid) {
                     //   wrong temperature type selection
                     ShowSevereError(state, format("{}{}=\"{}\", invalid", RoutineName, CurrentModuleObject, varSpeedCoil.Name));

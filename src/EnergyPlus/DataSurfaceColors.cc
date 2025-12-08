@@ -103,7 +103,7 @@ bool MatchAndSetColorTextString(EnergyPlusData &state,
     }
 
     // try to find enum value
-    int foundIdx = getEnumValue(colorkeys, Util::makeUPPER(String));
+    int foundIdx = getEnumValue(colorkeys, String);
     if (foundIdx == -1) {
         return false;
     }

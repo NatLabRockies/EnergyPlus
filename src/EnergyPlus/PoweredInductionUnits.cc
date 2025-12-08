@@ -314,7 +314,7 @@ void GetPIUs(EnergyPlusData &state)
                     thisPIU.FanOnFlowFrac = ip->getRealFieldValue(fields, objectSchemaProps, "fan_on_flow_fraction");
                 }
                 thisPIU.HCoilType = static_cast<HtgCoilType>(
-                    getEnumValue(HCoilNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type"))));
+                    getEnumValue(HCoilNamesUC, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type")));
                 switch (thisPIU.HCoilType) {
                 case HtgCoilType::SimpleHeating: {
                     thisPIU.HCoil_PlantType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
@@ -438,7 +438,7 @@ void GetPIUs(EnergyPlusData &state)
 
                 // Variable speed fan inputs
                 std::string const fan_control_type = ip->getAlphaFieldValue(fields, objectSchemaProps, "fan_control_type");
-                thisPIU.fanControlType = static_cast<FanCntrlType>(getEnumValue(fanCntrlTypeNamesUC, Util::makeUPPER(fan_control_type)));
+                thisPIU.fanControlType = static_cast<FanCntrlType>(getEnumValue(fanCntrlTypeNamesUC, fan_control_type));
 
                 if (thisPIU.fanControlType == FanCntrlType::Invalid) {
                     ShowSevereError(state, format("Illegal Fan Control Type = {}", fan_control_type));

@@ -698,16 +698,24 @@ namespace Util {
     /// <returns>true if they are equal each other, false if they are not</returns>
     inline bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
     {
-        // case sensitive comparison (fastest)
-        if (s == t) {
+        //different sizes, can't be the same string
+        //int middlePosition = (s.length() > 3) ? (int)(s.length() / 2) : 0;
+        if (s.length() != t.length()) {
+            return false;
+        } else if (s.length() == 0) {
             return true;
-        // case insensitive comparison if the strings are the same size
+        } else if (s[s.length() / 2] == t[t.length() / 2] && s[s.length() / 3] == t[t.length() / 3] && s == t) {
+            // the strings are similar enough to to more intensive checks
+            // case sensitive comparison (fastest)
+            return true;
+        } else if (std::tolower(s[s.length() / 2]) != std::tolower(t[t.length()/2])) {
+            // fairly common scenario, middle character is different so check just that
+            return false;
         } else if (equali(s, t)) {
-            // change the original second string so next time this is faster
+            // case insensitive comparison if the strings are the same size
             if (replaceString) {
-                //std::cout << "Replacing string:" << s << " becomes " << t << std::endl;
-                s = t;//StrCopy(t);
-                //std::cout << "Done eplacing string:" << s << " becomes " << t << std::endl;
+                // change the original second string so next time this is faster
+                s = t;
             }
             return true;
         } else {
@@ -881,7 +889,7 @@ namespace Util {
 constexpr int getEnumValue(const gsl::span<const std::string_view> sList, const std::string_view s)
 {
     for (unsigned int i = 0; i < sList.size(); ++i) {
-        if (sList[i] == s) {
+        if (equali(sList[i], s)) {
             return i;
         }
     }

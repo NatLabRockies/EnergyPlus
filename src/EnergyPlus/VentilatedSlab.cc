@@ -117,6 +117,13 @@ namespace VentilatedSlab {
     // Fred Buhl's fan coil module (FanCoilUnits.cc)
 
     std::string const cMO_VentilatedSlab = "ZoneHVAC:VentilatedSlab";
+    std::string coilHeatingWater = "Coil:Heating:Water";
+    std::string coilHeatingSteam = "Coil:Heating:Steam";
+    std::string coilCoolingWater = "Coil:Cooling:Water";
+    std::string coilCoolingWaterDetailedgeometry = "Coil:Cooling:Water:DetailedGeometry";
+    std::string coilsystemCoolingWaterHeatExchangerAssisted = "CoilSystem:Cooling:Water:HeatExchangerAssisted";
+    std::string coilHeatingElectric = "Coil:Heating:Electric";
+    std::string coilHeatingFuel = "Coil:Heating:Fuel";
 
     //    int constexpr NotOperating = 0; // Parameter for use with OperatingMode variable, set for no heating/cooling
     int constexpr HeatingMode = 1; // Parameter for use with OperatingMode variable, set for heating
@@ -468,7 +475,7 @@ namespace VentilatedSlab {
             ventSlab.OutAirVolFlow = state.dataIPShortCut->rNumericArgs(3);
 
             ventSlab.outsideAirControlType =
-                static_cast<OutsideAirControlType>(getEnumValue(OutsideAirControlTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(5))));
+                static_cast<OutsideAirControlType>(getEnumValue(OutsideAirControlTypeNamesUC, state.dataIPShortCut->cAlphaArgs(5)));
 
             switch (ventSlab.outsideAirControlType) {
 
@@ -564,7 +571,7 @@ namespace VentilatedSlab {
             }
 
             // Process the temperature control type
-            ventSlab.controlType = static_cast<ControlType>(getEnumValue(ControlTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(9))));
+            ventSlab.controlType = static_cast<ControlType>(getEnumValue(ControlTypeNamesUC, state.dataIPShortCut->cAlphaArgs(9)));
 
             if (ventSlab.controlType == ControlType::Invalid) {
                 ShowSevereError(
@@ -922,7 +929,7 @@ namespace VentilatedSlab {
 
             // Coil options assign
 
-            ventSlab.coilOption = static_cast<CoilType>(getEnumValue(CoilTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(26))));
+            ventSlab.coilOption = static_cast<CoilType>(getEnumValue(CoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(26)));
 
             if (ventSlab.coilOption == CoilType::Invalid) {
                 ShowSevereError(
@@ -951,7 +958,7 @@ namespace VentilatedSlab {
                     errFlag = false;
 
                     ventSlab.hCoilType =
-                        static_cast<HeatingCoilType>(getEnumValue(HeatingCoilTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(27))));
+                        static_cast<HeatingCoilType>(getEnumValue(HeatingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(27)));
 
                     switch (ventSlab.hCoilType) {
 
@@ -1037,11 +1044,11 @@ namespace VentilatedSlab {
                     ventSlab.HotControlOffset = 0.001;
 
                     if (ventSlab.hCoilType == HeatingCoilType::Water) {
-                        ventSlab.MaxVolHotWaterFlow = GetWaterCoilMaxFlowRate(state, ventSlab.heatingCoilName, "Coil:Heating:Water", ErrorsFound);
-                        ventSlab.MaxVolHotSteamFlow = GetWaterCoilMaxFlowRate(state, ventSlab.heatingCoilName, "Coil:Heating:Water", ErrorsFound);
+                        ventSlab.MaxVolHotWaterFlow = GetWaterCoilMaxFlowRate(state, coilHeatingWater, ventSlab.heatingCoilName, ErrorsFound);
+                        ventSlab.MaxVolHotSteamFlow = GetWaterCoilMaxFlowRate(state, coilHeatingWater, ventSlab.heatingCoilName, ErrorsFound);
                     } else if (ventSlab.hCoilType == HeatingCoilType::Steam) {
-                        ventSlab.MaxVolHotWaterFlow = GetSteamCoilMaxFlowRate(state, ventSlab.heatingCoilName, "Coil:Heating:Steam", ErrorsFound);
-                        ventSlab.MaxVolHotSteamFlow = GetSteamCoilMaxFlowRate(state, ventSlab.heatingCoilName, "Coil:Heating:Steam", ErrorsFound);
+                        ventSlab.MaxVolHotWaterFlow = GetSteamCoilMaxFlowRate(state, coilHeatingSteam, ventSlab.heatingCoilName, ErrorsFound);
+                        ventSlab.MaxVolHotSteamFlow = GetSteamCoilMaxFlowRate(state, coilHeatingSteam, ventSlab.heatingCoilName, ErrorsFound);
                     }
 
                 } else { // no heating coil
@@ -1069,7 +1076,7 @@ namespace VentilatedSlab {
                     errFlag = false;
 
                     ventSlab.cCoilType =
-                        static_cast<CoolingCoilType>(getEnumValue(CoolingCoilTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(30))));
+                        static_cast<CoolingCoilType>(getEnumValue(CoolingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(30)));
                     switch (ventSlab.cCoilType) {
                     case CoolingCoilType::WaterCooling: {
                         ventSlab.coolingCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
@@ -1152,13 +1159,13 @@ namespace VentilatedSlab {
                     ventSlab.ColdControlOffset = 0.001;
 
                     if (ventSlab.cCoilType == CoolingCoilType::WaterCooling) {
-                        ventSlab.MaxVolColdWaterFlow = GetWaterCoilMaxFlowRate(state, ventSlab.coolingCoilName, "Coil:Cooling:Water", ErrorsFound);
+                        ventSlab.MaxVolColdWaterFlow = GetWaterCoilMaxFlowRate(state, coilCoolingWater, ventSlab.coolingCoilName, ErrorsFound);
                     } else if (ventSlab.cCoilType == CoolingCoilType::DetailedCooling) {
                         ventSlab.MaxVolColdWaterFlow =
-                            GetWaterCoilMaxFlowRate(state, ventSlab.coolingCoilName, "Coil:Cooling:Water:DetailedGeometry", ErrorsFound);
+                            GetWaterCoilMaxFlowRate(state, coilCoolingWaterDetailedgeometry, ventSlab.coolingCoilName, ErrorsFound);
                     } else if (ventSlab.cCoilType == CoolingCoilType::HXAssisted) {
                         ventSlab.MaxVolColdWaterFlow =
-                            GetHXAssistedCoilFlowRate(state, ventSlab.coolingCoilName, "CoilSystem:Cooling:Water:HeatExchangerAssisted", ErrorsFound);
+                            GetHXAssistedCoilFlowRate(state, coilsystemCoolingWaterHeatExchangerAssisted, ventSlab.coolingCoilName, ErrorsFound);
                     }
 
                 } else { // No Cooling Coil
@@ -1983,9 +1990,8 @@ namespace VentilatedSlab {
                     }
                 } else { // Autosize or hard-size with sizing run
                     CheckZoneSizing(state, cMO_VentilatedSlab, ventSlab.Name);
-                    std::string coilType = "Coil:Heating:Water";
-                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(state, coilType, ventSlab.heatingCoilName, ErrorsFound);
-                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, coilType, ventSlab.heatingCoilName, ErrorsFound);
+                    int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, ventSlab.heatingCoilName, ErrorsFound);
+                    int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, coilHeatingWater, ventSlab.heatingCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "Coil:Heating:Water", ventSlab.heatingCoilName, CoilWaterInletNode, CoilWaterOutletNode, ErrorsFound);
@@ -2112,8 +2118,8 @@ namespace VentilatedSlab {
                 } else { // Autosize or hard-size with sizing run
                     CheckZoneSizing(state, "ZoneHVAC:VentilatedSlab", ventSlab.Name);
 
-                    int CoilSteamInletNode = SteamCoils::GetCoilSteamInletNode(state, ventSlab.heatingCoilName, "Coil:Heating:Steam", ErrorsFound);
-                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, ventSlab.heatingCoilName, "Coil:Heating:Steam", ErrorsFound);
+                    int CoilSteamInletNode = SteamCoils::GetCoilSteamInletNode(state, coilHeatingSteam, ventSlab.heatingCoilName, ErrorsFound);
+                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, coilHeatingSteam, ventSlab.heatingCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         int PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "Coil:Heating:Steam", ventSlab.heatingCoilName, CoilSteamInletNode, CoilSteamOutletNode, ErrorsFound);
@@ -2479,12 +2485,12 @@ namespace VentilatedSlab {
             }
             case HeatingCoilType::Electric: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, ventSlab.heatingCoilName, "Coil:Heating:Electric", ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
+                    state, coilHeatingElectric, ventSlab.heatingCoilName, ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
                 break;
             }
             case HeatingCoilType::Gas: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, ventSlab.heatingCoilName, "Coil:Heating:Fuel", ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
+                    state, coilHeatingFuel, ventSlab.heatingCoilName, ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
                 break;
             }
             default:
@@ -2524,12 +2530,12 @@ namespace VentilatedSlab {
             }
             case HeatingCoilType::Electric: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, ventSlab.heatingCoilName, "Coil:Heating:Electric", ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
+                    state, coilHeatingElectric, ventSlab.heatingCoilName, ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
                 break;
             }
             case HeatingCoilType::Gas: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, ventSlab.heatingCoilName, "Coil:Heating:Fuel", ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
+                    state, coilHeatingFuel, ventSlab.heatingCoilName, ventSlab.heatingCoilSchedValue, ventSlab.heatingCoil_Index);
                 break;
             }
             default:

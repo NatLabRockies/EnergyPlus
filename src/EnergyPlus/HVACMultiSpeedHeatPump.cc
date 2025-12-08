@@ -123,6 +123,9 @@ namespace HVACMultiSpeedHeatPump {
         Num
     };
 
+    std::string coilHeatingWater = "Coil:Heating:Water";
+    std::string coilHeatingSteam = "Coil:Heating:Steam";
+
     void SimMSHeatPump(EnergyPlusData &state,
                        std::string_view CompName,     // Name of the unitary engine driven heat pump system
                        bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system time step
@@ -850,7 +853,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the ReHeat Coil hot water max volume flow rate
                     errFlag = false;
-                    thisMSHP.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, thisMSHP.HeatCoilName, "Coil:Heating:Water", errFlag);
+                    thisMSHP.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, Alphas(10), thisMSHP.HeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -867,7 +870,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the supplemental Heating Coil Outlet Node
                     errFlag = false;
-                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, thisMSHP.HeatCoilName, "Coil:Heating:Water", errFlag);
+                    HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, Alphas(10), thisMSHP.HeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -901,7 +904,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the supplemental Heating Coil steam inlet node number
                     errFlag = false;
-                    thisMSHP.CoilControlNode = SteamCoils::GetCoilAirOutletNode(state, thisMSHP.HeatCoilName, "Coil:Heating:Steam", errFlag);
+                    thisMSHP.CoilControlNode = SteamCoils::GetCoilAirOutletNode(state, Alphas(10), thisMSHP.HeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -1117,7 +1120,7 @@ namespace HVACMultiSpeedHeatPump {
                     // Get the ReHeat Coil hot water max volume flow rate
                     errFlag = false;
                     thisMSHP.MaxSuppCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, thisMSHP.SuppHeatCoilName, "Coil:Heating:Water", errFlag);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, Alphas(14), thisMSHP.SuppHeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -1134,7 +1137,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the Supplemental Heating Coil Outlet Node
                     errFlag = false;
-                    SuppHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, thisMSHP.SuppHeatCoilName, "Coil:Heating:Water", errFlag);
+                    SuppHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, Alphas(14), thisMSHP.SuppHeatCoilName, errFlag);
                     thisMSHP.SuppCoilAirOutletNode = SuppHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
@@ -1169,7 +1172,7 @@ namespace HVACMultiSpeedHeatPump {
 
                     // Get the Supplemental Heating Coil steam inlet node number
                     errFlag = false;
-                    thisMSHP.SuppCoilControlNode = SteamCoils::GetCoilAirOutletNode(state, thisMSHP.SuppHeatCoilName, "Coil:Heating:Steam", errFlag);
+                    thisMSHP.SuppCoilControlNode = SteamCoils::GetCoilAirOutletNode(state, Alphas(14), thisMSHP.SuppHeatCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -1852,13 +1855,13 @@ namespace HVACMultiSpeedHeatPump {
                     ShowFatalError(state, "InitMSHeatPump: Program terminated for previous conditions.");
                 }
                 MSHeatPump(MSHeatPumpNum).MaxCoilFluidFlow =
-                    WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).HeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                    WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).HeatCoilName, ErrorsFound);
 
                 if (MSHeatPump(MSHeatPumpNum).MaxCoilFluidFlow > 0.0) {
                     rho = state.dataPlnt->PlantLoop(MSHeatPump(MSHeatPumpNum).plantLoc.loopNum)
                               .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                     MSHeatPump(MSHeatPumpNum).MaxCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).HeatCoilName, "Coil:Heating:Water", ErrorsFound) * rho;
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).HeatCoilName, ErrorsFound) * rho;
                 }
                 // fill outlet node for coil
                 MSHeatPump(MSHeatPumpNum).CoilOutletNode =
@@ -1908,13 +1911,13 @@ namespace HVACMultiSpeedHeatPump {
                     ShowFatalError(state, "InitMSHeatPump: Program terminated for previous conditions.");
                 }
                 MSHeatPump(MSHeatPumpNum).MaxSuppCoilFluidFlow =
-                    WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                    WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, ErrorsFound);
 
                 if (MSHeatPump(MSHeatPumpNum).MaxSuppCoilFluidFlow > 0.0) {
                     rho = state.dataPlnt->PlantLoop(MSHeatPump(MSHeatPumpNum).SuppPlantLoc.loopNum)
                               .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                     MSHeatPump(MSHeatPumpNum).MaxSuppCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, "Coil:Heating:Water", ErrorsFound) *
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, ErrorsFound) *
                         rho;
                 }
                 // fill outlet node for coil
@@ -2163,7 +2166,7 @@ namespace HVACMultiSpeedHeatPump {
                             state, MSHeatPump(MSHeatPumpNum).HeatCoilName, FirstHVACIteration, MSHeatPump(MSHeatPumpNum).HeatCoilNum);
 
                         CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).HeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).HeatCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(MSHeatPump(MSHeatPumpNum).plantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -2204,7 +2207,7 @@ namespace HVACMultiSpeedHeatPump {
                             state, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, FirstHVACIteration, MSHeatPump(MSHeatPumpNum).SuppHeatCoilNum);
 
                         CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, "Coil:Heating:Water", ErrorsFound);
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(MSHeatPump(MSHeatPumpNum).SuppPlantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -2698,7 +2701,7 @@ namespace HVACMultiSpeedHeatPump {
                                                         1.0,
                                                         QActual); // QCoilReq, simulate any load > 0 to get max capacity of steam coil
                 MSHeatPump(MSHeatPumpNum).DesignSuppHeatingCapacity =
-                    SteamCoils::GetCoilCapacity(state, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, "Coil:Heating:Steam", ErrorsFound);
+                    SteamCoils::GetCoilCapacity(state, coilHeatingSteam, MSHeatPump(MSHeatPumpNum).SuppHeatCoilName, ErrorsFound);
 
             } // from IF(MSHeatPump(MSHeatPumpNum)%SuppHeatCoilType == Coil_HeatingSteam) THEN
         } // from IF( FirstHVACIteration ) THEN

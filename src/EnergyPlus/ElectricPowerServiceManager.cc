@@ -746,7 +746,7 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
 
         if (!s_ipsc->lAlphaFieldBlanks(3)) {
             // Load the Generator Control Operation Scheme
-            genOperationScheme_ = static_cast<GeneratorOpScheme>(getEnumValue(generatorOpSchemeNamesUC, s_ipsc->cAlphaArgs(3)));
+            genOperationScheme_ = static_cast<GeneratorOpScheme>(getEnumValue(generatorOpSchemeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             if (genOperationScheme_ == GeneratorOpScheme::Invalid) {
                 ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                 errorsFound = true;
@@ -770,7 +770,7 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
 
         if (s_ipsc->cAlphaArgs(6).empty()) {
             bussType = ElectricBussType::ACBuss;
-        } else if ((bussType = static_cast<ElectricBussType>(getEnumValue(electricBussTypeNamesUC, s_ipsc->cAlphaArgs(6)))) ==
+        } else if ((bussType = static_cast<ElectricBussType>(getEnumValue(electricBussTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))))) ==
                    ElectricBussType::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
             errorsFound = true;
@@ -813,7 +813,7 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
         // user selected storage operation scheme
         if (s_ipsc->lAlphaFieldBlanks(10)) {
             storageScheme_ = StorageOpScheme::FacilityDemandStoreExcessOnSite;
-        } else if ((storageScheme_ = static_cast<StorageOpScheme>(getEnumValue(storageOpSchemeNamesUC, s_ipsc->cAlphaArgs(10)))) ==
+        } else if ((storageScheme_ = static_cast<StorageOpScheme>(getEnumValue(storageOpSchemeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(10))))) ==
                    StorageOpScheme::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(10), s_ipsc->cAlphaArgs(10));
             errorsFound = true;
@@ -2078,7 +2078,7 @@ GeneratorController::GeneratorController(EnergyPlusData &state,
 
     name = objectName;
 
-    generatorType = static_cast<GeneratorType>(getEnumValue(generatorTypeNamesUC, Util::makeUPPER(objectType)));
+    generatorType = static_cast<GeneratorType>(getEnumValue(generatorTypeNamesUC, objectType));
     switch (generatorType) {
     case GeneratorType::ICEngine: {
         compPlantType = DataPlant::PlantEquipmentType::Generator_ICEngine;
@@ -2868,7 +2868,7 @@ ACtoDCConverter::ACtoDCConverter(EnergyPlusData &state, std::string const &objec
             errorsFound = true;
         }
 
-        modelType_ = static_cast<ConverterModelType>(getEnumValue(converterModelTypeNamesUC, s_ipsc->cAlphaArgs(3)));
+        modelType_ = static_cast<ConverterModelType>(getEnumValue(converterModelTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
         if (modelType_ == ConverterModelType::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
             errorsFound = true;
@@ -4505,7 +4505,7 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
 
         if (s_ipsc->lAlphaFieldBlanks(3)) {
             usageMode_ = TransformerUse::PowerInFromGrid; // default
-        } else if ((usageMode_ = static_cast<TransformerUse>(getEnumValue(transformerUseNamesUC, s_ipsc->cAlphaArgs(3)))) ==
+        } else if ((usageMode_ = static_cast<TransformerUse>(getEnumValue(transformerUseNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))))) ==
                    TransformerUse::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
             errorsFound = true;
@@ -4537,7 +4537,7 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
         tempRise_ = s_ipsc->rNumericArgs(4);
         eddyFrac_ = s_ipsc->rNumericArgs(5);
 
-        performanceInputMode_ = static_cast<TransformerPerformanceInput>(getEnumValue(transformerPerformanceInputNamesUC, s_ipsc->cAlphaArgs(6)));
+        performanceInputMode_ = static_cast<TransformerPerformanceInput>(getEnumValue(transformerPerformanceInputNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))));
         if (performanceInputMode_ == TransformerPerformanceInput::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
             errorsFound = true;

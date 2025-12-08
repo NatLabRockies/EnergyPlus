@@ -243,7 +243,7 @@ namespace FileSystem {
     {
         std::string stringExtension = toString(filePath.extension());
         stringExtension = stringExtension.substr(stringExtension.rfind('.') + 1);
-        return static_cast<FileTypes>(getEnumValue(FileTypesExtUC, Util::makeUPPER(stringExtension)));
+        return static_cast<FileTypes>(getEnumValue(FileTypesExtUC, stringExtension));
     }
 
     // TODO: remove for fs::path::replace_extension directly? Note that replace_extension mutates the object

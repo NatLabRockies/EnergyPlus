@@ -377,7 +377,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     this->prevTimeSteps = 0.0;
 
     GroundTemp::ModelType modelType = static_cast<GroundTemp::ModelType>(
-        getEnumValue(GroundTemp::modelTypeNamesUC, Util::makeUPPER(j["undisturbed_ground_temperature_model_type"].get<std::string>())));
+        getEnumValue(GroundTemp::modelTypeNamesUC, j["undisturbed_ground_temperature_model_type"].get<std::string>()));
     assert(modelType != GroundTemp::ModelType::Invalid);
 
     // Initialize ground temperature model and get pointer reference

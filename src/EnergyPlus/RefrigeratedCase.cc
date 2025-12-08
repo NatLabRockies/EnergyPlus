@@ -4965,7 +4965,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
             if (lAlphaBlanks(5)) {
                 Compressor(CompNum).TransFlag = false;
                 // For some reason, Alkphas(5) is not uppercased?
-            } else if (CriticalType crit = static_cast<CriticalType>(getEnumValue(criticalTypeNamesUC, Util::makeUPPER(Alphas(5))));
+            } else if (CriticalType crit = static_cast<CriticalType>(getEnumValue(criticalTypeNamesUC, Alphas(5)));
                        crit != CriticalType::Invalid) {
                 Compressor(CompNum).TransFlag = static_cast<bool>(crit);
             } else {

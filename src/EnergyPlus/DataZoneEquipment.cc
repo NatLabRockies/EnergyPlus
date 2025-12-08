@@ -698,7 +698,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                 state.dataZoneEquip->SupplyAirPath(PathNum).SplitterIndex(CompNum) = 0;
                 state.dataZoneEquip->SupplyAirPath(PathNum).PlenumIndex(CompNum) = 0;
                 state.dataZoneEquip->SupplyAirPath(PathNum).ComponentTypeEnum(CompNum) =
-                    (AirLoopHVACZone)getEnumValue(AirLoopHVACTypeNamesUC, AlphArray(Counter));
+                    (AirLoopHVACZone)getEnumValue(AirLoopHVACTypeNamesUC, Util::makeUPPER(AlphArray(Counter)));
             } else {
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->SupplyAirPath(PathNum).Name));
                 ShowContinueError(state, format("Unhandled component type =\"{}\".", AlphArray(Counter)));
@@ -767,7 +767,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 }
                 state.dataZoneEquip->ReturnAirPath(PathNum).ComponentTypeEnum(CompNum) =
-                    static_cast<AirLoopHVACZone>(getEnumValue(AirLoopHVACTypeNamesUC, AlphArray(Counter)));
+                    static_cast<AirLoopHVACZone>(getEnumValue(AirLoopHVACTypeNamesUC, Util::makeUPPER(AlphArray(Counter))));
             } else {
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, cAlphaFields(1), state.dataZoneEquip->ReturnAirPath(PathNum).Name));
                 ShowContinueError(state, format("Unhandled component type =\"{}\".", AlphArray(Counter)));
@@ -883,7 +883,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
 
             std::string loadDistName = ip->getAlphaFieldValue(epListFields, objectSchemaProps, "load_distribution_scheme");
             thisZoneEquipList.LoadDistScheme =
-                static_cast<DataZoneEquipment::LoadDist>(getEnumValue(DataZoneEquipment::LoadDistNamesUC, Util::makeUPPER(loadDistName)));
+                static_cast<DataZoneEquipment::LoadDist>(getEnumValue(DataZoneEquipment::LoadDistNamesUC, loadDistName));
             if (thisZoneEquipList.LoadDistScheme == DataZoneEquipment::LoadDist::Invalid) {
                 ShowSevereError(state, format("{}{} = \"{}, Invalid choice\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                 ShowContinueError(state, format("...load_distribution_scheme=\"{}\".", loadDistName));
@@ -1250,7 +1250,7 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
     static constexpr std::string_view RoutineName("processZoneEquipSplitterInput: "); // include trailing blank space
     auto &ip = state.dataInputProcessing->inputProcessor;
     std::string const zeqTypeName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "zone_equipment_object_type");
-    thisZeqSplitter.zoneEquipType = DataZoneEquipment::ZoneEquipType(getEnumValue(zoneEquipTypeNamesUC, zeqTypeName));
+    thisZeqSplitter.zoneEquipType = DataZoneEquipment::ZoneEquipType(getEnumValue(zoneEquipTypeNamesUC, Util::makeUPPER(zeqTypeName)));
     if (thisZeqSplitter.zoneEquipType == ZoneEquipType::Invalid) {
         ShowSevereError(state, format("{}{} = {}", RoutineName, zeqSplitterModuleObject, thisZeqSplitter.Name));
         ShowContinueError(state, format("..Invalid Equipment Type = {}", zeqTypeName));
@@ -1296,7 +1296,7 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
                           objectIsParent);
 
     thisZeqSplitter.tstatControl = DataZoneEquipment::ZoneEquipTstatControl(
-        getEnumValue(zoneEquipTstatControlNamesUC, ip->getAlphaFieldValue(objectFields, objectSchemaProps, "thermostat_control_method")));
+        getEnumValue(zoneEquipTstatControlNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "thermostat_control_method"))));
     if (thisZeqSplitter.tstatControl == DataZoneEquipment::ZoneEquipTstatControl::SingleSpace) {
         std::string spaceName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "control_space_name");
         thisZeqSplitter.controlSpaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
@@ -1307,7 +1307,7 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
         }
     }
     thisZeqSplitter.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(
-        getEnumValue(spaceEquipSizingBasisNamesUC, ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method")));
+        getEnumValue(spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
 
     auto extensibles = objectFields.find("spaces");
     auto const &extensionSchemaProps = objectSchemaProps["spaces"]["items"]["properties"];
@@ -1384,7 +1384,7 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
     }
 
     thisZeqMixer.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(
-        getEnumValue(spaceEquipSizingBasisNamesUC, ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method")));
+        getEnumValue(spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
 
     auto extensibles = objectFields.find("spaces");
     auto const &extensionSchemaProps = objectSchemaProps["spaces"]["items"]["properties"];

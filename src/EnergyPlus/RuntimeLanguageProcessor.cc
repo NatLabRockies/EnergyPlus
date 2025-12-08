@@ -3395,7 +3395,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                         ShowContinueError(state, format("...Units entered in {} (deprecated use)=\"{}\"", cAlphaFieldNames(1), UnitsA));
                     }
                 }
-                curUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, Util::makeUPPER(UnitsB)));
+                curUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, UnitsB));
 
                 state.dataRuntimeLangProcessor->RuntimeReportVar(RuntimeReportVarNum).Name = cAlphaArgs(1);
 
@@ -3568,7 +3568,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                         ShowContinueError(state, format("...Units entered in {} (deprecated use)=\"{}\"", cAlphaFieldNames(1), UnitsA));
                     }
                 }
-                curUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, Util::makeUPPER(UnitsB)));
+                curUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, UnitsB));
 
                 state.dataRuntimeLangProcessor->RuntimeReportVar(RuntimeReportVarNum).Name = cAlphaArgs(1);
 
@@ -3628,7 +3628,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
 
                 // Resource Type
                 Constant::eResource resource =
-                    static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, Util::makeUPPER(cAlphaArgs(5))));
+                    static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, cAlphaArgs(5)));
 
                 if (resource == Constant::eResource::Invalid) {
                     ShowSevereError(state, format("{}{}=\"{} invalid field.", RoutineName, cCurrentModuleObject, cAlphaArgs(1)));

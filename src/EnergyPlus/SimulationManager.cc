@@ -1090,7 +1090,7 @@ namespace SimulationManager {
                                                                      state.dataIPShortCut->cNumericFieldNames);
             if (NumAlpha > 0) {
                 state.dataHeatBal->heatIndexMethod =
-                    static_cast<DataHeatBalance::HeatIndexMethod>(getEnumValue(DataHeatBalance::HeatIndexMethodUC, Util::makeUPPER(Alphas(1))));
+                    static_cast<DataHeatBalance::HeatIndexMethod>(getEnumValue(DataHeatBalance::HeatIndexMethodUC, Alphas(1)));
             }
         }
 

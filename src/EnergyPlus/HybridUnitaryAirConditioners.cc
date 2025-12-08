@@ -638,14 +638,14 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
                 // ShowSevereEmptyField(state, eoh, cAlphaFields(15));
                 // ErrorsFound = true;
             } else if ((hybridUnitaryAC.firstFuel = static_cast<Constant::eFuel>(
-                            getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(Alphas(15))))) == Constant::eFuel::Invalid) {
+                            getEnumValue(Constant::eFuelNamesUC, Alphas(15)))) == Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(15), Alphas(15));
                 ErrorsFound = true;
             }
 
             // A16, \field Second fuel type
             if (!lAlphaBlanks(16) && Alphas(16) != "NONE" &&
-                (hybridUnitaryAC.secondFuel = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(Alphas(16))))) ==
+                (hybridUnitaryAC.secondFuel = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Alphas(16)))) ==
                     Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(16), Alphas(16));
                 ErrorsFound = true;
@@ -653,7 +653,7 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
 
             // A17, \field Third fuel type
             if (!lAlphaBlanks(17) && Alphas(17) != "NONE" &&
-                (hybridUnitaryAC.thirdFuel = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(Alphas(17))))) ==
+                (hybridUnitaryAC.thirdFuel = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Alphas(17)))) ==
                     Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(17), Alphas(17));
                 ErrorsFound = true;

@@ -3963,7 +3963,7 @@ namespace AirflowNetwork {
                 // Avoid duplication of EPlusName
                 if (!simulation_control.DuctLoss) {
                     for (int j = 1; j < i; ++j) {
-                        if (!Util::SameString(Alphas(2), "")) {
+                        if (Alphas(2) != "") {
                             if (Util::SameString(DisSysNodeData(j).EPlusName, Alphas(2))) {
                                 ShowSevereError(m_state,
                                                 format(RoutineName) + CurrentModuleObject + "=\"" + Alphas(1) + "\" Duplicated " + cAlphaFields(2) +
@@ -10360,12 +10360,12 @@ namespace AirflowNetwork {
         }
         // Validate EPlus Node names and types
         for (int i = 1; i <= DisSysNumOfNodes; ++i) {
-            if (Util::SameString(DisSysNodeData(i).EPlusName, "") || Util::SameString(DisSysNodeData(i).EPlusName, "Other")) {
+            if (DisSysNodeData(i).EPlusName == "" || Util::SameString(DisSysNodeData(i).EPlusName, "Other")) {
                 continue;
             }
             LocalError = false;
             for (int j = 1; j <= m_state.dataLoopNodes->NumOfNodes; ++j) { // NodeID
-                if (DisSysNodeData(i).EPlusName == m_state.dataLoopNodes->NodeID(j)) {
+                if (equali(DisSysNodeData(i).EPlusName, m_state.dataLoopNodes->NodeID(j))) {
                     DisSysNodeData(i).AirLoopNum = get_airloop_number(j);
                     if (DisSysNodeData(i).AirLoopNum == 0) {
                         ShowSevereError(m_state,
@@ -12143,7 +12143,7 @@ namespace AirflowNetwork {
                     if (m_state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(NumOfComp).NumSubComps == 0) {
                         DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumValue(
                             BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                            m_state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(NumOfComp).TypeOf));
+                            Util::makeUPPER(m_state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(NumOfComp).TypeOf)));
                         std::string const &NameOfComp =
                             m_state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(NumOfComp).Name;
                         if (IsParentObject(m_state, TypeOfComp, NameOfComp)) {

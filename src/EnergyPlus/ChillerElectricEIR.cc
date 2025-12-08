@@ -434,7 +434,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
                                                "Condenser (unknown?) Nodes");
         }
 
-        thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, s_ipsc->cAlphaArgs(10)));
+        thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(10))));
         if (thisChiller.FlowMode == DataPlant::FlowMode::Invalid) {
             ShowSevereError(state, format("{}{}=\"{}\",", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, format("Invalid {}={}", s_ipsc->cAlphaFieldNames(10), s_ipsc->cAlphaArgs(10)));
@@ -615,7 +615,7 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
 
         if (NumAlphas > 16) {
             thisChiller.CondenserFlowControl =
-                static_cast<DataPlant::CondenserFlowControl>(getEnumValue(DataPlant::CondenserFlowControlNamesUC, s_ipsc->cAlphaArgs(17)));
+                static_cast<DataPlant::CondenserFlowControl>(getEnumValue(DataPlant::CondenserFlowControlNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(17))));
         } else {
             thisChiller.CondenserFlowControl = DataPlant::CondenserFlowControl::ConstantFlow;
         }

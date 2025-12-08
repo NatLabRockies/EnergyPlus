@@ -938,7 +938,7 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
         for (int CompNum = 1; CompNum <= thisControllerList.NumControllers; ++CompNum) {
             // Json will catch any object types that are not the correct key choice of Controller:OutdoorAir or Controller:WaterCoil
             thisControllerList.ControllerType(CompNum) =
-                static_cast<ControllerKind>(getEnumValue(ControllerKindNamesUC, Util::makeUPPER(AlphArray(AlphaNum))));
+                static_cast<ControllerKind>(getEnumValue(ControllerKindNamesUC, AlphArray(AlphaNum)));
             thisControllerList.ControllerName(CompNum) = AlphArray(AlphaNum + 1);
             // loop over all previous controller lists to check if this controllers is also present on previous controllers
             for (int previousListNum = 1; previousListNum < Item; ++previousListNum) {
@@ -1328,7 +1328,7 @@ void GetOAControllerInputs(EnergyPlusData &state)
             }
 
             // System outdoor air method
-            thisVentilationMechanical.SystemOAMethod = static_cast<DataSizing::SysOAMethod>(getEnumValue(SOAMNamesUC, Util::makeUPPER(AlphArray(4))));
+            thisVentilationMechanical.SystemOAMethod = static_cast<DataSizing::SysOAMethod>(getEnumValue(SOAMNamesUC, AlphArray(4)));
 
             if (thisVentilationMechanical.SystemOAMethod == DataSizing::SysOAMethod::IAQP ||
                 thisVentilationMechanical.SystemOAMethod == DataSizing::SysOAMethod::ProportionalControlSchOcc ||

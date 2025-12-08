@@ -115,6 +115,12 @@ namespace UnitVentilator {
     // ASHRAE Systems and Equipment Handbook (SI), 1996. pp. 31.1-31.3
     // Fred Buhl's fan coil module (FanCoilUnits.cc)
 
+    std::string coilsystemCoolingWaterHeatexchangerassisted = "CoilSystem:Cooling:Water:HeatExchangerAssisted";
+    std::string coilHeatingWater = "Coil:Heating:Water";
+    std::string coilHeatingSteam = "Coil:Heating:Steam";
+    std::string coilHeatingElectric = "Coil:Heating:Electric";
+    std::string coilHeatingFuel = "Coil:Heating:Fuel";
+
     static constexpr std::array<std::string_view, static_cast<int>(CoilsUsed::Num)> CoilsUsedNamesUC = {
         "NONE", "HEATINGANDCOOLING", "HEATING", "COOLING"};
     static constexpr std::array<std::string_view, static_cast<int>(OAControl::Num)> OAControlNamesUC = {
@@ -655,7 +661,7 @@ namespace UnitVentilator {
                                 unitVent.ColdControlNode =
                                     HVACHXAssistedCoolingCoil::GetCoilWaterInletNode(state, unitVent.CCoilTypeCh, unitVent.CCoilName, errFlag);
                                 unitVent.MaxVolColdWaterFlow = HVACHXAssistedCoolingCoil::GetCoilMaxWaterFlowRate(
-                                    state, unitVent.CCoilName, "CoilSystem:Cooling:Water:HeatExchangerAssisted", errFlag);
+                                    state, coilsystemCoolingWaterHeatexchangerassisted, unitVent.CCoilName, errFlag);
                             }
                             // Other error checks should trap before it gets to this point in the code, but including just in case.
                             if (errFlag) {
@@ -1766,7 +1772,7 @@ namespace UnitVentilator {
                 } else {
                     CheckZoneSizing(state, state.dataUnitVentilators->cMO_UnitVentilator, unitVent.Name);
 
-                    CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, unitVent.HCoilName, "Coil:Heating:Water", ErrorsFound);
+                    CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(state, coilHeatingWater, unitVent.HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "COIL:HEATING:WATER", unitVent.HCoilName, unitVent.HotControlNode, CoilWaterOutletNode, ErrorsFound);
@@ -1912,7 +1918,7 @@ namespace UnitVentilator {
                 } else {
                     CheckZoneSizing(state, state.dataUnitVentilators->cMO_UnitVentilator, unitVent.Name);
 
-                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, unitVent.HCoilName, "Coil:Heating:Steam", ErrorsFound);
+                    int CoilSteamOutletNode = SteamCoils::GetCoilSteamOutletNode(state, coilHeatingSteam, unitVent.HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(
                             state, "Coil:Heating:Steam", unitVent.HCoilName, unitVent.HotControlNode, CoilSteamOutletNode, ErrorsFound);
@@ -2282,11 +2288,11 @@ namespace UnitVentilator {
             } break;
             case HeatCoilType::Electric: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, unitVent.HCoilName, "Coil:Heating:Electric", unitVent.HCoilSchedValue, unitVent.HCoil_Index);
+                    state, coilHeatingElectric, unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             case HeatCoilType::Gas: {
                 HeatingCoils::CheckHeatingCoilSchedule(
-                    state, unitVent.HCoilName, "Coil:Heating:Fuel", unitVent.HCoilSchedValue, unitVent.HCoil_Index);
+                    state, coilHeatingFuel, unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             default: {
             } break;

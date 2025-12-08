@@ -396,7 +396,7 @@ void GetInputTabularMonthly(EnergyPlusData &state)
             }
             std::string const curAggString = AlphArray(jField + 1);
             // kind of aggregation identified (see AggType parameters)
-            AggType curAggType = static_cast<AggType>(getEnumValue(AggTypeNamesUC, Util::makeUPPER(curAggString)));
+            AggType curAggType = static_cast<AggType>(getEnumValue(AggTypeNamesUC, curAggString));
             // set accumulator values to default as appropriate for aggregation type
             if (curAggType == AggType::Invalid) {
                 ShowWarningError(state, format("{}={}, Variable name={}", CurrentModuleObject, ort->MonthlyInput(TabNum).name, AlphArray(jField)));
@@ -1382,7 +1382,7 @@ void GetInputTabularStyle(EnergyPlusData &state)
 
 UnitsStyle SetUnitsStyleFromString(std::string const &unitStringIn)
 {
-    UnitsStyle unitsStyleReturn = static_cast<UnitsStyle>(getEnumValue(UnitsStyleNamesUC, Util::makeUPPER(unitStringIn)));
+    UnitsStyle unitsStyleReturn = static_cast<UnitsStyle>(getEnumValue(UnitsStyleNamesUC, unitStringIn));
     if (unitsStyleReturn == UnitsStyle::Invalid) {
         unitsStyleReturn = UnitsStyle::NotFound;
     }

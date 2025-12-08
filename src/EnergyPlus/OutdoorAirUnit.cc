@@ -120,6 +120,8 @@ namespace OutdoorAirUnit {
     // component types addressed by this module
     constexpr static std::string_view ZoneHVACOAUnit = {"ZoneHVAC:OutdoorAirUnit"};
     constexpr static std::string_view ZoneHVACEqList = {"ZoneHVAC:OutdoorAirUnit:EquipmentList"};
+    std::string coilHeatingWater = "Coil:Heating:Water";
+
 
     void SimOutdoorAirUnit(EnergyPlusData &state,
                            std::string_view CompName,     // name of the outdoor air unit
@@ -577,13 +579,12 @@ namespace OutdoorAirUnit {
                     thisOutAirUnit.NumComponents = NumInList;
                     thisOutAirUnit.OAEquip.allocate(NumInList);
 
-                    std::string coilHeatingWater = "Coil:Heating:Water";
                     // Get information of component
                     for (int InListNum = 1; InListNum <= NumInList; ++InListNum) {
                         thisOutAirUnit.OAEquip(InListNum).ComponentName = AlphArray(InListNum * 2 + 1);
 
                         thisOutAirUnit.OAEquip(InListNum).Type =
-                            static_cast<CompType>(getEnumValue(CompTypeNamesUC, Util::makeUPPER(AlphArray(InListNum * 2))));
+                            static_cast<CompType>(getEnumValue(CompTypeNamesUC, AlphArray(InListNum * 2)));
 
                         int const CompNum = InListNum;
 
@@ -661,10 +662,10 @@ namespace OutdoorAirUnit {
                                 state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterInletNode = GetCoilSteamInletNode(
                                 state, thisOutAirUnit.OAEquip(CompNum).ComponentIndex, thisOutAirUnit.OAEquip(CompNum).ComponentName, ErrorsFound);
-                            std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
+                            std::string tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(CompNum).Type)]);
                             thisOutAirUnit.OAEquip(CompNum).CoilWaterOutletNode =
                                 GetCoilSteamOutletNode(state,
-                                                       thisOutAirUnit.OAEquip(CompNum).ComponentName, tempConstCompType,
+                                                       tempConstCompType, thisOutAirUnit.OAEquip(CompNum).ComponentName, 
                                                        ErrorsFound);
 
                             thisOutAirUnit.OAEquip(CompNum).MaxVolWaterFlow =
@@ -1195,10 +1196,10 @@ namespace OutdoorAirUnit {
                 for (int compLoop = 1; compLoop <= thisOutAirUnit.NumComponents; ++compLoop) {
                     if ((thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_Cooling) ||
                         (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_DetailedCool)) {
-                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
+                        std::string tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
                             WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName, tempConstCompType,
+                                                                tempConstCompType, thisOutAirUnit.OAEquip(compLoop).ComponentName,
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
@@ -1212,10 +1213,9 @@ namespace OutdoorAirUnit {
                     }
 
                     if (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_SimpleHeat) {
-                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
+                        std::string tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName, tempConstCompType,
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, tempConstCompType, thisOutAirUnit.OAEquip(compLoop).ComponentName, 
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -1241,11 +1241,9 @@ namespace OutdoorAirUnit {
                                            thisOutAirUnit.OAEquip(compLoop).CoilWaterOutletNode);
                     }
                     if (thisOutAirUnit.OAEquip(compLoop).Type == CompType::WaterCoil_CoolingHXAsst) {
-                        std::string const tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
+                        std::string tempConstCompType(CompTypeNames[static_cast<int>(thisOutAirUnit.OAEquip(compLoop).Type)]);
                         thisOutAirUnit.OAEquip(compLoop).MaxVolWaterFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state,
-                                                                thisOutAirUnit.OAEquip(compLoop).ComponentName,
-                                                                tempConstCompType,
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, tempConstCompType, thisOutAirUnit.OAEquip(compLoop).ComponentName,
                                                                 errFlag);
                         Real64 const rho = state.dataPlnt->PlantLoop(thisOutAirUnit.OAEquip(compLoop).plantLoc.loopNum)
                                                .glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);

@@ -3010,7 +3010,7 @@ namespace Curve {
         if (InInputType.empty()) {
             return true; // if not used it is valid
         }
-        CurveInputType found = static_cast<CurveInputType>(getEnumValue(inputTypes, Util::makeUPPER(InInputType)));
+        CurveInputType found = static_cast<CurveInputType>(getEnumValue(inputTypes, InInputType));
         return found != CurveInputType::Invalid;
     }
 
@@ -3038,7 +3038,7 @@ namespace Curve {
         };
         constexpr std::array<std::string_view, static_cast<int>(CurveOutputType::Num)> outputTypes = {
             "DIMENSIONLESS", "PRESSURE", "TEMPERATURE", "CAPACITY", "POWER"};
-        CurveOutputType found = static_cast<CurveOutputType>(getEnumValue(outputTypes, Util::makeUPPER(InOutputType)));
+        CurveOutputType found = static_cast<CurveOutputType>(getEnumValue(outputTypes, InOutputType));
         return found != CurveOutputType::Invalid;
     }
 

@@ -846,7 +846,7 @@ namespace AirLoopHVACDOAS {
 
             // Check valid OA controller
             for (int OASysNum = 1; OASysNum <= state.dataAirLoop->NumOASystems; OASysNum++) {
-                if (Util::SameString(state.dataAirLoop->OutsideAirSys(OASysNum).ControllerListName, "")) {
+                if (state.dataAirLoop->OutsideAirSys(OASysNum).ControllerListName == "") {
                     if (state.dataAirLoop->OutsideAirSys(OASysNum).AirLoopDOASNum == -1) {
                         ShowSevereError(state,
                                         format(R"(AirLoopHVAC:OutdoorAirSystem = "{}" invalid Controller List Name = " not found.)",
@@ -880,7 +880,7 @@ namespace AirLoopHVACDOAS {
 
                 if (Util::SameString(CompType, "COIL:HEATING:WATER")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_HeatCoilNum);
-                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Heating:Water", ErrorsFound);
+                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompType, CompName, ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->HWPlantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,
@@ -890,7 +890,7 @@ namespace AirLoopHVACDOAS {
                 }
                 if (Util::SameString(CompType, "COIL:COOLING:WATER")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_CoolCoilNum);
-                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Cooling:Water", ErrorsFound);
+                    Real64 const CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, CompType, CompName, ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,
@@ -901,7 +901,7 @@ namespace AirLoopHVACDOAS {
                 if (Util::SameString(CompType, "COIL:COOLING:WATER:DETAILEDGEOMETRY")) {
                     WaterCoils::SimulateWaterCoilComponents(state, CompName, FirstHVACIteration, this->m_CoolCoilNum);
                     Real64 const CoilMaxVolFlowRate =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, CompName, "Coil:Cooling:Water:DetailedGeometry", ErrorsFound);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, CompType, CompName, ErrorsFound);
                     rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
                     PlantUtilities::InitComponentNodes(state,
                                                        0.0,

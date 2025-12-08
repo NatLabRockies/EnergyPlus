@@ -400,7 +400,7 @@ void GetFanInput(EnergyPlusData &state)
                 format("{}=\"{}\" has specified 0.0 max air flow rate. It will not be used in the simulation.", cCurrentModuleObject, fan->Name));
         }
         fan->maxAirFlowRateIsAutosized = true;
-        fan->minAirFracMethod = static_cast<MinFlowFracMethod>(getEnumValue(minFlowFracMethodNamesUC, cAlphaArgs(3)));
+        fan->minAirFracMethod = static_cast<MinFlowFracMethod>(getEnumValue(minFlowFracMethodNamesUC, Util::makeUPPER(cAlphaArgs(3))));
 
         fan->minFrac = rNumericArgs(4);
         fan->fixedMin = rNumericArgs(5);
@@ -535,7 +535,7 @@ void GetFanInput(EnergyPlusData &state)
 
         if (NumAlphas <= 6 || lAlphaFieldBlanks(7)) {
             fan->availManagerMode = AvailManagerMode::Coupled;
-        } else if ((fan->availManagerMode = static_cast<AvailManagerMode>(getEnumValue(availManagerModeNamesUC, cAlphaArgs(7)))) ==
+        } else if ((fan->availManagerMode = static_cast<AvailManagerMode>(getEnumValue(availManagerModeNamesUC, Util::makeUPPER(cAlphaArgs(7))))) ==
                    AvailManagerMode::Invalid) {
             ShowSevereInvalidKey(state, eoh, cAlphaFieldNames(7), cAlphaArgs(7));
             ErrorsFound = true;
@@ -801,7 +801,7 @@ void GetFanInput(EnergyPlusData &state)
         fan->motorSizingFactor = rNumericArgs(15); // Motor sizing factor [-]
         fan->motorInAirFrac = rNumericArgs(16);    // Fraction of fan and motor losses to airstream [-]
 
-        fan->vfdEffType = static_cast<VFDEffType>(getEnumValue(vfdEffTypeNamesUC, cAlphaArgs(5))); // VFD efficiency type [Speed or Power
+        fan->vfdEffType = static_cast<VFDEffType>(getEnumValue(vfdEffTypeNamesUC, Util::makeUPPER(cAlphaArgs(5)))); // VFD efficiency type [Speed or Power
 
         fan->vfdMaxOutPower = rNumericArgs(17);  // VFD maximum output power [W, autosizable]
         fan->vfdSizingFactor = rNumericArgs(18); // VFD sizing factor [-]
@@ -901,7 +901,7 @@ void GetFanInput(EnergyPlusData &state)
         if (lAlphaFieldBlanks(5)) {
             fan->speedControl = SpeedControl::Discrete;
         } else {
-            fan->speedControl = static_cast<SpeedControl>(getEnumValue(speedControlNamesUC, cAlphaArgs(5)));
+            fan->speedControl = static_cast<SpeedControl>(getEnumValue(speedControlNamesUC, Util::makeUPPER(cAlphaArgs(5))));
         }
 
         fan->minPowerFlowFrac = rNumericArgs(2);
@@ -920,7 +920,7 @@ void GetFanInput(EnergyPlusData &state)
             if (lAlphaFieldBlanks(6)) {
                 fan->powerSizingMethod = PowerSizing::PerFlowPerPressure;
             } else {
-                fan->powerSizingMethod = static_cast<PowerSizing>(getEnumValue(powerSizingNamesUC, cAlphaArgs(6)));
+                fan->powerSizingMethod = static_cast<PowerSizing>(getEnumValue(powerSizingNamesUC, Util::makeUPPER(cAlphaArgs(6))));
             }
             fan->elecPowerPerFlowRate = rNumericArgs(7);
             fan->elecPowerPerFlowRatePerPressure = rNumericArgs(8);

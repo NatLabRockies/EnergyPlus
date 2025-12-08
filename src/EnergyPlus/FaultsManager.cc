@@ -477,7 +477,7 @@ namespace FaultsManager {
             // Chiller check
             int ChillerNum;
             ChillerType ChillerTypeCheck =
-                static_cast<ChillerType>(getEnumValue(ChillerTypeNamesUC, Util::makeUPPER(faultsChillerFouling.ChillerType)));
+                static_cast<ChillerType>(getEnumValue(ChillerTypeNamesUC, faultsChillerFouling.ChillerType));
             switch (ChillerTypeCheck) {
             case ChillerType::ChillerElectric: {
                 // Check whether the chiller name and chiller type match each other
@@ -821,7 +821,7 @@ namespace FaultsManager {
             }
 
             // Coil check and link
-            CoilType CoilTypeCheck = static_cast<CoilType>(getEnumValue(CoilTypeNamesUC, Util::makeUPPER(faultsCoilSATFouling.CoilType)));
+            CoilType CoilTypeCheck = static_cast<CoilType>(getEnumValue(CoilTypeNamesUC, faultsCoilSATFouling.CoilType));
             switch (CoilTypeCheck) {
             case CoilType::CoilHeatingElectric:
             case CoilType::CoilHeatingFuel:
@@ -1245,7 +1245,7 @@ namespace FaultsManager {
 
             // Chiller check
             int ChillerNum;
-            ChillerType ChillerTypeCheck = static_cast<ChillerType>(getEnumValue(ChillerTypeNamesUC, Util::makeUPPER(faultsChillerSWT.ChillerType)));
+            ChillerType ChillerTypeCheck = static_cast<ChillerType>(getEnumValue(ChillerTypeNamesUC, faultsChillerSWT.ChillerType));
             switch (ChillerTypeCheck) {
             case ChillerType::ChillerElectric: {
                 // Check whether the chiller name and chiller type match each other
@@ -1437,7 +1437,7 @@ namespace FaultsManager {
             faultsAirFilter.Name = cAlphaArgs(1);
 
             // Information of the fan associated with the fouling air filter
-            faultsAirFilter.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, cAlphaArgs(2)));
+            faultsAirFilter.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(cAlphaArgs(2))));
             if (faultsAirFilter.fanType == HVAC::FanType::SystemModel) {
                 ShowSevereError(state, "Fault:AirFilter cannot be applied to a Fan:SystemModel object");
                 state.dataFaultsMgr->ErrorsFound = true;
@@ -1645,7 +1645,7 @@ namespace FaultsManager {
                 state.dataFaultsMgr->ErrorsFound = true;
             }
 
-            faultsFoulCoil.FoulingInputMethod = static_cast<FouledCoil>(getEnumValue(FouledCoilNamesUC, Util::makeUPPER(cAlphaArgs(5))));
+            faultsFoulCoil.FoulingInputMethod = static_cast<FouledCoil>(getEnumValue(FouledCoilNamesUC, cAlphaArgs(5)));
             if (faultsFoulCoil.FoulingInputMethod == FouledCoil::Invalid) {
                 faultsFoulCoil.FoulingInputMethod = FouledCoil::UARated;
             }

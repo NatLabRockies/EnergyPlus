@@ -487,19 +487,19 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ComputeEscalatedEnergyCosts)
 
 TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_GetMonthNumber)
 {
-    EXPECT_EQ(0, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("January")));
-    EXPECT_EQ(1, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("February")));
-    EXPECT_EQ(2, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("March")));
-    EXPECT_EQ(3, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("April")));
-    EXPECT_EQ(4, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("May")));
-    EXPECT_EQ(5, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("June")));
-    EXPECT_EQ(6, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("July")));
-    EXPECT_EQ(7, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("August")));
-    EXPECT_EQ(8, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("September")));
-    EXPECT_EQ(9, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("October")));
-    EXPECT_EQ(10, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("November")));
-    EXPECT_EQ(11, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("December")));
-    EXPECT_EQ(-1, getEnumValue(Util::MonthNamesUC, Util::makeUPPER("Hexember")));
+    EXPECT_EQ(0, getEnumValue(Util::MonthNamesUC, "January"));
+    EXPECT_EQ(1, getEnumValue(Util::MonthNamesUC, "February"));
+    EXPECT_EQ(2, getEnumValue(Util::MonthNamesUC, "March"));
+    EXPECT_EQ(3, getEnumValue(Util::MonthNamesUC, "April"));
+    EXPECT_EQ(4, getEnumValue(Util::MonthNamesUC, "May"));
+    EXPECT_EQ(5, getEnumValue(Util::MonthNamesUC, "June"));
+    EXPECT_EQ(6, getEnumValue(Util::MonthNamesUC, "July"));
+    EXPECT_EQ(7, getEnumValue(Util::MonthNamesUC, "August"));
+    EXPECT_EQ(8, getEnumValue(Util::MonthNamesUC, "September"));
+    EXPECT_EQ(9, getEnumValue(Util::MonthNamesUC, "October"));
+    EXPECT_EQ(10, getEnumValue(Util::MonthNamesUC, "November"));
+    EXPECT_EQ(11, getEnumValue(Util::MonthNamesUC, "December"));
+    EXPECT_EQ(-1, getEnumValue(Util::MonthNamesUC, "Hexember"));
 }
 
 TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ExpressAsCashFlows)

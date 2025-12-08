@@ -234,7 +234,7 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
             }
             Constant::Units thisUnit = Constant::Units::None;
             if (!units.empty()) {
-                thisUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, Util::makeUPPER(units)));
+                thisUnit = static_cast<Constant::Units>(getEnumValue(Constant::unitNamesUC, units));
                 if (thisUnit == Constant::Units::Invalid) {
                     thisUnit = Constant::Units::customEMS;
                 }

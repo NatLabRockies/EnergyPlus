@@ -858,7 +858,7 @@ namespace EMSManager {
                 state.dataRuntimeLang->EMSProgramCallManager(CallManagerNum).Name = cAlphaArgs(1);
 
                 state.dataRuntimeLang->EMSProgramCallManager(CallManagerNum).CallingPoint =
-                    static_cast<EMSCallFrom>(getEnumValue(EMSCallFromNamesUC, Util::makeUPPER(cAlphaArgs(2))));
+                    static_cast<EMSCallFrom>(getEnumValue(EMSCallFromNamesUC, cAlphaArgs(2)));
 
                 ErrorsFound = ErrorsFound || (state.dataRuntimeLang->EMSProgramCallManager(CallManagerNum).CallingPoint == EMSCallFrom::Invalid);
 

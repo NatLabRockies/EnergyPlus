@@ -321,7 +321,7 @@ namespace WaterToAirHeatPump {
                 heatPump.LossFactor = s_ip->getRealFieldValue(fields, schemaProps, "compressor_efficiency");
 
                 std::string const compType = s_ip->getAlphaFieldValue(fields, schemaProps, "compressor_type");
-                heatPump.compressorType = static_cast<CompressorType>(getEnumValue(CompressTypeNamesUC, Util::makeUPPER(compType)));
+                heatPump.compressorType = static_cast<CompressorType>(getEnumValue(CompressTypeNamesUC, compType));
                 switch (heatPump.compressorType) {
                 case CompressorType::Reciprocating: {
                     heatPump.CompPistonDisp = s_ip->getRealFieldValue(fields, schemaProps, "compressor_piston_displacement");
@@ -558,7 +558,7 @@ namespace WaterToAirHeatPump {
                 heatPump.LossFactor = s_ip->getRealFieldValue(fields, schemaProps, "compressor_efficiency");
 
                 std::string const compType = s_ip->getAlphaFieldValue(fields, schemaProps, "compressor_type");
-                heatPump.compressorType = static_cast<CompressorType>(getEnumValue(CompressTypeNamesUC, Util::makeUPPER(compType)));
+                heatPump.compressorType = static_cast<CompressorType>(getEnumValue(CompressTypeNamesUC, compType));
                 switch (heatPump.compressorType) {
                 case CompressorType::Reciprocating: {
                     heatPump.CompPistonDisp = s_ip->getRealFieldValue(fields, schemaProps, "compressor_piston_displacement");

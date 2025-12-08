@@ -5076,12 +5076,12 @@ namespace OutputProcessor {
     {
 
         EXPECT_EQ((int)Constant::Units::J, (int)getEnumValue(Constant::unitNamesUC, "J"));
-        EXPECT_EQ((int)Constant::Units::J, (int)getEnumValue(Constant::unitNamesUC, Util::makeUPPER("j")));
+        EXPECT_EQ((int)Constant::Units::J, (int)getEnumValue(Constant::unitNamesUC, "j"));
 
-        EXPECT_EQ((int)Constant::Units::kgWater_kgDryAir, (int)getEnumValue(Constant::unitNamesUC, Util::makeUPPER("kgWater/kgDryAir")));
-        EXPECT_EQ((int)Constant::Units::kgWater_s, (int)getEnumValue(Constant::unitNamesUC, Util::makeUPPER("kgWater/s")));
+        EXPECT_EQ((int)Constant::Units::kgWater_kgDryAir, (int)getEnumValue(Constant::unitNamesUC, "kgWater/kgDryAir"));
+        EXPECT_EQ((int)Constant::Units::kgWater_s, (int)getEnumValue(Constant::unitNamesUC, "kgWater/s"));
 
-        EXPECT_EQ((int)Constant::Units::Invalid, (int)getEnumValue(Constant::unitNamesUC, Util::makeUPPER("junk")));
+        EXPECT_EQ((int)Constant::Units::Invalid, (int)getEnumValue(Constant::unitNamesUC, "junk"));
     }
 
     TEST_F(EnergyPlusFixture, OutputProcessor_unitEnumToString)

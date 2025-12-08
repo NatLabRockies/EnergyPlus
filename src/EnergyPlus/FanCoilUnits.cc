@@ -285,7 +285,7 @@ namespace FanCoilUnits {
                                                                                              "VARIABLEFANCONSTANTFLOW",
                                                                                              "MULTISPEEDFAN",
                                                                                              "ASHRAE90VARIABLEFAN"};
-            std::string capCtrlMeth = Alphas(3);
+            std::string capCtrlMeth = Util::makeUPPER(Alphas(3));
             fanCoil.CapCtrlMeth_Num = static_cast<CCM>(getEnumValue(CapCtrlMethUC, capCtrlMeth));
             if (fanCoil.CapCtrlMeth_Num == CCM::ASHRAE) {
                 fanCoil.DesZoneCoolingLoad = DataSizing::AutoSize;
@@ -497,7 +497,7 @@ namespace FanCoilUnits {
                 }
             }
 
-            fanCoil.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Alphas(9)));
+            fanCoil.fanType = static_cast<HVAC::FanType>(getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(Alphas(9))));
             if (fanCoil.fanType != HVAC::FanType::Constant && fanCoil.fanType != HVAC::FanType::VAV && fanCoil.fanType != HVAC::FanType::OnOff &&
                 fanCoil.fanType != HVAC::FanType::SystemModel) {
                 ShowSevereInvalidKey(state,

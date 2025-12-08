@@ -103,7 +103,8 @@ namespace UnitHeater {
     // only when there is actually a heating load.  This fan control works together
     // with the unit operation schedule to determine what the unit heater actually
     // does at a given point in time.
-
+    std::string coilHeatingWater = "Coil:Heating:Water";
+ 
     // REFERENCES:
     // ASHRAE Systems and Equipment Handbook (SI), 1996. pp. 31.3-31.8
     // Rick Strand's unit heater module which was based upon Fred Buhl's fan coil
@@ -117,7 +118,6 @@ namespace UnitHeater {
                        Real64 &LatOutputProvided,     // Latent add/removal supplied by window AC (kg/s), dehumid = negative
                        int &CompIndex)
     {
-
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Rick Strand
         //       DATE WRITTEN   May 2000
@@ -342,7 +342,7 @@ namespace UnitHeater {
 
             // Heating coil information:
             {
-                unitHeat.Type = static_cast<HCoilType>(getEnumValue(HCoilTypeNamesUC, Util::makeUPPER(Alphas(7))));
+                unitHeat.Type = static_cast<HCoilType>(getEnumValue(HCoilTypeNamesUC, Alphas(7)));
                 switch (unitHeat.Type) {
                 case HCoilType::WaterHeatingCoil:
                     unitHeat.HeatingCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
@@ -376,7 +376,7 @@ namespace UnitHeater {
                         // mine the hot water or steam node from the coil object
                         errFlag = false;
                         if (unitHeat.Type == HCoilType::WaterHeatingCoil) {
-                            unitHeat.HotControlNode = WaterCoils::GetCoilWaterInletNode(state, unitHeat.HCoilName, "Coil:Heating:Water", errFlag);
+                            unitHeat.HotControlNode = WaterCoils::GetCoilWaterInletNode(state, coilHeatingWater, unitHeat.HCoilName, errFlag);
                         } else { // its a steam coil
                             unitHeat.HCoil_Index = SteamCoils::GetSteamCoilIndex(state, "COIL:HEATING:STEAM", unitHeat.HCoilName, errFlag);
                             unitHeat.HotControlNode = SteamCoils::GetCoilSteamInletNode(state, unitHeat.HCoil_Index, unitHeat.HCoilName, errFlag);
@@ -934,11 +934,10 @@ namespace UnitHeater {
                     }
                 } else {
                     CheckZoneSizing(state, "ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name);
-                    std::string hotWaterCoilType = "Coil:Heating:Water";
                     int CoilWaterInletNode = WaterCoils::GetCoilWaterInletNode(
-                        state, hotWaterCoilType, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
+                        state, coilHeatingWater, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     int CoilWaterOutletNode = WaterCoils::GetCoilWaterOutletNode(
-                        state, hotWaterCoilType, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
+                        state, coilHeatingWater, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         bool DoWaterCoilSizing = false; // if TRUE do water coil sizing calculation
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,
@@ -1082,11 +1081,11 @@ namespace UnitHeater {
                 } else {
                     auto &ZoneEqSizing = state.dataSize->ZoneEqSizing(CurZoneEqNum);
                     CheckZoneSizing(state, "ZoneHVAC:UnitHeater", state.dataUnitHeaters->UnitHeat(UnitHeatNum).Name);
-
+                    std::string coilHeatingString = "Coil:Heating:Steam";
                     int CoilSteamInletNode = SteamCoils::GetCoilSteamInletNode(
-                        state, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, "Coil:Heating:Steam", ErrorsFound);
+                        state, coilHeatingString, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     int CoilSteamOutletNode = SteamCoils::GetCoilSteamInletNode(
-                        state, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, "Coil:Heating:Steam", ErrorsFound);
+                        state, coilHeatingString, state.dataUnitHeaters->UnitHeat(UnitHeatNum).HCoilName, ErrorsFound);
                     if (IsAutoSize) {
                         PltSizHeatNum = PlantUtilities::MyPlantSizingIndex(state,
                                                                            "Coil:Heating:Steam",

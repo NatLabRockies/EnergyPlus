@@ -1008,8 +1008,8 @@ TEST_F(EnergyPlusFixture, Test_finishCoilSummaryReportTable)
     zoneEquipList.EquipType.allocate(2);
     zoneEquipList.EquipIndex.allocate(2);
 
-    EXPECT_TRUE(Util::SameString(zoneEquipList.EquipName(1), "")); // equipment list data is cleared
-    EXPECT_TRUE(Util::SameString(zoneEquipList.EquipName(2), ""));
+    EXPECT_TRUE(zoneEquipList.EquipName(1) == ""); // equipment list data is cleared
+    EXPECT_TRUE(zoneEquipList.EquipName(2) == "");
 
     // test that 2 equipment in the equipment list will fill coil selection data
     std::string coil2Name = "ElecHeatCoil 2";        // user-defined name of the coil

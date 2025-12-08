@@ -175,7 +175,7 @@ void SetupPollutionCalculations(EnergyPlusData &state)
 
         if (!state.dataIPShortCut->lAlphaFieldBlanks(1) &&
             (freq = static_cast<OutputProcessor::ReportFreq>(
-                 getEnumValue(OutputProcessor::reportFreqNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(1))))) ==
+                 getEnumValue(OutputProcessor::reportFreqNamesUC, state.dataIPShortCut->cAlphaArgs(1)))) ==
                 OutputProcessor::ReportFreq::Invalid) {
             ShowSevereError(state, format("Invalid reporting frequency {}", state.dataIPShortCut->cAlphaArgs(1)));
             continue;
@@ -284,7 +284,7 @@ void GetPollutionFactorInput(EnergyPlusData &state)
 
         ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)};
 
-        PollFuel pollFuel = static_cast<PollFuel>(getEnumValue(pollFuelNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(1))));
+        PollFuel pollFuel = static_cast<PollFuel>(getEnumValue(pollFuelNamesUC, ipsc->cAlphaArgs(1)));
         if (pollFuel == PollFuel::Invalid) {
             ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(1), ipsc->cAlphaArgs(1));
             ErrorsFound = true;

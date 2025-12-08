@@ -2346,7 +2346,7 @@ void ProcessInputOARequirements(EnergyPlusData &state,
     auto &thisOARequirements(state.dataSize->OARequirements(OAIndex));
 
     if (NumAlphas > 1) {
-        thisOARequirements.OAFlowMethod = static_cast<OAFlowCalcMethod>(getEnumValue(OAFlowCalcMethodNamesUC, Util::makeUPPER(Alphas(2))));
+        thisOARequirements.OAFlowMethod = static_cast<OAFlowCalcMethod>(getEnumValue(OAFlowCalcMethodNamesUC, Alphas(2)));
         if (thisOARequirements.OAFlowMethod == OAFlowCalcMethod::Invalid) {
             ShowSevereError(state, format("{}{}=\"{}\",", RoutineName, CurrentModuleObject, state.dataSize->OARequirements(OAIndex).Name));
             ShowContinueError(state, format("...Invalid {}=\"{}\",", cAlphaFields(2), Alphas(2)));
@@ -3217,10 +3217,10 @@ void GetZoneSizingInput(EnergyPlusData &state)
                 constexpr static std::array<std::string_view, static_cast<int>(DataSizing::AirflowSizingMethod::Num)> AirflowSizingMethodNamesUC = {
                     "DESIGNDAY", "FLOW/ZONE", "DESIGNDAYWITHLIMIT"};
                 state.dataSize->ZoneSizingInput(ZoneSizIndex).CoolAirDesMethod =
-                    static_cast<AirflowSizingMethod>(getEnumValue(AirflowSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(5))));
+                    static_cast<AirflowSizingMethod>(getEnumValue(AirflowSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(5)));
                 assert(state.dataSize->ZoneSizingInput(ZoneSizIndex).CoolAirDesMethod != AirflowSizingMethod::Invalid);
                 state.dataSize->ZoneSizingInput(ZoneSizIndex).HeatAirDesMethod =
-                    static_cast<AirflowSizingMethod>(getEnumValue(AirflowSizingMethodNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(6))));
+                    static_cast<AirflowSizingMethod>(getEnumValue(AirflowSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(6)));
                 assert(state.dataSize->ZoneSizingInput(ZoneSizIndex).HeatAirDesMethod != AirflowSizingMethod::Invalid);
 
                 BooleanSwitch accountForDOAS = getYesNoValue(state.dataIPShortCut->cAlphaArgs(8));
@@ -3230,7 +3230,7 @@ void GetZoneSizingInput(EnergyPlusData &state)
                     constexpr static std::array<std::string_view, static_cast<int>(DataSizing::DOASControl::Num)> DOASControlNamesUC = {
                         "NEUTRALSUPPLYAIR", "NEUTRALDEHUMIDIFIEDSUPPLYAIR", "COLDSUPPLYAIR"};
                     state.dataSize->ZoneSizingInput(ZoneSizIndex).DOASControlStrategy =
-                        static_cast<DataSizing::DOASControl>(getEnumValue(DOASControlNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(9))));
+                        static_cast<DataSizing::DOASControl>(getEnumValue(DOASControlNamesUC, state.dataIPShortCut->cAlphaArgs(9)));
 
                     state.dataSize->ZoneSizingInput(ZoneSizIndex).DOASLowSetpoint = state.dataIPShortCut->rNumericArgs(17);
                     state.dataSize->ZoneSizingInput(ZoneSizIndex).DOASHighSetpoint = state.dataIPShortCut->rNumericArgs(18);
@@ -3513,7 +3513,7 @@ void GetSystemSizingInput(EnergyPlusData &state)
         constexpr std::array<std::string_view, static_cast<int>(DataSizing::LoadSizing::Num)> LoadSizingNamesUC{
             "SENSIBLE", "LATENT", "TOTAL", "VENTILATIONREQUIREMENT"};
         SysSizInput(SysSizIndex).loadSizingType = static_cast<DataSizing::LoadSizing>(
-            getEnumValue(LoadSizingNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(iLoadTypeSizeAlphaNum))));
+            getEnumValue(LoadSizingNamesUC, state.dataIPShortCut->cAlphaArgs(iLoadTypeSizeAlphaNum)));
 
         // assign PeakLoad based on LoadSizing for now
         if (SysSizInput(SysSizIndex).loadSizingType == DataSizing::LoadSizing::Sensible) {
@@ -3527,10 +3527,10 @@ void GetSystemSizingInput(EnergyPlusData &state)
         // set the CoolCapControl input
         constexpr std::array<std::string_view, static_cast<int>(CapacityControl::Num)> CapacityControlNamesUC{"VAV", "BYPASS", "VT", "ONOFF"};
         SysSizInput(SysSizIndex).CoolCapControl = static_cast<CapacityControl>(
-            getEnumValue(CapacityControlNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(iCoolCapControlAlphaNum))));
+            getEnumValue(CapacityControlNamesUC, state.dataIPShortCut->cAlphaArgs(iCoolCapControlAlphaNum)));
 
         SysSizInput(SysSizIndex).SizingOption = static_cast<SizingConcurrence>(
-            getEnumValue(SizingConcurrenceNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum))));
+            getEnumValue(SizingConcurrenceNamesUC, state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum)));
 
         BooleanSwitch is100PctOACooling = getYesNoValue(state.dataIPShortCut->cAlphaArgs(i100PercentOACoolingAlphaNum));
         SysSizInput(SysSizIndex).CoolOAOption = (is100PctOACooling == BooleanSwitch::Yes) ? OAControl::AllOA : OAControl::MinOA;
@@ -4053,12 +4053,12 @@ void GetPlantSizingInput(EnergyPlusData &state)
         constexpr static std::array<std::string_view, static_cast<int>(DataSizing::TypeOfPlantLoop::Num)> TypeOfPlantLoopNamesUC = {
             "HEATING", "COOLING", "CONDENSER", "STEAM"};
         state.dataSize->PlantSizData(PltSizIndex).LoopType =
-            static_cast<TypeOfPlantLoop>(getEnumValue(TypeOfPlantLoopNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(2))));
+            static_cast<TypeOfPlantLoop>(getEnumValue(TypeOfPlantLoopNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
         assert(state.dataSize->PlantSizData(PltSizIndex).LoopType != TypeOfPlantLoop::Invalid);
 
         if (NumAlphas > 2) {
             state.dataSize->PlantSizData(PltSizIndex).ConcurrenceOption =
-                static_cast<SizingConcurrence>(getEnumValue(SizingConcurrenceNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3))));
+                static_cast<SizingConcurrence>(getEnumValue(SizingConcurrenceNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
         }
         if (NumAlphas > 3) {
             {

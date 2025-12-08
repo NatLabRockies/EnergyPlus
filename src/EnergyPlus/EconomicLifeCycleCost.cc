@@ -210,7 +210,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \key MidYear
         //      \key BeginningOfYear
         //      \default EndOfYear
-        elcc->discountConvention = static_cast<DiscConv>(getEnumValue(DiscConvNamesUC, Util::makeUPPER(AlphaArray(2))));
+        elcc->discountConvention = static_cast<DiscConv>(getEnumValue(DiscConvNamesUC, AlphaArray(2)));
         if (elcc->discountConvention == DiscConv::Invalid) {
             elcc->discountConvention = DiscConv::EndOfYear;
             ShowWarningError(
@@ -223,7 +223,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \key ConstantDollar
         //      \key CurrentDollar
         //      \default ConstantDollar
-        elcc->inflationApproach = static_cast<InflAppr>(getEnumValue(InflApprNamesUC, Util::makeUPPER(AlphaArray(3))));
+        elcc->inflationApproach = static_cast<InflAppr>(getEnumValue(InflApprNamesUC, AlphaArray(3)));
         if (elcc->inflationApproach == InflAppr::Invalid) {
             elcc->inflationApproach = InflAppr::ConstantDollar;
             ShowWarningError(state,
@@ -295,7 +295,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \key November
         //      \key December
         //      \default January
-        elcc->baseDateMonth = getEnumValue(Util::MonthNamesUC, Util::makeUPPER(AlphaArray(4)));
+        elcc->baseDateMonth = getEnumValue(Util::MonthNamesUC, AlphaArray(4));
         if (elcc->baseDateMonth == -1) {
             elcc->baseDateMonth = 0;
             ShowWarningError(state,
@@ -336,7 +336,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \key November
         //      \key December
         //      \default January
-        elcc->serviceDateMonth = getEnumValue(Util::MonthNamesUC, Util::makeUPPER(AlphaArray(5)));
+        elcc->serviceDateMonth = getEnumValue(Util::MonthNamesUC, AlphaArray(5));
         if (elcc->serviceDateMonth == -1) {
             elcc->serviceDateMonth = 0;
             ShowWarningError(state,
@@ -404,7 +404,7 @@ void GetInputLifeCycleCostParameters(EnergyPlusData &state)
         //      \key StraightLine-40year
         //      \key None
         //      \default None
-        elcc->depreciationMethod = static_cast<DeprMethod>(getEnumValue(DeprMethodNamesUC, Util::makeUPPER(AlphaArray(6))));
+        elcc->depreciationMethod = static_cast<DeprMethod>(getEnumValue(DeprMethodNamesUC, AlphaArray(6)));
         if (elcc->depreciationMethod == DeprMethod::Invalid) {
             elcc->depreciationMethod = DeprMethod::None;
             if (state.dataIPShortCut->lAlphaFieldBlanks(6)) {
@@ -498,7 +498,7 @@ void GetInputLifeCycleCostRecurringCosts(EnergyPlusData &state)
         //        \key MajorOverhaul
         //        \key OtherOperational
         //        \default Maintenance
-        elcc->RecurringCosts[iInObj].category = static_cast<CostCategory>(getEnumValue(CostCategoryNamesUCNoSpace, Util::makeUPPER(AlphaArray(2))));
+        elcc->RecurringCosts[iInObj].category = static_cast<CostCategory>(getEnumValue(CostCategoryNamesUCNoSpace, AlphaArray(2)));
         bool isNotRecurringCost =
             (elcc->RecurringCosts[iInObj].category != CostCategory::Maintenance && elcc->RecurringCosts[iInObj].category != CostCategory::Repair &&
              elcc->RecurringCosts[iInObj].category != CostCategory::Operation && elcc->RecurringCosts[iInObj].category != CostCategory::Replacement &&
@@ -521,7 +521,7 @@ void GetInputLifeCycleCostRecurringCosts(EnergyPlusData &state)
         //        \key ServicePeriod
         //        \key BasePeriod
         //        \default ServicePeriod
-        elcc->RecurringCosts[iInObj].startOfCosts = static_cast<StartCosts>(getEnumValue(StartCostNamesUC, Util::makeUPPER(AlphaArray(3))));
+        elcc->RecurringCosts[iInObj].startOfCosts = static_cast<StartCosts>(getEnumValue(StartCostNamesUC, AlphaArray(3)));
         if (elcc->RecurringCosts[iInObj].startOfCosts == StartCosts::Invalid) {
             elcc->RecurringCosts[iInObj].startOfCosts = StartCosts::ServicePeriod;
             ShowWarningError(state,
@@ -709,7 +709,7 @@ void GetInputLifeCycleCostNonrecurringCost(EnergyPlusData &state)
         //      \key Salvage
         //      \key OtherCapital
         //      \default Construction
-        elcc->NonrecurringCost[iInObj].category = static_cast<CostCategory>(getEnumValue(CostCategoryNamesUCNoSpace, Util::makeUPPER(AlphaArray(2))));
+        elcc->NonrecurringCost[iInObj].category = static_cast<CostCategory>(getEnumValue(CostCategoryNamesUCNoSpace, AlphaArray(2)));
         bool isNotNonRecurringCost = (elcc->NonrecurringCost[iInObj].category != CostCategory::Construction &&
                                       elcc->NonrecurringCost[iInObj].category != CostCategory::Salvage &&
                                       elcc->NonrecurringCost[iInObj].category != CostCategory::OtherCapital);
@@ -729,7 +729,7 @@ void GetInputLifeCycleCostNonrecurringCost(EnergyPlusData &state)
         //      \key ServicePeriod
         //      \key BasePeriod
         //      \default ServicePeriod
-        elcc->NonrecurringCost[iInObj].startOfCosts = static_cast<StartCosts>(getEnumValue(StartCostNamesUC, Util::makeUPPER(AlphaArray(3))));
+        elcc->NonrecurringCost[iInObj].startOfCosts = static_cast<StartCosts>(getEnumValue(StartCostNamesUC, AlphaArray(3)));
         if (elcc->NonrecurringCost[iInObj].startOfCosts == StartCosts::Invalid) {
             elcc->NonrecurringCost[iInObj].startOfCosts = StartCosts::ServicePeriod;
             ShowWarningError(state,
@@ -859,7 +859,7 @@ void GetInputLifeCycleCostUsePriceEscalation(EnergyPlusData &state)
             //       \key Water
             //       \key OtherFuel1
             //       \key OtherFuel2
-            elcc->UsePriceEscalation(iInObj).resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, AlphaArray(2)));
+            elcc->UsePriceEscalation(iInObj).resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, Util::makeUPPER(AlphaArray(2))));
             if (NumAlphas > 3) {
                 ShowWarningError(state, format("In {} contains more alpha fields than expected.", CurrentModuleObject));
             }
@@ -895,7 +895,7 @@ void GetInputLifeCycleCostUsePriceEscalation(EnergyPlusData &state)
             //      \key November
             //      \key December
             //      \default January
-            elcc->UsePriceEscalation(iInObj).escalationStartMonth = getEnumValue(Util::MonthNamesUC, Util::makeUPPER(AlphaArray(3)));
+            elcc->UsePriceEscalation(iInObj).escalationStartMonth = getEnumValue(Util::MonthNamesUC, AlphaArray(3));
             if (elcc->UsePriceEscalation(iInObj).escalationStartMonth == -1) {
                 elcc->UsePriceEscalation(iInObj).escalationStartMonth = 0;
                 ShowWarningError(state,
@@ -1010,7 +1010,7 @@ void GetInputLifeCycleCostUseAdjustment(EnergyPlusData &state)
             //       \key Water
             //       \key OtherFuel1
             //       \key OtherFuel2
-            elcc->UseAdjustment(iInObj).resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, AlphaArray(2)));
+            elcc->UseAdjustment(iInObj).resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, Util::makeUPPER(AlphaArray(2))));
             if (NumAlphas > 2) {
                 ShowWarningError(state, format("In {} contains more alpha fields than expected.", CurrentModuleObject));
             }

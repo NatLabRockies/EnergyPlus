@@ -4589,7 +4589,7 @@ void GetDaylightingControls(EnergyPlusData &state, bool &ErrorsFound)
             daylightControl.DaylightMethod = DaylightingMethod::SplitFlux;
         } else {
             daylightControl.DaylightMethod =
-                static_cast<DaylightingMethod>(getEnumValue(DaylightingMethodNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
+                static_cast<DaylightingMethod>(getEnumValue(DaylightingMethodNamesUC, s_ipsc->cAlphaArgs(3)));
 
             if (daylightControl.DaylightMethod == DaylightingMethod::Invalid) {
                 daylightControl.DaylightMethod = DaylightingMethod::SplitFlux;
@@ -4616,7 +4616,7 @@ void GetDaylightingControls(EnergyPlusData &state, bool &ErrorsFound)
             daylightControl.availSched = Sched::GetScheduleAlwaysOn(state);
         }
 
-        daylightControl.LightControlType = static_cast<LtgCtrlType>(getEnumValue(LtgCtrlTypeNamesUC, s_ipsc->cAlphaArgs(5)));
+        daylightControl.LightControlType = static_cast<LtgCtrlType>(getEnumValue(LtgCtrlTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(5))));
         if (daylightControl.LightControlType == LtgCtrlType::Invalid) {
             ShowWarningInvalidKey(
                 state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "Continuous assumed, and the simulation continues.");

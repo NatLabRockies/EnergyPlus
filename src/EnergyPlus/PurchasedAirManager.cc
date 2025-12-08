@@ -365,12 +365,12 @@ void GetPurchasedAir(EnergyPlusData &state)
             PurchAir.MinCoolSuppAirHumRat = s_ip->getRealFieldValue(fields, schemaProps, "minimum_cooling_supply_air_humidity_ratio");
             cAlphaFieldName = "Heating Limit";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "heating_limit");
-            PurchAir.HeatingLimit = static_cast<LimitType>(getEnumValue(limitTypeNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.HeatingLimit = static_cast<LimitType>(getEnumValue(limitTypeNamesUC, fieldValue));
             PurchAir.MaxHeatVolFlowRate = s_ip->getRealFieldValue(fields, schemaProps, "maximum_heating_air_flow_rate");
             PurchAir.MaxHeatSensCap = s_ip->getRealFieldValue(fields, schemaProps, "maximum_sensible_heating_capacity");
             cAlphaFieldName = "Cooling Limit";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "cooling_limit");
-            PurchAir.CoolingLimit = static_cast<LimitType>(getEnumValue(limitTypeNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.CoolingLimit = static_cast<LimitType>(getEnumValue(limitTypeNamesUC, fieldValue));
             PurchAir.MaxCoolVolFlowRate = s_ip->getRealFieldValue(fields, schemaProps, "maximum_cooling_air_flow_rate");
             PurchAir.MaxCoolTotCap = s_ip->getRealFieldValue(fields, schemaProps, "maximum_total_cooling_capacity");
             // get optional heating availability schedule
@@ -394,12 +394,12 @@ void GetPurchasedAir(EnergyPlusData &state)
             // get Dehumidification control type
             cAlphaFieldName = "Dehumidification Control Type";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "dehumidification_control_type");
-            PurchAir.DehumidCtrlType = static_cast<HumControl>(getEnumValue(humControlNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.DehumidCtrlType = static_cast<HumControl>(getEnumValue(humControlNamesUC, fieldValue));
             PurchAir.CoolSHR = s_ip->getRealFieldValue(fields, schemaProps, "cooling_sensible_heat_ratio");
             // get Humidification control type
             cAlphaFieldName = "Humidification Control Type";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "humidification_control_type");
-            PurchAir.HumidCtrlType = static_cast<HumControl>(getEnumValue(humControlNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.HumidCtrlType = static_cast<HumControl>(getEnumValue(humControlNamesUC, fieldValue));
             //  get Design specification outdoor air object
             cAlphaFieldName = "Design Specification Outdoor Air Object Name";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "design_specification_outdoor_air_object_name");
@@ -455,7 +455,7 @@ void GetPurchasedAir(EnergyPlusData &state)
                 // get Demand controlled ventilation type
                 cAlphaFieldName = "Demand Controlled Ventilation Type";
                 fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "demand_controlled_ventilation_type");
-                PurchAir.DCVType = static_cast<DCV>(getEnumValue(dcvNamesUC, Util::makeUPPER(fieldValue)));
+                PurchAir.DCVType = static_cast<DCV>(getEnumValue(dcvNamesUC, fieldValue));
                 if (PurchAir.DCVType == DCV::CO2SetPoint) {
                     if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
                         PurchAir.DCVType = DCV::None;
@@ -470,11 +470,11 @@ void GetPurchasedAir(EnergyPlusData &state)
                 // get Outdoor air economizer type
                 cAlphaFieldName = "Outdoor Air Economizer Type";
                 fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "outdoor_air_economizer_type");
-                PurchAir.EconomizerType = static_cast<Econ>(getEnumValue(econNamesUC, Util::makeUPPER(fieldValue)));
+                PurchAir.EconomizerType = static_cast<Econ>(getEnumValue(econNamesUC, fieldValue));
                 // get Outdoor air heat recovery type and effectiveness
                 cAlphaFieldName = "Heat Recovery Type";
                 fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "heat_recovery_type");
-                PurchAir.HtRecType = static_cast<HeatRecovery>(getEnumValue(heatRecoveryNamesUC, Util::makeUPPER(fieldValue)));
+                PurchAir.HtRecType = static_cast<HeatRecovery>(getEnumValue(heatRecoveryNamesUC, fieldValue));
             } else { // No outdoorair
                 PurchAir.DCVType = DCV::None;
                 PurchAir.EconomizerType = Econ::NoEconomizer;
@@ -515,7 +515,7 @@ void GetPurchasedAir(EnergyPlusData &state)
             // get heating fuel type
             cAlphaFieldName = "Heating Fuel Type";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "heating_fuel_type");
-            PurchAir.heatingFuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.heatingFuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, fieldValue));
             //  get optional cooling fuel efficiency schedule name
             cAlphaFieldName = "Cooling Fuel Efficiency Schedule Name";
             std::string const coolFuelEfficiencySchedName = s_ip->getAlphaFieldValue(fields, schemaProps, "cooling_fuel_efficiency_schedule_name");
@@ -528,7 +528,7 @@ void GetPurchasedAir(EnergyPlusData &state)
             // get cooling fuel type
             cAlphaFieldName = "Cooling Fuel Type";
             fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "cooling_fuel_type");
-            PurchAir.coolingFuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(fieldValue)));
+            PurchAir.coolingFuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, fieldValue));
         }
         EndUniqueNodeCheck(state, s_ipsc->cCurrentModuleObject);
     }

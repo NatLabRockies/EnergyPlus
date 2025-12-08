@@ -158,7 +158,7 @@ namespace ExhaustAirSystemManager {
                 thisExhSys.ZoneMixerIndex = zoneMixerIndex;
 
                 thisExhSys.centralFanType = static_cast<HVAC::FanType>(
-                    getEnumValue(HVAC::fanTypeNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "fan_object_type"))));
+                    getEnumValue(HVAC::fanTypeNamesUC, ip->getAlphaFieldValue(objectFields, objectSchemaProps, "fan_object_type")));
                 if (thisExhSys.centralFanType != HVAC::FanType::SystemModel && thisExhSys.centralFanType != HVAC::FanType::ComponentModel) {
                     ShowSevereError(state, format("{}{}={}", RoutineName, cCurrentModuleObject, thisExhSys.Name));
                     ShowContinueError(state, format("Fan Type ={} is not supported.", HVAC::fanTypeNames[(int)thisExhSys.centralFanType]));

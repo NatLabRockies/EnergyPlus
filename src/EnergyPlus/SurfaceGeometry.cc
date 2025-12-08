@@ -9737,7 +9737,7 @@ namespace SurfaceGeometry {
             }
 
             windowShadingControl.shadingControlType = static_cast<DataSurfaces::WindowShadingControlType>(
-                getEnumValue(WindowShadingControlTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(5))));
+                getEnumValue(WindowShadingControlTypeNamesUC, s_ipsc->cAlphaArgs(5)));
 
             if (windowShadingControl.ShadingDevice > 0) {
                 if (s_mat->materials(windowShadingControl.ShadingDevice)->group == Material::Group::Screen &&

@@ -223,7 +223,7 @@ namespace PhotovoltaicThermalCollectors {
             auto &thisTmpSimplePVTperf = tmpSimplePVTperf(Item);
             thisTmpSimplePVTperf.Name = state.dataIPShortCut->cAlphaArgs(1);
             thisTmpSimplePVTperf.ThermEfficMode =
-                static_cast<ThermEfficEnum>(getEnumValue(ThermEfficTypeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(2))));
+                static_cast<ThermEfficEnum>(getEnumValue(ThermEfficTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
             thisTmpSimplePVTperf.ThermalActiveFract = state.dataIPShortCut->rNumericArgs(1);
             thisTmpSimplePVTperf.ThermEffic = state.dataIPShortCut->rNumericArgs(2);
 

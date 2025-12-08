@@ -719,7 +719,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Set space flow fractions
                 // Infiltration equipment design level calculation method.
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     if (lNumericFieldBlanks(1)) {
@@ -912,7 +912,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                     }
                 }
                 thisInfiltration.densityBasis = static_cast<DataHeatBalance::InfVentDensityBasis>(
-                    getEnumValue(infVentDensityBasisNamesUC, cAlphaArgs(5))); // NOLINT(modernize-use-auto)
+                    getEnumValue(infVentDensityBasisNamesUC, Util::makeUPPER(cAlphaArgs(5)))); // NOLINT(modernize-use-auto)
             }
         }
     }
@@ -1394,7 +1394,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Ventilation equipment design level calculation method
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     thisVentilation.DesignLevel = rNumericArgs(1);
@@ -1523,7 +1523,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (cAlphaArgs(5).empty()) {
                     thisVentilation.FanType = DataHeatBalance::VentilationType::Natural;
                 } else {
-                    thisVentilation.FanType = static_cast<DataHeatBalance::VentilationType>(getEnumValue(ventilationTypeNamesUC, cAlphaArgs(5)));
+                    thisVentilation.FanType = static_cast<DataHeatBalance::VentilationType>(getEnumValue(ventilationTypeNamesUC, Util::makeUPPER(cAlphaArgs(5))));
                     if (thisVentilation.FanType == DataHeatBalance::VentilationType::Invalid) {
                         ShowSevereError(state,
                                         format(R"({}{}="{}". invalid {}="{}".)",
@@ -1798,7 +1798,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 thisVentilation.densityBasis = static_cast<DataHeatBalance::InfVentDensityBasis>(
-                    getEnumValue(infVentDensityBasisNamesUC, cAlphaArgs(11))); // NOLINT(modernize-use-auto)
+                    getEnumValue(infVentDensityBasisNamesUC, Util::makeUPPER(cAlphaArgs(11)))); // NOLINT(modernize-use-auto)
 
                 // Report variables should be added for individual VENTILATION objects, in addition to zone totals below
 
@@ -2436,7 +2436,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Mixing equipment design level calculation method
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4)));
+                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4))));
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     thisMixing.DesignLevel = rNumericArgs(1);
@@ -2935,7 +2935,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Mixing equipment design level calculation method.
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, cAlphaArgs(4))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     thisMixing.DesignLevel = rNumericArgs(1);
@@ -4263,7 +4263,7 @@ void GetRoomAirModelParameters(EnergyPlusData &state, bool &errFlag) // True if 
 
             // state.dataRoomAir->AirModel(ZoneNum).AirModelName = state.dataIPShortCut->cAlphaArgs(1);
             state.dataRoomAir->AirModel(ZoneNum).AirModel =
-                static_cast<RoomAir::RoomAirModel>(getEnumValue(roomAirModelNamesUC, state.dataIPShortCut->cAlphaArgs(3))); // is this arg1 or arg3?
+                static_cast<RoomAir::RoomAirModel>(getEnumValue(roomAirModelNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3)))); // is this arg1 or arg3?
             switch (state.dataRoomAir->AirModel(ZoneNum).AirModel) {
             case RoomAir::RoomAirModel::Mixing:
                 // nothing to do here actually
@@ -4376,7 +4376,7 @@ void GetRoomAirModelParameters(EnergyPlusData &state, bool &errFlag) // True if 
             }
 
             state.dataRoomAir->AirModel(ZoneNum).TempCoupleScheme =
-                static_cast<RoomAir::CouplingScheme>(getEnumValue(couplingSchemeNamesUC, state.dataIPShortCut->cAlphaArgs(4)));
+                static_cast<RoomAir::CouplingScheme>(getEnumValue(couplingSchemeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(4))));
             if (state.dataRoomAir->AirModel(ZoneNum).TempCoupleScheme == RoomAir::CouplingScheme::Invalid) {
                 ShowWarningError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4)));
                 ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));

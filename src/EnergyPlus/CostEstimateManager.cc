@@ -185,7 +185,7 @@ namespace CostEstimateManager {
                                                                      IOStatus);
             state.dataCostEstimateManager->CostLineItem(Item).LineName = state.dataIPShortCut->cAlphaArgs(1);
             state.dataCostEstimateManager->CostLineItem(Item).ParentObjType =
-                static_cast<ParentObject>(getEnumValue(ParentObjectNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
+                static_cast<ParentObject>(getEnumValue(ParentObjectNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3))));
             state.dataCostEstimateManager->CostLineItem(Item).ParentObjName = state.dataIPShortCut->cAlphaArgs(4);
             state.dataCostEstimateManager->CostLineItem(Item).PerEach = state.dataIPShortCut->rNumericArgs(1);
             state.dataCostEstimateManager->CostLineItem(Item).PerSquareMeter = state.dataIPShortCut->rNumericArgs(2);

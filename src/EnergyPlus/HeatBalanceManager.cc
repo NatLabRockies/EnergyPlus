@@ -740,7 +740,7 @@ namespace HeatBalanceManager {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            Convect::HcInt hcIn = static_cast<Convect::HcInt>(getEnumValue(Convect::HcIntNamesUC, AlphaName(1)));
+            Convect::HcInt hcIn = static_cast<Convect::HcInt>(getEnumValue(Convect::HcIntNamesUC, Util::makeUPPER(AlphaName(1))));
 
             if (hcIn == Convect::HcInt::TrombeWall) {
                 ShowSevereError(state,
@@ -780,7 +780,7 @@ namespace HeatBalanceManager {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            Convect::HcExt hcOut = static_cast<Convect::HcExt>(getEnumValue(Convect::HcExtNamesUC, AlphaName(1)));
+            Convect::HcExt hcOut = static_cast<Convect::HcExt>(getEnumValue(Convect::HcExtNamesUC, Util::makeUPPER(AlphaName(1))));
 
             if (hcOut != Convect::HcExt::ASHRAESimple && hcOut != Convect::HcExt::ASHRAETARP && hcOut != Convect::HcExt::MoWiTTHcOutside &&
                 hcOut != Convect::HcExt::DOE2HcOutside && hcOut != Convect::HcExt::AdaptiveConvectionAlgorithm) {
@@ -1118,7 +1118,7 @@ namespace HeatBalanceManager {
                                                                      state.dataIPShortCut->cNumericFieldNames);
             if (NumAlpha > 0) {
                 {
-                    int FlowTypeNum = getEnumValue(DataHeatBalance::AdjustmentTypeNamesUC, Util::makeUPPER(AlphaName(1)));
+                    int FlowTypeNum = getEnumValue(DataHeatBalance::AdjustmentTypeNamesUC, AlphaName(1));
                     state.dataHeatBal->ZoneAirMassFlow.ZoneFlowAdjustment = static_cast<DataHeatBalance::AdjustmentType>(FlowTypeNum);
                     AlphaName(1) = DataHeatBalance::AdjustmentTypeNamesCC[FlowTypeNum];
                     DataHeatBalance::AdjustmentType ZoneFlowAdjustment = state.dataHeatBal->ZoneAirMassFlow.ZoneFlowAdjustment;
@@ -1143,7 +1143,7 @@ namespace HeatBalanceManager {
             }
             if (NumAlpha > 1) {
                 {
-                    int FlowTypeNum = getEnumValue(DataHeatBalance::InfiltrationFlowTypeNamesUC, Util::makeUPPER(AlphaName(2)));
+                    int FlowTypeNum = getEnumValue(DataHeatBalance::InfiltrationFlowTypeNamesUC, AlphaName(2));
                     state.dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment = static_cast<DataHeatBalance::InfiltrationFlow>(FlowTypeNum);
                     AlphaName(2) = DataHeatBalance::InfiltrationFlowTypeNamesCC[FlowTypeNum];
                     if (state.dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment == DataHeatBalance::InfiltrationFlow::Add ||
@@ -1169,7 +1169,7 @@ namespace HeatBalanceManager {
             } else {
                 if (NumAlpha > 2) {
                     {
-                        int FlowTypeNum = getEnumValue(DataHeatBalance::InfiltrationZoneTypeNamesUC, Util::makeUPPER(AlphaName(3)));
+                        int FlowTypeNum = getEnumValue(DataHeatBalance::InfiltrationZoneTypeNamesUC, AlphaName(3));
                         state.dataHeatBal->ZoneAirMassFlow.InfiltrationForZones = static_cast<DataHeatBalance::InfiltrationZoneType>(FlowTypeNum);
                         AlphaName(3) = DataHeatBalance::InfiltrationZoneTypeNamesCC[FlowTypeNum];
                         if (state.dataHeatBal->ZoneAirMassFlow.InfiltrationForZones == DataHeatBalance::InfiltrationZoneType::Invalid) {
@@ -1226,7 +1226,7 @@ namespace HeatBalanceManager {
             if (NumAlpha > 0) {
                 HVACSystemRootFinding.Algorithm = AlphaName(1);
                 HVACSystemRootFinding.HVACSystemRootSolverMethod =
-                    static_cast<HVACSystemRootSolverAlgorithm>(getEnumValue(HVACSystemRootSolverAlgorithmUC, Util::makeUPPER(AlphaName(1))));
+                    static_cast<HVACSystemRootSolverAlgorithm>(getEnumValue(HVACSystemRootSolverAlgorithmUC, AlphaName(1)));
                 if (HVACSystemRootFinding.HVACSystemRootSolverMethod == HVACSystemRootSolverAlgorithm::Invalid) {
                     HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::RegulaFalsi;
                     ShowWarningInvalidKey(
@@ -2340,7 +2340,7 @@ namespace HeatBalanceManager {
         }
 
         if (NumAlphas > 1 && !state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-            Convect::HcInt hcIn = static_cast<Convect::HcInt>(getEnumValue(Convect::HcIntNamesUC, cAlphaArgs(2)));
+            Convect::HcInt hcIn = static_cast<Convect::HcInt>(getEnumValue(Convect::HcIntNamesUC, Util::makeUPPER(cAlphaArgs(2))));
 
             if (hcIn != Convect::HcInt::ASHRAESimple && hcIn != Convect::HcInt::ASHRAETARP && hcIn != Convect::HcInt::CeilingDiffuser &&
                 hcIn != Convect::HcInt::TrombeWall && hcIn != Convect::HcInt::AdaptiveConvectionAlgorithm && hcIn != Convect::HcInt::ASTMC1340) {
@@ -2357,7 +2357,7 @@ namespace HeatBalanceManager {
 
         if (NumAlphas > 2 && !state.dataIPShortCut->lAlphaFieldBlanks(3)) {
 
-            Convect::HcExt hcOut = static_cast<Convect::HcExt>(getEnumValue(Convect::HcExtNamesUC, cAlphaArgs(3)));
+            Convect::HcExt hcOut = static_cast<Convect::HcExt>(getEnumValue(Convect::HcExtNamesUC, Util::makeUPPER(cAlphaArgs(3))));
 
             if (hcOut != Convect::HcExt::ASHRAESimple && hcOut != Convect::HcExt::ASHRAETARP && hcOut != Convect::HcExt::MoWiTTHcOutside &&
                 hcOut != Convect::HcExt::DOE2HcOutside && hcOut != Convect::HcExt::AdaptiveConvectionAlgorithm) {
@@ -5369,11 +5369,11 @@ namespace HeatBalanceManager {
             }
 
             windowThermalModel.CalculationStandard =
-                static_cast<TARCOGGassesParams::Stdrd>(getEnumValue(TARCOGGassesParams::stdrdNamesUC, s_ipsc->cAlphaArgs(2)));
+                static_cast<TARCOGGassesParams::Stdrd>(getEnumValue(TARCOGGassesParams::stdrdNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
             windowThermalModel.ThermalModel =
-                static_cast<TARCOGParams::TARCOGThermalModel>(getEnumValue(TARCOGParams::thermalModelNamesUC, s_ipsc->cAlphaArgs(3)));
+                static_cast<TARCOGParams::TARCOGThermalModel>(getEnumValue(TARCOGParams::thermalModelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
             windowThermalModel.DeflectionModel =
-                static_cast<TARCOGParams::DeflectionCalculation>(getEnumValue(TARCOGParams::deflectionCalculationNamesUC, s_ipsc->cAlphaArgs(4)));
+                static_cast<TARCOGParams::DeflectionCalculation>(getEnumValue(TARCOGParams::deflectionCalculationNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
 
             if (windowThermalModel.DeflectionModel == TARCOGParams::DeflectionCalculation::TEMPERATURE) {
                 windowThermalModel.VacuumPressureLimit = s_ipsc->rNumericArgs(2);

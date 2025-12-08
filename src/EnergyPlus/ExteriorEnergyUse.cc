@@ -274,7 +274,7 @@ namespace ExteriorEnergyUse {
                 ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
                 ErrorsFound = true;
 
-            } else if ((exteriorEquip.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, s_ipsc->cAlphaArgs(2)))) ==
+            } else if ((exteriorEquip.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))))) ==
                        Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
                 ErrorsFound = true;

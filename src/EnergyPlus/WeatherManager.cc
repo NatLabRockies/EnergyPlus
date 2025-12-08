@@ -6101,7 +6101,7 @@ namespace Weather {
             if (ipsc->lAlphaFieldBlanks(3)) {
                 desDayInput.dryBulbRangeType = DesDayDryBulbRangeType::Default;
             } else if ((desDayInput.dryBulbRangeType = static_cast<DesDayDryBulbRangeType>(
-                            getEnumValue(DesDayDryBulbRangeTypeNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(3))))) != DesDayDryBulbRangeType::Invalid) {
+                            getEnumValue(DesDayDryBulbRangeTypeNamesUC, ipsc->cAlphaArgs(3)))) != DesDayDryBulbRangeType::Invalid) {
             } else {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3));
                 ErrorsFound = true;
@@ -6221,7 +6221,7 @@ namespace Weather {
             }
 
             //   A5,  \field Humidity Condition Type
-            desDayInput.HumIndType = static_cast<DesDayHumIndType>(getEnumValue(DesDayHumIndTypeNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(5))));
+            desDayInput.HumIndType = static_cast<DesDayHumIndType>(getEnumValue(DesDayHumIndTypeNamesUC, ipsc->cAlphaArgs(5)));
 
             switch (desDayInput.HumIndType) {
             case DesDayHumIndType::WetBulb: {
@@ -6442,7 +6442,7 @@ namespace Weather {
             if (ipsc->lAlphaFieldBlanks(10)) {
                 desDayInput.solarModel = DesDaySolarModel::ASHRAE_ClearSky;
             } else if ((desDayInput.solarModel = static_cast<DesDaySolarModel>(
-                            getEnumValue(DesDaySolarModelNamesUC, Util::makeUPPER(ipsc->cAlphaArgs(10))))) != DesDaySolarModel::Invalid) {
+                            getEnumValue(DesDaySolarModelNamesUC, ipsc->cAlphaArgs(10)))) != DesDaySolarModel::Invalid) {
             } else {
                 ShowWarningInvalidKey(state, eoh, ipsc->cAlphaFieldNames(10), ipsc->cAlphaArgs(10), "ASHRAE ClearSky");
                 desDayInput.solarModel = DesDaySolarModel::ASHRAE_ClearSky;
