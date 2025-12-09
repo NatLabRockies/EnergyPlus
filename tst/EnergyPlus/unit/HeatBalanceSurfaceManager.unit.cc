@@ -5355,6 +5355,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestInitHBDaylightingNoExtWi
     state->dataViewFactor->EnclSolInfo(1).TotalEnclosureDaylRefPoints = 1;
     state->dataDayltg->enclDaylight.allocate(1);
     state->dataDayltg->enclDaylight(1).hasSplitFluxDaylighting = true;
+    HeatBalanceIntRadExchange::InitSolarViewFactors(*state);
     InitSurfaceHeatBalance(*state);
     EXPECT_FALSE(has_err_output(true));
 }
