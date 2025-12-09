@@ -309,7 +309,7 @@ namespace RoomAir {
                                 }
                             }
                             for (int iNode = 1; iNode <= state.dataLoopNodes->NumOfNodes; ++iNode) { // loop over all nodes to find supply node ID
-                                if (Util::SameString(state.dataLoopNodes->NodeID(iNode), afnHVAC.SupplyNodeName)) {
+                                if (equali(state.dataLoopNodes->NodeID(iNode), afnHVAC.SupplyNodeName)) {
                                     afnHVAC.SupNodeNum = iNode;
                                     break;
                                 }
@@ -339,7 +339,7 @@ namespace RoomAir {
 
                             if (afnHVAC.RetNodeNum == 0) {
                                 for (int iNode = 1; iNode <= state.dataLoopNodes->NumOfNodes; ++iNode) { // loop over all nodes to find return node ID
-                                    if (Util::SameString(state.dataLoopNodes->NodeID(iNode), afnHVAC.ReturnNodeName)) {
+                                    if (equali(state.dataLoopNodes->NodeID(iNode), afnHVAC.ReturnNodeName)) {
                                         afnHVAC.RetNodeNum = iNode;
                                         break;
                                     }
