@@ -1508,7 +1508,7 @@ namespace SteamCoils {
             state.dataSteamCoils->GetSteamCoilsInputFlag = false;
         }
 
-        if (CoilType == "COIL:HEATING:STEAM") {
+        if (Util::makeUPPER(CoilType) == "COIL:HEATING:STEAM") {
             IndexNum = Util::FindItemInList(CoilName, state.dataSteamCoils->SteamCoil);
         } else {
             IndexNum = 0;
