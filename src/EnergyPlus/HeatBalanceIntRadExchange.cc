@@ -459,14 +459,7 @@ namespace HeatBalanceIntRadExchange {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         static constexpr std::string_view RoutineName("InitInteriorRadExchange: ");
-        bool NoUserInputF; // Logical flag signifying no input F's for zone
         bool ErrorsFound(false);
-        Real64 CheckValue1 = 0.0;
-        Real64 CheckValue2 = 0.0;
-        Real64 FinalCheckValue = 0.0;
-        Array2D<Real64> SaveApproximateViewFactors; // Save for View Factor reporting
-        Real64 FixedRowSum = 0.0;
-        int NumIterations = 0;
         std::string Option1; // view factor report option
 
         auto &ViewFactorReport = state.dataHeatBalIntRadExchg->ViewFactorReport;
@@ -700,9 +693,6 @@ namespace HeatBalanceIntRadExchange {
                         }
                         print(state.files.eio, "\n");
                     }
-
-                    // Deallocate saved approximate/user view factors
-                    SaveApproximateViewFactors.deallocate();
                 }
             }
         }
