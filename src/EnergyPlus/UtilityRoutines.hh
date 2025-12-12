@@ -697,20 +697,21 @@ namespace Util {
     inline bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
     {
         //different sizes, can't be the same string
-        //int middlePosition = (s.length() > 3) ? (int)(s.length() / 2) : 0;
         if (s.length() != t.length()) {
+            //Strings are different lengths so they can't be equal
             return false;
         } else if (s.length() == 0) {
+            //Two empy strings, so they're equal
             return true;
         } else if (s[s.length() / 2] == t[t.length() / 2] && s[s.length() / 3] == t[t.length() / 3] && s == t) {
-            // the strings are similar enough to to more intensive checks
+            // the strings are similar enough to do more intensive checks
             // case sensitive comparison (fastest)
             return true;
         } else if (std::tolower(s[s.length() / 2]) != std::tolower(t[t.length()/2])) {
-            // fairly common scenario, middle character is different so check just that
+            // fairly common scenario, middle character is different so check just that for a quick exit
             return false;
         } else if (equali(s, t)) {
-            // case insensitive comparison if the strings are the same size
+            // case insensitive comparison, at this point we know they don't match each other's casing
             if (replaceString) {
                 // change the original second string so next time this is faster
                 s = t;
@@ -720,13 +721,7 @@ namespace Util {
             return false;
         }
     }
-    /*
-    std::string StrCopy(const std::string_view str2)
-    {
-        std::string tempStr(str2);
-        return tempStr;
-    }
-    */
+
     template <typename InputIterator>
     inline void VerifyName(EnergyPlusData &state,
                            InputIterator first,

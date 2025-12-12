@@ -587,8 +587,10 @@ bool
 equali_char(char const c, char const d)
 {
 	if (c == d) {
+		//Same character
 		return true;
 	}
+	//Without passing or changing the character, check if it's the same, ignoring case
 	else if (c >= 'A' && c <= 'Z') {
 		if (c == (d - 32)) {
 			return true;
@@ -606,8 +608,6 @@ equali_char(char const c, char const d)
 		}
 	}
 	return false;
-	//return (to_upper(c) == to_upper(d));
-	//return ( to_lower( c ) == to_lower( d ) );
 }
 
 // string == string Case-Insensitively?
@@ -619,9 +619,11 @@ equali( std::string_view const s, std::string_view const t )
 	std::string::size_type const s_len( s.length() );
 	if ( s_len != t.length() ) return false;
 	if (s_len == 0) {
+		//Both are empty strings, return true
 		return true;
 	}
 	else if (to_lower(s[(int)s.length() / 2]) != to_lower(t[(int)t.length() / 2])) {
+		//Check the middle character for a quick false
 		return false;
 	}
 	for ( std::string::size_type i = 0; i < s_len; ++i ) {
@@ -635,11 +637,14 @@ equali( std::string_view const s, std::string_view const t )
 #else
 	if (s.length() == t.length()) {
 		if (s.length() == 0) {
+			//Both are empty strings, return true
 			return true;
 		}
 		else if (!equali_char(s[(int)s.length() / 2], t[(int)t.length() / 2])) {
+			//Check the middle character for a quick false
 			return false;
 		}
+		//Do case insensitive compare
 		return std::equal(s.begin(), s.end(), t.begin(), equali_char);
 	}
 	return false;
