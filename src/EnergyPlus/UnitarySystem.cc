@@ -114,7 +114,6 @@ namespace UnitarySystems {
     std::string coilHeatingWater = "Coil:Heating:Water";
     std::string coilHeatingSteam = "Coil:Heating:Steam";
 
-
     static constexpr std::string_view blankString("");
     static const std::string blankStdString("");
 
@@ -3306,8 +3305,8 @@ namespace UnitarySystems {
                                                                 0.0,
                                                                 FirstHVACIteration);
                 std::string tempCoilType = HVAC::cAllCoilTypes(this->m_CoolingCoilType_Num);
-                state.dataSize->DataConstantUsedForSizing = WaterToAirHeatPumpSimple::GetCoilCapacity(
-                    state, tempCoilType, this->m_CoolingCoilName, ErrFound);
+                state.dataSize->DataConstantUsedForSizing =
+                    WaterToAirHeatPumpSimple::GetCoilCapacity(state, tempCoilType, this->m_CoolingCoilName, ErrFound);
                 EqSizing.DesCoolingLoad = state.dataSize->DataConstantUsedForSizing;
                 state.dataSize->DataFractionUsedForSizing = 1.0;
                 SizingMethod = HVAC::AutoCalculateSizing;
@@ -3316,8 +3315,7 @@ namespace UnitarySystems {
                     EqSizing.DesHeatingLoad = state.dataSize->DataConstantUsedForSizing;
                 }
                 // airflow sizing with multispeed fan
-                Real64 AirFlowRate = WaterToAirHeatPumpSimple::GetCoilAirFlowRate(
-                    state, tempCoilType, this->m_CoolingCoilName, ErrFound);
+                Real64 AirFlowRate = WaterToAirHeatPumpSimple::GetCoilAirFlowRate(state, tempCoilType, this->m_CoolingCoilName, ErrFound);
                 if (this->m_NumOfSpeedCooling > 1) {
                     int FanIndex = this->m_FanIndex;
                     for (int i = 1; i <= this->m_NumOfSpeedCooling; ++i) {
@@ -3405,8 +3403,8 @@ namespace UnitarySystems {
                                                                 0.0,
                                                                 FirstHVACIteration);
                 std::string tempCoilType = HVAC::cAllCoilTypes(this->m_HeatingCoilType_Num);
-                state.dataSize->DataConstantUsedForSizing = WaterToAirHeatPumpSimple::GetCoilCapacity(
-                    state, tempCoilType, this->m_HeatingCoilName, ErrFound);
+                state.dataSize->DataConstantUsedForSizing =
+                    WaterToAirHeatPumpSimple::GetCoilCapacity(state, tempCoilType, this->m_HeatingCoilName, ErrFound);
                 EqSizing.DesHeatingLoad = state.dataSize->DataConstantUsedForSizing;
                 state.dataSize->DataFractionUsedForSizing = 1.0;
                 SizingMethod = HVAC::AutoCalculateSizing;
@@ -3423,16 +3421,15 @@ namespace UnitarySystems {
                                                                     0.0,
                                                                     FirstHVACIteration);
                     std::string tempCoilType = HVAC::cAllCoilTypes(this->m_CoolingCoilType_Num);
-                    state.dataSize->DataConstantUsedForSizing = WaterToAirHeatPumpSimple::GetCoilCapacity(
-                        state, tempCoilType, this->m_CoolingCoilName, ErrFound);
+                    state.dataSize->DataConstantUsedForSizing =
+                        WaterToAirHeatPumpSimple::GetCoilCapacity(state, tempCoilType, this->m_CoolingCoilName, ErrFound);
                     EqSizing.DesCoolingLoad = state.dataSize->DataConstantUsedForSizing;
                 }
                 state.dataSize->DataFractionUsedForSizing = 1.0;
                 this->m_DesignCoolingCapacity = DataSizing::AutoSize;
                 // airflow sizing with multispeed fan
                 tempCoilType = HVAC::cAllCoilTypes(this->m_HeatingCoilType_Num);
-                Real64 AirFlowRate = WaterToAirHeatPumpSimple::GetCoilAirFlowRate(
-                    state, tempCoilType, this->m_HeatingCoilName, ErrFound);
+                Real64 AirFlowRate = WaterToAirHeatPumpSimple::GetCoilAirFlowRate(state, tempCoilType, this->m_HeatingCoilName, ErrFound);
                 if (this->m_NumOfSpeedHeating > 1) {
                     int FanIndex = this->m_FanIndex;
                     for (int i = 1; i <= this->m_NumOfSpeedHeating; ++i) {
@@ -3704,12 +3701,8 @@ namespace UnitarySystems {
         //    UnitarySystemNumericFields.deallocate(); // remove temporary array for field names at end of sizing
     } // namespace UnitarySystems
 
-    void UnitarySys::processInputSpec(EnergyPlusData &state,
-                                      UnitarySysInputSpec &input_data,
-                                      int sysNum,
-                                      bool &errorsFound,
-                                      bool const ZoneEquipment,
-                                      int const ZoneOAUnitNum)
+    void UnitarySys::processInputSpec(
+        EnergyPlusData &state, UnitarySysInputSpec &input_data, int sysNum, bool &errorsFound, bool const ZoneEquipment, int const ZoneOAUnitNum)
     {
         static constexpr std::string_view routineName = "UnitarySys::processInputSpec";
 
@@ -3718,8 +3711,8 @@ namespace UnitarySystems {
         static constexpr std::string_view unitarySysHeatPumpPerformanceObjectType("UnitarySystemPerformance:Multispeed");
 
         std::string const &cCurrentModuleObject = input_data.system_type;
-        DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, input_data.system_type));
+        DataLoopNode::ConnectionObjectType objType =
+            static_cast<DataLoopNode::ConnectionObjectType>(getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, input_data.system_type));
         std::string const &thisObjectName = input_data.name;
 
         ErrorObjectHeader eoh{routineName, cCurrentModuleObject, thisObjectName};
@@ -5131,13 +5124,12 @@ namespace UnitarySystems {
                         errorsFound = true;
                     }
                     std::string tempCoilType = HVAC::cAllCoilTypes(ActualCoolCoilType);
-                    this->m_coolingCoilAvailSched =
-                        WaterCoils::GetWaterCoilAvailSched(state, tempCoilType, HXCoilName, errFlag);
+                    this->m_coolingCoilAvailSched = WaterCoils::GetWaterCoilAvailSched(state, tempCoilType, HXCoilName, errFlag);
                     this->MaxCoolCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName,  errFlag);
+                        WaterCoils::GetCoilMaxWaterFlowRate(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName, errFlag);
                     // Get the Cooling Coil water Inlet Node number
                     this->CoolCoilFluidInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)),  HXCoilName, errFlag);
+                        WaterCoils::GetCoilWaterInletNode(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", cCurrentModuleObject, thisObjectName));
                         errFlag = false;
@@ -7632,7 +7624,7 @@ namespace UnitarySystems {
                 // why is this cooling coil does not have a field for Design Air Vol Flow Rate
                 // set it "SupplyAirFlowRate" to avoid blank, which lead to fatal out during get input
                 static constexpr std::string_view loc_cooling_coil_object_type("COIL:COOLING:WATER:DETAILEDGEOMETRY");
-                if (equali(loc_cooling_coil_object_type ,thisSys.input_specs.cooling_coil_object_type)) {
+                if (equali(loc_cooling_coil_object_type, thisSys.input_specs.cooling_coil_object_type)) {
                     thisSys.input_specs.cooling_supply_air_flow_rate_method = Util::makeUPPER("SupplyAirFlowRate");
                     thisSys.input_specs.cooling_supply_air_flow_rate = DataSizing::AutoSize;
                 }

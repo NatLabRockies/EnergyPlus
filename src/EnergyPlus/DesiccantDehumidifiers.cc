@@ -123,7 +123,7 @@ namespace DesiccantDehumidifiers {
 
     Real64 constexpr TempSteamIn = 100.0;
     std::string coilHeatingWater = "Coil:Heating:Water";
- 
+
     void SimDesiccantDehumidifier(EnergyPlusData &state,
                                   std::string const &CompName,   // name of the dehumidifier unit
                                   bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
@@ -1651,8 +1651,7 @@ namespace DesiccantDehumidifiers {
                     }
 
                     ErrorFlag = false;
-                    desicDehum.MaxCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, desicDehum.RegenCoilName, ErrorFlag);
+                    desicDehum.MaxCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, desicDehum.RegenCoilName, ErrorFlag);
                     if (desicDehum.MaxCoilFluidFlow > 0.0) {
                         Real64 FluidDensity =
                             state.dataPlnt->PlantLoop(desicDehum.plantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, initCBVAV);

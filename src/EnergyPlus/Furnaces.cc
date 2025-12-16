@@ -2086,8 +2086,7 @@ namespace Furnaces {
 
                         // Get the ReHeat Coil hot water max volume flow rate
                         errFlag = false;
-                        thisFurnace.MaxSuppCoilFluidFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, ReheatingCoilType, ReheatingCoilName, errFlag);
+                        thisFurnace.MaxSuppCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, ReheatingCoilType, ReheatingCoilName, errFlag);
                         if (errFlag) {
                             ShowContinueError(state, format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                             ErrorsFound = true;
@@ -2623,7 +2622,8 @@ namespace Furnaces {
                 if (thisFurnace.bIsIHP) {
                     thisFurnace.CoolingCoilIndex = IntegratedHeatPump::GetCoilIndexIHP(state, CoolingCoilType, CoolingCoilName, errFlag);
                     IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
-                    thisFurnace.DesignCoolingCapacity = VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, coilCoolingDxVariableSpeed, IHPCoilName, errFlag);
+                    thisFurnace.DesignCoolingCapacity =
+                        VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, coilCoolingDxVariableSpeed, IHPCoilName, errFlag);
                 } else {
                     thisFurnace.DesignCoolingCapacity =
                         VariableSpeedCoils::GetCoilCapacityVariableSpeed(state, CoolingCoilType, CoolingCoilName, errFlag);
@@ -2645,7 +2645,6 @@ namespace Furnaces {
             SetMinOATCompressor(state, FurnaceNum, cCurrentModuleObject, ErrorsFound);
 
         } // End of the HeatCool Furnace Loop
-
 
         // Get the data for the Unitary System HeatPump AirToAir (UnitarySystem:HeatPump:AirToAir)
         for (int HeatPumpNum = 1; HeatPumpNum <= NumHeatPump; ++HeatPumpNum) {
@@ -3449,7 +3448,7 @@ namespace Furnaces {
 
                 if (thisFurnace.bIsIHP) {
                     IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SHCoilName;
- 
+
                     thisFurnace.MaxHeatAirVolFlow =
                         VariableSpeedCoils::GetCoilAirFlowRateVariableSpeed(state, coilHeatingDxVariableSpeed, IHPCoilName, errFlag);
                     IHPCoilName = state.dataIntegratedHP->IntegratedHeatPumps(thisFurnace.CoolingCoilIndex).SCCoilName;
@@ -4946,8 +4945,7 @@ namespace Furnaces {
                     // If water coil max water flow rate is autosized, simulate once in order to mine max flow rate
                     if (thisFurnace.HeatingCoilType_Num == HVAC::Coil_HeatingWater) {
                         WaterCoils::SimulateWaterCoilComponents(state, thisFurnace.HeatingCoilName, FirstHVACIteration, thisFurnace.HeatingCoilIndex);
-                        CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.HeatingCoilName, ErrorsFound);
+                        CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.HeatingCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(thisFurnace.plantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -4979,8 +4977,7 @@ namespace Furnaces {
                         // If water coil max water flow rate is autosized, simulate once in order to mine max flow rate
                         WaterCoils::SimulateWaterCoilComponents(
                             state, thisFurnace.SuppHeatCoilName, FirstHVACIteration, thisFurnace.SuppHeatCoilIndex);
-                        CoilMaxVolFlowRate =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.SuppHeatCoilName, ErrorsFound);
+                        CoilMaxVolFlowRate = WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, thisFurnace.SuppHeatCoilName, ErrorsFound);
                         if (CoilMaxVolFlowRate != DataSizing::AutoSize) {
                             rho = state.dataPlnt->PlantLoop(thisFurnace.SuppPlantLoc.loopNum)
                                       .glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);

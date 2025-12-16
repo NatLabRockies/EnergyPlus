@@ -15347,7 +15347,7 @@ GetDXCoilName(EnergyPlusData &state, int &DXCoilIndex, bool &ErrorsFound, std::s
 }
 
 Real64 GetCoilCapacity(EnergyPlusData &state,
-                       std::string &CoilType, // must match coil types in this module
+                       std::string &CoilType,       // must match coil types in this module
                        std::string const &CoilName, // must match coil names for the coil type
                        bool &ErrorsFound            // set to true if problem
 )
@@ -15767,8 +15767,8 @@ int GetHPCoolingCoilIndex(EnergyPlusData &state,
 
     DXCoolingCoilIndex = 0;
 
-    DataLoopNode::ConnectionObjectType HeatingCoilTypeNum = static_cast<DataLoopNode::ConnectionObjectType>(
-        getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, HeatingCoilType));
+    DataLoopNode::ConnectionObjectType HeatingCoilTypeNum =
+        static_cast<DataLoopNode::ConnectionObjectType>(getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, HeatingCoilType));
 
     DataLoopNode::ConnectionObjectType CompSetsParentType; // Parent object type which uses DX heating coil pass into this function
     std::string CompSetsParentName;

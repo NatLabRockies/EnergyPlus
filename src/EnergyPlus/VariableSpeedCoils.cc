@@ -1697,8 +1697,8 @@ namespace VariableSpeedCoils {
                 //"defrost_control",
                 cFieldName = "Defrost Control"; // cAlphaFields(8)
                 std::string defrostControl = s_ip->getAlphaFieldValue(fields, schemaProps, "defrost_control");
-                varSpeedCoil.DefrostControl = static_cast<StandardRatings::HPdefrostControl>(
-                    getEnumValue(StandardRatings::HPdefrostControlUC, defrostControl));
+                varSpeedCoil.DefrostControl =
+                    static_cast<StandardRatings::HPdefrostControl>(getEnumValue(StandardRatings::HPdefrostControlUC, defrostControl));
                 if (varSpeedCoil.DefrostControl == StandardRatings::HPdefrostControl::Invalid) {
                     ShowSevereInvalidKey(state, eoh, cFieldName, defrostControl, "...valid values for this field are Timed or OnDemand.");
                     ErrorsFound = true;
@@ -6814,7 +6814,7 @@ namespace VariableSpeedCoils {
     }
 
     Real64 GetCoilCapacityVariableSpeed(EnergyPlusData &state,
-                                        std::string &CoilType, // must match coil types in this module
+                                        std::string &CoilType,       // must match coil types in this module
                                         std::string const &CoilName, // must match coil names for the coil type
                                         bool &ErrorsFound            // set to true if problem
     )
@@ -6904,7 +6904,7 @@ namespace VariableSpeedCoils {
     }
 
     Real64 GetCoilAirFlowRateVariableSpeed(EnergyPlusData &state,
-                                           std::string &CoilType, // must match coil types in this module
+                                           std::string &CoilType,       // must match coil types in this module
                                            std::string const &CoilName, // must match coil names for the coil type
                                            bool &ErrorsFound            // set to true if problem
     )

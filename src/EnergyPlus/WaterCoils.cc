@@ -5405,7 +5405,7 @@ void CheckWaterCoilSchedule(EnergyPlusData &state, std::string_view CompName, Re
 }
 
 Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
-                               std::string &CoilType,   // must match coil types in this module
+                               std::string &CoilType,       // must match coil types in this module
                                std::string const &CoilName, // must match coil names for the coil type
                                bool &ErrorsFound            // set to true if problem
 )
@@ -5454,7 +5454,7 @@ Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
 }
 
 int GetCoilInletNode(EnergyPlusData &state,
-                     std::string &CoilType,   // must match coil types in this module
+                     std::string &CoilType,       // must match coil types in this module
                      std::string const &CoilName, // must match coil names for the coil type
                      bool &ErrorsFound            // set to true if problem
 )
@@ -5497,9 +5497,9 @@ int GetCoilInletNode(EnergyPlusData &state,
 }
 
 int GetCoilInletNodeConstCoil(EnergyPlusData &state,
-                     std::string_view CoilType,       // must match coil types in this module
-                     std::string const &CoilName, // must match coil names for the coil type
-                     bool &ErrorsFound            // set to true if problem
+                              std::string_view CoilType,   // must match coil types in this module
+                              std::string const &CoilName, // must match coil names for the coil type
+                              bool &ErrorsFound            // set to true if problem
 )
 {
 
@@ -5520,8 +5520,7 @@ int GetCoilInletNodeConstCoil(EnergyPlusData &state,
 
     int NodeNumber = 0;
     int WhichCoil = 0;
-    if (equali(CoilType, "Coil:Heating:Water") || equali(CoilType, "Coil:Cooling:Water:DetailedGeometry") ||
-        equali(CoilType, "Coil:Cooling:Water")) {
+    if (equali(CoilType, "Coil:Heating:Water") || equali(CoilType, "Coil:Cooling:Water:DetailedGeometry") || equali(CoilType, "Coil:Cooling:Water")) {
         WhichCoil = Util::FindItem(CoilName, state.dataWaterCoils->WaterCoil);
         if (WhichCoil != 0) {
             NodeNumber = state.dataWaterCoils->WaterCoil(WhichCoil).AirInletNodeNum;
@@ -5539,9 +5538,8 @@ int GetCoilInletNodeConstCoil(EnergyPlusData &state,
     return NodeNumber;
 }
 
-
 int GetCoilOutletNode(EnergyPlusData &state,
-                      std::string &CoilType,   // must match coil types in this module
+                      std::string &CoilType,       // must match coil types in this module
                       std::string const &CoilName, // must match coil names for the coil type
                       bool &ErrorsFound            // set to true if problem
 )
@@ -5586,7 +5584,7 @@ int GetCoilOutletNode(EnergyPlusData &state,
 }
 
 int GetCoilWaterInletNode(EnergyPlusData &state,
-                          std::string &CoilType,   // must match coil types in this module
+                          std::string &CoilType,       // must match coil types in this module
                           std::string const &CoilName, // must match coil names for the coil type
                           bool &ErrorsFound            // set to true if problem
 )
@@ -5629,7 +5627,7 @@ int GetCoilWaterInletNode(EnergyPlusData &state,
 }
 
 int GetCoilWaterOutletNode(EnergyPlusData &state,
-                           std::string &CoilType,   // must match coil types in this module
+                           std::string &CoilType,       // must match coil types in this module
                            std::string const &CoilName, // must match coil names for the coil type
                            bool &ErrorsFound            // set to true if problem
 )
@@ -5709,7 +5707,7 @@ void SetCoilDesFlow(EnergyPlusData &state,
 }
 
 Real64 GetWaterCoilDesAirFlow(EnergyPlusData &state,
-                              std::string &CoilType, // must match coil types in this module
+                              std::string &CoilType,       // must match coil types in this module
                               std::string const &CoilName, // must match coil names for the coil type
                               bool &ErrorsFound            // set to true if problem
 )
@@ -6069,8 +6067,7 @@ int GetCompIndex(EnergyPlusData &state, CoilModel compType, std::string_view con
     if (index == 0) { // may not find coil name
         ShowSevereError(state,
                         format("GetCompIndex: Could not find CoilType = \"{}\" with Name = \"{}\"", CoilModelNamesUC[(int)compType], coilName));
-        ShowSevereError(state,
-                        format("++++++++++++++GetCompIndex: Coil Count {}", state.dataWaterCoils->WaterCoil.isize()));
+        ShowSevereError(state, format("++++++++++++++GetCompIndex: Coil Count {}", state.dataWaterCoils->WaterCoil.isize()));
         for (int i = 0; i < state.dataWaterCoils->WaterCoil.isize(); i++) {
             ShowSevereError(state, format("-----------GetCompIndex: Available Name = \"{}\"", state.dataWaterCoils->WaterCoil[i].Name));
         }
@@ -6228,7 +6225,7 @@ void UpdateWaterToAirCoilPlantConnection(EnergyPlusData &state,
 }
 
 Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
-                                        std::string &CoilType, // must match coil types in this module
+                                        std::string &CoilType,       // must match coil types in this module
                                         std::string const &CoilName, // must match coil names for the coil type
                                         bool &ErrorsFound            // set to true if problem
 )

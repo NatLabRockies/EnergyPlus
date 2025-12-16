@@ -3511,8 +3511,8 @@ void GetSystemSizingInput(EnergyPlusData &state)
 
         constexpr std::array<std::string_view, static_cast<int>(DataSizing::LoadSizing::Num)> LoadSizingNamesUC{
             "SENSIBLE", "LATENT", "TOTAL", "VENTILATIONREQUIREMENT"};
-        SysSizInput(SysSizIndex).loadSizingType = static_cast<DataSizing::LoadSizing>(
-            getEnumValue(LoadSizingNamesUC, state.dataIPShortCut->cAlphaArgs(iLoadTypeSizeAlphaNum)));
+        SysSizInput(SysSizIndex).loadSizingType =
+            static_cast<DataSizing::LoadSizing>(getEnumValue(LoadSizingNamesUC, state.dataIPShortCut->cAlphaArgs(iLoadTypeSizeAlphaNum)));
 
         // assign PeakLoad based on LoadSizing for now
         if (SysSizInput(SysSizIndex).loadSizingType == DataSizing::LoadSizing::Sensible) {
@@ -3525,11 +3525,11 @@ void GetSystemSizingInput(EnergyPlusData &state)
         }
         // set the CoolCapControl input
         constexpr std::array<std::string_view, static_cast<int>(CapacityControl::Num)> CapacityControlNamesUC{"VAV", "BYPASS", "VT", "ONOFF"};
-        SysSizInput(SysSizIndex).CoolCapControl = static_cast<CapacityControl>(
-            getEnumValue(CapacityControlNamesUC, state.dataIPShortCut->cAlphaArgs(iCoolCapControlAlphaNum)));
+        SysSizInput(SysSizIndex).CoolCapControl =
+            static_cast<CapacityControl>(getEnumValue(CapacityControlNamesUC, state.dataIPShortCut->cAlphaArgs(iCoolCapControlAlphaNum)));
 
-        SysSizInput(SysSizIndex).SizingOption = static_cast<SizingConcurrence>(
-            getEnumValue(SizingConcurrenceNamesUC, state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum)));
+        SysSizInput(SysSizIndex).SizingOption =
+            static_cast<SizingConcurrence>(getEnumValue(SizingConcurrenceNamesUC, state.dataIPShortCut->cAlphaArgs(iSizingOptionAlphaNum)));
 
         BooleanSwitch is100PctOACooling = getYesNoValue(state.dataIPShortCut->cAlphaArgs(i100PercentOACoolingAlphaNum));
         SysSizInput(SysSizIndex).CoolOAOption = (is100PctOACooling == BooleanSwitch::Yes) ? OAControl::AllOA : OAControl::MinOA;

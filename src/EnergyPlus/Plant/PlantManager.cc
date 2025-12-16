@@ -620,8 +620,7 @@ void GetPlantLoopData(EnergyPlusData &state)
         if (NumAlphas >= PressSimAlphaIndex) {
             MatchedPressureString = false;
 
-            this_loop.PressureSimType =
-                static_cast<DataPlant::PressSimType>(getEnumValue(PressureSimTypeNamesUC, Alpha(PressSimAlphaIndex)));
+            this_loop.PressureSimType = static_cast<DataPlant::PressSimType>(getEnumValue(PressureSimTypeNamesUC, Alpha(PressSimAlphaIndex)));
 
             switch (this_loop.PressureSimType) {
                 // Check all types

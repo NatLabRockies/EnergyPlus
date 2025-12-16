@@ -957,8 +957,7 @@ namespace VentilatedSlab {
                     ventSlab.heatingCoilTypeCh = state.dataIPShortCut->cAlphaArgs(27);
                     errFlag = false;
 
-                    ventSlab.hCoilType =
-                        static_cast<HeatingCoilType>(getEnumValue(HeatingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(27)));
+                    ventSlab.hCoilType = static_cast<HeatingCoilType>(getEnumValue(HeatingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(27)));
 
                     switch (ventSlab.hCoilType) {
 
@@ -1075,8 +1074,7 @@ namespace VentilatedSlab {
                     ventSlab.coolingCoilTypeCh = state.dataIPShortCut->cAlphaArgs(30);
                     errFlag = false;
 
-                    ventSlab.cCoilType =
-                        static_cast<CoolingCoilType>(getEnumValue(CoolingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(30)));
+                    ventSlab.cCoilType = static_cast<CoolingCoilType>(getEnumValue(CoolingCoilTypeNamesUC, state.dataIPShortCut->cAlphaArgs(30)));
                     switch (ventSlab.cCoilType) {
                     case CoolingCoilType::WaterCooling: {
                         ventSlab.coolingCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;

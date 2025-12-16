@@ -1543,7 +1543,7 @@ void ReportStandAloneERV(EnergyPlusData &state, int const StandAloneERVNum) // n
 //        Utility subroutines/functions for the HeatingCoil Module
 
 Real64 GetSupplyAirFlowRate(EnergyPlusData &state,
-                            std::string &ERVType,     // must be "ZoneHVAC:EnergyRecoveryVentilator"
+                            std::string &ERVType,           // must be "ZoneHVAC:EnergyRecoveryVentilator"
                             std::string const &ERVCtrlName, // must match a controller name in the ERV data structure
                             bool &ErrorsFound               // set to true if problem
 )

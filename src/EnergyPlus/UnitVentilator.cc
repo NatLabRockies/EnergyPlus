@@ -2291,8 +2291,7 @@ namespace UnitVentilator {
                     state, coilHeatingElectric, unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             case HeatCoilType::Gas: {
-                HeatingCoils::CheckHeatingCoilSchedule(
-                    state, coilHeatingFuel, unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
+                HeatingCoils::CheckHeatingCoilSchedule(state, coilHeatingFuel, unitVent.HCoilName, unitVent.HCoilSchedValue, unitVent.HCoil_Index);
             } break;
             default: {
             } break;

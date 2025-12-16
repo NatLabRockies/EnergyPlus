@@ -1187,8 +1187,7 @@ void ScanForReports(EnergyPlusData &state,
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            ReportType checkReportType =
-                static_cast<ReportType>(getEnumValue(ReportTypeNamesUC, state.dataIPShortCut->cAlphaArgs(1)));
+            ReportType checkReportType = static_cast<ReportType>(getEnumValue(ReportTypeNamesUC, state.dataIPShortCut->cAlphaArgs(1)));
 
             switch (checkReportType) {
             case ReportType::DXF: {

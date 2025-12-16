@@ -223,8 +223,8 @@ namespace PlantChillers {
             thisChiller.Name = state.dataIPShortCut->cAlphaArgs(1);
             thisChiller.ChillerType = DataPlant::PlantEquipmentType::Chiller_Electric;
 
-            thisChiller.CondenserType = static_cast<DataPlant::CondenserType>(
-                getEnumValue(DataPlant::CondenserTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
+            thisChiller.CondenserType =
+                static_cast<DataPlant::CondenserType>(getEnumValue(DataPlant::CondenserTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
             switch (thisChiller.CondenserType) {
             case DataPlant::CondenserType::AirCooled:
             case DataPlant::CondenserType::WaterCooled:

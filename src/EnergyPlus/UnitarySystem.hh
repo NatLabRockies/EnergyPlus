@@ -593,12 +593,8 @@ namespace UnitarySystems {
 
         static void getUnitarySystemInput(EnergyPlusData &state, std::string_view Name, bool const ZoneEquipment, int const ZoneOAUnitNum);
 
-        void processInputSpec(EnergyPlusData &state,
-                              UnitarySysInputSpec &input_data,
-                              int sysNum,
-                              bool &errorsFound,
-                              bool const ZoneEquipment,
-                              int const ZoneOAUnitNum);
+        void processInputSpec(
+            EnergyPlusData &state, UnitarySysInputSpec &input_data, int sysNum, bool &errorsFound, bool const ZoneEquipment, int const ZoneOAUnitNum);
 
         void setSystemParams(EnergyPlusData &state, Real64 &TotalFloorAreaOnAirLoop, const std::string &thisObjectName);
 

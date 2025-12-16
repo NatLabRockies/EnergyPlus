@@ -239,7 +239,7 @@ namespace HeatingCoils {
     );
 
     int GetHeatReclaimSourceIndex(EnergyPlusData &state,
-                                  std::string &CoilType, // must match coil types in this module
+                                  std::string &CoilType,       // must match coil types in this module
                                   std::string const &CoilName, // must match coil names for the coil type
                                   bool &ErrorsFound            // set to true if problem
     );

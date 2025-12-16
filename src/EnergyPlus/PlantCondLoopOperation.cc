@@ -1400,8 +1400,8 @@ void FindCompSPInput(EnergyPlusData &state,
 
     SchemeNameFound = true;
 
-    DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-        getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, CurrentModuleObject));
+    DataLoopNode::ConnectionObjectType objType =
+        static_cast<DataLoopNode::ConnectionObjectType>(getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, CurrentModuleObject));
 
     if (state.dataPlnt->PlantLoop(LoopNum).TypeOfLoop == LoopType::Plant) {
         LoopOpSchemeObj = "PlantEquipmentOperationSchemes";

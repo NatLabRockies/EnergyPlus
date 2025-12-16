@@ -175,8 +175,7 @@ void SetupPollutionCalculations(EnergyPlusData &state)
 
         if (!state.dataIPShortCut->lAlphaFieldBlanks(1) &&
             (freq = static_cast<OutputProcessor::ReportFreq>(
-                 getEnumValue(OutputProcessor::reportFreqNamesUC, state.dataIPShortCut->cAlphaArgs(1)))) ==
-                OutputProcessor::ReportFreq::Invalid) {
+                 getEnumValue(OutputProcessor::reportFreqNamesUC, state.dataIPShortCut->cAlphaArgs(1)))) == OutputProcessor::ReportFreq::Invalid) {
             ShowSevereError(state, format("Invalid reporting frequency {}", state.dataIPShortCut->cAlphaArgs(1)));
             continue;
         }

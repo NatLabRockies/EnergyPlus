@@ -1296,8 +1296,7 @@ namespace Avail {
                             ip->getAlphaFieldValue(extensibleInstance, extensionSchemaProps, "availability_manager_name");
                         std::string availManagerObjType =
                             ip->getAlphaFieldValue(extensibleInstance, extensionSchemaProps, "availability_manager_object_type");
-                        mgrList.availManagers(listItem).type =
-                            static_cast<ManagerType>(getEnumValue(managerTypeNamesUC, availManagerObjType));
+                        mgrList.availManagers(listItem).type = static_cast<ManagerType>(getEnumValue(managerTypeNamesUC, availManagerObjType));
                         if (mgrList.availManagers(listItem).type == ManagerType::HybridVent) {
                             mgrList.availManagers(listItem).type = ManagerType::Invalid;
                         }

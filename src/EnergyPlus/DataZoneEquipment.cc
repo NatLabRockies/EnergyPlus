@@ -1295,8 +1295,8 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
                           NodeInputManager::CompFluidStream::Primary,
                           objectIsParent);
 
-    thisZeqSplitter.tstatControl = DataZoneEquipment::ZoneEquipTstatControl(
-        getEnumValue(zoneEquipTstatControlNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "thermostat_control_method"))));
+    thisZeqSplitter.tstatControl = DataZoneEquipment::ZoneEquipTstatControl(getEnumValue(
+        zoneEquipTstatControlNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "thermostat_control_method"))));
     if (thisZeqSplitter.tstatControl == DataZoneEquipment::ZoneEquipTstatControl::SingleSpace) {
         std::string spaceName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "control_space_name");
         thisZeqSplitter.controlSpaceIndex = Util::FindItemInList(spaceName, state.dataHeatBal->space);
@@ -1306,8 +1306,8 @@ void processZoneEquipSplitterInput(EnergyPlusData &state,
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
         }
     }
-    thisZeqSplitter.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(
-        getEnumValue(spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
+    thisZeqSplitter.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(getEnumValue(
+        spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
 
     auto extensibles = objectFields.find("spaces");
     auto const &extensionSchemaProps = objectSchemaProps["spaces"]["items"]["properties"];
@@ -1383,8 +1383,8 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
         state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
     }
 
-    thisZeqMixer.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(
-        getEnumValue(spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
+    thisZeqMixer.spaceSizingBasis = DataZoneEquipment::SpaceEquipSizingBasis(getEnumValue(
+        spaceEquipSizingBasisNamesUC, Util::makeUPPER(ip->getAlphaFieldValue(objectFields, objectSchemaProps, "space_fraction_method"))));
 
     auto extensibles = objectFields.find("spaces");
     auto const &extensionSchemaProps = objectSchemaProps["spaces"]["items"]["properties"];

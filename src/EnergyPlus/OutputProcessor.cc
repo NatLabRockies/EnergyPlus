@@ -721,8 +721,7 @@ namespace OutputProcessor {
             }
 
             // Check for invalid resource
-            Constant::eResource resource =
-                static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, ipsc->cAlphaArgs(2)));
+            Constant::eResource resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, ipsc->cAlphaArgs(2)));
             if (resource == Constant::eResource::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;
@@ -1030,8 +1029,7 @@ namespace OutputProcessor {
             }
 
             // Can't use resource type in AddMeter cause it will confuse it with other meters.  So, now:
-            Constant::eResource resource =
-                static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, ipsc->cAlphaArgs(2)));
+            Constant::eResource resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, ipsc->cAlphaArgs(2)));
             if (resource == Constant::eResource::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(2), ipsc->cAlphaArgs(2));
                 ErrorsFound = true;

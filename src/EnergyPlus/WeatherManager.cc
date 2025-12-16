@@ -6441,8 +6441,8 @@ namespace Weather {
             //   A10, \field Solar Model Indicator
             if (ipsc->lAlphaFieldBlanks(10)) {
                 desDayInput.solarModel = DesDaySolarModel::ASHRAE_ClearSky;
-            } else if ((desDayInput.solarModel = static_cast<DesDaySolarModel>(
-                            getEnumValue(DesDaySolarModelNamesUC, ipsc->cAlphaArgs(10)))) != DesDaySolarModel::Invalid) {
+            } else if ((desDayInput.solarModel = static_cast<DesDaySolarModel>(getEnumValue(DesDaySolarModelNamesUC, ipsc->cAlphaArgs(10)))) !=
+                       DesDaySolarModel::Invalid) {
             } else {
                 ShowWarningInvalidKey(state, eoh, ipsc->cAlphaFieldNames(10), ipsc->cAlphaArgs(10), "ASHRAE ClearSky");
                 desDayInput.solarModel = DesDaySolarModel::ASHRAE_ClearSky;

@@ -9738,8 +9738,8 @@ namespace SurfaceGeometry {
                                        s_ipsc->cAlphaArgs(1)));
             }
 
-            windowShadingControl.shadingControlType = static_cast<DataSurfaces::WindowShadingControlType>(
-                getEnumValue(WindowShadingControlTypeNamesUC, s_ipsc->cAlphaArgs(5)));
+            windowShadingControl.shadingControlType =
+                static_cast<DataSurfaces::WindowShadingControlType>(getEnumValue(WindowShadingControlTypeNamesUC, s_ipsc->cAlphaArgs(5)));
 
             if (windowShadingControl.ShadingDevice > 0) {
                 if (s_mat->materials(windowShadingControl.ShadingDevice)->group == Material::Group::Screen &&

@@ -754,8 +754,9 @@ namespace EMSManager {
                 thisEMSactuator.UniqueIDName = cAlphaArgs(2);
                 thisEMSactuator.ControlTypeName = cAlphaArgs(4);
 
-                auto found = state.dataRuntimeLang->EMSActuatorAvailableMap.find(
-                    std::make_tuple(Util::makeUPPER(thisEMSactuator.ComponentTypeName), Util::makeUPPER(thisEMSactuator.UniqueIDName), Util::makeUPPER(thisEMSactuator.ControlTypeName)));
+                auto found = state.dataRuntimeLang->EMSActuatorAvailableMap.find(std::make_tuple(Util::makeUPPER(thisEMSactuator.ComponentTypeName),
+                                                                                                 Util::makeUPPER(thisEMSactuator.UniqueIDName),
+                                                                                                 Util::makeUPPER(thisEMSactuator.ControlTypeName)));
                 if (found != state.dataRuntimeLang->EMSActuatorAvailableMap.end()) {
 
                     // SetupNodeSetPointAsActuators has NOT been called yet at this point
@@ -1041,8 +1042,9 @@ namespace EMSManager {
                 continue;
             }
 
-            auto found = s_lang->EMSActuatorAvailableMap.find(
-                std::make_tuple(Util::makeUPPER(actuatorUsed.ComponentTypeName), Util::makeUPPER(actuatorUsed.UniqueIDName), Util::makeUPPER(actuatorUsed.ControlTypeName)));
+            auto found = s_lang->EMSActuatorAvailableMap.find(std::make_tuple(Util::makeUPPER(actuatorUsed.ComponentTypeName),
+                                                                              Util::makeUPPER(actuatorUsed.UniqueIDName),
+                                                                              Util::makeUPPER(actuatorUsed.ControlTypeName)));
             if (found == s_lang->EMSActuatorAvailableMap.end()) {
                 if (reportErrors) {
                     ShowSevereError(state, format("Actuator {} = {} not found.", cCurrentModuleObject, actuatorUsed.Name));

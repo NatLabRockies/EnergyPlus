@@ -719,7 +719,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 // Set space flow fractions
                 // Infiltration equipment design level calculation method.
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow =
+                    static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     if (lNumericFieldBlanks(1)) {
@@ -1394,7 +1395,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Ventilation equipment design level calculation method
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow =
+                    static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     thisVentilation.DesignLevel = rNumericArgs(1);
@@ -1523,7 +1525,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (cAlphaArgs(5).empty()) {
                     thisVentilation.FanType = DataHeatBalance::VentilationType::Natural;
                 } else {
-                    thisVentilation.FanType = static_cast<DataHeatBalance::VentilationType>(getEnumValue(ventilationTypeNamesUC, Util::makeUPPER(cAlphaArgs(5))));
+                    thisVentilation.FanType =
+                        static_cast<DataHeatBalance::VentilationType>(getEnumValue(ventilationTypeNamesUC, Util::makeUPPER(cAlphaArgs(5))));
                     if (thisVentilation.FanType == DataHeatBalance::VentilationType::Invalid) {
                         ShowSevereError(state,
                                         format(R"({}{}="{}". invalid {}="{}".)",
@@ -2935,7 +2938,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 }
 
                 // Mixing equipment design level calculation method.
-                AirflowSpec flow = static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
+                AirflowSpec flow =
+                    static_cast<AirflowSpec>(getEnumValue(airflowSpecNamesUC, Util::makeUPPER(cAlphaArgs(4)))); // NOLINT(modernize-use-auto)
                 switch (flow) {
                 case AirflowSpec::FlowPerZone:
                     thisMixing.DesignLevel = rNumericArgs(1);
@@ -4262,8 +4266,8 @@ void GetRoomAirModelParameters(EnergyPlusData &state, bool &errFlag) // True if 
             state.dataRoomAir->AirModel(ZoneNum).ZoneName = state.dataIPShortCut->cAlphaArgs(2);
 
             // state.dataRoomAir->AirModel(ZoneNum).AirModelName = state.dataIPShortCut->cAlphaArgs(1);
-            state.dataRoomAir->AirModel(ZoneNum).AirModel =
-                static_cast<RoomAir::RoomAirModel>(getEnumValue(roomAirModelNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3)))); // is this arg1 or arg3?
+            state.dataRoomAir->AirModel(ZoneNum).AirModel = static_cast<RoomAir::RoomAirModel>(
+                getEnumValue(roomAirModelNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3)))); // is this arg1 or arg3?
             switch (state.dataRoomAir->AirModel(ZoneNum).AirModel) {
             case RoomAir::RoomAirModel::Mixing:
                 // nothing to do here actually

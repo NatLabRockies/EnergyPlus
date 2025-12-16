@@ -473,7 +473,8 @@ namespace FuelCellElectricGenerator {
                 }
                 fuelCell.AirSup.BlowerHeatLossFactor = NumArray(1);
 
-                fuelCell.AirSup.AirSupRateMode = static_cast<DataGenerators::AirSupRateMode>(getEnumValue(airSupRateModeNamesUC, Util::makeUPPER(AlphArray(4))));
+                fuelCell.AirSup.AirSupRateMode =
+                    static_cast<DataGenerators::AirSupRateMode>(getEnumValue(airSupRateModeNamesUC, Util::makeUPPER(AlphArray(4))));
                 if (fuelCell.AirSup.AirSupRateMode == DataGenerators::AirSupRateMode::Invalid) {
                     ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), AlphArray(4));
                     ErrorsFound = true;
@@ -507,13 +508,15 @@ namespace FuelCellElectricGenerator {
                     }
                 }
 
-                fuelCell.AirSup.IntakeRecoveryMode = static_cast<DataGenerators::RecoverMode>(getEnumValue(recoverModeNamesUC, Util::makeUPPER(AlphArray(7))));
+                fuelCell.AirSup.IntakeRecoveryMode =
+                    static_cast<DataGenerators::RecoverMode>(getEnumValue(recoverModeNamesUC, Util::makeUPPER(AlphArray(7))));
                 if (fuelCell.AirSup.IntakeRecoveryMode == DataGenerators::RecoverMode::Invalid) {
                     ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(7), AlphArray(7));
                     ErrorsFound = true;
                 }
 
-                fuelCell.AirSup.ConstituentMode = static_cast<DataGenerators::ConstituentMode>(getEnumValue(constituentModeNamesUC, Util::makeUPPER(AlphArray(8))));
+                fuelCell.AirSup.ConstituentMode =
+                    static_cast<DataGenerators::ConstituentMode>(getEnumValue(constituentModeNamesUC, Util::makeUPPER(AlphArray(8))));
                 if (fuelCell.AirSup.ConstituentMode == DataGenerators::ConstituentMode::Invalid) {
                     ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(8), AlphArray(8));
                     ErrorsFound = true;
@@ -659,7 +662,8 @@ namespace FuelCellElectricGenerator {
 
                 fuelCell.WaterSup.PmpPowerLossFactor = NumArray(1);
 
-                fuelCell.WaterSup.waterTempMode = static_cast<DataGenerators::WaterTempMode>(getEnumValue(waterTempModeNamesUC, Util::makeUPPER(AlphArray(4))));
+                fuelCell.WaterSup.waterTempMode =
+                    static_cast<DataGenerators::WaterTempMode>(getEnumValue(waterTempModeNamesUC, Util::makeUPPER(AlphArray(4))));
 
                 if (fuelCell.WaterSup.waterTempMode == DataGenerators::WaterTempMode::Invalid) {
                     ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), AlphArray(4));
@@ -848,7 +852,8 @@ namespace FuelCellElectricGenerator {
                                                         NodeInputManager::CompFluidStream::Secondary,
                                                         DataLoopNode::ObjectIsNotParent);
 
-                fuelCell.ExhaustHX.HXmodelMode = static_cast<DataGenerators::ExhaustGasHX>(getEnumValue(exhaustGasHXNamesUC, Util::makeUPPER(AlphArray(5))));
+                fuelCell.ExhaustHX.HXmodelMode =
+                    static_cast<DataGenerators::ExhaustGasHX>(getEnumValue(exhaustGasHXNamesUC, Util::makeUPPER(AlphArray(5))));
                 if (fuelCell.ExhaustHX.HXmodelMode == DataGenerators::ExhaustGasHX::Invalid) {
                     ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(5), AlphArray(5));
                     ErrorsFound = true;

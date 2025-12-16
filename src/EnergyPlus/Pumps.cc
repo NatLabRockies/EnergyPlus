@@ -395,8 +395,7 @@ void GetPumpInput(EnergyPlusData &state)
             thisPump.HasVFD = false;
         } else {
             thisPump.HasVFD = true;
-            thisPump.VFD.VFDControlType =
-                static_cast<ControlTypeVFD>(getEnumValue(controlTypeVFDNamesUC, state.dataIPShortCut->cAlphaArgs(7)));
+            thisPump.VFD.VFDControlType = static_cast<ControlTypeVFD>(getEnumValue(controlTypeVFDNamesUC, state.dataIPShortCut->cAlphaArgs(7)));
 
             switch (thisPump.VFD.VFDControlType) {
 
@@ -480,8 +479,7 @@ void GetPumpInput(EnergyPlusData &state)
         }
 
         if (!thisInput->lAlphaFieldBlanks(14)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(14)));
+            thisPump.powerSizingMethod = static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(14)));
             if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
@@ -648,8 +646,7 @@ void GetPumpInput(EnergyPlusData &state)
         }
 
         if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
+            thisPump.powerSizingMethod = static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
             if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
@@ -780,8 +777,7 @@ void GetPumpInput(EnergyPlusData &state)
         }
 
         if (!thisInput->lAlphaFieldBlanks(6)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(6)));
+            thisPump.powerSizingMethod = static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(6)));
             if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
@@ -924,8 +920,7 @@ void GetPumpInput(EnergyPlusData &state)
         }
 
         if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
+            thisPump.powerSizingMethod = static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
             if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",
@@ -1066,8 +1061,7 @@ void GetPumpInput(EnergyPlusData &state)
             }
         }
         if (!thisInput->lAlphaFieldBlanks(8)) {
-            thisPump.powerSizingMethod =
-                static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
+            thisPump.powerSizingMethod = static_cast<PowerSizingMethod>(getEnumValue(powerSizingMethodNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
             if (thisPump.powerSizingMethod == PowerSizingMethod::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\", sizing method type entered is invalid.  Use one of the key choice entries.",

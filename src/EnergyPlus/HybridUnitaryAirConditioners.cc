@@ -637,8 +637,8 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
                 // The original code never checks if this field is empty, but adding this check leads to a unit test failure.
                 // ShowSevereEmptyField(state, eoh, cAlphaFields(15));
                 // ErrorsFound = true;
-            } else if ((hybridUnitaryAC.firstFuel = static_cast<Constant::eFuel>(
-                            getEnumValue(Constant::eFuelNamesUC, Alphas(15)))) == Constant::eFuel::Invalid) {
+            } else if ((hybridUnitaryAC.firstFuel = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Alphas(15)))) ==
+                       Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(15), Alphas(15));
                 ErrorsFound = true;
             }

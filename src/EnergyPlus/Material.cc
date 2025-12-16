@@ -1520,8 +1520,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         // Load the material derived type from the input data.
 
-        matScreen->bmRefModel =
-            static_cast<ScreenBeamReflectanceModel>(getEnumValue(screenBeamReflectanceModelNamesUC, s_ipsc->cAlphaArgs(2)));
+        matScreen->bmRefModel = static_cast<ScreenBeamReflectanceModel>(getEnumValue(screenBeamReflectanceModelNamesUC, s_ipsc->cAlphaArgs(2)));
         if (matScreen->bmRefModel == ScreenBeamReflectanceModel::Invalid) {
             ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,

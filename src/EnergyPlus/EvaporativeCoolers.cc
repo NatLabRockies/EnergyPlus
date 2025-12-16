@@ -3557,7 +3557,8 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
             }
 
             if (!lAlphaBlanks(13)) {
-                thisZoneEvapUnit.EvapCooler_2_Type_Num = static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Util::makeUPPER(Alphas(13))));
+                thisZoneEvapUnit.EvapCooler_2_Type_Num =
+                    static_cast<EvapCoolerType>(getEnumValue(evapCoolerTypeNamesUC, Util::makeUPPER(Alphas(13))));
                 if (thisZoneEvapUnit.EvapCooler_2_Type_Num != EvapCoolerType::Invalid) {
                     thisZoneEvapUnit.EvapCooler_2_ObjectClassName = evapCoolerTypeNames[static_cast<int>(thisZoneEvapUnit.EvapCooler_2_Type_Num)];
                 } else {

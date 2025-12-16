@@ -2247,9 +2247,9 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumBranches; ++BranchNum) {
             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
-                DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(
-                    EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                                             Util::makeUPPER(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf)));
+                DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumValue(
+                    BranchNodeConnections::ConnectionObjectTypeNamesUC,
+                    Util::makeUPPER(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf)));
                 std::string &NameOfComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                 // Get complete list of components for complex branches
                 if (BranchNodeConnections::IsParentObject(state, TypeOfComp, NameOfComp)) {
@@ -2307,7 +2307,8 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                     DataLoopNode::ConnectionObjectType TypeOfSubComp = static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumValue(
                         BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                        Util::makeUPPER(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf)));
+                        Util::makeUPPER(
+                            state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf)));
                     std::string &NameOfSubComp =
                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).Name;
                     if (BranchNodeConnections::IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
@@ -4612,12 +4613,12 @@ void MatchPlantSys(EnergyPlusData &state,
 
 void FindDemandSideMatch(EnergyPlusData &state,
                          std::string &CompType, // Inlet node of the component to find the match of
-                         std::string &CompName,   // Outlet node of the component to find the match of
-                         bool &MatchFound,            // Set to .TRUE. when a match is found
-                         int &MatchLoopType,          // Loop number of the match
-                         int &MatchLoop,              // Loop number of the match
-                         int &MatchBranch,            // Branch number of the match
-                         int &MatchComp               // Component number of the match
+                         std::string &CompName, // Outlet node of the component to find the match of
+                         bool &MatchFound,      // Set to .TRUE. when a match is found
+                         int &MatchLoopType,    // Loop number of the match
+                         int &MatchLoop,        // Loop number of the match
+                         int &MatchBranch,      // Branch number of the match
+                         int &MatchComp         // Component number of the match
 )
 {
 

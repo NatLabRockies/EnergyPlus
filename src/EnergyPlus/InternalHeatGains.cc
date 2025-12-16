@@ -2226,8 +2226,7 @@ namespace InternalHeatGains {
                         ErrorsFound = ErrorsFound || (thisZoneITEq.Class == ITEClass::Invalid);
 
                         // Air and supply inlet connections
-                        thisZoneITEq.AirConnectionType =
-                            static_cast<ITEInletConnection>(getEnumValue(ITEInletConnectionNamesUC, IHGAlphas(11)));
+                        thisZoneITEq.AirConnectionType = static_cast<ITEInletConnection>(getEnumValue(ITEInletConnectionNamesUC, IHGAlphas(11)));
                         if (thisZoneITEq.AirConnectionType == ITEInletConnection::RoomAirModel) {
                             // ZoneITEq(Loop).AirConnectionType = ITEInletConnection::RoomAirModel;
                             ShowWarningError(state,

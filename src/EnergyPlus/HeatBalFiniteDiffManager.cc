@@ -176,8 +176,7 @@ namespace HeatBalFiniteDiffManager {
 
             if (!s_ipsc->lAlphaFieldBlanks(1)) {
                 {
-                    s_hbfd->CondFDSchemeType =
-                        static_cast<CondFDScheme>(getEnumValue(CondFDSchemeTypeNamesUC, s_ipsc->cAlphaArgs(1)));
+                    s_hbfd->CondFDSchemeType = static_cast<CondFDScheme>(getEnumValue(CondFDSchemeTypeNamesUC, s_ipsc->cAlphaArgs(1)));
                     if (s_hbfd->CondFDSchemeType == CondFDScheme::Invalid) {
                         ShowSevereError(state,
                                         format("{}: invalid {} entered={}, must match CrankNicholsonSecondOrder or FullyImplicitFirstOrder.",

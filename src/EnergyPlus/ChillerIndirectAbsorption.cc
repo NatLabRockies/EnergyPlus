@@ -447,7 +447,8 @@ void GetIndirectAbsorberInput(EnergyPlusData &state)
         }
 
         {
-            thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(6))));
+            thisChiller.FlowMode =
+                static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(6))));
             if (thisChiller.FlowMode == DataPlant::FlowMode::Invalid) {
                 ShowSevereError(state,
                                 format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));

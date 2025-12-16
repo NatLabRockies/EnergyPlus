@@ -2576,9 +2576,9 @@ namespace Curve {
                 };
                 NormalizationMethod normalizeMethod = NM_NONE;
                 if (fields.count("normalization_method") != 0u) {
-                    if (Util::SameString(fields.at("normalization_method").get<std::string>(), "DIVISORONLY")) {
+                    if (equali(fields.at("normalization_method").get<std::string>(), "DIVISORONLY")) {
                         normalizeMethod = NM_DIVISOR_ONLY;
-                    } else if (Util::SameString(fields.at("normalization_method").get<std::string>(), "AUTOMATICWITHDIVISOR")) {
+                    } else if (equali(fields.at("normalization_method").get<std::string>(), "AUTOMATICWITHDIVISOR")) {
                         normalizeMethod = NM_AUTO_WITH_DIVISOR;
                     }
                 }

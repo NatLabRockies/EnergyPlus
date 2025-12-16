@@ -197,7 +197,8 @@ namespace BoilerSteam {
             thisBoiler.Name = state.dataIPShortCut->cAlphaArgs(1);
 
             // Validate fuel type input
-            thisBoiler.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(2))));
+            thisBoiler.FuelType =
+                static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(2))));
 
             // INPUTS from the IDF file
             thisBoiler.BoilerMaxOperPress = state.dataIPShortCut->rNumericArgs(1);

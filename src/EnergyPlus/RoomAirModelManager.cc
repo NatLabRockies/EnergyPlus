@@ -1038,8 +1038,7 @@ namespace RoomAir {
                     ShowSevereEmptyField(state, eoh, ipsc->cAlphaFieldNames(3));
                     ErrorsFound = true;
                 }
-            } else if ((zoneCV.VforComfort = static_cast<Comfort>(getEnumValue(comfortNamesUC, ipsc->cAlphaArgs(3)))) ==
-                       Comfort::Invalid) {
+            } else if ((zoneCV.VforComfort = static_cast<Comfort>(getEnumValue(comfortNamesUC, ipsc->cAlphaArgs(3)))) == Comfort::Invalid) {
                 ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3));
                 ErrorsFound = true;
             }
@@ -1554,8 +1553,8 @@ namespace RoomAir {
                 int numGainsFound = 0;
                 for (int gainsLoop = 1; gainsLoop <= numInputGains; ++gainsLoop) {
                     auto &intGain = roomAFNZoneNode.IntGain(gainsLoop);
-                    intGain.type = static_cast<DataHeatBalance::IntGainType>(
-                        getEnumValue(DataHeatBalance::IntGainTypeNamesUC, ipsc->cAlphaArgs(gainsLoop * 2)));
+                    intGain.type =
+                        static_cast<DataHeatBalance::IntGainType>(getEnumValue(DataHeatBalance::IntGainTypeNamesUC, ipsc->cAlphaArgs(gainsLoop * 2)));
 
                     if (intGain.type == DataHeatBalance::IntGainType::Invalid) {
                         ShowSevereInvalidKey(state, eoh, ipsc->cAlphaFieldNames(gainsLoop * 2), ipsc->cAlphaArgs(gainsLoop * 2));

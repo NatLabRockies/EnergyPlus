@@ -772,7 +772,8 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
 
         if (s_ipsc->lAlphaFieldBlanks(13)) {
             tariff.buyOrSell = BuySell::BuyFromUtility;
-        } else if ((tariff.buyOrSell = static_cast<BuySell>(getEnumValue(buySellNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(13))))) == BuySell::Invalid) {
+        } else if ((tariff.buyOrSell = static_cast<BuySell>(getEnumValue(buySellNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(13))))) ==
+                   BuySell::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(13), s_ipsc->cAlphaArgs(13));
             ErrorsFound = true;
         }

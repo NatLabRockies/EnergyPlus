@@ -1133,7 +1133,7 @@ namespace HVACHXAssistedCoolingCoil {
     }
 
     Real64 GetCoilCapacity(EnergyPlusData &state,
-                           std::string &CoilType, // must match coil types in this module
+                           std::string &CoilType,       // must match coil types in this module
                            std::string const &CoilName, // must match coil names for the coil type
                            bool &ErrorsFound            // set to true if problem
     )
@@ -1342,7 +1342,7 @@ namespace HVACHXAssistedCoolingCoil {
     }
 
     int GetCoilWaterInletNode(EnergyPlusData &state,
-                              std::string_view CoilType, // must match coil types in this module
+                              std::string_view CoilType,   // must match coil types in this module
                               std::string const &CoilName, // must match coil names for the coil type
                               bool &ErrorsFound            // set to true if problem
     )
@@ -1628,7 +1628,7 @@ namespace HVACHXAssistedCoolingCoil {
     }
 
     Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
-                                   std::string &CoilType,   // must match coil types in this module
+                                   std::string &CoilType,       // must match coil types in this module
                                    std::string const &CoilName, // must match coil names for the coil type
                                    bool &ErrorsFound            // set to true if problem
     )
@@ -1691,7 +1691,7 @@ namespace HVACHXAssistedCoolingCoil {
     }
 
     Real64 GetHXCoilAirFlowRate(EnergyPlusData &state,
-                                std::string &CoilType, // must match coil types in this module
+                                std::string &CoilType,       // must match coil types in this module
                                 std::string const &CoilName, // must match coil names for the coil type
                                 bool &ErrorsFound            // set to true if problem
     )
@@ -1746,8 +1746,8 @@ namespace HVACHXAssistedCoolingCoil {
     }
 
     bool VerifyHeatExchangerParent(EnergyPlusData &state,
-                                   std::string &HXType, // must match coil types in this module
-                                   std::string const &HXName  // must match coil names for the coil type
+                                   std::string &HXType,      // must match coil types in this module
+                                   std::string const &HXName // must match coil names for the coil type
     )
     {
 

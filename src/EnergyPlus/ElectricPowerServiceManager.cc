@@ -4535,7 +4535,8 @@ ElectricTransformer::ElectricTransformer(EnergyPlusData &state, std::string cons
         tempRise_ = s_ipsc->rNumericArgs(4);
         eddyFrac_ = s_ipsc->rNumericArgs(5);
 
-        performanceInputMode_ = static_cast<TransformerPerformanceInput>(getEnumValue(transformerPerformanceInputNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))));
+        performanceInputMode_ =
+            static_cast<TransformerPerformanceInput>(getEnumValue(transformerPerformanceInputNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(6))));
         if (performanceInputMode_ == TransformerPerformanceInput::Invalid) {
             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
             errorsFound = true;

@@ -1589,7 +1589,7 @@ namespace SteamCoils {
     }
 
     Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
-                                   std::string &CoilType, // must match coil types in this module
+                                   std::string &CoilType,       // must match coil types in this module
                                    std::string const &CoilName, // must match coil names for the coil type
                                    bool &ErrorsFound            // set to true if problem
     )
@@ -1761,7 +1761,7 @@ namespace SteamCoils {
     }
 
     int GetCoilAirOutletNode(EnergyPlusData &state,
-                             std::string &CoilType,       // must match coil types in this module
+                             std::string &CoilType,             // must match coil types in this module
                              std::string const &CoilName,       // must match coil names for the coil type
                              [[maybe_unused]] bool &ErrorsFound // set to true if problem
     )
@@ -1844,7 +1844,7 @@ namespace SteamCoils {
     }
 
     int GetCoilSteamInletNode(EnergyPlusData &state,
-                              std::string &CoilType, // must match coil types in this module
+                              std::string &CoilType,       // must match coil types in this module
                               std::string const &CoilName, // must match coil names for the coil type
                               bool &ErrorsFound            // set to true if problem
     )
@@ -1929,7 +1929,7 @@ namespace SteamCoils {
     }
 
     int GetCoilSteamOutletNode(EnergyPlusData &state,
-                               std::string &CoilType,   // must match coil types in this module
+                               std::string &CoilType,       // must match coil types in this module
                                std::string const &CoilName, // must match coil names for the coil type
                                bool &ErrorsFound            // set to true if problem
     )
@@ -1976,7 +1976,7 @@ namespace SteamCoils {
     }
 
     Real64 GetCoilCapacity(EnergyPlusData &state,
-                           std::string &CoilType, // must match coil types in this module
+                           std::string &CoilType,       // must match coil types in this module
                            std::string const &CoilName, // must match coil names for the coil type
                            bool &ErrorsFound            // set to true if problem
     )
@@ -2057,7 +2057,7 @@ namespace SteamCoils {
     }
 
     int GetSteamCoilControlNodeNum(EnergyPlusData &state,
-                                   std::string &CoilType, // must match coil types in this module
+                                   std::string &CoilType,       // must match coil types in this module
                                    std::string const &CoilName, // must match coil names for the coil type
                                    bool &ErrorFlag              // set to true if problem
     )
@@ -2107,7 +2107,7 @@ namespace SteamCoils {
     }
 
     int GetSteamCoilAvailScheduleIndex(EnergyPlusData &state,
-                                       std::string &CoilType, // must match coil types in this module
+                                       std::string &CoilType,       // must match coil types in this module
                                        std::string const &CoilName, // must match coil names for the coil type
                                        bool &ErrorsFound            // set to true if problem
     )

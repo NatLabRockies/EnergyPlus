@@ -614,8 +614,8 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
         }
 
         if (NumAlphas > 16) {
-            thisChiller.CondenserFlowControl =
-                static_cast<DataPlant::CondenserFlowControl>(getEnumValue(DataPlant::CondenserFlowControlNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(17))));
+            thisChiller.CondenserFlowControl = static_cast<DataPlant::CondenserFlowControl>(
+                getEnumValue(DataPlant::CondenserFlowControlNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(17))));
         } else {
             thisChiller.CondenserFlowControl = DataPlant::CondenserFlowControl::ConstantFlow;
         }

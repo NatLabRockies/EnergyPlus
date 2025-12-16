@@ -401,8 +401,7 @@ void GetDemandManagerListInput(EnergyPlusData &state)
             thisDemandMgrList.History = 0.0;
 
             // Validate Demand Manager Priority
-            thisDemandMgrList.ManagerPriority =
-                static_cast<ManagePriorityType>(getEnumValue(ManagePriorityNamesUC, s_ipsc->cAlphaArgs(6)));
+            thisDemandMgrList.ManagerPriority = static_cast<ManagePriorityType>(getEnumValue(ManagePriorityNamesUC, s_ipsc->cAlphaArgs(6)));
             ErrorsFound = ErrorsFound || (thisDemandMgrList.ManagerPriority == ManagePriorityType::Invalid);
 
             // Get DEMAND MANAGER Type and Name pairs

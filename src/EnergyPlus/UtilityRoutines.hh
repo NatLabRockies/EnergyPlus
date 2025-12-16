@@ -438,7 +438,7 @@ namespace Util {
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
     // Container needs and operator[i] and elements need Name
-    inline int FindItemInList(std::string_view const String, Container const &ListOfItems, int const NumItems, bool CaseInsensitive=false)
+    inline int FindItemInList(std::string_view const String, Container const &ListOfItems, int const NumItems, bool CaseInsensitive = false)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
             if (String == ListOfItems[i].Name) {
@@ -692,22 +692,22 @@ namespace Util {
     /// </summary>
     /// <param name="s">First string</param>
     /// <param name="t">Second String</param>
-    /// <param name="replaceString">If they match, but have different cases, then replace the first string with the second so later checks are faster</param>
-    /// <returns>true if they are equal each other, false if they are not</returns>
+    /// <param name="replaceString">If they match, but have different cases, then replace the first string with the second so later checks are
+    /// faster</param> <returns>true if they are equal each other, false if they are not</returns>
     inline bool SameString(std::string &s, std::string_view const t, bool replaceString = true)
     {
-        //different sizes, can't be the same string
+        // different sizes, can't be the same string
         if (s.length() != t.length()) {
-            //Strings are different lengths so they can't be equal
+            // Strings are different lengths so they can't be equal
             return false;
         } else if (s.length() == 0) {
-            //Two empy strings, so they're equal
+            // Two empy strings, so they're equal
             return true;
         } else if (s[s.length() / 2] == t[t.length() / 2] && s[s.length() / 3] == t[t.length() / 3] && s == t) {
             // the strings are similar enough to do more intensive checks
             // case sensitive comparison (fastest)
             return true;
-        } else if (std::tolower(s[s.length() / 2]) != std::tolower(t[t.length()/2])) {
+        } else if (std::tolower(s[s.length() / 2]) != std::tolower(t[t.length() / 2])) {
             // fairly common scenario, middle character is different so check just that for a quick exit
             return false;
         } else if (equali(s, t)) {

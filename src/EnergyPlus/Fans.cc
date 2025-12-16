@@ -801,7 +801,8 @@ void GetFanInput(EnergyPlusData &state)
         fan->motorSizingFactor = rNumericArgs(15); // Motor sizing factor [-]
         fan->motorInAirFrac = rNumericArgs(16);    // Fraction of fan and motor losses to airstream [-]
 
-        fan->vfdEffType = static_cast<VFDEffType>(getEnumValue(vfdEffTypeNamesUC, Util::makeUPPER(cAlphaArgs(5)))); // VFD efficiency type [Speed or Power
+        fan->vfdEffType =
+            static_cast<VFDEffType>(getEnumValue(vfdEffTypeNamesUC, Util::makeUPPER(cAlphaArgs(5)))); // VFD efficiency type [Speed or Power
 
         fan->vfdMaxOutPower = rNumericArgs(17);  // VFD maximum output power [W, autosizable]
         fan->vfdSizingFactor = rNumericArgs(18); // VFD sizing factor [-]

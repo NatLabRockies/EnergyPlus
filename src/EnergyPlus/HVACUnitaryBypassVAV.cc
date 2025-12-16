@@ -1374,8 +1374,7 @@ namespace HVACUnitaryBypassVAV {
                         Real64 FluidDensity =
                             state.dataPlnt->PlantLoop(cBVAV.plantLoc.loopNum).glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                         cBVAV.MaxHeatCoilFluidFlow =
-                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, cBVAV.HeatCoilName, ErrorsFound) *
-                            FluidDensity;
+                            WaterCoils::GetCoilMaxWaterFlowRate(state, coilHeatingWater, cBVAV.HeatCoilName, ErrorsFound) * FluidDensity;
                     }
 
                 } else if (cBVAV.HeatCoilType == HVAC::CoilType::HeatingSteam) {

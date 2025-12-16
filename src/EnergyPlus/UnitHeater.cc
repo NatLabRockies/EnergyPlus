@@ -104,7 +104,7 @@ namespace UnitHeater {
     // with the unit operation schedule to determine what the unit heater actually
     // does at a given point in time.
     std::string coilHeatingWater = "Coil:Heating:Water";
- 
+
     // REFERENCES:
     // ASHRAE Systems and Equipment Handbook (SI), 1996. pp. 31.3-31.8
     // Rick Strand's unit heater module which was based upon Fred Buhl's fan coil

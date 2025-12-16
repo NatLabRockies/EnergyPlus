@@ -5370,10 +5370,10 @@ namespace HeatBalanceManager {
 
             windowThermalModel.CalculationStandard =
                 static_cast<TARCOGGassesParams::Stdrd>(getEnumValue(TARCOGGassesParams::stdrdNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
-            windowThermalModel.ThermalModel =
-                static_cast<TARCOGParams::TARCOGThermalModel>(getEnumValue(TARCOGParams::thermalModelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
-            windowThermalModel.DeflectionModel =
-                static_cast<TARCOGParams::DeflectionCalculation>(getEnumValue(TARCOGParams::deflectionCalculationNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
+            windowThermalModel.ThermalModel = static_cast<TARCOGParams::TARCOGThermalModel>(
+                getEnumValue(TARCOGParams::thermalModelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
+            windowThermalModel.DeflectionModel = static_cast<TARCOGParams::DeflectionCalculation>(
+                getEnumValue(TARCOGParams::deflectionCalculationNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(4))));
 
             if (windowThermalModel.DeflectionModel == TARCOGParams::DeflectionCalculation::TEMPERATURE) {
                 windowThermalModel.VacuumPressureLimit = s_ipsc->rNumericArgs(2);

@@ -2352,8 +2352,7 @@ bool getWaterHeaterMixedInputs(EnergyPlusData &state)
         }
 
         // Validate Heater Control Type
-        Tank.ControlType =
-            static_cast<HeaterControlMode>(getEnumValue(HeaterControlModeNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
+        Tank.ControlType = static_cast<HeaterControlMode>(getEnumValue(HeaterControlModeNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
         switch (Tank.ControlType) {
         case HeaterControlMode::Cycle: {
             Tank.MinCapacity = Tank.MaxCapacity;
@@ -2500,8 +2499,7 @@ bool getWaterHeaterMixedInputs(EnergyPlusData &state)
 
         Tank.OnCycParaFracToTank = state.dataIPShortCut->rNumericArgs(12);
 
-        Tank.AmbientTempIndicator =
-            static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
+        Tank.AmbientTempIndicator = static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(8)));
         switch (Tank.AmbientTempIndicator) {
 
         case WTTAmbientTemp::Schedule: {
@@ -2715,8 +2713,7 @@ bool getWaterHeaterMixedInputs(EnergyPlusData &state)
         }
 
         if (!state.dataIPShortCut->lAlphaFieldBlanks(18)) {
-            Tank.SourceSideControlMode =
-                static_cast<SourceSideControl>(getEnumValue(SourceSideControlNamesUC, state.dataIPShortCut->cAlphaArgs(18)));
+            Tank.SourceSideControlMode = static_cast<SourceSideControl>(getEnumValue(SourceSideControlNamesUC, state.dataIPShortCut->cAlphaArgs(18)));
             if (Tank.SourceSideControlMode == SourceSideControl::Invalid) {
                 ShowSevereError(state,
                                 format("{} = {}:  Invalid Control Mode entered={}",
@@ -2846,8 +2843,7 @@ bool getWaterHeaterStratifiedInput(EnergyPlusData &state)
         }
 
         // Validate Heater Priority Control
-        Tank.StratifiedControlMode =
-            static_cast<PriorityControlMode>(getEnumValue(PriorityControlModeNamesUC, state.dataIPShortCut->cAlphaArgs(4)));
+        Tank.StratifiedControlMode = static_cast<PriorityControlMode>(getEnumValue(PriorityControlModeNamesUC, state.dataIPShortCut->cAlphaArgs(4)));
         if (Tank.StratifiedControlMode == PriorityControlMode::Invalid) {
             ShowSevereError(state,
                             format("{} = {}:  Invalid Heater Priority Control entered={}",
@@ -3011,8 +3007,7 @@ bool getWaterHeaterStratifiedInput(EnergyPlusData &state)
         Tank.OnCycParaFracToTank = state.dataIPShortCut->rNumericArgs(16);
         Tank.OnCycParaHeight = state.dataIPShortCut->rNumericArgs(17);
 
-        Tank.AmbientTempIndicator =
-            static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(10)));
+        Tank.AmbientTempIndicator = static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(10)));
         switch (Tank.AmbientTempIndicator) {
 
         case WTTAmbientTemp::Schedule: {
@@ -3292,8 +3287,7 @@ bool getWaterHeaterStratifiedInput(EnergyPlusData &state)
         }
 
         // Validate inlet mode
-        Tank.InletMode =
-            static_cast<InletPositionMode>(getEnumValue(InletPositionModeNamesUC, state.dataIPShortCut->cAlphaArgs(20)));
+        Tank.InletMode = static_cast<InletPositionMode>(getEnumValue(InletPositionModeNamesUC, state.dataIPShortCut->cAlphaArgs(20)));
 
         Tank.Nodes = state.dataIPShortCut->rNumericArgs(32);
         int specifiedNodes = 0;
@@ -3327,8 +3321,7 @@ bool getWaterHeaterStratifiedInput(EnergyPlusData &state)
         Tank.SetupStratifiedNodes(state);
 
         if (!state.dataIPShortCut->lAlphaFieldBlanks(21)) {
-            Tank.SourceSideControlMode =
-                static_cast<SourceSideControl>(getEnumValue(SourceSideControlNamesUC, state.dataIPShortCut->cAlphaArgs(21)));
+            Tank.SourceSideControlMode = static_cast<SourceSideControl>(getEnumValue(SourceSideControlNamesUC, state.dataIPShortCut->cAlphaArgs(21)));
             if (Tank.SourceSideControlMode == SourceSideControl::Invalid) {
                 ShowSevereError(state,
                                 format("{} = {}:  Invalid Control Mode entered={}",
@@ -3453,8 +3446,7 @@ bool getWaterTankMixedInput(EnergyPlusData &state)
         Tank.OnCycParaFuelType = Constant::eFuel::Electricity;
         Tank.OnCycParaFracToTank = 0.0;
 
-        Tank.AmbientTempIndicator =
-            static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
+        Tank.AmbientTempIndicator = static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, state.dataIPShortCut->cAlphaArgs(3)));
         switch (Tank.AmbientTempIndicator) {
 
         case WTTAmbientTemp::Schedule: {
@@ -3708,8 +3700,7 @@ bool getWaterTankStratifiedInput(EnergyPlusData &state, std::string objectType)
             Tank.HeightWasAutoSized = true;
         }
 
-        Tank.Shape =
-            static_cast<TankShape>(getEnumValue(TankShapeNamesUC, Util::makeUPPER(fields.at("tank_shape").get<std::string>())));
+        Tank.Shape = static_cast<TankShape>(getEnumValue(TankShapeNamesUC, Util::makeUPPER(fields.at("tank_shape").get<std::string>())));
         switch (Tank.Shape) {
         case TankShape::HorizCylinder:
         case TankShape::VertCylinder: {
@@ -3844,8 +3835,8 @@ bool getWaterTankStratifiedInput(EnergyPlusData &state, std::string objectType)
         Tank.OnCycParaFracToTank = 0.0;
         Tank.OnCycParaHeight = 0.0;
 
-        Tank.AmbientTempIndicator = static_cast<WTTAmbientTemp>(
-            getEnumValue(TankAmbientTempNamesUC, fields.at("ambient_temperature_indicator").get<std::string>()));
+        Tank.AmbientTempIndicator =
+            static_cast<WTTAmbientTemp>(getEnumValue(TankAmbientTempNamesUC, fields.at("ambient_temperature_indicator").get<std::string>()));
         auto const ambientTempSched = fields.find("ambient_temperature_schedule_name");
         std::string fieldName;
         switch (Tank.AmbientTempIndicator) {
@@ -4076,8 +4067,7 @@ bool getWaterTankStratifiedInput(EnergyPlusData &state, std::string objectType)
         }
 
         // Validate inlet mode
-        Tank.InletMode =
-            static_cast<InletPositionMode>(getEnumValue(InletPositionModeNamesUC, fields.at("inlet_mode").get<std::string>()));
+        Tank.InletMode = static_cast<InletPositionMode>(getEnumValue(InletPositionModeNamesUC, fields.at("inlet_mode").get<std::string>()));
 
         Tank.Nodes = state.dataInputProcessing->inputProcessor->getRealFieldValue(fields, schemaProps, "number_of_nodes");
         Tank.AdditionalCond =

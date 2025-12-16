@@ -1904,8 +1904,8 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
     std::string &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
     for (auto const &classToInput : classesToInput) {
         cCurrentModuleObject = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
-        DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, cCurrentModuleObject));
+        DataLoopNode::ConnectionObjectType objType =
+            static_cast<DataLoopNode::ConnectionObjectType>(getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, cCurrentModuleObject));
         int numPLHP = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
         if (numPLHP > 0) {
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(cCurrentModuleObject);
@@ -2042,8 +2042,7 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 constexpr std::array<std::string_view, static_cast<int>(ControlType::Num)> PLHPCtrlTypeNamesUC = {"SETPOINT", "LOAD"};
                 auto const controlType = fields.find("control_type");
                 if (controlType != fields.end()) {
-                    thisPLHP.sysControlType =
-                        static_cast<ControlType>(getEnumValue(PLHPCtrlTypeNamesUC, controlType.value().get<std::string>()));
+                    thisPLHP.sysControlType = static_cast<ControlType>(getEnumValue(PLHPCtrlTypeNamesUC, controlType.value().get<std::string>()));
                 } else {
                     thisPLHP.sysControlType = ControlType::Load;
                 }
@@ -2057,8 +2056,8 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                     "NONE", "TIMED", "ONDEMAND", "TIMEDEMPIRICAL"};
                 auto const defrostControlStrategy = fields.find("heat_pump_defrost_control");
                 if (defrostControlStrategy != fields.end()) {
-                    thisPLHP.defrostStrategy = static_cast<DefrostControl>(
-                        getEnumValue(PLHPDefrostTypeNamesUC, defrostControlStrategy.value().get<std::string>()));
+                    thisPLHP.defrostStrategy =
+                        static_cast<DefrostControl>(getEnumValue(PLHPDefrostTypeNamesUC, defrostControlStrategy.value().get<std::string>()));
                 } else {
                     thisPLHP.defrostStrategy = DefrostControl::None;
                 }
@@ -3349,8 +3348,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
     for (auto &classToInput : classesToInput) {
         cCurrentModuleObject = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
 
-        DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, cCurrentModuleObject));
+        DataLoopNode::ConnectionObjectType objType =
+            static_cast<DataLoopNode::ConnectionObjectType>(getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, cCurrentModuleObject));
 
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(cCurrentModuleObject);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
@@ -3465,8 +3464,7 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
             }
 
             // A8 flow mode
-            thisPLHP.flowMode = static_cast<DataPlant::FlowMode>(
-                getEnumValue(DataPlant::FlowModeNamesUC, fields.at("flow_mode").get<std::string>()));
+            thisPLHP.flowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, fields.at("flow_mode").get<std::string>()));
 
             // A9 outdoor_air_temperature_curve_input_variable
             std::string oaTempCurveInputVar = Util::makeUPPER(fields.at("outdoor_air_temperature_curve_input_variable").get<std::string>());
@@ -3817,8 +3815,8 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                 }
                 auto controlType = fields.find("control_type");
                 if (controlType != fields.end()) {
-                    thisAWHP.controlType = static_cast<CompressorControlType>(
-                        getEnumValue(AWHPControlTypeUC, fields.at("control_type").get<std::string>()));
+                    thisAWHP.controlType =
+                        static_cast<CompressorControlType>(getEnumValue(AWHPControlTypeUC, fields.at("control_type").get<std::string>()));
                 } else {
                     thisAWHP.controlType = CompressorControlType::VariableSpeed;
                 }
@@ -3954,8 +3952,8 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                     "NONE", "TIMED", "ONDEMAND", "TIMEDEMPIRICAL"};
                 auto const defrostControlStrategy = fields.find("heat_pump_defrost_control");
                 if (defrostControlStrategy != fields.end()) {
-                    thisAWHP.defrostStrategy = static_cast<DefrostControl>(
-                        getEnumValue(PLHPDefrostTypeNamesUC, defrostControlStrategy.value().get<std::string>()));
+                    thisAWHP.defrostStrategy =
+                        static_cast<DefrostControl>(getEnumValue(PLHPDefrostTypeNamesUC, defrostControlStrategy.value().get<std::string>()));
                 } else {
                     thisAWHP.defrostStrategy = DefrostControl::None;
                 }
