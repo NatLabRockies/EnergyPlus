@@ -168,7 +168,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
     // Now check output tables to ensure that we also get the right units etc
     const std::string compType = "Coil:Cooling:DX:CurveFit:OperatingMode";
     const std::string compName = thisMode.name;
-    EXPECT_EQ( Util::makeUPPER(compName), "COIL COOLING DX CURVE FIT OPERATING MODE 1");
+    EXPECT_EQ(Util::makeUPPER(compName), "COIL COOLING DX CURVE FIT OPERATING MODE 1");
 
     struct TestQuery
     {

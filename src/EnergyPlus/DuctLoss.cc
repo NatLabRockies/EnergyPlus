@@ -820,7 +820,8 @@ namespace DuctLoss {
                 if (thisDuctLoss.LossType == DuctLossType::Leakage) {
                     AFNNodeNum1 = state.afn->AirflowNetworkLinkageData(thisDuctLoss.LinkageNum).NodeNums[0];
                     AFNNodeNum2 = state.afn->AirflowNetworkLinkageData(thisDuctLoss.LinkageNum).NodeNums[1];
-                    if (!state.afn->DisSysNodeData(AFNNodeNum1).EPlusName.empty() && !equali(state.afn->DisSysNodeData(AFNNodeNum1).EPlusType, "ZONE")) {
+                    if (!state.afn->DisSysNodeData(AFNNodeNum1).EPlusName.empty() &&
+                        !equali(state.afn->DisSysNodeData(AFNNodeNum1).EPlusType, "ZONE")) {
                         NodeNum1 = Util::FindItemInList(state.afn->DisSysNodeData(AFNNodeNum1).EPlusName, state.dataLoopNodes->NodeID);
                         // Zone inlet
                         state.afn->DisSysNodeData(AFNNodeNum1).EPlusNodeNum = NodeNum1;
