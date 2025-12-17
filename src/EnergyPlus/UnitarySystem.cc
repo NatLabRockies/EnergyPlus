@@ -5125,11 +5125,9 @@ namespace UnitarySystems {
                     }
                     std::string tempCoilType = HVAC::cAllCoilTypes(ActualCoolCoilType);
                     this->m_coolingCoilAvailSched = WaterCoils::GetWaterCoilAvailSched(state, tempCoilType, HXCoilName, errFlag);
-                    this->MaxCoolCoilFluidFlow =
-                        WaterCoils::GetCoilMaxWaterFlowRate(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName, errFlag);
+                    this->MaxCoolCoilFluidFlow = WaterCoils::GetCoilMaxWaterFlowRate(state, tempCoilType, HXCoilName, errFlag);
                     // Get the Cooling Coil water Inlet Node number
-                    this->CoolCoilFluidInletNode =
-                        WaterCoils::GetCoilWaterInletNode(state, std::string(HVAC::cAllCoilTypes(ActualCoolCoilType)), HXCoilName, errFlag);
+                    this->CoolCoilFluidInletNode = WaterCoils::GetCoilWaterInletNode(state, tempCoilType, HXCoilName, errFlag);
                     if (errFlag) {
                         ShowContinueError(state, format("Occurs in {} = {}", cCurrentModuleObject, thisObjectName));
                         errFlag = false;
