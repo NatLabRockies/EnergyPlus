@@ -1361,8 +1361,8 @@ void GetAirPathData(EnergyPlusData &state)
             CompType_Num = GetOACompTypeNum(state, OASysNum, OACompNum);
             if (CompType_Num == CompType::WaterCoil_DetailedCool || CompType_Num == CompType::WaterCoil_SimpleHeat ||
                 CompType_Num == CompType::WaterCoil_Cooling) {
-                WaterCoilNodeNum =
-                    GetCoilWaterInletNode(state, GetOACompType(state, OASysNum, OACompNum), GetOACompName(state, OASysNum, OACompNum), ErrorsFound);
+                std::string ctype = GetOACompType(state, OASysNum, OACompNum);
+                WaterCoilNodeNum = GetCoilWaterInletNode(state, ctype, GetOACompName(state, OASysNum, OACompNum), ErrorsFound);
                 CheckCoilWaterInletNode(state, WaterCoilNodeNum, NodeNotFound);
                 UnitarySystems::isWaterCoilHeatRecoveryType(state, WaterCoilNodeNum, NodeNotFound);
                 if (NodeNotFound) {
