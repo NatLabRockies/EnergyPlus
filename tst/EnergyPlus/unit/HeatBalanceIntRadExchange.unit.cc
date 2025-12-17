@@ -574,9 +574,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest)
                           "radiant or solar enclosure name."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(1).Name, "Enclosure 1");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(2).Name, "Enclosure 2");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(3).Name, "Space 3");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(1).Name), "ENCLOSURE 1");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(2).Name), "ENCLOSURE 2");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(3).Name), "SPACE 3");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest2)
@@ -673,9 +673,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest2)
                                                        "6\" did not find a matching radiant or solar enclosure name."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(1).Name, "PERIMETER ZONES");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(2).Name, "Enclosure 2");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(3).Name, "Space 3");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(1).Name), "PERIMETER ZONES");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(2).Name), "ENCLOSURE 2");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(3).Name), "SPACE 3");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest3)
@@ -775,9 +775,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest3)
                           "radiant or solar enclosure name."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(1).Name, "Enclosure 1");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(2).Name, "Enclosure 2");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(3).Name, "Space 3");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(1).Name), "ENCLOSURE 1");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(2).Name), "ENCLOSURE 2");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(3).Name), "SPACE 3");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest4)
@@ -874,9 +874,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest4)
                                                        "6\" did not find a matching radiant or solar enclosure name."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(1).Name, "PERIMETER ZONES");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(2).Name, "Enclosure 2");
-    EXPECT_EQ(state->dataViewFactor->EnclRadInfo(3).Name, "Space 3");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(1).Name), "PERIMETER ZONES");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(2).Name), "ENCLOSURE 2");
+    EXPECT_EQ(Util::makeUPPER(state->dataViewFactor->EnclRadInfo(3).Name), "SPACE 3");
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_ViewFactorAngleLimitTest)

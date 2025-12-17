@@ -61,8 +61,8 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitPerformanceInput)
     EXPECT_TRUE(process_idf(idf_objects, false));
     state->init_state(*state);
     CoilCoolingDXCurveFitPerformance thisPerf(*state, "coilPerformance");
-    EXPECT_EQ("COILPERFORMANCE", thisPerf.name);
-    EXPECT_EQ("BASEOPERATINGMODE", thisPerf.normalMode.name);
+    EXPECT_EQ("COILPERFORMANCE", Util::makeUPPER(thisPerf.name));
+    EXPECT_EQ("BASEOPERATINGMODE", Util::makeUPPER(thisPerf.normalMode.name));
     EXPECT_EQ((int)thisPerf.maxAvailCoilMode, (int)HVAC::CoilMode::Normal);
 }
 
@@ -72,7 +72,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitPerformanceInputAlternateMode)
     EXPECT_TRUE(process_idf(idf_objects, false));
     state->init_state(*state);
     CoilCoolingDXCurveFitPerformance thisPerf(*state, "coilPerformance");
-    EXPECT_EQ("COILPERFORMANCE", thisPerf.name);
-    EXPECT_EQ("BASEOPERATINGMODE", thisPerf.normalMode.name);
+    EXPECT_EQ("COILPERFORMANCE", Util::makeUPPER(thisPerf.name));
+    EXPECT_EQ("BASEOPERATINGMODE", Util::makeUPPER(thisPerf.normalMode.name));
     EXPECT_EQ((int)thisPerf.maxAvailCoilMode, (int)HVAC::CoilMode::Enhanced);
 }

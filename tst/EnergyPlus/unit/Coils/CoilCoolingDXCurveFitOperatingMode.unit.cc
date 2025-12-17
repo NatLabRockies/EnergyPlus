@@ -68,8 +68,8 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitModeInput)
     EXPECT_TRUE(process_idf(idf_objects, false));
     state->init_state(*state);
     CoilCoolingDXCurveFitOperatingMode thisMode(*state, "mode1");
-    EXPECT_EQ("MODE1", thisMode.name);
-    EXPECT_EQ("MODE1SPEED1", thisMode.speeds[0].name);
+    EXPECT_EQ("MODE1", Util::makeUPPER(thisMode.name));
+    EXPECT_EQ("MODE1SPEED1", Util::makeUPPER(thisMode.speeds[0].name));
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
@@ -168,7 +168,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
     // Now check output tables to ensure that we also get the right units etc
     const std::string compType = "Coil:Cooling:DX:CurveFit:OperatingMode";
     const std::string compName = thisMode.name;
-    EXPECT_EQ(compName, "COIL COOLING DX CURVE FIT OPERATING MODE 1");
+    EXPECT_EQ( Util::makeUPPER(compName), "COIL COOLING DX CURVE FIT OPERATING MODE 1");
 
     struct TestQuery
     {
@@ -271,8 +271,8 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitCrankcaseHeaterCurve)
 
     int coilIndex = CoilCoolingDX::factory(*state, "Coil Cooling DX 1");
     auto &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
-    EXPECT_EQ("COIL COOLING DX 1", thisCoil.name);
-    EXPECT_EQ("COIL COOLING DX CURVE FIT PERFORMANCE 1", thisCoil.performance->name);
+    EXPECT_EQ("COIL COOLING DX 1", Util::makeUPPER(thisCoil.name));
+    EXPECT_EQ("COIL COOLING DX CURVE FIT PERFORMANCE 1", Util::makeUPPER(thisCoil.performance->name));
 
     HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
     int speedNum = 1;

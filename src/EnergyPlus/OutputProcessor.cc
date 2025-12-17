@@ -3884,7 +3884,7 @@ void UpdateMeterReporting(EnergyPlusData &state)
         } else { // Wildcard input
             std::string nameSubstr = name.substr(0, wildCardPosition);
             for (int iMeter = 0; iMeter < (int)op->meters.size(); ++iMeter) {
-                if (Util::SameString(op->meters[iMeter]->Name.substr(0, wildCardPosition), nameSubstr)) {
+                if (equali(op->meters[iMeter]->Name.substr(0, wildCardPosition), nameSubstr)) {
                     SetInitialMeterReportingAndOutputNames(state, iMeter, MeterFileOnlyIndicator, freq, CumulativeIndicator);
                     result = true;
                 }

@@ -1149,7 +1149,7 @@ void CalcDayltgCoeffsMapPoints(EnergyPlusData &state, int const mapNum)
     int WinEl;             // window elements counter
 
     Vector3<Real64> W2;
-    Vector3<Real64> W3;
+    Vector3<Real64> W3 = {0.0, 0.0, 0.0};
     Vector3<Real64> W21;
     Vector3<Real64> W23;
     Vector3<Real64> RREF2;

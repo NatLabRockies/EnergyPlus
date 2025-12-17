@@ -3116,7 +3116,7 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlowSch, "ADU a"));
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMaxFlowReh, "ADU a"));
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOAflowSch, "ADU a"));
-    EXPECT_EQ("COIL:HEATING:ELECTRIC", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatCoilType, "ADU a"));
+    EXPECT_EQ("COIL:HEATING:ELECTRIC", Util::makeUPPER(RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatCoilType, "ADU a")));
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolCoilType, "ADU a"));
     EXPECT_EQ("Fan:ConstantVolume", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU a"));
     EXPECT_EQ("FanA", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU a"));

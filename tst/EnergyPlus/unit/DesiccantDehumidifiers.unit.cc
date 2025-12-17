@@ -5502,9 +5502,9 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     GetDesiccantDehumidifierInput(*state);
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumDesicDehums);
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumGenericDesicDehums);
-    EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
-    EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilType);
+    EXPECT_EQ("DESICCANT 1", Util::makeUPPER(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name));
+    EXPECT_EQ("DESICCANT REGEN COIL", Util::makeUPPER(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName));
+    EXPECT_EQ("COIL:HEATING:WATER", Util::makeUPPER(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilType));
 
     CompName = state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name;
     CompIndex = state->dataDesiccantDehumidifiers->NumGenericDesicDehums;

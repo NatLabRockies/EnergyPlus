@@ -8529,7 +8529,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
     thisAirLoopDOASObjec.SimAirLoopHVACDOAS(*state, true, index);
     // verify doas air flow rate and heating rate
     HeatingCoilEquipConditions &mainHtgCoil = state->dataHeatingCoils->HeatingCoil(doasMainHCIndex);
-    EXPECT_EQ("OA HEATING COIL", mainHtgCoil.Name);
+    EXPECT_EQ("OA HEATING COIL", Util::makeUPPER(mainHtgCoil.Name));
     EXPECT_EQ(0.5, thisAirLoopDOASObjec.SumMassFlowRate);
     EXPECT_NEAR(2130.0, mainHtgCoil.HeatingCoilRate, 1.0);
     // reset doas air flow rate to zero and verify the

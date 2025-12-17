@@ -2430,37 +2430,37 @@ namespace OutputProcessor {
         EXPECT_EQ(6, op->reqVars.size());
 
         EXPECT_EQ("", op->reqVars[0]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[0]->name));
         EXPECT_EQ((int)ReportFreq::TimeStep, (int)op->reqVars[0]->freq);
         EXPECT_EQ(nullptr, op->reqVars[0]->sched);
         EXPECT_TRUE(op->reqVars[0]->Used);
 
         EXPECT_EQ("", op->reqVars[1]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[1]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[1]->name));
         EXPECT_EQ((int)ReportFreq::Hour, (int)op->reqVars[1]->freq);
         EXPECT_EQ(nullptr, op->reqVars[1]->sched);
         EXPECT_TRUE(op->reqVars[1]->Used);
 
         EXPECT_EQ("", op->reqVars[2]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[2]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[2]->name));
         EXPECT_EQ((int)ReportFreq::Day, (int)op->reqVars[2]->freq);
         EXPECT_EQ(nullptr, op->reqVars[2]->sched);
         EXPECT_TRUE(op->reqVars[2]->Used);
 
         EXPECT_EQ("", op->reqVars[3]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[3]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[3]->name));
         EXPECT_EQ((int)ReportFreq::Month, (int)op->reqVars[3]->freq);
         EXPECT_EQ(nullptr, op->reqVars[3]->sched);
         EXPECT_TRUE(op->reqVars[3]->Used);
 
         EXPECT_EQ("", op->reqVars[4]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[4]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[4]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[4]->freq);
         EXPECT_EQ(nullptr, op->reqVars[4]->sched);
         EXPECT_TRUE(op->reqVars[4]->Used);
 
         EXPECT_EQ("", op->reqVars[4]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[4]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[4]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[4]->freq);
         EXPECT_EQ(nullptr, op->reqVars[4]->sched);
         EXPECT_TRUE(op->reqVars[4]->Used);
@@ -2699,31 +2699,31 @@ namespace OutputProcessor {
         EXPECT_EQ(5, op->reqVars.size());
 
         EXPECT_EQ("", op->reqVars[0]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[0]->name));
         EXPECT_EQ((int)ReportFreq::TimeStep, (int)op->reqVars[0]->freq);
         EXPECT_EQ(nullptr, op->reqVars[0]->sched);
         EXPECT_TRUE(op->reqVars[0]->Used);
 
         EXPECT_EQ("", op->reqVars[1]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[1]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[1]->name));
         EXPECT_EQ((int)ReportFreq::Hour, (int)op->reqVars[1]->freq);
         EXPECT_EQ(nullptr, op->reqVars[1]->sched);
         EXPECT_TRUE(op->reqVars[1]->Used);
 
         EXPECT_EQ("", op->reqVars[2]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[2]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[2]->name));
         EXPECT_EQ((int)ReportFreq::Day, (int)op->reqVars[2]->freq);
         EXPECT_EQ(nullptr, op->reqVars[2]->sched);
         EXPECT_TRUE(op->reqVars[2]->Used);
 
         EXPECT_EQ("", op->reqVars[3]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[3]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[3]->name));
         EXPECT_EQ((int)ReportFreq::Month, (int)op->reqVars[3]->freq);
         EXPECT_EQ(nullptr, op->reqVars[3]->sched);
         EXPECT_TRUE(op->reqVars[3]->Used);
 
         EXPECT_EQ("", op->reqVars[4]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[4]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[4]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[4]->freq);
         EXPECT_EQ(nullptr, op->reqVars[4]->sched);
         EXPECT_TRUE(op->reqVars[4]->Used);
@@ -2777,7 +2777,7 @@ namespace OutputProcessor {
         EXPECT_EQ((int)VariableType::Real, (int)op->ddOutVars[0]->variableType);
         EXPECT_EQ(-1, op->ddOutVars[0]->Next);
         EXPECT_FALSE(op->ddOutVars[0]->ReportedOnDDFile);
-        EXPECT_EQ("Site Outdoor Air Drybulb Temperature", op->ddOutVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->ddOutVars[0]->name));
         EXPECT_EQ((int)Constant::Units::C, (int)op->ddOutVars[0]->units);
 
         EXPECT_EQ((int)TimeStepType::Zone, (int)op->ddOutVars[1]->timeStepType);
@@ -2785,7 +2785,7 @@ namespace OutputProcessor {
         EXPECT_EQ((int)VariableType::Real, (int)op->ddOutVars[1]->variableType);
         EXPECT_EQ(-1, op->ddOutVars[1]->Next);
         EXPECT_FALSE(op->ddOutVars[1]->ReportedOnDDFile);
-        EXPECT_EQ("Site Outdoor Air Wetbulb Temperature", op->ddOutVars[1]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR WETBULB TEMPERATURE", Util::makeUPPER(op->ddOutVars[1]->name));
         EXPECT_EQ((int)Constant::Units::C, (int)op->ddOutVars[1]->units);
 
         EXPECT_EQ((int)TimeStepType::Zone, (int)op->ddOutVars[2]->timeStepType);
@@ -2793,7 +2793,7 @@ namespace OutputProcessor {
         EXPECT_EQ((int)VariableType::Real, (int)op->ddOutVars[2]->variableType);
         EXPECT_EQ(-1, op->ddOutVars[2]->Next);
         EXPECT_FALSE(op->ddOutVars[2]->ReportedOnDDFile);
-        EXPECT_EQ("Site Outdoor Air Humidity Ratio", op->ddOutVars[2]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR HUMIDITY RATIO", Util::makeUPPER(op->ddOutVars[2]->name));
         EXPECT_EQ((int)Constant::Units::kgWater_kgDryAir, (int)op->ddOutVars[2]->units);
 
         EXPECT_EQ((int)TimeStepType::Zone, (int)op->ddOutVars[3]->timeStepType);
@@ -2801,7 +2801,7 @@ namespace OutputProcessor {
         EXPECT_EQ((int)VariableType::Real, (int)op->ddOutVars[3]->variableType);
         EXPECT_EQ(-1, op->ddOutVars[3]->Next);
         EXPECT_FALSE(op->ddOutVars[3]->ReportedOnDDFile);
-        EXPECT_EQ("Site Outdoor Air Relative Humidity", op->ddOutVars[3]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR RELATIVE HUMIDITY", Util::makeUPPER(op->ddOutVars[3]->name));
         EXPECT_EQ((int)Constant::Units::Perc, (int)op->ddOutVars[3]->units);
     }
 
@@ -2832,7 +2832,7 @@ namespace OutputProcessor {
         // EXPECT_EQ(1, op->NumExtraVars);
 
         EXPECT_EQ("", op->reqVars[0]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[0]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[0]->freq);
         EXPECT_EQ(nullptr, op->reqVars[0]->sched);
         EXPECT_EQ(true, op->reqVars[0]->Used);
@@ -2842,7 +2842,7 @@ namespace OutputProcessor {
         EXPECT_EQ((int)VariableType::Real, (int)op->ddOutVars[0]->variableType);
         EXPECT_EQ(-1, op->ddOutVars[0]->Next);
         EXPECT_FALSE(op->ddOutVars[0]->ReportedOnDDFile);
-        EXPECT_EQ("Site Outdoor Air Drybulb Temperature", op->ddOutVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->ddOutVars[0]->name));
     }
 
     TEST_F(EnergyPlusFixture, OutputProcessor_setupOutputVariable_endUseSubKey)
@@ -2902,7 +2902,7 @@ namespace OutputProcessor {
         // Cooling
         // testing an ABUPS end use with no sub end use specified
         EXPECT_EQ(1, op->EndUseCategory(2).NumSubcategories);
-        EXPECT_EQ("General", op->EndUseCategory(2).SubcategoryName(1));
+        EXPECT_EQ("GENERAL", Util::makeUPPER(op->EndUseCategory(2).SubcategoryName(1)));
 
         auto found = op->meterMap.find(Util::makeUPPER("Cooling:Electricity"));
         EXPECT_NE(found, op->meterMap.end());
@@ -2914,12 +2914,12 @@ namespace OutputProcessor {
         EXPECT_NE(found, op->meterMap.end());
         EXPECT_EQ((int)Constant::eResource::Electricity, (int)op->meters[found->second]->resource);
         EXPECT_EQ((int)EndUseCat::Cooling, (int)op->meters[found->second]->endUseCat);
-        EXPECT_EQ("General", op->meters[found->second]->EndUseSub);
+        EXPECT_EQ("GENERAL", Util::makeUPPER(op->meters[found->second]->EndUseSub));
 
         // lighting
         // testing an ABUPS end use with a sub end use specified
         EXPECT_EQ(1, op->EndUseCategory(3).NumSubcategories); // lighting end use
-        EXPECT_EQ("RailroadCrossing", op->EndUseCategory(3).SubcategoryName(1));
+        EXPECT_EQ("RAILROADCROSSING", Util::makeUPPER(op->EndUseCategory(3).SubcategoryName(1)));
 
         found = op->meterMap.find(Util::makeUPPER("InteriorLights:Electricity"));
         EXPECT_NE(found, op->meterMap.end());
@@ -2934,7 +2934,7 @@ namespace OutputProcessor {
         EXPECT_NE(found, op->meterMap.end());
         EXPECT_EQ((int)Constant::eResource::Electricity, (int)op->meters[found->second]->resource);
         EXPECT_EQ((int)EndUseCat::InteriorLights, (int)op->meters[found->second]->endUseCat);
-        EXPECT_EQ("RailroadCrossing", op->meters[found->second]->EndUseSub);
+        EXPECT_EQ("RAILROADCROSSING", Util::makeUPPER(op->meters[found->second]->EndUseSub));
 
         // fuel oil CO2 emissions
         // testing a non-ABUPS end use with no sub end use specified
@@ -3218,31 +3218,31 @@ namespace OutputProcessor {
         EXPECT_EQ(5, op->reqVars.size());
 
         EXPECT_EQ("", op->reqVars[0]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[0]->name));
         EXPECT_EQ((int)ReportFreq::TimeStep, (int)op->reqVars[0]->freq);
         EXPECT_EQ(nullptr, op->reqVars[0]->sched);
         EXPECT_EQ(true, op->reqVars[0]->Used);
 
         EXPECT_EQ("", op->reqVars[1]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[1]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[1]->name));
         EXPECT_EQ((int)ReportFreq::Hour, (int)op->reqVars[1]->freq);
         EXPECT_EQ(nullptr, op->reqVars[1]->sched);
         EXPECT_EQ(true, op->reqVars[1]->Used);
 
         EXPECT_EQ("", op->reqVars[2]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[2]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[2]->name));
         EXPECT_EQ((int)ReportFreq::Day, (int)op->reqVars[2]->freq);
         EXPECT_EQ(nullptr, op->reqVars[2]->sched);
         EXPECT_EQ(true, op->reqVars[2]->Used);
 
         EXPECT_EQ("", op->reqVars[3]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[3]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[3]->name));
         EXPECT_EQ((int)ReportFreq::Month, (int)op->reqVars[3]->freq);
         EXPECT_EQ(nullptr, op->reqVars[3]->sched);
         EXPECT_EQ(true, op->reqVars[3]->Used);
 
         EXPECT_EQ("", op->reqVars[4]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[4]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[4]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[4]->freq);
         EXPECT_EQ(nullptr, op->reqVars[4]->sched);
         EXPECT_EQ(true, op->reqVars[4]->Used);
@@ -5297,7 +5297,7 @@ namespace OutputProcessor {
         // EXPECT_EQ(1, op->NumExtraVars);
 
         EXPECT_EQ("", op->reqVars[0]->key);
-        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", op->reqVars[0]->name);
+        EXPECT_EQ("SITE OUTDOOR AIR DRYBULB TEMPERATURE", Util::makeUPPER(op->reqVars[0]->name));
         EXPECT_EQ((int)ReportFreq::Simulation, (int)op->reqVars[0]->freq);
         EXPECT_EQ(nullptr, op->reqVars[0]->sched);
         EXPECT_EQ(true, op->reqVars[0]->Used);

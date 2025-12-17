@@ -8177,33 +8177,33 @@ TEST_F(EnergyPlusFixture, VRFTU_SupplementalHeatingCoilGetInput)
 
     auto &VRFTU_1(state->dataHVACVarRefFlow->VRFTU(1));
     // Check the results
-    EXPECT_EQ(VRFTU_1.Name, "TU1");
-    EXPECT_EQ(VRFTU_1.SuppHeatCoilType, "COIL:HEATING:ELECTRIC");
-    EXPECT_EQ(VRFTU_1.SuppHeatCoilName, "TU1 SUPP HEATING COIL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_1.Name), "TU1");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_1.SuppHeatCoilType), "COIL:HEATING:ELECTRIC");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_1.SuppHeatCoilName), "TU1 SUPP HEATING COIL");
 
     auto &VRFTU_2(state->dataHVACVarRefFlow->VRFTU(2));
     // Check the results
-    EXPECT_EQ(VRFTU_2.Name, "TU2");
-    EXPECT_EQ(VRFTU_2.SuppHeatCoilType, "COIL:HEATING:FUEL");
-    EXPECT_EQ(VRFTU_2.SuppHeatCoilName, "TU2 SUPP HEATING COIL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_2.Name), "TU2");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_2.SuppHeatCoilType), "COIL:HEATING:FUEL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_2.SuppHeatCoilName), "TU2 SUPP HEATING COIL");
 
     auto &VRFTU_3(state->dataHVACVarRefFlow->VRFTU(3));
     // Check the results
-    EXPECT_EQ(VRFTU_3.Name, "TU3");
-    EXPECT_EQ(VRFTU_3.SuppHeatCoilType, "COIL:HEATING:WATER");
-    EXPECT_EQ(VRFTU_3.SuppHeatCoilName, "TU3 SUPP HEATING COIL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_3.Name), "TU3");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_3.SuppHeatCoilType), "COIL:HEATING:WATER");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_3.SuppHeatCoilName), "TU3 SUPP HEATING COIL");
 
     auto &VRFTU_4(state->dataHVACVarRefFlow->VRFTU(4));
     // Check the results
-    EXPECT_EQ(VRFTU_4.Name, "TU4");
-    EXPECT_EQ(VRFTU_4.SuppHeatCoilType, "COIL:HEATING:FUEL");
-    EXPECT_EQ(VRFTU_4.SuppHeatCoilName, "TU4 SUPP HEATING COIL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_4.Name), "TU4");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_4.SuppHeatCoilType), "COIL:HEATING:FUEL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_4.SuppHeatCoilName), "TU4 SUPP HEATING COIL");
 
     auto &VRFTU_5(state->dataHVACVarRefFlow->VRFTU(5));
     // Check the results
-    EXPECT_EQ(VRFTU_5.Name, "TU5");
-    EXPECT_EQ(VRFTU_5.SuppHeatCoilType, "COIL:HEATING:STEAM");
-    EXPECT_EQ(VRFTU_5.SuppHeatCoilName, "TU5 SUPP HEATING COIL");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_5.Name), "TU5");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_5.SuppHeatCoilType), "COIL:HEATING:STEAM");
+    EXPECT_EQ(Util::makeUPPER(VRFTU_5.SuppHeatCoilName), "TU5 SUPP HEATING COIL");
 }
 
 TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilElectric)

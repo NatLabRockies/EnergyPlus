@@ -406,10 +406,11 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctVAVHeatCool_GetInputTest)
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
 
-    EXPECT_EQ("AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat", state->dataSingleDuct->sd_airterminal(1).sysType); // AT SD VAV HeatCool Reheat Type
-    EXPECT_EQ("ZONE 1 VAV SYSTEM", state->dataSingleDuct->sd_airterminal(1).SysName);                             // AT SD VAV HeatCool Reheat Name
-    EXPECT_EQ("COIL:HEATING:ELECTRIC", state->dataSingleDuct->sd_airterminal(1).ReheatComp);                      // Reheat Coil Type
-    EXPECT_EQ("REHEAT COIL ZONE 1", state->dataSingleDuct->sd_airterminal(1).ReheatName);                         // Reheat Coil Name
+    EXPECT_EQ("AIRTERMINAL:SINGLEDUCT:VAV:HEATANDCOOL:REHEAT",
+              Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).sysType));                             // AT SD VAV HeatCool Reheat Type
+    EXPECT_EQ("ZONE 1 VAV SYSTEM", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).SysName));        // AT SD VAV HeatCool Reheat Name
+    EXPECT_EQ("COIL:HEATING:ELECTRIC", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).ReheatComp)); // Reheat Coil Type
+    EXPECT_EQ("REHEAT COIL ZONE 1", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).ReheatName));    // Reheat Coil Name
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctVAVReheatVarSpeedFan_GetInputTest)
@@ -530,10 +531,10 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctVAVReheatVarSpeedFan_GetInputTest
     GetSysInput(*state);
 
     EXPECT_EQ("AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan",
-              state->dataSingleDuct->sd_airterminal(1).sysType);                          // AT SD VAV HeatCool Reheat Type
-    EXPECT_EQ("SPACE1-1 VAV REHEAT", state->dataSingleDuct->sd_airterminal(1).SysName);   // AT SD VAV HeatCool Reheat Name
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataSingleDuct->sd_airterminal(1).ReheatComp); // Reheat Coil Type
-    EXPECT_EQ("SPACE1-1 ZONE COIL", state->dataSingleDuct->sd_airterminal(1).ReheatName); // Reheat Coil Name
+              state->dataSingleDuct->sd_airterminal(1).sysType);                                           // AT SD VAV HeatCool Reheat Type
+    EXPECT_EQ("SPACE1-1 VAV REHEAT", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).SysName));   // AT SD VAV HeatCool Reheat Name
+    EXPECT_EQ("COIL:HEATING:WATER", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).ReheatComp)); // Reheat Coil Type
+    EXPECT_EQ("SPACE1-1 ZONE COIL", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(1).ReheatName)); // Reheat Coil Name
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctVAVReheat_NormalActionTest)
@@ -647,7 +648,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctVAVReheat_NormalActionTest)
     Real64 MassFlowRateMaxAvail = state->dataSingleDuct->sd_airterminal(SysNum).MaxAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     EXPECT_EQ(1.0, state->dataSingleDuct->sd_airterminal(SysNum).MaxAirVolFlowRate);
     EXPECT_EQ(1.0, MassFlowRateMaxAvail);
-    EXPECT_EQ("COIL:HEATING:ELECTRIC", state->dataSingleDuct->sd_airterminal(SysNum).ReheatComp);
+    EXPECT_EQ("COIL:HEATING:ELECTRIC", Util::makeUPPER(state->dataSingleDuct->sd_airterminal(SysNum).ReheatComp));
     EXPECT_ENUM_EQ(Action::Normal, state->dataSingleDuct->sd_airterminal(SysNum).DamperHeatingAction);
     EXPECT_EQ(0.2, state->dataSingleDuct->sd_airterminal(SysNum).ZoneMinAirFracDes);
 
@@ -1628,7 +1629,7 @@ TEST_F(EnergyPlusFixture, SingleDuctVAVReheatVSFan_DamperPositionTest)
     int InletNodeNum = Util::FindItemInList("ZONE 1 ATU IN NODE", state->dataLoopNodes->NodeID);
     EXPECT_EQ("AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan", thisAirTerminal.sysType);
     EXPECT_EQ("VAV RHT VS FAN AIRTERM", thisAirTerminal.SysName);
-    EXPECT_EQ("COIL:HEATING:ELECTRIC", thisAirTerminal.ReheatComp);
+    EXPECT_EQ("COIL:HEATING:ELECTRIC", Util::makeUPPER(thisAirTerminal.ReheatComp));
     EXPECT_EQ("ZONE 1 REHEAT COIL", thisAirTerminal.ReheatName);
     EXPECT_EQ((int)HVAC::FanType::SystemModel, (int)thisAirTerminal.fanType);
     EXPECT_EQ("ZONE 1 VS FAN", thisAirTerminal.FanName);

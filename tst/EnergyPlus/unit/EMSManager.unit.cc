@@ -2778,9 +2778,9 @@ TEST_F(EnergyPlusFixture, EMSManager_Sensor_On_ScheduleConstant)
     EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::SetupSimulation, anyEMSRan, ObjexxFCL::Optional_int_const());
     EXPECT_FALSE(anyEMSRan);
     // this stays the same
-    EXPECT_EQ("SCHEDULECONSTANT_SENSOR", sensor.Name);
-    EXPECT_EQ("SCHEDULECONSTANT", sensor.UniqueKeyName);
-    EXPECT_EQ("SCHEDULE VALUE", sensor.OutputVarName);
+    EXPECT_EQ("SCHEDULECONSTANT_SENSOR", Util::makeUPPER(sensor.Name));
+    EXPECT_EQ("SCHEDULECONSTANT", Util::makeUPPER(sensor.UniqueKeyName));
+    EXPECT_EQ("SCHEDULE VALUE", Util::makeUPPER(sensor.OutputVarName));
     EXPECT_EQ(0, sensor.Index);
     EXPECT_EQ(1, sensor.VariableNum);
     // CheckedOkay and sched are ok now

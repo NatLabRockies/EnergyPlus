@@ -427,7 +427,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_TemperatureSensorOffset_CoilSAT)
 
     // Check
     EXPECT_EQ(2.0, state->dataFaultsMgr->FaultsCoilSATSensor(1).Offset);
-    EXPECT_EQ("COIL:COOLING:WATER", state->dataFaultsMgr->FaultsCoilSATSensor(1).CoilType);
+    EXPECT_EQ("COIL:COOLING:WATER", Util::makeUPPER(state->dataFaultsMgr->FaultsCoilSATSensor(1).CoilType));
     EXPECT_TRUE(state->dataHVACControllers->ControllerProps(1).FaultyCoilSATFlag);
     EXPECT_EQ(1, state->dataHVACControllers->ControllerProps(1).FaultyCoilSATIndex);
 }

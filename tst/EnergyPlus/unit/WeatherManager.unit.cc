@@ -1985,14 +1985,14 @@ TEST_F(EnergyPlusFixture, epwHeaderTest)
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(1).EndDay, 22);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).Title, "No Dry Season - Week Near Annual Max");
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).ShortTitle, "NoDrySeasonMax");
-    EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).TEType, "Extreme");
+    EXPECT_EQ(Util::makeUPPER(state->dataWeather->TypicalExtremePeriods(2).TEType), "EXTREME");
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).StartMonth, 2);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).StartDay, 5);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).EndMonth, 2);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(2).EndDay, 11);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).Title, "No Dry Season - Week Near Annual Min");
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).ShortTitle, "NoDrySeasonMin");
-    EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).TEType, "Extreme");
+    EXPECT_EQ(Util::makeUPPER(state->dataWeather->TypicalExtremePeriods(3).TEType), "EXTREME");
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).StartMonth, 7);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).StartDay, 16);
     EXPECT_EQ(state->dataWeather->TypicalExtremePeriods(3).EndMonth, 7);

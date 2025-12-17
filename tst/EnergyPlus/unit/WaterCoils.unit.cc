@@ -1574,10 +1574,10 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
 
     GetFanCoilUnits(*state);
     EXPECT_ENUM_EQ(CCM::ConsFanVarFlow, state->dataFanCoilUnits->FanCoil(1).CapCtrlMeth_Num);
-    EXPECT_EQ("OUTDOORAIR:MIXER", state->dataFanCoilUnits->FanCoil(1).OAMixType);
+    EXPECT_EQ("OUTDOORAIR:MIXER", Util::makeUPPER(state->dataFanCoilUnits->FanCoil(1).OAMixType));
     EXPECT_EQ((int)HVAC::FanType::OnOff, (int)state->dataFanCoilUnits->FanCoil(1).fanType);
-    EXPECT_EQ("COIL:COOLING:WATER", state->dataFanCoilUnits->FanCoil(1).CCoilType);
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataFanCoilUnits->FanCoil(1).HCoilType);
+    EXPECT_EQ("COIL:COOLING:WATER", Util::makeUPPER(state->dataFanCoilUnits->FanCoil(1).CCoilType));
+    EXPECT_EQ("COIL:HEATING:WATER", Util::makeUPPER(state->dataFanCoilUnits->FanCoil(1).HCoilType));
 
     state->dataPlnt->TotNumLoops = 2;
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);

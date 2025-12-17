@@ -7395,7 +7395,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthlyPredefined_FindNeededOutputV
     OutputReportTabular::InitializeTabularMonthly(*state);
 
     // We check that the Predefined Table is actually set to show
-    EXPECT_EQ("SetpointsNotMetWithTemperaturesMonthly", state->dataOutRptTab->namedMonthly(31).title);
+    EXPECT_EQ("SETPOINTSNOTMETWITHTEMPERATURESMONTHLY", Util::makeUPPER(state->dataOutRptTab->namedMonthly(31).title));
     EXPECT_TRUE(state->dataOutRptTab->namedMonthly(31).show);
 
     // Check that it's the only one that's shown
@@ -7442,7 +7442,7 @@ TEST_F(SQLiteFixture, OutputReportTabularTest_PredefinedTableDXConversion)
     EXPECT_EQ("10000.0", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchDXCoolCoilNetCapSIA, CompName));
 
     // We enable the report we care about, making sure it's the right one
-    EXPECT_EQ("EquipmentSummary", state->dataOutRptPredefined->reportName(5).name);
+    EXPECT_EQ("EQUIPMENTSUMMARY", Util::makeUPPER(state->dataOutRptPredefined->reportName(5).name));
     state->dataOutRptPredefined->reportName(5).show = true;
 
     WritePredefinedTables(*state);
@@ -7492,9 +7492,9 @@ TEST_F(SQLiteFixture, OutputReportTabularTest_PredefinedTableCoilHumRat)
     PreDefTableEntry(*state, state->dataOutRptPredefined->pdchCoilLvgHumRatIdealPeak, CompName, 0.006, 8);
 
     // We enable the reports we care about, making sure we have the right ones
-    EXPECT_EQ("HVACSizingSummary", state->dataOutRptPredefined->reportName(7).name);
+    EXPECT_EQ("HVACSIZINGSUMMARY", Util::makeUPPER(state->dataOutRptPredefined->reportName(7).name));
     state->dataOutRptPredefined->reportName(7).show = true;
-    EXPECT_EQ("CoilSizingDetails", state->dataOutRptPredefined->reportName(8).name);
+    EXPECT_EQ("COILSIZINGDETAILS", Util::makeUPPER(state->dataOutRptPredefined->reportName(8).name));
     state->dataOutRptPredefined->reportName(8).show = true;
 
     WritePredefinedTables(*state);

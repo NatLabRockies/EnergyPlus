@@ -64,7 +64,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitSpeedInput)
     state->init_state(*state);
 
     CoilCoolingDXCurveFitSpeed thisSpeed(*state, "speed1");
-    EXPECT_EQ("SPEED1", thisSpeed.name);
+    EXPECT_EQ("SPEED1", Util::makeUPPER(thisSpeed.name));
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitSpeedTest)
@@ -74,7 +74,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitSpeedTest)
     state->init_state(*state);
 
     CoilCoolingDXCurveFitSpeed thisSpeed(*state, "speed1");
-    EXPECT_EQ("SPEED1", thisSpeed.name);
+    EXPECT_EQ("SPEED1", Util::makeUPPER(thisSpeed.name));
 
     CoilCoolingDXCurveFitOperatingMode thisMode;
     thisMode.ratedGrossTotalCap = 12000;

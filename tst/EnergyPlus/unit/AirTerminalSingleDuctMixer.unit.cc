@@ -7729,10 +7729,10 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimFCU_ATMInletSideTest)
     EXPECT_EQ((int)HVAC::MixerType::InletSide, (int)thisATMixer.type);                                  // air terminal mixer connection type
     EXPECT_EQ("AIRTERMINAL:SINGLEDUCT:MIXER", state->dataDefineEquipment->AirDistUnit(1).EquipType(1)); // Air distribution unit equipment type
     EXPECT_EQ((int)HVAC::FanType::VAV, (int)thisFanCoil.fanType);
-    EXPECT_EQ("COIL:COOLING:WATER", thisFanCoil.CCoilType);
-    EXPECT_EQ("FCU COOLING COIL", thisFanCoil.CCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", thisFanCoil.HCoilType);
-    EXPECT_EQ("FCU HEATING COIL", thisFanCoil.HCoilName);
+    EXPECT_EQ("COIL:COOLING:WATER", Util::makeUPPER(thisFanCoil.CCoilType));
+    EXPECT_EQ("FCU COOLING COIL", Util::makeUPPER(thisFanCoil.CCoilName));
+    EXPECT_EQ("COIL:HEATING:WATER", Util::makeUPPER(thisFanCoil.HCoilType));
+    EXPECT_EQ("FCU HEATING COIL", Util::makeUPPER(thisFanCoil.HCoilName));
 
     state->dataPlnt->TotNumLoops = 2;
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);
@@ -8147,10 +8147,10 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_FCU_NightCycleTest)
     EXPECT_EQ((int)HVAC::MixerType::InletSide, (int)thisATMixer.type);                                  // air terminal mixer connection type
     EXPECT_EQ("AIRTERMINAL:SINGLEDUCT:MIXER", state->dataDefineEquipment->AirDistUnit(1).EquipType(1)); // Air distribution unit equipment type
     EXPECT_EQ((int)HVAC::FanType::VAV, (int)thisFanCoil.fanType);
-    EXPECT_EQ("COIL:COOLING:WATER", thisFanCoil.CCoilType);
-    EXPECT_EQ("FCU COOLING COIL", thisFanCoil.CCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", thisFanCoil.HCoilType);
-    EXPECT_EQ("FCU HEATING COIL", thisFanCoil.HCoilName);
+    EXPECT_EQ("COIL:COOLING:WATER", Util::makeUPPER(thisFanCoil.CCoilType));
+    EXPECT_EQ("FCU COOLING COIL", Util::makeUPPER(thisFanCoil.CCoilName));
+    EXPECT_EQ("COIL:HEATING:WATER", Util::makeUPPER(thisFanCoil.HCoilType));
+    EXPECT_EQ("FCU HEATING COIL", Util::makeUPPER(thisFanCoil.HCoilName));
     EXPECT_EQ("NIGHTCYCLE AVAILMGR", thisAvaiManager.Name);
     EXPECT_EQ((int)Avail::ManagerType::NightCycle, (int)thisAvaiManager.type);
 

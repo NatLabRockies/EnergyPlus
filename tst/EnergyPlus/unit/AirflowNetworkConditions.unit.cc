@@ -168,10 +168,10 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestDefaultBehaviourOfSimulationControl
 
     EXPECT_EQ(state->afn->simulation_control.name, "AFNDefaultControl");
     EXPECT_ENUM_EQ(AirflowNetwork::ControlType::MultizoneWithoutDistribution, state->afn->simulation_control.type);
-    EXPECT_EQ(state->afn->simulation_control.WPCCntr, "SURFACEAVERAGECALCULATION");
-    EXPECT_EQ(state->afn->simulation_control.HeightOption, "OPENINGHEIGHT");
-    EXPECT_EQ(state->afn->simulation_control.BldgType, "LOWRISE");
-    EXPECT_EQ(state->afn->simulation_control.InitType, "ZERONODEPRESSURES");
+    EXPECT_EQ(Util::makeUPPER(state->afn->simulation_control.WPCCntr), "SURFACEAVERAGECALCULATION");
+    EXPECT_EQ(Util::makeUPPER(state->afn->simulation_control.HeightOption), "OPENINGHEIGHT");
+    EXPECT_EQ(Util::makeUPPER(state->afn->simulation_control.BldgType), "LOWRISE");
+    EXPECT_EQ(Util::makeUPPER(state->afn->simulation_control.InitType), "ZERONODEPRESSURES");
     EXPECT_FALSE(state->afn->simulation_control.temperature_height_dependence);
     EXPECT_ENUM_EQ(AirflowNetwork::SimulationControl::Solver::SkylineLU, state->afn->simulation_control.solver);
     //// Use default values for numerical fields

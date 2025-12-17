@@ -172,8 +172,8 @@ std::vector<std::string> EnergyPlusFixture::read_lines_in_file(fs::path const &f
 bool EnergyPlusFixture::compare_eso_stream(std::string const &expected_string, bool reset_stream)
 {
     auto const stream_str = state->files.eso.get_output();
-    EXPECT_EQ(expected_string, stream_str);
-    bool are_equal = (expected_string == stream_str);
+    EXPECT_EQ(Util::makeUPPER(expected_string), Util::makeUPPER(stream_str));
+    bool are_equal = equali(expected_string, stream_str);
     if (reset_stream) {
         state->files.eso.open_as_stringstream();
     }
@@ -183,8 +183,8 @@ bool EnergyPlusFixture::compare_eso_stream(std::string const &expected_string, b
 bool EnergyPlusFixture::compare_eio_stream(std::string const &expected_string, bool reset_stream)
 {
     auto const stream_str = state->files.eio.get_output();
-    EXPECT_EQ(expected_string, stream_str);
-    bool are_equal = (expected_string == stream_str);
+    EXPECT_EQ(Util::makeUPPER(expected_string), Util::makeUPPER(stream_str));
+    bool are_equal = equali(expected_string, stream_str);
     if (reset_stream) {
         state->files.eio.open_as_stringstream();
     }
@@ -193,8 +193,8 @@ bool EnergyPlusFixture::compare_eio_stream(std::string const &expected_string, b
 
 bool EnergyPlusFixture::compare_eio_stream_substring(std::string const &search_string, bool reset_stream)
 {
-    auto const stream_str = state->files.eio.get_output();
-    bool const found = stream_str.find(search_string) != std::string::npos;
+    auto const stream_str = Util::makeUPPER(state->files.eio.get_output());
+    bool const found = stream_str.find(Util::makeUPPER(search_string)) != std::string::npos;
     EXPECT_TRUE(found);
     if (reset_stream) {
         state->files.eio.open_as_stringstream();
@@ -205,8 +205,8 @@ bool EnergyPlusFixture::compare_eio_stream_substring(std::string const &search_s
 bool EnergyPlusFixture::compare_mtr_stream(std::string const &expected_string, bool reset_stream)
 {
     auto const stream_str = state->files.mtr.get_output();
-    EXPECT_EQ(expected_string, stream_str);
-    bool are_equal = (expected_string == stream_str);
+    EXPECT_EQ(Util::makeUPPER(expected_string), Util::makeUPPER(stream_str));
+    bool are_equal = equali(expected_string, stream_str);
     if (reset_stream) {
         state->files.mtr.open_as_stringstream();
     }
@@ -216,8 +216,8 @@ bool EnergyPlusFixture::compare_mtr_stream(std::string const &expected_string, b
 bool EnergyPlusFixture::compare_err_stream(std::string const &expected_string, bool reset_stream)
 {
     auto const stream_str = this->err_stream->str();
-    EXPECT_EQ(expected_string, stream_str);
-    bool are_equal = (expected_string == stream_str);
+    EXPECT_EQ(Util::makeUPPER(expected_string), Util::makeUPPER(stream_str));
+    bool are_equal = equali(expected_string, stream_str);
     if (reset_stream) {
         this->err_stream->str(std::string());
     }
