@@ -5076,7 +5076,7 @@ TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test3)
         "   ** Warning ** GlobalGeometryRules: Potential mismatch of coordinate specifications. Note that the rectangular surfaces are relying on "
         "the default SurfaceGeometry for 'Relative to zone' coordinate.",
         "   **   ~~~   ** Coordinate System=\"WORLD\"; while ",
-        "   **   ~~~   ** Rectangular Surface Coordinate System=\"DEFAULTS TO RELATIVE\".",
+        "   **   ~~~   ** Rectangular Surface Coordinate System=\"RELATIVE\".",
     });
     EXPECT_TRUE(compare_err_stream(error_string, false));
 }
@@ -5113,7 +5113,7 @@ TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test4)
         "   ** Warning ** GlobalGeometryRules: Potential mismatch of coordinate specifications. Note that the rectangular surfaces are relying on "
         "the default SurfaceGeometry for 'Relative to zone' coordinate.",
         "   **   ~~~   ** Coordinate System=\"WORLD\"; while ",
-        "   **   ~~~   ** Rectangular Surface Coordinate System=\"DEFAULTS TO RELATIVE\".",
+        "   **   ~~~   ** Rectangular Surface Coordinate System=\"RELATIVE\".",
     });
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }

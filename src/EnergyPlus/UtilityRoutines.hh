@@ -713,8 +713,8 @@ namespace Util {
         } else if (equali(s, t)) {
             // case insensitive comparison, at this point we know they don't match each other's casing
             if (replaceString) {
-                // change the original second string so next time this is faster
-                s = t;
+                // changing to uppercase
+                s = Util::makeUPPER(s);
             }
             return true;
         } else {
