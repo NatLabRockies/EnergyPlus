@@ -818,10 +818,10 @@ namespace VariableSpeedCoils {
                 cFieldName = "Evaporative Condenser Pump Rated Power Consumption";                       // NumArray(10)
                 if (fields.find("evaporative_condenser_pump_rated_power_consumption") != fields.end()) { // not required field, has default value
                     auto &evapCondPumpPower = fields.at("evaporative_condenser_pump_rated_power_consumption");
-                    varSpeedCoil.EvapCondPumpElecNomPower = (evapCondPumpPower.type() == nlohmann::detail::value_t::string &&
-                                                             Util::SameString(evapCondPumpPower.get<std::string>(), "Autosize"))
-                                                                ? DataSizing::AutoSize
-                                                                : evapCondPumpPower.get<Real64>();
+                    varSpeedCoil.EvapCondPumpElecNomPower =
+                        (evapCondPumpPower.type() == nlohmann::detail::value_t::string && equali(evapCondPumpPower.get<std::string>(), "Autosize"))
+                            ? DataSizing::AutoSize
+                            : evapCondPumpPower.get<Real64>();
                 }
                 if (varSpeedCoil.EvapCondPumpElecNomPower != DataSizing::AutoSize) {
                     if (varSpeedCoil.EvapCondPumpElecNomPower < 0.0) {
@@ -1737,10 +1737,9 @@ namespace VariableSpeedCoils {
                 cFieldName = "Resistive Defrost Heater Capacity"; // cNumericFields(11)
                 if (fields.find("resistive_defrost_heater_capacity") != fields.end()) {
                     auto &dCap = fields.at("resistive_defrost_heater_capacity");
-                    varSpeedCoil.DefrostCapacity =
-                        (dCap.type() == nlohmann::detail::value_t::string && Util::SameString(dCap.get<std::string>(), "Autosize"))
-                            ? DataSizing::AutoSize
-                            : dCap.get<Real64>();
+                    varSpeedCoil.DefrostCapacity = (dCap.type() == nlohmann::detail::value_t::string && equali(dCap.get<std::string>(), "Autosize"))
+                                                       ? DataSizing::AutoSize
+                                                       : dCap.get<Real64>();
                 }
                 if (varSpeedCoil.DefrostCapacity == 0.0 && varSpeedCoil.DefrostStrategy == StandardRatings::DefrostStrat::Resistive) {
                     ShowWarningError(state, format("{}{}=\"{}\", ", RoutineName, CurrentModuleObject, varSpeedCoil.Name));

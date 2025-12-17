@@ -299,13 +299,13 @@ namespace UnitarySystems {
                             if (speedNum < (maxSpeeds + 1)) {
                                 auto &cobj = flowRatio.at("cooling_speed_supply_air_flow_ratio");
                                 thisDesignSpec.coolingVolFlowRatio[speedNum] =
-                                    (cobj.type() == nlohmann::detail::value_t::string && Util::SameString(cobj.get<std::string>(), "Autosize"))
+                                    (cobj.type() == nlohmann::detail::value_t::string && equali(cobj.get<std::string>(), "Autosize"))
                                         ? DataSizing::AutoSize
                                         : cobj.get<Real64>();
 
                                 auto &hobj = flowRatio.at("heating_speed_supply_air_flow_ratio");
                                 thisDesignSpec.heatingVolFlowRatio[speedNum] =
-                                    (hobj.type() == nlohmann::detail::value_t::string && Util::SameString(hobj.get<std::string>(), "Autosize"))
+                                    (hobj.type() == nlohmann::detail::value_t::string && equali(hobj.get<std::string>(), "Autosize"))
                                         ? DataSizing::AutoSize
                                         : hobj.get<Real64>();
                             }
@@ -7641,11 +7641,11 @@ namespace UnitarySystems {
 
                 bool runOnSensibleLoad = true;
                 if (auto it = fields.find("run_on_sensible_load"); it != fields.end()) {
-                    runOnSensibleLoad = Util::SameString(it.value().get<std::string>(), "YES");
+                    runOnSensibleLoad = equali(it.value().get<std::string>(), "YES");
                 }
                 bool runOnLatentLoad = false;
                 if (auto it = fields.find("run_on_latent_load"); it != fields.end()) {
-                    runOnLatentLoad = Util::SameString(it.value().get<std::string>(), "YES");
+                    runOnLatentLoad = equali(it.value().get<std::string>(), "YES");
                 }
 
                 if (runOnSensibleLoad && !runOnLatentLoad) {
@@ -7673,7 +7673,7 @@ namespace UnitarySystems {
                     thisSys.m_minWaterLoopTempForHR = it.value().get<Real64>();
                 }
                 if (auto it = fields.find("economizer_lockout"); it != fields.end()) { // duplicate above as default
-                    bool econoFlag = Util::SameString(it.value().get<std::string>(), "YES");
+                    bool econoFlag = equali(it.value().get<std::string>(), "YES");
                     if (econoFlag) {
                         thisSys.m_waterSideEconomizerFlag = true;
                     }
@@ -7820,7 +7820,7 @@ namespace UnitarySystems {
                 if (auto it = fields.find("minimum_supply_air_temperature");
                     it != fields.end()) { // not required field, has default (2C), and autosizable
                     thisSys.input_specs.minimum_supply_air_temperature =
-                        (it.value().type() == nlohmann::detail::value_t::string && Util::SameString(it.value().get<std::string>(), "Autosize"))
+                        (it.value().type() == nlohmann::detail::value_t::string && equali(it.value().get<std::string>(), "Autosize"))
                             ? DataSizing::AutoSize
                             : it.value().get<Real64>();
                 }
@@ -7840,7 +7840,7 @@ namespace UnitarySystems {
                 }
                 if (auto it = fields.find("cooling_supply_air_flow_rate"); it != fields.end()) { // not required field, autosizable
                     thisSys.input_specs.cooling_supply_air_flow_rate =
-                        (it.value().type() == nlohmann::detail::value_t::string && Util::SameString(it.value().get<std::string>(), "Autosize"))
+                        (it.value().type() == nlohmann::detail::value_t::string && equali(it.value().get<std::string>(), "Autosize"))
                             ? DataSizing::AutoSize
                             : it.value().get<Real64>();
                 }
@@ -7858,7 +7858,7 @@ namespace UnitarySystems {
                 }
                 if (auto it = fields.find("heating_supply_air_flow_rate"); it != fields.end()) { // not required field
                     thisSys.input_specs.heating_supply_air_flow_rate =
-                        (it.value().type() == nlohmann::detail::value_t::string && Util::SameString(it.value().get<std::string>(), "Autosize"))
+                        (it.value().type() == nlohmann::detail::value_t::string && equali(it.value().get<std::string>(), "Autosize"))
                             ? DataSizing::AutoSize
                             : it.value().get<Real64>();
                 }
@@ -7876,7 +7876,7 @@ namespace UnitarySystems {
                 }
                 if (auto it = fields.find("no_load_supply_air_flow_rate"); it != fields.end()) { // not required field
                     thisSys.input_specs.no_load_supply_air_flow_rate =
-                        (it.value().type() == nlohmann::detail::value_t::string && Util::SameString(it.value().get<std::string>(), "Autosize"))
+                        (it.value().type() == nlohmann::detail::value_t::string && equali(it.value().get<std::string>(), "Autosize"))
                             ? DataSizing::AutoSize
                             : it.value().get<Real64>();
                 }
@@ -7902,9 +7902,8 @@ namespace UnitarySystems {
                 if (fields.find("maximum_supply_air_temperature") != fields.end()) { // not required field, has default of 80 C
                     auto const &obj = fields.at("maximum_supply_air_temperature");
                     thisSys.input_specs.maximum_supply_air_temperature =
-                        (obj.type() == nlohmann::detail::value_t::string && Util::SameString(obj.get<std::string>(), "Autosize"))
-                            ? DataSizing::AutoSize
-                            : obj.get<Real64>();
+                        (obj.type() == nlohmann::detail::value_t::string && equali(obj.get<std::string>(), "Autosize")) ? DataSizing::AutoSize
+                                                                                                                        : obj.get<Real64>();
                 }
                 if (auto it = fields.find("maximum_outdoor_dry_bulb_temperature_for_supplemental_heater_operation");
                     it != fields.end()) { // not required field, has default

@@ -2284,11 +2284,11 @@ namespace AirflowNetwork {
                                                                        cNumericFields);
 
             simulation_control.ductSizing.name = Alphas(1);
-            if (Util::SameString(Alphas(2), Util::makeUPPER("MaximumVelocity"))) {
+            if (Util::SameString(Alphas(2), "MaximumVelocity")) {
                 simulation_control.ductSizing.method = DuctSizingMethod::MaxVelocity;
-            } else if (Util::SameString(Alphas(2), Util::makeUPPER("PressureLoss"))) {
+            } else if (Util::SameString(Alphas(2), "PressureLoss")) {
                 simulation_control.ductSizing.method = DuctSizingMethod::PressureLoss;
-            } else if (Util::SameString(Alphas(2), Util::makeUPPER("PressureLossWithMaximumVelocity"))) {
+            } else if (Util::SameString(Alphas(2), "PressureLossWithMaximumVelocity")) {
                 simulation_control.ductSizing.method = DuctSizingMethod::VelocityAndLoss;
             } else {
                 ShowSevereError(m_state, format("{} {} object, {} = {}  is invalid.", RoutineName, CurrentModuleObject, cAlphaFields(2), Alphas(2)));
