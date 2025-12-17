@@ -394,16 +394,14 @@ void GetPIUs(EnergyPlusData &state)
                 // The reheat coil control node is necessary for hot water reheat, but not necessary for
                 // electric or gas reheat.
                 if (thisPIU.HCoilType == HtgCoilType::SimpleHeating) {
-                    thisPIU.HotControlNode = GetCoilWaterInletNode(state,
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type"),
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                                   ErrorsFound);
+                    std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
+                    thisPIU.HotControlNode =
+                        GetCoilWaterInletNode(state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                 }
                 if (thisPIU.HCoilType == HtgCoilType::SteamAirHeating) {
-                    thisPIU.HotControlNode = GetCoilSteamInletNode(state,
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type"),
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                                   ErrorsFound);
+                    std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
+                    thisPIU.HotControlNode =
+                        GetCoilSteamInletNode(state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                 }
                 thisPIU.MixerName = ip->getAlphaFieldValue(fields, objectSchemaProps, "zone_mixer_name");
                 thisPIU.FanName = ip->getAlphaFieldValue(fields, objectSchemaProps, "fan_name");
