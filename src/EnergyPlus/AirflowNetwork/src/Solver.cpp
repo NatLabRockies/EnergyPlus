@@ -10374,7 +10374,7 @@ namespace AirflowNetwork {
         }
         // Validate EPlus Node names and types
         for (int i = 1; i <= DisSysNumOfNodes; ++i) {
-            if (DisSysNodeData(i).EPlusName == "" || Util::SameString(DisSysNodeData(i).EPlusName, "Other")) {
+            if (DisSysNodeData(i).EPlusName.empty() || Util::SameString(DisSysNodeData(i).EPlusName, "Other")) {
                 continue;
             }
             LocalError = false;
