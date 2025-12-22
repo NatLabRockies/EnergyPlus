@@ -1001,6 +1001,8 @@ namespace PlantPipingSystemsManager {
 
     void SimulateGroundDomains(EnergyPlusData &state, bool initOnly);
 
+    Real64 calcFluxWeightingFactor(const Real64 weightedHeatFlux, const Real64 uniformHeatFlux);
+
     void CheckIfAnySlabs(EnergyPlusData &state);
 
     void CheckIfAnyBasements(EnergyPlusData &state);

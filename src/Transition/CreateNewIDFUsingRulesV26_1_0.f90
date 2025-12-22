@@ -383,6 +383,21 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with A, insert the rules here
 
+              CASE('AIRTERMINAL:SINGLEDUCT:PARALLELPIU:REHEAT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:9)=InArgs(1:9)
+                  ! InArgs(10) is deleted
+                  OutArgs(10:CurArgs-1)=InArgs(11:CurArgs)
+                  CurArgs = CurArgs - 1
+              CASE('AIRTERMINAL:SINGLEDUCT:SERIESPIU:REHEAT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:8)=InArgs(1:8)
+                  ! InArgs(9) is deleted
+                  OutArgs(9:CurArgs-1)=InArgs(10:CurArgs)
+                  CurArgs = CurArgs - 1
+
               ! If your original object starts with C, insert the rules here
 
               ! If your original object starts with D, insert the rules here

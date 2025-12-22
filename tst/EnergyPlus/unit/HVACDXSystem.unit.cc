@@ -639,6 +639,23 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
     EXPECT_NEAR(state->dataLoopNodes->Node(ControlNode).HumRat, state->dataLoopNodes->Node(ControlNode).HumRatMax, 0.0000001);
     // latent load needed to increase compressor speed to speed 4
     EXPECT_EQ(4, thisSys->m_CoolingSpeedNum);
+
+    // test for divide by zero error in controlCoolingSystemToSP
+    thisSys->m_DesiredOutletTemp = 23.888888888888900;
+    thisSys->m_DesiredOutletHumRat = 0.0092857142857142895;
+    state->dataLoopNodes->Node(InletNode).MassFlowRate = 1.3840962084222401;
+    state->dataLoopNodes->Node(InletNode).Temp = 16.566173051926114;
+    state->dataLoopNodes->Node(InletNode).HumRat = 0.0092873376541228961;
+    state->dataLoopNodes->Node(InletNode).HumRatMax = -999;
+
+    has_err_output(true);
+    EXPECT_NO_THROW(thisSys->controlCoolingSystemToSP(*state, airLoopNum, FirstHVACIteration, HXUnitOn, CompressorOn));
+    EXPECT_EQ(thisSys->m_CoolingPartLoadFrac, 0);
+    std::string const expected_error =
+        "   ** Warning ** CoilSystem:Cooling:DX - sensible part-load ratio calculation failed: part-load ratio limits exceeded, for unit = DX "
+        "COOLING COIL SYSTEM\n   **   ~~~   ** Estimated part-load ratio = 0.000\n   **   ~~~   ** The estimated part-load ratio will be used and "
+        "the simulation continues. Occurrence info:\n   **   ~~~   **  Environment=, at Simulation time= 00:-15 - 00:00\n";
+    compare_err_stream(expected_error, true);
 }
 
 TEST_F(EnergyPlusFixture, VariableSpeedCoils_LatentDegradation_Test)
@@ -1149,6 +1166,23 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
     EXPECT_LT(outHumRat3, outHumRat1);        // lower outlet humrat with multimode's alternate operating mode
     EXPECT_NEAR(outHumRat1, 0.01166, 0.0001); // sensible control yields higher outlet humrat
     EXPECT_NEAR(outHumRat3, 0.01119, 0.0001); // multimode control yields lower outlet humrat
+
+    // test for divide by zero error in controlCoolingSystemToSP
+    thisSys->m_DesiredOutletTemp = 23.888888888888900;
+    thisSys->m_DesiredOutletHumRat = 0.0092857142857142895;
+    state->dataLoopNodes->Node(InletNode).MassFlowRate = 1.3840962084222401;
+    state->dataLoopNodes->Node(InletNode).Temp = 16.566173051926114;
+    state->dataLoopNodes->Node(InletNode).HumRat = 0.0092873376541228961;
+    state->dataLoopNodes->Node(InletNode).HumRatMax = -999;
+
+    has_err_output(true);
+    EXPECT_NO_THROW(thisSys->controlCoolingSystemToSP(*state, airLoopNum, FirstHVACIteration, HXUnitOn, CompOn));
+    EXPECT_EQ(thisSys->m_CoolingPartLoadFrac, 0);
+    std::string const expected_error =
+        "   ** Warning ** CoilSystem:Cooling:DX - sensible part-load ratio calculation failed: part-load ratio limits exceeded, for unit = DX "
+        "COOLING COIL SYSTEM\n   **   ~~~   ** Estimated part-load ratio = 0.000\n   **   ~~~   ** The estimated part-load ratio will be used and "
+        "the simulation continues. Occurrence info:\n   **   ~~~   **  Environment=, at Simulation time= 00:-15 - 00:00\n";
+    compare_err_stream(expected_error, true);
 }
 
 } // namespace EnergyPlus

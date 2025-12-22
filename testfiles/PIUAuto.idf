@@ -2306,7 +2306,6 @@
     Zone 1 PIU Pri Air Inlet Node,  !- Supply Air Inlet Node Name
     Zone 1 PIU Sec Air Inlet Node,  !- Secondary Air Inlet Node Name
     Zone 1 PIU Air Outlet Node,  !- Outlet Node Name
-    Zone 1 Reheat Air Inlet Node,  !- Reheat Coil Air Inlet Node Name
     Zone 1 PIU Mixer,        !- Zone Mixer Name
     Zone 1 PIU Fan,          !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -2345,7 +2344,6 @@
     Zone 3 PIU Pri Air Inlet Node,  !- Supply Air Inlet Node Name
     Zone 3 PIU Sec Air Inlet Node,  !- Secondary Air Inlet Node Name
     Zone 3 PIU Air Outlet Node,  !- Outlet Node Name
-    Zone 3 Reheat Air Inlet Node,  !- Reheat Coil Air Inlet Node Name
     Zone 3 PIU Mixer,        !- Zone Mixer Name
     Zone 3 PIU Fan,          !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type

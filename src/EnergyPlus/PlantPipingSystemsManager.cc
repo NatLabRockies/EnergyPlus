@@ -341,7 +341,8 @@ namespace PlantPipingSystemsManager {
                         }
                     }
 
-                    thisDomain.HeatFluxWeightingFactor = thisDomain.TotalEnergyWeightedHeatFlux / thisDomain.TotalEnergyUniformHeatFlux;
+                    thisDomain.HeatFluxWeightingFactor =
+                        calcFluxWeightingFactor(thisDomain.TotalEnergyWeightedHeatFlux, thisDomain.TotalEnergyUniformHeatFlux);
                     thisDomain.TotalEnergyWeightedHeatFlux = 0.0;
 
                     // Finally, adjust the weighted heat flux so that energy balances
@@ -390,6 +391,18 @@ namespace PlantPipingSystemsManager {
             }
             state.dataPlantPipingSysMgr->WriteEIOFlag = false;
         }
+    }
+
+    Real64 calcFluxWeightingFactor(const Real64 weightedHeatFlux, const Real64 uniformHeatFlux)
+    {
+        Real64 returnValue;
+        Real64 constexpr tolerance = 1.0e-6;
+        if (std::abs(uniformHeatFlux) <= tolerance) {
+            returnValue = 1.0;
+        } else {
+            returnValue = weightedHeatFlux / uniformHeatFlux;
+        }
+        return returnValue;
     }
 
     void GetPipingSystemsAndGroundDomainsInput(EnergyPlusData &state)

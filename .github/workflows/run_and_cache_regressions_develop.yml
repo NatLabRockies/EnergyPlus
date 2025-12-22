@@ -71,7 +71,7 @@ jobs:
         echo "CURRENT_SHA=$CURRENT_SHA" >> $GITHUB_ENV
 
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       id: cacheccache-restore
       with:
         path: |
@@ -141,7 +141,7 @@ jobs:
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
@@ -172,7 +172,7 @@ jobs:
         fi;
         mv testfiles testfiles-develop
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       with:
         path: |
           ./build/testfiles-develop

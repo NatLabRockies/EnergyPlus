@@ -1492,7 +1492,6 @@
     ZN_1_FLR_1_SEC_1 VAV Box Inlet Node,  !- Supply Air Inlet Node Name
     ZN_1_FLR_1_SEC_1 Exhaust Node,  !- Secondary Air Inlet Node Name
     ZN_1_FLR_1_SEC_1 VAV Box Outlet Node,  !- Outlet Node Name
-    ZN_1_FLR_1_SEC_1 VAV Box Damper Node,  !- Reheat Coil Air Inlet Node Name
     Zone 1 PIU Mixer,        !- Zone Mixer Name
     Zone 1 PIU Fan,          !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type

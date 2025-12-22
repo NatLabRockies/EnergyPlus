@@ -48803,24 +48803,22 @@ AirTerminal:SingleDuct:SeriesPIU:Reheat,
        \type node
   A5,  \field Outlet Node Name
        \type node
-  A6,  \field Reheat Coil Air Inlet Node Name
-       \type node
-  A7,  \field Zone Mixer Name
+  A6,  \field Zone Mixer Name
        \type object-list
        \object-list ZoneMixers
-  A8,  \field Fan Name
+  A7,  \field Fan Name
        \note Fan type must be Fan:SystemModel or Fan:ConstantVolume
        \type object-list
        \object-list FansCV
        \object-list FansSystemModel
-  A9,  \field Reheat Coil Object Type
+  A8,  \field Reheat Coil Object Type
        \required-field
        \type choice
        \key Coil:Heating:Water
        \key Coil:Heating:Electric
        \key Coil:Heating:Fuel
        \key Coil:Heating:Steam
-  A10, \field Reheat Coil Name
+  A9,  \field Reheat Coil Name
        \required-field
        \type object-list
        \object-list HeatingCoilName
@@ -48841,7 +48839,7 @@ AirTerminal:SingleDuct:SeriesPIU:Reheat,
        \type real
        \minimum> 0.0
        \default 0.001
-  A11, \field Fan Control Type
+  A10, \field Fan Control Type
        \note If VariableSpeed, then the fan object type must be Fan:SystemModel
        \type choice
        \key VariableSpeed
@@ -48854,7 +48852,7 @@ AirTerminal:SingleDuct:SeriesPIU:Reheat,
        \minimum 0.0
        \maximum 1.0
        \default 0.3
-  A12, \field Heating Control Type
+  A11, \field Heating Control Type
        \type choice
        \key Staged
        \key Modulated
@@ -48916,25 +48914,22 @@ AirTerminal:SingleDuct:ParallelPIU:Reheat,
        \type node
   A5,  \field Outlet Node Name
        \type node
-  A6,  \field Reheat Coil Air Inlet Node Name
-       \type node
-       \note mixer outlet node
-  A7,  \field Zone Mixer Name
+  A6,  \field Zone Mixer Name
        \type object-list
        \object-list ZoneMixers
-  A8,  \field Fan Name
+  A7,  \field Fan Name
        \note Fan type must be Fan:SystemModel or Fan:ConstantVolume
        \type object-list
        \object-list FansCV
        \object-list FansSystemModel
-  A9,  \field Reheat Coil Object Type
+  A8,  \field Reheat Coil Object Type
        \required-field
        \type choice
        \key Coil:Heating:Water
        \key Coil:Heating:Electric
        \key Coil:Heating:Fuel
        \key Coil:Heating:Steam
-  A10, \field Reheat Coil Name
+  A9,  \field Reheat Coil Name
        \required-field
        \type object-list
        \object-list HeatingCoilName
@@ -48955,7 +48950,7 @@ AirTerminal:SingleDuct:ParallelPIU:Reheat,
        \type real
        \minimum> 0.0
        \default 0.001
-  A11, \field Fan Control Type
+  A10, \field Fan Control Type
        \note If VariableSpeed, then the fan object type must be Fan:SystemModel
        \type choice
        \key VariableSpeed
@@ -48968,7 +48963,7 @@ AirTerminal:SingleDuct:ParallelPIU:Reheat,
        \minimum 0.0
        \maximum 1.0
        \default 0.3
-  A12, \field Heating Control Type
+  A11, \field Heating Control Type
        \type choice
        \key Staged
        \key Modulated

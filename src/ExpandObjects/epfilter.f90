@@ -9589,7 +9589,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Fan Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN
@@ -9627,7 +9626,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Mixer Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN

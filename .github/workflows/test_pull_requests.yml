@@ -67,7 +67,7 @@ jobs:
         echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
     - name: Baseline Regression Testing caching
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       id: cachebaselineregression
       with:
         path: |
@@ -83,7 +83,7 @@ jobs:
         echo "ENABLE_PCH=OFF" >> $GITHUB_ENV
 
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       id: cacheccache-restore
       with:
         path: |
@@ -207,7 +207,7 @@ jobs:
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
@@ -248,7 +248,7 @@ jobs:
       continue-on-error: true
       run: python ./scripts/dev/gha_regressions.py ./build/testfiles-develop ./build/testfiles ./regressions
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       id: upload_regressions
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'  # only run this if regressions were encountered "failed"
       with:
