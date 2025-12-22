@@ -390,19 +390,15 @@ void GetPIUs(EnergyPlusData &state)
                                                      ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
                                                      ErrorsFound);
 
-                  std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
-                  thisPIU.HotControlNode = GetCoilWaterInletNode(state,
-                                                                   ctype,
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                                   ErrorsFound);
+                    std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
+                    thisPIU.HotControlNode =
+                        GetCoilWaterInletNode(state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                     break;
                 }
                 case HtgCoilType::SteamAirHeating: {
-                   std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
-                   int SteamCoilIndex = SteamCoils::GetSteamCoilIndex(state,
-                                                                       ctype,
-                                                                       ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                                       ErrorsFound);
+                    std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
+                    int SteamCoilIndex = SteamCoils::GetSteamCoilIndex(
+                        state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                     thisPIU.HCoilInAirNode = SteamCoils::GetCoilAirInletNode(
                         state, SteamCoilIndex, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
 
@@ -424,7 +420,6 @@ void GetPIUs(EnergyPlusData &state)
                 default: {
                     break;
                 }
-
                 }
                 thisPIU.MixerName = ip->getAlphaFieldValue(fields, objectSchemaProps, "zone_mixer_name");
                 thisPIU.FanName = ip->getAlphaFieldValue(fields, objectSchemaProps, "fan_name");
