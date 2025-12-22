@@ -384,13 +384,10 @@ void GetPIUs(EnergyPlusData &state)
                 // The reheat coil control node is necessary for hot water reheat, but not necessary for electric or gas reheat.
                 switch (thisPIU.HCoilType) {
                 case HtgCoilType::SimpleHeating: {
-                    thisPIU.HCoilInAirNode =
-                        WaterCoils::GetCoilInletNode(state,
-                                                     ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type"),
-                                                     ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                     ErrorsFound);
-
                     std::string ctype = ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type");
+                    thisPIU.HCoilInAirNode = WaterCoils::GetCoilInletNode(
+                        state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
+
                     thisPIU.HotControlNode =
                         GetCoilWaterInletNode(state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                     break;
@@ -402,10 +399,8 @@ void GetPIUs(EnergyPlusData &state)
                     thisPIU.HCoilInAirNode = SteamCoils::GetCoilAirInletNode(
                         state, SteamCoilIndex, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
 
-                    thisPIU.HotControlNode = GetCoilSteamInletNode(state,
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_object_type"),
-                                                                   ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"),
-                                                                   ErrorsFound);
+                    thisPIU.HotControlNode =
+                        GetCoilSteamInletNode(state, ctype, ip->getAlphaFieldValue(fields, objectSchemaProps, "reheat_coil_name"), ErrorsFound);
                     break;
                 }
                 case HtgCoilType::Electric:
