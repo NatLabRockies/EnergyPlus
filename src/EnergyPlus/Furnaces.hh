@@ -105,6 +105,7 @@ namespace Furnaces {
         int FanSchedPtr;                    // Index to fan operating mode schedule
         int FanAvailSchedPtr;               // Index to fan availability schedule
         int ControlZoneNum;                 // Index to controlled zone
+        int airloopNum;                     // Index to air loop
         int ZoneSequenceCoolingNum;         // Index to cooling sequence/priority for this zone
         int ZoneSequenceHeatingNum;         // Index to heating sequence/priority for this zone
         int CoolingCoilType_Num;            // Numeric Equivalent for Cooling Coil Type
@@ -248,15 +249,15 @@ namespace Furnaces {
         bool FirstPass;                                   // used to determine when first call is made
 
         FurnaceEquipConditions()
-            : FurnaceType_Num(0), FurnaceIndex(0), SchedPtr(0), FanSchedPtr(0), FanAvailSchedPtr(0), ControlZoneNum(0), ZoneSequenceCoolingNum(0),
-              ZoneSequenceHeatingNum(0), CoolingCoilType_Num(0), CoolingCoilIndex(0), ActualDXCoilIndexForHXAssisted(0), CoolingCoilUpstream(true),
-              HeatingCoilType_Num(0), HeatingCoilIndex(0), ReheatingCoilType_Num(0), ReheatingCoilIndex(0), CoilControlNode(0), HWCoilAirInletNode(0),
-              HWCoilAirOutletNode(0), SuppCoilAirInletNode(0), SuppCoilAirOutletNode(0), SuppHeatCoilType_Num(0), SuppHeatCoilIndex(0),
-              SuppCoilControlNode(0), FanType_Num(0), FanIndex(0), FurnaceInletNodeNum(0), FurnaceOutletNodeNum(0), OpMode(0),
-              LastMode(Furnaces::ModeOfOperation::Invalid), AirFlowControl(AirFlowControlConstFan::Invalid), FanPlace(0), NodeNumOfControlledZone(0),
-              WatertoAirHPType(0), CoolingConvergenceTolerance(0.0), HeatingConvergenceTolerance(0.0), DesignHeatingCapacity(0.0),
-              DesignCoolingCapacity(0.0), CoolingCoilSensDemand(0.0), HeatingCoilSensDemand(0.0), CoolingCoilLatentDemand(0.0),
-              DesignSuppHeatingCapacity(0.0), DesignFanVolFlowRate(0.0), DesignFanVolFlowRateEMSOverrideOn(false),
+            : FurnaceType_Num(0), FurnaceIndex(0), SchedPtr(0), FanSchedPtr(0), FanAvailSchedPtr(0), ControlZoneNum(0), airloopNum(0),
+              ZoneSequenceCoolingNum(0), ZoneSequenceHeatingNum(0), CoolingCoilType_Num(0), CoolingCoilIndex(0), ActualDXCoilIndexForHXAssisted(0),
+              CoolingCoilUpstream(true), HeatingCoilType_Num(0), HeatingCoilIndex(0), ReheatingCoilType_Num(0), ReheatingCoilIndex(0),
+              CoilControlNode(0), HWCoilAirInletNode(0), HWCoilAirOutletNode(0), SuppCoilAirInletNode(0), SuppCoilAirOutletNode(0),
+              SuppHeatCoilType_Num(0), SuppHeatCoilIndex(0), SuppCoilControlNode(0), FanType_Num(0), FanIndex(0), FurnaceInletNodeNum(0),
+              FurnaceOutletNodeNum(0), OpMode(0), LastMode(Furnaces::ModeOfOperation::Invalid), AirFlowControl(AirFlowControlConstFan::Invalid),
+              FanPlace(0), NodeNumOfControlledZone(0), WatertoAirHPType(0), CoolingConvergenceTolerance(0.0), HeatingConvergenceTolerance(0.0),
+              DesignHeatingCapacity(0.0), DesignCoolingCapacity(0.0), CoolingCoilSensDemand(0.0), HeatingCoilSensDemand(0.0),
+              CoolingCoilLatentDemand(0.0), DesignSuppHeatingCapacity(0.0), DesignFanVolFlowRate(0.0), DesignFanVolFlowRateEMSOverrideOn(false),
               DesignFanVolFlowRateEMSOverrideValue(0.0), DesignMassFlowRate(0.0), MaxCoolAirVolFlow(0.0), MaxCoolAirVolFlowEMSOverrideOn(false),
               MaxCoolAirVolFlowEMSOverrideValue(0.0), MaxHeatAirVolFlow(0.0), MaxHeatAirVolFlowEMSOverrideOn(false),
               MaxHeatAirVolFlowEMSOverrideValue(0.0), MaxNoCoolHeatAirVolFlow(0.0), MaxNoCoolHeatAirVolFlowEMSOverrideOn(false),

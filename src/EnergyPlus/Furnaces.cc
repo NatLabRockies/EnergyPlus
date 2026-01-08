@@ -274,6 +274,12 @@ namespace Furnaces {
             state.dataFurnaces->GetFurnaceInputFlag = false;
         }
 
+        // Save the current AFNLoopHeatingCoilMaxRTF for comparison with the one calculated below
+        Real64 refAFNLoopHeatingCoilMaxRTF(0.0);
+        if (state.afn->distribution_simulated) {
+            refAFNLoopHeatingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
+        }
+
         // Find the correct Furnace
         if (CompIndex == 0) {
             FurnaceNum = UtilityRoutines::FindItemInList(FurnaceName, state.dataFurnaces->Furnace);
@@ -757,6 +763,50 @@ namespace Furnaces {
         // Report the current Furnace output
         ReportFurnace(state, FurnaceNum, AirLoopNum);
 
+        // Get the actual maximum RTF for AFN simulations
+        if (state.afn->distribution_simulated) {
+            Real64 heatingCoilRTF = 0.0;
+            Real64 suppHeatingCoilRTF = 0.0;
+            bool errorFound(false);
+            switch (state.dataFurnaces->Furnace(FurnaceNum).HeatingCoilType_Num) {
+            case Coil_HeatingGasOrOtherFuel:
+            case Coil_HeatingElectric:
+            case Coil_HeatingDesuperheater: {
+                int heatingCoilIndex;
+                HeatingCoils::GetCoilIndex(state, state.dataFurnaces->Furnace(FurnaceNum).HeatingCoilName, heatingCoilIndex, errorFound);
+                if (heatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataHeatingCoils->HeatingCoil(heatingCoilIndex).RTF;
+                }
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, format("The index of \"{}\" is not found", state.dataFurnaces->Furnace(FurnaceNum).HeatingCoilName));
+                ShowContinueError(state, format("...occurs for {}", state.dataFurnaces->Furnace(FurnaceNum).Name));
+                errorFound = false;
+            }
+            switch (state.dataFurnaces->Furnace(FurnaceNum).SuppHeatCoilType_Num) {
+            case Coil_HeatingGasOrOtherFuel:
+            case Coil_HeatingElectric:
+            case Coil_HeatingDesuperheater: {
+                int suppHeatingCoilIndex;
+                HeatingCoils::GetCoilIndex(state, state.dataFurnaces->Furnace(FurnaceNum).SuppHeatCoilName, suppHeatingCoilIndex, errorFound);
+                if (suppHeatingCoilIndex > 0) {
+                    suppHeatingCoilRTF = state.dataHeatingCoils->HeatingCoil(suppHeatingCoilIndex).RTF;
+                }
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, format("The index of \"{}\" is not found", state.dataFurnaces->Furnace(FurnaceNum).SuppHeatCoilName));
+                ShowContinueError(state, format("...occurs for {}", state.dataFurnaces->Furnace(FurnaceNum).Name));
+                errorFound = false;
+            }
+            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
+                max(refAFNLoopHeatingCoilMaxRTF, heatingCoilRTF, suppHeatingCoilRTF);
+        }
+
+        
         // Reset OnOffFanPartLoadFraction to 1 in case another on/off fan is called without a part-load curve
         state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
 
@@ -1066,6 +1116,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    state.dataFurnaces->Furnace(FurnaceNum).airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
@@ -1677,6 +1728,7 @@ namespace Furnaces {
                 //             Determine if system is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    state.dataFurnaces->Furnace(FurnaceNum).airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
@@ -3056,6 +3108,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    state.dataFurnaces->Furnace(FurnaceNum).airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
@@ -4056,6 +4109,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    state.dataFurnaces->Furnace(FurnaceNum).airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).Branch(BranchNum).TotalComponents;
@@ -6914,6 +6968,12 @@ namespace Furnaces {
                         state, cFurnaceTypes(state.dataFurnaces->Furnace(FurnaceNum).FurnaceType_Num), state.dataFurnaces->Furnace(FurnaceNum).Name);
 
                     state.dataFurnaces->Furnace(FurnaceNum).DesignHeatingCapacity = state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).HeatCap;
+                    if (state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity > 0) {
+                        // apply sizing factor and reset it to 1.0 so it doesn't get apply again during heating coil sizing
+                        state.dataFurnaces->Furnace(FurnaceNum).DesignHeatingCapacity *=
+                            state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity;
+                        state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity = 1.0;
+                    }
                 }
 
                 if (state.dataFurnaces->Furnace(FurnaceNum).DesignHeatingCapacity < SmallLoad) {
