@@ -8,7 +8,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with District Heating and Cooling as necessary.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -258,7 +258,7 @@
     0,                       !- Design Minimum Flow Rate {m3/s}
     INTERMITTENT;            !- Pump Control Type
 
-HeatPump:AirToWater:FuelFired:Heating,
+  HeatPump:AirToWater:FuelFired:Heating,
     Heating Coil,            !- Name
     Heating Coil Load Loop Intermediate Node,  !- Water Inlet Node Name
     Heating Coil Load Loop Supply Outlet Node,  !- Water Outlet Node Name
@@ -275,8 +275,8 @@ HeatPump:AirToWater:FuelFired:Heating,
     NotModulated,            !- Flow Mode
     DryBulb,                 !- Outdoor Air Temperature Curve Input Variable
     EnteringCondenser,       !- Water Temperature Curve Input Variable
-    HeatingCapCurveFuncTemp,        !- Normalized Capacity Function of Temperature Curve Name
-    HeatingEIRCurveFuncTemp,        !- Fuel Energy Input Ratio Function of Temperature Curve Name
+    HeatingCapCurveFuncTemp, !- Normalized Capacity Function of Temperature Curve Name
+    HeatingEIRCurveFuncTemp, !- Fuel Energy Input Ratio Function of Temperature Curve Name
     EIRCurveFuncPLR,         !- Fuel Energy Input Ratio Function of PLR Curve Name
     0.2,                     !- Minimum Part Load Ratio
     1.0,                     !- Maximum Part Load Ratio
@@ -290,7 +290,6 @@ HeatPump:AirToWater:FuelFired:Heating,
     auxElecEIRCurveFuncTempCurve,  !- Auxiliary Electric Energy Input Ratio Function of Temperature Curve Name
     auxElecEIRFoPLRCurve,    !- Auxiliary Electric Energy Input Ratio Function of PLR Curve Name
     20;                      !- Standby Electric Power {W}
-
 
   Curve:Quadratic,
     EIRDefrostFoTCurve,      !- Name
@@ -335,6 +334,7 @@ HeatPump:AirToWater:FuelFired:Heating,
     100;                     !- Maximum Value of x
 
 !- From Table 3 in "Pathways to Decarbonization of Residential Heating", Fridlyand et al. (2021)
+
   Curve:Biquadratic,
     HeatingCapCurveFuncTemp, !- Name
     1.011452,                !- Coefficient1 Constant
@@ -437,7 +437,8 @@ HeatPump:AirToWater:FuelFired:Heating,
     Heating Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
     Heating Coil Load Profile Load Schedule,  !- Load Schedule Name
     0.005,                   !- Peak Flow Rate {m3/s}
-    Heating Coil Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Heating Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
 ! *** Cooling coil loop
 
@@ -517,7 +518,7 @@ HeatPump:AirToWater:FuelFired:Heating,
     0,                       !- Design Minimum Flow Rate {m3/s}
     INTERMITTENT;            !- Pump Control Type
 
-HeatPump:AirToWater:FuelFired:Cooling,
+  HeatPump:AirToWater:FuelFired:Cooling,
     Cooling Coil,            !- Name
     Cooling Coil Load Loop Intermediate Node,  !- Water Inlet Node Name
     Cooling Coil Load Loop Supply Outlet Node,  !- Water Outlet Node Name
@@ -544,7 +545,6 @@ HeatPump:AirToWater:FuelFired:Cooling,
     auxElecEIRCurveFuncTempCurve,  !- Auxiliary Electric Energy Input Ratio Function of Temperature Curve Name
     auxElecEIRFoPLRCurve,    !- Auxiliary Electric Energy Input Ratio Function of PLR Curve Name
     20;                      !- Standby Electric Power {W}
-
 
   Curve:Biquadratic,
     CapCurveFuncTemp2,       !- Name
@@ -608,7 +608,8 @@ HeatPump:AirToWater:FuelFired:Cooling,
     Cooling Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
     Cooling Coil Load Profile Load Schedule,  !- Load Schedule Name
     0.005,                   !- Peak Flow Rate {m3/s}
-    Cooling Coil Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Cooling Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
   OutdoorAir:Node,
     Outdoor Air Inlet Node;  !- Name
@@ -644,3 +645,4 @@ HeatPump:AirToWater:FuelFired:Cooling,
   Output:Variable,*,Fuel-fired Absorption HeatPump Mass Flow Rate,Hourly;
 
   Output:Variable,*,Fuel-fired Absorption HeatPump Volumetric Flow Rate,Hourly;
+

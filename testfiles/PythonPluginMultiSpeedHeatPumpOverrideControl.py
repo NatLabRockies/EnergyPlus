@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -75,25 +75,25 @@ class CoilSpeedControl(EnergyPlusPlugin):
 
             # get variable handles if needed
             if self.need_to_get_handles:
-                self.zone_air_temp_handle = self.api.exchange.get_variable_handle(state,
-                                                                                  "Zone Air Temperature",
-                                                                                  "LIVING ZONE")
+                self.zone_air_temp_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Air Temperature", "LIVING ZONE"
+                )
 
-                self.heating_setpoint_handle = self.api.exchange.get_variable_handle(state,
-                                                                                     "Zone Thermostat Heating Setpoint Temperature",
-                                                                                     "LIVING ZONE")
+                self.heating_setpoint_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Thermostat Heating Setpoint Temperature", "LIVING ZONE"
+                )
 
-                self.cooling_setpoint_handle = self.api.exchange.get_variable_handle(state,
-                                                                                     "Zone Thermostat Cooling Setpoint Temperature",
-                                                                                     "LIVING ZONE")
+                self.cooling_setpoint_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Thermostat Cooling Setpoint Temperature", "LIVING ZONE"
+                )
 
-                self.coil_speed_level_handle = self.api.exchange.get_actuator_handle(state,
-                                                                                     "Coil Speed Control",
-                                                                                     "Unitary System DX Coil Speed Value",
-                                                                                     "TWOSPEED HEAT PUMP 1")
+                self.coil_speed_level_handle = self.api.exchange.get_actuator_handle(
+                    state, "Coil Speed Control", "Unitary System DX Coil Speed Value", "TWOSPEED HEAT PUMP 1"
+                )
 
-
-                self.coil_speed_override_report_handle = self.api.exchange.get_global_handle(state, "CoilSpeedLevelOverrideReport")
+                self.coil_speed_override_report_handle = self.api.exchange.get_global_handle(
+                    state, "CoilSpeedLevelOverrideReport"
+                )
 
                 self.need_to_get_handles = False
 

@@ -122,7 +122,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Small Office,            !- Name
@@ -451,84 +451,84 @@
     .42000,                  !- <none>
     .43000,                  !- <none>
     .44000,                  !- <none>
-    .45000,                  !- Extended Field
-    .46000,                  !- Extended Field
-    .47000,                  !- Extended Field
-    .48000,                  !- Extended Field
-    .49000,                  !- Extended Field
-    .50000,                  !- Extended Field
-    .51000,                  !- Extended Field
-    .52000,                  !- Extended Field
-    .53000,                  !- Extended Field
-    .54000,                  !- Extended Field
-    .55000,                  !- Extended Field
-    .56000,                  !- Extended Field
-    .57000,                  !- Extended Field
-    .58000,                  !- Extended Field
-    .59000,                  !- Extended Field
-    .60000,                  !- Extended Field
-    .61000,                  !- Extended Field
-    .62000,                  !- Extended Field
-    .63000,                  !- Extended Field
-    .64000,                  !- Extended Field
-    .65000,                  !- Extended Field
-    .66000,                  !- Extended Field
-    .67000,                  !- Extended Field
-    .68000,                  !- Extended Field
-    .69000,                  !- Extended Field
-    .70000,                  !- Extended Field
-    .71000,                  !- Extended Field
-    .72000,                  !- Extended Field
-    .73000,                  !- Extended Field
-    .74000,                  !- Extended Field
-    .75000,                  !- Extended Field
-    .76000,                  !- Extended Field
-    .77000,                  !- Extended Field
-    .78000,                  !- Extended Field
-    .79000,                  !- Extended Field
-    .80000,                  !- Extended Field
-    .81000,                  !- Extended Field
-    .82000,                  !- Extended Field
-    .83000,                  !- Extended Field
-    .84000,                  !- Extended Field
-    .85000,                  !- Extended Field
-    .86000,                  !- Extended Field
-    .87000,                  !- Extended Field
-    .88000,                  !- Extended Field
-    .89000,                  !- Extended Field
-    .90000,                  !- Extended Field
-    .95000,                  !- Extended Field
-    1.00000,                 !- Extended Field
-    1.05000,                 !- Extended Field
-    1.10000,                 !- Extended Field
-    1.15000,                 !- Extended Field
-    1.20000,                 !- Extended Field
-    1.25000,                 !- Extended Field
-    1.30000,                 !- Extended Field
-    1.35000,                 !- Extended Field
-    1.40000,                 !- Extended Field
-    1.45000,                 !- Extended Field
-    1.50000,                 !- Extended Field
-    1.55000,                 !- Extended Field
-    1.60000,                 !- Extended Field
-    1.65000,                 !- Extended Field
-    1.70000,                 !- Extended Field
-    1.75000,                 !- Extended Field
-    1.80000,                 !- Extended Field
-    1.85000,                 !- Extended Field
-    1.90000,                 !- Extended Field
-    1.95000,                 !- Extended Field
-    2.00000,                 !- Extended Field
-    2.05000,                 !- Extended Field
-    2.10000,                 !- Extended Field
-    2.15000,                 !- Extended Field
-    2.20000,                 !- Extended Field
-    2.25000,                 !- Extended Field
-    2.30000,                 !- Extended Field
-    2.35000,                 !- Extended Field
-    2.40000,                 !- Extended Field
-    2.45000,                 !- Extended Field
-    2.50000;                 !- Extended Field
+    .45000,                  !- <none>
+    .46000,                  !- <none>
+    .47000,                  !- <none>
+    .48000,                  !- <none>
+    .49000,                  !- <none>
+    .50000,                  !- <none>
+    .51000,                  !- <none>
+    .52000,                  !- <none>
+    .53000,                  !- <none>
+    .54000,                  !- <none>
+    .55000,                  !- <none>
+    .56000,                  !- <none>
+    .57000,                  !- <none>
+    .58000,                  !- <none>
+    .59000,                  !- <none>
+    .60000,                  !- <none>
+    .61000,                  !- <none>
+    .62000,                  !- <none>
+    .63000,                  !- <none>
+    .64000,                  !- <none>
+    .65000,                  !- <none>
+    .66000,                  !- <none>
+    .67000,                  !- <none>
+    .68000,                  !- <none>
+    .69000,                  !- <none>
+    .70000,                  !- <none>
+    .71000,                  !- <none>
+    .72000,                  !- <none>
+    .73000,                  !- <none>
+    .74000,                  !- <none>
+    .75000,                  !- <none>
+    .76000,                  !- <none>
+    .77000,                  !- <none>
+    .78000,                  !- <none>
+    .79000,                  !- <none>
+    .80000,                  !- <none>
+    .81000,                  !- <none>
+    .82000,                  !- <none>
+    .83000,                  !- <none>
+    .84000,                  !- <none>
+    .85000,                  !- <none>
+    .86000,                  !- <none>
+    .87000,                  !- <none>
+    .88000,                  !- <none>
+    .89000,                  !- <none>
+    .90000,                  !- <none>
+    .95000,                  !- <none>
+    1.00000,                 !- <none>
+    1.05000,                 !- <none>
+    1.10000,                 !- <none>
+    1.15000,                 !- <none>
+    1.20000,                 !- <none>
+    1.25000,                 !- <none>
+    1.30000,                 !- <none>
+    1.35000,                 !- <none>
+    1.40000,                 !- <none>
+    1.45000,                 !- <none>
+    1.50000,                 !- <none>
+    1.55000,                 !- <none>
+    1.60000,                 !- <none>
+    1.65000,                 !- <none>
+    1.70000,                 !- <none>
+    1.75000,                 !- <none>
+    1.80000,                 !- <none>
+    1.85000,                 !- <none>
+    1.90000,                 !- <none>
+    1.95000,                 !- <none>
+    2.00000,                 !- <none>
+    2.05000,                 !- <none>
+    2.10000,                 !- <none>
+    2.15000,                 !- <none>
+    2.20000,                 !- <none>
+    2.25000,                 !- <none>
+    2.30000,                 !- <none>
+    2.35000,                 !- <none>
+    2.40000,                 !- <none>
+    2.45000,                 !- <none>
+    2.50000;                 !- <none>
 
   Table:IndependentVariableList,
     Spectral and Angular Data,  !- Name
@@ -2301,7 +2301,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -2315,7 +2315,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -2329,7 +2329,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -2343,7 +2343,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2355,7 +2355,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2367,7 +2367,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2797,15 +2797,18 @@
     0.8,                     !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.9,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Fan:ConstantVolume,
     Supply Fan 1,            !- Name

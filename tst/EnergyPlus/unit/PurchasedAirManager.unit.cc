@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -303,7 +303,7 @@ TEST_F(EnergyPlusFixture, IdealLoadsAirSystem_GetInput)
     EXPECT_ENUM_EQ(PurchAir(1).CoolingLimit, LimitType::None);
     EXPECT_ENUM_EQ(PurchAir(1).DehumidCtrlType, HumControl::ConstantSupplyHumidityRatio);
     EXPECT_ENUM_EQ(PurchAir(1).HumidCtrlType, HumControl::ConstantSupplyHumidityRatio);
-    // confirm a constant fuel efficiency defalt value of 1.0
+    // confirm a constant fuel efficiency default value of 1.0
     EXPECT_EQ(PurchAir(1).heatFuelEffSched, Sched::GetScheduleAlwaysOn(*state));
     EXPECT_EQ(PurchAir(1).coolFuelEffSched, Sched::GetScheduleAlwaysOn(*state));
     EXPECT_EQ(PurchAir(1).heatFuelEffSched->getCurrentVal(), 1.0);

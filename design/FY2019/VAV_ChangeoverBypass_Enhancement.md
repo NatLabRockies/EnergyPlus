@@ -8,9 +8,9 @@ Enhancement: VAV Changeover Bypass
 
 ## Justification for New Feature ##
 
-The existing AirloopHVAC:UnitaryHeatCool:VAVChangeoverBypass model, a constant volume flow system, uses a bypass duct to short-circuit excess supply air back to the inlet of the unit. The following figure from the Engineering Reference illustrates the use and location of the bypass duct. 
+The existing AirloopHVAC:UnitaryHeatCool:VAVChangeoverBypass model, a constant volume flow system, uses a bypass duct to short-circuit excess supply air back to the inlet of the unit. The following figure from the Engineering Reference illustrates the use and location of the bypass duct.
 
-Figure 1: ![Figure 1](https://github.com/NREL/EnergyPlus/blob/New-Feature-CBVAV-Mods/doc/engineering-reference/media/image5053.png)
+Figure 1: ![Figure 1](https://github.com/NatLabRockies/EnergyPlus/blob/New-Feature-CBVAV-Mods/doc/engineering-reference/media/image5053.png)
  Schematic of Changeover Bypass VAV Unitary System with Blow Through Fan
 
 With this configuration the treated supply air that bypasses the zones mixes with the return air prior to entering the outdoor air mixer. At the higher bypass fractions this can lead to unreasonably low or high air temperatures entering the OA mixing box. When the AirloopHVAC:OutdoorAirSystem is used external to this model (upstream of the Air Inlet Node in the previous figure), mixing the bypass air in this fashion (i.e., after the external OA Mixer) leads to unexpected economizer operation since the true mixed air temperature entering the external OA Mixer would be different had the bypass air been mixed prior to the external OA Mixer.
@@ -37,11 +37,11 @@ Tiejun Wu at Carrier was the first to notice this problem and last year offered 
 
     Suggestions: 1.  Model an air side economizer properly.
                  2.  Add a priority control mode “LoadPriority” with minimum run time setting in a mode.
-                 3.  Allow modeling of ceiling plenum bypass and return. 
+                 3.  Allow modeling of ceiling plenum bypass and return.
 
 The solution to the above mentioned problem is to move the internal bypass duct away from the model and mix the bypass air using an AirloopHVAC:ReturnPlenum or AirloopHVAC:ZoneMixer (if a plenum is not used). Figure 2 represents the proposed enhancement to the Changeover Bypass model. The bypass duct leaves the system at the Bypass Duct Splitter Node and connects to existing air loop mixing objects.
 
-Figure 2: ![Figure 2](https://github.com/NREL/EnergyPlus/blob/New-Feature-CBVAV-Mods/doc/engineering-reference/media/ChangeoverBypassVAV-ReturnPlenumOrMixer.PNG)
+Figure 2: ![Figure 2](https://github.com/NatLabRockies/EnergyPlus/blob/New-Feature-CBVAV-Mods/doc/engineering-reference/media/ChangeoverBypassVAV-ReturnPlenumOrMixer.PNG)
  Proposed changes to Changeover Bypass VAV Unitary System Model
 
 
@@ -51,7 +51,7 @@ Figure 2: ![Figure 2](https://github.com/NREL/EnergyPlus/blob/New-Feature-CBVAV-
  2.  Expand priority control type options to include LoadPriority and minimum time limit.
 
 
- 
+
 ## E-mail and  Conference Call Conclusions ##
 
 3/28/2019 - Provide initial schematic of proposed changes to select individuals for review.
@@ -63,7 +63,7 @@ Figure 2: ![Figure 2](https://github.com/NREL/EnergyPlus/blob/New-Feature-CBVAV-
 4/1/2019 - Edwin commented:
 
     1 - Like the DOAS to multiple AHU, I feel concerned about extra iteration required to handle this situation where you are coupling nodes together
-    2 - Presumably in figure 2 you don't need a zonemixer because the return plenum collects the zone return nodes 
+    2 - Presumably in figure 2 you don't need a zonemixer because the return plenum collects the zone return nodes
     3 - in figure 2 it mentions the internal OA mixer will have flow set to zero when using an AirLoopHVAC:OASys -- is there already a precedent for this? Does the solution algorithm rely on there being an OA mixer internal there? Seems like it could be a chance to remove some calculations that aren't necessary.
 
 4/2/2019 - Answers to Edwin's questions:
@@ -79,7 +79,7 @@ When a user connects the HVAC system's bypass duct to a return plenum or mixing 
 
 *Pros* - Backward compatibility with previous model configuration, enhanced economizer operation and more realistic configuration with real world applications.
 
-*Cons* - May increase simulation time to correctly model mixed conditions at air loop inlet. 
+*Cons* - May increase simulation time to correctly model mixed conditions at air loop inlet.
 
 ## Code Design and Programming ##
 
@@ -115,8 +115,3 @@ Transition will not be required.
 
 
 ## References ##
-
-
-
-
-

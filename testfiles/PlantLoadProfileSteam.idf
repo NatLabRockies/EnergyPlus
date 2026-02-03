@@ -10,7 +10,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with Boiler:Steam.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Steam Example,  !- Name
@@ -112,8 +112,8 @@
     NO,                      !- Do System Sizing Calculation
     NO,                      !- Do Plant Sizing Calculation
     YES,                     !- Run Simulation for Sizing Periods
-    NO,                     !- Run Simulation for Weather File Run Periods
-    NO,                     !- Do HVAC Sizing Simulation for Sizing Periods
+    NO,                      !- Run Simulation for Weather File Run Periods
+    NO,                      !- Do HVAC Sizing Simulation for Sizing Periods
     1;                       !- Maximum Number of HVAC Sizing Simulation Passes
 
   PlantLoop,
@@ -150,19 +150,19 @@
   PlantEquipmentOperationSchemes,
     Main Loop Operation,     !- Name
     PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
-    Steam Boiler Plant Heat Supply,          !- Control Scheme 1 Name
+    Steam Boiler Plant Heat Supply,  !- Control Scheme 1 Name
     AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
 
   PlantEquipmentOperation:HeatingLoad,
-    Steam Boiler Plant Heat Supply,          !- Name
+    Steam Boiler Plant Heat Supply,  !- Name
     0,                       !- Load Range 1 Lower Limit {W}
     10000000,                !- Load Range 1 Upper Limit {W}
-    Steam Boiler Heating Plant;           !- Range 1 Equipment List Name
+    Steam Boiler Heating Plant;  !- Range 1 Equipment List Name
 
   PlantEquipmentList,
-    Steam Boiler Heating Plant,           !- Name
-    Boiler:Steam,         !- Equipment 1 Object Type
-    Steam Boiler Plant Boiler;       !- Equipment 1 Name
+    Steam Boiler Heating Plant,  !- Name
+    Boiler:Steam,            !- Equipment 1 Object Type
+    Steam Boiler Plant Boiler;  !- Equipment 1 Name
 
   BranchList,
     Supply Branches,         !- Name
@@ -190,14 +190,14 @@
   Branch,
     Supply Inlet Branch,     !- Name
     ,                        !- Pressure Drop Curve Name
-    Pump:VariableSpeed:Condensate,      !- Component 1 Object Type
-    Steam Boiler Plant Steam Circ Pump,                    !- Component 1 Name
+    Pump:VariableSpeed:Condensate,  !- Component 1 Object Type
+    Steam Boiler Plant Steam Circ Pump,  !- Component 1 Name
     Supply Inlet Node,       !- Component 1 Inlet Node Name
-    Condensate Pump Outlet Node;!- Component 1 Outlet Node Name
+    Condensate Pump Outlet Node;  !- Component 1 Outlet Node Name
 
   Pump:VariableSpeed:Condensate,
     Steam Boiler Plant Steam Circ Pump,  !- Name
-    Supply Inlet Node,  !- Inlet Node Name
+    Supply Inlet Node,       !- Inlet Node Name
     Condensate Pump Outlet Node,  !- Outlet Node Name
     autosize,                !- Design Steam Volume Flow Rate {m3/s}
     179352,                  !- Design Pump Head {Pa}
@@ -213,8 +213,8 @@
   Branch,
     Heating Branch,          !- Name
     ,                        !- Pressure Drop Curve Name
-    Boiler:Steam,         !- Component 1 Object Type
-    Steam Boiler Plant Boiler,       !- Component 1 Name
+    Boiler:Steam,            !- Component 1 Object Type
+    Steam Boiler Plant Boiler,  !- Component 1 Name
     Steam Boiler Plant Boiler Inlet Node,  !- Component 1 Inlet Node Name
     Steam Boiler Plant Boiler Outlet Node;  !- Component 1 Outlet Node Name
 
@@ -237,14 +237,14 @@
   Branch,
     Supply Outlet Branch,    !- Name
     ,                        !- Pressure Drop Curve Name
-    Pipe:Adiabatic:Steam,          !- Component 1 Object Type
+    Pipe:Adiabatic:Steam,    !- Component 1 Object Type
     Supply Outlet Pipe,      !- Component 1 Name
-    Supply Outlet Pipe Inlet Node,!- Component 1 Inlet Node Name
+    Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
     Supply Outlet Node;      !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic:Steam,
     Supply Outlet Pipe,      !- Name
-    Supply Outlet Pipe Inlet Node,!- Inlet Node Name
+    Supply Outlet Pipe Inlet Node,  !- Inlet Node Name
     Supply Outlet Node;      !- Outlet Node Name
 
   BranchList,
@@ -292,20 +292,20 @@
     Demand Load Profile 1 Outlet Node;  !- Component 1 Outlet Node Name
 
   LoadProfile:Plant,
-    Load Profile 1,                     !- Name
-    Demand Load Profile 1 Inlet Node,   !- Inlet Node Name
+    Load Profile 1,          !- Name
+    Demand Load Profile 1 Inlet Node,  !- Inlet Node Name
     Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
-    Load Profile 1 Load Schedule,       !- Load Schedule Name
-    0.008,                              !- Peak Flow Rate {m3/s}
+    Load Profile 1 Load Schedule,  !- Load Schedule Name
+    0.008,                   !- Peak Flow Rate {m3/s}
     Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
-    Steam,                              !- Plant Loop Fluid Type
-    3,                                  !- Degree of SubCooling
-    15;                                 !- Degree of Loop SubCooling
+    Steam,                   !- Plant Loop Fluid Type
+    3,                       !- Degree of SubCooling {C}
+    15;                      !- Degree of Loop SubCooling {C}
 
   Branch,
     Demand Outlet Branch,    !- Name
     ,                        !- Pressure Drop Curve Name
-    Pipe:Adiabatic:Steam,          !- Component 1 Object Type
+    Pipe:Adiabatic:Steam,    !- Component 1 Object Type
     Demand Outlet Pipe,      !- Component 1 Name
     Demand Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
     Demand Outlet Node;      !- Component 1 Outlet Node Name
@@ -344,8 +344,8 @@
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
     UNTIL: 7:00,2000,        !- Field 3
-    UNTIL: 17:00,10000,      !- Field 4
-    UNTIL: 24:00,6000;       !- Field 5
+    UNTIL: 17:00,10000,      !- Field 5
+    UNTIL: 24:00,6000;       !- Field 7
 
   Schedule:Compact,
     Load Profile 1 Flow Frac Schedule,  !- Name
@@ -357,7 +357,7 @@
   Sizing:Plant,
     Main Loop,               !- Plant or Condenser Loop Name
     Steam,                   !- Loop Type
-    110,                    !- Design Loop Exit Temperature {C}
+    110,                     !- Design Loop Exit Temperature {C}
     25;                      !- Loop Design Temperature Difference {deltaC}
 
   Output:VariableDictionary,Regular;
@@ -377,7 +377,7 @@
   Output:Variable,*,Boiler Heating Rate,Hourly;
 
   Output:Variable,*,Boiler Steam Efficiency,Hourly;
-  
+
   Output:Variable,*,Boiler Steam Mass Flow Rate,Hourly;
 
   Output:Variable,*,Boiler Steam Inlet Temperature,Hourly;

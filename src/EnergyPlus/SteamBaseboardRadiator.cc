@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -909,11 +909,9 @@ namespace SteamBaseboardRadiator {
 
         static constexpr std::string_view RoutineName("InitSteamCoil");
 
-        int Loop;
         int SteamInletNode;
         Real64 StartEnthSteam;
         Real64 SteamDensity;
-        bool errFlag;
 
         // Do the one time initializations
         if (state.dataSteamBaseboardRadiator->MyOneTimeFlag) {
@@ -930,7 +928,7 @@ namespace SteamBaseboardRadiator {
         // Need to check all units to see if they are on ZoneHVAC:EquipmentList or issue warning
         if (!state.dataSteamBaseboardRadiator->ZoneEquipmentListChecked && state.dataZoneEquip->ZoneEquipInputsFilled) {
             state.dataSteamBaseboardRadiator->ZoneEquipmentListChecked = true;
-            for (Loop = 1; Loop <= state.dataSteamBaseboardRadiator->NumSteamBaseboards; ++Loop) {
+            for (int Loop = 1; Loop <= state.dataSteamBaseboardRadiator->NumSteamBaseboards; ++Loop) {
                 if (CheckZoneEquipmentList(state,
                                            state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                            state.dataSteamBaseboardRadiator->SteamBaseboard(Loop).Name)) {
@@ -945,7 +943,7 @@ namespace SteamBaseboardRadiator {
 
         if (state.dataSteamBaseboardRadiator->SetLoopIndexFlag(BaseboardNum)) {
             if (allocated(state.dataPlnt->PlantLoop)) {
-                errFlag = false;
+                bool errFlag = false;
                 ScanPlantLoopsForObject(state,
                                         state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name,
                                         state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType,
@@ -1073,16 +1071,7 @@ namespace SteamBaseboardRadiator {
         bool IsAutoSize(false);              // Indicator to autosizing steam flow
         Real64 SteamVolFlowRateMaxDes(0.0);  // Design maximum steam volume flow for reporting
         Real64 SteamVolFlowRateMaxUser(0.0); // User hard-sized maximum steam volume flow for reporting
-        std::string CompName;                // component name
-        std::string CompType;                // component type
-        std::string SizingString;            // input field sizing description (e.g., Nominal Capacity)
         Real64 TempSize;                     // autosized value of coil input field
-        int FieldNum = 1;                    // IDD numeric field number where input field description is found
-        int SizingMethod;                    // Integer representation of sizing method name (HeatingCapacitySizing)
-        bool PrintFlag;                      // TRUE when sizing information is reported in the eio file
-        int CapSizingMethod(0); // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, and FractionOfAutosizedHeatingCapacity )
-
-        int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
 
         SteamBaseboardDesignData SteamBaseboardDesignDataObject{state.dataSteamBaseboardRadiator->SteamBaseboardDesign(
             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).DesignObjectPtr)}; // Contains the data for variable flow hydronic systems
@@ -1096,7 +1085,7 @@ namespace SteamBaseboardRadiator {
         if (PltSizSteamNum > 0) {
 
             state.dataSize->DataScalableCapSizingON = false;
-
+            int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
             if (CurZoneEqNum > 0) {
 
                 if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax == AutoSize) {
@@ -1116,14 +1105,16 @@ namespace SteamBaseboardRadiator {
                                     state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name);
 
                     auto &zoneEqSizing = state.dataSize->ZoneEqSizing(CurZoneEqNum);
-                    CompType = state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam;
-                    CompName = state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name;
+                    std::string CompName = state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name; // component name
+                    std::string CompType = state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam;             // component type
                     state.dataSize->DataFracOfAutosizedHeatingCapacity = 1.0;
                     state.dataSize->DataZoneNumber = state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).ZonePtr;
-                    SizingMethod = HeatingCapacitySizing;
-                    FieldNum = 1;
-                    PrintFlag = false;
-                    SizingString = state.dataSteamBaseboardRadiator->SteamBaseboardNumericFields(BaseboardNum).FieldNames(FieldNum) + " [W]";
+                    int SizingMethod = HeatingCapacitySizing; // Integer representation of sizing method name (HeatingCapacitySizing)
+                    int FieldNum = 1;                         // IDD numeric field number where input field description is found
+                    std::string SizingString = state.dataSteamBaseboardRadiator->SteamBaseboardNumericFields(BaseboardNum).FieldNames(FieldNum) +
+                                               " [W]"; // input field sizing description (e.g., Nominal Capacity)
+                    int CapSizingMethod =
+                        0; // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, and FractionOfAutosizedHeatingCapacity)
                     CapSizingMethod = SteamBaseboardDesignDataObject.HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == HeatingDesignCapacity || CapSizingMethod == CapacityPerFloorArea ||
@@ -1154,6 +1145,7 @@ namespace SteamBaseboardRadiator {
                             TempSize = state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).ScaledHeatingCapacity;
                         }
                         bool errorsFound = false;
+                        bool PrintFlag = false; // TRUE when sizing information is reported in the eio file
                         HeatingCapacitySizer sizerHeatingCapacity;
                         sizerHeatingCapacity.overrideSizingString(SizingString);
                         sizerHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);

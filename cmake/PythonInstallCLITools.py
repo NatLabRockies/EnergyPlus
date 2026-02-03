@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -75,7 +75,7 @@ def install_packages(python_lib_dir: Path):
         return
 
     to_install = [f"{n}=={v}" for n, v in pkgs_to_install.items()]
-    
+
     is_windows = platform.system() == "Windows"
     is_arm = platform.machine().lower() in ("arm64", "aarch64")
     if "ghedesigner" in pkgs_to_install and is_windows and is_arm:

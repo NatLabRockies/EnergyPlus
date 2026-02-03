@@ -118,7 +118,7 @@ CURVE:QUADRATIC	Curve:Quadratic
 CURVE:QUADRATICLINEAR	Curve:QuadraticLinear
 CURVE:TRIQUADRATIC	Curve:Triquadratic
 CUSTOM METER	Meter:Custom
-CUSTOM METER:DECREMENT	Meter:CustomDecrement 
+CUSTOM METER:DECREMENT	Meter:CustomDecrement
 Daylighting Device:Shelf	DaylightingDevice:Shelf
 Daylighting Device:Tubular	DaylightingDevice:Tubular
 DAYLIGHTING:DElight	Daylighting:DELight:Controls

@@ -111,7 +111,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -1156,7 +1156,7 @@
     1.500,                   !- <none>
     1.625,                   !- <none>
     1.750,                   !- <none>
-    1.875;                   !- Extended Field
+    1.875;                   !- <none>
 
   Table:IndependentVariableList,
     IECEffWBFlowMod_IndependentVariableList,  !- Name
@@ -1451,8 +1451,8 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     West Zone IEC Outlet Node,  !- Air Inlet Node Name
     West Zone CCoil Air Outlet Node,  !- Air Outlet Node Name
     DXSysACCoolCapFT,        !- Total Cooling Capacity Function of Temperature Curve Name
@@ -1910,8 +1910,8 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     East Zone IEC Outlet Node,  !- Air Inlet Node Name
     East Zone CCoil Air Outlet Node,  !- Air Outlet Node Name
     DXSysACCoolCapFT,        !- Total Cooling Capacity Function of Temperature Curve Name
@@ -2674,7 +2674,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA West Zone,       !- Name
@@ -2732,7 +2739,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA East Zone,       !- Name
@@ -2841,7 +2855,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     284,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2855,7 +2869,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0.,                      !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2500,                  !- Fraction Radiant
@@ -2869,7 +2883,7 @@
     Watts/Area,              !- Design Power Input Calculation Method
     ,                        !- Watts per Unit {W}
     ,                        !- Number of Units
-    200,                     !- Watts per Zone Floor Area {W/m2}
+    200,                     !- Watts per Floor Area {W/m2}
     Data Center Operation Schedule,  !- Design Power Input Schedule Name
     Data Center CPU Loading Schedule,  !- CPU Loading  Schedule Name
     Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
@@ -2982,7 +2996,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     284,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2996,7 +3010,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0.,                      !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3010,7 +3024,7 @@
     Watts/Area,              !- Design Power Input Calculation Method
     ,                        !- Watts per Unit {W}
     ,                        !- Number of Units
-    200,                     !- Watts per Zone Floor Area {W/m2}
+    200,                     !- Watts per Floor Area {W/m2}
     Data Center Operation Schedule,  !- Design Power Input Schedule Name
     Data Center CPU Loading Schedule,  !- CPU Loading  Schedule Name
     Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -190,7 +190,7 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
 
     InitZoneHybridUnitaryAirConditioners(*state, 1, 1);
     // setup local variables for model inputs
-    Real64 Requestedheating = 0.0;
+    Real64 RequestedHeating = 0.0;
     Real64 RequestedCooling = 0.0;
     constexpr Real64 Requested_Humidification = 0.0;
     constexpr Real64 Requested_Dehumidification = 0.0;
@@ -198,11 +198,11 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
 
     // Scenario 1: Hi Cooling
 
-    Requestedheating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
+    RequestedHeating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
     RequestedCooling = -58469.99445; // Watts (Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     Real64 NormalizationDivisor = 3.0176;
@@ -232,7 +232,7 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     thisUnitary.InitializeModelParams();
     thisUnitary.ScalingFactor = thisUnitary.ScalingFactor * 2;
     thisUnitary.ScaledSystemMaximumSupplyAirMassFlowRate = thisUnitary.ScaledSystemMaximumSupplyAirMassFlowRate * 2;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     modenumber = thisUnitary.PrimaryMode;
@@ -260,7 +260,7 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     thisUnitary.ScaledSystemMaximumSupplyAirMassFlowRate = thisUnitary.ScaledSystemMaximumSupplyAirMassFlowRate / 2; // reset back to original values
     thisUnitary.SecInletTemp = 150;
     thisUnitary.SecInletHumRat = 0;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     modenumber = thisUnitary.PrimaryMode;
@@ -271,14 +271,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     EXPECT_NEAR(Electricpower, 244 / NormalizationDivisor, 1);
 
     // Scenario 4: Low Cooling
-    Requestedheating = -64358.68966; //-
+    RequestedHeating = -64358.68966; //-
     RequestedCooling = -633.6613591; // W
     /// add all the correct values to set in pZoneHybridUnitaryAirConditioner
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletHumRat = Wosa;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     modenumber = thisUnitary.PrimaryMode;
@@ -297,13 +297,13 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     EXPECT_LT(Electricpower, 5000 / NormalizationDivisor);
 
     // Scenario 5: No Heating or Cooling, Minimum Ventilation
-    Requestedheating = -55795.8058;
+    RequestedHeating = -55795.8058;
     RequestedCooling = 8171.47128;
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletHumRat = Wosa;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     modenumber = thisUnitary.PrimaryMode;
@@ -325,7 +325,7 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     thisUnitary.InitializeModelParams();
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletHumRat = Wosa;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
 
@@ -341,7 +341,7 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     thisUnitary.InitializeModelParams();
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletHumRat = Wosa;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     Tsa = thisUnitary.OutletTemp;
@@ -349,14 +349,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     EXPECT_NEAR(Tsa, Tosa + 0.36, 0.1);
 
     // Scenario 6: Availability Manager Off
-    Requestedheating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
+    RequestedHeating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
     RequestedCooling = -58469.99445; // Watts (Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletHumRat = Wosa;
     thisUnitary.availStatus = Avail::Status::ForceOff;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     modenumber = thisUnitary.PrimaryMode;
@@ -396,14 +396,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     // All to get OA requirements
     GetOARequirements(*state);
 
-    Requestedheating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
+    RequestedHeating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
     RequestedCooling = -58469.99445; // Watts (Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
     thisUnitary.InletTemp = Tra;
     thisUnitary.SecInletTemp = Tosa;
     thisUnitary.SecInletMassFlowRate = DesignMinVR;
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
     ReportZoneHybridUnitaryAirConditioners(*state, 1);
 
     SystemReports::ReportVentilationLoads(*state);
@@ -1295,14 +1295,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ModelOperatingSetting
 
     InitZoneHybridUnitaryAirConditioners(*state, 1, 2);
 
-    constexpr Real64 Requestedheating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
+    constexpr Real64 RequestedHeating = -122396.255;  // Watts (Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate
     constexpr Real64 RequestedCooling = -58469.99445; // Watts (Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate
     constexpr Real64 Requested_Humidification = 0;
     constexpr Real64 Requested_Dehumidification = 0;
 
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     for (auto &Setting : thisUnitary.Settings) {
         const int MassFlowSolutionSize = Setting.oMode.sol.MassFlowRatio.size();
@@ -1508,18 +1508,18 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_RuntimeFraction_Initi
 
     InitZoneHybridUnitaryAirConditioners(*state, 1, 1);
     // setup local variables for model inputs
-    Real64 Requestedheating = 0.0;
+    Real64 RequestedHeating = 0.0;
     Real64 RequestedCooling = 0.0;
     constexpr Real64 Requested_Humidification = 0.0;
     constexpr Real64 Requested_Dehumidification = 0.0;
 
     // Scenario 1: Low Cooling
 
-    Requestedheating = -64358.68966; //-
+    RequestedHeating = -64358.68966; //-
     RequestedCooling = -633.6613591; // W
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, DesignMinVR);
 
     // output results
     Real64 Setting0Mode = thisUnitary.CurrentOperatingSettings[0].Mode;
@@ -1534,14 +1534,14 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_RuntimeFraction_Initi
     EXPECT_NEAR(Setting1RuntimeFraction, 0.453, 0.001); // Standby Mode
 
     // Scenario 2: Outside of env conditions. should go to standby and have standby energy
-    Requestedheating = -55795.8058;
+    RequestedHeating = -55795.8058;
     RequestedCooling = 8171.47128;
     thisUnitary.SecInletTemp = 150;
     thisUnitary.SecInletHumRat = 0;
 
     thisUnitary.Initialize(1);
     thisUnitary.InitializeModelParams();
-    thisUnitary.doStep(*state, RequestedCooling, Requestedheating, Requested_Humidification, Requested_Dehumidification, 0);
+    thisUnitary.doStep(*state, RequestedCooling, RequestedHeating, Requested_Humidification, Requested_Dehumidification, 0);
 
     // output results
     Setting0Mode = thisUnitary.CurrentOperatingSettings[0].Mode;

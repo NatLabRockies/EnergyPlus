@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -71,8 +71,10 @@ public:
     json decode(std::string_view csv, char t_delimiter = ',', int t_rows_to_skip = 0);
 
     std::vector<std::pair<std::string, bool>> const &errors();
+    std::vector<std::pair<std::string, bool>> const &warnings();
 
     bool hasErrors();
+    bool hasWarnings();
 
     enum class Token : size_t
     {
@@ -93,7 +95,8 @@ private:
     char delimiter = ',';
     int rows_to_skip = 0;
     char s[129] = {};
-    std::vector<std::pair<std::string, bool>> errors_; // the boolean is for continuing lines
+    std::vector<std::pair<std::string, bool>> errors_;   // the boolean is for continuing lines
+    std::vector<std::pair<std::string, bool>> warnings_; // the boolean is for continuing lines
 
     static void increment_both_index(size_t &index, size_t &line_index);
 

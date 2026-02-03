@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -148,12 +148,22 @@ Real64 HeatingWaterflowSizer::size(EnergyPlusData &state, Real64 _originalValue,
         state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterFlowPltSizNum(
             state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
         state.dataRptCoilSelection->coilSelectionReportObj->setCoilEntWaterTemp(state, this->compName, this->compType, Constant::HWInitConvTemp);
-        if (this->plantSizData.size() > 0 && this->dataPltSizHeatNum > 0) {
+        if (!this->plantSizData.empty() && this->dataPltSizHeatNum > 0) {
             state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterDeltaT(
                 state, this->compName, this->compType, this->plantSizData(this->dataPltSizHeatNum).DeltaT);
             state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgWaterTemp(
                 state, this->compName, this->compType, Constant::HWInitConvTemp - this->plantSizData(this->dataPltSizHeatNum).DeltaT);
         }
+        this->calcCoilWaterFlowRates(state,
+                                     this->compName,
+                                     this->compType,
+                                     this->autoSizedValue,
+                                     this->dataWaterLoopNum,
+                                     this->curZoneEqNum,
+                                     this->curSysNum,
+                                     this->curOASysNum,
+                                     this->finalZoneSizing,
+                                     this->finalSysSizing);
     }
     return this->autoSizedValue;
 }

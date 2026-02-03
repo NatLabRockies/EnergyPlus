@@ -81,6 +81,7 @@ set(test_src
     ConvectionCoefficients.unit.cc
     CoolTower.unit.cc
     CrossVentMgr.unit.cc
+    CsvParser.unit.cc
     CurveManager.unit.cc
     CustomMatchers.unit.cc
     DElightManager.unit.cc
@@ -193,6 +194,7 @@ set(test_src
     OutsideEnergySources.unit.cc
     PVWatts.unit.cc
     PackagedTerminalHeatPump.unit.cc
+    PCMThermalTank.unit.cc
     Photovoltaics.unit.cc
     PhotovoltaicThermalCollectors.unit.cc
     PierceSurface.unit.cc

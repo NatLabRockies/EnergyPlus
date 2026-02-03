@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2516,7 +2516,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySrdSurfLWR)
     EXPECT_DOUBLE_EQ(0.0, state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(4));
     // LWR Exchange Coefficient check for CTF method heat balance algorithm
     EXPECT_EQ(state->dataHeatBal->OverallHeatTransferSolutionAlgo, DataSurfaces::HeatTransferModel::CTF);
-    // HSurrFD coeffcient are zeros since the heat balance algorithm is not CondFD
+    // HSurrFD coefficient are zeros since the heat balance algorithm is not CondFD
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(1));
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(2));
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(3));
@@ -5910,7 +5910,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestTDDSurfWinHeatGain)
     state->dataSurfaceGeometry->SinZoneRelNorth(2) = std::sin(-state->dataHeatBal->Zone(2).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
-    int const HoursInDay(24);
+    int constexpr HoursInDay(24);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
         state->dataSurface->SurfSunCosHourly(hour) = 0.0;
@@ -7182,11 +7182,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     // set exterior surface and ground surface temperatures
     Real64 surf_TK = 20.0 + Constant::Kelvin;
     Real64 grnd_TK = 22.0 + Constant::Kelvin;
-    // calculate LWR exchange coefficent from exterior surface to ground
+    // calculate LWR exchange coefficient from exterior surface to ground
     result_LWRExchangeCoeff_surf1 = Constant::StefanBoltzmann * 0.9 * 0.5 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf2 = Constant::StefanBoltzmann * 0.9 * 0.2 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf3 = Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
-    // test LWR exchange coefficents b/n exterior wall and ground surfaces
+    // test LWR exchange coefficients b/n exterior wall and ground surfaces
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1));
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2));
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3));
@@ -8653,7 +8653,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_UpdateThermalHistoriesIZSurf
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfQdotRadSolarInRepPerAreaCalc)
 {
-    Real64 const diffTol = 0.0000000001;
+    Real64 constexpr diffTol = 0.0000000001;
     Real64 expectedResult;
 
     state->dataHeatBal->Zone.allocate(1);

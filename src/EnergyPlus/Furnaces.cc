@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -211,6 +211,12 @@ namespace Furnaces {
             // Get the furnace input
             GetFurnaceInput(state);
             state.dataFurnaces->GetFurnaceInputFlag = false;
+        }
+
+        // Save the current AFNLoopHeatingCoilMaxRTF for comparison with the one calculated below
+        Real64 refAFNLoopHeatingCoilMaxRTF(0.0);
+        if (state.afn->distribution_simulated) {
+            refAFNLoopHeatingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
         }
 
         // Find the correct Furnace
@@ -660,6 +666,49 @@ namespace Furnaces {
         // Report the current Furnace output
         ReportFurnace(state, FurnaceNum, AirLoopNum);
 
+        // Get the actual maximum RTF for AFN simulations
+        if (state.afn->distribution_simulated) {
+            Real64 heatingCoilRTF = 0.0;
+            Real64 suppHeatingCoilRTF = 0.0;
+            bool errorFound(false);
+            switch (thisFurnace.HeatingCoilType_Num) {
+            case HVAC::Coil_HeatingGasOrOtherFuel:
+            case HVAC::Coil_HeatingElectric:
+            case HVAC::Coil_HeatingDesuperheater: {
+                int heatingCoilIndex;
+                HeatingCoils::GetCoilIndex(state, thisFurnace.HeatingCoilName, heatingCoilIndex, errorFound);
+                if (heatingCoilIndex > 0) {
+                    heatingCoilRTF = state.dataHeatingCoils->HeatingCoil(heatingCoilIndex).RTF;
+                }
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, format("The index of \"{}\" is not found", thisFurnace.HeatingCoilName));
+                ShowContinueError(state, format("...occurs for {}", thisFurnace.Name));
+                errorFound = false;
+            }
+            switch (thisFurnace.SuppHeatCoilType_Num) {
+            case HVAC::Coil_HeatingGasOrOtherFuel:
+            case HVAC::Coil_HeatingElectric:
+            case HVAC::Coil_HeatingDesuperheater: {
+                int suppHeatingCoilIndex;
+                HeatingCoils::GetCoilIndex(state, thisFurnace.SuppHeatCoilName, suppHeatingCoilIndex, errorFound);
+                if (suppHeatingCoilIndex > 0) {
+                    suppHeatingCoilRTF = state.dataHeatingCoils->HeatingCoil(suppHeatingCoilIndex).RTF;
+                }
+            } break;
+            default:;
+            }
+            if (errorFound) {
+                ShowSevereError(state, format("The index of \"{}\" is not found", thisFurnace.SuppHeatCoilName));
+                ShowContinueError(state, format("...occurs for {}", thisFurnace.Name));
+                errorFound = false;
+            }
+            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
+                max(refAFNLoopHeatingCoilMaxRTF, heatingCoilRTF, suppHeatingCoilRTF);
+        }
+
         // Reset OnOffFanPartLoadFraction to 1 in case another on/off fan is called without a part-load curve
         state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
 
@@ -903,6 +952,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -1441,6 +1491,7 @@ namespace Furnaces {
                 //             Determine if system is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -2736,6 +2787,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -3667,6 +3719,7 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
+                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -4761,7 +4814,6 @@ namespace Furnaces {
             // Pass the fan cycling schedule index up to the air loop. Set the air loop unitary system flag.
             state.dataAirLoop->AirLoopControlInfo(AirLoopNum).cycFanSched = thisFurnace.fanOpModeSched;
             state.dataAirLoop->AirLoopControlInfo(AirLoopNum).UnitarySys = true;
-            // RR this is wrong, Op mode needs to be updated each time atep
             state.dataAirLoop->AirLoopControlInfo(AirLoopNum).fanOp = thisFurnace.fanOp;
 
             // Check that heat pump heating capacity is within 20% of cooling capacity
@@ -6273,6 +6325,12 @@ namespace Furnaces {
                     CheckSysSizing(state, HVAC::unitarySysTypeNames[(int)thisFurnace.type], thisFurnace.Name);
 
                     thisFurnace.DesignHeatingCapacity = state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).HeatCap;
+                    if (state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity > 0) {
+                        // apply sizing factor and reset it to 1.0 so it doesn't get apply again during heating coil sizing
+                        thisFurnace.DesignHeatingCapacity *=
+                            state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity;
+                        state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).FractionOfAutosizedHeatingCapacity = 1.0;
+                    }
                 }
 
                 if (thisFurnace.DesignHeatingCapacity < HVAC::SmallLoad) {
@@ -9071,16 +9129,13 @@ namespace Furnaces {
         if (par7_sensLatentFlag == 1.0) {
             if (LoadToBeMet == 0.0) {
                 return (SensibleLoadMet - LoadToBeMet) / 100.0;
-            } else {
-                return (SensibleLoadMet - LoadToBeMet) / LoadToBeMet;
             }
-        } else {
-            if (LoadToBeMet == 0.0) {
-                return (LatentLoadMet - LoadToBeMet) / 100.0;
-            } else {
-                return (LatentLoadMet - LoadToBeMet) / LoadToBeMet;
-            }
+            return (SensibleLoadMet - LoadToBeMet) / LoadToBeMet;
         }
+        if (LoadToBeMet == 0.0) {
+            return (LatentLoadMet - LoadToBeMet) / 100.0;
+        }
+        return (LatentLoadMet - LoadToBeMet) / LoadToBeMet;
     }
 
     Real64 CalcWaterToAirResidual(EnergyPlusData &state,
@@ -9210,9 +9265,8 @@ namespace Furnaces {
         // Calculate residual based on output calculation flag
         if (par7_latentOrSensible == 1.0) {
             return (ZoneSensLoadMet - LoadToBeMet) / LoadToBeMet;
-        } else {
-            return (ZoneLatLoadMet - LoadToBeMet) / LoadToBeMet;
         }
+        return (ZoneLatLoadMet - LoadToBeMet) / LoadToBeMet;
     }
 
     void SetAverageAirFlow(EnergyPlusData &state,
@@ -9244,7 +9298,7 @@ namespace Furnaces {
             state.dataFurnaces->FanSpeedRatio = state.dataFurnaces->CompOnFlowRatio;
         }
 
-        // IF the furnace is scheduled on or nightime cycle overrides fan schedule. Uses same logic as fan.
+        // IF the furnace is scheduled on or nighttime cycle overrides fan schedule. Uses same logic as fan.
         if (state.dataFurnaces->Furnace(FurnaceNum).availSched->getCurrentVal() > 0.0 &&
             ((state.dataFurnaces->Furnace(FurnaceNum).fanAvailSched->getCurrentVal() > 0.0 || state.dataHVACGlobal->TurnFansOn) &&
              !state.dataHVACGlobal->TurnFansOff)) {
@@ -10793,9 +10847,8 @@ namespace Furnaces {
         // Calculate residual based on output calculation flag
         if (par9_SensLatFlag == 1.0) {
             return (ZoneSensLoadMet - LoadToBeMet) / ResScale;
-        } else {
-            return (ZoneLatLoadMet - LoadToBeMet) / ResScale;
         }
+        return (ZoneLatLoadMet - LoadToBeMet) / ResScale;
     }
 
     //******************************************************************************
@@ -10859,9 +10912,8 @@ namespace Furnaces {
         // Calculate residual based on output calculation flag
         if (par9_SensLatFlag == 1.0) {
             return (ZoneSensLoadMet - LoadToBeMet) / ResScale;
-        } else {
-            return (ZoneLatLoadMet - LoadToBeMet) / ResScale;
         }
+        return (ZoneLatLoadMet - LoadToBeMet) / ResScale;
     }
 
     void SetVSHPAirFlow(EnergyPlusData &state,

@@ -14,13 +14,13 @@ The Carroll method is an approximation of gray-body long-wave radiation exchange
 The mean radiant temperature is calculated using three steps:
 
 1. Calculation of the mean radiant temperature “view factor”, Fi. These view factors represent each surface’s “view” to the mean radiant temperature node as though all surfaces were part of a spherical enclosure (i.e., they all have equal view of the node regardless of their orientation to each other). Fi is calculated as:
-	
+
     $$F_i=\frac{1}{1-\frac{A_i F_i}{\sum_1^n{A_j F_j} }}$$
 
     Because of the circular reference in this equation, the collection of all “view factors” must be solved iteratively, but only once per simulation as surface areas do not change throughout. This converges for realistic enclosures but won’t necessarily converge for “enclosures” having only two or three surfaces, particularly if there are large area disparities.
 
 2. Calculating the gray-body radiation resistance, F’i. This calculation must be computed every time surface emissivity changes. F’i is calculated as:
-	
+
     $$F'_i=\frac{\sigma\varepsilon_i}{\frac{\varepsilon_i}{F_i} +1-\varepsilon_i}$$
 
 3. Finally, the mean radiant temperature, Tr, is:
@@ -34,7 +34,7 @@ $$q=F'_i A_i (T_r^4-T_i^4)$$
 
 ## Input Output Reference Documentation ##
 
-See proposed changes in [Energy+.idd.in](https://github.com/NREL/EnergyPlus/pull/7534/files#diff-23ccf090b80d26e885712256b9a6d888). Will draft document once IDD is reviewed.
+See proposed changes in [Energy+.idd.in](https://github.com/NatLabRockies/EnergyPlus/pull/7534/files#diff-23ccf090b80d26e885712256b9a6d888). Will draft document once IDD is reviewed.
 
 ## Engineering Reference ##
 

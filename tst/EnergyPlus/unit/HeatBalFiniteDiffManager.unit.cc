@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -539,7 +539,7 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CheckFDNodeTempLimitsTest)
     EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 0);
     EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 0);
 
-    // Test 2-Surface 1: Temperature is below the minmum value.  Gets reset, error messages
+    // Test 2-Surface 1: Temperature is below the minimum value.  Gets reset, error messages
     surfNum = 1;
     nodeNum = 3;
     nodeTemp = -3000.0;
@@ -554,7 +554,7 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CheckFDNodeTempLimitsTest)
                                                           "   **   ~~~   ** Value has been reset to the lower limit value of -100.00."});
     compare_err_stream(error_string_21, true);
 
-    // Test 2-Surface 2: Temperature is below the minmum value.  Gets reset, error messages
+    // Test 2-Surface 2: Temperature is below the minimum value.  Gets reset, error messages
     surfNum = 2;
     nodeNum = 4;
     nodeTemp = -4000.0;
@@ -569,7 +569,7 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CheckFDNodeTempLimitsTest)
                                                           "   **   ~~~   ** Value has been reset to the lower limit value of -100.00."});
     compare_err_stream(error_string_22, true);
 
-    // Test 3-Surface 1: Temperature is below the minmum value for a second time.  Gets reset, but NO error messages
+    // Test 3-Surface 1: Temperature is below the minimum value for a second time.  Gets reset, but NO error messages
     surfNum = 1;
     nodeNum = 5;
     nodeTemp = -3000.0;
@@ -579,7 +579,7 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CheckFDNodeTempLimitsTest)
     EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 1);
     EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 0);
 
-    // Test 3-Surface 2: Temperature is below the minmum value for a second time.  Gets reset, but NO error messages
+    // Test 3-Surface 2: Temperature is below the minimum value for a second time.  Gets reset, but NO error messages
     surfNum = 2;
     nodeNum = 6;
     nodeTemp = -4000.0;

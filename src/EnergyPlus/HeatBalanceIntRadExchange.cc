@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -312,16 +312,20 @@ namespace HeatBalanceIntRadExchange {
                     SurfaceTempRad[ZoneSurfNum] = SurfaceTemp(SurfNum);
                     SurfaceEmiss[ZoneSurfNum] = construct.InsideAbsorpThermal;
                 }
+                SurfaceTempInKto4th[ZoneSurfNum] = pow_4(SurfaceTempRad[ZoneSurfNum] + Constant::Kelvin);
                 if (state.dataHeatBalIntRadExchg->CarrollMethod) {
-                    CarrollMRTNumerator += SurfaceTempRad[ZoneSurfNum] * zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
+                    // The original approach from Carroll's paper didn't balance because the mean radiant temperature was essentially the mean
+                    // of SurfaceTempRad. This has been updated to use SurfaceTempInKto4th so that the sum of the net long-wave radiation for each
+                    // surface equals 0.
+                    CarrollMRTNumerator += SurfaceTempInKto4th[ZoneSurfNum] * zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
                     CarrollMRTDenominator += zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
                 }
-                SurfaceTempInKto4th[ZoneSurfNum] = pow_4(SurfaceTempRad[ZoneSurfNum] + Constant::Kelvin);
             }
 
             if (state.dataHeatBalIntRadExchg->CarrollMethod) {
                 if (CarrollMRTDenominator > 0.0) {
-                    CarrollMRTInKTo4th = pow_4(CarrollMRTNumerator / CarrollMRTDenominator + Constant::Kelvin);
+                    // pow_4 and root_4 cancel out, so we can avoid calling root_4 here
+                    CarrollMRTInKTo4th = CarrollMRTNumerator / CarrollMRTDenominator;
                 } else {
                     // Likely only one surface in this enclosure
                     CarrollMRTInKTo4th = 293.15; // arbitrary value, IR will be zero
@@ -339,13 +343,13 @@ namespace HeatBalanceIntRadExchange {
                         Real64 CarrollMRTDenominatorWin(0.0);
                         for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
                             if (SendZoneSurfNum != RecZoneSurfNum) {
-                                CarrollMRTNumeratorWin +=
-                                    SurfaceTempRad[SendZoneSurfNum] * zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
+                                CarrollMRTNumeratorWin += pow_4(SurfaceTempRad[SendZoneSurfNum] + Constant::Kelvin) * zone_info.Fp[SendZoneSurfNum] *
+                                                          zone_info.Area[SendZoneSurfNum];
                                 CarrollMRTDenominatorWin += zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
                             }
                         }
                         if (CarrollMRTDenominatorWin > 0.0) {
-                            CarrollMRTInKTo4thWin = pow_4(CarrollMRTNumeratorWin / CarrollMRTDenominatorWin + Constant::Kelvin);
+                            CarrollMRTInKTo4thWin = CarrollMRTNumeratorWin / CarrollMRTDenominatorWin;
                         }
                         state.dataSurface->SurfWinIRfromParentZone(RecSurfNum) +=
                             (zone_info.Fp[RecZoneSurfNum] * CarrollMRTInKTo4thWin) / SurfaceEmiss[RecZoneSurfNum];
@@ -455,15 +459,13 @@ namespace HeatBalanceIntRadExchange {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         static constexpr std::string_view RoutineName("InitInteriorRadExchange: ");
-        bool NoUserInputF; // Logical flag signifying no input F's for zone
         bool ErrorsFound(false);
-        Real64 CheckValue1;
-        Real64 CheckValue2;
-        Real64 FinalCheckValue;
+        Real64 CheckValue1 = 0.0;
+        Real64 CheckValue2 = 0.0;
+        Real64 FinalCheckValue = 0.0;
         Array2D<Real64> SaveApproximateViewFactors; // Save for View Factor reporting
-        Real64 RowSum;
-        Real64 FixedRowSum;
-        int NumIterations;
+        Real64 FixedRowSum = 0.0;
+        int NumIterations = 0;
         std::string Option1; // view factor report option
 
         auto &ViewFactorReport = state.dataHeatBalIntRadExchg->ViewFactorReport;
@@ -520,8 +522,10 @@ namespace HeatBalanceIntRadExchange {
             thisEnclosure.Emissivity.dimension(numEnclosureSurfaces, 0.0);
             thisEnclosure.Azimuth.dimension(numEnclosureSurfaces, 0.0);
             thisEnclosure.Tilt.dimension(numEnclosureSurfaces, 0.0);
-            thisEnclosure.Fp.dimension(numEnclosureSurfaces, 1.0);
-            thisEnclosure.FMRT.dimension(numEnclosureSurfaces, 0.0);
+            if (state.dataHeatBalIntRadExchg->CarrollMethod) {
+                thisEnclosure.Fp.dimension(numEnclosureSurfaces, 1.0);
+                thisEnclosure.FMRT.dimension(numEnclosureSurfaces, 0.0);
+            }
             thisEnclosure.SurfacePtr.dimension(numEnclosureSurfaces, 0);
 
             // Initialize the enclosure surface arrays
@@ -573,8 +577,10 @@ namespace HeatBalanceIntRadExchange {
                 // If there is only one surface in a zone, then there is no radiant exchange
                 thisEnclosure.F = 0.0;
                 thisEnclosure.ScriptF = 0.0;
-                thisEnclosure.Fp = 0.0;
-                thisEnclosure.FMRT = 0.0;
+                if (state.dataHeatBalIntRadExchg->CarrollMethod) {
+                    thisEnclosure.Fp = 0.0;
+                    thisEnclosure.FMRT = 0.0;
+                }
                 if (state.dataGlobal->DisplayAdvancedReportVariables) {
                     print(state.files.eio, "Surface View Factor Check Values,{},0,0,0,-1,0,0\n", thisEnclosure.Name);
                 }
@@ -585,60 +591,70 @@ namespace HeatBalanceIntRadExchange {
             if (state.dataHeatBalIntRadExchg->CarrollMethod) {
 
                 // User View Factors cannot be used with Carroll method.
-                if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ZoneProperty:UserViewFactors:BySurfaceName")) {
+                if (state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ZoneProperty:UserViewFactors:BySurfaceName") != 0) {
                     ShowWarningError(state, "ZoneProperty:UserViewFactors:BySurfaceName objects have been defined, however View");
                     ShowContinueError(state, "  Factors are not used when Zone Radiant Exchange Algorithm is set to CarrollMRT.");
                 }
                 CalcFMRT(state, thisEnclosure.NumOfSurfaces, thisEnclosure.Area, thisEnclosure.FMRT);
                 CalcFp(thisEnclosure.NumOfSurfaces, thisEnclosure.Emissivity, thisEnclosure.FMRT, thisEnclosure.Fp);
             } else {
-                //  Get user supplied view factors if available in idf.
-
-                NoUserInputF = true;
+                // For radiant enclosures:
+                // If UseRepresentativeSurfaceCalculations is true and there are no user input view factors, then calc approx view factors
+                // (If User supplied view factors are present, then UseRepresentativeSurfaceCalculations is skipped in SufaceGeometry::GetSurfaceData)
+                // If there are any inside light shelfs then calc approx view factors (because the light shelf area is doubled for heat transfer)
+                // Otherwise, copy final view factors from the solar enclosure
 
                 constexpr std::string_view cCurrentModuleObject = "ZoneProperty:UserViewFactors:BySurfaceName";
                 int NumZonesWithUserFbyS = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-                if (NumZonesWithUserFbyS > 0) {
 
-                    GetInputViewFactorsbyName(state,
-                                              thisEnclosure.Name,
-                                              thisEnclosure.NumOfSurfaces,
-                                              thisEnclosure.F,
-                                              thisEnclosure.SurfacePtr,
-                                              NoUserInputF,
-                                              ErrorsFound); // Obtains user input view factors from input file
+                bool useSolarViewFactors = ((!state.dataSurface->UseRepresentativeSurfaceCalculations || NumZonesWithUserFbyS > 0) &&
+                                            !state.dataGlobal->AnyInsideShelf && !state.dataViewFactor->EnclSolInfo(enclosureNum).F.empty());
+
+                if (useSolarViewFactors) {
+                    thisEnclosure.F = state.dataViewFactor->EnclSolInfo(enclosureNum).F;
+                } else {
+                    bool NoUserInputF = true;
+                    if (NumZonesWithUserFbyS > 0) {
+
+                        GetInputViewFactorsbyName(state,
+                                                  thisEnclosure.Name,
+                                                  thisEnclosure.NumOfSurfaces,
+                                                  thisEnclosure.F,
+                                                  thisEnclosure.SurfacePtr,
+                                                  NoUserInputF,
+                                                  ErrorsFound); // Obtains user input view factors from input file
+                    }
+
+                    if (NoUserInputF) {
+                        // Calculate the view factors and make sure they satisfy reciprocity
+                        CalcApproximateViewFactors(state,
+                                                   thisEnclosure.NumOfSurfaces,
+                                                   thisEnclosure.Area,
+                                                   thisEnclosure.Azimuth,
+                                                   thisEnclosure.Tilt,
+                                                   thisEnclosure.F,
+                                                   thisEnclosure.SurfacePtr);
+                    }
+
+                    if (ViewFactorReport) { // Allocate and save user or approximate view factors for reporting.
+                        SaveApproximateViewFactors.allocate(thisEnclosure.NumOfSurfaces, thisEnclosure.NumOfSurfaces);
+                        SaveApproximateViewFactors = thisEnclosure.F;
+                    }
+
+                    bool anyIntMassInZone = DoesZoneHaveInternalMass(state, thisEnclosure.NumOfSurfaces, thisEnclosure.SurfacePtr);
+                    FixViewFactors(state,
+                                   thisEnclosure.NumOfSurfaces,
+                                   thisEnclosure.Area,
+                                   thisEnclosure.F,
+                                   thisEnclosure.Name,
+                                   thisEnclosure.spaceNums,
+                                   CheckValue1,
+                                   CheckValue2,
+                                   FinalCheckValue,
+                                   NumIterations,
+                                   FixedRowSum,
+                                   anyIntMassInZone);
                 }
-
-                if (NoUserInputF) {
-
-                    // Calculate the view factors and make sure they satisfy reciprocity
-                    CalcApproximateViewFactors(state,
-                                               thisEnclosure.NumOfSurfaces,
-                                               thisEnclosure.Area,
-                                               thisEnclosure.Azimuth,
-                                               thisEnclosure.Tilt,
-                                               thisEnclosure.F,
-                                               thisEnclosure.SurfacePtr);
-                }
-
-                if (ViewFactorReport) { // Allocate and save user or approximate view factors for reporting.
-                    SaveApproximateViewFactors.allocate(thisEnclosure.NumOfSurfaces, thisEnclosure.NumOfSurfaces);
-                    SaveApproximateViewFactors = thisEnclosure.F;
-                }
-
-                bool anyIntMassInZone = DoesZoneHaveInternalMass(state, thisEnclosure.NumOfSurfaces, thisEnclosure.SurfacePtr);
-                FixViewFactors(state,
-                               thisEnclosure.NumOfSurfaces,
-                               thisEnclosure.Area,
-                               thisEnclosure.F,
-                               thisEnclosure.Name,
-                               thisEnclosure.spaceNums,
-                               CheckValue1,
-                               CheckValue2,
-                               FinalCheckValue,
-                               NumIterations,
-                               FixedRowSum,
-                               anyIntMassInZone);
 
                 // Calculate the script F factors
                 CalcScriptF(state, thisEnclosure.NumOfSurfaces, thisEnclosure.Area, thisEnclosure.F, thisEnclosure.Emissivity, thisEnclosure.ScriptF);
@@ -664,24 +680,26 @@ namespace HeatBalanceIntRadExchange {
                         print(state.files.eio, "\n");
                     }
 
-                    print(state.files.eio, "Approximate or User Input ViewFactors,To Surface,Surface Class,RowSum");
-                    for (int SurfNum : thisEnclosure.SurfaceReportNums) {
-                        print(state.files.eio, ",{}", state.dataSurface->Surface(thisEnclosure.SurfacePtr(SurfNum)).Name);
-                    }
-                    print(state.files.eio, "\n");
-
-                    for (int Findex : thisEnclosure.SurfaceReportNums) {
-                        RowSum = sum(SaveApproximateViewFactors(_, Findex));
-                        print(state.files.eio,
-                              "{},{},{},{:.4R}",
-                              "View Factor",
-                              state.dataSurface->Surface(thisEnclosure.SurfacePtr(Findex)).Name,
-                              cSurfaceClass(state.dataSurface->Surface(thisEnclosure.SurfacePtr(Findex)).Class),
-                              RowSum);
+                    if (!useSolarViewFactors) {
+                        print(state.files.eio, "Approximate or User Input ViewFactors,To Surface,Surface Class,RowSum");
                         for (int SurfNum : thisEnclosure.SurfaceReportNums) {
-                            print(state.files.eio, ",{:.4R}", SaveApproximateViewFactors(SurfNum, Findex));
+                            print(state.files.eio, ",{}", state.dataSurface->Surface(thisEnclosure.SurfacePtr(SurfNum)).Name);
                         }
                         print(state.files.eio, "\n");
+
+                        for (int Findex : thisEnclosure.SurfaceReportNums) {
+                            Real64 RowSum = sum(SaveApproximateViewFactors(_, Findex));
+                            print(state.files.eio,
+                                  "{},{},{},{:.4R}",
+                                  "View Factor",
+                                  state.dataSurface->Surface(thisEnclosure.SurfacePtr(Findex)).Name,
+                                  cSurfaceClass(state.dataSurface->Surface(thisEnclosure.SurfacePtr(Findex)).Class),
+                                  RowSum);
+                            for (int SurfNum : thisEnclosure.SurfaceReportNums) {
+                                print(state.files.eio, ",{:.4R}", SaveApproximateViewFactors(SurfNum, Findex));
+                            }
+                            print(state.files.eio, "\n");
+                        }
                     }
 
                     print(state.files.eio, "Final ViewFactors,To Surface,Surface Class,RowSum");
@@ -691,7 +709,7 @@ namespace HeatBalanceIntRadExchange {
                     print(state.files.eio, "\n");
 
                     for (int Findex : thisEnclosure.SurfaceReportNums) {
-                        RowSum = sum(thisEnclosure.F(_, Findex));
+                        Real64 RowSum = sum(thisEnclosure.F(_, Findex));
                         print(state.files.eio,
                               "{},{},{},{:.4R}",
                               "View Factor",
@@ -708,7 +726,7 @@ namespace HeatBalanceIntRadExchange {
                         // TODO Both "original" and "final" print the same output. This is likely a bug
                         // (discovered while updating output to {fmt}
                         // see:
-                        // https://github.com/NREL/EnergyPlusArchive/commit/1c08247853c297dce59f3f53cde47ccfa67720c0#diff-124964a7e9b73ce494c1952ab1acdeeb
+                        // https://github.com/NatLabRockies/EnergyPlusArchive/commit/1c08247853c297dce59f3f53cde47ccfa67720c0#diff-124964a7e9b73ce494c1952ab1acdeeb
                         print(state.files.debug, "{}\n", "!======== original input factors ===========================");
                         print(state.files.debug, "ZoneProperty:UserViewFactors:BySurfaceName,{},\n", thisEnclosure.Name);
                         for (int SurfNum : thisEnclosure.SurfaceReportNums) {
@@ -763,22 +781,24 @@ namespace HeatBalanceIntRadExchange {
                     SaveApproximateViewFactors.deallocate();
                 }
 
-                RowSum = 0.0;
-                for (int Findex : thisEnclosure.SurfaceReportNums) {
-                    RowSum += sum(thisEnclosure.F(_, Findex));
-                }
-                RowSum = std::abs(RowSum - thisEnclosure.NumOfSurfaces);
-                FixedRowSum = std::abs(FixedRowSum - thisEnclosure.NumOfSurfaces);
-                if (state.dataGlobal->DisplayAdvancedReportVariables) {
-                    print(state.files.eio,
-                          "Surface View Factor Check Values,{},{:.6R},{:.6R},{:.6R},{},{:.6R},{:.6R}\n",
-                          thisEnclosure.Name,
-                          CheckValue1,
-                          CheckValue2,
-                          FinalCheckValue,
-                          NumIterations,
-                          FixedRowSum,
-                          RowSum);
+                if (!useSolarViewFactors) {
+                    Real64 RowSum = 0.0;
+                    for (int Findex : thisEnclosure.SurfaceReportNums) {
+                        RowSum += sum(thisEnclosure.F(_, Findex));
+                    }
+                    RowSum = std::abs(RowSum - thisEnclosure.NumOfSurfaces);
+                    FixedRowSum = std::abs(FixedRowSum - thisEnclosure.NumOfSurfaces);
+                    if (state.dataGlobal->DisplayAdvancedReportVariables) {
+                        print(state.files.eio,
+                              "Surface View Factor Check Values,{},{:.6R},{:.6R},{:.6R},{},{:.6R},{:.6R}\n",
+                              thisEnclosure.Name,
+                              CheckValue1,
+                              CheckValue2,
+                              FinalCheckValue,
+                              NumIterations,
+                              FixedRowSum,
+                              RowSum);
+                    }
                 }
             }
         }
@@ -1017,7 +1037,7 @@ namespace HeatBalanceIntRadExchange {
                 if (Option1 == "IDF") {
                     // TODO Both "original" and "final" print the same output. This is likely a bug
                     // see:
-                    // https://github.com/NREL/EnergyPlusArchive/commit/1c08247853c297dce59f3f53cde47ccfa67720c0#diff-124964a7e9b73ce494c1952ab1acdeeb
+                    // https://github.com/NatLabRockies/EnergyPlusArchive/commit/1c08247853c297dce59f3f53cde47ccfa67720c0#diff-124964a7e9b73ce494c1952ab1acdeeb
                     print(state.files.debug, "{}\n", "!======== original input factors ===========================");
                     print(state.files.debug, "ZoneProperty:UserViewFactors:BySurfaceName,{},\n", thisEnclosure.Name);
                     for (int SurfNum : thisEnclosure.SurfaceReportNums) {
@@ -1249,13 +1269,12 @@ namespace HeatBalanceIntRadExchange {
                     }
                     if (anySpaceNotFound) {
                         continue; // On to the next enclosure
-                    } else {
-                        enclMatchFound = true;
-                        // If matching SpaceList or ZoneList or Zone found, set the radiant and solar enclosure names to match
-                        thisEnclosure.Name = thisSpaceOrSpaceListName;
-                        state.dataViewFactor->EnclSolInfo(enclosureNum).Name = thisSpaceOrSpaceListName;
-                        break; // We're done with radiant enclosures
                     }
+                    enclMatchFound = true;
+                    // If matching SpaceList or ZoneList or Zone found, set the radiant and solar enclosure names to match
+                    thisEnclosure.Name = thisSpaceOrSpaceListName;
+                    state.dataViewFactor->EnclSolInfo(enclosureNum).Name = thisSpaceOrSpaceListName;
+                    break; // We're done with radiant enclosures
                 }
             }
             if (!enclMatchFound) {
@@ -1522,7 +1541,7 @@ namespace HeatBalanceIntRadExchange {
         // A(i)*F(i,j)=A(j)*F(j,i); F(i,i)=0.; SUM(F(i,j)=1.0, j=1,N)
         // Subroutine takes approximate view factors and enforces reciprocity by
         // averaging AiFij and AjFji.  Then it determines a set of row coefficients
-        // which can be multipled by each AF product to force the sum of AiFij for
+        // which can be multiplied by each AF product to force the sum of AiFij for
         // each row to equal Ai, and applies them. Completeness is checked, and if
         // not satisfied, the AF averaging and row modifications are repeated until
         // completeness is within a preselected small deviation from 1.0
@@ -1842,7 +1861,7 @@ namespace HeatBalanceIntRadExchange {
         CalcMatrixInverse(Cmatrix, Cinverse); // SOLVE THE LINEAR SYSTEM
         Cmatrix.clear();                      // Release memory ASAP
 
-        // Scale Cinverse colums by excitation to get partial radiosity matrix
+        // Scale Cinverse columns by excitation to get partial radiosity matrix
         l = 0u;
         for (int j = 1; j <= N; ++j) {
             Real64 const e_j(Excite(j));

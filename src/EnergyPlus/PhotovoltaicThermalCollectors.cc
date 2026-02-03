@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -197,11 +197,10 @@ namespace PhotovoltaicThermalCollectors {
 
         static constexpr std::string_view routineName = "GetPVTSimpleCollectorsInput";
 
-        int Item;                // Item to be "gotten"
-        int NumAlphas;           // Number of Alphas for each GetObjectItem call
-        int NumNumbers;          // Number of Numbers for each GetObjectItem call
-        int IOStatus;            // Used in GetObjectItem
-        bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
+        int Item;       // Item to be "gotten"
+        int NumAlphas;  // Number of Alphas for each GetObjectItem call
+        int NumNumbers; // Number of Numbers for each GetObjectItem call
+        int IOStatus;   // Used in GetObjectItem
 
         tmpSimplePVTperf.allocate(NumSimplePVTPerform);
         for (Item = 1; Item <= NumSimplePVTPerform; ++Item) {
@@ -230,10 +229,8 @@ namespace PhotovoltaicThermalCollectors {
             if (thisTmpSimplePVTperf.ThermEfficMode == ThermEfficEnum::SCHEDULED) {
                 if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
                     ShowSevereEmptyField(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3));
-                    ErrorsFound = true;
                 } else if ((thisTmpSimplePVTperf.thermEffSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(3))) == nullptr) {
                     ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3));
-                    ErrorsFound = true;
                 }
             }
             thisTmpSimplePVTperf.SurfEmissivity = state.dataIPShortCut->rNumericArgs(3);
@@ -1344,7 +1341,7 @@ namespace PhotovoltaicThermalCollectors {
 
         // Weather/thermodynamic state/air properties/heat transfer
         Real64 g(0.0);                                // Solar incident on surface of BIPVT collector (W/m^2)
-        Real64 tsurr, tsurrK;                         // surrouding temperature (DegC, DegK)
+        Real64 tsurr, tsurrK;                         // surrounding temperature (DegC, DegK)
         Real64 t1, t1K, t1_new;                       // temperature of pv backing surface (DegC, DegK, DegC)
         Real64 tpv_new;                               // temperature of pv surface (DegC, DegC)
         Real64 tpvg, tpvgK, tpvg_new;                 // temperature of pv glass cover (DegC, DegK,DegC)
@@ -1415,7 +1412,7 @@ namespace PhotovoltaicThermalCollectors {
         std::array<Real64, 9> jj = {0.0};                                     // 3x3 array for coefficient matrix
         std::array<Real64, 3> f = {0.0};                                      // 3 element array for constant term
         std::array<Real64, 3> y = {0.0};                                      // solution array for tpvg,tpv, and t1
-        int m(3);                                                             // parameter for number of unknwons
+        int m(3);                                                             // parameter for number of unknowns
         int i;                                                                // index
         int iter(0);                                                          // iteration counter
 
@@ -1506,7 +1503,7 @@ namespace PhotovoltaicThermalCollectors {
                 }
             }
 
-            // forced conv htc derived from results from Gorman et al 2019 - Charact. lenght is: Roof - length along flow direction, windward and
+            // forced conv htc derived from results from Gorman et al 2019 - Charact. length is: Roof - length along flow direction, windward and
             // leeawrd vert - hydraulic perimeter of surface, vert sides - length of surface along flow direction
             hconvt_forced = extHTCcoeff * std::pow((v_wind), extHTCexp) / (std::pow(l, 1.0 - extHTCexp)); // derived correlation for forced convection
 
@@ -1727,7 +1724,7 @@ namespace PhotovoltaicThermalCollectors {
         Real64 theta_r(0.0);
         Real64 taoalpha(0.0);
 
-        if (theta == 0.0) // if theta is zero, set to very small positive, otehrwise, taoalpha calculation causes division by zero
+        if (theta == 0.0) // if theta is zero, set to very small positive, otherwise, taoalpha calculation causes division by zero
         {
             theta = 0.000000001;
         }

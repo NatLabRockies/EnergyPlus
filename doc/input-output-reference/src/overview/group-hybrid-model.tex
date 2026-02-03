@@ -121,75 +121,71 @@ This numeric field should contain the ending day of the ending month (must be va
 Examples of the object in an IDF are:
 
 \begin{lstlisting}
-    
-    HybridModel:Zone,
-        ZONE 1 HybridModel,      !- Name
-        ZONE 1,                  !- Zone Name
-        Yes,                      !- Calculate Zone Internal Thermal Mass
-        No,                     !- Calculate Zone Air Infiltration Rate
-        No,                      !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
-        ,                        !- Zone Input People Activity Schedule Name
-        ,                        !- Zone Input People Sensible Heat Fraction Schedule Name
-        ,                        !- Zone Input People Radiant Heat Fraction Schedule Name
-        ,                        !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ,                        !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ,                        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
+HybridModel:Zone,
+  ZONE 1 HybridModel,         !- Name
+  ZONE 1,                     !- Zone Name
+  Yes,                        !- Calculate Zone Internal Thermal Mass
+  No,                         !- Calculate Zone Air Infiltration Rate
+  No,                         !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  ,                           !- Zone Input People Activity Schedule Name
+  ,                           !- Zone Input People Sensible Heat Fraction Schedule Name
+  ,                           !- Zone Input People Radiant Heat Fraction Schedule Name
+  ,                           !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ,                           !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ,                           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 
+HybridModel:Zone,
+  ZONE 1 HybridModel,         !- Name
+  ZONE 1,                     !- Zone Name
+  No,                         !- Calculate Zone Internal Thermal Mass
+  Yes,                        !- Calculate Zone Air Infiltration Rate
+  No,                         !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  ,                           !- Zone Input People Activity Schedule Name
+  ,                           !- Zone Input People Sensible Heat Fraction Schedule Name
+  ,                           !- Zone Input People Radiant Heat Fraction Schedule Name
+  ,                           !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ,                           !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ,                           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 
-    HybridModel:Zone,
-        ZONE 1 HybridModel,      !- Name
-        ZONE 1,                  !- Zone Name
-        No,                      !- Calculate Zone Internal Thermal Mass
-        Yes,                     !- Calculate Zone Air Infiltration Rate
-        No,                      !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
-        ,                        !- Zone Input People Activity Schedule Name
-        ,                        !- Zone Input People Sensible Heat Fraction Schedule Name
-        ,                        !- Zone Input People Radiant Heat Fraction Schedule Name
-        ,                        !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ,                        !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ,                        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
-
-
-    HybridModel:Zone,
-        ZONE 2 HybridModel,      !- Name
-        ZONE 2,                  !- Zone Name
-        No,                      !- Calculate Zone Internal Thermal Mass
-        No,                      !- Calculate Zone Air Infiltration Rate
-        Yes,                     !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 2_MeasuredCO2Concentration,     !- Zone Measured Air CO2 Concentration Schedule Name
-        OfficeSmall ACTIVITY_SCH,            !- Zone Input People Activity Schedule Name
-        People Sensible Heat Fraction Sch,   !- Zone Input People Sensible Heat Fraction Schedule Name
-        People Radiation Heat Fraction Sch,  !- Zone Input People Radiant Heat Fraction Schedule Name
-        People CO2 Generation Rate Sch,      !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ZONE 2_Inlet_MassFlow,   !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ZONE 2_Inlet_CO2,        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
-
+HybridModel:Zone,
+  ZONE 2 HybridModel,         !- Name
+  ZONE 2,                     !- Zone Name
+  No,                         !- Calculate Zone Internal Thermal Mass
+  No,                         !- Calculate Zone Air Infiltration Rate
+  Yes,                        !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 2_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  OfficeSmall ACTIVITY_SCH,   !- Zone Input People Activity Schedule Name
+  People Sensible Heat Fraction Sch,  !- Zone Input People Sensible Heat Fraction Schedule Name
+  People Radiation Heat Fraction Sch,  !- Zone Input People Radiant Heat Fraction Schedule Name
+  People CO2 Generation Rate Sch,  !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ZONE 2_Inlet_MassFlow,      !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ZONE 2_Inlet_CO2,           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 \end{lstlisting}
 
 

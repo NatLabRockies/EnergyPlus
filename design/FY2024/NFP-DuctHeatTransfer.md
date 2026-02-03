@@ -20,9 +20,9 @@ An Improved Duct Model
 	Had a conference call with NREL residential group
 
  - Original NFP, 12/15/23
-  
- - 
- 
+
+ -
+
 
 ## Justification for New Feature ##
 
@@ -109,7 +109,7 @@ Jason DeGraw:
 
 He has different opinion to allow a simple model, since the AFN is able to have a full duct model. He prefers to have compatable approach.
 
-Gu: 
+Gu:
 
 The proposed new object mimics AFN duct model with heat transfer only. The same conduction loss model is used. The model is mainly used by NREL residential group to simplify inputs without using the AFN model.
 
@@ -127,13 +127,13 @@ Suggest to use Inlet and Outlet node connection for the new object.
 
 Gu:
 
-Accept. 
+Accept.
 
 Actions:
 
 1. Use node to replace inlet and outlet name to have a clear picture for node connection
 2. Simplify inputs for exterior film coefficients to mimic inputs of AirflowNetwork:Distribution:Component:Duct
- 
+
 
 ## Overview ##
 
@@ -145,9 +145,9 @@ The objective is to design and implement the code changes required to support a 
 
 2. There are 4 duct types to be simulated: SupplyTrunk, SupplyBranch, ReturnTrunk, and ReturnBranch.
 
-3. There is a single duct used for SupplyTrunk and ReturnTrunk. 
+3. There is a single duct used for SupplyTrunk and ReturnTrunk.
 
-The connection of SupplyTrunk is between the inlet node (AirloopHVAC Demand Side Inlet Node) of AirLoopHVAC and the AirLoopHVAC:ZoneSplitter inlet node. If AirLoopHVAC:ZoneMixer is available, The connection of ReturnTrunk is between AirLoopHVAC:ZoneMixer outlet node and the outlet node (AirloopHVAC Demand Side Outlet Node) of AirLoopHVAC. 
+The connection of SupplyTrunk is between the inlet node (AirloopHVAC Demand Side Inlet Node) of AirLoopHVAC and the AirLoopHVAC:ZoneSplitter inlet node. If AirLoopHVAC:ZoneMixer is available, The connection of ReturnTrunk is between AirLoopHVAC:ZoneMixer outlet node and the outlet node (AirloopHVAC Demand Side Outlet Node) of AirLoopHVAC.
 
 4. Each branch has a single duct.
 
@@ -175,7 +175,7 @@ The outlet node humidity ratio will be calculated based on 13.1.5 Node Humidity 
 
 ####Steady state with both convection and radiation as Phase 2####
 
-Duct radiation will be added based on Phase 1 using the method decribed in 13.1.4.2 Duct Radiation in the Energuneering Reference. 
+Duct radiation will be added based on Phase 1 using the method decribed in 13.1.4.2 Duct Radiation in the Energuneering Reference.
 
 The radiation exchange has low priority from NREL point of view. FSEC agrees.
 
@@ -185,13 +185,13 @@ Removed
 
 ###Possible accomplishment###
 
-Due to time and budget limit, we will lay down foundation of structure for duct inputs and guarantee to deliver duct loss calculation using Steadystate method. The SteadystateWithRadiation method is in the plan and may not be  delivered.  
+Due to time and budget limit, we will lay down foundation of structure for duct inputs and guarantee to deliver duct loss calculation using Steadystate method. The SteadystateWithRadiation method is in the plan and may not be  delivered.
 
 ## Approach ##
 
 A new object simular to Pipe:Indoor is proposed. The main differences are that Fluid Inlet Node Name and Fluid Outlet Node Name are replaced by Inlet Node Name and Outlet Node Name. See detailed description in the Section of Input Description.
 
-In order to make the proposed object compatible with existing 
+In order to make the proposed object compatible with existing
 
 ## Testing/Validation/Data Sources ##
 
@@ -221,11 +221,11 @@ This alpha field references a `wall' construction object that gives a layer-by-l
 
 \paragraph{Field: Inlet Node Name}\label{field-inlet-node-name-000}
 
-This alpha field contains the name of the duct inlet. 
+This alpha field contains the name of the duct inlet.
 
 \paragraph{Field: Outlet Node Name}\label{field-outlet-node-name-000}
 
-This alpha field contains the name of the duct outlet. 
+This alpha field contains the name of the duct outlet.
 
 paragraph{Field: Duct Length}\label{field-duct-length}
 
@@ -371,7 +371,7 @@ Future expansion with optional fields
 Note:
 
 In order to be general, the AirflowNetwork:Distribution:DuctViewFactors object may be renamed as DuctViewFactors, so that this object can be used either AFN or general duct heat transfer.
- 
+
 ## Outputs Description ##
 
 insert text
@@ -392,8 +392,3 @@ Hanby, V.I., Wright, J.A., Fletcher, D.W and Jones, D.N.T. 2002. Modeling the Dy
 of Conduits. International Journal of HVACR&R, Vol.8, No.1. pp. 1-12.
 
 D. Parker, P. Fairey, L. Gu, Simulation of the effects of duct leakage and heat transfer on residential space-cooling energy use, Published 1993 Engineering Energy and Buildings
-
-
-
-
-

@@ -52,9 +52,6 @@
 ! U=5.894  SHGC=0.861  TSOL=0.837  TVIS=0.898
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Construction,
     Sgl Clr 3mm,             !- Name
     CLEAR 3MM;               !- Outside Layer

@@ -85,7 +85,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -441,7 +441,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -556,7 +563,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     284,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -570,7 +577,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     207.7352,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -887,6 +894,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -896,9 +904,9 @@
     Autosize,                !- Gross Rated Total Cooling Capacity {W}
     Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     5.12,                    !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -911,6 +919,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name

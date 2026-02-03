@@ -90,7 +90,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -494,7 +494,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1000,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -528,7 +528,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1000,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -542,7 +542,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1000,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -576,7 +576,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -590,7 +590,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1000,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1315,6 +1315,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.001,                   !- Design Source Side Flow Rate {m3/s}
@@ -1348,6 +1349,7 @@
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.001,                   !- Design Source Side Flow Rate {m3/s}

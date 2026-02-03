@@ -99,16 +99,15 @@ The visible absorptance field in the Material input syntax represents the fracti
 An IDF example:
 
 \begin{lstlisting}
-
-Material,A2 - 4 IN DENSE FACE BRICK,  ! Material Name
-   Rough,  ! Roughness
-    0.1014984    ,  ! Thickness {m}
-     1.245296    ,   ! Conductivity {W/M*K}
-     2082.400    ,   ! Density {Kg/M**3}
-    920.4800    ,   ! Specific Heat {J/Kg*K}
-    0.9000000    ,   ! Thermal Absorptance
-    0.9300000    ,   ! Solar Absorptance
-    0.9300000    ;   ! Visible Absorptance
+Material,A2 - 4 IN DENSE FACE BRICK,  !- Material Name
+  Rough,                      !- Roughness
+  0.1014984,                  !- Thickness {m}
+  1.245296,                   !- Conductivity {W/M*K}
+  2082.400,                   !- Density {Kg/M**3}
+  920.4800,                   !- Specific Heat {J/Kg*K}
+  0.9000000,                  !- Thermal Absorptance
+  0.9300000,                  !- Solar Absorptance
+  0.9300000;                  !- Visible Absorptance
 \end{lstlisting}
 
 \subsection{Material:NoMass}\label{materialnomass}
@@ -145,12 +144,12 @@ An IDF example:
 
 \begin{lstlisting}
 Material:NoMass,
-    R13LAYER,  ! Material Name
-    Rough,     ! Roughness
-    2.290965,  ! Resistance {M**2K/W}
-    0.9000000, ! Thermal Absorptance
-    0.7500000, ! Solar Absorptance
-    0.7500000; ! Visible Absorptance
+  R13LAYER,                   !- Material Name
+  Rough,                      !- Roughness
+  2.290965,                   !- Resistance {M**2K/W}
+  0.9000000,                  !- Thermal Absorptance
+  0.7500000,                  !- Solar Absorptance
+  0.7500000;                  !- Visible Absorptance
 \end{lstlisting}
 
 \subsection{Material:InfraredTransparent}\label{materialinfraredtransparent}
@@ -168,58 +167,52 @@ A Infrared Transparent surface should not participate in a convective/conductive
 An example idf object specification for use with the IRT surface is shown below. Note that surfaces are not described in this example
 
 \begin{lstlisting}
-
 Material:InfraredTransparent,
-      IRTMaterial1;            !- Name
+  IRTMaterial1;               !- Name
 
+Construction,
+  IRTSurface,                 !- Name
+  IRTMaterial1;               !- Outside Layer
 
-  Construction,
-      IRTSurface,              !- Name
-      IRTMaterial1;            !- Outside Layer
+SurfaceProperty:ConvectionCoefficients,
+  Bottom:Top,                 !- SurfaceName
+  Outside,                    !- Convection Type 1
+  value,                      !- Convection Value Type 1
+  0.1,                        !- Convection value 1 {W/m2-K}
+  ,                           !- Convection Schedule 1
+  Inside,                     !- Convection Type 2
+  value,                      !- Convection Value Type 2
+  0.1;                        !- Convection value 2 {W/m2-K}
 
+SurfaceProperty:ConvectionCoefficients,
+  SecondLevel:Bottom,         !- SurfaceName
+  Outside,                    !- Convection Type 1
+  value,                      !- Convection Value Type 1
+  0.1,                        !- Convection value 1 {W/m2-K}
+  ,                           !- Convection Schedule 1
+  Inside,                     !- Convection Type 2
+  value,                      !- Convection Value Type 2
+  0.1;                        !- Convection value 2 {W/m2-K}
 
-  SurfaceProperty:ConvectionCoefficients,
-      Bottom:Top,              !- SurfaceName
-      Outside,                 !- Convection Type 1
-      value,                   !- Convection Value Type 1
-      0.1,                     !- Convection value 1 {W/m2-K}
-      ,                        !- Convection Schedule 1
-      Inside,                  !- Convection Type 2
-      value,                   !- Convection Value Type 2
-      0.1;                     !- Convection value 2 {W/m2-K}
+SurfaceProperty:ConvectionCoefficients,
+  SecondLevel:Top,            !- SurfaceName
+  Outside,                    !- Convection Type 1
+  value,                      !- Convection Value Type 1
+  0.1,                        !- Convection value 1 {W/m2-K}
+  ,                           !- Convection Schedule 1
+  Inside,                     !- Convection Type 2
+  value,                      !- Convection Value Type 2
+  0.1;                        !- Convection value 2 {W/m2-K}
 
-
-  SurfaceProperty:ConvectionCoefficients,
-      SecondLevel:Bottom,      !- SurfaceName
-      Outside,                 !- Convection Type 1
-      value,                   !- Convection Value Type 1
-      0.1,                     !- Convection value 1 {W/m2-K}
-      ,                        !- Convection Schedule 1
-      Inside,                  !- Convection Type 2
-      value,                   !- Convection Value Type 2
-      0.1;                     !- Convection value 2 {W/m2-K}
-
-
-  SurfaceProperty:ConvectionCoefficients,
-      SecondLevel:Top,         !- SurfaceName
-      Outside,                 !- Convection Type 1
-      value,                   !- Convection Value Type 1
-      0.1,                     !- Convection value 1 {W/m2-K}
-      ,                        !- Convection Schedule 1
-      Inside,                  !- Convection Type 2
-      value,                   !- Convection Value Type 2
-      0.1;                     !- Convection value 2 {W/m2-K}
-
-
-  SurfaceProperty:ConvectionCoefficients,
-      ThirdLevel:Bottom,       !- SurfaceName
-      Outside,                 !- Convection Type 1
-      value,                   !- Convection Value Type 1
-      0.1,                     !- Convection value 1 {W/m2-K}
-      ,                        !- Convection Schedule 1
-      Inside,                  !- Convection Type 2
-      value,                   !- Convection Value Type 2
-      0.1;                     !- Convection value 2 {W/m2-K}
+SurfaceProperty:ConvectionCoefficients,
+  ThirdLevel:Bottom,          !- SurfaceName
+  Outside,                    !- Convection Type 1
+  value,                      !- Convection Value Type 1
+  0.1,                        !- Convection value 1 {W/m2-K}
+  ,                           !- Convection Schedule 1
+  Inside,                     !- Convection Type 2
+  value,                      !- Convection Value Type 2
+  0.1;                        !- Convection value 2 {W/m2-K}
 \end{lstlisting}
 
 \subsection{Material:AirGap}\label{materialairgap}
@@ -239,10 +232,9 @@ This field is used to enter the thermal resistance (R-value) of the material lay
 An IDF example:
 
 \begin{lstlisting}
-
 Material:AirGap,
-    B1 - AIRSPACE RESISTANCE,  ! Material Name
-    0.1603675;                 ! Resistance {M**2K/W}
+  B1 - AIRSPACE RESISTANCE,   !- Material Name
+  0.1603675;                  !- Resistance {M**2K/W}
 \end{lstlisting}
 
 \subsection{MaterialProperty:MoisturePenetrationDepth:Settings}\label{materialpropertymoisturepenetrationdepthsettings}
@@ -335,48 +327,48 @@ This set of inputs can be used for aerated concrete (assuming linear sorption cu
 
 \begin{lstlisting}
 MaterialProperty:MoisturePenetrationDepth:Settings,
-Concrete,            !- Name
-6.55,                !- Water Vapor Diffusion Resistance Factor {dimensionless}
-0.066,               !- Moisture Equation Coefficient a {dimensionless}
-1,                   !- Moisture Equation Coefficient b {dimensionless}
-0,                   !- Moisture Equation Coefficient c {dimensionless}
-1,                   !- Moisture Equation Coefficient d {dimensionless}
-0.007,               !- Surface Layer Penetration Depth {m}
-0.024,               !- Deep Layer Penetration Depth {m}
-0,                   !- Coating Layer Thickness {m}
-1;                   !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
+  Concrete,                   !- Name
+  6.55,                       !- Water Vapor Diffusion Resistance Factor {dimensionless}
+  0.066,                      !- Moisture Equation Coefficient a {dimensionless}
+  1,                          !- Moisture Equation Coefficient b {dimensionless}
+  0,                          !- Moisture Equation Coefficient c {dimensionless}
+  1,                          !- Moisture Equation Coefficient d {dimensionless}
+  0.007,                      !- Surface Layer Penetration Depth {m}
+  0.024,                      !- Deep Layer Penetration Depth {m}
+  0,                          !- Coating Layer Thickness {m}
+  1;                          !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
 \end{lstlisting}
 
 This set of inputs is for gypsum board with density 750 kg/m$^3$. This also assumes 2 coats of latex paint:
 
 \begin{lstlisting}
 MaterialProperty:MoisturePenetrationDepth:Settings,
-Concrete,            !- Name
-6.0,                 !- Water Vapor Diffusion Resistance Factor {dimensionless}
-0.0065,              !- Moisture Equation Coefficient a {dimensionless}
-0.65,                !- Moisture Equation Coefficient b {dimensionless}
-0.022,               !- Moisture Equation Coefficient c {dimensionless}
-10,                  !- Moisture Equation Coefficient d {dimensionless}
-0.021,               !- Surface Layer Penetration Depth {m}
-0.08,                !- Deep Layer Penetration Depth {m}
-0.0003,              !- Coating Layer Thickness {m}
-6000;                !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
+  Concrete,                   !- Name
+  6.0,                        !- Water Vapor Diffusion Resistance Factor {dimensionless}
+  0.0065,                     !- Moisture Equation Coefficient a {dimensionless}
+  0.65,                       !- Moisture Equation Coefficient b {dimensionless}
+  0.022,                      !- Moisture Equation Coefficient c {dimensionless}
+  10,                         !- Moisture Equation Coefficient d {dimensionless}
+  0.021,                      !- Surface Layer Penetration Depth {m}
+  0.08,                       !- Deep Layer Penetration Depth {m}
+  0.0003,                     !- Coating Layer Thickness {m}
+  6000;                       !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
 \end{lstlisting}
 
 Finally, here are values representing the empirical whole-house inputs from Woods et al., 2014 (see Engineering Reference). Density is 800 kg/m$^3$:
 
 \begin{lstlisting}
 MaterialProperty:MoisturePenetrationDepth:Settings,
-Concrete,            !- Name
-8.0,                 !- Water Vapor Diffusion Resistance Factor {dimensionless}
-0.012,               !- Moisture Equation Coefficient a {dimensionless}
-1,                   !- Moisture Equation Coefficient b {dimensionless}
-0,                   !- Moisture Equation Coefficient c {dimensionless}
-1,                   !- Moisture Equation Coefficient d {dimensionless}
-0.019,               !- Surface Layer Penetration Depth {m}
-0.113,               !- Deep Layer Penetration Depth {m}
-0,                   !- Coating Layer Thickness {m}
-1;                   !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
+  Concrete,                   !- Name
+  8.0,                        !- Water Vapor Diffusion Resistance Factor {dimensionless}
+  0.012,                      !- Moisture Equation Coefficient a {dimensionless}
+  1,                          !- Moisture Equation Coefficient b {dimensionless}
+  0,                          !- Moisture Equation Coefficient c {dimensionless}
+  1,                          !- Moisture Equation Coefficient d {dimensionless}
+  0.019,                      !- Surface Layer Penetration Depth {m}
+  0.113,                      !- Deep Layer Penetration Depth {m}
+  0,                          !- Coating Layer Thickness {m}
+  1;                          !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}
 \end{lstlisting}
 
 Other materials inputs can be estimated using the equations above and material properties from a variety of sources, such as \href{http://www.iea-ebc.org/fileadmin/user_upload/images/Pictures/EBC_Annex_24_Report_3.pdf}{\emph{Kumaran, 		1996}}, the \href{http://WUFI.de/en/}{\emph{WUFI}} simulation software, or the \href{http://www.techstreet.com/products/1719052}{\emph{ASHRAE 1018-RP}} report.
@@ -473,38 +465,34 @@ And, an IDF example showing how it is used in conjunction with the Material:
 Note, the following Heat Balance Algorithm is necessary (only specified once). Also, when using ConductionFiniteDifference, it is more efficient to set the zone timestep shorter than those used for the ConductionTransferFunction solution algorithm. It should be set to 12 timesteps per hour or greater, and can range up to 60.
 
 \begin{lstlisting}
-
 HeatBalanceAlgorithm,
   ConductionFiniteDifference;
 
-
-  Timestep,
+Timestep,
   12;
 
+Material,
+  E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
+  Smooth,                     !- Roughness
+  1.9050000E-02,              !- Thickness {m}
+  0.7264224,                  !- Conductivity {W/m-K}
+  1601.846,                   !- Density {kg/m3}
+  836.8000,                   !- Specific Heat {J/kg-K}
+  0.9000000,                  !- Thermal Absorptance
+  0.9200000,                  !- Solar Absorptance
+  0.9200000;                  !- Visible Absorptance
 
-  Material,
-      E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
-      Smooth,                  !- Roughness
-      1.9050000E-02,           !- Thickness {m}
-      0.7264224,               !- Conductivity {W/m-K}
-      1601.846,                !- Density {kg/m3}
-      836.8000,                !- Specific Heat {J/kg-K}
-      0.9000000,               !- Thermal Absorptance
-      0.9200000,               !- Solar Absorptance
-      0.9200000;               !- Visible Absorptance
-
-
-  MaterialProperty:PhaseChange,
-      E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
-      0.0,             !- Temperature coefficient,thermal conductivity(W/m K2)
-      -20.,            !- Temperature 1, C
-      0.01,            !- Enthalpy 1 at –20C, (J/kg)
-      20.,             !- Temperature 2, C
-      33400,           !- Enthalpy 2, (J/kg)
-      20.5,            !- temperature 3, C
-      70000,           !- Enthalpy 3, (J/kg)
-      100.,            !- Temperature 4, C
-      137000;          !- Enthalpy 4, (J/kg)
+MaterialProperty:PhaseChange,
+  E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
+  0.0,                        !- Temperature coefficient,thermal conductivity(W/m K2)
+  -20.,                       !- Temperature 1, C
+  0.01,                       !- Enthalpy 1 at –20C, (J/kg)
+  20.,                        !- Temperature 2, C
+  33400,                      !- Enthalpy 2, (J/kg)
+  20.5,                       !- temperature 3, C
+  70000,                      !- Enthalpy 3, (J/kg)
+  100.,                       !- Temperature 4, C
+  137000;                     !- Enthalpy 4, (J/kg)
 \end{lstlisting}
 
 \subsection{MaterialProperty:PhaseChangeHysteresis}\label{materialpropertyphasechangehysteresis}
@@ -576,38 +564,34 @@ This is the width of the enthalpy/specific heat freezing curve, on the low side 
 An IDF example using hysteresis in conjunction with an actual Material definition is shown below.  This example includes the specification of the Heat Balance Algorithm and Timestep to show appropriate values for these inputs when MaterialProperty:PhaseChangeHysteresis is used.  Heat Balance Algorithm and Timestep are only specified once in a particular idf file.  Note that when using ConductionFiniteDifference, it is more efficient to set the zone timestep shorter than those used for the ConductionTransferFunction solution algorithm.  It should be set to 12 timesteps per hour or greater and can range up to 60.
 
 \begin{lstlisting}
+HeatBalanceAlgorithm, ConductionFiniteDifference;
+Timestep, 12;
+Material,
+  E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
+  Smooth,                     !- Roughness
+  1.9050000E-02,              !- Thickness {m}
+  0.7264224,                  !- Conductivity {W/m-K}
+  1601.846,                   !- Density {kg/m3}
+  836.8000,                   !- Specific Heat {J/kg-K}
+  0.9000000,                  !- Thermal Absorptance
+  0.9200000,                  !- Solar Absorptance
+  0.9200000;                  !- Visible Absorptance
 
-  HeatBalanceAlgorithm, ConductionFiniteDifference;
-
-  Timestep, 12;
-
-  Material,
-    E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
-    Smooth,                  !- Roughness
-    1.9050000E-02,           !- Thickness {m}
-    0.7264224,               !- Conductivity {W/m-K}
-    1601.846,                !- Density {kg/m3}
-    836.8000,                !- Specific Heat {J/kg-K}
-    0.9000000,               !- Thermal Absorptance
-    0.9200000,               !- Solar Absorptance
-    0.9200000;               !- Visible Absorptance
-
-  MaterialProperty:PhaseChangeHysteresis,
-    E1 - 3 / 4 IN PLASTER OR GYP BOARD,   !- Name
-    10000,                   !- Latent Heat of Fusion {J/kg}
-    0.5,                     !- Liquid State Thermal Conductivity {W/m-K}
-    1500,                    !- Liquid State Density {kg/m3}
-    2000,                    !- Liquid State Specific Heat {J/kg-K}
-    1,                       !- High Temperature Difference of Melting Curve {deltaC}
-    23,                      !- Peak Melting Temperature {C}
-    1,                       !- Low Temperature Difference of Melting Curve {deltaC}
-    0.5,                     !- Solid State Thermal Conductivity {W/m-K}
-    1600,                    !- Solid State Density {kg/m3}
-    2000,                    !- Solid State Specific Heat {J/kg-K}
-    1,                       !- High Temperature Difference of Freezing Curve {deltaC}
-    20,                      !- Peak Freezing Temperature {C}
-    1;                       !- Low Temperature Difference of Freezing Curve {deltaC}
-
+MaterialProperty:PhaseChangeHysteresis,
+  E1 - 3 / 4 IN PLASTER OR GYP BOARD,  !- Name
+  10000,                      !- Latent Heat of Fusion {J/kg}
+  0.5,                        !- Liquid State Thermal Conductivity {W/m-K}
+  1500,                       !- Liquid State Density {kg/m3}
+  2000,                       !- Liquid State Specific Heat {J/kg-K}
+  1,                          !- High Temperature Difference of Melting Curve {deltaC}
+  23,                         !- Peak Melting Temperature {C}
+  1,                          !- Low Temperature Difference of Melting Curve {deltaC}
+  0.5,                        !- Solid State Thermal Conductivity {W/m-K}
+  1600,                       !- Solid State Density {kg/m3}
+  2000,                       !- Solid State Specific Heat {J/kg-K}
+  1,                          !- High Temperature Difference of Freezing Curve {deltaC}
+  20,                         !- Peak Freezing Temperature {C}
+  1;                          !- Low Temperature Difference of Freezing Curve {deltaC}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{materialpropertyphasechangehysteresis-outputs}
@@ -689,37 +673,33 @@ And, an IDF example showing how it is used in conjunction with the Materials:
 Note, the following Heat Balance Algorithm is necessary (only specified once). Also, when using Conduction Finite Difference, it is more efficient to set the zone time step shorter than those used for the Conduction Transfer Function solution algorithm. It should be set to 12 time steps per hour or greater, and can range up to 60.
 
 \begin{lstlisting}
-
 HeatBalanceAlgorithm,
   ConductionFiniteDifference;
 
-
-  Timestep,
+Timestep,
   12;
 
+Material,
+  PCMPlasterBoard,            !- Name
+  Smooth,                     !- Roughness
+  1.9050000E-02,              !- Thickness {m}
+  4.2,                        !- Conductivity {W/m-K}
+  1601.846,                   !- Density {kg/m3}
+  836.8000,                   !- Specific Heat {J/kg-K}
+  0.9000000,                  !- Thermal Absorptance
+  0.9200000,                  !- Solar Absorptance
+  0.9200000;                  !- Visible Absorptance
 
-  Material,
-      PCMPlasterBoard ,      !- Name
-      Smooth,                  !- Roughness
-      1.9050000E-02,           !- Thickness {m}
-      4.2,                     !- Conductivity {W/m-K}
-      1601.846,                !- Density {kg/m3}
-      836.8000,                !- Specific Heat {J/kg-K}
-      0.9000000,               !- Thermal Absorptance
-      0.9200000,               !- Solar Absorptance
-      0.9200000;               !- Visible Absorptance
-
-
-  MaterialProperty:VariableThermalConductivity,
-      PCMPlasterBoard,         !- Name
-      0,                       !- Temperature 1 {C}
-      4.2,                     !- Thermal Conductivity 1 {W/m-K}
-      22,                      !- Temperature 2 {C}
-      4.2,                     !- Thermal Conductivity 2 {W/m-K}
-      22.1,                    !- Temperature 3 {C}
-      2.5,                     !- Thermal Conductivity 3 {W/m-K}
-      100,                     !- Temperature 4 {C}
-      2.5;                     !- Thermal Conductivity 4 {W/m-K}
+MaterialProperty:VariableThermalConductivity,
+  PCMPlasterBoard,            !- Name
+  0,                          !- Temperature 1 {C}
+  4.2,                        !- Thermal Conductivity 1 {W/m-K}
+  22,                         !- Temperature 2 {C}
+  4.2,                        !- Thermal Conductivity 2 {W/m-K}
+  22.1,                       !- Temperature 3 {C}
+  2.5,                        !- Thermal Conductivity 3 {W/m-K}
+  100,                        !- Temperature 4 {C}
+  2.5;                        !- Thermal Conductivity 4 {W/m-K}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-026}
@@ -855,11 +835,10 @@ For this solution algorithm, the initial water content is assumed to be distribu
 Below is an example input for the porosity and initial water content of a material.
 
 \begin{lstlisting}
-
 MaterialProperty:HeatAndMoistureTransfer:Settings,
-        Concrete,     !- Name
-        0.76,     !- Porosity
-        0.2;     !- Initial (or typical) Water content
+  Concrete,                   !- Name
+  0.76,                       !- Porosity
+  0.2;                        !- Initial (or typical) Water content
 \end{lstlisting}
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:SorptionIsotherm}\label{materialpropertyheatandmoisturetransfersorptionisotherm}
@@ -897,30 +876,29 @@ The Moisture Content of the x\(^{th}\) coordinate. The units are {[}kg/m3{]}
 Below is an example input for a material isotherm
 
 \begin{lstlisting}
-
 MaterialProperty:HeatAndMoistureTransfer:SorptionIsotherm,
-        Concrete,     !- Name
-        10,     !- Number of data Coordinates
-        0.2205,    !- Relative Humidity fraction #1
-        22.31,     !- Moisture content #1
-        0.202,     !- Relative Humidity fraction #2
-        19.665,    !- Moisture content #2
-        0.449,     !- Relative Humidity fraction #3
-        40.02,     !- Moisture content #3
-        0.454,     !- Relative Humidity fraction #4
-        36.915,    !- Moisture content #4
-        0.6506,    !- Relative Humidity fraction #5
-        56.005,    !- Moisture content #5
-        0.655,     !- Relative Humidity fraction #6
-        52.325,    !- Moisture content #6
-        0.824,     !- Relative Humidity fraction #7
-        72.565,    !- Moisture content #7
-        0.8725,    !- Relative Humidity fraction #8
-        85.1,      !- Moisture content #8
-        0.924,     !- Relative Humidity fraction #9
-        91.08,     !- Moisture content #9
-        0.964,     !- Relative Humidity fraction #10
-        100.28;    !- Moisture content #10
+  Concrete,                   !- Name
+  10,                         !- Number of data Coordinates
+  0.2205,                     !- Relative Humidity fraction #1
+  22.31,                      !- Moisture content #1
+  0.202,                      !- Relative Humidity fraction #2
+  19.665,                     !- Moisture content #2
+  0.449,                      !- Relative Humidity fraction #3
+  40.02,                      !- Moisture content #3
+  0.454,                      !- Relative Humidity fraction #4
+  36.915,                     !- Moisture content #4
+  0.6506,                     !- Relative Humidity fraction #5
+  56.005,                     !- Moisture content #5
+  0.655,                      !- Relative Humidity fraction #6
+  52.325,                     !- Moisture content #6
+  0.824,                      !- Relative Humidity fraction #7
+  72.565,                     !- Moisture content #7
+  0.8725,                     !- Relative Humidity fraction #8
+  85.1,                       !- Moisture content #8
+  0.924,                      !- Relative Humidity fraction #9
+  91.08,                      !- Moisture content #9
+  0.964,                      !- Relative Humidity fraction #10
+  100.28;                     !- Moisture content #10
 \end{lstlisting}
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:Suction}\label{materialpropertyheatandmoisturetransfersuction}
@@ -952,20 +930,19 @@ The Liquid Transport Coefficient of the x\(^{th}\) point. The units are {[}m2/s{
 Below is an example input for a material liquid transport coefficient under suction.
 
 \begin{lstlisting}
-
 MaterialProperty:HeatAndMoistureTransfer:Suction,
-        Concrete,     !- Name
-        5,     !- Number of Suction points
-        0,     !- Moisture content 1
-        0,     !- Liquid Transport Coefficient 1
-        72,     !- Moisture content 2
-        0.0000000000741,     !- Liquid Transport Coefficient 2
-        85,     !- Moisture content 3
-        0.000000000253,     !- Liquid Transport Coefficient 3
-        100,     !- Moisture content 4
-        0.00000000101,     !- Liquid Transport Coefficient 4
-        118,     !- Moisture content 5
-        0.00000000128;     !- Liquid Transport Coefficient 5
+  Concrete,                   !- Name
+  5,                          !- Number of Suction points
+  0,                          !- Moisture content 1
+  0,                          !- Liquid Transport Coefficient 1
+  72,                         !- Moisture content 2
+  0.0000000000741,            !- Liquid Transport Coefficient 2
+  85,                         !- Moisture content 3
+  0.000000000253,             !- Liquid Transport Coefficient 3
+  100,                        !- Moisture content 4
+  0.00000000101,              !- Liquid Transport Coefficient 4
+  118,                        !- Moisture content 5
+  0.00000000128;              !- Liquid Transport Coefficient 5
 \end{lstlisting}
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:Redistribution}\label{materialpropertyheatandmoisturetransferredistribution}
@@ -997,20 +974,19 @@ The Liquid Transport Coefficient of the x\(^{th}\) point. The units are {[}m2/s{
 Below is an example input for the object.
 
 \begin{lstlisting}
-
 MaterialProperty:HeatAndMoistureTransfer:Redistribution,
-        Concrete,     !- Name
-        5,     !- Number of Redistribution points
-        0,     !- Moisture content 1
-        0,     !- Liquid Transport Coefficient 1
-        72,     !- Moisture content 2
-        0.00000000000741,     !- Liquid Transport Coefficient 2
-        85,     !- Moisture content 3
-        0.0000000000253,     !- Liquid Transport Coefficient 3
-        100,     !- Moisture content 4
-        0.000000000101,     !- Liquid Transport Coefficient 4
-        118,     !- Moisture content 5
-        0.000000000128;     !- Liquid Transport Coefficient 5
+  Concrete,                   !- Name
+  5,                          !- Number of Redistribution points
+  0,                          !- Moisture content 1
+  0,                          !- Liquid Transport Coefficient 1
+  72,                         !- Moisture content 2
+  0.00000000000741,           !- Liquid Transport Coefficient 2
+  85,                         !- Moisture content 3
+  0.0000000000253,            !- Liquid Transport Coefficient 3
+  100,                        !- Moisture content 4
+  0.000000000101,             !- Liquid Transport Coefficient 4
+  118,                        !- Moisture content 5
+  0.000000000128;             !- Liquid Transport Coefficient 5
 \end{lstlisting}
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:Diffusion}\label{materialpropertyheatandmoisturetransferdiffusion}
@@ -1042,22 +1018,21 @@ The Liquid Transport Coefficient of the x\(^{th}\) pair.
 Below are some examples of the values for materials.
 
 \begin{lstlisting}
+MaterialProperty:HeatAndMoistureTransfer:Diffusion,
+  Plywood,                    !- Name
+  3,                          !- Number of data Points
+  0,                          !- Relative Humidity Fraction 1
+  700,                        !- Water Vapor Diffusion Resistance Factor 1
+  0.5,                        !- Relative Humidity Fraction 2
+  200,                        !- Water Vapor Diffusion Resistance Factor 2
+  1,                          !- Relative Humidity Fraction 3
+  20;                         !- Water Vapor Diffusion Resistance Factor 3
 
 MaterialProperty:HeatAndMoistureTransfer:Diffusion,
-        Plywood,     !- Name
-        3,     !- Number of data Points
-        0,     !- Relative Humidity Fraction 1
-        700,     !- Water Vapor Diffusion Resistance Factor 1
-        0.5,     !- Relative Humidity Fraction 2
-        200,     !- Water Vapor Diffusion Resistance Factor 2
-        1,     !- Relative Humidity Fraction 3
-        20;     !- Water Vapor Diffusion Resistance Factor 3
-
-  MaterialProperty:HeatAndMoistureTransfer:Diffusion,
-        Concrete,     !- Name
-        1,     !- Number of Mu Points
-        0,     !- Relative Humidity Fraction 1
-        180;     !- Water Vapor Diffusion Resistance Factor 1
+  Concrete,                   !- Name
+  1,                          !- Number of Mu Points
+  0,                          !- Relative Humidity Fraction 1
+  180;                        !- Water Vapor Diffusion Resistance Factor 1
 \end{lstlisting}
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:ThermalConductivity}\label{materialpropertyheatandmoisturetransferthermalconductivity}
@@ -1089,14 +1064,13 @@ The Thermal Conductivity of the x\(^{th}\) coordinate. The units are {[}W/m-K{]}
 Below is an example of values for a material.
 
 \begin{lstlisting}
-
 MaterialProperty:HeatAndMoistureTransfer:ThermalConductivity
-        Concrete,     !- Name
-        2,     !- Number of Thermal Coordinates
-        0,     !- Moisture content \#1
-        1.6,     !- Thermal Conductivity \#1
-        180,     !- Moisture content \#2
-        2.602;     !- Thermal Conductivity \#2
+  Concrete,                   !- Name
+  2,                          !- Number of Thermal Coordinates
+  0,                          !- Moisture content \#1
+  1.6,                        !- Thermal Conductivity \#1
+  180,                        !- Moisture content \#2
+  2.602;                      !- Thermal Conductivity \#2
 \end{lstlisting}
 
 \subsubsection{Surface Outputs}\label{surface-outputs}
@@ -1331,95 +1305,88 @@ It should be pointed out that when Optical Data Type = SpectralAndAngle for a gl
 IDF examples of Spectral average and using a Spectral data set:
 
 \begin{lstlisting}
+WindowMaterial:Glazing,
+  CLEAR 3MM,                  !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.003,                      !- Thickness {m}
+  0.837,                      !- Solar Transmittance at Normal Incidence
+  0.075,                      !- Front Side Solar Reflectance at Normal Incidence
+  0.075,                      !- Back Side Solar Reflectance at Normal Incidence
+  0.898,                      !- Visible Transmittance at Normal Incidence
+  0.081,                      !- Front Side Visible Reflectance at Normal Incidence
+  0.081,                      !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                        !- Infrared Transmittance at Normal Incidence
+  0.84,                       !- Front Side Infrared Hemispherical Emissivity
+  0.84,                       !- Back Side Infrared Hemispherical Emissivity
+  0.9;                        !- Conductivity {W/m-K}
 
-  WindowMaterial:Glazing,
-    CLEAR 3MM,       !- Name
-    SpectralAverage, !- Optical Data Type
-    ,                !- Window Glass Spectral Data Set Name
-    0.003,           !- Thickness {m}
-    0.837,           !- Solar Transmittance at Normal Incidence
-    0.075,           !- Front Side Solar Reflectance at Normal Incidence
-    0.075,           !- Back Side Solar Reflectance at Normal Incidence
-    0.898,           !- Visible Transmittance at Normal Incidence
-    0.081,           !- Front Side Visible Reflectance at Normal Incidence
-    0.081,           !- Back Side Visible Reflectance at Normal Incidence
-    0.0,             !- Infrared Transmittance at Normal Incidence
-    0.84,            !- Front Side Infrared Hemispherical Emissivity
-    0.84,            !- Back Side Infrared Hemispherical Emissivity
-    0.9;             !- Conductivity {W/m-K}
-
-
-
-  WindowMaterial:Glazing,
-    SPECTRAL GLASS INNER PANE, ! Material name
-    Spectral,                  ! Optical data type {SpectralAverage or Spectral}
-    TestSpectralDataSet,       ! Name of spectral data set
-    0.0099,                    ! Thickness {m}
-    ,                          ! Solar transmittance at normal incidence
-    ,                          ! Solar reflectance at normal incidence: front side
-    ,                          ! Solar reflectance at normal incidence: back side
-    ,                          ! Visible transmittance at normal incidence
-    ,                          ! Visible reflectance at normal incidence: front side
-    ,                          ! Visible reflectance at normal incidence: back side
-    0.0,                       ! IR transmittance at normal incidence
-    0.84,                      ! IR emissivity: front side
-    0.84,                      ! IR emissivity: back side
-    0.798;                     ! Conductivity {W/m-K}
-
+WindowMaterial:Glazing,
+  SPECTRAL GLASS INNER PANE,  !- Material name
+  Spectral,                   !- Optical data type {SpectralAverage or Spectral}
+  TestSpectralDataSet,        !- Name of spectral data set
+  0.0099,                     !- Thickness {m}
+  ,                           !- Solar transmittance at normal incidence
+  ,                           !- Solar reflectance at normal incidence: front side
+  ,                           !- Solar reflectance at normal incidence: back side
+  ,                           !- Visible transmittance at normal incidence
+  ,                           !- Visible reflectance at normal incidence: front side
+  ,                           !- Visible reflectance at normal incidence: back side
+  0.0,                        !- IR transmittance at normal incidence
+  0.84,                       !- IR emissivity: front side
+  0.84,                       !- IR emissivity: back side
+  0.798;                      !- Conductivity {W/m-K}
 \end{lstlisting}
 
 IDF example using a SpectralAndAngle data set:
 
 \begin{lstlisting}
-
-  WindowMaterial:Glazing,
-    SPECTRAL AND ANGLE GLASS INNER PANE, ! Material name
-    SpectralAndAngle, ! Optical data type {SpectralAverage or Spectral}
-    ,                 !- Name of spectral data set
-    0.0099,           ! Thickness {m}
-    ,                 !- Solar transmittance at normal incidence
-    ,                 !- Solar reflectance at normal incidence: front side
-    ,                 !- Solar reflectance at normal incidence: back side
-    ,                 !- Visible transmittance at normal incidence
-    ,                 !- Visible reflectance at normal incidence: front side
-    ,                 !- Visible reflectance at normal incidence: back side
-    0.0,              !- IR transmittance at normal incidence
-    0.84,             !- IR emissivity: front side
-    0.84,             !- IR emissivity: back side
-    0.798,            !- Conductivity {W/m-K}
-    ,                 !- Dirt Correction Factor for Solar and Visible Transmittance
-    ,                 !- Solar Diffusing
-    ,                 !- Young's modulus
-    ,                 !- Poisson's ratio
-    TranmittanceDataSet,     !- Window Glass Spectral+Incident Angle Transmittance Data Set Table Name
-    FrontReflectanceDataSet, !- Window Glass Spectral+Incident Angle Front Reflectance Data Set Table Name
-    BackReflectanceDataSet;  !- Window Glass Spectral+Incident Angle Back Reflectance Data Set Table Name
-
+WindowMaterial:Glazing,
+  SPECTRAL AND ANGLE GLASS INNER PANE,  !- Material name
+  SpectralAndAngle,           !- Optical data type {SpectralAverage or Spectral}
+  ,                           !- Name of spectral data set
+  0.0099,                     !- Thickness {m}
+  ,                           !- Solar transmittance at normal incidence
+  ,                           !- Solar reflectance at normal incidence: front side
+  ,                           !- Solar reflectance at normal incidence: back side
+  ,                           !- Visible transmittance at normal incidence
+  ,                           !- Visible reflectance at normal incidence: front side
+  ,                           !- Visible reflectance at normal incidence: back side
+  0.0,                        !- IR transmittance at normal incidence
+  0.84,                       !- IR emissivity: front side
+  0.84,                       !- IR emissivity: back side
+  0.798,                      !- Conductivity {W/m-K}
+  ,                           !- Dirt Correction Factor for Solar and Visible Transmittance
+  ,                           !- Solar Diffusing
+  ,                           !- Young's modulus
+  ,                           !- Poisson's ratio
+  TranmittanceDataSet,        !- Window Glass Spectral+Incident Angle Transmittance Data Set Table Name
+  FrontReflectanceDataSet,    !- Window Glass Spectral+Incident Angle Front Reflectance Data Set Table Name
+  BackReflectanceDataSet;     !- Window Glass Spectral+Incident Angle Back Reflectance Data Set Table Name
 \end{lstlisting}
 
 IDF example of Spectral Data Type = BSDF
 
 \begin{lstlisting}
-
 WindowMaterial:Glazing,
-    Glass_5012_Layer,        !- Layer name : CLEAR_6.PPG
-    BSDF,                    !- Optical Data Type
-    ,                        !- Spectral Data name
-    0.005664,                !- Thickness
-    ,                        !- Solar Transmittance
-    ,                        !- Solar Front Reflectance
-    ,                        !- Solar Back Reflectance
-    ,                        !- Visible Transmittance
-    ,                        !- Visible Front Reflectance
-    ,                        !- Visible Back reflectance
-    0.000000,                !- IR Transmittance
-    0.840000,                !-Front Emissivity
-    0.840000,                !-Back Emissivity
-    1.000000,                !-Conductivity
-    ,                        !-Dirt Correction Factor for Sol/Vis Transmittance
-    ,                        !-Solar Diffusing
-    7.2e10,                  !-Young’s modulus
-    0.22;                    !-Poisson’s ratio
+  Glass_5012_Layer,           !- Layer name : CLEAR_6.PPG
+  BSDF,                       !- Optical Data Type
+  ,                           !- Spectral Data name
+  0.005664,                   !- Thickness
+  ,                           !- Solar Transmittance
+  ,                           !- Solar Front Reflectance
+  ,                           !- Solar Back Reflectance
+  ,                           !- Visible Transmittance
+  ,                           !- Visible Front Reflectance
+  ,                           !- Visible Back reflectance
+  0.000000,                   !- IR Transmittance
+  0.840000,                   !- Front Emissivity
+  0.840000,                   !- Back Emissivity
+  1.000000,                   !- Conductivity
+  ,                           !- Dirt Correction Factor for Sol/Vis Transmittance
+  ,                           !- Solar Diffusing
+  7.2e10,                     !- Young’s modulus
+  0.22;                       !- Poisson’s ratio
 \end{lstlisting}
 
 \subsection{WindowMaterial:Glazing:RefractionExtinctionMethod}\label{windowmaterialglazingrefractionextinctionmethod}
@@ -1484,15 +1451,15 @@ An IDF example:
 
 \begin{lstlisting}
 WindowMaterial:Glazing:RefractionExtinctionMethod,
-  4MM CLEAR GLASS,  !- Material name
-  0.004,            !- Thickness {m}
-  1.526,            !- Solar index of refraction
-  30.0 ,            !- Solar extinction coefficient (1/m)
-  1.526,            !- Visible index of refraction
-  30.0 ,            !- Visible extinction coefficient (1/m)
-  0.0,              !- IR transmittance at normal incidence
-  0.84,             !- IR emissivity
-  0.9;              !- Conductivity {W/m-K}
+  4MM CLEAR GLASS,            !- Material name
+  0.004,                      !- Thickness {m}
+  1.526,                      !- Solar index of refraction
+  30.0,                       !- Solar extinction coefficient (1/m)
+  1.526,                      !- Visible index of refraction
+  30.0,                       !- Visible extinction coefficient (1/m)
+  0.0,                        !- IR transmittance at normal incidence
+  0.84,                       !- IR emissivity
+  0.9;                        !- Conductivity {W/m-K}
 \end{lstlisting}
 
 \subsection{Glass Optical Properties Conversion}\label{glass-optical-properties-conversion}
@@ -1569,20 +1536,20 @@ IDF Examples
 
 \begin{lstlisting}
 Construction,
-  window_const,     !- Name
-  Usual Glass,      !- Layer 1
-  AIR 6MM,          !- Layer 2
-  TCGlazings,       !- Layer 3
-  AIR 6MM,          !- Layer 4
-  Usual Glass;      !- Layer 5
+  window_const,               !- Name
+  Usual Glass,                !- Layer 1
+  AIR 6MM,                    !- Layer 2
+  TCGlazings,                 !- Layer 3
+  AIR 6MM,                    !- Layer 4
+  Usual Glass;                !- Layer 5
 
 WindowMaterial:Gas,
-  AIR 6MM,          !- Name
-  Air,              !- Gas Type
-  0.0063;           !- Thickness {m}
+  AIR 6MM,                    !- Name
+  Air,                        !- Gas Type
+  0.0063;                     !- Thickness {m}
 
 ! Added for thermochromic glazings
-WindowMaterial:GlazingGroup:Thermochromic,
+  WindowMaterial:GlazingGroup:Thermochromic,
   TCGlazings,
   0 ,  TCGlazing0,
   20,  TCGlazing20,
@@ -1599,238 +1566,238 @@ WindowMaterial:GlazingGroup:Thermochromic,
   85,  TCGlazing85;
 
 WindowMaterial:Glazing,
-  TCGlazing0,       !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing0,                 !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing20,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing20,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing25,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing25,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing30,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing30,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing35,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing35,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing40,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing40,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing45,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing45,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing50,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing50,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing55,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing55,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing60,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing60,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing65,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing65,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing75,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing75,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 
 WindowMaterial:Glazing,
-  TCGlazing85,      !- Name
-  SpectralAverage,  !- Optical Data Type
-  ,                 !- Window Glass Spectral Data Set Name
-  0.0030,           !- Thickness
-  0.2442,           !- Solar Transmittance at Normal Incidence
-  0.7058,           !- Front Side Solar Reflectance at Normal Incidence
-  0.7058,           !- Back Side Solar Reflectance at Normal Incidence
-  0.3192,           !- Visible Transmittance at Normal Incidence
-  0.6308,           !- Front Side Visible Reflectance at Normal Incidence
-  0.6308,           !- Back Side Visible Reflectance at Normal Incidence
-  0.0000,           !- Infrared Transmittance at Normal Incidence
-  0.9000,           !- Front Side Infrared Hemispherical Emissivity
-  0.9000,           !- Back Side Infrared Hemispherical Emissivity
-  0.0199,           !- Conductivity
-  1.0000,           !- Dirt Correction Factor for Solar and Visible Transmittance
-  No;               !- Solar Diffusing
+  TCGlazing85,                !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.0030,                     !- Thickness
+  0.2442,                     !- Solar Transmittance at Normal Incidence
+  0.7058,                     !- Front Side Solar Reflectance at Normal Incidence
+  0.7058,                     !- Back Side Solar Reflectance at Normal Incidence
+  0.3192,                     !- Visible Transmittance at Normal Incidence
+  0.6308,                     !- Front Side Visible Reflectance at Normal Incidence
+  0.6308,                     !- Back Side Visible Reflectance at Normal Incidence
+  0.0000,                     !- Infrared Transmittance at Normal Incidence
+  0.9000,                     !- Front Side Infrared Hemispherical Emissivity
+  0.9000,                     !- Back Side Infrared Hemispherical Emissivity
+  0.0199,                     !- Conductivity
+  1.0000,                     !- Dirt Correction Factor for Solar and Visible Transmittance
+  No;                         !- Solar Diffusing
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-019}
@@ -1922,41 +1889,38 @@ The specific heat ratio for gas.~ The specific heat ratio of a gas is the ratio 
 An IDF example:
 
 \begin{lstlisting}
-
 WindowMaterial:Gas,AIRGAP,
-    AIR,      ! Gas type (Air - Argon - Krypton - Xenon - Custom)]
-    0.0125;   ! Thickness {m} 1/2 inch
+  AIR,                        !- Gas type (Air - Argon - Krypton - Xenon - Custom)]
+  0.0125;                     !- Thickness {m} 1/2 inch
 \end{lstlisting}
 
 An IDF example to be used with a \hyperref[windowmaterialgap]{WindowMaterial:Gap} definition (see below)
 
 \begin{lstlisting}
-
 WindowMaterial:Gas,
-  Gas_1_W_0_0100,                                     !- gap name - Air
-  Air,                                                !- type
-  0.0100;                                             !- thickness
+  Gas_1_W_0_0100,             !- gap name - Air
+  Air,                        !- type
+  0.0100;                     !- thickness
 \end{lstlisting}
 
 An IDF example for a Custom Gas
 
 \begin{lstlisting}
-
 WindowMaterial:Gas,
-  Gas_16_W_0_0003,                   !- gap name
-  Custom,                            !- type
-  0.0003,                            !- thickness
-  2.873000e-003,                     !- Conductivity Coefficient A
-  7.760000e-005,                     !- Conductivity Coefficient B
-  0.000000e+000,                     !- Conductivity Coefficient C
-  3.723000e-006,                     !- Conductivity Viscosity A
-  4.940000e-008,                     !- Conductivity Viscosity B
-  0.000000e+000,                     !- Conductivity Viscosity C
-  1002.737000,                       !- Specific Heat Coefficient A
-  0.012324,                          !- Specific Heat Coefficient B
-  0.000000,                          !- Specific Heat Coefficient C
-  28.969999,                         !- Molecular Weight
-  1.400000;                          !- Specific Heat Ratio
+  Gas_16_W_0_0003,            !- gap name
+  Custom,                     !- type
+  0.0003,                     !- thickness
+  2.873000e-003,              !- Conductivity Coefficient A
+  7.760000e-005,              !- Conductivity Coefficient B
+  0.000000e+000,              !- Conductivity Coefficient C
+  3.723000e-006,              !- Conductivity Viscosity A
+  4.940000e-008,              !- Conductivity Viscosity B
+  0.000000e+000,              !- Conductivity Viscosity C
+  1002.737000,                !- Specific Heat Coefficient A
+  0.012324,                   !- Specific Heat Coefficient B
+  0.000000,                   !- Specific Heat Coefficient C
+  28.969999,                  !- Molecular Weight
+  1.400000;                   !- Specific Heat Ratio
 \end{lstlisting}
 
 \subsection{WindowMaterial:GasMixture}\label{windowmaterialgasmixture}
@@ -1990,14 +1954,13 @@ The fraction of the first gas in the mixture.
 An IDF example:
 
 \begin{lstlisting}
-
 WindowMaterial:GasMixture,ArgonKryptonMix,
-  0.0125,   ! Thickness {m} 1/2 inch
-  2,        ! Number of Gases in Mixture
-  Argon,    ! Gas 1 Type
-  0.6,      ! Gas 1 Fraction
-  Krypton,  ! Gas 2 Type
-  0.4;      ! Gas 2 Fraction
+  0.0125,                     !- Thickness {m} 1/2 inch
+  2,                          !- Number of Gases in Mixture
+  Argon,                      !- Gas 1 Type
+  0.6,                        !- Gas 1 Fraction
+  Krypton,                    !- Gas 2 Type
+  0.4;                        !- Gas 2 Fraction
 \end{lstlisting}
 
 \subsection{WindowMaterial:Gap}\label{windowmaterialgap}
@@ -2033,36 +1996,32 @@ References gas (\hyperref[windowmaterialgas]{WindowMaterial:Gas}) or gas mixture
 An IDF example for simple glazing:
 
 \begin{lstlisting}
-
 WindowMaterial:Gas,
-  Gas_1_W_0_0120,                                !- gap name - Air
-  Air,                                           !- type
-  0.0120;                                        !- thickness
+  Gas_1_W_0_0120,             !- gap name - Air
+  Air,                        !- type
+  0.0120;                     !- thickness
 
-
-  WindowMaterial:Gap,
-  Gap_1_Layer,                                   !- gap name: Air
-  0.0120,                                        !- thickness
-  Gas_1_W_0_0120,                                !- Gas (or Gas Mixture) name
-  101325.0000;                                   !- pressure
+WindowMaterial:Gap,
+  Gap_1_Layer,                !- gap name: Air
+  0.0120,                     !- thickness
+  Gas_1_W_0_0120,             !- Gas (or Gas Mixture) name
+  101325.0000;                !- pressure
 \end{lstlisting}
 
 An IDF example for vacuum glazing:
 
 \begin{lstlisting}
-
 WindowMaterial:Gap,
-  Gap_16_Layer,                     !- gap name: Vacuum_0.001_pr-0.5_ps-50.8
-  0.0003,                                             !- thicknessGas_16_W_0_0003,                                    !- Gas (or Gas Mixture) name
-  0.1333,                                             !- pressure
-  ,                                                   !- deflection state
-  SupportPillar_16_Gap_1;                             !- SupportPillar
+  Gap_16_Layer,               !- gap name: Vacuum_0.001_pr-0.5_ps-50.8
+  0.0003,                     !- thicknessGas_16_W_0_0003,                                    !- Gas (or Gas Mixture) name
+  0.1333,                     !- pressure
+  ,                           !- deflection state
+  SupportPillar_16_Gap_1;     !- SupportPillar
 
-
-  WindowGap:SupportPillar,
-  SupportPillar_16_Gap_1,                             !- Name
-  0.0508,                                             !- spacing
-  0.0005;                                             !- radius
+WindowGap:SupportPillar,
+  SupportPillar_16_Gap_1,     !- Name
+  0.0508,                     !- spacing
+  0.0005;                     !- radius
 \end{lstlisting}
 
 \subsection{WindowGap:DeflectionState}\label{windowgapdeflectionstate}
@@ -2082,18 +2041,16 @@ The thickness (m) of the gap in deflected state.~ It represents value of deflect
 An IDF example where \hyperref[windowthermalmodelparams]{WindowThermalModel:Params} Deflection Model = MeasuredDeflection:
 
 \begin{lstlisting}
-
 WindowMaterial:Gap,
-  Gap_1_Layer,                                  !- gap name: Air
-  0.0120,                                       !- thickness
-  Gas_1_W_0_0120,                               !- Gas (or Gas Mixture) name
-  101325.0000,                                  !- pressure
-  Gap_1_Deflection;                              !- deflection state
+  Gap_1_Layer,                !- gap name: Air
+  0.0120,                     !- thickness
+  Gas_1_W_0_0120,             !- Gas (or Gas Mixture) name
+  101325.0000,                !- pressure
+  Gap_1_Deflection;           !- deflection state
 
-
-  WindowGap:DeflectionState,       !- deflection state of gap
-    Gap_1_Deflection,              !- name
-    0.011;                         !- gap thickness in deflected state
+WindowGap:DeflectionState,    !- deflection state of gap
+  Gap_1_Deflection,           !- name
+  0.011;                      !- gap thickness in deflected state
 \end{lstlisting}
 
 \subsection{WindowGap:SupportPillar}\label{windowgapsupportpillar}
@@ -2123,11 +2080,10 @@ The radius (m) of the support pillar (see Engineering reference document for mor
 An IDF example for vacuum glazing (see Vacuum Glazing example in \hyperref[windowmaterialgap]{WindowMaterial:Gap} above) is as follows:
 
 \begin{lstlisting}
-
-WindowGap:SupportPillar,       !- gap support pillar
-    SupportPillar_16_Gap_1,      !- basis matrix name
-    0.05,                        !- pillar spacing
-    0.005;                       !- pillar radius
+WindowGap:SupportPillar,      !- gap support pillar
+  SupportPillar_16_Gap_1,     !- basis matrix name
+  0.05,                       !- pillar spacing
+  0.005;                      !- pillar radius
 \end{lstlisting}
 
 \subsection{WindowMaterial:SimpleGlazingSystem}\label{windowmaterialsimpleglazingsystem}
@@ -2163,12 +2119,11 @@ This field is optional. If it is omitted, then the visible transmittance propert
 An example of this object is as follows:
 
 \begin{lstlisting}
-
 WindowMaterial:SimpleGlazingSystem,
-      SimpleWindow:DOUBLE PANE WINDOW , !- Name
-      2.716 , !-  U-Factor
-      0.763 , !-  Solar Heat Gain Coefficient
-      0.812 ; !-  Visible Transmittance
+  SimpleWindow:DOUBLE PANE WINDOW,  !- Name
+  2.716,                      !- U-Factor
+  0.763,                      !- Solar Heat Gain Coefficient
+  0.812;                      !- Visible Transmittance
 \end{lstlisting}
 
 \subsection{WindowMaterial:Shade}\label{windowmaterialshade}
@@ -2190,7 +2145,7 @@ There are two methods of assigning a shade to a window:
 \begin{itemize}
 
 \item 1) Define the construction of the window without the shade, the so-called ``bare'' construction.
-	
+
 \item 2) Reference the bare construction in the \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed} for the window.
 
 \item 3) Define the WindowMaterial:Shade.
@@ -2311,21 +2266,21 @@ An IDF example:
 
 \begin{lstlisting}
 WindowMaterial:Shade,
-  DRAPES - CLOSE WEAVE MEDIUM,  !- Name
-  0.05,                         !- Solar transmittance
-  0.3000000,                    !- Solar Reflectance
-  .05,                          !- Visible transmittance
-  0.3000000,                    !- Visible reflectance
-  0.9000000,                    !- Infrared Hemispherical Emissivity
-  0.0,                          !- Infrared Transmittance
-  0.003,                        !- Thickness {m}
-  0.1,                          !- Conductivity {W/m-K}
-  0.050,                        !- Shade to glass distance {m}
-  1.0,                          !- Top opening multiplier
-  1.0,                          !- Bottom opening multiplier
-  0.0,                          !- Left-side opening multiplier
-  0.0,                          !- Right-side opening multiplier
-  0.0;                          !- Air flow permeability
+  DRAPES - CLOSE WEAVE MEDIUM,!- Name
+  0.05,                       !- Solar transmittance
+  0.3000000,                  !- Solar Reflectance
+  .05,                        !- Visible transmittance
+  0.3000000,                  !- Visible reflectance
+  0.9000000,                  !- Infrared Hemispherical Emissivity
+  0.0,                        !- Infrared Transmittance
+  0.003,                      !- Thickness {m}
+  0.1,                        !- Conductivity {W/m-K}
+  0.050,                      !- Shade to glass distance {m}
+  1.0,                        !- Top opening multiplier
+  1.0,                        !- Bottom opening multiplier
+  0.0,                        !- Left-side opening multiplier
+  0.0,                        !- Right-side opening multiplier
+  0.0;                        !- Air flow permeability
 \end{lstlisting}
 
 \subsection{WindowMaterial:Blind}\label{windowmaterialblind}
@@ -2500,37 +2455,36 @@ The maximum allowed slat angle (degrees). Used only if \hyperref[windowpropertys
 An IDF example:
 
 \begin{lstlisting}
-
 WindowMaterial:Blind,
-   White Painted Metal Blind,   !- Name
-   HORIZONTAL, !- Slat orientation
-   0.025   , !- Slat width (m)
-   0.01875 , !- Slat separation (m)
-   0.001   , !- Slat thickness (m)
-   45.0    , !- Slat angle (deg)
-   44.9    , !- Slat conductivity (W/m-K)
-   0.0     , !- Slat beam solar transmittance
-   0.8     , !- Front Side Slat beam solar reflectance
-   0.8     , !- Back Side Slat beam solar reflectance
-   0.0     , !- Slat diffuse solar transmittance
-   0.8     , !- Front Side Slat diffuse solar reflectance
-   0.8     , !- Back Side Slat diffuse solar reflectance
-   0.0     , !- Slat beam visible transmittance
-   0.7     , !- Front Side Slat beam visible reflectance
-   0.7     , !- Back Side Slat beam visible reflectance
-   0.0     , !- Slat diffuse visible transmittance
-   0.7     , !- Front Side Slat diffuse visible reflectance
-   0.7     , !- Back Side Slat diffuse visible reflectance
-   0.0     , !- Slat Infrared hemispherical transmittance
-   0.9     , !- Front Side Slat Infrared hemispherical emissivity
-   0.9     , !- Back Side Slat Infrared hemispherical emissivity
-   0.050   , !- Blind-to-glass distance
-   0.0     , !- Blind top opening multiplier
-   0.0     , !- Blind bottom opening multiplier
-   0.5     , !- Blind left-side opening multiplier
-   0.5     , !- Blind right-side opening multiplier
-   ,         !- Minimum slat angle (deg)
-   ;         !- Maximum slat angle (deg)
+  White Painted Metal Blind,  !- Name
+  HORIZONTAL,                 !- Slat orientation
+  0.025,                      !- Slat width (m)
+  0.01875,                    !- Slat separation (m)
+  0.001,                      !- Slat thickness (m)
+  45.0,                       !- Slat angle (deg)
+  44.9,                       !- Slat conductivity (W/m-K)
+  0.0,                        !- Slat beam solar transmittance
+  0.8,                        !- Front Side Slat beam solar reflectance
+  0.8,                        !- Back Side Slat beam solar reflectance
+  0.0,                        !- Slat diffuse solar transmittance
+  0.8,                        !- Front Side Slat diffuse solar reflectance
+  0.8,                        !- Back Side Slat diffuse solar reflectance
+  0.0,                        !- Slat beam visible transmittance
+  0.7,                        !- Front Side Slat beam visible reflectance
+  0.7,                        !- Back Side Slat beam visible reflectance
+  0.0,                        !- Slat diffuse visible transmittance
+  0.7,                        !- Front Side Slat diffuse visible reflectance
+  0.7,                        !- Back Side Slat diffuse visible reflectance
+  0.0,                        !- Slat Infrared hemispherical transmittance
+  0.9,                        !- Front Side Slat Infrared hemispherical emissivity
+  0.9,                        !- Back Side Slat Infrared hemispherical emissivity
+  0.050,                      !- Blind-to-glass distance
+  0.0,                        !- Blind top opening multiplier
+  0.0,                        !- Blind bottom opening multiplier
+  0.5,                        !- Blind left-side opening multiplier
+  0.5,                        !- Blind right-side opening multiplier
+  ,                           !- Minimum slat angle (deg)
+  ;                           !- Maximum slat angle (deg)
 \end{lstlisting}
 
 \begin{figure}[hbtp] % fig 14
@@ -2698,26 +2652,25 @@ The curvature radius (m) of the venetian slats.~ Setting this value to zero mean
 An IDF example for ShadingLayerType = VenetianHorizontal
 
 \begin{lstlisting}
-
-WindowMaterial:ComplexShade,       !- venetian blind layer
-    Shade_30001_Layer,               !- name
-    VenetianHorizontal,              !- shading layer type
-    0.005,                           !- thickness
-    160,                             !- layer conductivity
-    0.0,                             !- IR transmittance
-    0.9,                             !- front emissivity
-    0.9,                             !- back emissivity
-    0.0,                             !- top opening multiplier
-    0.0,                             !- bottom opening multiplier
-    0.0,                             !- left side opening multiplier
-    0.0,                             !- right side opening multiplier
-    0.05,                            !- front opening multiplier
-    0.016,                           !- venetian slat width
-    0.012,                           !- venetian slat spacing
-    0.0006,                          !- venetian slat thickness
-    -45.00,                          !- venetian slat angle
-    160.00,                          !- venetian slat conductivity
-    0.0000;                          !- venetian slat curve
+WindowMaterial:ComplexShade,  !- venetian blind layer
+  Shade_30001_Layer,          !- name
+  VenetianHorizontal,         !- shading layer type
+  0.005,                      !- thickness
+  160,                        !- layer conductivity
+  0.0,                        !- IR transmittance
+  0.9,                        !- front emissivity
+  0.9,                        !- back emissivity
+  0.0,                        !- top opening multiplier
+  0.0,                        !- bottom opening multiplier
+  0.0,                        !- left side opening multiplier
+  0.0,                        !- right side opening multiplier
+  0.05,                       !- front opening multiplier
+  0.016,                      !- venetian slat width
+  0.012,                      !- venetian slat spacing
+  0.0006,                     !- venetian slat thickness
+  -45.00,                     !- venetian slat angle
+  160.00,                     !- venetian slat conductivity
+  0.0000;                     !- venetian slat curve
 \end{lstlisting}
 
 An IDF example for ShadingLayerType = Woven
@@ -2725,20 +2678,19 @@ An IDF example for ShadingLayerType = Woven
 (Note that it is not necessary to include ``blank'' lines for the venetian blind input for a Woven shade definition).
 
 \begin{lstlisting}
-
-WindowMaterial:ComplexShade,       !- woven shade layer
-    Shade_30002_Layer,               !- name
-    Woven,                           !- shading layer type
-    0.011,                           !- thickness
-    1,                               !- layer conductivity
-    0.0,                             !- IR transmittance
-    0.9,                             !- front emissivity
-    0.9,                             !- back emissivity
-    0.0,                             !- top opening multiplier
-    0.0,                             !- bottom opening multiplier
-    0.0,                             !- left side opening multiplier
-    0.0,                             !- right side opening multiplier
-    0.17;                            !- front opening multiplier
+WindowMaterial:ComplexShade,  !- woven shade layer
+  Shade_30002_Layer,          !- name
+  Woven,                      !- shading layer type
+  0.011,                      !- thickness
+  1,                          !- layer conductivity
+  0.0,                        !- IR transmittance
+  0.9,                        !- front emissivity
+  0.9,                        !- back emissivity
+  0.0,                        !- top opening multiplier
+  0.0,                        !- bottom opening multiplier
+  0.0,                        !- left side opening multiplier
+  0.0,                        !- right side opening multiplier
+  0.17;                       !- front opening multiplier
 \end{lstlisting}
 
 \subsection{WindowMaterial:Screen}\label{windowmaterialscreen}
@@ -2874,47 +2826,46 @@ Angle of resolution, in degrees, for the overall screen beam transmittance (dire
 An IDF example for this object, along with Construction and \hyperref[windowpropertyshadingcontrol]{WindowShadingControl} objects, is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Screen,
-      EXTERIOR SCREEN,         !- Name
-      ModelAsDiffuse,        !- Reflected Beam Transmittance Accounting Method
-      0.6,                     !- Diffuse Solar Reflectance
-      0.6,                     !- Diffuse Visible Reflectance
-      0.9,                     !- Thermal Hemispherical Emissivity
-      221.0,                   !- Conductivity {W/m-K}
-      0.00154,                 !- Screen Material Spacing (m)
-      0.000254,                !- Screen Material Diameter (m)
-      0.025,                   !- Screen-to-Glass Distance {m}
-      0.0,                     !- Top Opening Multiplier
-      0.0,                     !- Bottom Opening Multiplier
-      0.0,                     !- Left-Side Opening Multiplier
-      0.0,                     !- Right-Side Opening Multiplier
-      0;                   !- Angle of Resolution for Output Map {deg}
+  EXTERIOR SCREEN,            !- Name
+  ModelAsDiffuse,             !- Reflected Beam Transmittance Accounting Method
+  0.6,                        !- Diffuse Solar Reflectance
+  0.6,                        !- Diffuse Visible Reflectance
+  0.9,                        !- Thermal Hemispherical Emissivity
+  221.0,                      !- Conductivity {W/m-K}
+  0.00154,                    !- Screen Material Spacing (m)
+  0.000254,                   !- Screen Material Diameter (m)
+  0.025,                      !- Screen-to-Glass Distance {m}
+  0.0,                        !- Top Opening Multiplier
+  0.0,                        !- Bottom Opening Multiplier
+  0.0,                        !- Left-Side Opening Multiplier
+  0.0,                        !- Right-Side Opening Multiplier
+  0;                          !- Angle of Resolution for Output Map {deg}
 
-  Construction,
-      DOUBLE PANE WITHOUT SCREEN,     !- Name
-      GLASS - CLEAR SHEET 1 / 8 IN,   !- Outside Layer
-      WinAirB1 - AIRSPACE RESISTANCE, !- Layer \#2
-      GLASS - CLEAR SHEET 1 / 8 IN;   !- Layer \#3
+Construction,
+  DOUBLE PANE WITHOUT SCREEN, !- Name
+  GLASS - CLEAR SHEET 1 / 8 IN,  !- Outside Layer
+  WinAirB1 - AIRSPACE RESISTANCE,  !- Layer \#2
+  GLASS - CLEAR SHEET 1 / 8 IN;  !- Layer \#3
 
-  WindowShadingControl,
-      DOUBLE PANE WITH SCREEN, !- Name
-      West Zone,               !- Zone Name
-      1,                       !- Shading Control Sequence Number
-      ExteriorScreen,          !- Shading Type
-      ,                        !- Name of construction with shading
-      AlwaysOn,                !- Shading Control Type
-      ScreenSchedule,          !- Schedule Name
-      20.0,                    !- SetPoint {W/m2, W or deg C}
-      YES,                     !- Shading Control Is Scheduled
-      NO,                      !- Glare Control Is Active
-      EXTERIOR SCREEN,         !- Material Name of Shading Device
-      ,                        !- Type of Slat Angle Control for Blinds
-      ,                        !- Slat Angle Schedule Name
-      ,                        !- Setpoint 2 {W/m2, deg C or cd/m2}
-      ,                        !- Daylighting Control Object Name
-      Sequential,              !- Multiple Surface Control Type
-      Zn001:Wall001:Win001;    !- Fenestration Surface 1 Name
+WindowShadingControl,
+  DOUBLE PANE WITH SCREEN,    !- Name
+  West Zone,                  !- Zone Name
+  1,                          !- Shading Control Sequence Number
+  ExteriorScreen,             !- Shading Type
+  ,                           !- Name of construction with shading
+  AlwaysOn,                   !- Shading Control Type
+  ScreenSchedule,             !- Schedule Name
+  20.0,                       !- SetPoint {W/m2, W or deg C}
+  YES,                        !- Shading Control Is Scheduled
+  NO,                         !- Glare Control Is Active
+  EXTERIOR SCREEN,            !- Material Name of Shading Device
+  ,                           !- Type of Slat Angle Control for Blinds
+  ,                           !- Slat Angle Schedule Name
+  ,                           !- Setpoint 2 {W/m2, deg C or cd/m2}
+  ,                           !- Daylighting Control Object Name
+  Sequential,                 !- Multiple Surface Control Type
+  Zn001:Wall001:Win001;       !- Fenestration Surface 1 Name
 \end{lstlisting}
 
 \subsection{WindowMaterial:Shade:EquivalentLayer}\label{windowmaterialshadeequivalentlayer}
@@ -2974,20 +2925,19 @@ This value is the back side long-wave hemispherical emissivity of shade material
 An IDF example for this object is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Shade:EquivalentLayer,
-    Shade1,        !- Name
-    0.190,         !- Shade Beam-Beam Solar Transmittance
-    0.206,         !- Front Side Shade Beam-Diffuse Solar Transmittance
-    0.206,         !- Back Side Shade Beam-Diffuse Solar Transmittance
-    0.499,         !- Front Side Shade Beam-Diffuse Solar Reflectance
-    0.499,         !- Back Side Shade Beam-Diffuse Solar Reflectance
-    0.0,           !- Shade Beam-Beam Visible Transmittance
-    0.0,           !- Shade Beam-Diffuse Visible Transmittance
-    0.0,           !- Shade Visible Reflectance
-    0.0,           !- Shade Material Infrared Transmittance
-    0.84,          !- Front Side Shade Material Infrared Emissivity
-    0.84;          !- Back Side Shade Material Infrared Emissivity
+  Shade1,                     !- Name
+  0.190,                      !- Shade Beam-Beam Solar Transmittance
+  0.206,                      !- Front Side Shade Beam-Diffuse Solar Transmittance
+  0.206,                      !- Back Side Shade Beam-Diffuse Solar Transmittance
+  0.499,                      !- Front Side Shade Beam-Diffuse Solar Reflectance
+  0.499,                      !- Back Side Shade Beam-Diffuse Solar Reflectance
+  0.0,                        !- Shade Beam-Beam Visible Transmittance
+  0.0,                        !- Shade Beam-Diffuse Visible Transmittance
+  0.0,                        !- Shade Visible Reflectance
+  0.0,                        !- Shade Material Infrared Transmittance
+  0.84,                       !- Front Side Shade Material Infrared Emissivity
+  0.84;                       !- Back Side Shade Material Infrared Emissivity
 \end{lstlisting}
 
 \subsection{WindowMaterial:Drape:EquivalentLayer}\label{windowmaterialdrapeequivalentlayer}
@@ -3064,20 +3014,20 @@ An IDF example for this object is shown below:
 
 \begin{lstlisting}
 WindowMaterial:Drape:EquivalentLayer,
-  Drape02,            !- Name
-  0.14,               !- Shade Beam-Beam Solar Transmittance
-  0.10,               !- Front Side Shade Beam-Diffuse Solar Transmittance
-  0.10,               !- Back Side Shade Beam-Diffuse Solar Transmittance
-  0.40,               !- Front Side Shade Beam-Diffuse Solar Reflectance
-  0.50,               !- Back Side Shade Beam-Diffuse Solar Reflectance
-  0.0,                !- Shade Beam-Beam Visible Transmittance
-  0.0,                !- Shade Beam-Diffuse Visible Transmittance
-  0.0,                !- Shade Beam-Diffuse Visible Reflectance
-  0.10,               !- Shade Material Infrared Transmittance
-  0.90,               !- Front Side Shade Material Infrared Emissivity
-  0.80,               !- Back Side Shade Material Infrared Emissivity
-  0.01,               !- Width of Pleated Fabric
-  0.025;              !- Length of Pleated Fabric
+  Drape02,                    !- Name
+  0.14,                       !- Shade Beam-Beam Solar Transmittance
+  0.10,                       !- Front Side Shade Beam-Diffuse Solar Transmittance
+  0.10,                       !- Back Side Shade Beam-Diffuse Solar Transmittance
+  0.40,                       !- Front Side Shade Beam-Diffuse Solar Reflectance
+  0.50,                       !- Back Side Shade Beam-Diffuse Solar Reflectance
+  0.0,                        !- Shade Beam-Beam Visible Transmittance
+  0.0,                        !- Shade Beam-Diffuse Visible Transmittance
+  0.0,                        !- Shade Beam-Diffuse Visible Reflectance
+  0.10,                       !- Shade Material Infrared Transmittance
+  0.90,                       !- Front Side Shade Material Infrared Emissivity
+  0.80,                       !- Back Side Shade Material Infrared Emissivity
+  0.01,                       !- Width of Pleated Fabric
+  0.025;                      !- Length of Pleated Fabric
 \end{lstlisting}
 
 \subsection{WindowMaterial:Blind:EquivalentLayer}\label{windowmaterialblindequivalentlayer}
@@ -3194,32 +3144,31 @@ This input field is used only if slat angle control is desired.~ The three key c
 An IDF example for this object, is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Blind:EquivalentLayer,
-    VBU8D6+45SW1,      ! - Name
-    Horizontal,        ! - Slat Orientation
-    0.025,             ! - Slat Width
-    0.025,             ! - Slat Separation
-    0.0,               ! - Slat Crown
-    45.0,              ! - Slat Angle
-    0.0,               ! - Front Side Slat Beam-Diffuse Solar Transmittance
-    0.0,               ! - Back Side Slat Beam-Diffuse Solar Transmittance
-    0.0,               ! - Front Side Slat Beam-Diffuse Solar Reflectance
-    0.0,               ! - Back Side Slat Beam-Diffuse Solar Reflectance
-    0.0,               ! - Front Side Slat Beam-Diffuse Visible Transmittance
-    0.0,               ! - Back Side Slat Beam-Diffuse Visible Transmittance
-    0.0,               ! - Front Side Slat Beam-Diffuse Visible Reflectance
-    0.0,               ! - Back Side Slat Beam-Diffuse Visible  Reflectance
-    0.0,               ! - Slat Diffuse-Diffuse Solar Transmittance
-    0.80,              ! - Front Side Slat Diffuse-Diffuse Solar Reflectance
-    0.60,              ! - Back Side Slat Diffuse-Diffuse Solar Reflectance
-    0.0,               ! - Slat Diffuse-Diffuse Visible Transmittance
-    0.0,               ! - Front Side Slat Diffuse-Diffuse Visible Reflectance
-    0.0,               ! - Back Side Slat Diffuse-Diffuse Visible Reflectance
-    0.0,               ! - Slat Infrared Transmittance
-    0.90,              ! - Front Side Slat Infrared Emissivity
-    0.90,              ! - Back Side Slat Infrared Emissivity
-    FixedSlatAngle;    ! - Slat Angle Control
+  VBU8D6+45SW1,               !- Name
+  Horizontal,                 !- Slat Orientation
+  0.025,                      !- Slat Width
+  0.025,                      !- Slat Separation
+  0.0,                        !- Slat Crown
+  45.0,                       !- Slat Angle
+  0.0,                        !- Front Side Slat Beam-Diffuse Solar Transmittance
+  0.0,                        !- Back Side Slat Beam-Diffuse Solar Transmittance
+  0.0,                        !- Front Side Slat Beam-Diffuse Solar Reflectance
+  0.0,                        !- Back Side Slat Beam-Diffuse Solar Reflectance
+  0.0,                        !- Front Side Slat Beam-Diffuse Visible Transmittance
+  0.0,                        !- Back Side Slat Beam-Diffuse Visible Transmittance
+  0.0,                        !- Front Side Slat Beam-Diffuse Visible Reflectance
+  0.0,                        !- Back Side Slat Beam-Diffuse Visible  Reflectance
+  0.0,                        !- Slat Diffuse-Diffuse Solar Transmittance
+  0.80,                       !- Front Side Slat Diffuse-Diffuse Solar Reflectance
+  0.60,                       !- Back Side Slat Diffuse-Diffuse Solar Reflectance
+  0.0,                        !- Slat Diffuse-Diffuse Visible Transmittance
+  0.0,                        !- Front Side Slat Diffuse-Diffuse Visible Reflectance
+  0.0,                        !- Back Side Slat Diffuse-Diffuse Visible Reflectance
+  0.0,                        !- Slat Infrared Transmittance
+  0.90,                       !- Front Side Slat Infrared Emissivity
+  0.90,                       !- Back Side Slat Infrared Emissivity
+  FixedSlatAngle;             !- Slat Angle Control
 \end{lstlisting}
 
 \subsection{WindowMaterial:Screen:EquivalentLayer}\label{windowmaterialscreenequivalentlayer}
@@ -3283,19 +3232,18 @@ The diameter, D (m), of individual strands or wires of the screen material. The 
 An IDF example for this object, is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Screen:EquivalentLayer,
-    INSCRN,                !- Name
-    0.763,                 !- Screen Beam-Beam Solar Transmittance
-    0.052,                 !- Screen Beam-Diffuse Solar Transmittance
-    0.076,                 !- Screen Beam-Diffuse Solar Reflectance
-    0.0,                   !- Screen Beam-Beam Visible Transmittance
-    0.0,                   !- Screen Beam-Diffuse Visible Transmittance
-    0.0,                   !- Screen Beam-Diffuse Visible Reflectance
-    0.0,                   !- Screen Infrared Transmittance
-    0.84,                  !- Screen Infrared Emissivity
-    0.025,                 !- Screen Wire Spacing
-    0.005;                 !- Screen Wire Diameter
+  INSCRN,                     !- Name
+  0.763,                      !- Screen Beam-Beam Solar Transmittance
+  0.052,                      !- Screen Beam-Diffuse Solar Transmittance
+  0.076,                      !- Screen Beam-Diffuse Solar Reflectance
+  0.0,                        !- Screen Beam-Beam Visible Transmittance
+  0.0,                        !- Screen Beam-Diffuse Visible Transmittance
+  0.0,                        !- Screen Beam-Diffuse Visible Reflectance
+  0.0,                        !- Screen Infrared Transmittance
+  0.84,                       !- Screen Infrared Emissivity
+  0.025,                      !- Screen Wire Spacing
+  0.005;                      !- Screen Wire Diameter
 \end{lstlisting}
 
 \subsection{WindowMaterial:Glazing:EquivalentLayer}\label{windowmaterialglazingequivalentlayer}
@@ -3423,37 +3371,36 @@ This field is used to enter the thermal resistance (R-value) of the material lay
 An IDF example for this object, is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Glazing:EquivalentLayer,
-    GLZCLR,                  !- Name
-    SpectralAverage,         !- Optical Data Type
-    ,                        !- Window Glass Spectral Data Set Name
-    0.83,                    !- Front Side Beam-Beam Solar Transmittance
-    0.83,                    !- Back Side Beam-Beam Solar Transmittance
-    0.08,                    !- Front Side Beam-Beam Solar Reflectance
-    0.08,                    !- Back Side Beam-Beam Solar Reflectance
-    0.0,                     !- Front Side Beam-Beam Visible Transmittance
-    0.0,                     !- Back Side Beam-Beam Visible Transmittance
-    0.0,                     !- Front Side Beam-Beam Visible Reflectance
-    0.0,                     !- Back Side Beam-Beam Visible Reflectance
-    0.0,                     !- Front Side Beam-Diffuse Solar Transmittance
-    0.0,                     !- Back Side Beam-Diffuse Solar Transmittance
-    0.0,                     !- Front Side Beam-Diffuse Solar Reflectance
-    0.0,                     !- Back Side Beam-Diffuse Solar Reflectance
-    0.0,                     !- Front Side Beam-Diffuse Visible Transmittance
-    0.0,                     !- Back Side Beam-Diffuse Visible Transmittance
-    0.0,                     !- Front Side Beam-Diffuse Visible Reflectance
-    0.0,                     !- Back Side Beam-Diffuse Visible Reflectance
-    0.76,                    !- Diffuse-Diffuse Solar Transmittance
-    0.14,                    !- Front Side Diffuse-Diffuse Solar Reflectance
-    0.14,                    !- Back Side Diffuse-Diffuse Solar Reflectance
-    0.0,                     !- Diffuse-Diffuse Visible Transmittance
-    0.0,                     !- Front Side Diffuse-Diffuse Visible Reflectance
-    0.0,                     !- Back Side Diffuse-Diffuse Visible Reflectance
-    0.0,                     !- Infrared Transmittance
-    0.84,                    !- Front Side Infrared Emissivity
-    0.84,                    !- Back Side Infrared Emissivity
-    0.158;                   !- Thermal Resistance (used for movable insulation only)
+  GLZCLR,                     !- Name
+  SpectralAverage,            !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
+  0.83,                       !- Front Side Beam-Beam Solar Transmittance
+  0.83,                       !- Back Side Beam-Beam Solar Transmittance
+  0.08,                       !- Front Side Beam-Beam Solar Reflectance
+  0.08,                       !- Back Side Beam-Beam Solar Reflectance
+  0.0,                        !- Front Side Beam-Beam Visible Transmittance
+  0.0,                        !- Back Side Beam-Beam Visible Transmittance
+  0.0,                        !- Front Side Beam-Beam Visible Reflectance
+  0.0,                        !- Back Side Beam-Beam Visible Reflectance
+  0.0,                        !- Front Side Beam-Diffuse Solar Transmittance
+  0.0,                        !- Back Side Beam-Diffuse Solar Transmittance
+  0.0,                        !- Front Side Beam-Diffuse Solar Reflectance
+  0.0,                        !- Back Side Beam-Diffuse Solar Reflectance
+  0.0,                        !- Front Side Beam-Diffuse Visible Transmittance
+  0.0,                        !- Back Side Beam-Diffuse Visible Transmittance
+  0.0,                        !- Front Side Beam-Diffuse Visible Reflectance
+  0.0,                        !- Back Side Beam-Diffuse Visible Reflectance
+  0.76,                       !- Diffuse-Diffuse Solar Transmittance
+  0.14,                       !- Front Side Diffuse-Diffuse Solar Reflectance
+  0.14,                       !- Back Side Diffuse-Diffuse Solar Reflectance
+  0.0,                        !- Diffuse-Diffuse Visible Transmittance
+  0.0,                        !- Front Side Diffuse-Diffuse Visible Reflectance
+  0.0,                        !- Back Side Diffuse-Diffuse Visible Reflectance
+  0.0,                        !- Infrared Transmittance
+  0.84,                       !- Front Side Infrared Emissivity
+  0.84,                       !- Back Side Infrared Emissivity
+  0.158;                      !- Thermal Resistance (used for movable insulation only)
 \end{lstlisting}
 
 \subsection{WindowMaterial:Gap:EquivalentLayer}\label{windowmaterialgapequivalentlayer}
@@ -3483,7 +3430,7 @@ This input field contains the valid key choice for gap vent type.~ The valid ven
 The following entries are used only if Gas Type = Custom. The A, B and C coefficients are those in the following expression that gives a property value as a function of temperature in degrees K:
 
 \begin{equation}
-Property = Coef{f_A} + Coef{f_B} \times Temperatur{e_K} + Coef{f_C} \times Temperature_K^2
+Property = Coef{f_A} + Coef{f_B} \times Temperature{e_K} + Coef{f_C} \times Temperature_K^2
 \end{equation}
 
 \paragraph{Field: Conductivity Coefficient A}\label{field-conductivity-coefficient-a-1}
@@ -3537,22 +3484,21 @@ The specific heat ratio for gas.~ The specific heat ratio of a gas is the ratio 
 An IDF example for this object, is shown below:
 
 \begin{lstlisting}
-
 WindowMaterial:Gap:EquivalentLayer,
-    Custom CO2 Sealed 12mm,    !- Name
-    CUSTOM,                    !- Gas Type
-    0.0120,                    !- Thickness {m}
-    Sealed,                    !- Gap Vent Type
-   -5.8181E-3,                 !- Conductivity Coefficient A {W/m-K}
-    7.4714E-5,                 !- Conductivity Coefficient B {W/m-K2}
-    0.0,                       !- Conductivity Coefficient C {W/m-K3}
-    8.5571E-7,                 !- Viscosity Coefficient A {kg/m-s}
-    4.7143E-8,                 !- Viscosity Coefficient B {kg/m-s-K}
-    0.0,                       !- Viscosity Coefficient C {kg/m-s-K2}
-    5.76903E2,                 !- Specific Heat Coefficient A {J/kg-K}
-    9.18088E-2,                !- Specific Heat Coefficient B {J/kg-K2}
-    0.0,                       !- Specific Heat Coefficient C {J/kg-K3}
-    44.01;                     !- Molecular Weight {g/mol}
+  Custom CO2 Sealed 12mm,     !- Name
+  CUSTOM,                     !- Gas Type
+  0.0120,                     !- Thickness {m}
+  Sealed,                     !- Gap Vent Type
+  -5.8181E-3,                 !- Conductivity Coefficient A {W/m-K}
+  7.4714E-5,                  !- Conductivity Coefficient B {W/m-K2}
+  0.0,                        !- Conductivity Coefficient C {W/m-K3}
+  8.5571E-7,                  !- Viscosity Coefficient A {kg/m-s}
+  4.7143E-8,                  !- Viscosity Coefficient B {kg/m-s-K}
+  0.0,                        !- Viscosity Coefficient C {kg/m-s-K2}
+  5.76903E2,                  !- Specific Heat Coefficient A {J/kg-K}
+  9.18088E-2,                 !- Specific Heat Coefficient B {J/kg-K2}
+  0.0,                        !- Specific Heat Coefficient C {J/kg-K3}
+  44.01;                      !- Molecular Weight {g/mol}
 \end{lstlisting}
 
 \subsection{Material:RoofVegetation}\label{materialroofvegetation}
@@ -3646,60 +3592,57 @@ Marcel G Schaap and Martinus Th. van Genuchten, 2006, `A modified Maulem-van Gen
 An IDF example:
 
 \begin{lstlisting}
+Material:RoofVegetation,
+  BaseEco,                    !- Name
+  0.5,                        !- Height of Plants {m}
+  5,                          !- Leaf Area Index {dimensionless}
+  0.2,                        !- Leaf Reflectivity {dimensionless}
+  0.95,                       !- Leaf Emissivity
+  180,                        !- Minimum Stomatal Resistance {s/m}
+  EcoRoofSoil,                !- Soil Layer Name
+  MediumSmooth,               !- Roughness
+  0.18,                       !- Thickness {m}
+  0.4,                        !- Conductivity of Dry Soil {W/m-K}
+  641,                        !- Density of Dry Soil {kg/m3}
+  1100,                       !- Specific Heat of Dry Soil {J/kg-K}
+  0.95,                       !- Thermal Absorptance
+  0.8,                        !- Solar Absorptance
+  0.7,                        !- Visible Absorptance
+  0.4,                        !- Saturation Volumetric Moisture Content of the Soil Layer
+  0.01,                       !- Residual Volumetric Moisture Content of the Soil Layer
+  0.2,                        !- Initial Volumetric Moisture Content of the Soil Layer
+  Simple;                     !- Moisture Diffusion Calculation Method
 
 Material:RoofVegetation,
-      BaseEco,                 !- Name
-      0.5,                     !- Height of Plants {m}
-      5,                       !- Leaf Area Index {dimensionless}
-      0.2,                     !- Leaf Reflectivity {dimensionless}
-      0.95,                    !- Leaf Emissivity
-      180,                     !- Minimum Stomatal Resistance {s/m}
-      EcoRoofSoil,             !- Soil Layer Name
-      MediumSmooth,            !- Roughness
-      0.18,                    !- Thickness {m}
-      0.4,                     !- Conductivity of Dry Soil {W/m-K}
-      641,                     !- Density of Dry Soil {kg/m3}
-      1100,                    !- Specific Heat of Dry Soil {J/kg-K}
-      0.95,                    !- Thermal Absorptance
-      0.8,                     !- Solar Absorptance
-      0.7,                     !- Visible Absorptance
-      0.4,                     !- Saturation Volumetric Moisture Content of the Soil Layer
-      0.01,                    !- Residual Volumetric Moisture Content of the Soil Layer
-      0.2,                     !- Initial Volumetric Moisture Content of the Soil Layer
-      Simple;                  !- Moisture Diffusion Calculation Method
-
-
-    Material:RoofVegetation,
-      LowLAI,                  !- Name
-      0.5,                     !- Height of Plants {m}
-      0.5,                     !- Leaf Area Index {dimensionless}
-      0.2,                     !- Leaf Reflectivity {dimensionless}
-      0.95,                    !- Leaf Emissivity
-      180,                     !- Minimum Stomatal Resistance {s/m}
-      EcoRoofSoil,             !- Soil Layer Name
-      MediumSmooth,            !- Roughness
-      0.18,                    !- Thickness {m}
-      0.4,                     !- Conductivity of Dry Soil {W/m-K}
-      641,                     !- Density of Dry Soil {kg/m3}
-      1100,                    !- Specific Heat of Dry Soil {J/kg-K}
-      0.95,                    !- Thermal Absorptance
-      0.8,                     !- Solar Absorptance
-      0.7,                     !- Visible Absorptance
-      0.4,                     !- Saturation Volumetric Moisture Content of the Soil Layer
-      0.01,                    !- Residual Volumetric Moisture Content of the Soil Layer
-      0.2,                     !- Initial Volumetric Moisture Content of the Soil Layer
-      Simple;                 !- Moisture Diffusion Calculation Method
+  LowLAI,                     !- Name
+  0.5,                        !- Height of Plants {m}
+  0.5,                        !- Leaf Area Index {dimensionless}
+  0.2,                        !- Leaf Reflectivity {dimensionless}
+  0.95,                       !- Leaf Emissivity
+  180,                        !- Minimum Stomatal Resistance {s/m}
+  EcoRoofSoil,                !- Soil Layer Name
+  MediumSmooth,               !- Roughness
+  0.18,                       !- Thickness {m}
+  0.4,                        !- Conductivity of Dry Soil {W/m-K}
+  641,                        !- Density of Dry Soil {kg/m3}
+  1100,                       !- Specific Heat of Dry Soil {J/kg-K}
+  0.95,                       !- Thermal Absorptance
+  0.8,                        !- Solar Absorptance
+  0.7,                        !- Visible Absorptance
+  0.4,                        !- Saturation Volumetric Moisture Content of the Soil Layer
+  0.01,                       !- Residual Volumetric Moisture Content of the Soil Layer
+  0.2,                        !- Initial Volumetric Moisture Content of the Soil Layer
+  Simple;                     !- Moisture Diffusion Calculation Method
 \end{lstlisting}
 
 And construction using the ecoroof material:
 
 \begin{lstlisting}
-
 Construction,
-      ASHRAE 90.1-2004_Sec 5.5-2_Roof,  !- Name
-      BaseEco,                 !- Outside Layer
-      ASHRAE 90.1-2004_Sec 5.5-2_Roof Insulation_1,  !- Layer \#2
-      ASHRAE 90.1-2004_Sec 5.5-2_MAT-METAL;  !- Layer \#3
+  ASHRAE 90.1-2004_Sec 5.5-2_Roof,  !- Name
+  BaseEco,                    !- Outside Layer
+  ASHRAE 90.1-2004_Sec 5.5-2_Roof Insulation_1,  !- Layer \#2
+  ASHRAE 90.1-2004_Sec 5.5-2_MAT-METAL;  !- Layer \#3
 \end{lstlisting}
 
 \subsubsection{Ecoroof / RoofVegetation outputs}\label{ecoroof-roofvegetation-outputs}
@@ -3838,26 +3781,23 @@ The wavelength values must be in ascending order. The transmittance and reflecta
 An IDF example:
 
 \begin{lstlisting}
-
 MaterialProperty:GlazingSpectralData,
-        TestSpectralDataSet,
+  TestSpectralDataSet,
          ! { from WINDOW 4 library }
          ! { actual 9.91mm clear laminate: 15_mil PVB, ID:37966/50032-39-9 } 10.38
          ! { conductivity PVB adjusted, W/M/K  } 0.798
          ! { thermal IR transmittance, assumed } tir = 0.00
          ! { thermal IR hemispherical emittance, assumed } emis = 0.84 0.84
-
-
          ! WL   T     Rfront Rback
-         .300, 0.000, 0.045, 0.045,
-         .310, 0.000, 0.044, 0.044,
-         .320, 0.000, 0.044, 0.044,
-         .330, 0.000, 0.042, 0.042,
-         .340, 0.000, 0.041, 0.041,
-         .350, 0.000, 0.040, 0.040,
+  .300, 0.000, 0.045, 0.045,
+  .310, 0.000, 0.044, 0.044,
+  .320, 0.000, 0.044, 0.044,
+  .330, 0.000, 0.042, 0.042,
+  .340, 0.000, 0.041, 0.041,
+  .350, 0.000, 0.040, 0.040,
   <snip>
-        2.450, 0.200, 0.040, 0.040,
-        2.500, 0.214, 0.039, 0.039;
+  2.450, 0.200, 0.040, 0.040,
+  2.500, 0.214, 0.039, 0.039;
 \end{lstlisting}
 
 \subsection{Construction}\label{construction-000}
@@ -3907,32 +3847,29 @@ The next fields are optional and the number of them showing up in a particular C
 IDF Example (floor construction):
 
 \begin{lstlisting}
-
-Construction, FLOOR38,  ! Material layer names follow:
-        E5 - ACOUSTIC TILE,
-        E4 - CEILING AIRSPACE,
-        C12 - 2 IN HW CONCRETE;
+Construction, FLOOR38,        !- Material layer names follow:
+  E5 - ACOUSTIC TILE,
+  E4 - CEILING AIRSPACE,
+  C12 - 2 IN HW CONCRETE;
 \end{lstlisting}
 
 IDF Example (window construction, no shade):
 
 \begin{lstlisting}
-
 Construction, DOUBLE PANE WINDOW,  !- Material layer names follow:
-        GLASS - CLEAR SHEET 1 / 8 IN,
-        WinAirB1 - AIRSPACE RESISTANCE,
-        GLASS - CLEAR SHEET 1 / 8 IN;
+  GLASS - CLEAR SHEET 1 / 8 IN,
+  WinAirB1 - AIRSPACE RESISTANCE,
+  GLASS - CLEAR SHEET 1 / 8 IN;
 \end{lstlisting}
 
 IDF Example (window construction, with interior shade):
 
 \begin{lstlisting}
-
 Construction, DOUBLE PANE WITH ROLL SHADE,  !- Material layer names follow:
-        GLASS - CLEAR SHEET 1 / 8 IN,
-        WinAirB1 - AIRSPACE RESISTANCE,
-        GLASS - CLEAR SHEET 1 / 8 IN,
-        ROLL SHADE - LIGHT
+  GLASS - CLEAR SHEET 1 / 8 IN,
+  WinAirB1 - AIRSPACE RESISTANCE,
+  GLASS - CLEAR SHEET 1 / 8 IN,
+  ROLL SHADE - LIGHT
 \end{lstlisting}
 
 \subsection{Constructions - Modeling Underground Walls and Ground Floors Defined with C and F Factors for Building Energy Code Compliance}\label{constructions---modeling-underground-walls-and-ground-floors-defined-with-c-and-f-factors-for-building-energy-code-compliance}
@@ -3968,28 +3905,26 @@ This field describes the height of the underground wall, i.e.~the depth to the g
 IDF Example:
 
 \begin{lstlisting}
-
 Construction:CfactorUndergroundWall,
-      CfactorUGWall,
-      0.436,           ! C-factor (W/m2K), does not include soil or air films
-      4.57;            ! Height (m)
+  CfactorUGWall,
+  0.436,                      !- C-factor (W/m2K), does not include soil or air films
+  4.57;                       !- Height (m)
 
-
-    BuildingSurface:Detailed,
-      Zn001:Wall001,           !- Name
-      Wall,                    !- Surface Type
-      CfactorUGWall,           !- Construction Name
-      ZONE ONE,                !- Zone Name
-      GroundFCfactorMethod,    !- Outside Boundary Condition
-      ,                        !- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0.0,                     !- View Factor to Ground
-      4,                       !- Number of Vertices
-      0.0,0.0,4.572,           !- X,Y,Z = = > Vertex 1
-      0.0,0.0,0.0,             !- X,Y,Z = = > Vertex 2
-      15.24,0.0,0.0,           !- X,Y,Z = = > Vertex 3
-      15.24,0.0,4.572;         !- X,Y,Z = = > Vertex 4
+BuildingSurface:Detailed,
+  Zn001:Wall001,              !- Name
+  Wall,                       !- Surface Type
+  CfactorUGWall,              !- Construction Name
+  ZONE ONE,                   !- Zone Name
+  GroundFCfactorMethod,       !- Outside Boundary Condition
+  ,                           !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0.0,0.0,4.572,              !- X,Y,Z = = > Vertex 1
+  0.0,0.0,0.0,                !- X,Y,Z = = > Vertex 2
+  15.24,0.0,0.0,              !- X,Y,Z = = > Vertex 3
+  15.24,0.0,4.572;            !- X,Y,Z = = > Vertex 4
 \end{lstlisting}
 
 \subsection{Construction:FfactorGroundFloor}\label{constructionffactorgroundfloor}
@@ -4019,29 +3954,27 @@ This field describes the exposed (direct contact with ambient air) perimeter (in
 IDF Example:
 
 \begin{lstlisting}
-
 Construction:FfactorGroundFloor,
-      slabconst,
-      0.12,     !F-factor in W/m-K
-      232.26,   !Area in m2
-      61.0;     !Exposed perimeter in m
+  slabconst,
+  0.12,                       !- F-factor in W/m-K
+  232.26,                     !- Area in m2
+  61.0;                       !- Exposed perimeter in m
 
-
-    BuildingSurface:Detailed,
-      Zn001:Flr001,            !- Name
-      Floor,                   !- Surface Type
-      slabconst,               !- Construction Name, FLOOR
-      ZONE ONE,                !- Zone Name
-      GroundFCfactorMethod,    !- Outside Boundary Condition, Surface
-      ,                        !- Outside Boundary Condition Object, Zn001:Flr001
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0,                       !- View Factor to Ground
-      4,                       !- Number of Vertices
-      15.24,0.0,0.0,           !- X,Y,Z = = > Vertex 1
-      0.0,0.0,0.0,             !- X,Y,Z = = > Vertex 2
-      0.0,15.240,0.0,          !- X,Y,Z = = > Vertex 3
-      15.24,15.24,0.0;         !- X,Y,Z = = > Vertex 4
+BuildingSurface:Detailed,
+  Zn001:Flr001,               !- Name
+  Floor,                      !- Surface Type
+  slabconst,                  !- Construction Name, FLOOR
+  ZONE ONE,                   !- Zone Name
+  GroundFCfactorMethod,       !- Outside Boundary Condition, Surface
+  ,                           !- Outside Boundary Condition Object, Zn001:Flr001
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0,                          !- View Factor to Ground
+  4,                          !- Number of Vertices
+  15.24,0.0,0.0,              !- X,Y,Z = = > Vertex 1
+  0.0,0.0,0.0,                !- X,Y,Z = = > Vertex 2
+  0.0,15.240,0.0,             !- X,Y,Z = = > Vertex 3
+  15.24,15.24,0.0;            !- X,Y,Z = = > Vertex 4
 \end{lstlisting}
 
 \subsection{ConstructionProperty:InternalHeatSource}\label{constructioninternalsource}
@@ -4172,11 +4105,11 @@ If the Air Exchange Method is \textit{SimpleMixing} then this field specifies th
 IDF Example:
 
 \begin{lstlisting}
-  Construction:AirBoundary,
-    Air Wall,                !- Name
-    SimpleMixing,            !- Air Exchange Method
-    0.5,                     !- Simple Mixing Air Changes per Hour {1/hr}
-    ;                        !- Simple Mixing Schedule Name
+Construction:AirBoundary,
+  Air Wall,                   !- Name
+  SimpleMixing,               !- Air Exchange Method
+  0.5,                        !- Simple Mixing Air Changes per Hour {1/hr}
+  ;                           !- Simple Mixing Schedule Name
 \end{lstlisting}
 
 \subsection{Composite Wall Constructions}\label{composite-wall-constructions}
@@ -4264,45 +4197,43 @@ These layers include gaps, which do not need to have matrix data specified.
 An IDF example of complex fenestration with single layer:
 
 \begin{lstlisting}
-
-Construction:ComplexFenestrationState,       !- single layer example
-    CFS_Glz_1,                 !- name
-    LBNLWindow,                !- basis type
-    None,                      !- basis symmetry type
-    ThermParam_1,              !- window thermal model
-    CFS_Glz_1_Basis,           !- basis matrix name
-    CFS_Glz_1_TfSol,           !- Tfsol
-    CFS_Glz_1_RbSol,           !- Rbsol
-    CFS_Glz_1_Tfvis,           !- Tfvis
-    CFS_Glz_1_Tbvis,           !- Tbvis
-    Glass_102_Layer,           !- layer 1 name
-    CFS_Glz_1_Layer_1_fAbs,    !- fAbs
-    CFS_Glz_1_Layer_1_bAbs;    !- bAbs
+Construction:ComplexFenestrationState,  !- single layer example
+  CFS_Glz_1,                  !- name
+  LBNLWindow,                 !- basis type
+  None,                       !- basis symmetry type
+  ThermParam_1,               !- window thermal model
+  CFS_Glz_1_Basis,            !- basis matrix name
+  CFS_Glz_1_TfSol,            !- Tfsol
+  CFS_Glz_1_RbSol,            !- Rbsol
+  CFS_Glz_1_Tfvis,            !- Tfvis
+  CFS_Glz_1_Tbvis,            !- Tbvis
+  Glass_102_Layer,            !- layer 1 name
+  CFS_Glz_1_Layer_1_fAbs,     !- fAbs
+  CFS_Glz_1_Layer_1_bAbs;     !- bAbs
 \end{lstlisting}
 
 An complex fenestration IDF example with double layer (first layer is shading device):
 
 \begin{lstlisting}
-
-Construction:ComplexFenestrationState,       !- double layer example
-    CFS_Glz_59,                    !- name
-    LBNLWindow,                    !- basis type
-    None,                          !- basis symmetry type
-    ThermParam_59,                 !- window thermal model
-    CFS_Glz_59_Basis,              !- basis matrix name
-    CFS_Glz_59_TfSol,              !- Tfsol
-    CFS_Glz_59_RbSol,              !- Rbsol
-    CFS_Glz_59_Tfvis,              !- Tfvis
-    CFS_Glz_59_Tbvis,              !- Tbvis
-    Shade_30001_Layer,             !- layer 1 name (shading device)
-    CFS_Glz_59_Layer_1_fAbs,       !- fAbs
-    CFS_Glz_59_Layer_1_bAbs,       !- bAbs
-    Gap_1_Layer,                   !- layer 1 name
-    ,                 !- absorptance matrices for gaps should be empty for now
-    ,                              !- it is for future use
-    Glass_3110_Layer,              !- layer 2 name
-    CFS_Glz_59_Layer_3110_fAbs,    !- fAbs
-    CFS_Glz_59_Layer_3110_bAbs;    !- bAbs
+Construction:ComplexFenestrationState,  !- double layer example
+  CFS_Glz_59,                 !- name
+  LBNLWindow,                 !- basis type
+  None,                       !- basis symmetry type
+  ThermParam_59,              !- window thermal model
+  CFS_Glz_59_Basis,           !- basis matrix name
+  CFS_Glz_59_TfSol,           !- Tfsol
+  CFS_Glz_59_RbSol,           !- Rbsol
+  CFS_Glz_59_Tfvis,           !- Tfvis
+  CFS_Glz_59_Tbvis,           !- Tbvis
+  Shade_30001_Layer,          !- layer 1 name (shading device)
+  CFS_Glz_59_Layer_1_fAbs,    !- fAbs
+  CFS_Glz_59_Layer_1_bAbs,    !- bAbs
+  Gap_1_Layer,                !- layer 1 name
+  ,                           !- absorptance matrices for gaps should be empty for now
+  ,                           !- it is for future use
+  Glass_3110_Layer,           !- layer 2 name
+  CFS_Glz_59_Layer_3110_fAbs, !- fAbs
+  CFS_Glz_59_Layer_3110_bAbs; !- bAbs
 \end{lstlisting}
 
 \subsection{WindowThermalModel:Params}\label{windowthermalmodelparams}
@@ -4381,41 +4312,38 @@ The pressure (Pa) of the gap at the time of fabrication of the sealed glazing sy
 An IDF example for WindowThermalModel:Params (without deflection):
 
 \begin{lstlisting}
-
 WindowThermalModel:Params,
-    ThermParam_59,                   !- name
-    ISO15099,                        !- standard
-    ISO15099,                        !- thermal model standard
-    1.00,                            !- SD scalar
-    NoDeflection;                    !- deflection model
+  ThermParam_59,              !- name
+  ISO15099,                   !- standard
+  ISO15099,                   !- thermal model standard
+  1.00,                       !- SD scalar
+  NoDeflection;               !- deflection model
 \end{lstlisting}
 
 An IDF example for thermal parameters (with deflection):
 
 \begin{lstlisting}
-
 WindowThermalModel:Params,
-    ThermParam_59,                   !- name
-    ISO15099,                        !- standard
-    ISO15099,                        !- thermal model standard
-    1.00,                            !- SD scalar
-    TemperatureAndPressureInput,     !- deflection model
-    ,                                !- vacuum pressure limit
-    21.00,                           !- temperature at time of fabrication
-    10000.00;                        !- pressure at time of fabrication
+  ThermParam_59,              !- name
+  ISO15099,                   !- standard
+  ISO15099,                   !- thermal model standard
+  1.00,                       !- SD scalar
+  TemperatureAndPressureInput,!- deflection model
+  ,                           !- vacuum pressure limit
+  21.00,                      !- temperature at time of fabrication
+  10000.00;                   !- pressure at time of fabrication
 \end{lstlisting}
 
 An IDF example for WindowThermalModel:Params for modeling vacuum glazing
 
 \begin{lstlisting}
-
 WindowThermalModel:Params,
-  ThermParam_1006,                                    !- name
-  ISO15099,                                           !- standard
-  ISO15099,                                           !- thermal model
-  1.0000,                                             !- SDScalar
-  NoDeflection,                                       !- deflection model
-  13.238;                                             !- vacuum pressure limit
+  ThermParam_1006,            !- name
+  ISO15099,                   !- standard
+  ISO15099,                   !- thermal model
+  1.0000,                     !- SDScalar
+  NoDeflection,               !- deflection model
+  13.238;                     !- vacuum pressure limit
 \end{lstlisting}
 
 \subsection{Matrix:TwoDimension}\label{matrixtwodimension}
@@ -4455,20 +4383,19 @@ This is the value of the matrix at the first row and the second column.
 An IDF example of matrix for defining BSDF basis:
 
 \begin{lstlisting}
-
-Matrix:TwoDimension,       !- matrix for basis definition
-    CFS_Glz_1_Basis,         !- basis matrix name
-    9,                       !- number of rows
-    2,                       !- number of columns
-    0.00000, 1.00000,
-    10.00000, 8.00000,
-    20.00000, 16.00000,
-    30.00000, 20.00000,
-    40.00000, 24.00000,
-    50.00000, 24.00000,
-    60.00000, 24.00000,
-    70.00000, 16.00000,
-    82.50000, 12.00000;
+Matrix:TwoDimension,          !- matrix for basis definition
+  CFS_Glz_1_Basis,            !- basis matrix name
+  9,                          !- number of rows
+  2,                          !- number of columns
+  0.00000, 1.00000,
+  10.00000, 8.00000,
+  20.00000, 16.00000,
+  30.00000, 20.00000,
+  40.00000, 24.00000,
+  50.00000, 24.00000,
+  60.00000, 24.00000,
+  70.00000, 16.00000,
+  82.50000, 12.00000;
 \end{lstlisting}
 
 \subsection{Construction:WindowEquivalentLayer}\label{constructionwindowequivalentlayer}
@@ -4501,20 +4428,19 @@ The next fields are optional and the number of them showing up in a particular e
 An IDF example for this object, is shown below:
 
 \begin{lstlisting}
-
 Construction:WindowEquivalentLayer,
-    Six Solid Layers Window,   !- Name
-    INSCRN,                    !- Outside Layer
-    Air GAP Outdoor 12.7mm,    !- Layer 2
-    GLZGRY,                    !- Layer 3
-    Argon GAP Sealed 12.7mm,   !- Layer 4
-    FEP,                       !- Layer 5
-    Xenon GAP Sealed 12.7mm,   !- Layer 6
-    LOF1436,                   !- Layer 7
-    Krypton GAP Sealed 12.7mm, !- Layer 8
-    GLZCLR,                    !- Layer 9
-    Air GAP Indoor 12.7mm,     !- Layer 10
-    ShadeTrns;                 !- Layer 11
+  Six Solid Layers Window,    !- Name
+  INSCRN,                     !- Outside Layer
+  Air GAP Outdoor 12.7mm,     !- Layer 2
+  GLZGRY,                     !- Layer 3
+  Argon GAP Sealed 12.7mm,    !- Layer 4
+  FEP,                        !- Layer 5
+  Xenon GAP Sealed 12.7mm,    !- Layer 6
+  LOF1436,                    !- Layer 7
+  Krypton GAP Sealed 12.7mm,  !- Layer 8
+  GLZCLR,                     !- Layer 9
+  Air GAP Indoor 12.7mm,      !- Layer 10
+  ShadeTrns;                  !- Layer 11
 \end{lstlisting}
 
 \subsection{Construction:WindowDataFile}\label{constructionwindowdatafile}
@@ -4537,19 +4463,19 @@ Input Example
 
 \begin{lstlisting}
 Construction:WindowDataFile,
-  DoubleClear;            !- Name of a Window on the Window Data File
-  ! Note -- Window5DataFile.dat is presumed to be in the "run" folder where EnergyPlus.exe is
+  DoubleClear;                !- Name of a Window on the Window Data File
 
-FenestrationSurface:Detailed,
-  Zn001:Wall001:Win001, !- Name
-  Window,               !- Class
-  DoubleClear,          !- Construction Name
-  Zn001:Wall001,        !- Base Surface Name, and Target (if applicable)
-  0.5,                  !- View Factor to Ground
-  ,                     !- Frame/Divider name
-   1.0,                 !- Multiplier
-  4,                    !- Number of vertices
-  0.548, 0.0, 2.5000,   !- X,Y,Z of Vertices
+! Note -- Window5DataFile.dat is presumed to be in the "run" folder where EnergyPlus.exe is
+  FenestrationSurface:Detailed,
+  Zn001:Wall001:Win001,       !- Name
+  Window,                     !- Class
+  DoubleClear,                !- Construction Name
+  Zn001:Wall001,              !- Base Surface Name, and Target (if applicable)
+  0.5,                        !- View Factor to Ground
+  ,                           !- Frame/Divider name
+  1.0,                        !- Multiplier
+  4,                          !- Number of vertices
+  0.548, 0.0, 2.5000,         !- X,Y,Z of Vertices
   0.548, 0.0, 0.5000,
   5.548, 0.0, 0.5000,
   5.548, 0.0, 2.5000;
@@ -4559,7 +4485,7 @@ An example showing use of specific data file name and complete path location fol
 
 \begin{lstlisting}
 Construction:WindowDataFile,
-  DoubleClear,          !- Name of a Window on the Window Data File
+  DoubleClear,                !- Name of a Window on the Window Data File
   C:\EnergyPlusData\DataSets\MyWindow.dat;
 \end{lstlisting}
 

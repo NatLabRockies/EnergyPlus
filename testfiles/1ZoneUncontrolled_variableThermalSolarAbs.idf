@@ -88,7 +88,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -225,9 +225,9 @@
     variableThermalR13LAYER, !- Name
     R13LAYER_vary,           !- Reference Material Name
     SurfaceTemperature,      !- Control Signal
-    ThermalAbsorptanceTemperatureTable,   !- Trigger Solar Absorptance Function Name
+    ThermalAbsorptanceTemperatureTable,  !- Thermal Absorptance Function Name
     ,                        !- Thermal Absorptance Schedule Name
-    SolarAbsorptanceTemperatureCurve,   !- Trigger Solar Absorptance Function Name
+    SolarAbsorptanceTemperatureCurve,  !- Solar Absorptance Function Name
     ;                        !- Solar Absorptance Schedule Name
 
   Table:IndependentVariable,
@@ -248,7 +248,7 @@
 
   Table:IndependentVariableList,
     ThermalAbsorptanceTemperatureTable_IndependentVariableList,  !- Name
-    ThermalAbsorptanceTemperatureTable_IndependentVariable1;     !- Independent Variable 1 Name
+    ThermalAbsorptanceTemperatureTable_IndependentVariable1;  !- Independent Variable 1 Name
 
   Table:Lookup,
     ThermalAbsorptanceTemperatureTable,  !- Name
@@ -267,7 +267,7 @@
     0.90;                    !- <none>
 
   Curve:Linear,
-    SolarAbsorptanceTemperatureCurve,    !- Name
+    SolarAbsorptanceTemperatureCurve,  !- Name
     0.6,                     !- Coefficient1 Constant
     -0.01,                   !- Coefficient2 x
     -40.0,                   !- Minimum Value of x
@@ -502,7 +502,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -515,7 +515,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant

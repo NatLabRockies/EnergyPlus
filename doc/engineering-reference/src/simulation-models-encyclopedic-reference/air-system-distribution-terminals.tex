@@ -15,9 +15,9 @@ This object can be configured with a water, steam, electric or gas reheat coil. 
 
 \subsection{Constant Volume Single Duct No Reheat Air Terminal}\label{constant-volume-single-duct-no-reheat-air-terminal}
 
-The input object AirTerminal:SingleDuct:ConstantVolume:NoReheat is used to pass conditioned or treated central supply air directly into a zone without any reheat. This terminal air equipment allows to supply central system air directly to a zone without any zone level control or tempering. The supply air temperature is controlled by the central system to meet the load in a controlled zone. This object is configured for use with a constant volume central air system, unitary system or furnace and variable supply air temperature. 
+The input object AirTerminal:SingleDuct:ConstantVolume:NoReheat is used to pass conditioned or treated central supply air directly into a zone without any reheat. This terminal air equipment allows to supply central system air directly to a zone without any zone level control or tempering. The supply air temperature is controlled by the central system to meet the load in a controlled zone. This object is configured for use with a constant volume central air system, unitary system or furnace and variable supply air temperature.
 
-This unit allows the program to know what zone this branch of the air system is attached to, and has input fields for availability schedule, air inlet and outlet nodes, an input field for the maximum air flow rate, and other two optional input fields. The air inlet node should be the same as one of the \emph{AirLoopHVAC:ZoneSplitter} or \emph{AirLoopHVAC:SupplyPlenum} component outlet nodes. The air outlet node name should be same as zone air inlet node name and the air distribution unit air outlet node name. The last two optional input fields: \textit{Design Specification Outdoor Air Object Name}, and \textit{Per Person Ventilation Rate Mode} are used to compute the outdoor air requirement of an air terminal unit and the air terminal mass flow rate is set to the value calculated using these two input fields. 
+This unit allows the program to know what zone this branch of the air system is attached to, and has input fields for availability schedule, air inlet and outlet nodes, an input field for the maximum air flow rate, and other two optional input fields. The air inlet node should be the same as one of the \emph{AirLoopHVAC:ZoneSplitter} or \emph{AirLoopHVAC:SupplyPlenum} component outlet nodes. The air outlet node name should be same as zone air inlet node name and the air distribution unit air outlet node name. The last two optional input fields: \textit{Design Specification Outdoor Air Object Name}, and \textit{Per Person Ventilation Rate Mode} are used to compute the outdoor air requirement of an air terminal unit and the air terminal mass flow rate is set to the value calculated using these two input fields.
 
 \begin{figure}[hbtp] % fig 154
 \centering
@@ -311,7 +311,7 @@ From the result of the zone simulation we have the heating/cooling demand on the
   \item
     Otherwise, the zone needs cooling and the unit is active.
     \begin{itemize}
-      \item 
+      \item
         We determine the fan temperature rise: the secondary air flow is set to the max total air flow, primary air flow to zero, and the mixer and fan are simulated. The fan delta T is the difference between the temperature at the fan's outlet node and inlet node.
       \item
         We calculate the unit air outlet temperature needed to meet the zone cooling load: \({T_{out}} = {T_{z}} + {\dot Q_{z,req}}/({\dot m_{air,tot}}\cdot {c_{p,air,z}})\)
@@ -570,7 +570,7 @@ The modification factor \(f_{\dot m_{HW,mod}}()\) describes how the heating capa
 
 \begin{equation}
   {\dot m_{HW,rated}} = {\dot v_{HW,rated}} \cdot {\rho_{HW}}
-\end{equation} 
+\end{equation}
 
 where:
 
@@ -707,8 +707,8 @@ Because of the way the model is formulated with defaulted inputs for rated, norm
 
 \begin{equation}
   {\dot V_{CW,Des}} = {{\dot v_{CW,rated}} \cdot {L}}
-\end{equation} 
-  
+\end{equation}
+
 \begin{equation}
   {\dot V_{HW,Des}} = {{\dot v_{HW,rated}} \cdot {L}}
 \end{equation}
@@ -799,8 +799,8 @@ When sizing for the cooling design load, the following design values are set for
 
 \begin{equation}
   {\dot m_{SA,max limit}} = { \left(\frac{{\dot Q_{Z,cool,design } }}{{c_{p,SA}} \cdot {( {T_{Z,cool,design } } - {T_{SA,cool,design } } )}}  \right) }
-\end{equation}  
-  
+\end{equation}
+
 or if \(({T_{Z,cool,design }} - {T_{SA,cool,design}}) < 2.0\) then:
 
 \begin{equation}
@@ -931,9 +931,9 @@ The room air volumetric flow rate across coil per unit length in m\(^{3}\)/(s-m)
 \begin{equation}
 q_{in} = K_{1}·\Delta T^{n} + K_{in}·q_{pr}
 \end{equation}
- 
+
 where:
- 
+
 \(\Delta\)T is the room air--water temperature difference (average water temperature is used) in \(^{\circ}\)C
 
 \(\omega\) is the water velocity in m/s

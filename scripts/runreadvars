@@ -35,7 +35,7 @@ if [ -n "$ENERGYPLUS_DIR" ]; then
   auto_eplus_dir=false
 fi
 
-# Set the ENERGYPLUS_DIR 
+# Set the ENERGYPLUS_DIR
 if $auto_eplus_dir; then
   SetEnergyPlusDir
 fi
@@ -65,7 +65,7 @@ function Usage() {
 function CleanOutputFiles() {
   # delete files
   for extension in $OUT_EXT out;
-  do 
+  do
     rm -f *.$extension
   done
   echo "Deleted output files";
@@ -165,4 +165,3 @@ case $EXT in
     ;;*)
     Usage; ExitWithError;
 esac
-

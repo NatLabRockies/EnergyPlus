@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -80,310 +80,168 @@ class PythonSetpointManagers(EnergyPlusPlugin):
     def get_handles(self, state):
         self.need_to_get_handles = False
         self.handles["Seasonal_Reset_SAT_Sched"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "Seasonal-Reset-Supply-Air-Temp-Sch"
+            state, "Schedule Value", "Seasonal-Reset-Supply-Air-Temp-Sch"
         )
         self.handles["VAV_5_SAT_setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_5 Supply Equipment Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_5 Supply Equipment Outlet Node"
         )
         self.handles["T_VAV5FanOut"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_5 Supply Equipment Outlet Node"
+            state, "System Node Temperature", "VAV_5 Supply Equipment Outlet Node"
         )
         self.handles["T_VAV5FanIn"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_5_HeatC-VAV_5_FanNode"
+            state, "System Node Temperature", "VAV_5_HeatC-VAV_5_FanNode"
         )
         self.handles["VAV_5_CoolC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_5_CoolC-VAV_5_HeatCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_5_CoolC-VAV_5_HeatCNode"
         )
         self.handles["VAV_5_HeatC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_5_HeatC-VAV_5_FanNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_5_HeatC-VAV_5_FanNode"
         )
         self.handles["VAV_5_OA_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_5_OA-VAV_5_CoolCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_5_OA-VAV_5_CoolCNode"
         )
         self.handles["VAV_1_SAT_setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_1 Supply Equipment Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_1 Supply Equipment Outlet Node"
         )
         self.handles["VAV_1_CoolC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_1_CoolC-VAV_1_HeatCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_1_CoolC-VAV_1_HeatCNode"
         )
         self.handles["T_VAV1FanOut"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_1 Supply Equipment Outlet Node"
+            state, "System Node Temperature", "VAV_1 Supply Equipment Outlet Node"
         )
         self.handles["T_VAV1FanIn"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_1_HeatC-VAV_1_FanNode"
+            state, "System Node Temperature", "VAV_1_HeatC-VAV_1_FanNode"
         )
         self.handles["VAV_1_HeatC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_1_HeatC-VAV_1_FanNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_1_HeatC-VAV_1_FanNode"
         )
         self.handles["VAV_1_OA_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_1_OA-VAV_1_CoolCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_1_OA-VAV_1_CoolCNode"
         )
         self.handles["VAV_3_SAT_setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_3 Supply Equipment Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_3 Supply Equipment Outlet Node"
         )
         self.handles["VAV_3_CoolC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_3_CoolC-VAV_3_HeatCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_3_CoolC-VAV_3_HeatCNode"
         )
         self.handles["T_VAV3FanOut"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_3 Supply Equipment Outlet Node"
+            state, "System Node Temperature", "VAV_3 Supply Equipment Outlet Node"
         )
         self.handles["T_VAV3FanIn"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_3_HeatC-VAV_3_FanNode"
+            state, "System Node Temperature", "VAV_3_HeatC-VAV_3_FanNode"
         )
         self.handles["VAV_2_SAT_setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_2 Supply Equipment Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_2 Supply Equipment Outlet Node"
         )
         self.handles["VAV_2_CoolC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_2_CoolC-VAV_2_HeatCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_2_CoolC-VAV_2_HeatCNode"
         )
         self.handles["T_VAV2FanOut"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_2 Supply Equipment Outlet Node"
+            state, "System Node Temperature", "VAV_2 Supply Equipment Outlet Node"
         )
         self.handles["T_VAV2FanIn"] = self.e.get_variable_handle(
-            state,
-            "System Node Temperature",
-            "VAV_2_HeatC-VAV_2_FanNode"
+            state, "System Node Temperature", "VAV_2_HeatC-VAV_2_FanNode"
         )
         self.handles["VAV_2_HeatC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_2_HeatC-VAV_2_FanNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_2_HeatC-VAV_2_FanNode"
         )
         self.handles["VAV_2_OA_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_2_OA-VAV_2_CoolCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_2_OA-VAV_2_CoolCNode"
         )
         self.handles["CW_Loop_Temp_Schedule"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "CW-Loop-Temp-Schedule"
+            state, "Schedule Value", "CW-Loop-Temp-Schedule"
         )
         self.handles["CoolSys1_Loop_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "CoolSys1 Supply Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "CoolSys1 Supply Outlet Node"
         )
         self.handles["HW_Loop_Temp_Schedule"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "HW-Loop-Temp-Schedule"
+            state, "Schedule Value", "HW-Loop-Temp-Schedule"
         )
         self.handles["HeatSys1_Loop_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "HeatSys1 Supply Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "HeatSys1 Supply Outlet Node"
         )
         self.handles["SHWSys1_Loop_Temp_Schedule"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "SHWSys1-Loop-Temp-Schedule"
+            state, "Schedule Value", "SHWSys1-Loop-Temp-Schedule"
         )
         self.handles["SHWSys1_Loop_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "SHWSys1 Supply Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "SHWSys1 Supply Outlet Node"
         )
-        self.handles["heating_setpoint"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "HTGSETP_SCH"
-        )
-        self.handles["cooling_setpoint"] = self.e.get_variable_handle(
-            state,
-            "Schedule Value",
-            "CLGSETP_SCH"
-        )
-        self.handles["TzoneVAV5"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Basement"
-        )
+        self.handles["heating_setpoint"] = self.e.get_variable_handle(state, "Schedule Value", "HTGSETP_SCH")
+        self.handles["cooling_setpoint"] = self.e.get_variable_handle(state, "Schedule Value", "CLGSETP_SCH")
+        self.handles["TzoneVAV5"] = self.e.get_variable_handle(state, "Zone Mean Air Temperature", "Basement")
         self.handles["VAV_5_NightCycleStatus"] = self.e.get_actuator_handle(
-            state,
-            "AirLoopHVAC",
-            "Availability Status",
-            "VAV_5"
+            state, "AirLoopHVAC", "Availability Status", "VAV_5"
         )
-        self.handles["TzoneVAV1_1"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Core_bottom"
-        )
+        self.handles["TzoneVAV1_1"] = self.e.get_variable_handle(state, "Zone Mean Air Temperature", "Core_bottom")
         self.handles["TzoneVAV1_2"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_bot_ZN_3"
+            state, "Zone Mean Air Temperature", "Perimeter_bot_ZN_3"
         )
         self.handles["TzoneVAV1_3"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_bot_ZN_2"
+            state, "Zone Mean Air Temperature", "Perimeter_bot_ZN_2"
         )
         self.handles["TzoneVAV1_4"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_bot_ZN_1"
+            state, "Zone Mean Air Temperature", "Perimeter_bot_ZN_1"
         )
         self.handles["TzoneVAV1_5"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_bot_ZN_4"
+            state, "Zone Mean Air Temperature", "Perimeter_bot_ZN_4"
         )
         self.handles["VAV_1_NightCycleStatus"] = self.e.get_actuator_handle(
-            state,
-            "AirLoopHVAC",
-            "Availability Status",
-            "VAV_1"
+            state, "AirLoopHVAC", "Availability Status", "VAV_1"
         )
-        self.handles["TzoneVAV2_1"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Core_mid"
-        )
+        self.handles["TzoneVAV2_1"] = self.e.get_variable_handle(state, "Zone Mean Air Temperature", "Core_mid")
         self.handles["TzoneVAV2_2"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_mid_ZN_3"
+            state, "Zone Mean Air Temperature", "Perimeter_mid_ZN_3"
         )
         self.handles["TzoneVAV2_3"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_mid_ZN_2"
+            state, "Zone Mean Air Temperature", "Perimeter_mid_ZN_2"
         )
         self.handles["TzoneVAV2_4"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_mid_ZN_1"
+            state, "Zone Mean Air Temperature", "Perimeter_mid_ZN_1"
         )
         self.handles["TzoneVAV2_5"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_mid_ZN_4"
+            state, "Zone Mean Air Temperature", "Perimeter_mid_ZN_4"
         )
         self.handles["VAV_2_NightCycleStatus"] = self.e.get_actuator_handle(
-            state,
-            "AirLoopHVAC",
-            "Availability Status",
-            "VAV_2"
+            state, "AirLoopHVAC", "Availability Status", "VAV_2"
         )
         self.handles["VAV_3_HeatC_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_3_HeatC-VAV_3_FanNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_3_HeatC-VAV_3_FanNode"
         )
         self.handles["VAV_3_NightCycleStatus"] = self.e.get_actuator_handle(
-            state,
-            "AirLoopHVAC",
-            "Availability Status",
-            "VAV_3"
+            state, "AirLoopHVAC", "Availability Status", "VAV_3"
         )
-        self.handles["TzoneVAV3_1"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Core_top"
-        )
+        self.handles["TzoneVAV3_1"] = self.e.get_variable_handle(state, "Zone Mean Air Temperature", "Core_top")
         self.handles["TzoneVAV3_2"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_top_ZN_3"
+            state, "Zone Mean Air Temperature", "Perimeter_top_ZN_3"
         )
         self.handles["TzoneVAV3_3"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_top_ZN_2"
+            state, "Zone Mean Air Temperature", "Perimeter_top_ZN_2"
         )
         self.handles["TzoneVAV3_4"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_top_ZN_1"
+            state, "Zone Mean Air Temperature", "Perimeter_top_ZN_1"
         )
         self.handles["TzoneVAV3_5"] = self.e.get_variable_handle(
-            state,
-            "Zone Mean Air Temperature",
-            "Perimeter_top_ZN_4"
+            state, "Zone Mean Air Temperature", "Perimeter_top_ZN_4"
         )
         self.handles["VAV_3_OA_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "VAV_3_OA-VAV_3_CoolCNode"
+            state, "System Node Setpoint", "Temperature Setpoint", "VAV_3_OA-VAV_3_CoolCNode"
         )
         self.handles["HeatSys1_Boiler_Setpoint"] = self.e.get_actuator_handle(
-            state,
-            "System Node Setpoint",
-            "Temperature Setpoint",
-            "HeatSys1 Supply Equipment Outlet Node"
+            state, "System Node Setpoint", "Temperature Setpoint", "HeatSys1 Supply Equipment Outlet Node"
         )
 
     def handles_are_valid(self, state):
         handles_are_valid = True
-        for (k, v) in self.handles.items():
+        for k, v in self.handles.items():
             if v == -1:
                 handles_are_valid = False
                 self.api.runtime.issue_severe(state, f"Handle not found for '{k}'")
         return handles_are_valid
 
     def vav_5_sched_setpoint(self, state):
-        self.values["Seasonal_Reset_SAT_Sched"] = self.e.get_variable_value(state, self.handles["Seasonal_Reset_SAT_Sched"])
+        self.values["Seasonal_Reset_SAT_Sched"] = self.e.get_variable_value(
+            state, self.handles["Seasonal_Reset_SAT_Sched"]
+        )
         self.e.set_actuator_value(state, self.handles["VAV_5_SAT_setpoint"], self.values["Seasonal_Reset_SAT_Sched"])
 
     def vav_5_mixed_air_managers(self, state):

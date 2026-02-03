@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -295,7 +295,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults)
     // UpdateDataandReport( 1 ); not sure if this is needed
     GatherAnnualResultsForTimeStep(*state, OutputProcessor::TimeStepType::Zone);
 
-    // STOPPPED HERE. NOT SEEING THE POWER VARIABLE SHOWING UP
+    // STOPPED HERE. NOT SEEING THE POWER VARIABLE SHOWING UP
 
     std::vector<AnnualTable>::iterator firstTable = state->dataOutputReportTabularAnnual->annualTables.begin();
     std::vector<std::string> fieldSetParams = firstTable->inspectTableFieldSets(0);
@@ -318,7 +318,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
     state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:MYTH", state->dataOutputProcessor->meters.size() - 1);
 
     std::vector<AnnualTable> annualTables;
-    annualTables.push_back(AnnualTable(*state, "PEAK ELECTRICTY ANNUAL MYTH REPORT", "", ""));
+    annualTables.emplace_back(*state, "PEAK ELECTRICITY ANNUAL MYTH REPORT", "", "");
     annualTables.back().addFieldSet("HEATING:MYTH:VARIABLE", AnnualFieldSet::AggregationKind::hoursPositive, 2);
     annualTables.back().addFieldSet("ELECTRICITY:MYTH", AnnualFieldSet::AggregationKind::maximumDuringHoursShown, 2);
     annualTables.back().setupGathering(*state);
@@ -556,6 +556,7 @@ TEST_F(SQLiteFixture, OutputReportTabularAnnual_CurlyBraces)
 
     OutputReportTabularAnnual::GetInputTabularAnnual(*state);
     EXPECT_EQ(state->dataOutputReportTabularAnnual->annualTables.size(), 1u);
+    OutputReportTabular::setTabularReportStyles(*state);
 
     OutputReportTabularAnnual::WriteAnnualTables(*state);
 

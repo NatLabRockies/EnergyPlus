@@ -23,6 +23,11 @@ Pull request overview
  - [ ] If IDD requires transition, transition source, rules, ExpandObjects, and IDFs must be updated, and add IDDChange label
  - [ ] If structural output changes, add to output rules file and add OutputChange label
  - [ ] If adding/removing any LaTeX docs or figures, update that document's CMakeLists file dependencies
+ - [ ] If adding/removing any output files (e.g., eplustbl.*)
+   - [ ] Update ..\scripts\Epl-run.bat
+   - [ ] Update ..\scripts\RunEPlus.bat
+   - [ ] Update ..\src\EPLaunch\ MainModule.bas, epl-ui.frm, and epl.vbp (VersionComments)
+   - [ ] Update ..\.github\workflows\energyplus.py
 
 ### Reviewer
 

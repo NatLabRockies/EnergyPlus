@@ -1,0 +1,576 @@
+! PlantLoopHeatPump_EIR_AirSource.idf
+!
+! Basic file description:
+! The EIR formulated air-to-water heat pump is demonstrated using a simple collection of plant loops.  Building loads
+!  are represented using Plant Load Profile objects
+! Run:      1 design day.
+! Building: None.
+! System:   None.
+! Plant:    PLANT LOAD PROFILE with District Heating and Cooling as necessary.
+
+  Version,26.1;
+
+  Building,
+    Plant Load Profile Example,  !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.04,                    !- Temperature Convergence Tolerance Value {deltaC}
+    FullInteriorAndExterior, !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  Timestep,1;
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+  Site:Location,
+    Chicago,                 !- Name
+    42.00,                   !- Latitude {deg}
+    -87.88,                  !- Longitude {deg}
+    -6.00,                   !- Time Zone {hr}
+    190.00;                  !- Elevation {m}
+
+  SizingPeriod:DesignDay,
+    Chicago Summer 1%,       !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    31.5,                    !- Maximum Dry-Bulb Temperature {C}
+    10.7,                    !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    23,                      !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.,                  !- Barometric Pressure {Pa}
+    5.3,                     !- Wind Speed {m/s}
+    230,                     !- Wind Direction {deg}
+    ,                        !- Rain Indicator
+    ,                        !- Snow Indicator
+    ,                        !- Daylight Saving Time Indicator
+    ,                        !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+  SizingPeriod:DesignDay,
+    Chicago Ohare Intl Ap Ann Htg 99.6% Condns DB,  !- Name
+    1,                       !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    -20,                     !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    DefaultMultipliers,      !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    -20,                     !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    98934.,                  !- Barometric Pressure {Pa}
+    4.9,                     !- Wind Speed {m/s}
+    270,                     !- Wind Direction {deg}
+    ,                        !- Rain Indicator
+    ,                        !- Snow Indicator
+    ,                        !- Daylight Saving Time Indicator
+    ,                        !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+  SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    No,                      !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  RunPeriod,
+    Run Period 1,            !- Name
+    7,                       !- Begin Month
+    11,                      !- Begin Day of Month
+    ,                        !- Begin Year
+    7,                       !- End Month
+    18,                      !- End Day of Month
+    ,                        !- End Year
+    Sunday,                  !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  ScheduleTypeLimits,
+    On/Off,                  !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    Discrete;                !- Numeric Type
+
+  ScheduleTypeLimits,
+    FlowDir,                 !- Name
+    -1,                      !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    Discrete;                !- Numeric Type
+
+  Schedule:Constant,Heating Coil Load Loop Setpoint Temperature Schedule,Any Number,65.0;
+
+  Schedule:Constant,AlwaysOnSchedule,On/Off,1;
+
+  ! Simulate a winter time, overnight hours load, but the pump is always running in that season
+
+  Schedule:Compact,
+    Heating Coil Load Profile Load Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL:  4:00,186000,     !- Field 3
+    UNTIL:  8:00,50000,      !- Field 5
+    UNTIL:  9:00,30000,      !- Field 7
+    UNTIL: 17:00,18000,      !- Field 9
+    UNTIL: 24:00,72000;      !- Field 11
+
+  Schedule:Compact,
+    Heating Coil Load Profile Flow Frac Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,1.0;        !- Field 3
+
+  ! Simulate a summer time, daytime hours load, but the pump is always running in that season
+! *** Heating Coil Loop
+
+  PlantLoop,
+    Heating Coil Load Loop,  !- Name
+    WATER,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Heating Coil Load Loop Operation,  !- Plant Equipment Operation Scheme Name
+    Tank Use Outlet Node,    !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    0.005,                   !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    1,                       !- Plant Loop Volume {m3}
+    Heating Coil Load Loop Supply Inlet Node,  !- Plant Side Inlet Node Name
+    Tank Use Outlet Node,    !- Plant Side Outlet Node Name
+    Heating Coil Load Loop Supply Branches,  !- Plant Side Branch List Name
+    ,                        !- Plant Side Connector List Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Demand Side Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node,  !- Demand Side Outlet Node Name
+    Heating Coil Load Loop Demand Branches,  !- Demand Side Branch List Name
+    ,                        !- Demand Side Connector List Name
+    Optimal;                 !- Load Distribution Scheme
+
+  PlantLoop,
+    Hot Water Loop,          !- Name
+    WATER,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Hot Water Loop Operation,!- Plant Equipment Operation Scheme Name
+    Hot Water Loop Supply Outlet Node,  !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    0.005,                   !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    1,                       !- Plant Loop Volume {m3}
+    Hot Water Loop Supply Inlet Node,  !- Plant Side Inlet Node Name
+    Hot Water Loop Supply Outlet Node,  !- Plant Side Outlet Node Name
+    Hot Water Loop Supply Branches,  !- Plant Side Branch List Name
+    ,                        !- Plant Side Connector List Name
+    Tank Source Inlet Node,  !- Demand Side Inlet Node Name
+    Tank Source Outlet Node, !- Demand Side Outlet Node Name
+    Hot Water Loop Demand Branches,  !- Demand Side Branch List Name
+    ,                        !- Demand Side Connector List Name
+    Optimal;                 !- Load Distribution Scheme
+
+  Sizing:Plant,
+    Heating Coil Load Loop,  !- Plant or Condenser Loop Name
+    heating,                 !- Loop Type
+    60.,                     !- Design Loop Exit Temperature {C}
+    10;                      !- Loop Design Temperature Difference {deltaC}
+
+  Sizing:Plant,
+    Hot Water Loop,          !- Plant or Condenser Loop Name
+    heating,                 !- Loop Type
+    60.,                     !- Design Loop Exit Temperature {C}
+    10;                      !- Loop Design Temperature Difference {deltaC}
+
+  SetpointManager:Scheduled,
+    Heating Coil Load Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    Heating Coil Load Loop Setpoint Temperature Schedule,  !- Schedule Name
+    Tank Use Outlet Node;    !- Setpoint Node or NodeList Name
+
+  PlantEquipmentOperationSchemes,
+    Heating Coil Load Loop Operation,  !- Name
+    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
+    Heating Coil Load Loop Heating Operation,  !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:HeatingLoad,
+    Heating Coil Load Loop Heating Operation,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    Heating Coil Load Loop Heating Equipment;  !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    Heating Coil Load Loop Heating Equipment,  !- Name
+    ThermalStorage:HotWater:Stratified,  !- Equipment 1 Object Type
+    Hot Water Storage Tank;  !- Equipment 1 Name
+
+  PlantEquipmentOperationSchemes,
+    Hot Water Loop Operation,!- Name
+    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
+    Hot Water Loop Heating Operation,  !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:HeatingLoad,
+    Hot Water Loop Heating Operation,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    Hot Water Loop Heating Equipment;  !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    Hot Water Loop Heating Equipment,  !- Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
+    Heating Coil;            !- Equipment 1 Name
+
+  BranchList,
+    Heating Coil Load Loop Supply Branches,  !- Name
+    Heating Coil Load Loop Supply Branch;  !- Branch 1 Name
+
+  Branch,
+    Heating Coil Load Loop Supply Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    Heating Coil Load Loop Pump,  !- Component 1 Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
+    Tank Use Inlet Node,     !- Component 1 Outlet Node Name
+    ThermalStorage:HotWater:Stratified,  !- Component 2 Object Type
+    Hot Water Storage Tank,  !- Component 2 Name
+    Tank Use Inlet Node,     !- Component 2 Inlet Node Name
+    Tank Use Outlet Node;    !- Component 2 Outlet Node Name
+
+  Pump:VariableSpeed,
+    Heating Coil Load Loop Pump,  !- Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Inlet Node Name
+    Tank Use Inlet Node,     !- Outlet Node Name
+    0.005,                   !- Design Maximum Flow Rate {m3/s}
+    3000,                    !- Design Pump Head {Pa}
+    22,                      !- Design Power Consumption {W}
+    0.87,                    !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    INTERMITTENT;            !- Pump Control Type
+
+  BranchList,
+    Hot Water Loop Supply Branches,  !- Name
+    Hot Water Loop Supply Branch;  !- Branch 1 Name
+
+  Branch,
+    Hot Water Loop Supply Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    Hot Water Loop Pump,     !- Component 1 Name
+    Hot Water Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
+    Hot Water Loop Intermediate Node,  !- Component 1 Outlet Node Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Component 2 Object Type
+    Heating Coil,            !- Component 2 Name
+    Hot Water Loop Intermediate Node,  !- Component 2 Inlet Node Name
+    Hot Water Loop Supply Outlet Node;  !- Component 2 Outlet Node Name
+
+  Pump:VariableSpeed,
+    Hot Water Loop Pump,     !- Name
+    Hot Water Loop Supply Inlet Node,  !- Inlet Node Name
+    Hot Water Loop Intermediate Node,  !- Outlet Node Name
+    0.005,                   !- Design Maximum Flow Rate {m3/s}
+    3000,                    !- Design Pump Head {Pa}
+    22,                      !- Design Power Consumption {W}
+    0.87,                    !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    INTERMITTENT;            !- Pump Control Type
+
+  HeatPump:PlantLoop:EIR:Heating,
+    Heating Coil,            !- Name
+    Hot Water Loop Intermediate Node,  !- Load Side Inlet Node Name
+    Hot Water Loop Supply Outlet Node,  !- Load Side Outlet Node Name
+    AirSource,               !- Condenser Type
+    Outdoor Air Inlet Node,  !- Source Side Inlet Node Name
+    Outdoor Air Outlet Node, !- Source Side Outlet Node Name
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    ,                        !- Companion Heat Pump Name
+    0.005,                   !- Load Side Reference Flow Rate {m3/s}
+    2,                       !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    80000,                   !- Reference Capacity {W}
+    3.5,                     !- Reference Coefficient of Performance {W/W}
+    ,                        !- Sizing Factor
+    CapCurveFuncTemp,        !- Capacity Modifier Function of Temperature Curve Name
+    EIRCurveFuncTemp,        !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR;         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+
+  Curve:Biquadratic,
+    CapCurveFuncTemp,        !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    EIRCurveFuncTemp,        !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Quadratic,
+    EIRCurveFuncPLR,         !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+  BranchList,
+    Hot Water Loop Demand Branches,  !- Name
+    Hot Water Loop Demand Branch;  !- Branch 1 Name
+
+  Branch,
+    Hot Water Loop Demand Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    ThermalStorage:HotWater:Stratified,  !- Component 1 Object Type
+    Hot Water Storage Tank,  !- Component 1 Name
+    Tank Source Inlet Node,  !- Component 1 Inlet Node Name
+    Tank Source Outlet Node; !- Component 1 Outlet Node Name
+
+  BranchList,
+    Heating Coil Load Loop Demand Branches,  !- Name
+    Heating Coil Load Loop Demand Branch;  !- Branch 1 Name
+
+  Branch,
+    Heating Coil Load Loop Demand Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    LoadProfile:Plant,       !- Component 1 Object Type
+    Heating Coil Load Profile,  !- Component 1 Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node;  !- Component 1 Outlet Node Name
+
+  ThermalStorage:HotWater:Stratified,
+    Hot Water Storage Tank,  !- Name
+    50.0,                    !- Tank Volume {m3}
+    8.0,                     !- Tank Height {m}
+    VerticalCylinder,        !- Tank Shape
+    ,                        !- Tank Perimeter {m}
+    CW Tank Temp Top Schedule,  !- Top Setpoint Temperature Schedule Name
+    CW Tank Temp Bottom Schedule,  !- Bottom Setpoint Temperature Schedule Name
+    2.5,                     !- Deadband Temperature Difference {deltaC}
+    8.0,                     !- Top Temperature Sensor Height {m}
+    1.0,                     !- Bottom Temperature Sensor Height {m}
+    82.0,                    !- Maximum Temperature Limit {C}
+    0.0,                     !- Nominal Heating Capacity {W}
+    Outdoors,                !- Ambient Temperature Indicator
+    ,                        !- Ambient Temperature Schedule Name
+    ,                        !- Ambient Temperature Zone Name
+    Dummy Tank OA Node,      !- Ambient Temperature Outdoor Air Node Name
+    0.0,                     !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}
+    Tank Use Inlet Node,     !- Use Side Inlet Node Name
+    Tank Use Outlet Node,    !- Use Side Outlet Node Name
+    Tank Use Flow Dir Sched, !- Use Side Flow Direction Schedule
+    1.0,                     !- Use Side Heat Transfer Effectiveness
+    ALWAYS_ON,               !- Use Side Availability Schedule Name
+    0.15,                    !- Use Side Inlet Height {m}
+    7.85,                    !- Use Side Outlet Height {m}
+    autosize,                !- Use Side Design Flow Rate {m3/s}
+    Tank Source Inlet Node,  !- Source Side Inlet Node Name
+    Tank Source Outlet Node, !- Source Side Outlet Node Name
+    ,                        !- Source Side Flow Direction Schedule
+    0.9,                     !- Source Side Heat Transfer Effectiveness
+    TES Charge Schedule,     !- Source Side Availability Schedule Name
+    7.85,                    !- Source Side Inlet Height {m}
+    0.15,                    !- Source Side Outlet Height {m}
+    5.0E-3,                  !- Source Side Design Flow Rate {m3/s}
+    4.0,                     !- Tank Recovery Time {hr}
+    Seeking,                 !- Inlet Mode
+    6,                       !- Number of Nodes
+    0.0;                     !- Additional Destratification Conductivity {W/m-K}
+
+  OutdoorAir:Node,
+    Dummy Tank OA Node;      !- Name
+
+  Schedule:Compact,
+    ALWAYS_ON,               !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,1.0;        !- Field 3
+
+  Schedule:Compact,
+    CW Tank Temp Top Schedule,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,21;         !- Field 3
+
+  Schedule:Compact,
+    CW Tank Temp Bottom Schedule,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,15;         !- Field 3
+
+  SetpointManager:Scheduled,
+    Hot Water Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    HW Loop Temp Schedule,   !- Schedule Name
+    HOT WATER LOOP SUPPLY OUTLET NODE;  !- Setpoint Node or NodeList Name
+
+  Schedule:Compact,
+    HW Loop Temp Schedule,   !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,82;         !- Field 3
+
+  Schedule:Compact,
+    TES Charge Schedule,     !- Name
+    on/off,                  !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    Until: 24:00,1.0;        !- Field 3
+
+  Schedule:Compact,
+    Tank Use Flow Dir Sched, !- Name
+    FlowDir,                 !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    Until: 24:00,-1.0;       !- Field 3
+
+  LoadProfile:Plant,
+    Heating Coil Load Profile,  !- Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
+    Heating Coil Load Profile Load Schedule,  !- Load Schedule Name
+    0.005,                   !- Peak Flow Rate {m3/s}
+    Heating Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
+
+  OutdoorAir:Node,
+    Outdoor Air Inlet Node;  !- Name
+
+  Output:VariableDictionary,IDF;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Tank Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 1,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 2,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 3,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 4,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 5,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 6,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 1,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 2,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 3,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 4,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 5,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 6,hourly;
+
+  Output:Variable,*,Plant Supply Side Heating Demand Rate,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Setpoint,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Sensor Value,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Setpoint,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Sensor Value,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Needs Charge,hourly;
+

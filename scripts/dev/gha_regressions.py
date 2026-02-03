@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -54,20 +54,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import json
-import os
+import multiprocessing
 import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy, rmtree
 from traceback import print_exc
 from zoneinfo import ZoneInfo
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from energyplus_regressions.builds.base import BuildTree
-from energyplus_regressions.runtests import SuiteRunner
-from energyplus_regressions.structures import EndErrSummary, TestEntry, TextDifferences
+from energyplus_regressions.builds.base import BuildTree  # type: ignore[import]
+from energyplus_regressions.runtests import SuiteRunner  # type: ignore[import]
+from energyplus_regressions.structures import EndErrSummary, TestEntry, TextDifferences  # type: ignore[import]
 
 
 def run_single_entry(
@@ -101,11 +100,11 @@ class RegressionManager:
         self.summary_results = {}
         self.num_idf_inspected = 0
         # self.all_files_compared = []  TODO: need to get this from regression runner
-        import energyplus_regressions
+        import energyplus_regressions  # type: ignore[import]
 
         self.threshold_file = str(Path(energyplus_regressions.__file__).parent / "diffs" / "math_diff.config")
 
-    def process_single_file_regressions(self, idf_name: str, entry: TestEntry) -> [TestEntry, bool]:
+    def process_single_file_regressions(self, idf_name: str, entry: TestEntry) -> tuple[TestEntry, bool]:
 
         self.num_idf_inspected += 1
         this_file_diffs = []

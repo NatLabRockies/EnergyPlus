@@ -197,9 +197,6 @@
 ##def ACR_Solar_International_10-01[]
 !***********************************************************************************************************
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   SolarCollectorPerformance:FlatPlate,
     ACR Solar International 10-01,  !- Name
     0.9325,                  !- Gross Area {m2}

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -197,7 +197,7 @@ protected:
     // This calls EXPECT_* within the function as well as returns a boolean so you can call [ASSERT/EXPECT]_[TRUE/FALSE] depending
     // if it makes sense for the unit test to continue after returning from function.
     // Will return true if string is found in the stream and false if it is not
-    bool compare_err_stream_substring(std::string const &search_string, bool reset_stream = true);
+    bool compare_err_stream_substring(std::string const &search_string, bool reset_stream = true, bool call_expect = true);
 
     // Compare an expected string against the COUT stream. The default is to reset the COUT stream after every call.
     // It is easier to test successive functions if the COUT stream is 'empty' before the next call.
@@ -205,6 +205,13 @@ protected:
     // if it makes sense for the unit test to continue after returning from function.
     // Will return true if string matches the stream and false if it does not
     bool compare_cout_stream(std::string const &expected_string, bool reset_stream = true);
+
+    // Check if COUT stream contains a substring. The default is to reset the COUT stream after every call.
+    // It is easier to test successive functions if the COUT stream is 'empty' before the next call.
+    // This returns a boolean so you can call [ASSERT/EXPECT]_[TRUE/FALSE] depending
+    // if it makes sense for the unit test to continue after returning from function.
+    // Will return true if string is found in the stream and false if it is not
+    bool compare_cout_stream_substring(std::string const &search_string, bool reset_stream = true);
 
     // Compare an expected string against the CERR stream. The default is to reset the CERR stream after every call.
     // It is easier to test successive functions if the CERR stream is 'empty' before the next call.

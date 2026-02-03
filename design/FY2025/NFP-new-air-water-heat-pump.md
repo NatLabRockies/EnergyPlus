@@ -168,8 +168,8 @@ In terms of the coverage of the input object, compared with the first two
 columns, the air-to-water heat pump (column 4) has very few "x", indicating very
 few input fields. Apart from the common object identifier and loop connections,
 the inputs in the current air-to-water heat pump object focus on the COP and
-power section. Other details are left out including: 
-- Cannot specify parameters like single, multi-speed, or variable speed for capacity control 
+power section. Other details are left out including:
+- Cannot specify parameters like single, multi-speed, or variable speed for capacity control
 - The naming of the object is not intuitive - it does not refer to water to water or air to
 water, making searching for the object difficult (not intuitive to users)
 - Missing the input of an availability schedule (which disables the HP for
@@ -988,4 +988,3 @@ Paul Hydukovich of Daikin Applied and Dr. Bo Shen of ORNL provided valuable inpu
 
 [1] https://www.gminsights.com/industry-analysis/air-to-water-heat-pump-market
 [2] https://www.daikin.eu/en_us/products/product.html/EWYT-CZP.html
-

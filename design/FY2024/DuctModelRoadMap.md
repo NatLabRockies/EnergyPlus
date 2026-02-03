@@ -43,48 +43,48 @@ Mike
 
 On 2/6/2024 2:08 PM, gu@fsec.ucf.edu wrote:
 Mike:
- 
+
 Thanks for your comments. Let me explain what I need to define duct objects to calculate conduction loss and leakage first. Here are requirements.
- 
+
 1.	Air node
- 
+
 Some nodes are needed to be redefined, in addition to air node defined in AirLoopHAVC. For example, the inlet node of a zone splitter is the same node of AirloopHVAC demand outlet node. In order to build a duct, I need to make two separate nodes, instead of one.
- 
+
 2.	Duct as a linkage
- 
+
 A linkage is needed to use two air nodes to represent a duct for conduction loss calculation.
- 
+
 3.	Leak as a linkage
- 
+
 A zone and an air node have to used to represent a supply or return leak
- 
+
 4.	Make up air as a linkage
- 
+
 Due to unbalanced supply and return leaks, additional flows between outdoor and a zone, and between two zones have to be defined based on a leakage
- 
+
 5.	Duct component
- 
+
 Duct geometry and materials are needed for conduction loss calculation
- 
+
 6.	Leakage component
- 
+
 The fraction flow is needed to represent leakage
- 
+
 The most important restriction is that any proposed new objects or existing objects have to be used in the AFN model for the roadmap.
- 
+
 Therefore, I propose to use existing the AFN objects. An alternative choice is that the AFN objects may be renames by removing “AirflowNetwork” for general purpose. For example, AirflowNetwork:Distribution:Node can be replaced by Distribution:Node.
- 
-Therefore, expansion of ZoneHVAC:AirDistributionUnit may not be enough to cover what I need. The object may not be used in the AFN model. 
- 
+
+Therefore, expansion of ZoneHVAC:AirDistributionUnit may not be enough to cover what I need. The object may not be used in the AFN model.
+
 Thanks.
- 
+
 Gu
- 
-From: Michael J. Witte <mjwitte@gard.com> 
+
+From: Michael J. Witte <mjwitte@gard.com>
 Sent: Tuesday, February 6, 2024 12:49 PM
 To: Lixing Gu <gu@fsec.ucf.edu>; 'Lee, Edwin' <Edwin.Lee@nrel.gov>; 'Horowitz, Scott' <Scott.Horowitz@nrel.gov>; 'Winkler, Jon' <Jon.Winkler@nrel.gov>; 'DeGraw, Jason' <degrawjw@ornl.gov>; 'Neal Kruis' <neal.kruis@bigladdersoftware.com>; rraustad@fsec.ucf.edu
 Subject: Re: Roadmap for comments
- 
+
 Gu,
 
 Did you consider extending the leakage options in ZoneHVAC:AirDistributionUnit instead of using the AFN objects?
@@ -152,8 +152,8 @@ The detailed approaches are provided below.
 
 When the makeup air is introduced, it is better to investigate the ZoneAirMassFlowConservation to see possible connection.
 
-Gu: There are two types of makeup air. The first type is that the makeup aie flows from outdoor to a zone, equivalent to Infiltration. The second type is that the makeup air flows from a zone to another zone, equivalent to Mixing object. It is possible to assign makeup air into Infiltration and Mixing airflows and call ZoneAirMassFlowConservation to perform mass conservation. 
- 
+Gu: There are two types of makeup air. The first type is that the makeup aie flows from outdoor to a zone, equivalent to Infiltration. The second type is that the makeup air flows from a zone to another zone, equivalent to Mixing object. It is possible to assign makeup air into Infiltration and Mixing airflows and call ZoneAirMassFlowConservation to perform mass conservation.
+
 ### Discussion in the conference call on 2/22/24 ###
 
 Scott and Gu attended the conference call.
@@ -178,7 +178,7 @@ The design document was presented in the call.
 
 Mike asked a question why added duct loss is restricted to a system. The general is preferred.
 
-Gu's reply: 
+Gu's reply:
 
 There is a function to calculate zone sensible and latent outputs as CalcZoneSensibleLatentOutput in the GeneralRoutines module.
 
@@ -192,19 +192,19 @@ There is a function to calculate zone sensible and latent outputs as CalcZoneSen
 	                                  Real64 &TotalOutput     // total = sensible + latent putput rate (state 2 -> State 1), {W}
 	)
 	{
-	
+
 	    // Purpose:
 	    // returns total, sensible and latent heat rate of transfer between the supply air zone inlet
 	    // node and zone air node. The moist air energy transfer can be cooling or heating depending
 	    // on the supply air zone inlet node and zone air node conditions.
-	
+
 	    // Methodology:
 	    // Q_total = m_dot * (hEquip - hZone)
 	    // Q_sensible = m_dot * Psychrometrics::PsyDeltaHSenFnTdbEquipTdbWZone(TDBEquip, TDBZone, WZone);
 	    // or Q_sensible = m_dot * cp_moistair_zoneHumRat * (TDBEquip - TDBZone)
 	    //    cp_moistair_zoneHumRat = Psychrometrics::PsyCpAirFnW(WZone);
 	    // Q_latent = Q_total - Q_latent;
-	
+
 	    TotalOutput = 0.0;
 	    LatentOutput = 0.0;
 	    SensibleOutput = 0.0;
@@ -215,7 +215,7 @@ There is a function to calculate zone sensible and latent outputs as CalcZoneSen
 	        LatentOutput = TotalOutput - SensibleOutput;                                                   // latent addition/removal rate, {W}
 	    }
 	}
-	
+
 There are several modules to call this function: Furnace, HVACMultispeedHeatPump, HVACStandAloneERV, and UnitarySystem.
 
 Here is an example function to call CalcZoneSensibleLatentOutput in UnitarySystem:
@@ -261,12 +261,12 @@ Here is an example function to call CalcZoneSensibleLatentOutput in UnitarySyste
         }
         this->m_SensibleLoadMet = SensOutput;
         this->m_LatentLoadMet = LatOutput;
-    } 
+    }
 
 The sensible and latent zone loads are claculated based on system outlet node (this->AirOutNode) and zone node, instead of zone supply inlet node. The assumtion is that air conditions at both zone supply inlet node and system outlet node are the same. It misses any possible losses between both nodes. The proposed new feature will add any possible losses between both nodes.
 
 It is recommended that possible refactor for any systems should use zone supply inlet condition, instead of system outlet condition.
-  
+
 ## Roadmap ##
 
 The roadmap presents my view to implement simplified duct model without using the AFN model. The proposed new feature should meet the above requirements and include three new objects and possible modifications of existing objects. The present document addresses the possible inputs and partial design document so far.
@@ -287,7 +287,7 @@ The group has not finalized the new objects. There are two choices. The first ha
 
 #### 3 new objects ####
 
-An alternative approach is to have 3 new obejcts. Each object represents each loss type explicitly. 
+An alternative approach is to have 3 new obejcts. Each object represents each loss type explicitly.
 
 	Duct:Loss:Conduction,
    	A1,  \field Name
@@ -335,7 +335,7 @@ An alternative approach is to have 3 new obejcts. Each object represents each lo
         \required-field
         \type object-list
         \object-list AirflowNetworkDistributionLinkageNames
- 
+
 #### Existing object AirflowNetwork:Distribution:Node ####
 
 The added choice is highlighted in red.
@@ -388,7 +388,7 @@ The added choice is highlighted in red.
       \note Enter the reference height used to calculate the relative pressure.
 
 
-Note for AirflowNetwork:Distribution:Node: 
+Note for AirflowNetwork:Distribution:Node:
 
 1. Component Name or Node Name
 
@@ -398,7 +398,7 @@ The field of Component Name or Node Name is either Air Node name or Zone name. I
 
 Since the proposed feature is used for duct energy losses from conduction and leakage, N1 field is not used in energy loss calculation. The outdoor air node is allowed as either leakage source or target.
 
-3. A new choice of A3 field is added as zone name. When AFN is fully implemented, the zone name is defined in AirflowNetwork:MultiZone:Zone. For the simplified duct model without using AFN, the added new choice can be used to define a zone for duct leakage calculation. Therefore, there is no need to use AirflowNetwork:MultiZone:Zone.  
+3. A new choice of A3 field is added as zone name. When AFN is fully implemented, the zone name is defined in AirflowNetwork:MultiZone:Zone. For the simplified duct model without using AFN, the added new choice can be used to define a zone for duct leakage calculation. Therefore, there is no need to use AirflowNetwork:MultiZone:Zone.
 
 #### Existing object AirflowNetwork:Distribution:Linkage ####
 
@@ -439,7 +439,7 @@ Since the proposed feature is used for duct energy losses from conduction and le
       \note The zone name is where AirflowNetwork:Distribution:Component:Duct is exposed. Leave this field blank if the duct
       \note conduction loss is ignored.
 
-Note for AirflowNetwork:Distribution:Linkage: 
+Note for AirflowNetwork:Distribution:Linkage:
 
 1. Conduction
 
@@ -455,7 +455,7 @@ If a return leak is defined, Node 1 name should be either a zone name or an outd
 
 3. Restriction
 
-Although there is no restriction of the number of ducts and locations, it is proposed for Phase 1 to have limits as follows. 
+Although there is no restriction of the number of ducts and locations, it is proposed for Phase 1 to have limits as follows.
 
 3.1 There is a single duct used for SupplyTrunk and ReturnTrunk.
 
@@ -511,7 +511,7 @@ The AirflowNetwork:Distribution:Component:Duct object is used to calculate duct 
       \minimum 0.0
       \note Enter the coefficient used to calculate dynamic losses of fittings (e.g. elbows).
 <span style="color:red">
- 
+
    	A2,  \field Construction Name
         \required-field
         \type object-list
@@ -546,7 +546,7 @@ Heat Transmittance Coefficient (U-Factor) for Duct Wall Construction field is re
 
 Although I can require to add one more field for moisture diffusivity in the Material object, this property is driven by humidity ratio. As we know, heat transfer is driven by the temperature difference, while the mositure transfer is driven by partial vapor pressure difference. The humidity ratio, as an independent variable, may not be proper.
 
-Let's keep the field for the time being. We may need to think to use the partial vapor pressure as driving force to simulate moisture performance across walls. 
+Let's keep the field for the time being. We may need to think to use the partial vapor pressure as driving force to simulate moisture performance across walls.
 
 3. The Component:Duct is the only component listed in the Component Name defined in the Linkage object for conduction loss calculation.
 
@@ -623,11 +623,11 @@ Field Effective Leakage Ratio is used as leakage, a fraction of AirLoopHVAC flow
 
 An important factor for duct leakage is to introduce make up flow due to supply and return leaks. Since we don't use pressure to calculate make up airflow impact, we will allow users to specify makeup air flows and direction using existing AFN object, so that make up airflows can flow from outdoor to a zone, and from a zone to another zone. The requirements are as follows:
 
-1. The Node 1 name and Node 2 name in the AirflowNetwork:Distribution:Linkage object have to be either zone names for both fields or a zone name and an outdoor node name. The Node 1 name represents flow starting point, and the Node 2 name represents flow ending points. The flow direction for a linkage with a zone name and an outdoor node name should be from outdoor to a zone, equivalent to air infiltration. When both zone names are specified, the equivalent object should Zobe Mixing. 
+1. The Node 1 name and Node 2 name in the AirflowNetwork:Distribution:Linkage object have to be either zone names for both fields or a zone name and an outdoor node name. The Node 1 name represents flow starting point, and the Node 2 name represents flow ending points. The flow direction for a linkage with a zone name and an outdoor node name should be from outdoor to a zone, equivalent to air infiltration. When both zone names are specified, the equivalent object should Zobe Mixing.
 
 2. Exfiltration is not used in energy calculation. In other words, an outdoor air node can not be specified as Node 2 name.
 
-3. The current makeup air is limited in a single AirLoopHVAC. When multiple AirLoopHVACs are applied, makeup air movement between two zones can be very complicated. More deep discussion may be needed after implementation with a single AirLoopHVAC.  
+3. The current makeup air is limited in a single AirLoopHVAC. When multiple AirLoopHVACs are applied, makeup air movement between two zones can be very complicated. More deep discussion may be needed after implementation with a single AirLoopHVAC.
 
 An example of objects used to calculate duct leak loss in an IDF is:
 
@@ -701,7 +701,7 @@ An example of objects used to calculate duct leak loss in an IDF is:
 
 ### Trigger ###
 
-The duct model can be trigged by two choices. The first choice is to use a new object as Duct:Loss. The second choice is add more choices in the AirflowNetwork Control field of the AirflowNetwork:SimulationControl object. I prefer the first choice. The main reason is that the simplified duct mode does not use the AFN model. Instead, the model only uses the existing AFN objects. 
+The duct model can be trigged by two choices. The first choice is to use a new object as Duct:Loss. The second choice is add more choices in the AirflowNetwork Control field of the AirflowNetwork:SimulationControl object. I prefer the first choice. The main reason is that the simplified duct mode does not use the AFN model. Instead, the model only uses the existing AFN objects.
 
 #### Can be triggered by new chocies of AirflowNetwork Control ####
 
@@ -713,7 +713,7 @@ Thie option is removed based on most people opinions in the Technicalities.
 I prefer to use this approach:
 </span>
 
-	Duct:Loss objects are used without any modifications of AirflowNetwork:SimulationControl. 
+	Duct:Loss objects are used without any modifications of AirflowNetwork:SimulationControl.
 
 ### Leakage losses with mass flow changes ###
 
@@ -794,15 +794,15 @@ m<sub>1</sub>h<sub>1</sub> = m<sub>2</sub> h<sub>2</sub> + m<sub>3</sub> h<sub>3
 
 Mass balance
 
-m<sub>1</sub> = m<sub>2</sub> + m<sub>3</sub> 
+m<sub>1</sub> = m<sub>2</sub> + m<sub>3</sub>
 
 Assumption:
 
-When a supply leak occurs, it assumes to be at the outlet of the duct. The reality is that the outlet enthalpy remains the same, and supply mass flow rate is changed. However, if we assume the same mass flow rate in the Airloop and keep energy balanced, the equivalent ourlet temperature and humidity will be calculated. 
+When a supply leak occurs, it assumes to be at the outlet of the duct. The reality is that the outlet enthalpy remains the same, and supply mass flow rate is changed. However, if we assume the same mass flow rate in the Airloop and keep energy balanced, the equivalent ourlet temperature and humidity will be calculated.
 
 Based on EnergyPlus psychrometric functions, the enthalpy may be calculayed as follows:
 
-h = 1.00484e3 * TDB + max(dW, 1.0e-5) * (2.50094e6 + 1.85895e3 * TDB); // enthalpy {J/kg}   
+h = 1.00484e3 * TDB + max(dW, 1.0e-5) * (2.50094e6 + 1.85895e3 * TDB); // enthalpy {J/kg}
 
 where TDB is dry bulb temperature with units of C.
 
@@ -816,7 +816,7 @@ The energy balance equation can be re-written using the same mass flow rate at t
 
 m<sub>1</sub>h<sub>1</sub> = m<sub>2</sub> h<sub>2</sub> + m<sub>3</sub> h<sub>3</sub> = m<sub>1</sub> h<sub>4</sub> + m<sub>3</sub> h<sub>3</sub>
 
-where 
+where
 
 h<sub>4</sub> = [(m<sub>1</sub> - m<sub>3</sub>) \*h<sub>1</sub>]/m<sub>1</sub> = h<sub>1</sub>*( 1 - m<sub>3</sub>/m<sub>1</sub> )
 
@@ -824,7 +824,7 @@ By substituting E+ enthalpy equation, the energy balance equation can be written
 
 h<sub>4</sub> = h<sub>1</sub>*( 1 - m<sub>3</sub>/m<sub>1</sub> )
 
-[a\*T<sub>4</sub> + W<sub>4</sub> *(b+c\*T<sub>4</sub>)] = [a\*T<sub>1</sub> + W<sub>1</sub> *(b+c\*T<sub>1</sub>)] *( 1 - m<sub>3</sub>/m<sub>1</sub> ) 
+[a\*T<sub>4</sub> + W<sub>4</sub> *(b+c\*T<sub>4</sub>)] = [a\*T<sub>1</sub> + W<sub>1</sub> *(b+c\*T<sub>1</sub>)] *( 1 - m<sub>3</sub>/m<sub>1</sub> )
 
 Since there are two variables, one set of possible solutions can be
 
@@ -892,7 +892,7 @@ Q<sub>lat</sub> = m<sub>mix</sub>h<sub>g</sub>(W<sub>j</sub> − W<sub>i</sub>)
 
 #### Add loss to zone load and system load ####
 
-This section provides treament pathway of losses to either a system or a zone. 
+This section provides treament pathway of losses to either a system or a zone.
 
 1. Duct conduction and leakage loss
 
@@ -900,17 +900,17 @@ When the system outlet node is replaced by the zone supply inlet zone, duct loss
 
 2. Makeup losses
 
-I have two choices for the makeup losses. The first choice is to add losses as a part of system load, so that all losses will be added every system iteration. The second choice is to treat makeup losses as zone load used in the next time step. 
+I have two choices for the makeup losses. The first choice is to add losses as a part of system load, so that all losses will be added every system iteration. The second choice is to treat makeup losses as zone load used in the next time step.
 
-Here is a reason: 
+Here is a reason:
 
-When makeup losses are added as zone gain, they are excluded in the predictor calculation, so that requested system load will not have makeup losses at beginning of every time step. Thereofre, the makeup losses needs to be caught in the next zone time step. 
+When makeup losses are added as zone gain, they are excluded in the predictor calculation, so that requested system load will not have makeup losses at beginning of every time step. Thereofre, the makeup losses needs to be caught in the next zone time step.
 
 I will try the first choice first. If not working well, the second choice will be implemented.
 
 ##### Conduction and leakage #####
 
-All losses from conduction and leakage will be added to a system as Duct loss. The implementation code is similar to the DuctLoss code in UntarySystem, Furnace and Multispeed AirToAir Heat pump mdules. The addon is summed by all conduction and leakage losses served to a system by the same Airloop.  
+All losses from conduction and leakage will be added to a system as Duct loss. The implementation code is similar to the DuctLoss code in UntarySystem, Furnace and Multispeed AirToAir Heat pump mdules. The addon is summed by all conduction and leakage losses served to a system by the same Airloop.
 
 ![DuctlossAddon](DuctlossAddon.png)
 
@@ -976,7 +976,7 @@ Call AFN model functions to get all required AFN objects
 
 ##### Local variables #####
 
-All new objects and AFN obejcts will have local array variables defined in the header file.   
+All new objects and AFN obejcts will have local array variables defined in the header file.
 
 #### InitDuctLoss ####
 

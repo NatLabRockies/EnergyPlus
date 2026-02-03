@@ -84,7 +84,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -590,14 +590,14 @@
     CFS_Glz_203_Tfvis,       !- Visible Optical Complex Front Transmittance Matrix Name
     CFS_Glz_203_Tbvis,       !- Visible Optical Complex Back Transmittance Matrix Name
     Glass_888_Layer,         !- Outside Layer Name
-    CFS_Glz_203_Layer_1_fAbs,!- Outside Layer Directional Front Absoptance Matrix Name
-    CFS_Glz_203_Layer_1_bAbs,!- Outside Layer Directional Back Absoptance Matrix Name
+    CFS_Glz_203_Layer_1_fAbs,!- Outside Layer Directional Front Absorptance Matrix Name
+    CFS_Glz_203_Layer_1_bAbs,!- Outside Layer Directional Back Absorptance Matrix Name
     Gap_1_Layer,             !- Gap 1 Name
-    ,                        !- CFS Gap 1 Directional Front Absoptance Matrix Name
-    ,                        !- CFS Gap 1 Directional Back Absoptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Front Absorptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Back Absorptance Matrix Name
     Glass_888_Layer,         !- Layer 2 Name
-    CFS_Glz_203_Layer_2_fAbs,!- Layer 2 Directional Front Absoptance Matrix Name
-    CFS_Glz_203_Layer_2_bAbs;!- Layer 2 Directional Back Absoptance Matrix Name
+    CFS_Glz_203_Layer_2_fAbs,!- Layer 2 Directional Front Absorptance Matrix Name
+    CFS_Glz_203_Layer_2_bAbs;!- Layer 2 Directional Back Absorptance Matrix Name
 
 !----------------------------------------------------------------------
 !         Thermal Model Params

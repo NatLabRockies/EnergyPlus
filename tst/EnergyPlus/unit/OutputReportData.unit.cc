@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -204,7 +204,7 @@ TEST_F(EnergyPlusFixture, OutputReportData_Regex)
     ASSERT_TRUE(process_idf(idf_objects));
 
     EXPECT_EQ(state->dataOutput->NumConsideredOutputVariables, 10);
-    // FindItemInVariableList is case-insentive, so we also test that
+    // FindItemInVariableList is case-insensitive, so we also test that
     EXPECT_TRUE(FindItemInVariableList(*state, "Outside Air Inlet Node", "System Node Mass Flow Rate"));
     EXPECT_TRUE(FindItemInVariableList(*state, "OUTSIDE AIR INLET NODE", "System Node Mass Flow Rate"));
     EXPECT_TRUE(FindItemInVariableList(*state, "OutsIDE AiR InLEt NoDE", "System NoDE MaSS FLOw Rate"));

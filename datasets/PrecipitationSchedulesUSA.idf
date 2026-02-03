@@ -15,12 +15,8 @@
 !   Ave Mon Precip Location: 500280 ANC ANCHORAGE INTL AP AK
 !   Ave Mon Precipitation: 0.0127, 0.01575, 0.01219, 0.009906, 0.01422, 0.02286, 0.03734, 0.0635, 0.06731, 0.04826, 0.02108, 0.02235
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
-
-!  Version,
-!    9.0;                    !- Version Identifier
-
   SCHEDULE:COMPACT,
-    PrecipitationSchd1,    !- Name
+    PrecipitationSchd1,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -1769,7 +1765,7 @@
 !   Ave Mon Precipitation: 0.002286, 0.00254, 0.001778, 0.002286, 0.002286, 0.00635, 0.01803, 0.02311, 0.01549, 0.009144, 0.003302, 0.00254
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd2,    !- Name
+    PrecipitationSchd2,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -3938,7 +3934,7 @@
 !   Ave Mon Precipitation: 0.01168, 0.006604, 0.00508, 0.003556, 0.01219, 0.032, 0.04013, 0.04013, 0.02388, 0.02159, 0.01473, 0.01397
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd3,    !- Name
+    PrecipitationSchd3,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -5611,7 +5607,7 @@
 !   Ave Mon Precipitation: 0.1123, 0.08484, 0.08204, 0.06985, 0.08306, 0.08103, 0.09779, 0.126, 0.1808, 0.2022, 0.1245, 0.1217
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd4,    !- Name
+    PrecipitationSchd4,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -8114,7 +8110,7 @@
 !   Ave Mon Precipitation: 0.1783, 0.127, 0.1161, 0.1295, 0.14, 0.1148, 0.09423, 0.09627, 0.1803, 0.1986, 0.1501, 0.1692
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd5,    !- Name
+    PrecipitationSchd5,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -10042,7 +10038,7 @@
 !   Ave Mon Precipitation: 0.02007, 0.01346, 0.01168, 0.01118, 0.01372, 0.02184, 0.04724, 0.07315, 0.05766, 0.03505, 0.02642, 0.02286
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd6,    !- Name
+    PrecipitationSchd6,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -11756,7 +11752,7 @@
 !   Ave Mon Precipitation: 0.129, 0.0983, 0.1402, 0.1021, 0.111, 0.08433, 0.1118, 0.07493, 0.08103, 0.06502, 0.1092, 0.1026
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd7,    !- Name
+    PrecipitationSchd7,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -13258,7 +13254,7 @@
 !   Ave Mon Precipitation: 0.1295, 0.1128, 0.157, 0.1021, 0.1219, 0.08865, 0.1013, 0.07188, 0.08941, 0.06934, 0.1242, 0.125
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd8,    !- Name
+    PrecipitationSchd8,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -14778,7 +14774,7 @@
 !   Ave Mon Precipitation: 0.1283, 0.113, 0.174, 0.09804, 0.1252, 0.1163, 0.1534, 0.141, 0.1252, 0.05359, 0.1168, 0.111
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd9,    !- Name
+    PrecipitationSchd9,      !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -16257,7 +16253,7 @@
 !   Ave Mon Precipitation: 0.1179, 0.1255, 0.1486, 0.09398, 0.09169, 0.08839, 0.1245, 0.08153, 0.09296, 0.0475, 0.1006, 0.1189
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd10,    !- Name
+    PrecipitationSchd10,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -17719,7 +17715,7 @@
 !   Ave Mon Precipitation: 0.04978, 0.05613, 0.09169, 0.08636, 0.1212, 0.09855, 0.06325, 0.05334, 0.07671, 0.08103, 0.1039, 0.07137
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd11,    !- Name
+    PrecipitationSchd11,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -19193,7 +19189,7 @@
 !   Ave Mon Precipitation: 0.08052, 0.07696, 0.1179, 0.1199, 0.1206, 0.08687, 0.07036, 0.0569, 0.08052, 0.08941, 0.1252, 0.1059
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd12,    !- Name
+    PrecipitationSchd12,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -20695,7 +20691,7 @@
 !   Ave Mon Precipitation: 0.03785, 0.04724, 0.04877, 0.02261, 0.01422, 0.00635, 0.05207, 0.06452, 0.0381, 0.03251, 0.03531, 0.03277
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd13,    !- Name
+    PrecipitationSchd13,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -22000,7 +21996,7 @@
 !   Ave Mon Precipitation: 0.01194, 0.0127, 0.01905, 0.003048, 0, 0, 0.01829, 0.016, 0.01143, 0.01143, 0.01118, 0.01219
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd14,    !- Name
+    PrecipitationSchd14,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -23225,7 +23221,7 @@
 !   Ave Mon Precipitation: 0.01397, 0.01575, 0.01499, 0.003048, 0.00254, 0.003048, 0.04013, 0.04902, 0.02591, 0.01803, 0.01321, 0.01499
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd15,    !- Name
+    PrecipitationSchd15,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -24483,7 +24479,7 @@
 !   Ave Mon Precipitation: 0.007874, 0.009906, 0.01245, 0.004064, 0.004572, 0.002032, 0.0221, 0.02896, 0.01702, 0.01549, 0.01092, 0.009144
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd16,    !- Name
+    PrecipitationSchd16,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -25782,7 +25778,7 @@
 !   Ave Mon Precipitation: 0.0221, 0.02184, 0.02921, 0.008382, 0.001016, 0, -2.54, 0, 0.000508, 0.004318, 0.009652, 0.01549
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd17,    !- Name
+    PrecipitationSchd17,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -27032,7 +27028,7 @@
 !   Ave Mon Precipitation: 0.01245, 0.008636, 0.00762, 0.00127, 0.000254, 0, 0.003302, 0.003556, 0.001016, 0.000762, 0.002032, 0.006858
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd18,    !- Name
+    PrecipitationSchd18,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -28193,7 +28189,7 @@
 !   Ave Mon Precipitation: 0.03988, 0.03988, 0.04242, 0.01194, 0.002286, 0, 0, 0, 0, 0.008128, 0.01676, 0.02591
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd19,    !- Name
+    PrecipitationSchd19,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -29511,7 +29507,7 @@
 !   Ave Mon Precipitation: 0.04826, 0.04394, 0.03962, 0.007874, 0.000254, 0, 0, 0, 0, 0.004064, 0.01448, 0.02794
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd20,    !- Name
+    PrecipitationSchd20,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -30732,7 +30728,7 @@
 !   Ave Mon Precipitation: 0.04775, 0.04623, 0.04242, 0.008382, 0, 0, 0, 0, 0.000254, 0.004572, 0.016, 0.03048
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd21,    !- Name
+    PrecipitationSchd21,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -31937,7 +31933,7 @@
 !   Ave Mon Precipitation: 0.07163, 0.06909, 0.05258, 0.02032, 0.005334, 0.001524, -2.54, 0, 0.001778, 0.01448, 0.0381, 0.04826
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd22,    !- Name
+    PrecipitationSchd22,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -33276,7 +33272,7 @@
 !   Ave Mon Precipitation: 0.04623, 0.05182, 0.04572, 0.01346, 0.000254, 0, 0, 0, 0.000762, 0.00635, 0.01829, 0.03277
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd23,    !- Name
+    PrecipitationSchd23,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -34511,7 +34507,7 @@
 !   Ave Mon Precipitation: 0.03962, 0.0348, 0.03988, 0.01092, 0.001524, 0, 0, 0, 0.000254, 0.005588, 0.016, 0.02362
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd24,    !- Name
+    PrecipitationSchd24,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -35705,7 +35701,7 @@
 !   Ave Mon Precipitation: 0.08687, 0.07671, 0.06096, 0.02159, 0.004064, 0.000762, 0, 0, 0.002286, 0.016, 0.03886, 0.05486
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd25,    !- Name
+    PrecipitationSchd25,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -37065,7 +37061,7 @@
 !   Ave Mon Precipitation: 0.005334, 0.004064, 0.009144, 0.01016, 0.01194, 0.01219, 0.01854, 0.02591, 0.01981, 0.01321, 0.009398, 0.005842
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd26,    !- Name
+    PrecipitationSchd26,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -38291,7 +38287,7 @@
 !   Ave Mon Precipitation: 0.01092, 0.01041, 0.02743, 0.04293, 0.04826, 0.03277, 0.04674, 0.03607, 0.02083, 0.01981, 0.02108, 0.01219
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd27,    !- Name
+    PrecipitationSchd27,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -39724,7 +39720,7 @@
 !   Ave Mon Precipitation: 0.005588, 0.005842, 0.02286, 0.03277, 0.05258, 0.04877, 0.06604, 0.08103, 0.02362, 0.01473, 0.009144, 0.008128
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd28,    !- Name
+    PrecipitationSchd28,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -41248,7 +41244,7 @@
 !   Ave Mon Precipitation: 0.01295, 0.01041, 0.0188, 0.01803, 0.01905, 0.006858, 0.01168, 0.01803, 0.01727, 0.01829, 0.01549, 0.01067
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd29,    !- Name
+    PrecipitationSchd29,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -42612,7 +42608,7 @@
 !   Ave Mon Precipitation: 0.00635, 0.004572, 0.02007, 0.02515, 0.03404, 0.02667, 0.04293, 0.05258, 0.016, 0.01219, 0.01016, 0.007366
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd30,    !- Name
+    PrecipitationSchd30,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -43991,7 +43987,7 @@
 !   Ave Mon Precipitation: 0.08331, 0.06782, 0.09728, 0.09042, 0.09144, 0.07366, 0.07874, 0.08255, 0.08077, 0.08052, 0.08153, 0.07849
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd31,    !- Name
+    PrecipitationSchd31,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -45487,7 +45483,7 @@
 !   Ave Mon Precipitation: 0.08357, 0.06909, 0.08992, 0.09068, 0.1019, 0.08077, 0.08712, 0.09068, 0.09017, 0.09144, 0.0955, 0.08103
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd32,    !- Name
+    PrecipitationSchd32,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -47215,7 +47211,7 @@
 !   Ave Mon Precipitation: 0.07874, 0.06477, 0.09119, 0.07899, 0.09728, 0.08128, 0.09779, 0.07899, 0.09093, 0.06731, 0.0701, 0.07442
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd33,    !- Name
+    PrecipitationSchd33,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -48822,7 +48818,7 @@
 !   Ave Mon Precipitation: 0.06452, 0.05639, 0.08357, 0.04851, 0.06731, 0.1234, 0.1102, 0.1463, 0.1471, 0.09525, 0.05512, 0.05156
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd34,    !- Name
+    PrecipitationSchd34,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -50239,7 +50235,7 @@
 !   Ave Mon Precipitation: 0.08026, 0.06883, 0.08534, 0.06426, 0.06807, 0.1242, 0.1417, 0.1628, 0.176, 0.0729, 0.05055, 0.04978
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd35,    !- Name
+    PrecipitationSchd35,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -51714,7 +51710,7 @@
 !   Ave Mon Precipitation: 0.03454, 0.02946, 0.03327, 0.03886, 0.07163, 0.09169, 0.0729, 0.1262, 0.1306, 0.0889, 0.03912, 0.03581
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd36,    !- Name
+    PrecipitationSchd36,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -53057,7 +53053,7 @@
 !   Ave Mon Precipitation: 0.03785, 0.0381, 0.04775, 0.06045, 0.1158, 0.2035, 0.1402, 0.2065, 0.1996, 0.1313, 0.06858, 0.04013
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd37,    !- Name
+    PrecipitationSchd37,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -54556,7 +54552,7 @@
 !   Ave Mon Precipitation: 0.1184, 0.1039, 0.1494, 0.06655, 0.09906, 0.1557, 0.1862, 0.1651, 0.1019, 0.06198, 0.08179, 0.09195
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd38,    !- Name
+    PrecipitationSchd38,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -56044,7 +56040,7 @@
 !   Ave Mon Precipitation: 0.04724, 0.05131, 0.05817, 0.0348, 0.04394, 0.1267, 0.1529, 0.1867, 0.1496, 0.04064, 0.02896, 0.04166
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd39,    !- Name
+    PrecipitationSchd39,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -57517,7 +57513,7 @@
 !   Ave Mon Precipitation: 0.07214, 0.05283, 0.07518, 0.06833, 0.1118, 0.1773, 0.1356, 0.1527, 0.1918, 0.1181, 0.1148, 0.06375
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd40,    !- Name
+    PrecipitationSchd40,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -59061,7 +59057,7 @@
 !   Ave Mon Precipitation: 0.1105, 0.1011, 0.1138, 0.07493, 0.08458, 0.08763, 0.1026, 0.08788, 0.07696, 0.06629, 0.08865, 0.08484
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd41,    !- Name
+    PrecipitationSchd41,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -60571,7 +60567,7 @@
 !   Ave Mon Precipitation: 0.1179, 0.1072, 0.1255, 0.08052, 0.09042, 0.07747, 0.11, 0.08179, 0.08484, 0.06121, 0.09677, 0.08687
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd42,    !- Name
+    PrecipitationSchd42,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -62119,7 +62115,7 @@
 !   Ave Mon Precipitation: 0.1054, 0.09474, 0.1039, 0.06426, 0.06655, 0.09525, 0.09195, 0.1029, 0.0729, 0.05182, 0.05791, 0.0701
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd43,    !- Name
+    PrecipitationSchd43,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -63608,7 +63604,7 @@
 !   Ave Mon Precipitation: 0.1148, 0.1044, 0.1331, 0.0795, 0.08128, 0.07595, 0.1176, 0.08458, 0.06629, 0.04343, 0.08992, 0.1024
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd44,    !- Name
+    PrecipitationSchd44,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -65098,7 +65094,7 @@
 !   Ave Mon Precipitation: 0.1184, 0.1006, 0.1115, 0.06401, 0.06655, 0.08077, 0.09398, 0.08763, 0.06909, 0.04267, 0.07087, 0.0889
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd45,    !- Name
+    PrecipitationSchd45,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -66736,7 +66732,7 @@
 !   Ave Mon Precipitation: 0.08636, 0.06452, 0.0823, 0.07188, 0.08052, 0.1209, 0.1369, 0.1621, 0.1021, 0.05207, 0.05055, 0.06274
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd46,    !- Name
+    PrecipitationSchd46,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -68190,7 +68186,7 @@
 !   Ave Mon Precipitation: 0.1669, 0.1605, 0.2835, 0.283, 0.1867, 0.1654, 0.2433, 0.2243, 0.2075, 0.2276, 0.3279, 0.2172
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd47,    !- Name
+    PrecipitationSchd47,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -70310,7 +70306,7 @@
 !   Ave Mon Precipitation: 0.04445, 0.03988, 0.03175, 0.02159, 0.01295, 0.006858, 0.009652, 0.007366, 0.01422, 0.032, 0.03531, 0.04623
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd48,    !- Name
+    PrecipitationSchd48,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -71986,7 +71982,7 @@
 !   Ave Mon Precipitation: 0.02794, 0.03505, 0.06477, 0.08331, 0.1019, 0.09601, 0.1006, 0.0856, 0.07544, 0.06553, 0.05994, 0.04445
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd49,    !- Name
+    PrecipitationSchd49,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -73513,7 +73509,7 @@
 !   Ave Mon Precipitation: 0.02032, 0.02692, 0.0447, 0.07874, 0.09804, 0.1044, 0.08763, 0.09373, 0.0696, 0.05588, 0.04369, 0.02667
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd50,    !- Name
+    PrecipitationSchd50,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -75054,7 +75050,7 @@
 !   Ave Mon Precipitation: 0.02083, 0.0188, 0.04877, 0.07747, 0.1021, 0.1133, 0.09398, 0.09931, 0.07087, 0.05334, 0.03962, 0.02286
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd51,    !- Name
+    PrecipitationSchd51,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -76568,7 +76564,7 @@
 !   Ave Mon Precipitation: 0.01245, 0.01295, 0.03962, 0.05969, 0.08941, 0.08153, 0.0701, 0.0602, 0.05182, 0.03785, 0.02718, 0.01448
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd52,    !- Name
+    PrecipitationSchd52,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -78014,7 +78010,7 @@
 !   Ave Mon Precipitation: 0.0188, 0.02134, 0.04547, 0.07569, 0.09423, 0.1135, 0.09068, 0.08687, 0.06579, 0.05105, 0.04496, 0.02362
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd53,    !- Name
+    PrecipitationSchd53,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -79585,7 +79581,7 @@
 !   Ave Mon Precipitation: 0.032, 0.0254, 0.03099, 0.0287, 0.0254, 0.01473, 0.005842, 0.004318, 0.01245, 0.016, 0.03099, 0.02794
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd54,    !- Name
+    PrecipitationSchd54,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -81061,7 +81057,7 @@
 !   Ave Mon Precipitation: 0.02565, 0.02108, 0.02642, 0.02819, 0.03658, 0.02616, 0.01295, 0.01168, 0.01397, 0.02057, 0.02743, 0.02337
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd55,    !- Name
+    PrecipitationSchd55,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -82516,7 +82512,7 @@
 !   Ave Mon Precipitation: 0.02591, 0.0221, 0.03073, 0.02515, 0.03302, 0.01753, 0.01295, 0.01194, 0.01422, 0.02007, 0.02337, 0.0221
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd56,    !- Name
+    PrecipitationSchd56,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -84080,7 +84076,7 @@
 !   Ave Mon Precipitation: 0.03759, 0.03581, 0.06071, 0.08534, 0.07595, 0.08331, 0.08306, 0.09982, 0.06502, 0.06147, 0.06604, 0.05359
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd57,    !- Name
+    PrecipitationSchd57,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -85716,7 +85712,7 @@
 !   Ave Mon Precipitation: 0.03556, 0.0348, 0.0635, 0.0889, 0.09576, 0.1039, 0.08865, 0.09093, 0.06604, 0.0602, 0.05944, 0.04851
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd58,    !- Name
+    PrecipitationSchd58,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -87242,7 +87238,7 @@
 !   Ave Mon Precipitation: 0.03277, 0.03759, 0.0635, 0.08204, 0.09449, 0.08153, 0.08458, 0.06553, 0.06452, 0.06401, 0.06502, 0.05385
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd59,    !- Name
+    PrecipitationSchd59,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -88865,7 +88861,7 @@
 !   Ave Mon Precipitation: 0.03175, 0.02896, 0.05385, 0.08382, 0.09042, 0.1087, 0.0922, 0.09474, 0.06934, 0.05537, 0.05817, 0.04597
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd60,    !- Name
+    PrecipitationSchd60,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -90536,7 +90532,7 @@
 !   Ave Mon Precipitation: 0.03327, 0.04089, 0.07391, 0.07645, 0.08763, 0.07976, 0.07899, 0.07493, 0.06121, 0.0602, 0.06274, 0.05537
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd61,    !- Name
+    PrecipitationSchd61,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -92082,7 +92078,7 @@
 !   Ave Mon Precipitation: 0.06528, 0.0701, 0.1016, 0.1024, 0.112, 0.09322, 0.08153, 0.06629, 0.06299, 0.06553, 0.09525, 0.08103
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd62,    !- Name
+    PrecipitationSchd62,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -93647,7 +93643,7 @@
 !   Ave Mon Precipitation: 0.04648, 0.04267, 0.06782, 0.08382, 0.08839, 0.09347, 0.07925, 0.08458, 0.06121, 0.06096, 0.06782, 0.06452
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd63,    !- Name
+    PrecipitationSchd63,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -95299,7 +95295,7 @@
 !   Ave Mon Precipitation: 0.05588, 0.05461, 0.08153, 0.08611, 0.09957, 0.09449, 0.09804, 0.08509, 0.06045, 0.06401, 0.08103, 0.06858
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd64,    !- Name
+    PrecipitationSchd64,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -96933,7 +96929,7 @@
 !   Ave Mon Precipitation: 0.05385, 0.04648, 0.06655, 0.08458, 0.07976, 0.09347, 0.08611, 0.09068, 0.07722, 0.07544, 0.08001, 0.07518
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd65,    !- Name
+    PrecipitationSchd65,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -98494,7 +98490,7 @@
 !   Ave Mon Precipitation: 0.01219, 0.01041, 0.03251, 0.0475, 0.06883, 0.06629, 0.06629, 0.05918, 0.02642, 0.02388, 0.01524, 0.01499
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd66,    !- Name
+    PrecipitationSchd66,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -99895,7 +99891,7 @@
 !   Ave Mon Precipitation: 0.009652, 0.00762, 0.02261, 0.03099, 0.07874, 0.06731, 0.07925, 0.05055, 0.0188, 0.01651, 0.01651, 0.006604
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd67,    !- Name
+    PrecipitationSchd67,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -101358,7 +101354,7 @@
 !   Ave Mon Precipitation: 0.02032, 0.02438, 0.05283, 0.07087, 0.1125, 0.1113, 0.07976, 0.0762, 0.0795, 0.05842, 0.0475, 0.02667
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd68,    !- Name
+    PrecipitationSchd68,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -102876,7 +102872,7 @@
 !   Ave Mon Precipitation: 0.01575, 0.01829, 0.05131, 0.05512, 0.09068, 0.09296, 0.06248, 0.05842, 0.06223, 0.04293, 0.03683, 0.02464
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd69,    !- Name
+    PrecipitationSchd69,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -104307,7 +104303,7 @@
 !   Ave Mon Precipitation: 0.06706, 0.06121, 0.09322, 0.09119, 0.1069, 0.1034, 0.08611, 0.09017, 0.05893, 0.06731, 0.08153, 0.07696
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd70,    !- Name
+    PrecipitationSchd70,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -105936,7 +105932,7 @@
 !   Ave Mon Precipitation: 0.07493, 0.07391, 0.1024, 0.08661, 0.1102, 0.1029, 0.1148, 0.08103, 0.06909, 0.06071, 0.08001, 0.09322
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd71,    !- Name
+    PrecipitationSchd71,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -107573,7 +107569,7 @@
 !   Ave Mon Precipitation: 0.07391, 0.07366, 0.1041, 0.08992, 0.1135, 0.08509, 0.09525, 0.07925, 0.06909, 0.0635, 0.08941, 0.08433
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd72,    !- Name
+    PrecipitationSchd72,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -109103,7 +109099,7 @@
 !   Ave Mon Precipitation: 0.1394, 0.114, 0.1184, 0.1085, 0.1161, 0.1087, 0.144, 0.1283, 0.1036, 0.08255, 0.1019, 0.1204
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd73,    !- Name
+    PrecipitationSchd73,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -110545,7 +110541,7 @@
 !   Ave Mon Precipitation: 0.1229, 0.07214, 0.07874, 0.07341, 0.1189, 0.1298, 0.1173, 0.1085, 0.128, 0.08001, 0.1059, 0.1067
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd74,    !- Name
+    PrecipitationSchd74,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -112085,7 +112081,7 @@
 !   Ave Mon Precipitation: 0.1252, 0.1115, 0.1234, 0.09754, 0.08915, 0.1468, 0.1427, 0.1367, 0.1161, 0.0635, 0.1052, 0.1189
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd75,    !- Name
+    PrecipitationSchd75,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -113590,7 +113586,7 @@
 !   Ave Mon Precipitation: 0.09677, 0.09347, 0.09855, 0.09068, 0.1082, 0.09982, 0.08636, 0.0569, 0.06579, 0.09627, 0.1062, 0.1021
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd76,    !- Name
+    PrecipitationSchd76,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -115078,7 +115074,7 @@
 !   Ave Mon Precipitation: 0.08636, 0.07645, 0.08915, 0.08331, 0.07366, 0.06375, 0.0701, 0.07391, 0.07493, 0.08687, 0.09017, 0.08204
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd77,    !- Name
+    PrecipitationSchd77,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -116665,7 +116661,7 @@
 !   Ave Mon Precipitation: 0.005334, 0.00381, 0.00889, 0.01803, 0.0348, 0.02438, 0.01219, 0.01067, 0.01727, 0.01397, 0.00762, 0.004826
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd78,    !- Name
+    PrecipitationSchd78,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -118308,7 +118304,7 @@
 !   Ave Mon Precipitation: 0.07976, 0.06706, 0.08992, 0.06934, 0.08992, 0.07899, 0.08839, 0.0856, 0.08306, 0.06833, 0.06934, 0.07391
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd79,    !- Name
+    PrecipitationSchd79,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -119885,7 +119881,7 @@
 !   Ave Mon Precipitation: 0.07112, 0.04775, 0.06198, 0.06401, 0.07645, 0.07899, 0.09296, 0.09627, 0.07874, 0.06756, 0.07468, 0.07569
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd80,    !- Name
+    PrecipitationSchd80,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -121672,7 +121668,7 @@
 !   Ave Mon Precipitation: 0.0922, 0.06833, 0.0983, 0.09703, 0.08814, 0.07391, 0.07874, 0.06553, 0.07747, 0.09779, 0.1087, 0.095
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd81,    !- Name
+    PrecipitationSchd81,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -123423,7 +123419,7 @@
 !   Ave Mon Precipitation: 0.04064, 0.02972, 0.04674, 0.05639, 0.0602, 0.05664, 0.07137, 0.0828, 0.06375, 0.05359, 0.04851, 0.04089
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd82,    !- Name
+    PrecipitationSchd82,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -125083,7 +125079,7 @@
 !   Ave Mon Precipitation: 0.04445, 0.0414, 0.05994, 0.07341, 0.07214, 0.08306, 0.0729, 0.06985, 0.07493, 0.05283, 0.06172, 0.05944
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd83,    !- Name
+    PrecipitationSchd83,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -126662,7 +126658,7 @@
 !   Ave Mon Precipitation: 0.03658, 0.03023, 0.05258, 0.07468, 0.06248, 0.0701, 0.0729, 0.0795, 0.0823, 0.0569, 0.06096, 0.0508
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd84,    !- Name
+    PrecipitationSchd84,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -128207,7 +128203,7 @@
 !   Ave Mon Precipitation: 0.04648, 0.03429, 0.06071, 0.08433, 0.07518, 0.08204, 0.08052, 0.0828, 0.09855, 0.06629, 0.07671, 0.06147
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd85,    !- Name
+    PrecipitationSchd85,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -129799,7 +129795,7 @@
 !   Ave Mon Precipitation: 0.1024, 0.05182, 0.05385, 0.03937, 0.05715, 0.06426, 0.0701, 0.06248, 0.07645, 0.06045, 0.06629, 0.07264
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd86,    !- Name
+    PrecipitationSchd86,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -131525,7 +131521,7 @@
 !   Ave Mon Precipitation: 0.03708, 0.03226, 0.05563, 0.07366, 0.06172, 0.07772, 0.06426, 0.08103, 0.08153, 0.0541, 0.06248, 0.05029
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd87,    !- Name
+    PrecipitationSchd87,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -133258,7 +133254,7 @@
 !   Ave Mon Precipitation: 0.05258, 0.03658, 0.05359, 0.06985, 0.06528, 0.05817, 0.05639, 0.08509, 0.07468, 0.06452, 0.07391, 0.06172
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd88,    !- Name
+    PrecipitationSchd88,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -134919,7 +134915,7 @@
 !   Ave Mon Precipitation: 0.06401, 0.03556, 0.05461, 0.06147, 0.05791, 0.0701, 0.07163, 0.08128, 0.08763, 0.07925, 0.0828, 0.06807
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd89,    !- Name
+    PrecipitationSchd89,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -136770,7 +136766,7 @@
 !   Ave Mon Precipitation: 0.0668, 0.03937, 0.04445, 0.06299, 0.05207, 0.07315, 0.06756, 0.07569, 0.08026, 0.06756, 0.06147, 0.06172
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd90,    !- Name
+    PrecipitationSchd90,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -138486,7 +138482,7 @@
 !   Ave Mon Precipitation: 0.02489, 0.01778, 0.03734, 0.04623, 0.06629, 0.09881, 0.09677, 0.09754, 0.095, 0.05309, 0.0442, 0.02083
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd91,    !- Name
+    PrecipitationSchd91,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -140197,7 +140193,7 @@
 !   Ave Mon Precipitation: 0.01727, 0.01397, 0.02159, 0.03048, 0.05537, 0.09449, 0.07798, 0.07341, 0.06604, 0.04191, 0.0315, 0.01575
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd92,    !- Name
+    PrecipitationSchd92,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -141913,7 +141909,7 @@
 !   Ave Mon Precipitation: 0.02235, 0.01727, 0.04216, 0.05004, 0.07645, 0.09728, 0.08661, 0.09576, 0.06147, 0.04343, 0.03912, 0.02134
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd93,    !- Name
+    PrecipitationSchd93,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -143512,7 +143508,7 @@
 !   Ave Mon Precipitation: 0.02057, 0.01575, 0.04216, 0.0701, 0.08433, 0.08839, 0.1024, 0.1013, 0.06248, 0.04928, 0.04013, 0.02286
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd94,    !- Name
+    PrecipitationSchd94,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -145085,7 +145081,7 @@
 !   Ave Mon Precipitation: 0.01626, 0.01219, 0.03429, 0.04394, 0.07061, 0.09804, 0.07569, 0.09195, 0.06553, 0.04597, 0.03048, 0.01524
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd95,    !- Name
+    PrecipitationSchd95,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -146575,7 +146571,7 @@
 !   Ave Mon Precipitation: 0.03531, 0.04623, 0.0729, 0.09423, 0.1143, 0.08585, 0.07823, 0.07518, 0.0696, 0.07264, 0.07544, 0.05385
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd96,    !- Name
+    PrecipitationSchd96,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -148095,7 +148091,7 @@
 !   Ave Mon Precipitation: 0.02413, 0.02921, 0.0541, 0.07544, 0.1224, 0.1041, 0.08661, 0.0762, 0.09855, 0.06655, 0.05258, 0.03048
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd97,    !- Name
+    PrecipitationSchd97,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -149606,7 +149602,7 @@
 !   Ave Mon Precipitation: 0.0442, 0.05029, 0.08585, 0.09474, 0.108, 0.1123, 0.0795, 0.07569, 0.1026, 0.07772, 0.09119, 0.06807
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd98,    !- Name
+    PrecipitationSchd98,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2
@@ -151179,7 +151175,7 @@
 !   Ave Mon Precipitation: 0.04394, 0.05207, 0.08585, 0.0823, 0.09296, 0.08382, 0.08788, 0.06477, 0.06172, 0.06198, 0.08103, 0.06147
 
   SCHEDULE:COMPACT,
-    PrecipitationSchd99,    !- Name
+    PrecipitationSchd99,     !- Name
     AnyNumber,               !- Schedule Type Limits Name
     Through: 1/1,            !- Field 1
     For: AllDays,            !- Field 2

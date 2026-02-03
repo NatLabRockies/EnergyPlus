@@ -106,7 +106,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -516,12 +516,12 @@
 
   People,
     West Zone,               !- Name
-    West Zone,               !- Zone or ZoneList Name
+    West Zone,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     3.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -538,11 +538,11 @@
 
   ElectricEquipment,
     West Zone ElecEq 1,      !- Name
-    West Zone,               !- Zone or ZoneList Name
+    West Zone,               !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -550,12 +550,12 @@
 
   People,
     EAST ZONE,               !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     3.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -572,11 +572,11 @@
 
   Lights,
     EAST ZONE Lights 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -586,11 +586,11 @@
 
   ElectricEquipment,
     EAST ZONE ElecEq 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -598,12 +598,12 @@
 
   People,
     NORTH ZONE,              !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     4.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -620,11 +620,11 @@
 
   Lights,
     NORTH ZONE Lights 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -634,11 +634,11 @@
 
   ElectricEquipment,
     NORTH ZONE ElecEq 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1447,7 +1447,7 @@
     A205Chiller Trane CGWD 207kW/3.99COP/None,  !- Name
     A205ExampleChiller.RS0001.a205.cbor,  !- Representation File Name
     Cubic,                   !- Performance Interpolation Method
-    ,                        !- Reference Capacity
+    ,                        !- Rated Capacity {W}
     1.0,                     !- Sizing Factor
     Zone,                    !- Ambient Temperature Indicator
     ,                        !- Ambient Temperature Schedule Name
@@ -1456,10 +1456,10 @@
     Big Chiller Inlet Node,  !- Chilled Water Inlet Node Name
     Big Chiller Outlet Node, !- Chilled Water Outlet Node Name
     0.0755,                  !- Chilled Water Maximum Requested Flow Rate
-    Big Chiller Condenser Inlet Node,           !- Condenser Inlet Node Name
-    Big Chiller Condenser Outlet Node,          !- Condenser Outlet Node Name
+    Big Chiller Condenser Inlet Node,  !- Condenser Inlet Node Name
+    Big Chiller Condenser Outlet Node,  !- Condenser Outlet Node Name
     0.0957,                  !- Condenser Maximum Requested Flow Rate
-    NotModulated;            !- Chiller Flow Mode Type
+    NotModulated;            !- Chiller Flow Mode
 
   Chiller:ConstantCOP,
     Little Chiller,          !- Name
@@ -1713,7 +1713,19 @@
     ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
     ,                        !- Nominal Capacity {W}
     ,                        !- Free Convection Capacity {W}
-    ;                        !- Free Convection Nominal Capacity Sizing Factor
+    ,                        !- Free Convection Nominal Capacity Sizing Factor
+    ,                        !- Design Inlet Air Dry-Bulb Temperature {C}
+    ,                        !- Design Inlet Air Wet-Bulb Temperature {C}
+    ,                        !- Design Approach Temperature {deltaC}
+    ,                        !- Design Range Temperature {deltaC}
+    ,                        !- Basin Heater Capacity {W/K}
+    ,                        !- Basin Heater Setpoint Temperature {C}
+    ,                        !- Basin Heater Operating Schedule Name
+    ,                        !- Evaporation Loss Mode
+    ,                        !- Evaporation Loss Factor {percent/K}
+    ,                        !- Drift Loss Percent {percent}
+    ,                        !- Blowdown Calculation Mode
+    ;                        !- Blowdown Concentration Ratio
 
   Pump:VariableSpeed,
     Cond Circ Pump,          !- Name

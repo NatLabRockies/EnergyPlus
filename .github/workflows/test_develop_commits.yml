@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-#        - os: macos-12
+#        - os: macos-15-intel
 #          macos_dev_target: 12.1
 #          arch: x86_64
 #          python-arch: x64
@@ -85,7 +85,7 @@ jobs:
           echo "FC=gfortran-13" >> $GITHUB_ENV
         fi
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Create Build Directory
       run: cmake -E make_directory ./build/

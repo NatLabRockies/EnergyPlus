@@ -88,7 +88,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,20;
 
@@ -472,7 +472,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -485,7 +485,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant

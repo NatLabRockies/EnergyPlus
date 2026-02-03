@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -478,7 +478,7 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int numResourcesUsed = 0;
     bool GetInput_GetLifeCycleCostInput = true;
 
-    // from former statics in GetInputLifeCycleCostUsePriceEscalation()
+    // from former statistics in GetInputLifeCycleCostUsePriceEscalation()
     int UsePriceEscalation_escStartYear = 0;
     int UsePriceEscalation_escNumYears = 0;
     int UsePriceEscalation_escEndYear = 0;
@@ -487,7 +487,7 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int UsePriceEscalation_curEsc = 0;
     int UsePriceEscalation_curFld = 0;
 
-    // from former statics in ExpressAsCashFlows
+    // from former statistics in ExpressAsCashFlows
     int ExpressAsCashFlows_baseMonths1900 = 0;    // number of months since 1900 for base period
     int ExpressAsCashFlows_serviceMonths1900 = 0; // number of months since 1900 for service period
 

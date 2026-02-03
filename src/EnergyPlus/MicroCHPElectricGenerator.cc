@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -139,13 +139,12 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
     Array1D_string AlphArray(25);  // character string data
     Array1D<Real64> NumArray(200); // numeric data TODO deal with allocatable for extensible
 
-    auto &s_ipsc = state.dataIPShortCut;
-
     if (state.dataCHPElectGen->MyOneTimeFlag) {
         int NumAlphas = 0;        // Number of elements in the alpha array
         int NumNums = 0;          // Number of elements in the numeric array
         int IOStat = 0;           // IO Status when calling get input subroutine
         bool ErrorsFound = false; // error flag
+        auto &s_ipsc = state.dataIPShortCut;
 
         // call to Fuel supply module to set up data there.
         GeneratorFuelSupply::GetGeneratorFuelSupplyInput(state);
@@ -1269,9 +1268,8 @@ Real64 FuncDetermineCoolantWaterExitTemp(Real64 const TcwIn,      // hot water i
 
     if (b * time < (-1.0 * Constant::MaxEXPArg)) {
         return -a / b;
-    } else {
-        return (TcwoutLast + a / b) * std::exp(b * time) - a / b;
     }
+    return (TcwoutLast + a / b) * std::exp(b * time) - a / b;
 }
 
 bool CheckMicroCHPThermalBalance(Real64 const NomHeatGen, // nominal heat generation rate for scaling

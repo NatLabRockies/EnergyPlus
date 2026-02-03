@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,6 +57,7 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
@@ -300,7 +301,7 @@ namespace EconomicTariff {
         int lastOperand;           // last item in the operand array
         bool activeNow;            // flag if the econVar is used in the current tariff
         bool isEvaluated;          // flag if the economics object that results in this variable
-        // has already been evaulated
+        // has already been evaluated
         bool isReported;                                // flag if the econVar has been reported in the output file
         VarUnitType varUnitType = VarUnitType::Invalid; // variable unit type: energy, demand, dimensionless, currency
 
@@ -354,7 +355,7 @@ namespace EconomicTariff {
         Array1D<std::array<Real64, (int)Period::Num>> gatherDemand;
         Real64 collectTime;
         Real64 collectEnergy;
-        // arryas for holding real time pricing gathered values
+        // arrays for holding real time pricing gathered values
         Array1D<Real64> RTPcost;
         Array1D<Real64> RTPaboveBaseCost;
         Array1D<Real64> RTPbelowBaseCost;
@@ -628,7 +629,8 @@ namespace EconomicTariff {
                                 std::string const &titleString,
                                 bool const includeCategory,
                                 bool const showCurrencySymbol,
-                                std::string const &forString);
+                                std::string const &forString,
+                                OutputReportTabular::tabularReportStyle &style);
 
     void selectTariff(EnergyPlusData &state);
 

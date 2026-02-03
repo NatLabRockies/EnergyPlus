@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,7 +53,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_char_p, c_int, c_void_p
+from ctypes import c_char_p, c_int, c_void_p, cdll
+
 from pyenergyplus.common import RealEP
 
 
@@ -97,7 +98,15 @@ class HeatingAirflowUASizer:
         self.api.sizerHeatingAirflowUANew.restype = c_void_p
         self.api.sizerHeatingAirflowUAInitializeForZone.argtypes = [c_void_p, c_void_p, c_int, RealEP, RealEP, RealEP]
         self.api.sizerHeatingAirflowUAInitializeForZone.restype = c_void_p
-        self.api.sizerHeatingAirflowUAInitializeForSystem.argtypes = [c_void_p, c_void_p, c_int, RealEP, RealEP, RealEP, c_int]
+        self.api.sizerHeatingAirflowUAInitializeForSystem.argtypes = [
+            c_void_p,
+            c_void_p,
+            c_int,
+            RealEP,
+            RealEP,
+            RealEP,
+            c_int,
+        ]
         self.api.sizerHeatingAirflowUAInitializeForSystem.restype = c_void_p
         self.api.sizerHeatingAirflowUADelete.argtypes = [c_void_p]
         self.api.sizerHeatingAirflowUADelete.restype = c_void_p
@@ -114,11 +123,30 @@ class HeatingAirflowUASizer:
     def get_last_error_messages(self):
         return self.base_worker.get_error_messages(self.api, self.instance)
 
-    def initialize_for_zone(self, state: c_void_p, zone_config: int, elevation: float, representative_flow_rate: float, reheat_multiplier: float = 1.0) -> None:
-        self.api.sizerHeatingAirflowUAInitializeForZone(state, self.instance, zone_config, elevation, representative_flow_rate, reheat_multiplier)
+    def initialize_for_zone(
+        self,
+        state: c_void_p,
+        zone_config: int,
+        elevation: float,
+        representative_flow_rate: float,
+        reheat_multiplier: float = 1.0,
+    ) -> None:
+        self.api.sizerHeatingAirflowUAInitializeForZone(
+            state, self.instance, zone_config, elevation, representative_flow_rate, reheat_multiplier
+        )
 
-    def initialize_for_system_outdoor_air(self, state: c_void_p, sys_config: int, elevation: float, representative_flow_rate: float, min_flow_rate_ratio: float, doas: bool) -> None:
-        self.api.sizerHeatingAirflowUAInitializeForSystem(state, self.instance, sys_config, elevation, representative_flow_rate, min_flow_rate_ratio, 1 if doas else 0)
+    def initialize_for_system_outdoor_air(
+        self,
+        state: c_void_p,
+        sys_config: int,
+        elevation: float,
+        representative_flow_rate: float,
+        min_flow_rate_ratio: float,
+        doas: bool,
+    ) -> None:
+        self.api.sizerHeatingAirflowUAInitializeForSystem(
+            state, self.instance, sys_config, elevation, representative_flow_rate, min_flow_rate_ratio, 1 if doas else 0
+        )
 
     def size(self, state: c_void_p) -> bool:
         """

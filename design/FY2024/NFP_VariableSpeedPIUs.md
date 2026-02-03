@@ -5,7 +5,7 @@ Variable Speed Power Induction Units (Series/Parallel)
 
  - Original Date: 11/2023
  - Revision Date: N/A
- 
+
 
 ## Justification for New Feature ##
 
@@ -13,11 +13,11 @@ Certain building energy codes require fan powered VAV boxes to use variable spee
 
     All fan powered VAV terminal units (series or parallel) shall be provided with electronically commutated motors. The DDC system shall be configured to vary the speed of the motor as a function of the heating and cooling load in the space. Minimum speed shall not be greater than 66 percent of design airflow required for the greater of heating or cooling operation. Minimum speed shall be used during periods of low heating and cooling operation and ventilation-only operation.
 
-There is also a user request for it, see [here](https://github.com/NREL/EnergyPlus/issues/7311).
+There is also a user request for it, see [here](https://github.com/NatLabRockies/EnergyPlus/issues/7311).
 
 ## E-mail and  Conference Call Conclusions ##
 
-TRANE has agreed to share their variable speed series fan powered terminal units hence this NFP will focus on the implementation of parallel fan powered terminal units. See this [PR](https://github.com/NREL/EnergyPlus/pull/10336) for reference.
+TRANE has agreed to share their variable speed series fan powered terminal units hence this NFP will focus on the implementation of parallel fan powered terminal units. See this [PR](https://github.com/NatLabRockies/EnergyPlus/pull/10336) for reference.
 
 ## Overview ##
 
@@ -47,7 +47,7 @@ PIU terminals currently don't have a maximum reheat air temperature input but is
 
 Currently, both the `CalcSeriesPIU` and `CalcParallelPIU` routine follow a similar approach which is to 1. determine the primary/secondary airflow rates, 2. simulate the fan, 3. simulate the heating coil. The new implementation will use a "two-step" approach when the terminal sees a heating load: First, the `Calc` methods will force the terminal to run at its minimum flow rate, if the maximum reheat temperature is reached and the load is not met, then flow rate will be increased so the load can be met (at that maximum reheat temperature). The "Deadband" and "Cooling" sequences of operations specified above can be implemented using the current structure of the routines (see 1.).
 
-TRANE has shared some documentation that describe how their product operate. This document is the bases for [PR #10336](https://github.com/NREL/EnergyPlus/pull/10336). The following figures shows how staged and modulated heating elements can be controlled along with variable speed fans in parallel fan powered terminals to meet space loads.
+TRANE has shared some documentation that describe how their product operate. This document is the bases for [PR #10336](https://github.com/NatLabRockies/EnergyPlus/pull/10336). The following figures shows how staged and modulated heating elements can be controlled along with variable speed fans in parallel fan powered terminals to meet space loads.
 
 ![Sequence of Operation of a VAV parallel FPB with staged heating](vav_parallel_fpb_trane_staged.png)
 
@@ -63,7 +63,7 @@ During heating operations and during the first stage of heating, the terminal fa
 
 ## Approach ##
 
-After presenting to the development team, feedback was that the Guideline 36 are specific to high performance building system. Hence, the TRANE sequences will be implemented in EnergyPlus to align with [PR #10336](https://github.com/NREL/EnergyPlus/pull/10336).
+After presenting to the development team, feedback was that the Guideline 36 are specific to high performance building system. Hence, the TRANE sequences will be implemented in EnergyPlus to align with [PR #10336](https://github.com/NatLabRockies/EnergyPlus/pull/10336).
 
 The following new inputs will be added to the `AirTerminal:SingleDuct:ParallelPIU:Reheat`:
 - `Fan Control Type`
@@ -89,15 +89,15 @@ This field is used to determine the minimum fan speed as a fraction when modelin
 
 \paragraph{Field: Heating Control Type}\label{field-heat-control-type-parallelPIU}
 
-This field is used to declare how the heating coil is to be controlled. There are two choices, \textbf{Staged} or \textbf{Modulated}, see the control diagrams above. 
+This field is used to declare how the heating coil is to be controlled. There are two choices, \textbf{Staged} or \textbf{Modulated}, see the control diagrams above.
 
-Staged heat control has two stages. The first stage increases the fan flow first while leaving the reheat coil off.  The second stage runs the fan at full speed and brings on heating.  
+Staged heat control has two stages. The first stage increases the fan flow first while leaving the reheat coil off.  The second stage runs the fan at full speed and brings on heating.
 
-Modulated heat control has three stages and considers discharge air temperature. The first stage of heating leaves fan speed at the minimum and brings on heat until the design discharge air temperature is reached. The second stage of heating maintains the design discharge air temperature and ramps up the fan speed. The third stage of heating runs at full fan speed and allows the discharge air temperature to exceed the design up until it reaches a high limit. When using the Modulated heat control type the following two fields are needed for input on the discharge air temperatures. 
+Modulated heat control has three stages and considers discharge air temperature. The first stage of heating leaves fan speed at the minimum and brings on heat until the design discharge air temperature is reached. The second stage of heating maintains the design discharge air temperature and ramps up the fan speed. The third stage of heating runs at full fan speed and allows the discharge air temperature to exceed the design up until it reaches a high limit. When using the Modulated heat control type the following two fields are needed for input on the discharge air temperatures.
 
 \paragraph{Field: Design Heating Discharge Air Temperature}\label{field-heat-design-DAT-parallelPIU}
 
-This field is used to indicate the design discharge air temperature during stage two heating for Modulated heat control. There is a default of 32.1 C (90F). 
+This field is used to indicate the design discharge air temperature during stage two heating for Modulated heat control. There is a default of 32.1 C (90F).
 
 \paragraph{Field: High Limit Heating Discharge Air Temperature}\label{field-heat-limit-DAT-parallelPIU}
 
@@ -151,7 +151,7 @@ This field reports the total air mass flow rate discharging from the air termina
 
 \paragraph{Zone Air Terminal Primary Air Mass Flow Rate {[}kg/s{]}}
 
-This field reports the air mass flow entering the terminal from the primary node, typically a central air handling unit, in kg/s. The flow will vary during cooling when using a central variable speed fan. 
+This field reports the air mass flow entering the terminal from the primary node, typically a central air handling unit, in kg/s. The flow will vary during cooling when using a central variable speed fan.
 
 \paragraph{Zone Air Terminal Secondary Air Mass Flow Rate {[}kg/s{]}}
 
@@ -163,13 +163,13 @@ This field reports the drybulb temperature of the air leaving the terminal and d
 
 \paragraph{Zone Air Terminal Current Operation Control Stage}
 
-This field reports the current control stage of a PIU terminal. The controller diagrams above show the different stages.  This output helps to monitor what control stage the air terminal is in at a given time.  The output itself is an integer value that is mapped to a stage in the following list.  Note that the frequency of reporting needs to be at the highest level because averaging integers across more than one system timestep makes them meaningless. 
+This field reports the current control stage of a PIU terminal. The controller diagrams above show the different stages.  This output helps to monitor what control stage the air terminal is in at a given time.  The output itself is an integer value that is mapped to a stage in the following list.  Note that the frequency of reporting needs to be at the highest level because averaging integers across more than one system timestep makes them meaningless.
 
 \begin{itemize}
 \item
-  value = -1  => Not determined, should not occur, please report to developers  
+  value = -1  => Not determined, should not occur, please report to developers
 \item
-  value = 0 => Terminal Shut Down, system is not available. 
+  value = 0 => Terminal Shut Down, system is not available.
 \item
   value = 1 => First Stage Cooling
 \item
@@ -186,7 +186,7 @@ This field reports the current control stage of a PIU terminal. The controller d
   value = 10 => Third Stage Heating, Modulated Heat Control
 \item
   value = 11 => Legacy Constant Volume Cooling
-\item 
+\item
   value = 12 => Legacy Constant Volume Heating
 \end{itemize}
 

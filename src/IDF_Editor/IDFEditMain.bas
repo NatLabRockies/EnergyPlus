@@ -325,7 +325,7 @@ Public maxNodeNameDialog As Long
 Public sizeNodeNameDialog As Long
 
 Public htmlViewFileName As String
- 
+
 
 Private Declare Function FindExecutable Lib "shell32.dll" Alias "FindExecutableA" (ByVal lpFile As String, ByVal lpDirectory As String, ByVal lpresults As String) As Long
 Private Declare Function GetShortPathName Lib "kernel32.dll" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
@@ -392,7 +392,7 @@ Private Const CB_SHOWDROPDOWN = &H14F
 ' to store Show Quick select combos or not
 Public ShowQuickSelectCombos As Boolean
 '------------CEPTChange over----------------------------------------------------
-   
+
    Public Function ExecCmd(cmdline$)
       Dim proc As PROCESS_INFORMATION
       Dim Start As STARTUPINFO
@@ -2328,8 +2328,8 @@ End Function
 ' CEPTChange: Added To add Autocomplete feature to comboboxes in IDFEdit form
 '-----------------------------------------------------------------------------
 Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Integer) As Integer
-    
-        
+
+
     Dim strFindThis As String, bContinueSearch As Boolean
     Dim lResult As Long, lStart As Long, lLength As Long
     AutoCompleteCombo = 0 ' block cbBox since we handle everything
@@ -2338,7 +2338,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
     lLength = cbBox.SelLength
 
     On Error GoTo ErrHandle
-        
+
     If KeyAscii < 32 Then 'control char
         bContinueSearch = False
         cbBox.SelLength = 0 'select nothing since we will delete/enter
@@ -2366,7 +2366,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
             strFindThis = Left(cbBox.Text, lStart) & Chr(KeyAscii)
         End If
     End If
-    
+
     If bContinueSearch Then 'need to search
         Call AutoDropDownComboBox(cbBox)  'open dropdown list
         lResult = SendMessage(cbBox.hwnd, CB_SELECTSTRING, -1, ByVal strFindThis)
@@ -2382,7 +2382,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
     End If
     On Error GoTo 0
     Exit Function
-    
+
 ErrHandle:
     'got problem, simply return whatever pass in
     Debug.Print "Failed: AutoCompleteComboBox due to : " & Err.Description

@@ -44,7 +44,7 @@
 !
 !
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Urbana             Load Calc,  !- Name
@@ -1360,7 +1360,7 @@
     Lshaped zone-LightsSchedule,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -1374,7 +1374,7 @@
     LshapedZoneBase-LightsSchedule,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -1388,7 +1388,7 @@
     Lshaped zone-EquipSchedule,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -1400,7 +1400,7 @@
     LshapedZoneBase-EquipSchedule,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -1412,8 +1412,8 @@
     Lshaped zone-InfiltrationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1426,8 +1426,8 @@
     LshapedZoneBase-InfiltrationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1440,7 +1440,7 @@
     Lshaped zone-VentilationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     4.716667E-04,            !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type
@@ -1464,7 +1464,7 @@
     LshapedZoneBase-VentilationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     4.716667E-04,            !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type

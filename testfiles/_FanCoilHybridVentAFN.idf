@@ -129,7 +129,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Small Office with AirflowNetwork model,  !- Name
@@ -286,7 +286,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     West Zone,               !- Zone or ZoneList Name
@@ -315,7 +322,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     North Zone,              !- Zone or ZoneList Name
@@ -344,7 +358,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ Zone,                 !- Name
@@ -1795,7 +1816,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     864.375,                 !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1809,7 +1830,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1823,7 +1844,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1837,7 +1858,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     464.375,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1849,7 +1870,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1861,7 +1882,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2866,7 +2887,7 @@
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
     Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
@@ -3000,7 +3021,7 @@
 
   PlantEquipmentList,
     heating plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
   DistrictHeating:Water,
@@ -3195,15 +3216,18 @@
     0.8,                     !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.9,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Fan:ConstantVolume,
     Supply Fan 1,            !- Name

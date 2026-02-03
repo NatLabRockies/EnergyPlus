@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -595,7 +595,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowSevereCustom(state, eoh, format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(14)));
         }
 
-        if (s_ipsc->cAlphaArgs(4) == "") {
+        if (s_ipsc->cAlphaArgs(4).empty()) {
             mat->SolarDiffusing = false;
         } else {
             BooleanSwitch answer = getYesNoValue(s_ipsc->cAlphaArgs(4));
@@ -647,7 +647,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minumum value = 0.1 micron in the entered table name={}",
+                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
                                             s_ipsc->cAlphaFieldNames(5),
                                             s_ipsc->cAlphaArgs(5)));
                 }
@@ -680,7 +680,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minumum value = 0.0 in the entered table name={}",
+                                     format("{} requires the minimum value = 0.0 in the entered table name={}",
                                             s_ipsc->cAlphaFieldNames(5),
                                             s_ipsc->cAlphaArgs(5)));
                 }
@@ -696,7 +696,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minumum value = 0.1 micron in the entered table name={}",
+                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
                                             s_ipsc->cAlphaFieldNames(5),
                                             s_ipsc->cAlphaArgs(5)));
                 }
@@ -728,7 +728,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minumum value = 0.0 in the entered table name={}",
+                                     format("{} requires the minimum value = 0.0 in the entered table name={}",
                                             s_ipsc->cAlphaFieldNames(5),
                                             s_ipsc->cAlphaArgs(5)));
                 }
@@ -744,7 +744,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minumum value = 0.1 micron in the entered table name={}",
+                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
                                             s_ipsc->cAlphaFieldNames(5),
                                             s_ipsc->cAlphaArgs(5)));
                 }
@@ -838,7 +838,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowSevereCustom(state, eoh, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(7)));
         }
 
-        if (s_ipsc->cAlphaArgs(2) == "") {
+        if (s_ipsc->cAlphaArgs(2).empty()) {
             mat->SolarDiffusing = false;
         } else if (s_ipsc->cAlphaArgs(2) == "YES") {
             mat->SolarDiffusing = true;
@@ -2153,7 +2153,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->slatAngleType = static_cast<SlatAngleType>(getEnumValue(slatAngleTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
         }
         if (mat->SlatWidth < mat->SlatSeparation) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Seperation/Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, format("{}=\"{}\", Slat Separation/Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
                               format("{} [{:.2R}] is less than {} [{:.2R}].",
                                      s_ipsc->cNumericFieldNames(1),
@@ -2163,7 +2163,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, "This will allow direct beam to be transmitted when Slat angle = 0.");
         }
         if (mat->SlatSeparation < 0.001) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Seperation", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, format("{}=\"{}\", Slat Separation", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, format("{} [{:.2R}]. Slate spacing must be > 0.0", s_ipsc->cNumericFieldNames(2), mat->SlatSeparation));
             ShowContinueError(state,
                               "...Setting slate spacing to default value of 0.025 m and "

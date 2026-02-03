@@ -4,7 +4,7 @@ Disable Self-Shading Effect
 
 **Original: November 2, 2017**
 
-# Justification for New Feature 
+# Justification for New Feature
 
 Building energy modeling for LEED certification requires to disable self-shading effect in the baseline model, which gives credit to the proposed building with self-shading. For example, an L-shape building that is oriented correctly can provide significant self-shading and ASHRAE Standard 90.1 wants to reward that design choice. The proposed new feature will allow users to disable self-shading effect in EnergyPlus.
 
@@ -12,18 +12,18 @@ Building energy modeling for LEED certification requires to disable self-shading
 
 Some feedback from Mike Witte and Jason Glazer.
 
-# Overview 
+# Overview
 
-Currently in EnergyPlus, if the Solar Distribution is not set to MinimalShadowing, shading from detached shading, wings, overhangs, and exterior surfaces of all zones are computed. To disable self-shading effect, we would bypass the shading by exterior surfaces of all zones, which are by default created in EnergyPlus: one shading surface for each exterior surface of all zones. This is straightforward, except when a single IDF file contains two or more detached buildings (which cannot be detected by EnergyPlus). In this case, the shading of one building’s exterior surfaces on other buildings should be counted even when self-shading is disabled. 
+Currently in EnergyPlus, if the Solar Distribution is not set to MinimalShadowing, shading from detached shading, wings, overhangs, and exterior surfaces of all zones are computed. To disable self-shading effect, we would bypass the shading by exterior surfaces of all zones, which are by default created in EnergyPlus: one shading surface for each exterior surface of all zones. This is straightforward, except when a single IDF file contains two or more detached buildings (which cannot be detected by EnergyPlus). In this case, the shading of one building’s exterior surfaces on other buildings should be counted even when self-shading is disabled.
 
-# Approaches 
+# Approaches
 
-We propose to add a fields to the ShadowCalculation object to disable self-shading effect from exterior surfaces from all zones, or from a subset of zones. To address the cases with multiple buildings in a single EnergyPlus model (IDF file), two flags are defined to enable the maximal flexibility of various interpretation of self-shading: one to disable shading between zones of a same zone group, the other to disable shading between different zone groups. 
+We propose to add a fields to the ShadowCalculation object to disable self-shading effect from exterior surfaces from all zones, or from a subset of zones. To address the cases with multiple buildings in a single EnergyPlus model (IDF file), two flags are defined to enable the maximal flexibility of various interpretation of self-shading: one to disable shading between zones of a same zone group, the other to disable shading between different zone groups.
 
 	ShadowCalculation,
 	  A6 , \field Disable Shading Within A Zone Group
 	       \note If Yes, for all surfaces in a targeted Zone Group,
-	       \note the shading effect by all other exterior surfaces of all zones within this Zone Group is disabled. 
+	       \note the shading effect by all other exterior surfaces of all zones within this Zone Group is disabled.
 	       \note The zones in a self-shading group will not self-shade each other, but they will cast shadows on all other zones in the model.
 	       \note Any zones not listed in a self-shading group will shade any zone in the model.
 	       \note If either Disable Shading Within A Zone Group = Yes or Disable Shading Between Zone Groups = Yes, but not both,
@@ -60,7 +60,7 @@ We propose to add a fields to the ShadowCalculation object to disable self-shadi
 
 # Testing/Validation/Data Sources
 
-Manually inspect EnergyPlus outputs of shading calculations. 
+Manually inspect EnergyPlus outputs of shading calculations.
 
 # Input Output Reference Documentation
 

@@ -97,7 +97,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1810,7 +1810,7 @@
     BLDG Sch   3,            !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    15,                      !- Watts per Zone Floor Area {W/m2}
+    15,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1824,7 +1824,7 @@
     BLDG Sch   3,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    15,                      !- Watts per Zone Floor Area {W/m2}
+    15,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1838,7 +1838,7 @@
     BLDG Sch   3,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    15,                      !- Watts per Zone Floor Area {W/m2}
+    15,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1852,7 +1852,7 @@
     BLDG Sch   3,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    15,                      !- Watts per Zone Floor Area {W/m2}
+    15,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1866,7 +1866,7 @@
     BLDG Sch   3,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     0,                       !- Lighting Level {W}
-    15,                      !- Watts per Zone Floor Area {W/m2}
+    15,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1882,7 +1882,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8.07,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1894,7 +1894,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8.07,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1906,7 +1906,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8.07,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1918,7 +1918,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8.07,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1930,7 +1930,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8.07,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1944,8 +1944,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.3,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1958,8 +1958,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.3,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1972,8 +1972,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.3,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1986,8 +1986,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.3,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -2000,8 +2000,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.3,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -2598,7 +2598,7 @@
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
     Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
@@ -3011,7 +3011,7 @@
 
   PlantEquipmentList,
     heating plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
 !-   ===========  ALL OBJECTS IN CLASS: PLANTEQUIPMENTOPERATION:COOLINGLOAD ===========

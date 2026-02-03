@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -182,7 +182,7 @@ namespace EvaporativeCoolers {
         Real64 EvapWaterStarvMakup;                     // Evap water consumed but not really available from tank m3
         Real64 SatEff;                                  // Reporting for Direct Stage and Ind Dry Saturation Efficiency
         Real64 StageEff;                                // Reporting for Indirect Total Stage Efficiency
-        Real64 DPBoundFactor;                           // in RDDSpecial efficency w.r.t. dewpoint
+        Real64 DPBoundFactor;                           // in RDDSpecial efficiency w.r.t. dewpoint
         int EvapControlNodeNum;                         // need to control to avoid over cooling
         Real64 DesiredOutletTemp;                       // setpoint manager should set this
         Real64 PartLoadFract;                           // reduces cooling performance and associated fan power
@@ -261,7 +261,7 @@ namespace EvaporativeCoolers {
         HVAC::FanPlace fanPlace;
         ControlType ControlSchemeType;
         Real64 TimeElapsed;
-        Real64 ThrottlingRange; // temperature range for hystersis type tstat contorl [Delta C]
+        Real64 ThrottlingRange; // temperature range for hystersis type tstat control [Delta C]
         bool IsOnThisTimestep;
         bool WasOnLastTimestep;
         Real64 ThresholdCoolingLoad;

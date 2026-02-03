@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -231,7 +231,7 @@ namespace DXCoils {
         int DefrostEIRFT;                                 // index of defrost mode total cooling capacity for reverse cycle heat pump
         int RegionNum;                                    // Region number for calculating HSPF of single speed DX heating coil
         Real64 MinOATCompressor;                          // Minimum OAT for heat pump compressor operation
-        Real64 OATempCompressorOn;                        // The outdoor tempearture when the compressor is automatically turned back on,
+        Real64 OATempCompressorOn;                        // The outdoor temperature when the compressor is automatically turned back on,
         // if applicable, following automatic shut off. This field is used only for
         // HSPF calculation.
         Real64 MaxOATCompressor;                 // Maximum OAT for VRF heat pump compressor operation
@@ -988,7 +988,7 @@ struct DXCoilsData : BaseGlobalStruct
     Real64 CalcVRFCoolingCoilCurrentEndTime = 0.0;
     Real64 NetCoolingCapRated = 0.0; // Net Cooling Coil capacity at Rated conditions, accounting for supply fan heat [W]
     Real64 EER = 0.0;                // Energy Efficiency Ratio in SI [W/W]
-    Real64 IEER = 0.0;               // Integerated Energy Efficiency Ratio in SI [W/W]
+    Real64 IEER = 0.0;               // Integrated Energy Efficiency Ratio in SI [W/W]
     Real64 TotCapTempModFac = 0.0;   // Total capacity modifier (function of entering wetbulb, outside drybulb) [-]
     Real64 TotCapFlowModFac = 0.0;   // Total capacity modifier (function of actual supply air flow vs rated flow) [-]
     Real64 EIRTempModFac = 0.0;      // EIR modifier (function of entering wetbulb, outside drybulb) [-]

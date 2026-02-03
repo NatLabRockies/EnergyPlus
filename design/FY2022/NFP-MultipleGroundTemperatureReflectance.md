@@ -8,7 +8,7 @@ Allow Multiple Ground Surface Temperature and Reflectance Objects
  - First draft: April 26, 2022
  - Modified Date: May 6, 2022
  - Added Design Document, May 16, 2022
- 
+
 
 ## Justification for New Feature ##
 
@@ -32,7 +32,7 @@ Currently EnergyPlus only allows one single ground surface with user defined gro
 
 (1) Exterior surface LWR exchange with the ground is calculated using outside air dryblub temperature (default)
 
-(2) Currently single ground surface temperature can be specified using `SurfaceProperty:SurroundingSurfaces` object 
+(2) Currently single ground surface temperature can be specified using `SurfaceProperty:SurroundingSurfaces` object
 
 (3) Existing model uses global Site:GroundReflectance object
 
@@ -45,11 +45,11 @@ Currently EnergyPlus only allows one single ground surface with user defined gro
      Existing object: `SurfaceProperty:LocalEnvironment`
 
      New Object: `SurfaceProperty:GroundSurfaces`
-	 
+
 	 The new object will have multiple ground surfaces properties of ground view factor, ground temperature and ground reflectance
-	 
+
 	 Ground surfaces are assumed horizontal surfaces for solar reflection calculations and relected solar radiations are assumed diffuse.
-	 
+
 *(2) Requires modifying SurfaceProperty:LocalEnvironment object:
 
      Add a new field `Ground Suraces Object Name` to this object. This field will be used to specify the name of the new object.
@@ -66,7 +66,7 @@ Currently EnergyPlus only allows one single ground surface with user defined gro
 
 ### Exsting Object SurfaceProperty:LocalEnvironment ###
 
- 
+
 ```
 SurfaceProperty:LocalEnvironment,
        \min-fields 3
@@ -197,7 +197,7 @@ SurfaceProperty:GroundSurfaces,
        \note optional
    N5, \field Ground Surface 5 View Factor
        \type real
-	   \units dimensionless	   
+	   \units dimensionless
        \minimum 0.0
        \maximum 1.0
        \default 0.0
@@ -241,7 +241,7 @@ SurfaceProperty:SurroundingSurfaces,
 ```
 
 
-	   
+
 ## Testing/Validation/Data Source(s): ##
 
 Demonstrate that the new approach duplicates the current results using exact set of inputs. Unit tests will be added to demonstrate the new feature.
@@ -260,7 +260,7 @@ This is a unique name of the surface property ground surfaces object.
 
 \subsubsection{Field: Ground Surface 1 Name}\label{field-ground-surface-1-name}
 
-This is a unique name for ground surface 1. 
+This is a unique name for ground surface 1.
 
 \subsubsection{Field: Ground Surface 1 View Factor}\label{field-ground-surface-1-view-factor}
 
@@ -379,7 +379,7 @@ where
 
 T\(_{gnd,avg}\) = view factor weighted average surface temperature of multiple ground surfaces seen by an exterior surface
 
-F\(_{gnd,sum}\) = sum of the view factors of an exterior surfaces to multiple ground surfaces 
+F\(_{gnd,sum}\) = sum of the view factors of an exterior surfaces to multiple ground surfaces
 
 
 ### Ground Surfaces Solar Reflectance ###
@@ -447,25 +447,25 @@ This is average surface reflectance of multiple ground surfaces viewed by an ext
 ## References ##
 
 Bill Marion. 2018. Ground Albedo Measurements and Modeling. Bifacial PV Workshop Lakewood, Colorado. September 11, 2018
-https://www.nrel.gov/docs/fy20osti/72589.pdf
+https://www.nlr.gov/docs/fy20osti/72589.pdf
 
 
 
 
 ## Design Documentation ##
 
-The new feature will modify modules: 
+The new feature will modify modules:
 
-   DataSurfaces, 
-   
-   SurfaceGeomtery, 
-   
-   HeatBalanceSurfaceManager, 
-   
+   DataSurfaces,
+
+   SurfaceGeomtery,
+
+   HeatBalanceSurfaceManager,
+
    HeatBalFinieDiffMamanger; and
-   
-   ConvectionCoefficients. 
-   
+
+   ConvectionCoefficients.
+
    Some existing functions will be modified and new functions will be added for getinput, average ground temperature and ground reflectance calculations.
 
 
@@ -478,7 +478,7 @@ Adds new function that calculates ground surfaces average temperature for each S
 	*// adds module level two new member vectors*
     Array1D<bool> IsSurfPropertyGndSurfacesDefined; // true if ground surfaces properties are listed for an external surface
     Array1D<int> GroundSurfsPropertyNum;            // index to a ground surfaces list (defined in SurfaceProperties::GroundSurfaces)
-	
+
     *Adds new struct for ground surfaces data:*
 
     // ground surfaces data
@@ -495,9 +495,9 @@ Adds new function that calculates ground surfaces average temperature for each S
         {
         }
     };
-	
+
 	*Adds new struct for ground surfaces properties:*
-	
+
 	*// ground surfaces object*
     struct GroundSurfacesProperty
     {
@@ -525,10 +525,10 @@ Adds new function that calculates ground surfaces average temperature for each S
         int ExtShadingSchedPtr;     // schedule pointer
         int SurroundingSurfsPtr;    // schedule pointer
         int OutdoorAirNodePtr;      // schedule pointer
-		
+
 		*// add new member pointer to SurfaceProperty:GroundSurfaces object*
 		int GndSurfsPtr;            // pointer to multiple ground surfaces object
-		
+
         // Default Constructor
         SurfaceLocalEnvironment() : SurfPtr(0), ExtShadingSchedPtr(0), SurroundingSurfsPtr(0), OutdoorAirNodePtr(0), GndSurfsPtr(0)
         {
@@ -543,11 +543,11 @@ Adds new function that calculates ground surfaces average temperature for each S
     {
       *// read input data for ground surfaces properties used in building exterior surface*
 	}
-	
-    *// add a calling point for new getinput function*    
+
+    *// add a calling point for new getinput function*
 	void GetSurfaceData(EnergyPlusData &state, bool &ErrorsFound)
     {
-	  *// calling the new getinput function*	
+	  *// calling the new getinput function*
       GetSurfaceGroundSurfsData(state, ErrorsFound);
     }
 
@@ -556,8 +556,8 @@ Adds new function that calculates ground surfaces average temperature for each S
     {
 	  *// read in new input field Ground Surfaces Object Name*
 	}
-	
-		
+
+
 #### HeatBalanceSurfaceManager.cc ####
 
     *// adds a new function that calculates average ground surface temperature*
@@ -567,9 +567,9 @@ Adds new function that calculates ground surfaces average temperature for each S
       *// ground temperature seen by a building exterior surface*
       *// view factor weighted multiple ground surfaces average temperature*
     }
-	
 
-    void CalcOutsideSurfTemp() 
+
+    void CalcOutsideSurfTemp()
     {
 
     ...
@@ -580,10 +580,10 @@ Adds new function that calculates ground surfaces average temperature for each S
 
     ...
    }
-   
+
 #### HeatBalFinieDiffMamanger.cc ####
 
-    void ExteriorBCEqns() 
+    void ExteriorBCEqns()
 	{
 
     *// Set ground surfaces temperature for use with outside surface heat balance (Finite Diff Method)*
@@ -595,7 +595,7 @@ Adds new function that calculates ground surfaces average temperature for each S
 #### ConvectionCoefficients.cc ####
 
 
-    void InitExteriorConvectionCoeff() 
+    void InitExteriorConvectionCoeff()
     {
 
     ...
@@ -606,7 +606,7 @@ Adds new function that calculates ground surfaces average temperature for each S
 
     ...
    }
-   
+
 
 
 ### Design Ground Reflectance ###
@@ -621,18 +621,18 @@ Ads new function that calculates ground surfaces average reflectance for each Su
        *// returns average ground surfaces reflectance for each timestep*
        *// ground reflectance seen by a building exterior surface*
     }
-	
+
     void InitSolarHeatGains(EnergyPlusData &state)
     {
       *// Adds a calling point for the new function that updates ground surfaces average reflectance*
-  
-      *// updates ground surfaces average reflectance* 
+
+      *// updates ground surfaces average reflectance*
       GetGroundSurfacesReflectanceAverage(state);
 
 	  *// set ground surfaces average reflectance value in several places for reflected solar*
 	  *// radiation calculations for exteriour opaque surfaces and windows at each timestep*
 	  *// in InitSolarHeatGains() function.*
-	
+
     }
 
 

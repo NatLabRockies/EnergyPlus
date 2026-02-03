@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2375,12 +2375,12 @@ namespace Curve {
                     state.dataCurveManager->btwxtManager.setLoggingContext(&callbackPair);
 
                     // Find independent variable input data
-                    if (state.dataCurveManager->btwxtManager.independentVarRefs.count(indVarName)) {
+                    if (state.dataCurveManager->btwxtManager.independentVarRefs.count(indVarName) != 0u) {
                         // If found, read data
                         auto const &indVarInstance = state.dataCurveManager->btwxtManager.independentVarRefs.at(indVarName);
 
                         // TODO: Actually use this to define output variable units
-                        if (indVarInstance.count("unit_type")) {
+                        if (indVarInstance.count("unit_type") != 0u) {
                             std::string unitType = indVarInstance.at("unit_type").get<std::string>();
                             if (!IsCurveInputTypeValid(unitType)) {
                                 ShowSevereError(state, format("{}: Unit Type [{}] is invalid", contextString, unitType));
@@ -2389,14 +2389,14 @@ namespace Curve {
 
                         std::vector<double> axis;
 
-                        if (indVarInstance.count("external_file_name")) {
+                        if (indVarInstance.count("external_file_name") != 0u) {
                             std::string tmp = indVarInstance.at("external_file_name").get<std::string>();
                             fs::path filePath(tmp);
-                            if (!indVarInstance.count("external_file_column_number")) {
+                            if (indVarInstance.count("external_file_column_number") == 0u) {
                                 ShowSevereError(state, format("{}: No column number defined for external file \"{}\"", contextString, filePath));
                                 ErrorsFound = true;
                             }
-                            if (!indVarInstance.count("external_file_starting_row_number")) {
+                            if (indVarInstance.count("external_file_starting_row_number") == 0u) {
                                 ShowSevereError(state,
                                                 format("{}: No starting row number defined for external file \"{}\"", contextString, filePath));
                                 ErrorsFound = true;
@@ -2405,7 +2405,7 @@ namespace Curve {
                             std::size_t colNum = indVarInstance.at("external_file_column_number").get<std::size_t>() - 1;
                             std::size_t rowNum = indVarInstance.at("external_file_starting_row_number").get<std::size_t>() - 1;
 
-                            if (!state.dataCurveManager->btwxtManager.tableFiles.count(filePath)) {
+                            if (state.dataCurveManager->btwxtManager.tableFiles.count(filePath) == 0u) {
                                 TableFile tableFile;
                                 ErrorsFound |= tableFile.load(state, filePath);
                                 state.dataCurveManager->btwxtManager.tableFiles.emplace(filePath, tableFile);
@@ -2426,7 +2426,7 @@ namespace Curve {
                             // remove duplicates
                             axis.erase(std::unique(axis.begin(), axis.end()), axis.end());
 
-                        } else if (indVarInstance.count("values")) {
+                        } else if (indVarInstance.count("values") != 0u) {
                             for (auto const &value : indVarInstance.at("values")) {
                                 axis.push_back(value.at("value").get<Real64>());
                             }
@@ -2514,7 +2514,7 @@ namespace Curve {
                 state.dataCurveManager->btwxtManager.setLoggingContext(&callbackPair);
 
                 // TODO: Actually use this to define output variable units
-                if (fields.count("output_unit_type")) {
+                if (fields.count("output_unit_type") != 0u) {
                     std::string unitType = fields.at("output_unit_type").get<std::string>();
                     if (!IsCurveOutputTypeValid(unitType)) {
                         ShowSevereError(state, format("{}: Output Unit Type [{}] is invalid", thisCurve->contextString, unitType));
@@ -2550,7 +2550,7 @@ namespace Curve {
                     }
                 }
 
-                if (fields.count("minimum_output")) {
+                if (fields.count("minimum_output") != 0u) {
                     thisCurve->outputLimits.min = fields.at("minimum_output").get<Real64>();
                     thisCurve->outputLimits.minPresent = true;
                 } else {
@@ -2558,7 +2558,7 @@ namespace Curve {
                     thisCurve->outputLimits.minPresent = false;
                 }
 
-                if (fields.count("maximum_output")) {
+                if (fields.count("maximum_output") != 0u) {
                     thisCurve->outputLimits.max = fields.at("maximum_output").get<Real64>();
                     thisCurve->outputLimits.maxPresent = true;
                 } else {
@@ -2575,7 +2575,7 @@ namespace Curve {
                     NM_AUTO_WITH_DIVISOR
                 };
                 NormalizationMethod normalizeMethod = NM_NONE;
-                if (fields.count("normalization_method")) {
+                if (fields.count("normalization_method") != 0u) {
                     if (Util::SameString(fields.at("normalization_method").get<std::string>(), "DIVISORONLY")) {
                         normalizeMethod = NM_DIVISOR_ONLY;
                     } else if (Util::SameString(fields.at("normalization_method").get<std::string>(), "AUTOMATICWITHDIVISOR")) {
@@ -2583,7 +2583,7 @@ namespace Curve {
                     }
                 }
 
-                if (normalizeMethod != NM_NONE && fields.count("normalization_divisor")) {
+                if (normalizeMethod != NM_NONE && (fields.count("normalization_divisor") != 0u)) {
                     normalizationDivisor = fields.at("normalization_divisor").get<Real64>();
                     if (std::abs(normalizationDivisor) < std::numeric_limits<Real64>::min()) {
                         ShowSevereError(
@@ -2594,15 +2594,15 @@ namespace Curve {
                 }
 
                 std::vector<double> lookupValues;
-                if (fields.count("external_file_name")) {
+                if (fields.count("external_file_name") != 0u) {
                     std::string tmp = fields.at("external_file_name").get<std::string>();
                     fs::path filePath(tmp);
 
-                    if (!fields.count("external_file_column_number")) {
+                    if (fields.count("external_file_column_number") == 0u) {
                         ShowSevereError(state, format("{}: No column number defined for external file \"{}\"", thisCurve->contextString, filePath));
                         ErrorsFound = true;
                     }
-                    if (!fields.count("external_file_starting_row_number")) {
+                    if (fields.count("external_file_starting_row_number") == 0u) {
                         ShowSevereError(state,
                                         format("{}: No starting row number defined for external file \"{}\"", thisCurve->contextString, filePath));
                         ErrorsFound = true;
@@ -2611,7 +2611,7 @@ namespace Curve {
                     std::size_t colNum = fields.at("external_file_column_number").get<std::size_t>() - 1;
                     std::size_t rowNum = fields.at("external_file_starting_row_number").get<std::size_t>() - 1;
 
-                    if (!state.dataCurveManager->btwxtManager.tableFiles.count(filePath)) {
+                    if (state.dataCurveManager->btwxtManager.tableFiles.count(filePath) == 0u) {
                         TableFile tableFile;
                         ErrorsFound |= tableFile.load(state, filePath);
                         state.dataCurveManager->btwxtManager.tableFiles.emplace(filePath, tableFile);
@@ -2627,7 +2627,7 @@ namespace Curve {
                     lookupValues.erase(std::remove_if(lookupValues.begin(), lookupValues.end(), [](const double &x) { return std::isnan(x); }),
                                        lookupValues.end());
 
-                } else if (fields.count("values")) {
+                } else if (fields.count("values") != 0u) {
                     for (auto &value : fields.at("values")) {
                         lookupValues.push_back(value.at("output_value").get<Real64>() / normalizationDivisor);
                     }
@@ -2685,7 +2685,7 @@ namespace Curve {
     int BtwxtManager::getGridIndex(EnergyPlusData &state, std::string &indVarListName, bool &ErrorsFound)
     {
         int gridIndex = -1;
-        if (gridMap.count(indVarListName)) {
+        if (gridMap.count(indVarListName) != 0u) {
             gridIndex = gridMap.at(indVarListName);
         } else {
             // Independent variable list does not exist
@@ -2769,7 +2769,7 @@ namespace Curve {
 
     std::vector<double> &TableFile::getArray(EnergyPlusData &state, std::pair<std::size_t, std::size_t> colAndRow)
     {
-        if (!arrays.count(colAndRow)) {
+        if (arrays.count(colAndRow) == 0u) {
             // create the column from the data if it doesn't exist already
             std::size_t col = colAndRow.first;  // 0 indexed
             std::size_t row = colAndRow.second; // 0 indexed
@@ -3095,9 +3095,8 @@ namespace Curve {
 
         if (CurveIndex > 0) {
             return state.dataCurveManager->curves(CurveIndex)->Name;
-        } else {
-            return "";
         }
+        return "";
     }
 
     int GetCurveIndex(EnergyPlusData &state, std::string const &CurveName) // name of the curve
@@ -3586,18 +3585,16 @@ namespace Curve {
         Real64 const Term3 = -1.8 * std::log10(Term1 + Term2);
         if (Term3 != 0.0) {
             return std::pow(Term3, -2.0);
-        } else {
-            if (!state.dataCurveManager->FrictionFactorErrorHasOccurred) {
-                ShowSevereError(state, "Plant Pressure System: Error in moody friction factor calculation");
-                ShowContinueError(state,
-                                  format("Current Conditions: Roughness Ratio={:.7R}; Reynolds Number={:.1R}", RoughnessRatio, ReynoldsNumber));
-                ShowContinueError(state, "These conditions resulted in an unhandled numeric issue.");
-                ShowContinueError(state, "Please contact EnergyPlus support/development team to raise an alert about this issue");
-                ShowContinueError(state, "This issue will occur only one time.  The friction factor has been reset to 0.04 for calculations");
-                state.dataCurveManager->FrictionFactorErrorHasOccurred = true;
-            }
-            return 0.04;
         }
+        if (!state.dataCurveManager->FrictionFactorErrorHasOccurred) {
+            ShowSevereError(state, "Plant Pressure System: Error in moody friction factor calculation");
+            ShowContinueError(state, format("Current Conditions: Roughness Ratio={:.7R}; Reynolds Number={:.1R}", RoughnessRatio, ReynoldsNumber));
+            ShowContinueError(state, "These conditions resulted in an unhandled numeric issue.");
+            ShowContinueError(state, "Please contact EnergyPlus support/development team to raise an alert about this issue");
+            ShowContinueError(state, "This issue will occur only one time.  The friction factor has been reset to 0.04 for calculations");
+            state.dataCurveManager->FrictionFactorErrorHasOccurred = true;
+        }
+        return 0.04;
     }
 
     void checkCurveIsNormalizedToOne(EnergyPlusData &state,

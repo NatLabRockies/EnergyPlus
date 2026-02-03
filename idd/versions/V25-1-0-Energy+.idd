@@ -7293,7 +7293,7 @@ MaterialProperty:PhaseChange,
        \type real
        \default 0.0
   N2 , \field Temperature 1
-       \begin-extensible       
+       \begin-extensible
        \required-field
        \note for Temperature-enthalpy function
        \units C
@@ -13378,7 +13378,7 @@ InternalMass,
   A3 , \field Zone or ZoneList Name
        \type object-list
        \object-list ZoneAndZoneListNames
-       \note Zone(s) the surface is a part of. 
+       \note Zone(s) the surface is a part of.
        \note This field is ignored when a Space or SpaceList Name is specified.
   A4 , \field Space or SpaceList Name
        \type object-list
@@ -34575,7 +34575,7 @@ Sizing:Zone,
       \type alpha
       \units percent
   A15;\field Type of Space Sum to Use
-      \note NonCoincident is available only if Do Space Heat Balance for Sizing=Yes in ZoneAirHeatBalanceAlgorithm. 
+      \note NonCoincident is available only if Do Space Heat Balance for Sizing=Yes in ZoneAirHeatBalanceAlgorithm.
       \type choice
       \key Coincident
       \key NonCoincident
@@ -73669,10 +73669,10 @@ Chiller:Electric:EIR,
   A17, \field Condenser Flow Control
        \note Select the chiller condenser flow request mode. With "ConstantFlow" a chiller will always request
        \note its maximum condenser flow rate. With "ModulatedChillerPLR" the condenser flow request corresponds
-       \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With 
-       \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water 
+       \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With
+       \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water
        \note loop's part load ratio, see the "Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio
-       \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required to meet 
+       \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required to meet
        \note the condenser loop load based on the condenser leaving fluid temperature and a reference temperature,
        \note see the "Temperature Difference Across Condenser"  and "Temperature Difference Across Condenser Schedule
        \note Name" input.
@@ -73686,7 +73686,7 @@ Chiller:Electric:EIR,
        \default ConstantFlow
   A18, \field Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio Curve Name
        \note Condenser loop flow rate fraction as a function of loop part load ratio
-       \note CWFR = C * PLR + D 
+       \note CWFR = C * PLR + D
        \note Where:
        \note CWFR is the condenser water flow fraction (actual/design)
        \note C and D are coefficients, see "Optimizing Design & Control Of Chilled Water Plants, Part 5", S. Taylor, ASHRAE Journal June 2012
@@ -73694,7 +73694,7 @@ Chiller:Electric:EIR,
        \type object-list
        \object-list UnivariateFunctions
   A19, \field Temperature Difference Across Condenser Schedule Name
-       \note A schedule that defines the temperature difference across the condenser. This input is used to 
+       \note A schedule that defines the temperature difference across the condenser. This input is used to
        \note calculate the condenser flow. This input is only used when "Condenser Flow Control" is set to
        \note "ModulatedDeltaTemperature".
        \type object-list
@@ -73921,10 +73921,10 @@ Chiller:Electric:ReformulatedEIR,
   A16, \field Condenser Flow Control
        \note Select the chiller condenser flow request mode. With "ConstantFlow" a chiller will always request
        \note its maximum condenser flow rate. With "ModulatedChillerPLR" the condenser flow request corresponds
-       \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With 
-       \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water 
+       \note to the chiller part load ratio multiplied by the chiller maximum condenser flow rate.  With
+       \note "ModulatedLoopPLR" the chiller will request a flow rate that is function of the chilled water
        \note loop's part load ratio, see the "Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio
-       \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required to meet 
+       \note Curve Name" input. With "ModulatedDeltaTemperature" the chiller will request the flow rate required to meet
        \note the condenser loop load based on the condenser leaving fluid temperature and a reference temperature,
        \note see the "Temperature Difference Across Condenser"  and "Temperature Difference Across Condenser Schedule
        \note Name" input.
@@ -73938,7 +73938,7 @@ Chiller:Electric:ReformulatedEIR,
        \default ConstantFlow
   A17, \field Condenser Loop Flow Rate Fraction Function of Loop Part Load Ratio Curve Name
        \note Condenser loop flow rate fraction as a function of loop part load ratio
-       \note CWFR = C * PLR + D 
+       \note CWFR = C * PLR + D
        \note Where:
        \note CWFR is the condenser water flow fraction (actual/design)
        \note C and D are coefficients, see "Optimizing Design & Control Of Chilled Water Plants, Part 5", S. Taylor, ASHRAE Journal June 2012
@@ -73946,7 +73946,7 @@ Chiller:Electric:ReformulatedEIR,
        \type object-list
        \object-list UnivariateFunctions
   A18, \field Temperature Difference Across Condenser Schedule Name
-       \note A schedule that defines the temperature difference across the condenser. This input is used to 
+       \note A schedule that defines the temperature difference across the condenser. This input is used to
        \note calculate the condenser flow. This input is only used when "Condenser Flow Control" is set to
        \note "ModulatedDeltaTemperature".
        \type object-list
@@ -75476,7 +75476,7 @@ HeatPump:PlantLoop:EIR:Cooling,
         \note curve = a + b*CWS + c*CWS**2 + d*ECT + e*ECT**2 + f*CWS*ECT
         \note CWS = supply (leaving) chilled water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
-        \note If this field is blank, the AWHP curve without heat recovery will be used 
+        \note If this field is blank, the AWHP curve without heat recovery will be used
    A19, \field Thermosiphon Capacity Fraction Curve Name
         \type object-list
         \object-list UniVariateFunctions
@@ -75731,7 +75731,7 @@ HeatPump:PlantLoop:EIR:Heating,
         \note curve = a + b*HWS + c*HWS**2 + d*ECT + e*ECT**2 + f*HWS*ECT
         \note HWS = supply (leaving) hot water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
-        \note If this field is blank, the AWHP curve without heat recovery will be used 
+        \note If this field is blank, the AWHP curve without heat recovery will be used
 
 HeatPump:AirToWater:FuelFired:Heating,
   \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.

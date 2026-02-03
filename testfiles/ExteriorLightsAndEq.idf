@@ -61,7 +61,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,2;
 
@@ -268,7 +268,7 @@
 
   Exterior:FuelEquipment,
     OutsideDistrictHeatingEq,!- Name
-    DistrictHeatingWater,         !- Fuel Use Type
+    DistrictHeatingWater,    !- Fuel Use Type
     ON,                      !- Schedule Name
     1000;                    !- Design Level {W}
 
@@ -382,7 +382,7 @@
 
   Meter:Custom,
     MyExteriorDistrictHeatingWater,  !- Name
-    DistrictHeatingWater,         !- Resource Type
+    DistrictHeatingWater,    !- Resource Type
     ,                        !- Key Name 1
     ExteriorEquipment:DistrictHeatingWater;  !- Output Variable or Meter Name 1
 

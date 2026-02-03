@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -367,12 +367,8 @@ namespace Sched {
         int EndDay;
         int StartPointer;
         int EndPointer;
-        int NumPointer;
         bool ErrorsFound(false);
         bool NumErrorFlag;
-
-        std::string CFld; // Character field for error message
-        //  CHARACTER(len=20) CFld1        ! Character field for error message
 
         std::array<Real64, Constant::iMinutesInDay> minuteVals;
         std::array<bool, Constant::iMinutesInDay> setMinuteVals;
@@ -398,11 +394,8 @@ namespace Sched {
         //  REAL(r64) tempval
         std::string CurrentThrough;
         std::string LastFor;
-        std::string errmsg;
-        // for SCHEDULE:FILE
         int rowCnt;
 
-        std::string subString;
         int MaxNums1;
         char ColumnSep;
         int rowLimitCount;
@@ -615,6 +608,13 @@ namespace Sched {
                         ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                         ShowFatalError(state, "Program terminates due to previous condition.");
                     }
+                    for (const auto &[warning, isContinued] : csvParser.warnings()) {
+                        if (isContinued) {
+                            ShowContinueError(state, warning);
+                        } else {
+                            ShowWarningError(state, warning);
+                        }
+                    }
                     schedule_file_shading_result = it.first;
                 } else if (FileSystem::is_all_json_type(ext)) {
                     auto schedule_data = FileSystem::readJSON(state.files.TempFullFilePath.filePath);
@@ -622,14 +622,50 @@ namespace Sched {
                         s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath, std::move(schedule_data));
                     schedule_file_shading_result = it.first;
                 } else {
-                    ShowSevereError(state,
-                                    fmt::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
-                                                routineName,
-                                                CurrentModuleObject,
-                                                Alphas(1),
-                                                cAlphaFields(3),
-                                                Alphas(3)));
-                    ShowFatalError(state, "Program terminates due to previous condition.");
+                    // Unknown extension, try to parse csv
+                    bool isCSV = false;
+                    bool isJSON = false;
+                    try {
+                        auto const schedule_data = FileSystem::readFile(state.files.TempFullFilePath.filePath);
+                        CsvParser csvParser;
+                        skiprowCount = 1; // make sure to parse header row only for Schedule:File:Shading
+                        auto it = s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath,
+                                                                                csvParser.decode(schedule_data, ColumnSep, skiprowCount));
+                        if (!csvParser.hasErrors()) {
+                            isCSV = true;
+                            ShowWarningMessage(state,
+                                               fmt::format("Extension of file {} is unrecognized, but parsed as CSV successfully",
+                                                           state.files.TempFullFilePath.filePath));
+                            schedule_file_shading_result = it.first;
+                        }
+                    } catch (...) {
+                        // We're testing to see if this is a csv, if any exception exists, then throw the standard error about an unknown
+                        // extension
+                        isCSV = false;
+                    }
+                    try {
+                        auto schedule_data = FileSystem::readJSON(state.files.TempFullFilePath.filePath);
+                        auto it = // (AUTO_OK_ITER)
+                            s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath, std::move(schedule_data));
+                        schedule_file_shading_result = it.first;
+                        ShowWarningMessage(state,
+                                           fmt::format("Extension of file {} is unrecognized, but parsed as JSON successfully",
+                                                       state.files.TempFullFilePath.filePath));
+                        isJSON = true;
+                    } catch (...) {
+                        // We're testing to see if this is json, if any exception exists, then throw the standard error about an unknown extension
+                        isJSON = false;
+                    }
+                    if (!isCSV && !isJSON) {
+                        ShowSevereError(state,
+                                        fmt::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
+                                                    routineName,
+                                                    CurrentModuleObject,
+                                                    Alphas(1),
+                                                    cAlphaFields(3),
+                                                    Alphas(3)));
+                        ShowFatalError(state, "Program terminates due to previous condition.");
+                    }
                 }
             }
 
@@ -973,9 +1009,9 @@ namespace Sched {
             int hr = 0;
             int begMin = 0;
             int endMin = MinutesPerItem - 1;
-            for (int NumFields = 2; NumFields <= NumNumbers; ++NumFields) {
+            for (int fieldNum = 2; fieldNum <= NumNumbers; ++fieldNum) {
                 for (int iMin = begMin; iMin <= endMin; ++iMin) {
-                    minuteVals[hr * Constant::iMinutesInHour + iMin] = Numbers(NumFields);
+                    minuteVals[hr * Constant::iMinutesInHour + iMin] = Numbers(fieldNum);
                 }
                 begMin = endMin + 1;
                 endMin += MinutesPerItem;
@@ -1153,24 +1189,24 @@ namespace Sched {
                 // Process for month, day
                 int StartMonth = int(Numbers(NumPointer + 1));
                 int StartDay = int(Numbers(NumPointer + 2));
-                int EndMonth = int(Numbers(NumPointer + 3));
-                int EndDay = int(Numbers(NumPointer + 4));
+                int endMonth = int(Numbers(NumPointer + 3));
+                int endDay = int(Numbers(NumPointer + 4));
                 NumPointer += 4;
-                int StartPointer = General::OrdinalDay(StartMonth, StartDay, 1);
-                int EndPointer = General::OrdinalDay(EndMonth, EndDay, 1);
-                if (StartPointer <= EndPointer) {
-                    for (int Count = StartPointer; Count <= EndPointer; ++Count) {
-                        ++daysInYear[Count];
-                        sched->weekScheds[Count] = weekSched;
+                int startPointer = General::OrdinalDay(StartMonth, StartDay, 1);
+                int endPointer = General::OrdinalDay(endMonth, endDay, 1);
+                if (startPointer <= endPointer) {
+                    for (int day = startPointer; day <= endPointer; ++day) {
+                        ++daysInYear[day];
+                        sched->weekScheds[day] = weekSched;
                     }
                 } else {
-                    for (int Count = StartPointer; Count <= 366; ++Count) {
-                        ++daysInYear[Count];
-                        sched->weekScheds[Count] = weekSched;
+                    for (int day = startPointer; day <= 366; ++day) {
+                        ++daysInYear[day];
+                        sched->weekScheds[day] = weekSched;
                     }
-                    for (int Count = 1; Count <= EndPointer; ++Count) {
-                        ++daysInYear[Count];
-                        sched->weekScheds[Count] = weekSched;
+                    for (int day = 1; day <= endPointer; ++day) {
+                        ++daysInYear[day];
+                        sched->weekScheds[day] = weekSched;
                     }
                 }
             }
@@ -1187,7 +1223,8 @@ namespace Sched {
                     ShowSevereCustomAudit(state, eoh, "has missing days in its schedule pointers");
                     ErrorsFound = true;
                     break;
-                } else if (daysInYear[iDay] > 1) {
+                }
+                if (daysInYear[iDay] > 1) {
                     ShowSevereCustomAudit(state, eoh, "has overlapping days in its schedule pointers");
                     ErrorsFound = true;
                     break;
@@ -1258,8 +1295,6 @@ namespace Sched {
                 ShowWarningItemNotFound(state, eoh, cAlphaFields(2), Alphas(2));
                 ShowContinueError(state, "Schedule will not be validated.");
             }
-
-            NumPointer = 0;
 
             std::array<int, 367> daysInYear;
             std::fill(daysInYear.begin() + 1, daysInYear.end(), 0);
@@ -1607,21 +1642,21 @@ namespace Sched {
             }
 
             // is it a sub-hourly schedule or not?
-            int MinutesPerItem = Constant::iMinutesInHour;
+            int minutesPerItem = Constant::iMinutesInHour;
             if (NumNumbers > 3) {
-                MinutesPerItem = int(Numbers(4));
+                minutesPerItem = int(Numbers(4));
                 // int NumExpectedItems = 1440 / MinutesPerItem;
-                if (mod(Constant::iMinutesInHour, MinutesPerItem) != 0) {
+                if (mod(Constant::iMinutesInHour, minutesPerItem) != 0) {
                     ShowSevereCustom(
-                        state, eoh, format("Requested {} field value ({}) not evenly divisible into 60", cNumericFields(4), MinutesPerItem));
+                        state, eoh, format("Requested {} field value ({}) not evenly divisible into 60", cNumericFields(4), minutesPerItem));
                     ErrorsFound = true;
                     continue;
                 }
             }
 
             int numHourlyValues = Numbers(3);
-            int rowLimitCount = (Numbers(3) * Constant::rMinutesInHour) / MinutesPerItem;
-            int hrLimitCount = Constant::iMinutesInHour / MinutesPerItem;
+            int rowLimitCnt = (Numbers(3) * Constant::rMinutesInHour) / minutesPerItem;
+            int hrLimitCount = Constant::iMinutesInHour / minutesPerItem;
 
             std::string contextString = format("{}=\"{}\", {}: ", CurrentModuleObject, Alphas(1), cAlphaFields(3));
 
@@ -1643,11 +1678,18 @@ namespace Sched {
                                 if (isContinued) {
                                     ShowContinueError(state, error);
                                 } else {
-                                    ShowSevereError(state, error);
+                                    ShowSevereCustom(state, eoh, error);
                                 }
                             }
                             ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                             ShowFatalError(state, "Program terminates due to previous condition.");
+                        }
+                        for (const auto &[warning, isContinued] : csvParser.warnings()) {
+                            if (isContinued) {
+                                ShowContinueError(state, warning);
+                            } else {
+                                ShowWarningCustom(state, eoh, warning);
+                            }
                         }
                         result = it.first;
                     } else if (FileSystem::is_all_json_type(ext)) {
@@ -1655,17 +1697,69 @@ namespace Sched {
                                                                                 FileSystem::readJSON(state.files.TempFullFilePath.filePath));
                         result = it.first;
                     } else {
-                        ShowSevereCustom(
-                            state,
-                            eoh,
-                            format("{} = {} has an unknown file extension and cannot be read by this program.", cAlphaFields(3), Alphas(3)));
-                        ShowFatalError(state, "Program terminates due to previous condition.");
+                        bool isCSV = false;
+                        bool isJSON = false;
+                        try {
+                            auto const schedule_data = FileSystem::readFile(state.files.TempFullFilePath.filePath);
+                            CsvParser csvParser;
+                            auto it = s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath,
+                                                                                    csvParser.decode(schedule_data, ColumnSep, skiprowCount));
+                            if (!csvParser.hasErrors()) {
+                                result = it.first;
+                                isCSV = true;
+                                ShowWarningMessage(state,
+                                                   fmt::format("Extension of file {} is unrecognized, but parsed as CSV successfully",
+                                                               state.files.TempFullFilePath.filePath));
+                            }
+                        } catch (...) {
+                            // We're testing to see if this is a csv, if any exception exists, then throw the standard error about an unknown
+                            // extension
+                            isCSV = false;
+                        }
+                        if (!isCSV) {
+                            try {
+                                auto it = s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath,
+                                                                                        FileSystem::readJSON(state.files.TempFullFilePath.filePath));
+                                result = it.first;
+                                ShowWarningMessage(state,
+                                                   fmt::format("Extension of file {} is unrecognized, but parsed as JSON successfully",
+                                                               state.files.TempFullFilePath.filePath));
+                                isJSON = true;
+                            } catch (...) {
+                                // We're testing to see if this is json, if any exception exists, then throw the standard error about an unknown
+                                // extension
+                                isJSON = false;
+                            }
+                        }
+                        if (!isCSV && !isJSON) {
+                            ShowSevereCustom(
+                                state,
+                                eoh,
+                                format("{} = {} has an unknown file extension and cannot be read by this program.", cAlphaFields(3), Alphas(3)));
+                            ShowFatalError(state, "Program terminates due to previous condition.");
+                        }
                     }
                 }
 
+                // curcolCount is 1-indexed here
+                if (static_cast<size_t>(curcolCount) > result->second["values"].size()) {
+                    ShowSevereCustom(
+                        state, eoh, format("Requested column number {}, but found only {} columns.", curcolCount, result->second["values"].size()));
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
                 auto const &column_json = result->second["values"][curcolCount - 1];
                 rowCnt = column_json.size();
-                auto const column_values = column_json.get<std::vector<Real64>>(); // (AUTO_OK_OBJ)
+
+                std::vector<Real64> column_values;
+                try {
+                    column_values = column_json.get<std::vector<Real64>>();
+                } catch (nlohmann::json::type_error &e) {
+                    ShowSevereCustom(state, eoh, format("Column number {} has non-numeric data.", curcolCount));
+                    ShowContinueError(state, e.what());
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
 
                 // schedule values have been filled into the hourlyFileValues array.
 
@@ -1677,13 +1771,13 @@ namespace Sched {
                                              numerrors));
                 }
 
-                if (rowCnt < rowLimitCount) {
+                if (rowCnt < rowLimitCnt) {
                     ShowWarningCustom(state,
                                       eoh,
                                       format("less than {} hourly values read from file."
                                              "..Number read={}.",
                                              numHourlyValues,
-                                             (rowCnt * Constant::iMinutesInHour) / MinutesPerItem));
+                                             (rowCnt * Constant::iMinutesInHour) / minutesPerItem));
                 }
 
                 // process the data into the normal schedule data structures
@@ -1716,7 +1810,7 @@ namespace Sched {
                     // schedule is pointing to the week schedule
                     sched->weekScheds[iDay] = weekSched;
 
-                    if (MinutesPerItem == Constant::iMinutesInHour) {
+                    if (minutesPerItem == Constant::iMinutesInHour) {
                         for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
                             Real64 curHrVal = column_values[ifld]; // hourlyFileValues((hDay - 1) * 24 + jHour)
                             ++ifld;
@@ -1727,16 +1821,16 @@ namespace Sched {
                         }
                     } else { // Minutes Per Item < 60
                         for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                            int endMin = MinutesPerItem - 1;
+                            int endMin = minutesPerItem - 1;
                             int begMin = 0;
-                            for (int NumFields = 1; NumFields <= hrLimitCount; ++NumFields) {
+                            for (int fieldIdx = 1; fieldIdx <= hrLimitCount; ++fieldIdx) {
                                 for (int iMin = begMin; iMin <= endMin; ++iMin) {
                                     minuteVals[hr * Constant::iMinutesInHour + iMin] = column_values[ifld];
                                 }
 
                                 ++ifld;
                                 begMin = endMin + 1;
-                                endMin += MinutesPerItem;
+                                endMin += minutesPerItem;
                             }
                         }
 
@@ -1761,6 +1855,9 @@ namespace Sched {
             auto const headers = schedule_file_shading_result->second["header"].get<std::vector<std::string>>();  // (AUTO_OK_OBJ)
             auto const headers_set = schedule_file_shading_result->second["header"].get<std::set<std::string>>(); // (AUTO_OK_OBJ)
 
+            std::string const shadingFileName = schedule_file_shading_result->first.filename().string();
+            ErrorObjectHeader eoh{routineName, "Schedule:File:Shading", shadingFileName};
+
             for (auto const &header : headers_set) {
                 size_t column = 0;
                 auto column_it = std::find(headers.begin(), headers.end(), header);
@@ -1770,7 +1867,26 @@ namespace Sched {
                 if (column == 0) {
                     continue; // Skip timestamp column and any duplicate column, which will be 0 as well since it won't be found.
                 }
-                auto const column_values = values_json.at(column).get<std::vector<Real64>>(); // (AUTO_OK_OBJ)
+
+                if (column >= values_json.size()) {
+                    ShowSevereCustom(
+                        state,
+                        eoh,
+                        fmt::format(
+                            "For header '{}', Requested column number {}, but found only {} columns.", header, column + 1, values_json.size()));
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", schedule_file_shading_result->first));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
+
+                std::vector<Real64> column_values;
+                try {
+                    column_values = values_json.at(column).get<std::vector<Real64>>();
+                } catch (nlohmann::json::type_error &e) {
+                    ShowSevereCustom(state, eoh, fmt::format("Column number {} has non-numeric data.", column + 1));
+                    ShowContinueError(state, e.what());
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", schedule_file_shading_result->first));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
 
                 std::string curName = format("{}_shading", header);
                 std::string curNameUC = Util::makeUPPER(curName);
@@ -2095,8 +2211,8 @@ namespace Sched {
 
             std::set<ReportLevel> reportLevelSet;
             //    RptSchedule=.FALSE.
-            for (int Count = 1; Count <= NumFields; ++Count) {
-                s_ip->getObjectItem(state, CurrentModuleObject, Count, Alphas, NumAlphas, Numbers, NumNumbers, Status);
+            for (int count = 1; count <= NumFields; ++count) {
+                s_ip->getObjectItem(state, CurrentModuleObject, count, Alphas, NumAlphas, Numbers, NumNumbers, Status);
 
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, Alphas(1)};
 
@@ -2377,7 +2493,7 @@ namespace Sched {
             ShowFatalError(state, format("LookUpScheduleValue called with thisHour={}", hr));
         }
 
-        int thisHr = hr + state.dataEnvrn->DSTIndicator * this->UseDaylightSaving;
+        int thisHr = hr + state.dataEnvrn->DSTIndicator * static_cast<int>(this->UseDaylightSaving);
 
         int thisDayOfYear = state.dataEnvrn->DayOfYear_Schedule;
         int thisDayOfWeek = state.dataEnvrn->DayOfWeek;
@@ -2390,7 +2506,7 @@ namespace Sched {
         }
 
         // In the case where DST is applied on 12/31 at 24:00, which is the case for a Southern Hemisphere location for eg
-        // (DayOfYear_Schedule is a bit weird, ScheduleManager always assumes LeapYear)
+        // (DayOfYear_Schedule is a bit weird, ScheduleManager always assumes leap year)
         if (thisDayOfYear == 367) {
             thisDayOfYear = 1;
         }
@@ -2839,9 +2955,6 @@ namespace Sched {
         // representation.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        std::string hHour;
-        std::string mMinute;
-
         std::string String = stripped(FieldValue);
         std::string::size_type const Pos = index(String, ':');
         bool nonIntegral = false;
@@ -2854,7 +2967,8 @@ namespace Sched {
             ShowContinueError(state, format("Occurred in Day Schedule={}", DayScheduleName));
             ErrorsFound = true;
             return;
-        } else if (Pos == 0) {
+        }
+        if (Pos == 0) {
             RetHH = 0;
         } else {
             bool error = false;
@@ -2922,9 +3036,8 @@ namespace Sched {
     {
         if (minute != 0) {
             return (minute % numMinutesPerTimestep == 0);
-        } else {
-            return true;
         }
+        return true;
     }
 
     void ProcessForDayTypes(EnergyPlusData &state,
@@ -3127,6 +3240,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *daySched1 = this->dayScheds[1];
+        if (daySched1 == nullptr) {
+            return;
+        }
         if (!daySched1->isMinMaxSet) {
             daySched1->setMinMaxVals(state);
         }
@@ -3161,6 +3277,9 @@ namespace Sched {
         assert(!this->isMinMaxSet);
 
         auto *weekSched1 = this->weekScheds[1];
+        if (weekSched1 == nullptr) {
+            return;
+        }
         if (!weekSched1->isMinMaxSet) {
             weekSched1->setMinMaxVals(state);
         }

@@ -39,9 +39,6 @@
 !                    Name                                         Th   Ts   Rfs  Rbs  Tv   Rfv  Rbv Tir Ef  Eb Con
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   WindowMaterial:Glazing,
     CLEAR 2.5MM,             !- Name
     SpectralAverage,         !- Optical Data Type

@@ -15,7 +15,7 @@
 ! Both the supply and the demand side will be modelled in this section of the template
 ! ******************************VERSION IDENTIFIER********************************************
 
-  Version,25.2;
+  Version,26.1;
 
 ! ********************************DEFINE THE CHILLED WATER(CW) LOOP***************************
 

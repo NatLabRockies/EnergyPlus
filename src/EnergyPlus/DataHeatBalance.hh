@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -137,15 +137,6 @@ namespace DataHeatBalance {
         Num
     };
 
-    // System type, detailed refrigeration or refrigerated case rack
-    enum class RefrigSystemType
-    {
-        Invalid = -1,
-        Detailed,
-        Rack,
-        Num
-    };
-
     // Refrigeration condenser type
     enum class RefrigCondenserType
     {
@@ -248,6 +239,7 @@ namespace DataHeatBalance {
         WaterHeaterStratified,
         ThermalStorageChilledWaterMixed,
         ThermalStorageChilledWaterStratified,
+        ThermalStorageHotWaterStratified,
         GeneratorFuelCell,
         GeneratorMicroCHP,
         ElectricLoadCenterTransformer,
@@ -330,6 +322,7 @@ namespace DataHeatBalance {
         "WATERHEATER:STRATIFIED",
         "THERMALSTORAGE:CHILLEDWATER:MIXED",
         "THERMALSTORAGE:CHILLEDWATER:STRATIFIED",
+        "THERMALSTORAGE:HOTWATER:STRATIFIED",
         "GENERATOR:FUELCELL",
         "GENERATOR:MICROCHP",
         "ELECTRICLOADCENTER:TRANSFORMER",
@@ -387,6 +380,7 @@ namespace DataHeatBalance {
         "WaterHeater:Stratified",
         "ThermalStorage:ChilledWater:Mixed",
         "ThermalStorage:ChilledWater:Stratified",
+        "ThermalStorage:HotWater:Stratified",
         "Generator:FuelCell",
         "Generator:MicroCHP",
         "ElectricLoadCenter:Transformer",
@@ -456,7 +450,7 @@ namespace DataHeatBalance {
 
     struct SpaceData : ZoneSpaceData
     {
-        int zoneNum = 0;                                       // Pointer to Zone wich contains this space
+        int zoneNum = 0;                                       // Pointer to Zone which contains this space
         Real64 userEnteredFloorArea = Constant::AutoCalculate; // User input floor area for this space
         std::string spaceType = "General";                     // Space type tag
         int spaceTypeNum = 0;                                  // Points to spaceType for this space
@@ -607,6 +601,7 @@ namespace DataHeatBalance {
         Real64 ExtGrossGroundWallArea_Multiplied = 0.0;            // Ground contact Wall Area for Zone (Gross) with multipliers
         bool IsSupplyPlenum = false;                               // True when this zone is a supply plenum
         bool IsReturnPlenum = false;                               // True when this zone is a return plenum
+        std::vector<Real64> leakageParallelPIUNums;                // parallel PIU index for backdraft damper leakage
         int PlenumCondNum = 0;                                     // Supply or return plenum conditions number, 0 if this is not a plenum zone
         int TempControlledZoneIndex = 0;                           // this is the index number for TempControlledZone structure for lookup
         int humidityControlZoneIndex = 0;                          // this is the index number for HumidityControlZone structure for lookup
@@ -1491,7 +1486,7 @@ namespace DataHeatBalance {
         Real64 SumEnthalpyM = 0.0;           // Zone sum of EnthalpyM
         Real64 SumEnthalpyH = 0.0;           // Zone sum of EnthalpyH
         // reporting flags
-        bool ReportWBGT = false; // whether the wetbulb globe temperature is reqeusted as an output variable or used as an EMS sensor
+        bool ReportWBGT = false; // whether the wetbulb globe temperature is requested as an output variable or used as an EMS sensor
 
         void setUpOutputVars(EnergyPlusData &state, std::string_view prefix, std::string const &name);
     };

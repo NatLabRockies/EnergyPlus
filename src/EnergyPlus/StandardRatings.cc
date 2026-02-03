@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2398,7 +2398,7 @@ namespace StandardRatings {
         }
         Real64 EER(0.0); // Energy Efficiency Rating
 
-        Real64 CD(0.0);               // Degradation Cofficient, (Btu/h)/(Btu/h)
+        Real64 CD(0.0);               // Degradation Coefficient, (Btu/h)/(Btu/h)
         Real64 LF(0.0);               // Fraction "on" time for the last stage at the tested load Point | Load Factor
         Real64 PL = ReducedPLR * 100; // Percent Load
 
@@ -2411,12 +2411,12 @@ namespace StandardRatings {
         // PC - Compressor power at the lowest machine unloading point operating at the applicable part-load Rating condition, W
         // PCD - Condenser Section Power, at the applicable part-load Rating condition, W
         Real64 PIF(0.0); // Indoor Fan Power, W
-        Real64 PCT(0.0); // Control Circuit Power and any auxilary Power, W
+        Real64 PCT(0.0); // Control Circuit Power and any auxiliary Power, W
         Real64 q(0.0);   // Cooling Capacity at the lowest machine unloading point operating at the applicable part-load Rating condition, Btu/h
 
         q = Qlx;
         PIF = FanPowerPerEvapAirFlowRate_2023 * RatedAirVolFlowRate; // Calculated for each Speed
-        PCT = 0;                                                     // Control Circuit Power  and any auxilary Power not in Energy Plus Object.
+        PCT = 0;                                                     // Control Circuit Power  and any auxiliary Power not in Energy Plus Object.
         Real64 PC_plus_PCD = EIR * (RatedTotalCapacity * TotCapTempModFac * TotCapFlowModFac);
         CD = (-0.13 * LF) + 1.13; // DegradationCoeff
         EER = (LF * q) / (LF * (CD * (PC_plus_PCD)) + PIF + PCT);
@@ -2450,7 +2450,7 @@ namespace StandardRatings {
 
             // Calculate the rated cooling capacity for the speed using Gross Total Cooling Capacity
             // and Gross Total Cooling Capacity Fraction of the speed.
-            MSRatedTotCap.push_back(speed.rated_total_capacity); // get the capcity at each speed bymultiplying this fraCTION WITH the gross.
+            MSRatedTotCap.push_back(speed.rated_total_capacity); // get the capacity at each speed bymultiplying this fraCTION WITH the gross.
             MSCCapAirFFlow.push_back(speed.indexCapFFF);
             MSRatedEvaporatorFanPowerPerVolumeFlowRate2023.push_back(speed.rated_evap_fan_power_per_volume_flow_rate_2023);
             // Calculate the rated evap air flow rate for the speed using Rated Evaporator Air flow Rate
@@ -2502,7 +2502,7 @@ namespace StandardRatings {
             MSCCapFTemp.push_back(speed.indexCapFT);
             // Calculate the rated cooling capacity for the speed using Gross Total Cooling Capacity
             // and Gross Total Cooling Capacity Fraction of the speed.
-            MSRatedTotCap.push_back(speed.rated_total_capacity); // get the capcity at each speed bymultiplying this fraCTION WITH the gross.
+            MSRatedTotCap.push_back(speed.rated_total_capacity); // get the capacity at each speed bymultiplying this fraCTION WITH the gross.
             MSCCapAirFFlow.push_back(speed.indexCapFFF);
             MSRatedEvaporatorFanPowerPerVolumeFlowRate2023.push_back(speed.rated_evap_fan_power_per_volume_flow_rate_2023);
             // Calculate the rated evap air flow rate for the speed using Rated Evaporator Air flow Rate
@@ -2652,83 +2652,85 @@ namespace StandardRatings {
                 if ((int)(ratioArray(i)) == 100.0) {
                     speedsForA.push_back(i);
                     continue;
-                } else if ((int)(ratioArray(i)) == 75.0) {
+                }
+                if ((int)(ratioArray(i)) == 75.0) {
                     speedsForB.push_back(i);
                     bFound = true;
                     smallerThanSpeedB = 0;
                     largerThanSpeedB = 0;
                     continue;
-                } else if ((int)(ratioArray(i)) == 50.0) {
+                }
+                if ((int)(ratioArray(i)) == 50.0) {
                     speedsForC.push_back(i);
                     cFound = true;
                     smallerThanSpeedC = 0;
                     largerThanSpeedC = 0;
                     continue;
-                } else if ((int)(ratioArray(i)) == 25.0) {
+                }
+                if ((int)(ratioArray(i)) == 25.0) {
                     speedsForD.push_back(i);
                     dFound = true;
                     smallerThanSpeedD = 0;
                     largerThanSpeedD = 0;
                     continue;
-                } else {
-                    if (((int)(ratioArray(i)) > 0.0 && (int)(ratioArray(i)) < 25.0) && !dFound) {
-                        if (smallerThanSpeedD == 0) {
+                }
+                if (((int)(ratioArray(i)) > 0.0 && (int)(ratioArray(i)) < 25.0) && !dFound) {
+                    if (smallerThanSpeedD == 0) {
+                        smallerThanSpeedD = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedD) - _25PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
                             smallerThanSpeedD = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedD) - _25PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
-                                smallerThanSpeedD = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !dFound) {
-                        if (largerThanSpeedD == 0) {
+                }
+                if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !dFound) {
+                    if (largerThanSpeedD == 0) {
+                        largerThanSpeedD = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedD) - _25PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
                             largerThanSpeedD = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedD) - _25PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
-                                largerThanSpeedD = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !cFound) {
-                        if (smallerThanSpeedC == 0) {
+                }
+                if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !cFound) {
+                    if (smallerThanSpeedC == 0) {
+                        smallerThanSpeedC = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedC) - _50PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
                             smallerThanSpeedC = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedC) - _50PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
-                                smallerThanSpeedC = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !cFound) {
-                        if (largerThanSpeedC == 0) {
+                }
+                if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !cFound) {
+                    if (largerThanSpeedC == 0) {
+                        largerThanSpeedC = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedC) - _50PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
                             largerThanSpeedC = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedC) - _50PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
-                                largerThanSpeedC = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !bFound) {
-                        if (smallerThanSpeedB == 0) {
+                }
+                if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !bFound) {
+                    if (smallerThanSpeedB == 0) {
+                        smallerThanSpeedB = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedB) - _75PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
                             smallerThanSpeedB = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedB) - _75PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
-                                smallerThanSpeedB = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 75.0 && (int)(ratioArray(i)) < 100.0) && !bFound) {
-                        if (largerThanSpeedB == 0) {
+                }
+                if (((int)(ratioArray(i)) > 75.0 && (int)(ratioArray(i)) < 100.0) && !bFound) {
+                    if (largerThanSpeedB == 0) {
+                        largerThanSpeedB = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedB) - _75PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
                             largerThanSpeedB = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedB) - _75PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
-                                largerThanSpeedB = i;
-                            }
                         }
                     }
                 }
@@ -4315,7 +4317,7 @@ namespace StandardRatings {
         Array1D<Real64> P_B_Full(nsp);                        // Outdoor Unit electric power at B2 test condition (High speed) | p_B_Full
         Array1D<Real64> P_B_Low(nsp);                         // Outdoor Unit electric power at B1 test condition (Low speed) | p_B_Low
         Array1D<Real64> P_F_Low(nsp);                         // Outdoor Unit electric power at F1 test condition | p_F_Low
-        Array1D<Real64> P_E_Int(nsp);                         // Outdoor Unit electric power at Eint (Ev) test conditon | p_E_Int
+        Array1D<Real64> P_E_Int(nsp);                         // Outdoor Unit electric power at Eint (Ev) test condition | p_E_Int
 
         Array1D<Real64> TotCapFlowModFac(nsp);        // Total capacity modifier f(actual flow vs rated flow) for each speed [-]
         Array1D<Real64> EIRFlowModFac(nsp);           // EIR modifier f(actual supply air flow vs rated flow) for each speed [-]
@@ -5085,7 +5087,7 @@ namespace StandardRatings {
         Array1D<Real64> P_B_Full(nsp);                        // Outdoor Unit electric power at B2 test condition (High speed) | p_B_Full
         Array1D<Real64> P_B_Low(nsp);                         // Outdoor Unit electric power at B1 test condition (Low speed) | p_B_Low
         Array1D<Real64> P_F_Low(nsp);                         // Outdoor Unit electric power at F1 test condition | p_F_Low
-        Array1D<Real64> P_E_Int(nsp);                         // Outdoor Unit electric power at Eint (Ev) test conditon | p_E_Int
+        Array1D<Real64> P_E_Int(nsp);                         // Outdoor Unit electric power at Eint (Ev) test condition | p_E_Int
 
         // part-load factor based on user-input PLF curve and C_D value that accounts for the cyclic degradation, [-]
         // Real64 PartLoadFactorUser_2023(0.0);
@@ -5295,7 +5297,7 @@ namespace StandardRatings {
                                 p_int, q_int, q_low, bl, n, Q_E_Int(spnum), q_full, P_E_Int(spnum), p_full, p_low);
                             goto SpeedLoop3_exit;
                         } else {
-                            // if we're here then all the speeds (apart from max speed) failed to staisfy the case 2A
+                            // if we're here then all the speeds (apart from max speed) failed to satisfy the case 2A
                             if (bl < q_full) {
                                 // Section 11.2.1.3.2 CASE 2 - Building load can be matched by modulating the compressor speed between low speed &
                                 // full Speed
@@ -5303,7 +5305,7 @@ namespace StandardRatings {
                                     p_int, bl, q_int, n, Q_E_Int(spnum), P_E_Int(spnum), q_low, p_low, q_full, p_full);
                                 goto SpeedLoop3_exit;
                             } else {
-                                // if we're here then all the speeds (apart form max speed ?? ) failed to staisfy the case 2B
+                                // if we're here then all the speeds (apart form max speed ?? ) failed to satisfy the case 2B
                                 // max speed should include in cases 1,2A,2B or not ?? TBD:
 
                                 if (spnum == nsp - 1) {
@@ -5725,7 +5727,7 @@ namespace StandardRatings {
         Real64 HeatingElecPowerHS;                       // outdoor unit electric power input at high speed, [W]
         Real64 HeatingCapacityMax;                       // cooling capacity of Mult-speed DX coil at max speed, [W]
         Real64 HeatingElecPowerMax;                      // outdoor unit electric power input at Max speed, [W]
-        Array1D<Real64> TotHeatCapTestH1High(nsp);       // net heating capacity high speed at H1 test conditon, [W]
+        Array1D<Real64> TotHeatCapTestH1High(nsp);       // net heating capacity high speed at H1 test condition, [W]
 
         // Intermediate values calculated from the inputs in the idf file
         Array1D<Real64> TotCapFlowModFac(nsp); // Total capacity modifier f(actual flow vs rated flow) for each speed [-]
@@ -5774,7 +5776,7 @@ namespace StandardRatings {
             }
         }
 
-        // Proceed withe HSPF value calculation
+        // Proceed with HSPF value calculation
         for (int spnum = 1; spnum <= nsp; ++spnum) {
             TotCapFlowModFac(spnum) = Curve::CurveValue(state, CapFFlowCurveIndex(spnum), AirMassFlowRatioRated);
             {
@@ -6052,7 +6054,7 @@ namespace StandardRatings {
         // Real64 HeatingElecPowerHS;                 // outdoor unit electric power input at high speed, [W]
         // Real64 HeatingCapacityMax;                 // cooling capacity of Mult-speed DX coil at max speed, [W]
         // Real64 HeatingElecPowerMax;                // outdoor unit electric power input at Max speed, [W]
-        // Array1D<Real64> TotHeatCapTestH1High(nsp); // net heating capacity high speed at H1 test conditon, [W]
+        // Array1D<Real64> TotHeatCapTestH1High(nsp); // net heating capacity high speed at H1 test condition, [W]
 
         // Intermediate values calculated from the inputs in the idf file
         Array1D<Real64> TotCapFlowModFac(nsp); // Total capacity modifier f(actual flow vs rated flow) for each speed [-]
@@ -6133,7 +6135,7 @@ namespace StandardRatings {
         Array1D<Real64> P_H3_Full(nsp); // Outdoor Unit electric power at H3 Full test condition (Full speed)
         Array1D<Real64> P_H4_Full(nsp); // Outdoor Unit electric power at H4 Full test condition (Full speed)
 
-        // Proceed withe HSPF2 value calculation
+        // Proceed with HSPF2 value calculation
         for (spnum = 1; spnum <= nsp; ++spnum) {
             TotCapFlowModFac(spnum) = Curve::CurveValue(state, CapFFlowCurveIndex(spnum), AirMassFlowRatioRated);
 

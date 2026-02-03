@@ -22,7 +22,7 @@ EnergyPlus code will be modified to add availability schedule input field to DX 
 ### Current Code ###
 
 (1) Seven DX Coils do not have availability schedule input fields
-(2) Table below summarizes the DX Coils missing availability schedule input field 
+(2) Table below summarizes the DX Coils missing availability schedule input field
 
 | S. No. | DX Coil Type | EnergyPlus Module | Priorities |
 |--|--|--|--|
@@ -70,7 +70,7 @@ Adds availability schedule new input field and logic that turns On or Off the DX
 
 * Update the min-fields number *
 
-	`Coil:Cooling:DX:VariableSpeed` 
+	`Coil:Cooling:DX:VariableSpeed`
 	`Coil:Heating:DX:VariableSpeed`
 	`Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit`
 	`Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit`
@@ -120,7 +120,7 @@ Coil:Cooling:DX:VariableSpeed,
         \default 2
 
     ...
-	
+
 
    A49, \field Speed 10 Energy Input Ratio Function of Temperature Curve Name
         \type object-list
@@ -172,8 +172,8 @@ Coil:Heating:DX:VariableSpeed,
         \maximum 10
         \default 2
 
-        ...    
- 
+        ...
+
    A47, \field Speed 10 Energy Input Ratio Function of Temperature Curve Name
         \type object-list
         \object-list BivariateFunctions
@@ -216,13 +216,13 @@ Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \type node
    A5,  \field Indoor Air Outlet Node Name
         \required-field
-        \type node	
+        \type node
    A6 , \field Availability Schedule Name
         \note Availability schedule name for this DX coil. Schedule value > 0 means the DX coil is available.
         \note If this field is blank, the system is always available.
         \type object-list
         \object-list ScheduleNames
-```	
+```
 
 ```
    N1,  \field Number of Speeds
@@ -277,7 +277,7 @@ Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \note If this field is blank, the system is always available.
         \type object-list
         \object-list ScheduleNames
-```	
+```
 
 ```
    N1,  \field Number of Speeds
@@ -323,7 +323,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
 ```
   N1,  \field Number of Speeds
@@ -375,7 +375,7 @@ Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
         \note If this field is blank, the system is always available.
         \type object-list
         \object-list ScheduleNames
-```	
+```
 
 ```
    A3 , \field Compressor Type
@@ -430,7 +430,7 @@ Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
 ```
    A3 , \field Compressor Type
@@ -485,9 +485,9 @@ Coil:Cooling:WaterToAirHeatPump:EquationFit,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
-```		
+```
    A3,  \field Water Inlet Node Name
         \required-field
         \type node
@@ -548,7 +548,7 @@ Coil:Heating:WaterToAirHeatPump:EquationFit,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
 ```
    A3,  \field Water Inlet Node Name
@@ -607,7 +607,7 @@ Coil:WaterHeating:AirToWaterHeatPump:Pumped,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
 ```
   N1 , \field Rated Heating Capacity
@@ -662,7 +662,7 @@ Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
-```	
+```
 
 ```
   N1 , \field Rated Heating Capacity
@@ -710,22 +710,22 @@ DX coil type:
 ```
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-001}
 
-This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period. 
-A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), 
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX heating coil can run during a given time period.
+A schedule value of 0 indicates that the DX heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used),
 the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-002}
 
-This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period. 
-A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), 
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX cooling coil can run during a given time period.
+A schedule value of 0 indicates that the DX cooling coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used),
 the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-16-003}
 
-This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX Water Heating coil can run during a given time period. 
-A schedule value of 0 indicates that the DX Water Heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used), 
+This alpha field defines the name of the schedule (ref: Schedule) that denotes whether the DX Water Heating coil can run during a given time period.
+A schedule value of 0 indicates that the DX Water Heating coil is off for that time period. If the schedule's value is \textgreater{} 0 (usually 1 is used),
 the coil is On duing that time period. If this field is blank, the schedule has values of 1 for all time periods. Schedule values must be \textgreater{}= 0 and \textless{}= 1.
 
 ```
@@ -772,14 +772,14 @@ N/A
 
 ```
     a. GetVarSpeedCoilInput()
-    b. GetWatertoAirHPInput() 
+    b. GetWatertoAirHPInput()
     c. GetSimpleWatertoAirHPInput()
     d. GetDXCoils()  {if budget allows}
 ```
 
 *(2) Update IDD and adjust the min-fields count *
 *(3) Add the new input field for each DX Coil *
-*    - Add "avail_schedule" member variable for each module as needed * 
+*    - Add "avail_schedule" member variable for each module as needed *
 
 
 ### Modify Calculate Functions ###
@@ -800,10 +800,10 @@ N/A
 
 
     * (2.1) Modify the calc code that truns the DX coils On or Off based on schedule value. See sample psuedo code below: *
-	
+
 	```
          if (state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).avail_schedule =< 0 ) {
-        ... (2.1.1) skip all the DX coil calculation steps 
+        ... (2.1.1) skip all the DX coil calculation steps
 	    ... (2.1.2) re-set the associated report variables
-         } 
+         }
     ```

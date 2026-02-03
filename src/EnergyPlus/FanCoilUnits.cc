@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -628,7 +628,7 @@ namespace FanCoilUnits {
                         state,
                         format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified", CurrentModuleObject, fanCoil.Name));
                 }
-                // check that the air teminal mixer out node is the fan coil inlet node
+                // check that the air terminal mixer out node is the fan coil inlet node
                 if (fanCoil.AirInNode != state.dataFanCoilUnits->ATMixerOutNode) {
                     ShowSevereError(
                         state,
@@ -655,7 +655,7 @@ namespace FanCoilUnits {
                         state,
                         format("{} = \"{}\". Fan coil unit has local as well as central outdoor air specified", CurrentModuleObject, fanCoil.Name));
                 }
-                // check that the air teminal mixer secondary air inlet node is the fan coil outlet node
+                // check that the air terminal mixer secondary air inlet node is the fan coil outlet node
                 if (fanCoil.AirOutNode != state.dataFanCoilUnits->ATMixerSecNode) {
                     ShowSevereError(state,
                                     format("{} = \"{}\". Fan coil unit air outlet node name must be the same as the air terminal mixer secondary air "
@@ -2223,9 +2223,8 @@ namespace FanCoilUnits {
                             // Calculate residual based on output magnitude
                             if (std::abs(QZnReq) <= 100.0) {
                                 return (QUnitOut - QZnReq) / 100.0;
-                            } else {
-                                return (QUnitOut - QZnReq) / QZnReq;
                             }
+                            return (QUnitOut - QZnReq) / QZnReq;
                         };
                         General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, HWFlow, f, 0.0, MaxWaterFlow);
                         if (SolFlag == -1) {
@@ -2519,7 +2518,7 @@ namespace FanCoilUnits {
 
             } else if (UnitOn && QCoilHeatSP > HVAC::SmallLoad &&
                        state.dataHeatBalFanSys->TempControlType(ControlledZoneNum) != HVAC::SetptType::SingleCool) {
-                // heating coil action, maximun hot water flow
+                // heating coil action, maximum hot water flow
 
                 if (fanCoil.HCoilType_Num == HCoil::Water) {
                     mdot = fanCoil.MaxHeatCoilFluidFlow;
@@ -2881,7 +2880,7 @@ namespace FanCoilUnits {
 
             } else if (UnitOn && state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlledZoneNum).RemainingOutputReqToHeatSP > HVAC::SmallLoad &&
                        state.dataHeatBalFanSys->TempControlType(ControlledZoneNum) != HVAC::SetptType::SingleCool) {
-                // heating coil action, maximun hot water flow
+                // heating coil action, maximum hot water flow
                 if (fanCoil.HCoilType_Num == HCoil::Water) {
                     mdot = fanCoil.MaxHeatCoilFluidFlow;
                     PlantUtilities::SetComponentFlowRate(
@@ -4234,9 +4233,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilPLRResidual(EnergyPlusData &state,
@@ -4279,9 +4277,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilHeatCoilPLRResidual(EnergyPlusData &state,
@@ -4306,9 +4303,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilCWLoadResidual(EnergyPlusData &state,
@@ -4333,9 +4329,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilWaterFlowResidual(EnergyPlusData &state,
@@ -4382,9 +4377,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilAirAndWaterFlowResidual(EnergyPlusData &state,
@@ -4436,9 +4430,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     int getEqIndex(EnergyPlusData &state, std::string_view CompName)

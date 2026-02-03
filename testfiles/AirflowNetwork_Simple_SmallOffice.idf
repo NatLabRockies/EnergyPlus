@@ -132,7 +132,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Small Office with AirflowNetwork model,  !- Name
@@ -1585,7 +1585,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1599,7 +1599,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1613,7 +1613,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1627,7 +1627,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1639,7 +1639,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1651,7 +1651,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1688,8 +1688,8 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1702,8 +1702,8 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1716,8 +1716,8 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1730,8 +1730,8 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1744,7 +1744,7 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     NATURAL,                 !- Ventilation Type
@@ -1766,7 +1766,7 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     NATURAL,                 !- Ventilation Type
@@ -1788,7 +1788,7 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     NATURAL,                 !- Ventilation Type
@@ -1810,7 +1810,7 @@
     ZONE MIXING,             !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.05,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per  Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     EAST ZONE,               !- Source Zone or Space Name
@@ -3012,15 +3012,18 @@
     0.8,                     !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.9,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Fan:ConstantVolume,
     Supply Fan 1,            !- Name

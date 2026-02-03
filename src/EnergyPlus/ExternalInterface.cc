@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -801,7 +801,7 @@ void InstantiateInitializeFMUImport(EnergyPlusData &state)
             fmuInst.fmicomponent = fmiEPlusInstantiateSlave(
                 (char *)folderStr.c_str(), &fmuInst.LenWorkingFolder, &fmu.TimeOut, &fmu.Visible, &fmu.Interactive, &fmu.LoggingOn, &fmuInst.Index);
             // TODO: This is doing a null pointer check; OK?
-            if (!fmuInst.fmicomponent) {
+            if (fmuInst.fmicomponent == nullptr) {
                 ShowSevereError(state, "ExternalInterface/CalcExternalInterfaceFMUImport: Error when trying to instantiate");
                 ShowContinueError(state, format("instance \"{}\" of FMU \"{}\"", fmuInst.Name, fmu.Name));
                 state.dataExternalInterface->ErrorsFound = true;
@@ -878,7 +878,7 @@ void TerminateResetFreeFMUImport(EnergyPlusData &state, int fmiEndSimulation)
                 fmuInst.fmistatus = fmiEPlusFreeSlave(&fmuInst.fmicomponent, &fmuInst.Index, &fmiEndSimulation);
             }
             // check if fmiComponent has been freed
-            if (!fmuInst.fmicomponent) {
+            if (fmuInst.fmicomponent == nullptr) {
                 ShowSevereError(state, "ExternalInterface/TerminateResetFreeFMUImport: Error when trying to terminate");
                 ShowContinueError(state, format("instance \"{}\" of FMU \"{}\"", fmuInst.Name, fmu.Name));
                 state.dataExternalInterface->ErrorsFound = true;
@@ -1012,7 +1012,7 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
         for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
             auto &fmu = state.dataExternalInterface->FMU(i);
 
-            std::string Name_OLD = "";
+            std::string Name_OLD;
             int j = 1;
             int k = 1;
             fmu.Instance.allocate(NumFMUInputVariables);
@@ -1128,7 +1128,7 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
                     // get the path to the binaries
                     // preprocess args for library call
                     std::vector<char> workingFolderArr(getCharArrayFromString(workingFolderStr));
-                    // Reserve some space in the string, becasue addLibPathCurrentWorkflowFolder doesn't allocate memory for the
+                    // Reserve some space in the string, because addLibPathCurrentWorkflowFolder doesn't allocate memory for the
                     // workingFolderWithLibArr Note: you can't call str.resize(str.length() + 91) because the conversion to std::vector<char> will
                     // find the null terminator and so it will have no effect
                     std::string reservedString =
@@ -2273,7 +2273,7 @@ void GetReportVariableKey(
     int numKeys(0);                                                                 // Number of keys found
     OutputProcessor::StoreType varAvgSum(OutputProcessor::StoreType::Average);      // Variable  is Averaged=1 or Summed=2
     OutputProcessor::TimeStepType varStepType(OutputProcessor::TimeStepType::Zone); // Variable time step is Zone=1 or HVAC=2
-    Constant::Units varUnits(Constant::Units::None);                                // Units sting, may be blank
+    Constant::Units varUnits(Constant::Units::None);                                // Units string, may be blank
     Array1D_string keyNames;
     Array1D_int keyIndexes; // Array index for
     int Loop, iKey;         // Loop counters

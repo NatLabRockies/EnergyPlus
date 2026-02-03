@@ -21,7 +21,7 @@ Everyone who tries to adopt Appendix C in their model should be able to implemen
 
 The current ASHRAE 90.1 narrative does not descibe sufficiently on the detail about 1) whether the luminance requirement for shading control in Appendix C is regarding a photosensor, and if it is, where should that photosensor location be; 2) what exactly should be considered as "rest of the day" in this context. The PNNL team reached out to ASHRAE 90.1 ESC (Envelope Subcommittee) and confirmed that 1) the luminance value for this control is to be based on the photosensor location defined in the daylighting reference point; 2) once the shade is lowered, it will remain down until the end of the day, i.e. midnight.
 
-When interpreting "rest of the day" being "midnight", feedback collected during technicalities call suggests expanding the implementation to cover three additional shading off options: 1) sunset; 2) sunrise next day; and 3) when luminance value drops below a setpoint, which requires adding one more field 'Setpoint3' under WindowShadingControl. 
+When interpreting "rest of the day" being "midnight", feedback collected during technicalities call suggests expanding the implementation to cover three additional shading off options: 1) sunset; 2) sunrise next day; and 3) when luminance value drops below a setpoint, which requires adding one more field 'Setpoint3' under WindowShadingControl.
 
 <!-- **The rest of this document describes the case of adding one new windows shading control option which accounts for the control option of shading off by midnight, other control options will be implemented in similar ways.** -->
 
@@ -88,4 +88,4 @@ Existing test file `WindowTests.idf` is updated with shading of two window surfa
 
 - ASHRAE. 2019. ANSI/ASHRAE/IES 90.1-2019, Energy Standard for Buildings Except Low-Rise
   Residential Buildings. ASHRAE, Atlanta, GA
-- [Add additional option for shading control for WindowProperty:ShadingControl object #7081](https://github.com/NREL/EnergyPlus/issues/7081)
+- [Add additional option for shading control for WindowProperty:ShadingControl object #7081](https://github.com/NatLabRockies/EnergyPlus/issues/7081)

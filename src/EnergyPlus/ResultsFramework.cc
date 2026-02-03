@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -68,6 +68,7 @@
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/GlobalNames.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -87,9 +88,8 @@ namespace ResultsFramework {
         auto const last = s.find_last_not_of(' ');
         if ((first == std::string::npos) || (last == std::string::npos)) {
             return std::string{};
-        } else {
-            return std::string{s.substr(first, last - first + 1)};
         }
+        return std::string{s.substr(first, last - first + 1)};
     }
 
     // Class SimInfo
@@ -620,8 +620,8 @@ namespace ResultsFramework {
         json cols = json::array();
         json rows;
 
-        for (size_t col = 0; col < ColHeaders.size(); ++col) {
-            cols.push_back(ColHeaders[col]);
+        for (const auto &ColHeader : ColHeaders) {
+            cols.push_back(ColHeader);
         }
 
         for (size_t row = 0; row < RowHeaders.size(); ++row) {
@@ -879,7 +879,7 @@ namespace ResultsFramework {
             return;
         }
 
-        Array1D_string alphas(5);
+        Array1D_string alphas(6);
         int numAlphas;
         Array1D<Real64> numbers(2);
         int numNumbers;
@@ -911,6 +911,13 @@ namespace ResultsFramework {
             if (numAlphas >= 4) {
                 outputMsgPack = Util::SameString(alphas(4), "Yes");
             }
+
+            auto const &ort = state.dataOutRptTab;
+            // Jan 2021 Note: Since here we do not know weather ort->unitsStyle_Tabular has been processed or not,
+            // the value "NotFound" is used for the option "UseOutputControlTableStyles" at this point;
+            // This will be updated again and got concretely assigned first thing in OutputReportTabular::WriteTabularReports().
+            ort->unitsStyle_JSON = OutputReportTabular::SetUnitsStyleFromString(alphas(5));
+            ort->formatReals_JSON = (getYesNoValue(alphas(6)) == BooleanSwitch::Yes);
         }
     }
 

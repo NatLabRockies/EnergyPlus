@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1353,7 +1353,7 @@ namespace DualDuct {
             if (this->dd_airterminalColdAirInlet.AirMassFlowRate > this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail) {
                 this->dd_airterminalColdAirInlet.AirMassFlowRate = this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail;
 
-                // These are shutoff boxes for either the hot or the cold, therfore one side or other can = 0.0
+                // These are shutoff boxes for either the hot or the cold, therefore one side or other can = 0.0
             } else if (this->dd_airterminalColdAirInlet.AirMassFlowRate < 0.0) {
                 this->dd_airterminalColdAirInlet.AirMassFlowRate = 0.0;
             } else if (this->dd_airterminalColdAirInlet.AirMassFlowRate > MassFlow) {
@@ -1530,7 +1530,7 @@ namespace DualDuct {
             // Need to make sure that the RA flows are within limits
             if (this->dd_airterminalRecircAirInlet.AirMassFlowRate > this->dd_airterminalRecircAirInlet.AirMassFlowRateMaxAvail) {
                 this->dd_airterminalRecircAirInlet.AirMassFlowRate = this->dd_airterminalRecircAirInlet.AirMassFlowRateMaxAvail;
-                // These are shutoff boxes for either the hot or the cold, therfore one side or other can = 0.0
+                // These are shutoff boxes for either the hot or the cold, therefore one side or other can = 0.0
             } else if (this->dd_airterminalRecircAirInlet.AirMassFlowRate < 0.0) {
                 this->dd_airterminalRecircAirInlet.AirMassFlowRate = 0.0;
             }

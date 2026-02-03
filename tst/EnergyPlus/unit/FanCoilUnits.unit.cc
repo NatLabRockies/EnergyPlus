@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2499,7 +2499,7 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
     EXPECT_NEAR(MinWaterFlow, 0.000015, 0.0000001);
     EXPECT_NEAR(MaxWaterFlow, 0.000150, 0.0000001);
 
-    // lower output of fan coil is around 112 W, MaxWaterFlow should be 0.001% of 1.5 = 0.000015 and MinWaterFlow should remian at 0.0
+    // lower output of fan coil is around 112 W, MaxWaterFlow should be 0.001% of 1.5 = 0.000015 and MinWaterFlow should remain at 0.0
     MinWaterFlow = 0.0;
     MaxWaterFlow = 1.5;
     QZnReq = 120.0;

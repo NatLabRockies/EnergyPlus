@@ -57,7 +57,7 @@
 ! Floor Area:              300 m2
 ! Number of Stories:       1
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -376,8 +376,8 @@
     System Availability Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient

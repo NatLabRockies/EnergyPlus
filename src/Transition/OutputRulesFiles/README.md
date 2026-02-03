@@ -15,4 +15,3 @@ Some examples of changes that need to be documented:
 Some examples of changes that don't need to be documented:
 
  - Numeric output changes within tables due to bug fixes/improvements.
-

@@ -82,7 +82,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -548,8 +548,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -562,8 +562,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -576,8 +576,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -590,8 +590,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -604,8 +604,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -618,8 +618,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -632,8 +632,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -646,8 +646,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -660,8 +660,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient

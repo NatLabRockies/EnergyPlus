@@ -7,7 +7,7 @@ This was previously an Excel workbook that made for very difficult version contr
 
 # Object Change: `AirflowNetwork:Distribution:Component:OutdoorAirFlow`
 
-Field 1 remains the same.  
+Field 1 remains the same.
 After F1, insert new alpha input choice field (A2) 'Outdoor Air Mixer Name' with the object name of  'OutdoorAir:Mixer'.
 Shift all later fields down by 1. The old input fields F2 - F4 become the new F3-F5. The new input field becomes F2.
 
@@ -16,7 +16,7 @@ Note: The old input file has a single OutdoorAir:Mixer object, so that the name 
 
 # Object Change: `AirflowNetwork:Distribution:Component:ReliefAirFlow`
 
-Field 1 remains the same.  
+Field 1 remains the same.
 After F1, insert new alpha input choice field (A2) 'Outdoor Air Mixer Name' with the object name of  'OutdoorAir:Mixer'.
 Shift all later fields down by 1. The old input fields F2 - F4 become the new F3-F5. The new input field becomes F2.
 
@@ -25,30 +25,30 @@ Note: The old input file has a single OutdoorAir:Mixer object, so that the name 
 
 # Object Change: `Boiler:HotWater`
 
-Fields F1-F6 (A1-A4, N1-N2) remain the same.  
+Fields F1-F6 (A1-A4, N1-N2) remain the same.
 Delete F7, which is N3 field. This field was removed as redundant: N3 , \field Design Water Outlet Temperature.
 Move up all later numeric fields by one (old N4-N10 become new N3-N9).
 
 
 # Object Change: `FenestrationSurface:Detailed`
 
-Fields F1-F6 (A1-A5, N1) remain the same.  
+Fields F1-F6 (A1-A5, N1) remain the same.
 Delete F7, which is A6 \field Shading Control Name.
 Shift all later fields by one.
 
 
 # Object Change: `GlazedDoor`
 
-Fields F1-F3 (A1-A3) remain the same.  
+Fields F1-F3 (A1-A3) remain the same.
 Delete F4, which is A4 \field Shading Control Name.
 Shift all later fields by one.
 
- 
+
 # Object Change: 'WindowMaterial:ComplexShade'
- 
+
 The only change is for field A2 (Layer Type). Logic to apply:
 If field contains value Venetian then change it to VenetianHorizontal.
- 
+
 
 # Object Change: 'RunPeriod'
 
@@ -68,7 +68,7 @@ New field F8 (new A2 Day of Week for Start Day)
   else new F8 = old F6 (old A2 Day of Week for Start Day)
 New F9=F13 = Old F7-F11
 
- 
+
 # Object Change: 'RunPeriod:CustomRange'
 
 Change the object type to 'RunPeriod'.
@@ -77,7 +77,7 @@ All fields remain the same.
 
 # Object Change: `Window`
 
-Fields F1-F3 (A1-A3) remain the same.  
+Fields F1-F3 (A1-A3) remain the same.
 Delete F4, which is A4 \field Shading Control Name.
 Shift all later fields by one.
 
@@ -96,7 +96,7 @@ All remaining old Fields F2-F12 (A2-A10, N1-N2) shift by one to F4-F14 (A3-A11, 
 Add the following new fields at the end, starting with F15:
 F15 (A12) Search for a Daylighting:Controls object that matches this Zone Name \field Daylighting Control Object Name.
 F16 (A13) "Sequential" \field Multiple Surface Control Type.
-F17 and following (A14ff) \field Fenestration Surface n Name: 
-a) Loop through all of the old Fenestration:Detailed, Window, and GlazedDoor objects, 
+F17 and following (A14ff) \field Fenestration Surface n Name:
+a) Loop through all of the old Fenestration:Detailed, Window, and GlazedDoor objects,
 b) If the "Shading Control Name" is not blank, and it matches the original shading control name (OldF1) and Zone Name (NewF2) of this object, then add the surface name as a new field here
 Order matters here, so need to maintain the same order that was previously used for control, which was the order of the fenestration surfaces within each zone.

@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -59,7 +59,7 @@ from pyenergyplus.plugin import EnergyPlusPlugin
 class HeatingSetPoint(EnergyPlusPlugin):
 
     def actuate(self, state, x):
-        self.api.exchange.set_actuator_value(state, self.data['actuator_heating'], x)
+        self.api.exchange.set_actuator_value(state, self.data["actuator_heating"], x)
 
     def on_begin_zone_timestep_before_set_current_weather(self, state) -> int:
         if self.api.exchange.warmup_flag(state):
@@ -68,14 +68,14 @@ class HeatingSetPoint(EnergyPlusPlugin):
         return 0
 
     def on_begin_timestep_before_predictor(self, state) -> int:
-        if 'handles_done' not in self.data:
-            self.data['actuator_heating'] = self.api.exchange.get_actuator_handle(
+        if "handles_done" not in self.data:
+            self.data["actuator_heating"] = self.api.exchange.get_actuator_handle(
                 state, "Schedule:Constant", "Schedule Value", "HTGSETP_SCH"
             )
-            if self.data['actuator_heating'] == -1:
+            if self.data["actuator_heating"] == -1:
                 self.api.runtime.issue_severe(state, "Could not get handle to heating setpoint schedule")
                 return 1
-            self.data['handles_done'] = True
+            self.data["handles_done"] = True
 
         hour = self.api.exchange.hour(state)
         day_of_week = self.api.exchange.day_of_week(state)
@@ -103,17 +103,17 @@ class HeatingSetPoint(EnergyPlusPlugin):
 class CoolingSetPoint(EnergyPlusPlugin):
 
     def actuate(self, state, x):
-        self.api.exchange.set_actuator_value(state, self.data['actuator_cooling'], x)
+        self.api.exchange.set_actuator_value(state, self.data["actuator_cooling"], x)
 
     def on_begin_timestep_before_predictor(self, state) -> int:
-        if 'handles_done' not in self.data:
-            self.data['actuator_cooling'] = self.api.exchange.get_actuator_handle(
+        if "handles_done" not in self.data:
+            self.data["actuator_cooling"] = self.api.exchange.get_actuator_handle(
                 state, "Schedule:Constant", "Schedule Value", "CLGSETP_SCH"
             )
-            if self.data['actuator_cooling'] == -1:
+            if self.data["actuator_cooling"] == -1:
                 self.api.runtime.issue_severe(state, "Could not get handle to cooling setpoint schedule")
                 return 1
-            self.data['handles_done'] = True
+            self.data["handles_done"] = True
         hour = self.api.exchange.hour(state)
         day_of_week = self.api.exchange.day_of_week(state)
         day_of_month = self.api.exchange.day_of_month(state)
@@ -161,16 +161,32 @@ class AverageZoneTemps(EnergyPlusPlugin):
         if self.api.exchange.api_data_fully_ready(state):
             # get handles if needed
             if self.need_to_get_handles:
-                self.T1_handle = self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", "Perimeter_ZN_1")
-                self.T2_handle = self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", "Perimeter_ZN_2")
-                self.T3_handle = self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", "Perimeter_ZN_3")
-                self.T4_handle = self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", "Perimeter_ZN_4")
+                self.T1_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Mean Air Temperature", "Perimeter_ZN_1"
+                )
+                self.T2_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Mean Air Temperature", "Perimeter_ZN_2"
+                )
+                self.T3_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Mean Air Temperature", "Perimeter_ZN_3"
+                )
+                self.T4_handle = self.api.exchange.get_variable_handle(
+                    state, "Zone Mean Air Temperature", "Perimeter_ZN_4"
+                )
                 self.T5_handle = self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", "Core_ZN")
 
-                Zn1vol_handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", "Perimeter_ZN_1")
-                Zn2vol_handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", "Perimeter_ZN_2")
-                Zn3vol_handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", "Perimeter_ZN_3")
-                Zn4vol_handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", "Perimeter_ZN_4")
+                Zn1vol_handle = self.api.exchange.get_internal_variable_handle(
+                    state, "Zone Air Volume", "Perimeter_ZN_1"
+                )
+                Zn2vol_handle = self.api.exchange.get_internal_variable_handle(
+                    state, "Zone Air Volume", "Perimeter_ZN_2"
+                )
+                Zn3vol_handle = self.api.exchange.get_internal_variable_handle(
+                    state, "Zone Air Volume", "Perimeter_ZN_3"
+                )
+                Zn4vol_handle = self.api.exchange.get_internal_variable_handle(
+                    state, "Zone Air Volume", "Perimeter_ZN_4"
+                )
                 Zn5vol_handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", "Core_ZN")
 
                 self.Zn1vol = self.api.exchange.get_internal_variable_value(state, Zn1vol_handle)

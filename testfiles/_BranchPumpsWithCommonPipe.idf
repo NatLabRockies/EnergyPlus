@@ -46,7 +46,7 @@
 ! Environmental Emissions: No
 ! Utility Tariffs: No
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Branch Pumps With Common Pipe,  !- Name
@@ -214,9 +214,9 @@
 
   PlantEquipmentList,
     Heating Plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating 1,     !- Equipment 1 Name
-    DistrictHeating:Water,         !- Equipment 2 Object Type
+    DistrictHeating:Water,   !- Equipment 2 Object Type
     Purchased Heating 2;     !- Equipment 2 Name
 
   BranchList,
@@ -265,7 +265,7 @@
     Branch Pump 1,           !- Component 1 Name
     Branch Pump 1 Inlet Node,!- Component 1 Inlet Node Name
     Supply Heating 1 Inlet Node,  !- Component 1 Outlet Node Name
-    DistrictHeating:Water,         !- Component 2 Object Type
+    DistrictHeating:Water,   !- Component 2 Object Type
     Purchased Heating 1,     !- Component 2 Name
     Supply Heating 1 Inlet Node,  !- Component 2 Inlet Node Name
     Supply Heating 1 Outlet Node;  !- Component 2 Outlet Node Name
@@ -294,7 +294,7 @@
     Branch Pump 2,           !- Component 1 Name
     Branch Pump 2 Inlet Node,!- Component 1 Inlet Node Name
     Supply Heating 2 Inlet Node,  !- Component 1 Outlet Node Name
-    DistrictHeating:Water,         !- Component 2 Object Type
+    DistrictHeating:Water,   !- Component 2 Object Type
     Purchased Heating 2,     !- Component 2 Name
     Supply Heating 2 Inlet Node,  !- Component 2 Inlet Node Name
     Supply Heating 2 Outlet Node;  !- Component 2 Outlet Node Name

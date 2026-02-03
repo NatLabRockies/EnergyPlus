@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -198,7 +198,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
     int MaxNums;
     int NumParams;
     Array1D_int NodeNums;
-    bool IsNotOK;                    // Flag to verify nam
+    bool IsNotOK;                    // Flag to verify name
     std::string CurrentModuleObject; // Object type for getting and error messages
     Array1D_string cAlphaFields;     // Alpha field names
     Array1D_string cNumericFields;   // Numeric field names
@@ -265,6 +265,10 @@ void GetZoneEquipmentData(EnergyPlusData &state)
         state.dataZoneEquip->ReturnAirPath.allocate(state.dataZoneEquip->NumReturnAirPaths);
     }
 
+    if (!state.dataHeatBal->ZoneIntGain.allocated()) {
+        DataHeatBalance::AllocateIntGains(state);
+    }
+
     state.dataZoneEquip->ZoneEquipConfig.allocate(state.dataGlobal->NumOfZones); // Allocate the array containing the configuration data for each zone
     if (state.dataHeatBal->doSpaceHeatBalanceSizing || state.dataHeatBal->doSpaceHeatBalanceSimulation) {
         state.dataZoneEquip->spaceEquipConfig.allocate(
@@ -300,8 +304,8 @@ void GetZoneEquipmentData(EnergyPlusData &state)
 
     // auto &Zone(state.dataHeatBal->Zone);
 
+    CurrentModuleObject = "ZoneHVAC:EquipmentConnections";
     for (int controlledZoneLoop = 1; controlledZoneLoop <= numControlledZones; ++controlledZoneLoop) {
-        CurrentModuleObject = "ZoneHVAC:EquipmentConnections";
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                  CurrentModuleObject,
                                                                  controlledZoneLoop,
@@ -350,8 +354,8 @@ void GetZoneEquipmentData(EnergyPlusData &state)
                                   NodeNums);
         thisZone.SystemZoneNodeNumber = thisZoneEquipConfig.ZoneNode;
     } // end loop over controlled zones
+    CurrentModuleObject = "SpaceHVAC:EquipmentConnections";
     for (int controlledSpaceLoop = 1; controlledSpaceLoop <= numControlledSpaces; ++controlledSpaceLoop) {
-        CurrentModuleObject = "SpaceHVAC:EquipmentConnections";
         if (!state.dataHeatBal->doSpaceHeatBalanceSimulation) {
             ShowWarningError(
                 state,
@@ -956,7 +960,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                         ShowSevereError(state, format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
                             state, format("invalid zone_equipment_cooling_sequence=[{}].", thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum)));
-                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipments in the list.");
+                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum) > 0) {
                             ShowContinueError(state, format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
@@ -970,7 +974,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                         ShowSevereError(state, format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
                             state, format("invalid zone_equipment_heating_sequence=[{}].", thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum)));
-                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipments in the list.");
+                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum) > 0) {
                             ShowContinueError(state, format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
@@ -1039,7 +1043,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                     ShowSevereError(state, format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       format("...multiple assignments for Zone Equipment Cooling Sequence={}, must be 1-1 correspondence between "
-                                             "sequence assignments and number of equipments.",
+                                             "sequence assignments and number of equipment.",
                                              ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) == 0) {
@@ -1053,7 +1057,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                     ShowSevereError(state, format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       format("...multiple assignments for Zone Equipment Heating or No-Load Sequence={}, must be 1-1 "
-                                             "correspondence between sequence assignments and number of equipments.",
+                                             "correspondence between sequence assignments and number of equipment.",
                                              ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) == 0) {

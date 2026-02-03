@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -65,12 +65,13 @@
 #   functions......: 19.6% (2224 of 11327 functions)
 
 from pathlib import Path
-cover_input = Path.cwd() / 'cover.txt'
-lines = cover_input.read_text().strip().split('\n')
-line_coverage = lines[-2].strip().split(':')[1].strip()
-line_percent = line_coverage.split(' ')[0]
-function_coverage = lines[-1].strip().split(':')[1].strip()
-cover_output = Path.cwd() / 'cover.md'
+
+cover_input = Path.cwd() / "cover.txt"
+lines = cover_input.read_text().strip().split("\n")
+line_coverage = lines[-2].strip().split(":")[1].strip()
+line_percent = line_coverage.split(" ")[0]
+function_coverage = lines[-1].strip().split(":")[1].strip()
+cover_output = Path.cwd() / "cover.md"
 content = f"""
 <details>
   <summary>Coverage Summary - {line_percent} of lines - Download Coverage Artifact for Full Details</summary>

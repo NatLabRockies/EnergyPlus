@@ -103,7 +103,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Building,                !- Name
@@ -753,12 +753,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     SPACE1-1 Infil 1,        !- Name
-    SPACE1-1,                !- Zone or ZoneList Name
+    SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.032,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -767,23 +767,23 @@
 
   People,
     SPACE1-1 People 1,       !- Name
-    SPACE1-1,                !- Zone or ZoneList Name
+    SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     11,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
 
   Lights,
     SPACE1-1 Lights 1,       !- Name
-    SPACE1-1,                !- Zone or ZoneList Name
+    SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -793,11 +793,11 @@
 
   ElectricEquipment,
     SPACE1-1 ElecEq 1,       !- Name
-    SPACE1-1,                !- Zone or ZoneList Name
+    SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -968,12 +968,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     SPACE2-1 Infil 1,        !- Name
-    SPACE2-1,                !- Zone or ZoneList Name
+    SPACE2-1,                !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.014,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -982,23 +982,23 @@
 
   People,
     SPACE2-1 People 1,       !- Name
-    SPACE2-1,                !- Zone or ZoneList Name
+    SPACE2-1,                !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     5,                       !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
 
   Lights,
     SPACE2-1 Lights 1,       !- Name
-    SPACE2-1,                !- Zone or ZoneList Name
+    SPACE2-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1008,11 +1008,11 @@
 
   ElectricEquipment,
     SPACE2-1 ElecEq 1,       !- Name
-    SPACE2-1,                !- Zone or ZoneList Name
+    SPACE2-1,                !- Zone or ZoneList or Space or SpaceList Name
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1148,12 +1148,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     SPACE3-1 Infil 1,        !- Name
-    SPACE3-1,                !- Zone or ZoneList Name
+    SPACE3-1,                !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.032,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1162,23 +1162,23 @@
 
   People,
     SPACE3-1 People 1,       !- Name
-    SPACE3-1,                !- Zone or ZoneList Name
+    SPACE3-1,                !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     11,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
 
   Lights,
     SPACE3-1 Lights 1,       !- Name
-    SPACE3-1,                !- Zone or ZoneList Name
+    SPACE3-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1188,11 +1188,11 @@
 
   ElectricEquipment,
     SPACE3-1 ElecEq 1,       !- Name
-    SPACE3-1,                !- Zone or ZoneList Name
+    SPACE3-1,                !- Zone or ZoneList or Space or SpaceList Name
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1343,12 +1343,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     SPACE4-1 Infil 1,        !- Name
-    SPACE4-1,                !- Zone or ZoneList Name
+    SPACE4-1,                !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.014,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1357,23 +1357,23 @@
 
   People,
     SPACE4-1 People 1,       !- Name
-    SPACE4-1,                !- Zone or ZoneList Name
+    SPACE4-1,                !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     5,                       !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
 
   Lights,
     SPACE4-1 Lights 1,       !- Name
-    SPACE4-1,                !- Zone or ZoneList Name
+    SPACE4-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1383,11 +1383,11 @@
 
   ElectricEquipment,
     SPACE4-1 ElecEq 1,       !- Name
-    SPACE4-1,                !- Zone or ZoneList Name
+    SPACE4-1,                !- Zone or ZoneList or Space or SpaceList Name
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1523,12 +1523,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     SPACE5-1 Infil 1,        !- Name
-    SPACE5-1,                !- Zone or ZoneList Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.062,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1537,23 +1537,23 @@
 
   People,
     SPACE5-1 People 1,       !- Name
-    SPACE5-1,                !- Zone or ZoneList Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     20,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
 
   Lights,
     SPACE5-1 Lights 1,       !- Name
-    SPACE5-1,                !- Zone or ZoneList Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1563,11 +1563,11 @@
 
   ElectricEquipment,
     SPACE5-1 ElecEq 1,       !- Name
-    SPACE5-1,                !- Zone or ZoneList Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1708,13 +1708,13 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
     ;                        !- Zone Humidistat Humidification Set Point Schedule Name
 
@@ -1728,11 +1728,11 @@
   OtherEquipment,
     SPACE1-1 Latent,         !- Name
     None,                    !- Fuel Type
-    SPACE1-1,                !- Zone or ZoneList Name
+    SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1.0,                     !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1766,13 +1766,13 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
     ;                        !- Zone Humidistat Humidification Set Point Schedule Name
 
@@ -1786,11 +1786,11 @@
   OtherEquipment,
     SPACE2-1 Latent,         !- Name
     None,                    !- Fuel Type
-    SPACE2-1,                !- Zone or ZoneList Name
+    SPACE2-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1.0,                     !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1824,13 +1824,13 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
     ;                        !- Zone Humidistat Humidification Set Point Schedule Name
 
@@ -1844,11 +1844,11 @@
   OtherEquipment,
     SPACE3-1 Latent,         !- Name
     None,                    !- Fuel Type
-    SPACE3-1,                !- Zone or ZoneList Name
+    SPACE3-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1.0,                     !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1882,13 +1882,13 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
     ;                        !- Zone Humidistat Humidification Set Point Schedule Name
 
@@ -1902,11 +1902,11 @@
   OtherEquipment,
     SPACE4-1 Latent,         !- Name
     None,                    !- Fuel Type
-    SPACE4-1,                !- Zone or ZoneList Name
+    SPACE4-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1.0,                     !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1940,13 +1940,13 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.005,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
     ;                        !- Zone Humidistat Humidification Set Point Schedule Name
 
@@ -1960,11 +1960,11 @@
   OtherEquipment,
     SPACE5-1 Latent,         !- Name
     None,                    !- Fuel Type
-    SPACE5-1,                !- Zone or ZoneList Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1.0,                     !- Fraction Latent
     0,                       !- Fraction Radiant

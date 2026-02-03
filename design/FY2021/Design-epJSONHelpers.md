@@ -5,10 +5,10 @@ epJSON helper functions to get field values
 
  - Original, May 17, 2021
  - Revision Date
- 
+
 
 ## Objective ##
-From issue [#7632](https://github.com/NREL/EnergyPlus/issues/7632)
+From issue [#7632](https://github.com/NatLabRockies/EnergyPlus/issues/7632)
 
 It would be useful to have an input processor function that
 
@@ -32,7 +32,7 @@ Here's a prototype `getInput` function using 3 new functions:
     InputProcessor::json objectSchemaProps;
     CurrentModuleObject = "AirflowNetwork:MultiZone:Surface:Crack";
     objectSchemaProps = state.dataInputProcessing->inputProcessor->getObjectSchemaProps(state, CurrentModuleObject);
-    
+
     // Get all instances of this object type from the input file
     auto instances = state.dataInputProcessing->inputProcessor->epJSON.find(CurrentModuleObject);
 
@@ -46,19 +46,19 @@ Here's a prototype `getInput` function using 3 new functions:
             // For incoming idf, maintain object order
             ++instanceCounter;
             itemNum = state.dataInputProcessing->inputProcessor->getIDFObjNum(state, state.dataHeatBalMgr->CurrentModuleObject, instanceCounter);
- 
+
             // Get simple input fields (if blank will return default or blank or zero)
             Real64 crack(itemNum).coeff = state.dataInputProcessing->inputProcessor->getRealFieldValue(
                 state, CurrentModuleObject, objectFields, objectSchemaProps, "air_mass_flow_coefficient_at_reference_conditions");
-            
+
             std::string crack(itemNum).referenceCrackConditionsName = state.dataInputProcessing->inputProcessor->getAlphaFieldValue(
                 state, CurrentModuleObject, objectFields, objectSchemaProps, "reference_crack_conditions");
-            
+
         }
     }
 
 Here's a prototype section for retrieving extensible fields:
-For this object, the extensible group is named "managers". 
+For this object, the extensible group is named "managers".
 The extensible group name and field names can be found in the schema (Energy+.schema.epJSON).
 
                 auto extensibles = objectFields.find("managers");
@@ -66,7 +66,7 @@ The extensible group name and field names can be found in the schema (Energy+.sc
                 if (extensibles != objectFields.end()) {
                     auto extensiblesArray = extensibles.value();
                     int numExtensibles = extensiblesArray.size();
-                    
+
                     // Allocate and initialize object arrays that are sized by the number of extensible field groups
                     state.dataSystemAvailabilityManager->SysAvailMgrListData(Item).NumItems = numExtensibles;
                     state.dataSystemAvailabilityManager->SysAvailMgrListData(Item).AvailManagerName.allocate(numExtensibles);

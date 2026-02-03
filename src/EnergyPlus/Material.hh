@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -218,7 +218,7 @@ namespace Material {
     struct MaterialBase
     {
         // Members
-        std::string Name = "";        // Name of material layer
+        std::string Name;             // Name of material layer
         int Num = 0;                  // Index in material array, comes in handy sometimes
         Group group = Group::Invalid; // Material group type (see Material Parameters above.  Currently
 
@@ -253,7 +253,7 @@ namespace Material {
 
         // Radiation parameters // Are these for windows or for opaque materials also?
         bool AbsorpSolarEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
-        Real64 AbsorpSolarEMSOverride = false;   // value to use when EMS calling to override value for solar absorptance
+        Real64 AbsorpSolarEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
         bool AbsorpThermalEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance
         Real64 AbsorpThermalEMSOverride = 0.0;   // value to use when EMS calling to override value for thermal absorptance
         bool AbsorpVisibleEMSOverrideOn = false; // if true, then EMS calling to override value for visible absorptance
@@ -347,15 +347,15 @@ namespace Material {
 
     // This may seem like an overly complicated way to handle a set of
     // multi-dimensional variables, but I think that it is actually
-    // cleaner than either a multi-dimensional array (and certaily
+    // cleaner than either a multi-dimensional array (and certainly
     // faster) and also better than just a long list of variables.
 
     // Blind-properties essentially have four dimensions: property
     // type (transmittance, reflectance, absorptance), beam or
     // diffuse, front or back, solar or visible (maybe solar or
     // visible or thermal/IR).  Rather than coming up with and
-    // enforcing a consistent namming scheme for these variables,
-    // arranging them into nested structres keeps the ordering (as
+    // enforcing a consistent naming scheme for these variables,
+    // arranging them into nested structures keeps the ordering (as
     // well as the naming) of the dimensions consistent, and also
     // inserts periods between the dimensions to help with
     // readability.  In this case, I chose the struct nesting to be
@@ -369,7 +369,7 @@ namespace Material {
     // single offset like it loads every other variable in an object.
     // This is another downside of references in C++.  Accessing
     // variables in structures (even nested structures) is fast.
-    // Acessing variables through pointer indirection is slow.
+    // Accessing variables through pointer indirection is slow.
     // W->X->Y->Z is slower than W.X.Y.Z.  References are pointers,
     // but they use the . notation rather than -> for accessing
     // fields.  So if W.X.Y.Z is implemented using nested structures

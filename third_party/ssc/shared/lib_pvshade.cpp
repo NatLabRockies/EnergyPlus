@@ -302,23 +302,23 @@ double sssky_diffuse_table::compute(double surface_tilt) {
     double Asky_shade[1000];
     for (int n = 0; n < 1000; n++)
     {
-        if (surface_tilt != 0)
+        if (surface_tilt != 0) {
             arg[n] = (1 / tand_stilt) - (1 / (gcr * sind_stilt * (1 - n * step)));
-        else
+            gamma[n] = (-M_PI / 2) + atan(arg[n]);
+            tan_tilt_gamma[n] = tan(surface_tilt * DTOR + gamma[n]);
+            Asky_shade[n] = M_PI + M_PI / pow((1 + tan_tilt_gamma[n] * tan_tilt_gamma[n]), 0.5);
+            if ((surface_tilt * DTOR + gamma[n]) > (M_PI / 2))
+            {
+                Asky_shade[n] = 2 * M_PI - Asky_shade[n];
+            }
+            skydiff += (Asky_shade[n] / Asky) * step;
+        } else {
             arg[n] = std::numeric_limits<double>::quiet_NaN();
-        gamma[n] = (-M_PI / 2) + atan(arg[n]);
-        tan_tilt_gamma[n] = tan(surface_tilt * DTOR + gamma[n]);
-        Asky_shade[n] = M_PI + M_PI / pow((1 + tan_tilt_gamma[n] * tan_tilt_gamma[n]), 0.5);
-        if (isnan(Asky_shade[n]))
-        {
+            gamma[n]  = std::numeric_limits<double>::quiet_NaN();
+            tan_tilt_gamma[n] = std::numeric_limits<double>::quiet_NaN();
             Asky_shade[n] = Asky;
+            skydiff += step;
         }
-        else if ((surface_tilt * DTOR + gamma[n]) > (M_PI / 2))
-        {
-            Asky_shade[n] = 2 * M_PI - Asky_shade[n];
-        }
-        else {}
-        skydiff += (Asky_shade[n] / Asky) * step;
     }
     char buf[8];
     sprintf(buf, "%.3f", surface_tilt);

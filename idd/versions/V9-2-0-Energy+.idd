@@ -443,13 +443,13 @@ SimulationControl,
       \type integer
       \minimum 1
       \default 1
-      
+
 PerformancePrecisionTradeoffs,
       \unique-object
       \memo This object enables users to choose certain options that speed up EnergyPlus simulation,
       \memo but may lead to small decreases in accuracy of results.
   A1; \field Use Coil Direct Solutions
-      \note If Yes, an analytical or empirical solution will be used to replace iterations in 
+      \note If Yes, an analytical or empirical solution will be used to replace iterations in
       \note the coil performance calculations.
       \type choice
       \key Yes
@@ -8813,9 +8813,9 @@ Construction:InternalSource,
        \object-list MaterialName
 
 Construction:AirBoundary,
-       \memo Indicates an open boundary between two zones. It may be used for base surfaces and fenestration surfaces. 
-       \memo When this construction type is used, the Outside Boundary Condition of the surface 
-       \memo (or the base surface of a fenestration surface) must be either Surface or Zone. 
+       \memo Indicates an open boundary between two zones. It may be used for base surfaces and fenestration surfaces.
+       \memo When this construction type is used, the Outside Boundary Condition of the surface
+       \memo (or the base surface of a fenestration surface) must be either Surface or Zone.
        \memo A base surface with Construction:AirBoundary cannot hold any fenestration surfaces.
   A1,  \field Name
        \required-field
@@ -8840,7 +8840,7 @@ Construction:AirBoundary,
        \key SimpleMixing
        \default None
   N1,  \field Simple Mixing Air Changes per Hour
-       \note If the Air Exchange Method is SimpleMixing then this field specifies the air changes per hour 
+       \note If the Air Exchange Method is SimpleMixing then this field specifies the air changes per hour
        \note using the volume of the smaller zone as the basis.
        \note If an AirflowNetwork simulation is active this field is ignored.
        \units 1/hr
@@ -8853,7 +8853,7 @@ Construction:AirBoundary,
        \note If an AirflowNetwork simulation is active this field is ignored.
        \type object-list
        \object-list ScheduleNames
-       
+
 WindowThermalModel:Params,
        \memo object is used to select which thermal model should be used in tarcog simulations
   A1 , \field Name
@@ -65063,7 +65063,7 @@ AirLoopHVAC:DedicatedOutdoorAirSystem,
        \type integer
        \note Enter the number of the AirLoopHAVC served by AirLoopHVAC:DedicatedOutdoorAirSystem
   A6 , \field AirLoopHVAC 1 Name
-       \note The rest of fields are extensible. It requires AirLoopHVAC names served by   
+       \note The rest of fields are extensible. It requires AirLoopHVAC names served by
        \note an AirLoopHVAC:DedicatedOutdoorAirSystem.
        \begin-extensible
        \type object-list
@@ -65128,8 +65128,8 @@ AirLoopHVAC:DedicatedOutdoorAirSystem,
 
 AirLoopHVAC:Mixer,
        \extensible:1 - Just duplicate last field and comments (changing numbering, please)
-       \memo Mix N inlet air streams from Relief Air Stream Node in OutdoorAir:Mixer objects 
-       \memo served by AirLoopHVAC objects listed in AirLoopHVAC:DedicatedOutdoorAirSystem into one 
+       \memo Mix N inlet air streams from Relief Air Stream Node in OutdoorAir:Mixer objects
+       \memo served by AirLoopHVAC objects listed in AirLoopHVAC:DedicatedOutdoorAirSystem into one
        \memo (currently 10 as default, but extensible). Node names cannot
        \memo be duplicated within a single mixer list.
   A1 , \field Name
@@ -65243,7 +65243,7 @@ AirLoopHVAC:Mixer,
 
 AirLoopHVAC:Splitter,
        \extensible:1 Just duplicate last field and comments (changing numbering, please)
-       \memo Split one air stream from AirLoopHVAC:DedicatedOutdoorAirSystem outlet node into N 
+       \memo Split one air stream from AirLoopHVAC:DedicatedOutdoorAirSystem outlet node into N
        \memo outlet streams (currently 10 as default, but extensible).  Node names
        \memo should be Outdoor Air Stream Node Name in OutdoorAir:Mixer objects served by
        \memo AirLoopHVAC objects listed in AirLoopHVAC:DedicatedOutdoorAirSystem.

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -308,7 +308,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
         }
     }
 
-    // Check that the fraction Sunlit is properly set to 1.0 when the sun is Up and ZERO otherwis: it does NOT remember previously set values
+    // Check that the fraction Sunlit is properly set to 1.0 when the sun is Up and ZERO otherwise: it does NOT remember previously set values
     for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
         SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
         for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
@@ -2200,7 +2200,7 @@ RunPeriod,
 
 ShadowCalculation,
   PolygonClipping,  !- Calculation Method
-  Periodic,  !- Caclulation Update Frequency Method
+  Periodic,  !- Calculation Update Frequency Method
   20,  !- Calculation Update Frequency
   15000;  !- Maximum Figures in Shadow Overlap Calculations
 
@@ -2518,7 +2518,7 @@ RunPeriod,
 
 ShadowCalculation,
   PixelCounting,  !- Calculation Method
-  Periodic,  !- Caclulation Update Frequency Method
+  Periodic,  !- Calculation Update Frequency Method
   20,  !- Calculation Update Frequency
   15000;  !- Maximum Figures in Shadow Overlap Calculations
 
@@ -2950,7 +2950,7 @@ TEST_F(EnergyPlusFixture, WindowShadingManager_Lum_Test)
     // solar below setpoint, shading expected to be conditionally off
     EXPECT_ENUM_EQ(state->dataSurface->SurfWinShadingFlag(1), WinShadingType::IntShadeConditionallyOff);
 
-    // solar above setpoint, shading expcted to be on
+    // solar above setpoint, shading expected to be on
     EXPECT_ENUM_EQ(state->dataSurface->SurfWinShadingFlag(2), WinShadingType::ExtShade);
 }
 
@@ -4486,7 +4486,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap)
     EXPECT_NEAR(0.99915, wallSunLitFracOverhangOnly, 0.0001);
     EXPECT_NEAR(0.76955, winSunLitFracOverhangOnly, 0.0001);
 
-    // Overhang tranparent, Tree opaque
+    // Overhang transparent, Tree opaque
     overhangSched->EMSActuatedOn = true;
     treeSched->EMSActuatedOn = true;
     overhangSched->EMSVal = 1.0;
@@ -4577,7 +4577,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap)
     EXPECT_NEAR(0.77626, wallSunLitFracOverhangOnly, 0.0001);
     EXPECT_NEAR(0.08560, winSunLitFracOverhangOnly, 0.0001);
 
-    // Overhang tranparent, Tree opaque
+    // Overhang transparent, Tree opaque
     overhangSched->EMSActuatedOn = true;
     treeSched->EMSActuatedOn = true;
     overhangSched->EMSVal = 1.0;

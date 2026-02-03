@@ -100,7 +100,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   CoilSystem:Heating:DX,
     HeatPump DX Coil 1,      !- Name
@@ -122,6 +122,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
+    ,                        !- Availability Schedule Name
     Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     5.0,                     !- Number of Speeds {dimensionless}
@@ -143,51 +144,52 @@
     9124.853458,             !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     4.29731,                 !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
     0.653,                   !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPHeatingCAPFTemp1,      !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    HPACFFF,                 !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACFFF,                 !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPHeatingEIRFTemp1,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     HPACFFF,                 !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
     12807.12192,             !- Speed 2 Reference Unit Gross Rated Heating Capacity {W}
     4.06127,                 !- Speed 2 Reference Unit Gross Rated Heating COP {W/W}
     0.6532,                  !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPHeatingCAPFTemp2,      !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    HPACFFF,                 !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACFFF,                 !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPHeatingEIRFTemp2,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     HPACFFF,                 !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
     16381.47714,             !- Speed 3 Reference Unit Gross Rated Heating Capacity {W}
     3.90494,                 !- Speed 3 Reference Unit Gross Rated Heating COP {W/W}
     0.79,                    !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPHeatingCAPFTemp3,      !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    HPACFFF,                 !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACFFF,                 !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPHeatingEIRFTemp3,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     HPACFFF,                 !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
     19932.09261,             !- Speed 4 Reference Unit Gross Rated Heating Capacity {W}
     3.50533,                 !- Speed 4 Reference Unit Gross Rated Heating COP {W/W}
     0.791,                   !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPHeatingCAPFTemp4,      !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    HPACFFF,                 !- Speed 4 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACFFF,                 !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPHeatingEIRFTemp4,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     HPACFFF,                 !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
     28464.50762,             !- Speed 5 Reference Unit Gross Rated Heating Capacity {W}
     2.63201,                 !- Speed 5 Reference Unit Gross Rated Heating COP {W/W}
     0.80,                    !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPHeatingCAPFTemp5,      !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    HPACFFF,                 !- Speed 5 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACFFF,                 !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPHeatingEIRFTemp5,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     HPACFFF;                 !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
   Coil:Cooling:DX:VariableSpeed,
     Heat Pump ACDXCoil 1,    !- Name
+    ,                        !- Availability Schedule Name
     DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     4.0,                     !- Number of Speeds {dimensionless}
@@ -196,9 +198,9 @@
     AUTOSIZE,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
-    ,                        !- Maximum Cycling Rate
-    ,                        !- Latent Capacity Time Constant
-    ,                        !- Fan Delay Time
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     HPACCOOLPLFFPLR,         !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
@@ -216,8 +218,8 @@
     0.79,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     3.980488789,             !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.944,                   !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     2.655,                   !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPCoolingCAPFTemp1,      !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -228,8 +230,8 @@
     0.73,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.08,                    !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     1.888,                   !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     5.31,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPCoolingCAPFTemp2,      !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -240,8 +242,8 @@
     0.78,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.19,                    !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     2.832,                   !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     7.965,                   !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPCoolingCAPFTemp3,      !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -252,8 +254,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     3.866381837,             !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     3.776,                   !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     10.62,                   !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPCoolingCAPFTemp4,      !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -1547,7 +1549,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1561,7 +1563,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1575,7 +1577,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1587,7 +1589,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1599,7 +1601,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1632,7 +1634,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA West Zone,       !- Name
@@ -1668,7 +1677,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA EAST ZONE,       !- Name
@@ -1704,7 +1720,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NORTH ZONE,      !- Name

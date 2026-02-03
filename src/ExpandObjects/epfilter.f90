@@ -9589,7 +9589,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Fan Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN
@@ -9627,7 +9626,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Mixer Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN
@@ -17297,6 +17295,7 @@ DO iSys = 1, numCompactSysUnitarySystem
       CALL WriteComment('and 29.4C (85F) entering water temperature')
       CALL CreateNewObj('Coil:Cooling:WaterToAirHeatPump:EquationFit')
       CALL AddToObjFld('Name', base + ussAirHandlerNameOff,' Cooling Coil')
+      CALL AddToObjStr('Availability Schedule Name','')
       CALL AddToObjFld('Water Inlet Node Name', base + ussAirHandlerNameOff,' WAHP Cooling Water Inlet Node')
       CALL AddToObjFld('Water Outlet Node Name', base + ussAirHandlerNameOff,' WAHP Cooling Water Outlet Node')
       CALL AddToObjFld('Air Inlet Node Name', base + ussAirHandlerNameOff, TRIM(coolCoilUnitInlet))
@@ -17823,6 +17822,7 @@ DO iSys = 1, numCompactSysUnitarySystem
     CALL WriteComment('21.11C (70F) entering air dry-bulb temperature and 21.11C (70F) entering water temperature')
     CALL CreateNewObj('Coil:Heating:WaterToAirHeatPump:EquationFit')
     CALL AddToObjFld('Name', base + ussAirHandlerNameOff,' Heating Coil')
+    CALL AddToObjStr('Availability Schedule Name','')
     CALL AddToObjFld('Water Inlet Node Name', base + ussAirHandlerNameOff,' WAHP Heating Water Inlet Node')
     CALL AddToObjFld('Water Outlet Node Name', base + ussAirHandlerNameOff,' WAHP Heating Water Outlet Node')
     CALL AddToObjFld('Air Inlet Node Name', base + ussAirHandlerNameOff, TRIM(heatCoilInlet))
@@ -22796,6 +22796,7 @@ LOGICAL :: isTstatCtrlTypeScheduled = .FALSE.
 LOGICAL :: isCoolCoilNone = .FALSE.
 LOGICAL :: isHeatCoilNone = .FALSE.
 LOGICAL :: isCondWaterCooled = .FALSE.
+LOGICAL :: isReverseCycleDefrost = .FALSE.
 INTEGER :: baseboardKind = 0
 CHARACTER(len=1) :: NextSequenceNumber = '1'
 INTEGER :: controlZoneBase
@@ -23314,6 +23315,10 @@ DO iSys = 1, numCompactSysVRF
     CALL WriteError('In HVACTemplate:System:VRF "'//TRIM(FldVal(base + vrfsNameOff))//'" the Master Thermostat  '//&
    'Priority Control Type = Scheduled, but the Thermostat Priority Schedule Name is blank.')
   END IF
+  isReverseCycleDefrost = .FALSE.
+  IF (SameString(FldVal(base + vrfsHPDefrTypeOff),'ReverseCycle')) THEN
+    isReverseCycleDefrost = .TRUE.
+  END IF
 
   CALL CreateNewObj('AirConditioner:VariableRefrigerantFlow')
   CALL AddToObjFld('Heat Pump Name', base + vrfsNameOff,' VRF Heat Pump')
@@ -23380,7 +23385,11 @@ DO iSys = 1, numCompactSysVRF
   CALL AddToObjFld('Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater {C}', base + vrfsCrankHtMaxODBOff,'')
   CALL AddToObjFld('Defrost Strategy', base + vrfsHPDefrTypeOff,'')
   CALL AddToObjFld('Defrost Control', base + vrfsHPDefrCtrlTypeOff,'')
-  CALL AddToObjStr('Defrost Energy Input Ratio Modifier Function of Temperature Curve Name','')
+  IF (isReverseCycleDefrost) THEN
+    CALL AddToObjFld('Defrost Energy Input Ratio Modifier Function of Temperature Curve Name', base + vrfsNameOff,' Reverse Cycle Defrost Curve')
+  ELSE
+    CALL AddToObjStr('Defrost Energy Input Ratio Modifier Function of Temperature Curve Name','')
+  END IF
   CALL AddToObjFld('Defrost Time Period Fraction', base + vrfsHPDefrTimeFracOff,'')
   CALL AddToObjFld('Resistive Defrost Heater Capacity {W}', base + vrfsHPDefrHeatCapOff,'')
   CALL AddToObjFld('Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}', base + vrfsHPDefrMaxODBOff,'')
@@ -23410,6 +23419,27 @@ DO iSys = 1, numCompactSysVRF
   CALL AddToObjStr('Heat Recovery Heating Eenrgy Modifier Curve Name','')
   CALL AddToObjStr('Initial Heat Recovery Heating Energy Fraction','')
   CALL AddToObjStr('Heat Recovery Heating Energy Time Constant (hr)','',.TRUE.)
+
+  IF (isReverseCycleDefrost) THEN
+    CALL WriteComment('VRF defrost curve example, modify as required')
+    CALL CreateNewObj('Curve:Biquadratic')
+    CALL AddToObjFld('Name', base + vrfsNameOff,' Reverse Cycle Defrost Curve')
+    CALL AddToObjStr('Coefficient1 Constant','0.95')
+    CALL AddToObjStr('Coefficient2 x','0.0')
+    CALL AddToObjStr('Coefficient3 x**2','0.0')
+    CALL AddToObjStr('Coefficient4 y','0.0')
+    CALL AddToObjStr('Coefficient5 y**2','0.0')
+    CALL AddToObjStr('Coefficient6 x*y','0.0')
+    CALL AddToObjStr('Minimum Value of x','15.55')
+    CALL AddToObjStr('Maximum Value of x','24')
+    CALL AddToObjStr('Minimum Value of y','-5')
+    CALL AddToObjStr('Maximum Value of y','24')
+    CALL AddToObjStr('Minimum Curve Output','')
+    CALL AddToObjStr('Maximum Curve Output','')
+    CALL AddToObjStr('Input Unit Type for X','Temperature')
+    CALL AddToObjStr('Input Unit Type for Y','Temperature')
+    CALL AddToObjStr('Output Unit Type','Dimensionless',.TRUE.)
+  END IF
 
   ! Terminal Unit List
   CALL CreateNewObj('ZoneTerminalUnitList')
@@ -30336,6 +30366,7 @@ DO iZone = 1, numCompactWaterAirHP
   CALL WriteComment('and 29.4C (85F) entering water temperature')
   CALL CreateNewObj('Coil:Cooling:WaterToAirHeatPump:EquationFit')
   CALL AddToObjFld('Name', base + wahpNameOff,' WAHP Cooling Coil')
+  CALL AddToObjStr('Availability Schedule Name','')
   CALL AddToObjFld('Water Inlet Node Name', base + wahpNameOff,' WAHP Cooling Water Inlet Node')
   CALL AddToObjFld('Water Outlet Node Name', base + wahpNameOff,' WAHP Cooling Water Outlet Node')
   IF (isDrawThru) THEN
@@ -30430,6 +30461,7 @@ DO iZone = 1, numCompactWaterAirHP
   CALL WriteComment('21.11C (70F) entering air dry-bulb temperature and 21.11C (70F) entering water temperature')
   CALL CreateNewObj('Coil:Heating:WaterToAirHeatPump:EquationFit')
   CALL AddToObjFld('Name', base + wahpNameOff,' WAHP Heating Coil')
+  CALL AddToObjStr('Availability Schedule Name','')
   CALL AddToObjFld('Water Inlet Node Name', base + wahpNameOff,' WAHP Heating Water Inlet Node')
   CALL AddToObjFld('Water Outlet Node Name', base + wahpNameOff,' WAHP Heating Water Outlet Node')
   CALL AddToObjFld('Air Inlet Node Name', base + wahpNameOff,' WAHP Cooling Coil Outlet')

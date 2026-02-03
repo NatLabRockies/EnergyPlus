@@ -160,5 +160,3 @@
 !
 !     TRADEMARKS: EnergyPlus is a trademark of the US Department of Energy.
 !
-
-

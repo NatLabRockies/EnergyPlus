@@ -5,7 +5,7 @@ Conduction Finite Difference Node Heat Flux Reporting
 
  - October 30, 2015
  - Revised November 18, 2015 - Plan B - Heat flux *at* each node rather than *between* nodes. Track half-nodes to accomplish this. Previous design did not meet the original objective which is to report the heat flux at the interface between two material layers.
- 
+
 
 ## Justification for New Feature ##
 

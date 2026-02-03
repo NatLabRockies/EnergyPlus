@@ -3,7 +3,7 @@
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     anyplace Load Calc,      !- Name
@@ -563,7 +563,7 @@
     OSCTest-LightsSchedule,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     400,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -577,7 +577,7 @@
     OSCTest-EquipSchedule,   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     800,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -589,8 +589,8 @@
     OSCTest-InfiltrationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     4.716666E-02,            !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -603,7 +603,7 @@
     OSCTest-VentilationSchedule,  !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     4.716667E-04,            !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type

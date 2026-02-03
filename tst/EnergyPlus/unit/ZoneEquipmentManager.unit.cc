@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2145,7 +2145,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_DistributeSequentialLoad_MixedEqu
     int EquipNum = 1;
     updateSystemOutputRequired(*state, ZoneNum, SysOutputProvided, LatOutputProvided, energy, moisture, EquipNum);
 
-    // Expect next sequenced load fractions to be applied here on the first and second equipments
+    // Expect next sequenced load fractions to be applied here on the first and second equipment
     Real64 expectedHeatLoad = energy.UnadjRemainingOutputReqToHeatSP * 0.6;
     Real64 expectedCoolLoad = energy.UnadjRemainingOutputReqToCoolSP * 0.6;
     EXPECT_DOUBLE_EQ(energy.SequencedOutputRequired(1), energy.TotalOutputRequired * 0.4);
@@ -3054,7 +3054,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneMassBalance_wAdjustInfiltrati
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.0;
     state->dataEnvrn->OutBaroPress = 100000.0;
@@ -3290,7 +3290,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustReturnOnly)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -3543,7 +3543,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustReturnThenMixing)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -3808,7 +3808,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wAdjustMixingThenReturn)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment, DataHeatBalance::InfiltrationFlow::Adjust);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -4113,7 +4113,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_wSourceAndReceivingZone)
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::AllZones);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    state->dataHeatBal->AirFlowFlag = 1;
+    state->dataHeatBal->AirFlowFlag = true;
     // set zone conditions
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -4339,7 +4339,7 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_ZoneMixingInfiltrationFlowsFlag
     GetProjectControlData(*state, ErrorsFound);
     GetSimpleAirModelInputs(*state, ErrorsFound);
     SetZoneMassConservationFlag(*state);
-    // ckeck zone mixing and infiltration flags
+    // check zone mixing and infiltration flags
     EXPECT_FALSE(ErrorsFound);
     EXPECT_TRUE(state->dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance);
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.ZoneFlowAdjustment, DataHeatBalance::AdjustmentType::AdjustMixingOnly);
@@ -4347,8 +4347,8 @@ TEST_F(EnergyPlusFixture, ZoneAirMassFlowBalance_ZoneMixingInfiltrationFlowsFlag
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationTreatment, DataHeatBalance::InfiltrationFlow::No);
     EXPECT_FALSE(state->dataHeatBal->ZoneAirMassFlow.AdjustZoneInfiltrationFlow);
     EXPECT_ENUM_EQ(state->dataHeatBal->ZoneAirMassFlow.InfiltrationForZones, DataHeatBalance::InfiltrationZoneType::Invalid);
-    // ckeck zone re-order,
-    EXPECT_EQ(state->dataHeatBalFanSys->ZoneReOrder(1), 3); // receving only zone
+    // check zone re-order,
+    EXPECT_EQ(state->dataHeatBalFanSys->ZoneReOrder(1), 3); // receiving only zone
     EXPECT_EQ(state->dataHeatBalFanSys->ZoneReOrder(2), 2); // source and receiving zone,
     EXPECT_EQ(state->dataHeatBalFanSys->ZoneReOrder(3), 1); // source only zone
 }
@@ -4925,7 +4925,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_SizeZoneEquipment_DOASLoadTest)
 TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 {
     std::string_view constexpr idf_objects = R"IDF(
-	
+
 	  ZoneHVAC:AirDistributionUnit,
 		ADU CV HW Rht,           !- Name
 		Node 5,                  !- Air Distribution Unit Outlet Node Name
@@ -4946,7 +4946,7 @@ TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
 		0,                       !- Minimum Hot Water or Steam Flow Rate {m3/s}
 		0.001,                   !- Convergence Tolerance
 		50;                      !- Maximum Reheat Air Temperature {C}
-	
+
       ZoneHVAC:AirDistributionUnit,
         ADU VAV Rht,             !- Name
         Node 5,                  !- Air Distribution Unit Outlet Node Name

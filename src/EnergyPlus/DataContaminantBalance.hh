@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -124,7 +124,7 @@ namespace DataContaminantBalance {
         std::string Name;                                 // Name of the pressure driven generic contaminant source and sink
         std::string SurfName;                             // Name of the surface
         int SurfNum = 0;                                  // Surface number
-        Real64 GenRateCoef = 0.0;                         // Generic contaminant design generation rate coefficeint [m3/s]
+        Real64 GenRateCoef = 0.0;                         // Generic contaminant design generation rate coefficient [m3/s]
         Sched::Schedule *generateRateCoefSched = nullptr; // Generic contaminant design generation rate schedule
         Real64 Expo = 0.0;                                // Generic contaminant exponent []
         Real64 GenRate = 0.0;                             // Generic contaminant design generation rate [m3/s] for reporting
@@ -162,8 +162,8 @@ namespace DataContaminantBalance {
         // and sink
         std::string SurfName;                      // Name of the surface
         int SurfNum = 0;                           // Surface number
-        Real64 TransCoef = 0.0;                    // Generic contaminant mass transfer coefficeint [m/s]
-        Sched::Schedule *transCoefSched = nullptr; // Generic contaminant mass transfer coefficeint schedule pointer
+        Real64 TransCoef = 0.0;                    // Generic contaminant mass transfer coefficient [m/s]
+        Sched::Schedule *transCoefSched = nullptr; // Generic contaminant mass transfer coefficient schedule pointer
         Real64 HenryCoef = 0.0;                    // Generic contaminant Henry adsorption constant or
         // partition coefficient []
         Real64 GenRate = 0.0; // Generic contaminant design generation rate [m3/s] for reporting

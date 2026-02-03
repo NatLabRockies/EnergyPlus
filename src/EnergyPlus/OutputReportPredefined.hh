@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1147,6 +1147,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaMvZoneArea = 0;
     int pdchOaMvDesZnOa = 0;
     int pdchOaMvMinDynTrgVent = 0;
+    int pdchOaMvZoneMult = 0;
 
     int pdstOAtotAirByZone = 0;
     int pdchOaTaBzMechVent = 0;
@@ -1159,6 +1160,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaTaBzTmAt = 0;
     int pdchOaTaBzTmAbove = 0;
     int pdchOaTaBzTmAboveUnocc = 0;
+    int pdchOaTaBzZoneMult = 0;
 
     int pdstOAavgOccByZone = 0;
     int pdchOaOccBzMechVent = 0;
@@ -1170,6 +1172,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaOccBzTmBelow = 0;
     int pdchOaOccBzTmAt = 0;
     int pdchOaOccBzTmAbove = 0;
+    int pdchOaOccBzZoneMult = 0;
 
     int pdstOAtotAirByLoop = 0;
     int pdchOaTaAlMechVent = 0;

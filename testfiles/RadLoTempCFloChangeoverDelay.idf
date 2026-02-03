@@ -96,7 +96,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -526,8 +526,8 @@
     ON,                      !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.010,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -540,8 +540,8 @@
     ON,                      !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.010,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -554,8 +554,8 @@
     ON,                      !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.015,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1567,7 +1567,7 @@
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
     Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
@@ -1719,7 +1719,7 @@
 
   PlantEquipmentList,
     heating plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
   Pump:VariableSpeed,

@@ -77,18 +77,17 @@ This output is the amount of outdoor air entering the zone. This is the average 
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:ConstantVolume:Reheat,
-      Reheat Zone 1,  !- Name of System
-      FanAndCoilAvailSched,  !- Availability schedule for VAV System
-      Zone 1 Reheat Air Outlet Node,  !- Unit Air Outlet Node
-      Zone 1 Reheat Air Inlet Node,  !- Unit Air Inlet Node
-      0.59,  !- Maximum air flow rate {m3/s}
-      COIL:Gas:Heating,  !- Reheat Component Object
-      Reheat Coil Zone 1,  !- Name of Reheat Component
-      0.0,  !- Max Reheat Water Flow {m3/s}
-      0.0,  !- Min Reheat Water Flow {m3/s}
-      0.001;  !- Convergence Tolerance
+  Reheat Zone 1,              !- Name of System
+  FanAndCoilAvailSched,       !- Availability schedule for VAV System
+  Zone 1 Reheat Air Outlet Node,  !- Unit Air Outlet Node
+  Zone 1 Reheat Air Inlet Node,  !- Unit Air Inlet Node
+  0.59,                       !- Maximum air flow rate {m3/s}
+  COIL:Gas:Heating,           !- Reheat Component Object
+  Reheat Coil Zone 1,         !- Name of Reheat Component
+  0.0,                        !- Max Reheat Water Flow {m3/s}
+  0.0,                        !- Min Reheat Water Flow {m3/s}
+  0.001;                      !- Convergence Tolerance
 \end{lstlisting}
 
 \subsection{AirTerminal:SingleDuct:ConstantVolume:NoReheat}\label{airterminalsingleductconstantvolumenoreheat}
@@ -140,15 +139,14 @@ This output is the amount of outdoor air entering the zone. This is the average 
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:ConstantVolume:NoReheat,
-      NoReheat Zone 1,                !- Name of System
-      AlwaysOnFanAvailSched,          !- Availability Schedule Name
-      Zone 1 Unit Air Inlet Node,     !- Air Inlet Node Name
-      Zone 1 Unit Air Outlet Node,    !- Air Outlet Node Name
-      0.60,                           !- Maximum Air Flow Rate {m3/s}
-      ,                               !- Design Specification Outdoor Air Object Name
-      ;                               !- Per Person Ventilation Rate Mode
+  NoReheat Zone 1,            !- Name of System
+  AlwaysOnFanAvailSched,      !- Availability Schedule Name
+  Zone 1 Unit Air Inlet Node, !- Air Inlet Node Name
+  Zone 1 Unit Air Outlet Node,!- Air Outlet Node Name
+  0.60,                       !- Maximum Air Flow Rate {m3/s}
+  ,                           !- Design Specification Outdoor Air Object Name
+  ;                           !- Per Person Ventilation Rate Mode
 \end{lstlisting}
 
 \subsection{AirTerminal:SingleDuct:VAV:Reheat}\label{airterminalsingleductvavreheat}
@@ -287,69 +285,68 @@ This field adjusts the \textit{Constant Minimum Air Flow Fraction}, \textit{Fixe
 An IDF example:
 
 \begin{lstlisting}
+AirTerminal:SingleDuct:VAV:Reheat,
+  SPACE2-1 VAV Reheat,        !- Name of System
+  ReheatCoilAvailSched,       !- Availability schedule for VAV System
+  SPACE2-1 Zone Coil Air In Node,  !- Damper Air Outlet Node
+  SPACE2-1 ATU In Node,       !- Unit Air Inlet Node
+  autosize,                   !- Maximum air flow rate {m3/s}
+  Constant,                   !- Zone Minimum Air Flow Input Method
+  0.3,                        !- Constant Minimum Air Flow Fraction
+  ,                           !- Fixed Minimum Air Flow Rate
+  ,                           !- Minimum Air Flow Fraction Schedule Name
+  COIL:Gas:Heating,           !- Reheat Component Object
+  SPACE2-1 Zone Coil,         !- Name of Reheat Component
+  0.0,                        !- Max Reheat Water Flow {m3/s}
+  0.0,                        !- Min Reheat Water Flow {m3/s}
+  SPACE2-1 In Node,           !- Unit Air Outlet Node
+  0.001,                      !- Convergence Tolerance
+  ReverseWithLimits,          !- Damper Heating Action
+  ,                           !- Maximum Flow per Zone Floor Area During Reheat
+  ,                           !- Maximum Flow Fraction During Reheat
+  35.0,                       !- Maximum Reheat Air Temperature {C}
+  ,                           !- Design Specification Outdoor Air Object Name
+  TurndownMinAirFlowSch;      !- Minimum Air Flow Turndown Schedule Name
 
-    AirTerminal:SingleDuct:VAV:Reheat,
-      SPACE2-1 VAV Reheat,  !- Name of System
-      ReheatCoilAvailSched,  !- Availability schedule for VAV System
-      SPACE2-1 Zone Coil Air In Node,  !- Damper Air Outlet Node
-      SPACE2-1 ATU In Node,  !- Unit Air Inlet Node
-      autosize,  !- Maximum air flow rate {m3/s}
-      Constant,  !- Zone Minimum Air Flow Input Method
-      0.3,  !- Constant Minimum Air Flow Fraction
-      ,  !- Fixed Minimum Air Flow Rate
-      ,  !- Minimum Air Flow Fraction Schedule Name
-      COIL:Gas:Heating,  !- Reheat Component Object
-      SPACE2-1 Zone Coil,  !- Name of Reheat Component
-      0.0,  !- Max Reheat Water Flow {m3/s}
-      0.0,  !- Min Reheat Water Flow {m3/s}
-      SPACE2-1 In Node,  !- Unit Air Outlet Node
-      0.001,  !- Convergence Tolerance
-      ReverseWithLimits,  !- Damper Heating Action
-      ,         !- Maximum Flow per Zone Floor Area During Reheat
-      ,         !- Maximum Flow Fraction During Reheat
-      35.0,     !- Maximum Reheat Air Temperature {C}
-      ,         !- Design Specification Outdoor Air Object Name
-      TurndownMinAirFlowSch;   !- Minimum Air Flow Turndown Schedule Name
+DesignSpecification:OutdoorAir,
+  ZoneMinOARequirements,      !- Name
+  Sum,                        !- Outdoor Air Method
+  0.00472,                    !- Outdoor Air Flow per Person {m3/s}
+  0.000508,                   !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  ,                           !- Outdoor Air Flow per Zone
+  ,                           !- Outdoor Air Flow Air Changes per Hour
+  Min OARequirements Sched;   !- Outdoor Air Flow Rate Fraction Schedule Name
 
-    DesignSpecification:OutdoorAir,
-      ZoneMinOARequirements,    !- Name
-      Sum,                      !- Outdoor Air Method
-      0.00472,                  !- Outdoor Air Flow per Person {m3/s}
-      0.000508,                 !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      ,                         !- Outdoor Air Flow per Zone
-      ,                         !- Outdoor Air Flow Air Changes per Hour
-      Min OARequirements Sched; !- Outdoor Air Flow Rate Fraction Schedule Name
+Schedule:Compact,
+  Min OARequirements Sched,   !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
+  Until: 24:00,1.0,           !- Field 7
+  For: AllOtherDays,          !- Field 9
+  Until: 24:00,0.25;          !- Field 10
 
-    Schedule:Compact,
-      Min OARequirements Sched,  !- Name
-      Any Number,                !- Schedule Type Limits Name
-      Through: 12/31,            !- Field 1
-      For: Weekdays SummerDesignDay WinterDesignDay, !- Field 2
-      Until: 24:00,1.0,          !- Field 7
-      For: AllOtherDays,         !- Field 9
-      Until: 24:00,0.25;         !- Field 10
+COIL:Heating:Fuel,
+  SPACE1-1 Zone Coil,         !- Coil Name
+  ReheatCoilAvailSched,       !- Availability Schedule Name
+  NaturalGas,                 !- Fuel Type
+  0.8,                        !- Gas Burner Efficiency of the Coil
+  autosize,                   !- Nominal Capacity of the Coil {W}
+  SPACE1-1 Zone Coil Air In Node,  !- Coil_Air_Inlet_Node
+  SPACE1-1 In Node;           !- Coil_Air_Outlet_Node
 
-    COIL:Heating:Fuel,
-      SPACE1-1 Zone Coil,  !- Coil Name
-      ReheatCoilAvailSched,  !- Availability Schedule Name
-      NaturalGas,             !- Fuel Type
-      0.8,  !- Gas Burner Efficiency of the Coil
-      autosize,  !- Nominal Capacity of the Coil {W}
-      SPACE1-1 Zone Coil Air In Node,  !- Coil_Air_Inlet_Node
-      SPACE1-1 In Node;  !- Coil_Air_Outlet_Node
-
-    Schedule:Compact,
-      TurndownMinAirFlowSch,   !- Name
-      Fraction,                !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays,           !- Field 2
-      Until: 7:00,0.50,        !- Field 3
-      Until: 17:00,0.75,       !- Field 4
-      Until: 24:00,0.50,       !- Field 5
-      For: SummerDesignDay WinterDesignDay, !- Field 6
-      Until: 24:00,1.0,        !- Field 7
-      For: Weekends Holidays CustomDay1 CustomDay2, !- Field 8
-      Until: 24:00,0.25;       !- Field 9
+Schedule:Compact,
+  TurndownMinAirFlowSch,      !- Name
+  Fraction,                   !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays,              !- Field 2
+  Until: 7:00,0.50,           !- Field 3
+  Until: 17:00,0.75,          !- Field 4
+  Until: 24:00,0.50,          !- Field 5
+  For: SummerDesignDay WinterDesignDay,  !- Field 6
+  Until: 24:00,1.0,           !- Field 7
+  For: Weekends Holidays CustomDay1 CustomDay2,  !- Field 8
+  Until: 24:00,0.25;          !- Field 9
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-000}
@@ -470,61 +467,61 @@ An IDF example:
 
 \begin{lstlisting}
 AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan,
-  SPACE2-1 VAV Reheat,                  !- Name of System
-  ReheatCoilAvailSched,                 !- System Availability schedule
-  autosize,                             !- Maximum cooling air volume flow rate
-  autosize,                             !- Maximum heating air volume flow rate
-  0.05,                                 !- Zone Minimum Air Flow Fraction
-  SPACE2-1 ATU In Node,                 !- Air Inlet Node Name
-  SPACE2-1 In Node,                     !- Air Outlet Node Name
-  FAN:VariableVolume,                   !- Fan object
-  SPACE2-1 Zone Fan,                    !- Fan name
+  SPACE2-1 VAV Reheat,        !- Name of System
+  ReheatCoilAvailSched,       !- System Availability schedule
+  autosize,                   !- Maximum cooling air volume flow rate
+  autosize,                   !- Maximum heating air volume flow rate
+  0.05,                       !- Zone Minimum Air Flow Fraction
+  SPACE2-1 ATU In Node,       !- Air Inlet Node Name
+  SPACE2-1 In Node,           !- Air Outlet Node Name
+  FAN:VariableVolume,         !- Fan object
+  SPACE2-1 Zone Fan,          !- Fan name
   COIL:Water:SimpleHeating,             Heating coil object
-  SPACE2-1 Zone Coil,                   !- Heating coil name
-  autosize,                             !- Max hot water flow
-  0.0,                                  !- Min hot water flow
-  0.001,                                !- Heating Convergence Tolerance
-  TurndownMinAirFlowSch;   !- Minimum Air Flow Turndown Schedule Name
+  SPACE2-1 Zone Coil,         !- Heating coil name
+  autosize,                   !- Max hot water flow
+  0.0,                        !- Min hot water flow
+  0.001,                      !- Heating Convergence Tolerance
+  TurndownMinAirFlowSch;      !- Minimum Air Flow Turndown Schedule Name
 
 Coil:Heating:Water,
-  SPACE2-1 Zone Coil,                   !- Coil Name
-  ReheatCoilAvailSched,                 !- Availability Schedule Name
-  autosize,                             !- UA of the Coil {W/K}
-  autosize,                             !- Max Water Flow Rate of Coil {m3/s}
-  SPACE2-1 Zone Coil Water In Node,     !- Coil_Water_Inlet_Node
-  SPACE2-1 Zone Coil Water Out Node,    !- Coil_Water_Outlet_Node
-  SPACE2-1 Zone Coil Air In Node,       !- Coil_Air_Inlet_Node
-  SPACE2-1 In Node;                     !- Coil_Air_Outlet_Node
+  SPACE2-1 Zone Coil,         !- Coil Name
+  ReheatCoilAvailSched,       !- Availability Schedule Name
+  autosize,                   !- UA of the Coil {W/K}
+  autosize,                   !- Max Water Flow Rate of Coil {m3/s}
+  SPACE2-1 Zone Coil Water In Node,  !- Coil_Water_Inlet_Node
+  SPACE2-1 Zone Coil Water Out Node,  !- Coil_Water_Outlet_Node
+  SPACE2-1 Zone Coil Air In Node,  !- Coil_Air_Inlet_Node
+  SPACE2-1 In Node;           !- Coil_Air_Outlet_Node
 
 Fan:VariableVolume,
-  SPACE2-1 Zone Fan,                    !- Fan Name
-  FanAvailSched,                        !- Availability Schedule Name
-  0.7,                                  !- Fan Total Efficiency
-  125.0,                                !- Delta Pressure {Pa}
-  autosize,                             !- Max Flow Rate {m3/s}
-  0.0,                                  !- Min Flow Rate {m3/s}
-  0.9,                                  !- Motor Efficiency
-  1.0,                                  !- Motor In Airstream Fraction
-  0.00153028,                           !- FanCoefficient 1
-  0.00520806,                           !- FanCoefficient 2
-  1.1086242,                            !- FanCoefficient 3
-  -.11635563,                           !- FanCoefficient 4
-  0.000,                                !- FanCoefficient 5
-  SPACE2-1 ATU In Node,                 !- Fan_Inlet_Node
-  SPACE2-1 Zone Coil AirIn Node;        !- Fan_Outlet_Node
+  SPACE2-1 Zone Fan,          !- Fan Name
+  FanAvailSched,              !- Availability Schedule Name
+  0.7,                        !- Fan Total Efficiency
+  125.0,                      !- Delta Pressure {Pa}
+  autosize,                   !- Max Flow Rate {m3/s}
+  0.0,                        !- Min Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  0.00153028,                 !- FanCoefficient 1
+  0.00520806,                 !- FanCoefficient 2
+  1.1086242,                  !- FanCoefficient 3
+  -.11635563,                 !- FanCoefficient 4
+  0.000,                      !- FanCoefficient 5
+  SPACE2-1 ATU In Node,       !- Fan_Inlet_Node
+  SPACE2-1 Zone Coil AirIn Node;  !- Fan_Outlet_Node
 
 Schedule:Compact,
-  TurndownMinAirFlowSch,   !- Name
-  Fraction,                !- Schedule Type Limits Name
-  Through: 12/31,          !- Field 1
-  For: Weekdays,           !- Field 2
-  Until: 7:00,0.50,        !- Field 3
-  Until: 17:00,0.75,       !- Field 4
-  Until: 24:00,0.50,       !- Field 5
-  For: SummerDesignDay WinterDesignDay, !- Field 6
-  Until: 24:00,1.0,        !- Field 7
-  For: Weekends Holidays CustomDay1 CustomDay2, !- Field 8
-  Until: 24:00,0.25;       !- Field 9
+  TurndownMinAirFlowSch,      !- Name
+  Fraction,                   !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays,              !- Field 2
+  Until: 7:00,0.50,           !- Field 3
+  Until: 17:00,0.75,          !- Field 4
+  Until: 24:00,0.50,          !- Field 5
+  For: SummerDesignDay WinterDesignDay,  !- Field 6
+  Until: 24:00,1.0,           !- Field 7
+  For: Weekends Holidays CustomDay1 CustomDay2,  !- Field 8
+  Until: 24:00,0.25;          !- Field 9
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3}
@@ -632,28 +629,27 @@ This field adjusts the \textit{Zone Minimum Air Flow Fraction} by multiplying it
 An IDF example is provided below:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat,
-      Zone 1 VAV System,             !- Name of System
-      FanAndCoilAvailSched,          !- System Availability schedule
-      Zone 1 Reheat Air Inlet Node,  !- DAMPER Air Outlet Node
-      Zone 1 VAV Inlet Node,         !- UNIT Air Inlet Node
-      0.583,                         !- Maximum air flow rate {m3/s}
-      0.25,                          !- Zone Minimum Air Flow Fraction
-      Coil:Heating:Electric,         !- Reheat Component Object
-      Reheat Coil Zone 1,            !- Name of Reheat Component
-      0.0,                           !- Max Reheat Water Flow {m3/s}
-      0.0,                           !- Min Reheat Water Flow {m3/s}
-      Zone 1 Reheat Air Outlet Node, !- UNIT Air Outlet Node
-      0.001;                         !- Convergence Tolerance
+  Zone 1 VAV System,          !- Name of System
+  FanAndCoilAvailSched,       !- System Availability schedule
+  Zone 1 Reheat Air Inlet Node,  !- DAMPER Air Outlet Node
+  Zone 1 VAV Inlet Node,      !- UNIT Air Inlet Node
+  0.583,                      !- Maximum air flow rate {m3/s}
+  0.25,                       !- Zone Minimum Air Flow Fraction
+  Coil:Heating:Electric,      !- Reheat Component Object
+  Reheat Coil Zone 1,         !- Name of Reheat Component
+  0.0,                        !- Max Reheat Water Flow {m3/s}
+  0.0,                        !- Min Reheat Water Flow {m3/s}
+  Zone 1 Reheat Air Outlet Node,  !- UNIT Air Outlet Node
+  0.001;                      !- Convergence Tolerance
 
-  Coil:Heating:Electric,
-      Reheat Coil Zone 1,            !- Coil Name
-      FanAndCoilAvailSched,          !- Availability Schedule Name
-      1.0,                           !- Efficiency of the Coil
-      3000.0,                        !- Nominal Capacity of the Coil {W}
-      Zone 1 Reheat Air Inlet Node,  !- Coil_Air_Inlet_Node
-      Zone 1 Reheat Air Outlet Node; !- Coil_Air_Outlet_Node
+Coil:Heating:Electric,
+  Reheat Coil Zone 1,         !- Coil Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  1.0,                        !- Efficiency of the Coil
+  3000.0,                     !- Nominal Capacity of the Coil {W}
+  Zone 1 Reheat Air Inlet Node,  !- Coil_Air_Inlet_Node
+  Zone 1 Reheat Air Outlet Node;  !- Coil_Air_Outlet_Node
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4}
@@ -732,50 +728,49 @@ This field adjusts the \textit{Constant Minimum Air Flow Fraction}, \textit{Fixe
 An IDF example:
 
 \begin{lstlisting}
+AirTerminal:SingleDuct:VAV:NoReheat,
+  Zone 1 VAV System,          !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone 1 Reheat Air Outlet Node,  !- Air Outlet Node Name
+  Zone 1 Damper Inlet Node,   !- Air Inlet Node Name
+  0.47,                       !- Maximum Air Flow Rate {m3/s}
+  Constant,                   !- Zone Minimum Air Flow Input Method
+  0.3,                        !- Constant Minimum Air Flow Fraction
+  ,                           !- Fixed Minimum Air Flow Rate
+  ,                           !- Minimum Air Flow Fraction Schedule Name
+  ZoneOAData,                 !- Design Specification Outdoor Air Object Name
+  TurndownMinAirFlowSch;      !- Minimum Air Flow Turndown Schedule Name
 
-  AirTerminal:SingleDuct:VAV:NoReheat,
-      Zone 1 VAV System,       !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      Zone 1 Reheat Air Outlet Node,  !- Air Outlet Node Name
-      Zone 1 Damper Inlet Node,!- Air Inlet Node Name
-      0.47,                    !- Maximum Air Flow Rate {m3/s}
-      Constant,                !- Zone Minimum Air Flow Input Method
-      0.3,                     !- Constant Minimum Air Flow Fraction
-      ,                        !- Fixed Minimum Air Flow Rate
-      ,                        !- Minimum Air Flow Fraction Schedule Name
-      ZoneOAData,              !- Design Specification Outdoor Air Object Name
-      TurndownMinAirFlowSch;   !- Minimum Air Flow Turndown Schedule Name
+DesignSpecification:OutdoorAir,
+  ZoneOAData,                 !- Name
+  Sum,                        !- Outdoor Air Method
+  0.00236,                    !- Outdoor Air Flow per Person {m3/s}
+  0.00305,                    !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  ,                           !- Outdoor Air Flow per Zone {m3/s}
+  ,                           !- Outdoor Air Flow Air Changes per Hour
+  OARequirements Sched;       !- Outdoor Air Flow Rate Fraction Schedule Name
 
-    DesignSpecification:OutdoorAir,
-      ZoneOAData,            !- Name
-      Sum,                   !- Outdoor Air Method
-      0.00236,               !- Outdoor Air Flow per Person {m3/s}
-      0.00305,               !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      ,                      !- Outdoor Air Flow per Zone {m3/s}
-      ,                      !- Outdoor Air Flow Air Changes per Hour
-      OARequirements Sched;  !- Outdoor Air Flow Rate Fraction Schedule Name
+Schedule:Compact,
+  OARequirements Sched,       !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
+  Until: 24:00, 1.0,          !- Field 4
+  For: AllOtherDays,          !- Field 5
+  Until: 24:00, 0.5;          !- Field 7
 
-  Schedule:Compact,
-      OARequirements Sched,    !- Name
-      Any Number,              !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
-      Until: 24:00, 1.0,       !- Field 4
-      For: AllOtherDays,       !- Field 5
-      Until: 24:00, 0.5;       !- Field 7
-
-    Schedule:Compact,
-      TurndownMinAirFlowSch,   !- Name
-      Fraction,                !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays,           !- Field 2
-      Until: 7:00,0.50,        !- Field 3
-      Until: 17:00,0.75,       !- Field 4
-      Until: 24:00,0.50,       !- Field 5
-      For: SummerDesignDay WinterDesignDay, !- Field 6
-      Until: 24:00,1.0,        !- Field 7
-      For: Weekends Holidays CustomDay1 CustomDay2, !- Field 8
-      Until: 24:00,0.25;       !- Field 9
+Schedule:Compact,
+  TurndownMinAirFlowSch,      !- Name
+  Fraction,                   !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays,              !- Field 2
+  Until: 7:00,0.50,           !- Field 3
+  Until: 17:00,0.75,          !- Field 4
+  Until: 24:00,0.50,          !- Field 5
+  For: SummerDesignDay WinterDesignDay,  !- Field 6
+  Until: 24:00,1.0,           !- Field 7
+  For: Weekends Holidays CustomDay1 CustomDay2,  !- Field 8
+  Until: 24:00,0.25;          !- Field 9
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5}
@@ -842,14 +837,13 @@ This field adjusts the \textit{Zone Minimum Air Flow Fraction} by multiplying it
 An IDF example is provided below:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat,
-      Zone 3 VAV System,       !- Name of System
-      FanAndCoilAvailSched,    !- System Availability schedule
-      Zone 3 Reheat Air Outlet Node,  !- UNIT Air Outlet Node
-      Zone 3 VAV Inlet Node,   !- UNIT Air Inlet Node
-      0.584,                   !- Maximum air flow rate {m3/s}
-      0.25;                    !- Zone Minimum Air Flow Fraction
+  Zone 3 VAV System,          !- Name of System
+  FanAndCoilAvailSched,       !- System Availability schedule
+  Zone 3 Reheat Air Outlet Node,  !- UNIT Air Outlet Node
+  Zone 3 VAV Inlet Node,      !- UNIT Air Inlet Node
+  0.584,                      !- Maximum air flow rate {m3/s}
+  0.25;                       !- Zone Minimum Air Flow Fraction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6}
@@ -930,10 +924,6 @@ The name of the HVAC system node from which the unit draws its secondary or reci
 
 The name of the HVAC system node to which the unit sends its outlet air. This should be one of the inlet air nodes of the zone which is being served.
 
-\paragraph{Field: Reheat Coil Air Inlet Node Name}\label{field-reheat-coil-air-inlet-node-name}
-
-The name of the HVAC system node which is the inlet node of the unit's heating coil. This is also the outlet node of the unit's fan.
-
 \paragraph{Field: Zone Mixer Name}\label{field-zone-mixer-name}
 
 The name of a zone mixer component (object: \hyperref[airloophvaczonemixer]{AirLoopHVAC:ZoneMixer}) which composes part of the unit. Note that some of the input for the mixer will duplicate input fields of the powered induction unit. One of the zone mixer inlet nodes should be the same as the supply air inlet node of the PIU; the other inlet node of the zone mixer should be the same as the secondary air inlet node of the PIU. The outlet node of the zone mixer should be the same as the inlet node of the PIU fan.
@@ -1008,24 +998,23 @@ This field is used to indicate the high limit on discharge air temperature at th
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:SeriesPIU:Reheat,
-            Zone 1 SPIU ATU,          ! Name of air terminal unit
-            FanAndCoilAvailSched,     ! Availability schedule for series PIU ATU
-            0.47,                     ! Total volume flow rate through ATU
-            0.47,                     ! Maximum primary air flow rate through terminal unit
-            0.3,                      ! Minimum primary air flow rate (fraction of max)
-            Zone 1 PIU Pri Air Inlet Node,   ! Air Terminal unit supply air inlet node
-            Zone 1 PIU Sec Air Inlet Node,   ! Air Terminal unit secondary air inlet node
-            Zone 1 PIU Air Outlet Node,      ! Air Terminal unit outlet node
-            Zone 1 Reheat Air Inlet Node,    ! Reheat coil air inlet node (fan outlet node)
-            Zone 1 PIU Mixer,                ! Air terminal unit mixer name
-            Zone 1 PIU Fan,                  ! Air terminal unit fan name
-            COIL:Heating:Water,              ! type of air terminal unit reheat coil
-            Reheat Coil Zone 1,              ! name of air terminal unit reheat coil
-            0.0013,                          ! Max Reheat Water Flow {Flow: m3/sec}
-            0.0,                             ! Min Reheat Water Flow {Flow: m3/sec}
-           0.001;                           ! Convergence tolerance
+  Zone 1 SPIU ATU,            !- Name of air terminal unit
+  FanAndCoilAvailSched,       !- Availability schedule for series PIU ATU
+  0.47,                       !- Total volume flow rate through ATU
+  0.47,                       !- Maximum primary air flow rate through terminal unit
+  0.3,                        !- Minimum primary air flow rate (fraction of max)
+  Zone 1 PIU Pri Air Inlet Node,  !- Air Terminal unit supply air inlet node
+  Zone 1 PIU Sec Air Inlet Node,  !- Air Terminal unit secondary air inlet node
+  Zone 1 PIU Air Outlet Node, !- Air Terminal unit outlet node
+  Zone 1 Reheat Air Inlet Node,  !- Reheat coil air inlet node (fan outlet node)
+  Zone 1 PIU Mixer,           !- Air terminal unit mixer name
+  Zone 1 PIU Fan,             !- Air terminal unit fan name
+  COIL:Heating:Water,         !- type of air terminal unit reheat coil
+  Reheat Coil Zone 1,         !- name of air terminal unit reheat coil
+  0.0013,                     !- Max Reheat Water Flow {Flow: m3/sec}
+  0.0,                        !- Min Reheat Water Flow {Flow: m3/sec}
+  0.001;                      !- Convergence tolerance
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7}
@@ -1193,10 +1182,6 @@ The name of the HVAC system node from which the unit draws its secondary or reci
 
 The name of the HVAC system node to which the unit sends its outlet air. This should be one of the inlet air nodes of the zone which is being served.
 
-\paragraph{Field: Reheat Coil Air Inlet Node Name}\label{field-reheat-coil-air-inlet-node-name-1}
-
-The name of the HVAC system node which is the inlet node of the unit's heating coil. This is also the outlet node of the unit's zone mixer.
-
 \paragraph{Field: Zone Mixer Name}\label{field-zone-mixer-name-1}
 
 The name of an zone mixer component (object: \hyperref[airloophvaczonemixer]{AirLoopHVAC:ZoneMixer}) which composes part of the unit. Note that some of the input for the mixer will duplicate input fields of the powered induction unit. One of the zone mixer inlet nodes should be the same as the supply air inlet node of the PIU; the other inlet node of the zone mixer should be the same as the air outlet node of the fan. The outlet node of the zone mixer should be the same as the inlet node of the heating coil.
@@ -1268,28 +1253,35 @@ This field is used to indicate the design discharge air temperature during the s
 
 This field is used to indicate the high limit on discharge air temperature at the end of stage three heating for \textbf{Modulated} heat control.  The default is 37.7 deg. C (100 deg. F).
 
+\paragraph{Field: Backdraft Damper Leakage Curve Name}\label{field-backdraft_damper_leakage_fraction_curve_name}
+
+This field is used to indicate how the backdraft damper leakage fraction changes with different primary air flow fractions. The leakage fraction is defined as the ratio of leakage mass flow rate to primary air mass flow rate at a constant supply static pressure setpoint. This curve should describe the leakage fraction as a function of primary air flow fraction (ratio of primary flow fraction to maximum nominal primary air flow rate). For a static pressure setpoint of 62 Pa (0.25 in w.c) a resonable low leakage assumption could be around 3\%, a medium leakage value could be around 5\%, and relatively high leakage could be up to 12\%.
+
+\paragraph{Field: Backdraft Damper Leakage Zone Name}\label{field-backdraft_damper_leakage_zone_name}
+
+This field is used to indicate what zone will be impacted by the air leaking from the backdraft damper of the terminal. The zone should be different than the one served by the terminal.
+
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:ParallelPIU:Reheat,
-            Zone 3 PPIU ATU,          ! Name of air terminal unit
-            FanAndCoilAvailSched,     ! Availability schedule for series PIU ATU
-            0.47,                     ! Maximum primary air flow rate through terminal unit
-            0.375,                    ! Maximum secondary air flow rate through the terminal unit
-            0.1,                      ! Minimum primary air flow rate (fraction of max)
-            0.1,                      ! fan on flow fraction
-            Zone 3 PIU Pri Air Inlet Node,   ! Air Terminal unit supply air inlet node
-            Zone 3 PIU Sec Air Inlet Node,   ! Air Terminal unit secondary air inlet node
-            Zone 3 PIU Air Outlet Node,      ! Air Terminal unit outlet node
-            Zone 3 Reheat Air Inlet Node,    ! Reheat coil air inlet node (fan outlet node)
-            Zone 3 PIU Mixer,                ! Air terminal unit mixer name
-            Zone 3 PIU Fan,                  ! Air terminal unit fan name
-            Coil:Heating:Water,              ! type of air terminal unit reheat coil
-            Reheat Coil Zone 3,              ! name of air terminal unit reheat coil
-            0.0013,                          ! Max Reheat Water Flow {Flow: m3/sec}
-            0.0,                             ! Min Reheat Water Flow {Flow: m3/sec}
-            0.001;                           ! Convergence tolerance
+  Zone 3 PPIU ATU,            !- Name of air terminal unit
+  FanAndCoilAvailSched,       !- Availability schedule for series PIU ATU
+  0.47,                       !- Maximum primary air flow rate through terminal unit
+  0.375,                      !- Maximum secondary air flow rate through the terminal unit
+  0.1,                        !- Minimum primary air flow rate (fraction of max)
+  0.1,                        !- fan on flow fraction
+  Zone 3 PIU Pri Air Inlet Node,  !- Air Terminal unit supply air inlet node
+  Zone 3 PIU Sec Air Inlet Node,  !- Air Terminal unit secondary air inlet node
+  Zone 3 PIU Air Outlet Node, !- Air Terminal unit outlet node
+  Zone 3 Reheat Air Inlet Node,  !- Reheat coil air inlet node (fan outlet node)
+  Zone 3 PIU Mixer,           !- Air terminal unit mixer name
+  Zone 3 PIU Fan,             !- Air terminal unit fan name
+  Coil:Heating:Water,         !- type of air terminal unit reheat coil
+  Reheat Coil Zone 3,         !- name of air terminal unit reheat coil
+  0.0013,                     !- Max Reheat Water Flow {Flow: m3/sec}
+  0.0,                        !- Min Reheat Water Flow {Flow: m3/sec}
+  0.001;                      !- Convergence tolerance
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8}
@@ -1502,53 +1494,52 @@ The name of an zone mixer component (object: \hyperref[airloophvaczonemixer]{Air
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction,
-      SPACE2-1 FPIU,            !- Name of System
-      ReheatCoilAvailSched,     !- System Availability schedule
-      autosize,                 !- Maximum total air volume flow rate
-      1.0,                      !- Induction ratio
-      SPACE2-1 ATU Supply Node, !- Terminal unit supply air inlet node
-      SPACE2-1 ATU Induc Node,  !- Terminal unit induced air inlet node
-      SPACE2-1 In Node,         !- Terminal unit air outlet node
-      COIL:Heating:Water,       !- Heating coil object
-      SPACE2-1 HW Coil,         !- Heating coil name
-      autosize,                 !- Max hot water flow
-      0.0,                      !- Min hot water flow
-      0.001,                    !- Heating Convergence Tolerance
-      COIL:Cooling:Water,       !- Cooling coil object
-      SPACE2-1 CW Coil,         !- Cooling coil name
-      autosize,                 !- Max cold water flow
-      0.0,                      !- Min cold water flow
-      0.001,                    !- Cooling Convergence Tolerance
-      SPACE2-1 ATU Mixer;       !- Zone mixer component name
+  SPACE2-1 FPIU,              !- Name of System
+  ReheatCoilAvailSched,       !- System Availability schedule
+  autosize,                   !- Maximum total air volume flow rate
+  1.0,                        !- Induction ratio
+  SPACE2-1 ATU Supply Node,   !- Terminal unit supply air inlet node
+  SPACE2-1 ATU Induc Node,    !- Terminal unit induced air inlet node
+  SPACE2-1 In Node,           !- Terminal unit air outlet node
+  COIL:Heating:Water,         !- Heating coil object
+  SPACE2-1 HW Coil,           !- Heating coil name
+  autosize,                   !- Max hot water flow
+  0.0,                        !- Min hot water flow
+  0.001,                      !- Heating Convergence Tolerance
+  COIL:Cooling:Water,         !- Cooling coil object
+  SPACE2-1 CW Coil,           !- Cooling coil name
+  autosize,                   !- Max cold water flow
+  0.0,                        !- Min cold water flow
+  0.001,                      !- Cooling Convergence Tolerance
+  SPACE2-1 ATU Mixer;         !- Zone mixer component name
 
-  COIL:Heating:Water,
-      SPACE2-1 HW Coil,        !- Coil Name
-      ReheatCoilAvailSched,    !- Availability Schedule Name
-      autosize,                !- UA of the Coil {W/K}
-      autosize,                !- Max Water Flow Rate of Coil {m3/s}
-      SPACE2-1 HW Coil Water In Node,  !- Coil_Water_Inlet_Node
-      SPACE2-1 HW Coil Water Out Node, !- Coil_Water_Outlet_Node
-      SPACE2-1 ATU Induc Node, !- Coil_Air_Inlet_Node
-      SPACE2-1 HW Coil Air Out Node;   !- Coil_Air_Outlet_Node
+COIL:Heating:Water,
+  SPACE2-1 HW Coil,           !- Coil Name
+  ReheatCoilAvailSched,       !- Availability Schedule Name
+  autosize,                   !- UA of the Coil {W/K}
+  autosize,                   !- Max Water Flow Rate of Coil {m3/s}
+  SPACE2-1 HW Coil Water In Node,  !- Coil_Water_Inlet_Node
+  SPACE2-1 HW Coil Water Out Node,  !- Coil_Water_Outlet_Node
+  SPACE2-1 ATU Induc Node,    !- Coil_Air_Inlet_Node
+  SPACE2-1 HW Coil Air Out Node;  !- Coil_Air_Outlet_Node
 
-  COIL:Cooling:Water,
-      SPACE2-1 CW Coil,        !- Coil Name
-      CWCoilAvailSched,        !- Availability Schedule
-      autosize,                !- UA of the Coil
-      autosize,                !- Max Water Flow Rate of Coil
-      ,                        !- Leaving Relative Humidity of Coil
-      SPACE2-1 CW Coil Water In Node,  !- Coil_Water_Inlet_Node
-      SPACE2-1 CW Coil Water Out Node, !- Coil_Water_Outlet_Node
-      SPACE2-1 HW Coil Air Out Node,   !- Coil_Air_Inlet_Node
-      SPACE2-1 CW Coil Air Out Node;   !- Coil_Air_Outlet_Node
+COIL:Cooling:Water,
+  SPACE2-1 CW Coil,           !- Coil Name
+  CWCoilAvailSched,           !- Availability Schedule
+  autosize,                   !- UA of the Coil
+  autosize,                   !- Max Water Flow Rate of Coil
+  ,                           !- Leaving Relative Humidity of Coil
+  SPACE2-1 CW Coil Water In Node,  !- Coil_Water_Inlet_Node
+  SPACE2-1 CW Coil Water Out Node,  !- Coil_Water_Outlet_Node
+  SPACE2-1 HW Coil Air Out Node,  !- Coil_Air_Inlet_Node
+  SPACE2-1 CW Coil Air Out Node;  !- Coil_Air_Outlet_Node
 
-  AirLoopHVAC:ZoneMixer,
-      SPACE2-1 ATU Mixer,              !- Mixer Name
-      SPACE2-1 In Node,                !- Outlet_Node
-      SPACE2-1 ATU Supply Node,        !- Inlet_Node_1
-      SPACE2-1 CW Coil Air Out Node;   !- Inlet_Node_2
+AirLoopHVAC:ZoneMixer,
+  SPACE2-1 ATU Mixer,         !- Mixer Name
+  SPACE2-1 In Node,           !- Outlet_Node
+  SPACE2-1 ATU Supply Node,   !- Inlet_Node_1
+  SPACE2-1 CW Coil Air Out Node;  !- Inlet_Node_2
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9}
@@ -1679,32 +1670,32 @@ This field is the name of a curve or table object that describes how the beam co
 An example input follows:
 
 \begin{lstlisting}
-  AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
-    Zone One 4pipe Beam, !- Name
-    ALWAYS_ON , !- Primary Air Availability Schedule Name
-    ALWAYS_ON , !- Cooling Availability Schedule Name
-    ALWAYS_ON , !- Heating Availability Schedule Name
-    Zone One 4pipe Beam Inlet Node Name , !- Primary Air Inlet Node Name
-    Zone One 4pipe Beam Outlet Node Name , !- Primary Air Outlet Node Name
-    Zone One 4pipe Beam CW Inlet Node , !- Chilled Water Inlet Node Name
-    Zone One 4pipe Beam CW Outlet Node , !- Chilled Water Outlet Node Name
-    AUTOSIZE , !- Design Primary Air Volume Flow Rate
-    AUTOSIZE , !- Design Chilled Water Volume Flow Rate
-    AUTOSIZE , !- Design Hot Water Volume Flow Rate
-    AUTOSIZE , !- Zone Total Beam Length
-    0.036 , !- Rated Primary Air Flow Rate per Beam Length
-    597 , !- Rated Beam Cooling Capacity per Beam Length
-    10.0 , !- Rated Cooling Room Air Chilled Water Temperature Difference
-    5.2E-5 , !- Rated Chilled Water Volume Flow Rate per Beam Length
-    CapModFuncOfTempDiff, !- Beam Cooling Capacity Temperature Difference Modification Factor Curve or Table Name
-    CoolCapModFuncOfSAFlow, !- Beam Cooling Capacity Air Flow Modification Factor Curve or Table Name
-    CapModFuncOfWaterFlow, !- Beam Cooling Capacity Chilled Water Flow Modification Factor Curve or Table Name
-    1548 , !- Rated Beam Heating Capacity per Beam Length
-    27.8, !- Rated Heating Room Air Hot Water Temperature Difference
-    5.2E-5, !- Rated Hot Water Volume Flow Rate per Beam Length
-    CapModFuncOfTempDiff, !- Beam Heating Capacity Temperature Difference Modification Factor Curve or Table Name
-    HeatCapModFuncOfSAFlow, !- Beam Heating Capacity Air Flow Modification Factor Curve or Table Name
-    CapModFuncOfWaterFlow; !- Beam Heating Capacity Hot Water Flow Modification Factor Curve or Table Name
+AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
+  Zone One 4pipe Beam,        !- Name
+  ALWAYS_ON,                  !- Primary Air Availability Schedule Name
+  ALWAYS_ON,                  !- Cooling Availability Schedule Name
+  ALWAYS_ON,                  !- Heating Availability Schedule Name
+  Zone One 4pipe Beam Inlet Node Name,  !- Primary Air Inlet Node Name
+  Zone One 4pipe Beam Outlet Node Name,  !- Primary Air Outlet Node Name
+  Zone One 4pipe Beam CW Inlet Node,  !- Chilled Water Inlet Node Name
+  Zone One 4pipe Beam CW Outlet Node,  !- Chilled Water Outlet Node Name
+  AUTOSIZE,                   !- Design Primary Air Volume Flow Rate
+  AUTOSIZE,                   !- Design Chilled Water Volume Flow Rate
+  AUTOSIZE,                   !- Design Hot Water Volume Flow Rate
+  AUTOSIZE,                   !- Zone Total Beam Length
+  0.036,                      !- Rated Primary Air Flow Rate per Beam Length
+  597,                        !- Rated Beam Cooling Capacity per Beam Length
+  10.0,                       !- Rated Cooling Room Air Chilled Water Temperature Difference
+  5.2E-5,                     !- Rated Chilled Water Volume Flow Rate per Beam Length
+  CapModFuncOfTempDiff,       !- Beam Cooling Capacity Temperature Difference Modification Factor Curve or Table Name
+  CoolCapModFuncOfSAFlow,     !- Beam Cooling Capacity Air Flow Modification Factor Curve or Table Name
+  CapModFuncOfWaterFlow,      !- Beam Cooling Capacity Chilled Water Flow Modification Factor Curve or Table Name
+  1548,                       !- Rated Beam Heating Capacity per Beam Length
+  27.8,                       !- Rated Heating Room Air Hot Water Temperature Difference
+  5.2E-5,                     !- Rated Hot Water Volume Flow Rate per Beam Length
+  CapModFuncOfTempDiff,       !- Beam Heating Capacity Temperature Difference Modification Factor Curve or Table Name
+  HeatCapModFuncOfSAFlow,     !- Beam Heating Capacity Air Flow Modification Factor Curve or Table Name
+  CapModFuncOfWaterFlow;      !- Beam Heating Capacity Hot Water Flow Modification Factor Curve or Table Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10}
@@ -1868,31 +1859,30 @@ The water pipe inside diameter in meters. The default is 0.0145.
 An example input is:
 
 \begin{lstlisting}
-
-  AirTerminal:SingleDuct:ConstantVolume:CooledBeam,
-      SPACE2-1 CB,             !- Name
-      CWCoilAvailSched,        !- Availability Schedule Name
-      Active,                  !- Cooled Beam Type
-      SPACE2-1 ATU Supply Node,!- Supply Air Inlet Node Name
-      SPACE2-1 In Node,        !- Supply Air Outlet Node Name
-      SPACE2-1 CW Coil Water In Node,  !- Chilled Water Inlet Node Name
-      SPACE2-1 CW Coil Water Out Node, !- Chilled Water Outlet Node Name
-      ,                        !- Supply Air Volumetric Flow Rate
-      ,                   !- Maximum Total Chilled Water Volumetric Flow Rate
-      ,                        !- Number of Beams
-      ,                        !- Beam Length
-      ,                        !- Design Inlet Water Temperature
-      ,                        !- Design Outlet Water temperature
-      ,                        !- Coil Surface Area per Coil Length
-      ,                        !- Model Parameter a
-      ,                        !- Model Parameter n1
-      ,                        !- Model Parameter n2
-     ,                        !- Model Parameter n3
-      ,                        !- Model Parameter a0
-      ,                        !- Model Parameter K1
-      ,                        !- Model Parameter n
-      ,                        !- Coefficient of Induction Kin
-      ;                        !- Leaving Pipe Inside Diameter
+AirTerminal:SingleDuct:ConstantVolume:CooledBeam,
+  SPACE2-1 CB,                !- Name
+  CWCoilAvailSched,           !- Availability Schedule Name
+  Active,                     !- Cooled Beam Type
+  SPACE2-1 ATU Supply Node,   !- Supply Air Inlet Node Name
+  SPACE2-1 In Node,           !- Supply Air Outlet Node Name
+  SPACE2-1 CW Coil Water In Node,  !- Chilled Water Inlet Node Name
+  SPACE2-1 CW Coil Water Out Node,  !- Chilled Water Outlet Node Name
+  ,                           !- Supply Air Volumetric Flow Rate
+  ,                           !- Maximum Total Chilled Water Volumetric Flow Rate
+  ,                           !- Number of Beams
+  ,                           !- Beam Length
+  ,                           !- Design Inlet Water Temperature
+  ,                           !- Design Outlet Water temperature
+  ,                           !- Coil Surface Area per Coil Length
+  ,                           !- Model Parameter a
+  ,                           !- Model Parameter n1
+  ,                           !- Model Parameter n2
+  ,                           !- Model Parameter n3
+  ,                           !- Model Parameter a0
+  ,                           !- Model Parameter K1
+  ,                           !- Model Parameter n
+  ,                           !- Coefficient of Induction Kin
+  ;                           !- Leaving Pipe Inside Diameter
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-11}
@@ -2035,27 +2025,25 @@ This field specifies how the outdoor air ventilation rates are calculated when b
 An IDF examples for InletSide and SupplySide connection type:
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:Mixer,
-      SPACE2-1 DOAS Air Terminal,  !- Name
-      ZoneHVAC:FourPipeFanCoil,    !- ZoneHVAC Unit Object Type
-      SPACE2-1 Fan Coil,           !- ZoneHVAC Unit Object Name
-      SPACE2-1 Fan Coil Inlet,     !- Mixer Outlet Node Name
-      SPACE2-1 ATM Primary Inlet,  !- Mixer Primary Air Inlet Node Name
-      SPACE2-1 ATM Secondary Inlet,!- Mixer Secondary Air Inlet Node Name
-      InletSide;                   !- Mixer Connection Type
+  SPACE2-1 DOAS Air Terminal, !- Name
+  ZoneHVAC:FourPipeFanCoil,   !- ZoneHVAC Unit Object Type
+  SPACE2-1 Fan Coil,          !- ZoneHVAC Unit Object Name
+  SPACE2-1 Fan Coil Inlet,    !- Mixer Outlet Node Name
+  SPACE2-1 ATM Primary Inlet, !- Mixer Primary Air Inlet Node Name
+  SPACE2-1 ATM Secondary Inlet,  !- Mixer Secondary Air Inlet Node Name
+  InletSide;                  !- Mixer Connection Type
 \end{lstlisting}
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:Mixer,
-      SPACE1-1 DOAS Air Terminal, !- Name
-      ZoneHVAC:FourPipeFanCoil,   !- ZoneHVAC Unit Object Type
-      SPACE1-1 Fan Coil,          !- ZoneHVAC Unit Object Name
-      SPACE1-1 Supply Inlet,      !- Mixer Outlet Node Name
-      SPACE1-1 ATM Primary Inlet, !- Mixer Primary Air Inlet Node Name
-      SPACE1-1 Fan Coil Outlet,   !- Mixer Secondary Air Inlet Node Name
-      SupplySide;                 !- Mixer Connection Type
+  SPACE1-1 DOAS Air Terminal, !- Name
+  ZoneHVAC:FourPipeFanCoil,   !- ZoneHVAC Unit Object Type
+  SPACE1-1 Fan Coil,          !- ZoneHVAC Unit Object Name
+  SPACE1-1 Supply Inlet,      !- Mixer Outlet Node Name
+  SPACE1-1 ATM Primary Inlet, !- Mixer Primary Air Inlet Node Name
+  SPACE1-1 Fan Coil Outlet,   !- Mixer Secondary Air Inlet Node Name
+  SupplySide;                 !- Mixer Connection Type
 \end{lstlisting}
 
 \subsection{AirTerminal:DualDuct:ConstantVolume}\label{airterminaldualductconstantvolume}
@@ -2091,14 +2079,13 @@ The design constant volume flow rate~ (m\(^{3}\)/sec) specified for that Multizo
 An IDF example:
 
 \begin{lstlisting}
-
 AirTerminal:DualDuct:ConstantVolume,
-      Zone2MixDamp,  !- Name
-      FanAndCoilAvailSched,  !- Availability Schedule
-      Zone 2 Dual Duct Outlet,  !- Unit Air Outlet Node
-      Zone 2 Dual Duct Hot Inlet,  !- Unit Hot Air Inlet Node
-      Zone 2 Dual Duct Cold Inlet,  !- Unit Cold Air Inlet Node
-      0.36;  !- Max Air Flow Rate {m3/s}
+  Zone2MixDamp,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule
+  Zone 2 Dual Duct Outlet,    !- Unit Air Outlet Node
+  Zone 2 Dual Duct Hot Inlet, !- Unit Hot Air Inlet Node
+  Zone 2 Dual Duct Cold Inlet,!- Unit Cold Air Inlet Node
+  0.36;                       !- Max Air Flow Rate {m3/s}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12}
@@ -2166,49 +2153,48 @@ This field adjusts \textit{Zone Minimum Air Flow Fraction} by multiplying it usi
 An IDF example:
 
 \begin{lstlisting}
+AirTerminal:DualDuct:VAV,
+  Zone1MixDamp,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone 1 Dual Duct Outlet,    !- Air Outlet Node Name
+  Zone 1 Dual Duct Hot Inlet, !- Hot Air Inlet Node Name
+  Zone 1 Dual Duct Cold Inlet,!- Cold Air Inlet Node Name
+  autosize,                   !- Maximum Air Flow Rate {m3/s}
+  0.1,                        !- Zone Minimum Air Flow Fraction
+  ZoneMinOARequirements,      !- Design Specification Outdoor Air Object Name
+  TurndownMinAirFlowSch;      !- Minimum Air Flow Turndown Schedule Name
 
-  AirTerminal:DualDuct:VAV,
-      Zone1MixDamp,            !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      Zone 1 Dual Duct Outlet, !- Air Outlet Node Name
-      Zone 1 Dual Duct Hot Inlet,  !- Hot Air Inlet Node Name
-      Zone 1 Dual Duct Cold Inlet,  !- Cold Air Inlet Node Name
-      autosize,                !- Maximum Air Flow Rate {m3/s}
-      0.1,                     !- Zone Minimum Air Flow Fraction
-      ZoneMinOARequirements,   !- Design Specification Outdoor Air Object Name
-      TurndownMinAirFlowSch;   !- Minimum Air Flow Turndown Schedule Name
+! Outdoor air specification should be consistent with Sizing:Zone object inputs.
+  DesignSpecification:OutdoorAir,
+  ZoneMinOARequirements,      !- Name
+  Sum,                        !- Outdoor Air Method
+  0.00944,                    !- Outdoor Air Flow per Person {m3/s}
+  0.000508,                   !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  ,                           !- Outdoor Air Flow per Zone
+  ,                           !- Outdoor Air Flow Air Changes per Hour
+  Min OARequirements Sched;   !- Outdoor Air Flow Rate Fraction Schedule Name
 
-  ! Outdoor air specification should be consistent with Sizing:Zone object inputs.
-    DesignSpecification:OutdoorAir,
-      ZoneMinOARequirements,    !- Name
-      Sum,                      !- Outdoor Air Method
-      0.00944,                  !- Outdoor Air Flow per Person {m3/s}
-      0.000508,                 !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      ,                         !- Outdoor Air Flow per Zone
-      ,                         !- Outdoor Air Flow Air Changes per Hour
-      Min OARequirements Sched; !- Outdoor Air Flow Rate Fraction Schedule Name
+Schedule:Compact,
+  Min OARequirements Sched,   !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
+  Until: 24:00,1.0,           !- Field 7
+  For: AllOtherDays,          !- Field 9
+  Until: 24:00,0.25;          !- Field 10
 
-    Schedule:Compact,
-      Min OARequirements Sched,  !- Name
-      Any Number,                !- Schedule Type Limits Name
-      Through: 12/31,            !- Field 1
-      For: Weekdays SummerDesignDay WinterDesignDay, !- Field 2
-      Until: 24:00,1.0,          !- Field 7
-      For: AllOtherDays,         !- Field 9
-      Until: 24:00,0.25;         !- Field 10
-
-    Schedule:Compact,
-      TurndownMinAirFlowSch,   !- Name
-      Fraction,                !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays,           !- Field 2
-      Until: 7:00,0.50,        !- Field 3
-      Until: 17:00,0.75,       !- Field 4
-      Until: 24:00,0.50,       !- Field 5
-      For: SummerDesignDay WinterDesignDay, !- Field 6
-      Until: 24:00,1.0,        !- Field 7
-      For: Weekends Holidays CustomDay1 CustomDay2, !- Field 8
-      Until: 24:00,0.25;       !- Field 9
+Schedule:Compact,
+  TurndownMinAirFlowSch,      !- Name
+  Fraction,                   !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays,              !- Field 2
+  Until: 7:00,0.50,           !- Field 3
+  Until: 17:00,0.75,          !- Field 4
+  Until: 24:00,0.50,          !- Field 5
+  For: SummerDesignDay WinterDesignDay,  !- Field 6
+  Until: 24:00,1.0,           !- Field 7
+  For: Weekends Holidays CustomDay1 CustomDay2,  !- Field 8
+  Until: 24:00,0.25;          !- Field 9
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-13}
@@ -2279,26 +2265,24 @@ This field specifies how the outdoor air ventilation rates are calculated when b
 An example input object follows.
 
 \begin{lstlisting}
+AirTerminal:DualDuct:VAV:OutdoorAir,
+  Media_Center Dual Duct Box Component,  !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  Media_Center Dual Duct Box Outlet Node Name,  !- Air Outlet Node Name
+  Media_Center Dual Duct Box Inlet Node Name,  !- Outdoor Air Inlet Node Name
+  RC Media_Center Dual Duct Box Inlet Node Name,  !- Recirculated Air Inlet Node Name
+  AUTOSIZE,                   !- Maximum Terminal Air Flow Rate {m3/s}
+  Media_Center Dual Duct Box OA Design Spec,  !- Design Specification Outdoor Air Object Name
+  CurrentOccupancy;           !- Per Person Ventilation Rate Mode
 
-  AirTerminal:DualDuct:VAV:OutdoorAir,
-      Media_Center Dual Duct Box Component,          !- Name
-      ALWAYS_ON,                                     !- Availability Schedule Name
-      Media_Center Dual Duct Box Outlet Node Name,   !- Air Outlet Node Name
-      Media_Center Dual Duct Box Inlet Node Name,    !- Outdoor Air Inlet Node Name
-      RC Media_Center Dual Duct Box Inlet Node Name, !- Recirculated Air Inlet Node Name
-      AUTOSIZE,                                      !- Maximum Terminal Air Flow Rate {m3/s}
-      Media_Center Dual Duct Box OA Design Spec,     !- Design Specification Outdoor Air Object Name
-      CurrentOccupancy;                              !- Per Person Ventilation Rate Mode
-
-
-    DesignSpecification:OutdoorAir,
-      Media_Center Dual Duct Box OA Design Spec,  !- Name
-      Sum,                     !- Outdoor Air Method
-      0.004719,                !- Outdoor Air Flow per Person {m3/s-person}
-      0.00061,                 !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      0.0,                     !- Outdoor Air Flow per Zone {m3/s}
-      0.0,                     !- Outdoor Air Flow Air Changes per Hour
-      MinOA_Sched;             !- Outdoor Air Flow Rate Fraction Schedule Name
+DesignSpecification:OutdoorAir,
+  Media_Center Dual Duct Box OA Design Spec,  !- Name
+  Sum,                        !- Outdoor Air Method
+  0.004719,                   !- Outdoor Air Flow per Person {m3/s-person}
+  0.00061,                    !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  0.0,                        !- Outdoor Air Flow per Zone {m3/s}
+  0.0,                        !- Outdoor Air Flow Air Changes per Hour
+  MinOA_Sched;                !- Outdoor Air Flow Rate Fraction Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-14}

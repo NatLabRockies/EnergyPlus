@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -98,7 +98,7 @@ namespace HeatBalanceHAMTManager {
         ~MaterialHAMT() = default;
     };
 
-    constexpr int ittermax(150); // Maximum Number of itterations
+    constexpr int ittermax(150); // Maximum Number of iterations
     constexpr int adjmax(6);     // Maximum Number of Adjacent Cells
 
     constexpr Real64 wdensity(1000.0); // Density of water kg.m-3
@@ -116,7 +116,7 @@ namespace HeatBalanceHAMTManager {
         int sid;          // Surface Id Number
         Real64 Qadds;     // Additional sources of heat
         Real64 density;   // Density
-        Real64 wthermalc; // Moisture Dependant Thermal Conductivity
+        Real64 wthermalc; // Moisture Dependent Thermal Conductivity
         Real64 spech;     // Specific Heat capacity
         Real64 htc;       // Heat Transfer Coefficient
         Real64 vtc;       // Vapor Transfer Coefficient

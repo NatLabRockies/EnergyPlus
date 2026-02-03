@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -731,7 +731,7 @@ Real64 SystemAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, bo
                 this->autoSizedValue = _originalValue;
             } else {
                 if (this->dataHRFlowSizingFlag) { // HX sizing
-                    if (this->curOASysNum) {
+                    if (this->curOASysNum != 0) {
                         // size to supply air duct flow rate
                         if (this->outsideAirSys(this->curOASysNum).AirLoopDOASNum > -1) {
                             auto const &thisAirloopDOAS = this->airloopDOAS[this->outsideAirSys(this->curOASysNum).AirLoopDOASNum];

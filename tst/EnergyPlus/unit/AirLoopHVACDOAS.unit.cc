@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -4395,7 +4395,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompOutletNodeIndex)
 
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(2), "HUMIDIFIER:STEAM:ELECTRIC");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), 2);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 23);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 24);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestGetDesignDayConditions)
@@ -8874,7 +8874,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompFanNoDrawAndBlow)
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 3);
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(3), "HUMIDIFIER:STEAM:ELECTRIC");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(3), 3);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), 24);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), 25);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
@@ -8882,7 +8882,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // 9066
     std::string const idf_objects = delimited_string({
 
-        "  Version,25.2;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    YES,                     !- Do Zone Sizing Calculation",
@@ -8892,6 +8892,9 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    NO,                      !- Run Simulation for Weather File Run Periods",
         "    No,                      !- Do HVAC Sizing Simulation for Sizing Periods",
         "    1;                       !- Maximum Number of HVAC Sizing Simulation Passes",
+
+        "  Output:Diagnostics,",
+        "    ReportDuringWarmup;",
 
         "  Building,",
         "    Ref Bldg Small Office New2004_v1.3_5.0,  !- Name",
@@ -9122,6 +9125,22 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    1,                       !- Multiplier",
         "    autocalculate,           !- Ceiling Height {m}",
         "    autocalculate;           !- Volume {m3}",
+
+        "  Schedule:Compact,",
+        "    always_on_lights,  !- Name",
+        "    ,             !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: SummerDesignDay WinterDesignDay, !- Field 2"
+        "    Until: 24:00,0,          !- Field 3"
+        "    For: AllOtherDays,            !- Field 2",
+        "    Until: 24:00,1;       !- Field 3",
+
+        "  Lights,",
+        "    lights_obj,",
+        "    core_zn,",
+        "    always_on_lights,",
+        "    lightinglevel,",
+        "    1;",
 
         "  GlobalGeometryRules,",
         "    UpperLeftCorner,         !- Starting Vertex Position",
@@ -10079,7 +10098,11 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // OA flow rate
     EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_MaxCoolAirVolFlow, 0.65598, 0.001);
     // Cooling capacity
-    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.05);
+    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24883.6371, 0.05);
+
+    // Check meter accumulation
+    // Lights are 1W so the meter should be 3600 [J] * 24 hours
+    EXPECT_TRUE(state->dataOutputProcessor->meters[4]->periodFinYrSM.Value == 3600 * 24);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)
@@ -10446,7 +10469,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
     // 9066
     std::string const idf_objects = delimited_string({
 
-        "  Version,25.2;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    YES,                     !- Do Zone Sizing Calculation",

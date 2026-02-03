@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmOpenFilePanel 
+Begin VB.Form frmOpenFilePanel
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Quick Open Panel for Single Simulation"
    ClientHeight    =   2400
@@ -13,7 +13,7 @@ Begin VB.Form frmOpenFilePanel
    ScaleWidth      =   6510
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
-   Begin VB.CommandButton cmdEDD 
+   Begin VB.CommandButton cmdEDD
       Caption         =   "EDD"
       Height          =   255
       Left            =   5400
@@ -22,7 +22,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   120
       Width           =   900
    End
-   Begin VB.CommandButton cmdProcCSV 
+   Begin VB.CommandButton cmdProcCSV
       Caption         =   "Proc CSV"
       Height          =   255
       Left            =   4440
@@ -31,7 +31,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   2040
       Width           =   900
    End
-   Begin VB.CommandButton cmdMDD 
+   Begin VB.CommandButton cmdMDD
       Caption         =   "MDD"
       Height          =   255
       Left            =   1080
@@ -40,7 +40,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   840
       Width           =   900
    End
-   Begin VB.CommandButton cmdVRML 
+   Begin VB.CommandButton cmdVRML
       Caption         =   "VRML"
       Height          =   255
       Left            =   3240
@@ -49,7 +49,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1680
       Width           =   900
    End
-   Begin VB.CommandButton cmdSHD 
+   Begin VB.CommandButton cmdSHD
       Caption         =   "SHD"
       Height          =   255
       Left            =   3240
@@ -58,7 +58,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1320
       Width           =   900
    End
-   Begin VB.CommandButton cmdScreen 
+   Begin VB.CommandButton cmdScreen
       Caption         =   "Screen"
       Height          =   255
       Left            =   3240
@@ -67,7 +67,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   840
       Width           =   900
    End
-   Begin VB.CommandButton cmdDFDMP 
+   Begin VB.CommandButton cmdDFDMP
       Caption         =   "DFDMP"
       Height          =   255
       Left            =   3240
@@ -76,7 +76,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   480
       Width           =   900
    End
-   Begin VB.CommandButton cmdELDMP 
+   Begin VB.CommandButton cmdELDMP
       Caption         =   "ELDMP"
       Height          =   255
       Left            =   3240
@@ -85,7 +85,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   120
       Width           =   900
    End
-   Begin VB.CommandButton cmdOUT 
+   Begin VB.CommandButton cmdOUT
       Caption         =   "DE OUT"
       Height          =   255
       Left            =   2280
@@ -94,7 +94,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   480
       Width           =   900
    End
-   Begin VB.CommandButton cmdIN 
+   Begin VB.CommandButton cmdIN
       Caption         =   "DE IN"
       Height          =   255
       Left            =   2280
@@ -103,7 +103,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   120
       Width           =   900
    End
-   Begin VB.CommandButton cmdDXF 
+   Begin VB.CommandButton cmdDXF
       Caption         =   "DXF"
       Height          =   255
       Left            =   120
@@ -112,7 +112,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   2040
       Width           =   900
    End
-   Begin VB.CommandButton cmdMAP 
+   Begin VB.CommandButton cmdMAP
       Caption         =   "MAP"
       Height          =   255
       Left            =   2280
@@ -121,7 +121,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   840
       Width           =   900
    End
-   Begin VB.CommandButton cmdEXPIDF 
+   Begin VB.CommandButton cmdEXPIDF
       Caption         =   "EXPIDF"
       Height          =   255
       Left            =   2280
@@ -130,7 +130,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1320
       Width           =   900
    End
-   Begin VB.CommandButton cmdEPMDET 
+   Begin VB.CommandButton cmdEPMDET
       Caption         =   "EPMDET"
       Height          =   255
       Left            =   2280
@@ -139,7 +139,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   2040
       Width           =   900
    End
-   Begin VB.CommandButton cmdEPMIDF 
+   Begin VB.CommandButton cmdEPMIDF
       Caption         =   "EPMIDF"
       Height          =   255
       Left            =   2280
@@ -148,7 +148,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1680
       Width           =   900
    End
-   Begin VB.CommandButton cmdSVG 
+   Begin VB.CommandButton cmdSVG
       Caption         =   "SVG"
       Height          =   255
       Left            =   120
@@ -157,7 +157,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1680
       Width           =   900
    End
-   Begin VB.CommandButton cmdDBG 
+   Begin VB.CommandButton cmdDBG
       Caption         =   "DBG"
       Height          =   255
       Left            =   4440
@@ -166,7 +166,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   480
       Width           =   900
    End
-   Begin VB.CommandButton cmdSLN 
+   Begin VB.CommandButton cmdSLN
       Caption         =   "SLN"
       Height          =   255
       Left            =   4440
@@ -175,7 +175,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   840
       Width           =   900
    End
-   Begin VB.CommandButton cmdAudit 
+   Begin VB.CommandButton cmdAudit
       Caption         =   "Audit"
       Height          =   255
       Left            =   3240
@@ -184,7 +184,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   2040
       Width           =   900
    End
-   Begin VB.CommandButton cmdSSZ 
+   Begin VB.CommandButton cmdSSZ
       Caption         =   "SSZ"
       Height          =   255
       Left            =   1080
@@ -193,7 +193,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   2040
       Width           =   900
    End
-   Begin VB.CommandButton cmdZSZ 
+   Begin VB.CommandButton cmdZSZ
       Caption         =   "ZSZ"
       Height          =   255
       Left            =   1080
@@ -202,7 +202,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1680
       Width           =   900
    End
-   Begin VB.CommandButton cmdMeter 
+   Begin VB.CommandButton cmdMeter
       Caption         =   "Meter"
       Height          =   255
       Left            =   120
@@ -211,7 +211,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   480
       Width           =   900
    End
-   Begin VB.CommandButton cmdMTD 
+   Begin VB.CommandButton cmdMTD
       Caption         =   "MTD"
       Height          =   255
       Left            =   1080
@@ -220,7 +220,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1320
       Width           =   900
    End
-   Begin VB.CommandButton cmdMTR 
+   Begin VB.CommandButton cmdMTR
       Caption         =   "MTR"
       Height          =   255
       Left            =   4440
@@ -229,7 +229,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1680
       Width           =   900
    End
-   Begin VB.CommandButton cmdBND 
+   Begin VB.CommandButton cmdBND
       Caption         =   "BND"
       Height          =   255
       Left            =   4440
@@ -238,7 +238,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   120
       Width           =   900
    End
-   Begin VB.CommandButton cmdEIO 
+   Begin VB.CommandButton cmdEIO
       Caption         =   "EIO"
       Height          =   255
       Left            =   120
@@ -247,7 +247,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1320
       Width           =   900
    End
-   Begin VB.CommandButton cmdRDD 
+   Begin VB.CommandButton cmdRDD
       Caption         =   "RDD"
       Height          =   255
       Left            =   1080
@@ -256,7 +256,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   480
       Width           =   900
    End
-   Begin VB.CommandButton cmdESO 
+   Begin VB.CommandButton cmdESO
       Caption         =   "ESO"
       Height          =   255
       Left            =   4440
@@ -265,7 +265,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   1320
       Width           =   900
    End
-   Begin VB.CommandButton cmdTable 
+   Begin VB.CommandButton cmdTable
       Caption         =   "Table"
       Height          =   255
       Left            =   120
@@ -274,7 +274,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   840
       Width           =   900
    End
-   Begin VB.CommandButton cmdERR 
+   Begin VB.CommandButton cmdERR
       Caption         =   "ERR"
       Height          =   255
       Left            =   1080
@@ -283,7 +283,7 @@ Begin VB.Form frmOpenFilePanel
       Top             =   120
       Width           =   900
    End
-   Begin VB.CommandButton cmdMain 
+   Begin VB.CommandButton cmdMain
       Caption         =   "CSV"
       Height          =   255
       Left            =   120
@@ -436,15 +436,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

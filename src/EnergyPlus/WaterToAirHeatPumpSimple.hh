@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -81,6 +81,7 @@ namespace WaterToAirHeatPumpSimple {
     {
         // Members
         std::string Name;                                                                     // Name of the Water to Air Heat pump
+        Sched::Schedule *availSched = nullptr;                                                // availability schedule
         WatertoAirHP WAHPType = WatertoAirHP::Invalid;                                        // Type of WatertoAirHP ie. Heating or Cooling
         DataPlant::PlantEquipmentType WAHPPlantType = DataPlant::PlantEquipmentType::Invalid; // type of component in plant
         bool SimFlag = false;                                                                 // Heat Pump Simulation Flag

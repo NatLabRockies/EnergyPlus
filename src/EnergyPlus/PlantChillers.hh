@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -393,7 +393,7 @@ namespace PlantChillers {
         Real64 UAtoCapRat;                         // (UACGC) Heat Exchanger UA to Capacity
         Array1D<Real64> UAtoCapCoef;               // Heat Exchanger UA to Capacity Coeffs Poly Fit
         Real64 GTEngineCapacity;                   // Capacity of GT Unit attached to Chiller
-        bool GTEngineCapacityWasAutoSized;         // true if previous field was autosize on inpt
+        bool GTEngineCapacityWasAutoSized;         // true if previous field was autosize on input
         Real64 MaxExhaustperGTPower;               // Max Exhaust Flow per KW Power Out
         Real64 DesignSteamSatTemp;                 // Steam Saturation Temperature
         Real64 ExhaustStackTemp;                   // Temperature of Exhaust Gases

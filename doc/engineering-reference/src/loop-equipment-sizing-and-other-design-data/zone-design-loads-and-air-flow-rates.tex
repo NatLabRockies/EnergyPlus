@@ -27,13 +27,13 @@ The data stored in \emph{CalcZoneSizing}, \emph{CalcFinalZoneSizing}, \emph{Zone
 % table 40
 \begin{longtable}[c]{p{1.85in}p{4.13in}}
 \caption{Zone Sizing Data \label{table:zone-sizing-data}} \tabularnewline
-\toprule 
+\toprule
 Name & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Zone Sizing Data} \tabularnewline
-\toprule 
+\toprule
 Name & Description \tabularnewline
 \midrule
 \endhead
@@ -111,7 +111,7 @@ As described in the preceding section, the Sizing Manager initiates the zone des
 
 In module \emph{HVACManager}, subroutine \emph{ManageHVAC} calls \emph{SimHVAC}. \emph{SimHVAC} checks \emph{ZoneSizingCalc}. If it is \emph{true}, \emph{SimHVAC} calls \emph{ManageZoneEquipment} and returns, rather than simulating the actual system. In turn \emph{ManageZoneEquipment} checks if \emph{ZoneSizingCalc} is \emph{true}; if it is it calls \emph{SizeZoneEquipment} rather than \emph{SimZoneEquipment}.
 
-\emph{SizeZoneEquipment} assumes that each controlled zone is served by an ideal air conditioning unit. This unit supplies sensible and latent (if latent sizing is requested) heating or cooling air at a fixed, user input temperature and humidity (specified in the Sizing:Zone objects). The units have infinite capacity: the flow rate can be any amount. Zone humidity is controlled at a constant level when latent sizing is requested, otherwise zone humidity is allowed to float. The sensible and latent loads and air mass flow rates are saved and reported to \emph{eplusout.zsz}. 
+\emph{SizeZoneEquipment} assumes that each controlled zone is served by an ideal air conditioning unit. This unit supplies sensible and latent (if latent sizing is requested) heating or cooling air at a fixed, user input temperature and humidity (specified in the Sizing:Zone objects). The units have infinite capacity: the flow rate can be any amount. Zone humidity is controlled at a constant level when latent sizing is requested, otherwise zone humidity is allowed to float. The sensible and latent loads and air mass flow rates are saved and reported to \emph{eplusout.zsz}.
 
 Before the ideal zone load is calculated, the function checks whether the user wants to account for the heat gain or loss caused by the ventilation air from a Dedicated Outdoor Air System (DOAS). If the user has selected \emph{Account For Dedicated Outdoor Air = Yes} the function performs an ideal DOAS calculation. The DOAS supply temperature is set according to the user's choice of 1 of 3 possible control strategies: \emph{NeutralSupplyAir}, \emph{NeutralDehumidifiedSupplyAir}, or \emph{ColdSupplyAir}. This value is saved and reported to \emph{eplusout.zsz}. The different strategies are:
 
@@ -130,7 +130,7 @@ With the DOAS supply temperature set and the air mass flow rate set to the minim
 {\dot Q_{doa}} = {c_{p,air}}{\dot m_{vent,min}}({T_{sup}} - {T_z})
 \end{equation}
 
-\emph{UpdateSystemOutputRequired} is then invoked to adjust the load to be met by the ideal zone system. 
+\emph{UpdateSystemOutputRequired} is then invoked to adjust the load to be met by the ideal zone system.
 
 When latent sizing is requested sensible and latent loads provided by the DOAS are updated. Latent load units are kgw per second.
 
@@ -186,7 +186,7 @@ The calculated and stored sequences are summed or averaged over the zone time-st
 \def\labelenumi{(\arabic{enumi})}
 \tightlist
 \item
-  Smooth the design sequences by applying a moving, fixed-width averaging window to the sequences. The width of the window is user specified in the \emph{Sizing:Parameters} input object. The sequences that are smoothed are: 
+  Smooth the design sequences by applying a moving, fixed-width averaging window to the sequences. The width of the window is user specified in the \emph{Sizing:Parameters} input object. The sequences that are smoothed are:
 \end{enumerate}
 
 \begin{enumerate}
@@ -281,11 +281,11 @@ All of these factors default to 1.0. Function \emph{UpdateTermUnitFinalZoneSizin
 
 {\scriptsize
 \begin{equation}
-    {CoolFlow_{TU}} = {CoolFlowNoOA_{FZ}} \cdot CoolFlowRatio + {MinOAFrac} \cdot ( {CoolFlowWithOA_{FZ}} - {CoolFlowNoOA_{FZ}} ) 
+    {CoolFlow_{TU}} = {CoolFlowNoOA_{FZ}} \cdot CoolFlowRatio + {MinOAFrac} \cdot ( {CoolFlowWithOA_{FZ}} - {CoolFlowNoOA_{FZ}} )
 \end{equation}}
 
 \begin{equation}
-    {CoolFlow_{TU}} = max({CoolFlow_{TU}},{minOAFlow_{TU}}) 
+    {CoolFlow_{TU}} = max({CoolFlow_{TU}},{minOAFlow_{TU}})
 \end{equation}
 
 Where:

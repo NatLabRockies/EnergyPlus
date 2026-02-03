@@ -129,7 +129,6 @@ Note that this option should be used in caution. Following recommendations may b
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneControl:Thermostat, Zone 3 Thermostat, NORTH ZONE,
   Zone Control Type Sched,
   DUAL SETPOINT WITH DEADBAND, VAV Setpoints;
@@ -138,66 +137,64 @@ ZoneControl:Thermostat, Zone 3 Thermostat, NORTH ZONE,
 An example of a global thermostat:
 
 \begin{lstlisting}
-
 ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
-  ZoneControl:Thermostat,
-  AllControlledZones Thermostat,               !- Name
-  AllControlledZones,                               !- Zone Name
-  Zone Control Type Sched, !- Control Type Schedule Name
-  ThermostatSetpoint:SingleCooling,   !- Control 1 Object Type
-  CoolingSetPoint,                 !- Control 1 Name
-  ThermostatSetpoint:SingleHeating,   !- Control 2 Object Type
-  HeatingSetpoint,                 !- Control 2 Name
-  ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type
-  DualSetPoint;                       !- Control 3 Name
+ZoneControl:Thermostat,
+  AllControlledZones Thermostat,  !- Name
+  AllControlledZones,         !- Zone Name
+  Zone Control Type Sched,    !- Control Type Schedule Name
+  ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
+  CoolingSetPoint,            !- Control 1 Name
+  ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
+  HeatingSetpoint,            !- Control 2 Name
+  ThermostatSetpoint:DualSetpoint,  !- Control 3 Object Type
+  DualSetPoint;               !- Control 3 Name
 \end{lstlisting}
 
 A complete zone thermostat example showing this statement and all of the objects it must reference is:
 
 \begin{lstlisting}
-
 ! Zone control object which links thermostats to a particular zone
   ZoneControl:Thermostat, Zone 2 Thermostat, EAST ZONE,
   Zone Control Type Sched,
   ThermostatSetpoint:SingleCooling, Cooling Setpoint with SB,
   ThermostatSetpoint:SingleHeating; Heating Setpoint with SB;
 
-  ! Control type objects     these may be used in more than one zone
+! Control type objects     these may be used in more than one zone
   ThermostatSetpoint:SingleCooling,
   Cooling Setpoint with SB,
   Cooling Setpoints;
 
-  ThermostatSetpoint:SingleHeating,
+ThermostatSetpoint:SingleHeating,
   Heating Setpoint with SB,
   Heating Setpoints;
 
-  ! Schedule type definitions
-  ScheduleTypeLimits,Temperature,-60:200,CONTINUOUS;
-  ScheduleTypeLimits,Control Type,0:4,DISCRETE;
+! Schedule type definitions
+ScheduleTypeLimits,Temperature,-60:200,CONTINUOUS;
 
-  ! Control type schedule definition
-  Schedule:Compact, Zone Control Type Sched, Control Type,
+ScheduleTypeLimits,Control Type,0:4,DISCRETE;
+
+! Control type schedule definition
+Schedule:Compact, Zone Control Type Sched, Control Type,
   Through: 3/31,
   For: AllDays,
-  Until: 24:00, 1,   !- Single Heating
+  Until: 24:00, 1,            !- Single Heating
   Through: 9/30,
   For: AllDays,
-  Until: 24:00, 2,   !- Single Cooling
+  Until: 24:00, 2,            !- Single Cooling
   Through: 12/31,
   For: AllDays,
-  Until: 24:00, 1;   !- Single Heating
+  Until: 24:00, 1;            !- Single Heating
 
-  ! Heating setpoint schedule definition
-  Schedule:Compact, Heating Setpoints, Temperature,
+! Heating setpoint schedule definition
+Schedule:Compact, Heating Setpoints, Temperature,
   Through: 12/31,
   For: AllDays,
   Until: 7:00, 15.,
   Until: 17:00,20.,
   Until: 24:00,15.;
 
-  ! Cooling setpoint schedule definition
-  Schedule:Compact, Cooling Setpoints, Temperature,
+! Cooling setpoint schedule definition
+Schedule:Compact, Cooling Setpoints, Temperature,
   Through: 12/31,
   For: AllDays,
   Until: 7:00, 30.,
@@ -439,11 +436,10 @@ The cooling temperature schedule. Values in the schedule are temperatures \{C\}.
 Examples of these statements in an IDF are:
 
 \begin{lstlisting}
-
 ThermostatSetpoint:SingleHeating, Heating Setpoint with SB, Heating Setpoints;
-  ThermostatSetpoint:SingleCooling, Cooling Setpoint with SB, Cooling Setpoints;
-  ThermostatSetpoint:SingleHeatingOrCooling, Heating Cooling Setpoint Sched, Heating Cooling Setpoints;
-  ThermostatSetpoint:DualSetpoint, VAV Setpoints, Heating Setpoints, Cooling Setpoints;
+ThermostatSetpoint:SingleCooling, Cooling Setpoint with SB, Cooling Setpoints;
+ThermostatSetpoint:SingleHeatingOrCooling, Heating Cooling Setpoint Sched, Heating Cooling Setpoints;
+ThermostatSetpoint:DualSetpoint, VAV Setpoints, Heating Setpoints, Cooling Setpoints;
 \end{lstlisting}
 
 \subsection{ZoneControl:Thermostat:OperativeTemperature}\label{zonecontrolthermostatoperativetemperature}
@@ -544,23 +540,21 @@ Global operative temperature applied to all zones for a global thermostat:
 
 \begin{lstlisting}
 ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
 ZoneControl:Thermostat,
-  AllControlledZones Thermostat,        !- Name
-  AllControlledZones,                   !- Zone Name
-  Zone Control Type Sched,              !- Control Type Schedule Name
-  ThermostatSetpoint:SingleCooling,     !- Control 1 Object Type
-  CoolingSetPoint,                      !- Control 1 Name
-  ThermostatSetpoint:SingleHeating,     !- Control 2 Object Type
-  HeatingSetpoint,                      !- Control 2 Name
-  ThermostatSetpoint:DualSetpoint,      !- Control 3 Object Type
-  DualSetPoint;                         !- Control 3 Name
-
+  AllControlledZones Thermostat,  !- Name
+  AllControlledZones,         !- Zone Name
+  Zone Control Type Sched,    !- Control Type Schedule Name
+  ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
+  CoolingSetPoint,            !- Control 1 Name
+  ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
+  HeatingSetpoint,            !- Control 2 Name
+  ThermostatSetpoint:DualSetpoint,  !- Control 3 Object Type
+  DualSetPoint;               !- Control 3 Name
 
 ZoneControl:Thermostat:OperativeTemperature,
-  AllControlledZones Thermostat,        !- Thermostat Name
-  CONSTANT,                             !- Radiative Fraction Input Mode
-  0.4;                                  !- Fixed Radiative Fraction
+  AllControlledZones Thermostat,  !- Thermostat Name
+  CONSTANT,                   !- Radiative Fraction Input Mode
+  0.4;                        !- Fixed Radiative Fraction
 \end{lstlisting}
 
 Global operative temperature referencing a single zone from the list:
@@ -571,20 +565,20 @@ ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
 
 \begin{lstlisting}
 ZoneControl:Thermostat,
-  AllControlledZones Thermostat,        !- Name
-  AllControlledZones,                   !- Zone Name
-  Zone Control Type Sched,              !- Control Type Schedule Name
-  ThermostatSetpoint:SingleCooling,     !- Control 1 Object Type
-  CoolingSetPoint,                      !- Control 1 Name
-  ThermostatSetpoint:SingleHeating,     !- Control 2 Object Type
-  HeatingSetpoint,                      !- Control 2 Name
-  ThermostatSetpoint:DualSetpoint,      !- Control 3 Object Type
-   DualSetPoint;                        !- Control 3 Name
+  AllControlledZones Thermostat,  !- Name
+  AllControlledZones,         !- Zone Name
+  Zone Control Type Sched,    !- Control Type Schedule Name
+  ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
+  CoolingSetPoint,            !- Control 1 Name
+  ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
+  HeatingSetpoint,            !- Control 2 Name
+  ThermostatSetpoint:DualSetpoint,  !- Control 3 Object Type
+  DualSetPoint;               !- Control 3 Name
 
 ZoneControl:Thermostat:OperativeTemperature,
-  SPACE3-1 AllControlledZones Thermostat, !- Thermostat Name
-  CONSTANT,                               !- Radiative Fraction Input Mode
-  0.4;                                    !- Fixed Radiative Fraction
+  SPACE3-1 AllControlledZones Thermostat,  !- Thermostat Name
+  CONSTANT,                   !- Radiative Fraction Input Mode
+  0.4;                        !- Fixed Radiative Fraction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-032}
@@ -640,15 +634,14 @@ The value of this input field is used to adjust the cooling setpoint temperature
 An example of this object follows.
 
 \begin{lstlisting}
-
 ZoneControl:Thermostat:TemperatureAndHumidity,
-  Zone Thermostat,                                 !- Thermostat Name
-  Seasonal Relative Humidity Sch,   !- Dehumidifying Relative Humidity Setpoint Schedule Name
-  Overcool,                                               !- Dehumidification Control Type
-  Constant,                                               !- Overcool Range Input Method
-  1.7,                                         !- Overcool Constant Range {deltaC}
-  ,                                               !- Overcool Range Schedule Name
-  3.0;                                         !- Overcool Control Ratio {percent/K}
+  Zone Thermostat,            !- Thermostat Name
+  Seasonal Relative Humidity Sch,  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+  Overcool,                   !- Dehumidification Control Type
+  Constant,                   !- Overcool Range Input Method
+  1.7,                        !- Overcool Constant Range {deltaC}
+  ,                           !- Overcool Range Schedule Name
+  3.0;                        !- Overcool Control Ratio {percent/K}
 \end{lstlisting}
 
 \subsection{ZoneControl:Thermostat:StagedDualSetpoint}\label{zonecontrolthermostatstageddualsetpoint}
@@ -734,24 +727,23 @@ Note: If the stage number is not equal to the number of cooling speed in the \hy
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneControl:Thermostat:StagedDualSetpoint,
-  ZoneThermostat,                   !- Name
-  AllZones,                               !- Zone or ZoneList Name
-  2,                                             !- Number of Heating Stages
-  Heating Setpoints,             !- Heating Temperature Setpoint Schedule Name
-  1.1,                                         !- Heating Throttling Temperature Range {deltaC}
-  0.0,                                         !- Stage 1 Heating Temperature Offset {deltaC}
-  -0.5,                                       !- Stage 2 Heating Temperature Offset {deltaC}
-  -1.0,                                       !- Stage 3 Heating Temperature Offset {deltaC}
-  -1.5,                                       !- Stage 4 Heating Temperature Offset {deltaC}
-  4,                                             !- Number of Cooling Stages
-  Cooling Setpoints,             !- Cooling Setpoint Temperature Schedule Name
-  1.1,                                         !- Cooling Throttling Temperature Range {deltaC}
-  0.0,                                         !- Stage 1 Cooling Temperature Offset {deltaC}
-  1.0,                                         !- Stage 2 Cooling Temperature Offset {deltaC}
-  2.0,                                         !- Stage 3 Cooling Temperature Offset {deltaC}
-  3.0;                                         !- Stage 4 Cooling Temperature Offset {deltaC}
+  ZoneThermostat,             !- Name
+  AllZones,                   !- Zone or ZoneList Name
+  2,                          !- Number of Heating Stages
+  Heating Setpoints,          !- Heating Temperature Setpoint Schedule Name
+  1.1,                        !- Heating Throttling Temperature Range {deltaC}
+  0.0,                        !- Stage 1 Heating Temperature Offset {deltaC}
+  -0.5,                       !- Stage 2 Heating Temperature Offset {deltaC}
+  -1.0,                       !- Stage 3 Heating Temperature Offset {deltaC}
+  -1.5,                       !- Stage 4 Heating Temperature Offset {deltaC}
+  4,                          !- Number of Cooling Stages
+  Cooling Setpoints,          !- Cooling Setpoint Temperature Schedule Name
+  1.1,                        !- Cooling Throttling Temperature Range {deltaC}
+  0.0,                        !- Stage 1 Cooling Temperature Offset {deltaC}
+  1.0,                        !- Stage 2 Cooling Temperature Offset {deltaC}
+  2.0,                        !- Stage 3 Cooling Temperature Offset {deltaC}
+  3.0;                        !- Stage 4 Cooling Temperature Offset {deltaC}
 \end{lstlisting}
 
 \subsection{ZoneControl:Humidistat}\label{zonecontrolhumidistat}
@@ -822,35 +814,32 @@ Name of a schedule that defines the dehumidifying relative humidity setpoint, ex
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneControl:Humidistat,
-  Zone 2 Humidistat,             !- Humidistat Name
-  EAST ZONE,                             !- Zone Name
-  Min Rel Hum Set Sch,       !- Humidifying Relative Humidity Setpoint SCHEDULE Name
-  Max Rel Hum Set Sch;       !- Dehumidifying Relative Humidity Setpoint SCHEDULE Name
+  Zone 2 Humidistat,          !- Humidistat Name
+  EAST ZONE,                  !- Zone Name
+  Min Rel Hum Set Sch,        !- Humidifying Relative Humidity Setpoint SCHEDULE Name
+  Max Rel Hum Set Sch;        !- Dehumidifying Relative Humidity Setpoint SCHEDULE Name
 \end{lstlisting}
 
 An example schedule for the Zone Control:Humidistat
 
 \begin{lstlisting}
-
 ScheduleTypeLimits,Humidity,0:100,CONTINUOUS;
+Schedule:Compact,
+  Min Rel Hum Set Sch,        !- Name
+  Humidity,                   !- ScheduleType
+  Through: 12/31,             !- Complex Field \#1
+  For: AllDays,               !- Complex Field \#2
+  Until: 24:00,               !- Complex Field \#3
+  30.0;                       !- Complex Field \#4
 
-
-  Schedule:Compact,
-  Min Rel Hum Set Sch,       !- Name
-  Humidity,                               !- ScheduleType
-  Through: 12/31,                   !- Complex Field \#1
-  For: AllDays,                       !- Complex Field \#2
-  Until: 24:00,                       !- Complex Field \#3
-  30.0;                                       !- Complex Field \#4
-  Schedule:Compact,,
-  Max Rel Hum Set Sch,       !- Name
-  Humidity,                               !- ScheduleType
-  Through: 12/31,                   !- Complex Field \#1
-  For: AllDays,                       !- Complex Field \#2
-  Until: 24:00,                       !- Complex Field \#3
-  55.0;                                       !- Complex Field \#4
+Schedule:Compact,,
+  Max Rel Hum Set Sch,        !- Name
+  Humidity,                   !- ScheduleType
+  Through: 12/31,             !- Complex Field \#1
+  For: AllDays,               !- Complex Field \#2
+  Until: 24:00,               !- Complex Field \#3
+  55.0;                       !- Complex Field \#4
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-027}
@@ -1001,42 +990,38 @@ The unique name for the corresponding thermal comfort control type.
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneControl:Thermostat:ThermalComfort,
-  Zone 2 Comfort Control,                   !- Thermal Comfort Control Name
-  EAST ZONE,                                             !- Zone Name
-  SpecificObject,                                   !- Averaging Method for Zones with Multiple People Objects
-  EAST ZONE,                                             !- Object Name for Specific Object Averaging Method
-  12.8,                                                       !- Minimum dry-bulb temperature setpoint
-  40.0,                                                       !- Maximum dry-bulb temperature setpoint
-  Zone Comfort Control Type Sched, !- Thermal Comfort Control Type SCHEDULE Name
-  Dual Thermal Comfort Setpoint WITH DEADBAND:Fanger, !- Control Type #1
-  Dual Comfort Setpoint;                     !- Thermal Comfort Control Type Name #1
+  Zone 2 Comfort Control,     !- Thermal Comfort Control Name
+  EAST ZONE,                  !- Zone Name
+  SpecificObject,             !- Averaging Method for Zones with Multiple People Objects
+  EAST ZONE,                  !- Object Name for Specific Object Averaging Method
+  12.8,                       !- Minimum dry-bulb temperature setpoint
+  40.0,                       !- Maximum dry-bulb temperature setpoint
+  Zone Comfort Control Type Sched,  !- Thermal Comfort Control Type SCHEDULE Name
+  Dual Thermal Comfort Setpoint WITH DEADBAND:Fanger,  !- Control Type #1
+  Dual Comfort Setpoint;      !- Thermal Comfort Control Type Name #1
 \end{lstlisting}
 
 Global thermal comfort thermostat example:
 
 \begin{lstlisting}
-
 ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
-
-  ZoneControl:Thermostat:ThermalComfort,
-  ControlledZones Comfort Control,   !- Name
-  AllControlledZones,                             !- Zone Name
-  PeopleAverage,                     !- Averaging Method
-  ,                                               !- Specific People Name
-  12.8,                                       !- Minimum Dry-Bulb Temperature Setpoint {C}
-  40.0,                                       !- Maximum Dry-Bulb Temperature Setpoint {C}
-  Zone Comfort Control Type Sched,   !- Thermal Comfort Control Type Schedule Name
-  ThermostatSetpoint:ThermalComfort:Fanger:SingleHeating,   !- Thermal Comfort Control 1 Object Type
-  Single Heating Comfort Setpoint,   !- Thermal Comfort Control 1 Name
-  ThermostatSetpoint:ThermalComfort:Fanger:SingleCooling,   !- Thermal Comfort Control 2 Object Type
-  Single Cooling Comfort Setpoint,   !- Thermal Comfort Control 2 Name
-  ThermostatSetpoint:ThermalComfort:Fanger:SingleHeatingOrCooling,   !- Thermal Comfort Control 3 Object Type
-  Single Heating Cooling Comfort Setpoint,   !- Thermal Comfort Control 3 Name
-  ThermostatSetpoint:ThermalComfort:Fanger:DualSetpoint,   !- Thermal Comfort Control 4 Object Type
-  Dual Comfort Setpoint;     !- Thermal Comfort Control 4 Name
+ZoneControl:Thermostat:ThermalComfort,
+  ControlledZones Comfort Control,  !- Name
+  AllControlledZones,         !- Zone Name
+  PeopleAverage,              !- Averaging Method
+  ,                           !- Specific People Name
+  12.8,                       !- Minimum Dry-Bulb Temperature Setpoint {C}
+  40.0,                       !- Maximum Dry-Bulb Temperature Setpoint {C}
+  Zone Comfort Control Type Sched,  !- Thermal Comfort Control Type Schedule Name
+  ThermostatSetpoint:ThermalComfort:Fanger:SingleHeating,  !- Thermal Comfort Control 1 Object Type
+  Single Heating Comfort Setpoint,  !- Thermal Comfort Control 1 Name
+  ThermostatSetpoint:ThermalComfort:Fanger:SingleCooling,  !- Thermal Comfort Control 2 Object Type
+  Single Cooling Comfort Setpoint,  !- Thermal Comfort Control 2 Name
+  ThermostatSetpoint:ThermalComfort:Fanger:SingleHeatingOrCooling,  !- Thermal Comfort Control 3 Object Type
+  Single Heating Cooling Comfort Setpoint,  !- Thermal Comfort Control 3 Name
+  ThermostatSetpoint:ThermalComfort:Fanger:DualSetpoint,  !- Thermal Comfort Control 4 Object Type
+  Dual Comfort Setpoint;      !- Thermal Comfort Control 4 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-024}
@@ -1150,26 +1135,22 @@ The name of the associated schedule containing cooling setpoint \lstinline!Zone 
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ThermostatSetpoint:ThermalComfort:Fanger:SingleHeating,
-  Heating Comfort Setpoint,!- Name
-  Heating PMV Setpoints;     !- Setpoint Temperature SCHEDULE Name
+  Heating Comfort Setpoint,   !- Name
+  Heating PMV Setpoints;      !- Setpoint Temperature SCHEDULE Name
 
+ThermostatSetpoint:ThermalComfort:Fanger:SingleCooling,
+  Cooling Comfort Setpoint,   !- Name
+  Cooling PMV Setpoints;      !- Setpoint Temperature SCHEDULE Name
 
-  ThermostatSetpoint:ThermalComfort:Fanger:SingleCooling,
-  Cooling Comfort Setpoint,!- Name
-  Cooling PMV Setpoints;     !- Setpoint Temperature SCHEDULE Name
+ThermostatSetpoint:ThermalComfort:Fanger:SingleHeatingOrCooling,
+  Heating Cooling Comfort Setpoint,  !- Name
+  Heating Cooling PMV Setpoints;  !- Setpoint Temperature SCHEDULE Name
 
-
-  ThermostatSetpoint:ThermalComfort:Fanger:SingleHeatingOrCooling,
-  Heating Cooling Comfort Setpoint,!- Name
-  Heating Cooling PMV Setpoints;     !- Setpoint Temperature SCHEDULE Name
-
-
-  ThermostatSetpoint:ThermalComfort:Fanger:DualSetpoint,
-  Dual Comfort Setpoint,     !- Name
-  Heating PMV Setpoints,     !- Fanger Thermal Comfort Heating Setpoint PMV SCHEDULE Name
-  Cooling PMV Setpoints;     !- Fanger Thermal Comfort Cooling Setpoint PMV SCHEDULE Name
+ThermostatSetpoint:ThermalComfort:Fanger:DualSetpoint,
+  Dual Comfort Setpoint,      !- Name
+  Heating PMV Setpoints,      !- Fanger Thermal Comfort Heating Setpoint PMV SCHEDULE Name
+  Cooling PMV Setpoints;      !- Fanger Thermal Comfort Cooling Setpoint PMV SCHEDULE Name
 \end{lstlisting}
 
 \subsection{ZoneControl:ContaminantController}\label{zonecontrolcontaminantcontroller}
@@ -1234,16 +1215,15 @@ This field contains the name of a schedule that contains the zone generic contam
 An IDF example is provided below:
 
 \begin{lstlisting}
-
 ZoneControl:ContaminantController,
-  CO2 Controller1,                 !- Name
-  EAST ZONE,                             !- Zone Name
-  CO2AvailSchedule,               !- Carbon Dioxide Control Availability Schedule Name
-  CO2SetpointSchedule,         !- Carbon Dioxide Setpoint Schedule Name
-  ,                                               !- Minimum Carbon Dioxide Concentration Schedule Name
-  ,                                               !- Maximum Carbon Dioxide Concentration Schedule Name
-  GCAvailSchedule,                 !- Generic Contaminant Control Availability Schedule Name
-  GCSetpointSchedule;           !- Generic Contaminant Setpoint Schedule Name
+  CO2 Controller1,            !- Name
+  EAST ZONE,                  !- Zone Name
+  CO2AvailSchedule,           !- Carbon Dioxide Control Availability Schedule Name
+  CO2SetpointSchedule,        !- Carbon Dioxide Setpoint Schedule Name
+  ,                           !- Minimum Carbon Dioxide Concentration Schedule Name
+  ,                           !- Maximum Carbon Dioxide Concentration Schedule Name
+  GCAvailSchedule,            !- Generic Contaminant Control Availability Schedule Name
+  GCSetpointSchedule;         !- Generic Contaminant Setpoint Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-020}

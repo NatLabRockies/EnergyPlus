@@ -21,13 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9"]
-        os: [ubuntu-22.04]  # , macos-13, windows-2022]
+        os: [ubuntu-22.04]  # , macos-15-intel, macos-15, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - name: Checkout EnergyPlus
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: ${{ github.event.inputs.ref }}
 
@@ -41,7 +41,7 @@ jobs:
         pip install wheel
         python setup.py bdist_wheel
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: energyplus-wheel-${{ matrix.os }}
         path: ./dist

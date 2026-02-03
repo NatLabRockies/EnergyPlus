@@ -23,7 +23,7 @@
 
   SurfaceConvectionAlgorithm:Outside,DOE-2;
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Test Harness for MicroCogen,  !- Name
@@ -320,8 +320,8 @@
     INF-SCHED,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.3,                     !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient

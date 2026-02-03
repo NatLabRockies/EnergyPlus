@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -108,7 +108,7 @@ namespace HVACMultiSpeedHeatPump {
         int FanOutletNode;                         // Fan Outlet node
         Real64 FanVolFlow;                         // Supply fan volumetric flow rate
         Sched::Schedule *fanOpModeSched = nullptr; // Supply air fan operating mode schedule
-        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;  // mode of operation; 1=cycling fan, cycling compressor; 2=continuous fan, cycling compresor
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;  // mode of operation; 1=cycling fan, cycling compressor; 2=continuous fan, cycling compressor
         std::string DXHeatCoilName;                // COIL:DX:MultiSpeed:Heating name
         int HeatCoilType;                          // Heating coil type: 1 COIL:DX:MultiSpeed:Heating only
         int HeatCoilNum;                           // Heating coil number
@@ -240,7 +240,7 @@ namespace HVACMultiSpeedHeatPump {
     struct MSHeatPumpReportData
     {
         // Members
-        Real64 ElecPowerConsumption;   // Electricity Rate comsumption: CondenserFan+CrankcaseHeater+Defroster+aux
+        Real64 ElecPowerConsumption;   // Electricity Rate consumption: CondenserFan+CrankcaseHeater+Defroster+aux
         Real64 HeatRecoveryEnergy;     // Heat recovery rate [J]
         Real64 CycRatio;               // Cycle ratio
         Real64 SpeedRatio;             // Speed ratio between two stages

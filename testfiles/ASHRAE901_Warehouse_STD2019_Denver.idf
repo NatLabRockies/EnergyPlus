@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -4369,7 +4369,7 @@
     BLDG_LIGHT_OFFICE_SCH,   !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -4384,7 +4384,7 @@
     BLDG_LIGHT_STORAGE_SCH,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    7.427098188,             !- Watts per Zone Floor Area {W/m2}
+    7.427098188,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -4399,7 +4399,7 @@
     BLDG_LIGHT_STORAGE_SCH,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    3.552090438,             !- Watts per Zone Floor Area {W/m2}
+    3.552090438,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -4416,7 +4416,7 @@
     Office_Plug_SCH,         !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1912.5,                  !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     ,                        !- Fraction Radiant
@@ -4429,7 +4429,7 @@
     Bulk Storage Plug Schedule,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8200.12,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     ,                        !- Fraction Radiant
@@ -4553,8 +4553,8 @@
     Office Infil Schedule,   !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000220198,             !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000220198,             !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4567,8 +4567,8 @@
     INFIL_Door_Opening_SCH,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.176508178,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4581,8 +4581,8 @@
     Fine Sorage Infil Schedule,  !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000225765,             !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000225765,             !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4595,8 +4595,8 @@
     Bulk Storage Infil_Base Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     2.330231241,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4611,7 +4611,7 @@
     Always On Schedule,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     37.7600047937506,        !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type
@@ -4639,7 +4639,7 @@
     Always On Schedule,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.943841435,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Natural,                 !- Ventilation Type
@@ -4743,7 +4743,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Zone2 Fine Storage,      !- Zone or ZoneList Name
@@ -4772,7 +4779,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Zone3 Bulk Storage,      !- Zone or ZoneList Name
@@ -4801,7 +4815,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:SYSTEM ===========
 
@@ -5156,8 +5177,8 @@
     0.79866,                 !- Speed 1 Gross Rated Sensible Heat Ratio
     4.11713235489972,        !- Speed 1 Gross Rated Cooling COP {W/W}
     0.653026666666667,       !- Speed 1 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
@@ -5176,8 +5197,8 @@
     0.79866,                 !- Speed 2 Gross Rated Sensible Heat Ratio
     4.11713235489972,        !- Speed 2 Gross Rated Cooling COP {W/W}
     0.97954,                 !- Speed 2 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
@@ -5217,8 +5238,8 @@
     0.74570,                 !- Speed 1 Gross Rated Sensible Heat Ratio
     3.7988306741603,         !- Speed 1 Gross Rated Cooling COP {W/W}
     1.33200666666667,        !- Speed 1 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
@@ -5237,8 +5258,8 @@
     0.74570,                 !- Speed 2 Gross Rated Sensible Heat Ratio
     3.7988306741603,         !- Speed 2 Gross Rated Cooling COP {W/W}
     1.99801,                 !- Speed 2 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 2 Energy Input Ratio Function of Temperature Curve Name

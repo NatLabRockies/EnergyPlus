@@ -4,15 +4,14 @@
 !-
 !- Last update: July 2022
 !-----------------------------------------------------------------------------------------------
-
 !- ClimateMaster TCH072 - Water loop heat pump
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 69 kBtu/h at 86F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 13.3 EER at 86F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 92.5 kBtu/h at 68F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
 !-   * Heating efficiency: 5.0 COP at 68F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
 
-Curve:QuadLinear,
+  Curve:QuadLinear,
     TCH072_WLHP_CLG_CAPFT,   !- Name
     -4.57474044463289,       !- Coefficient1 Constant
     8.40143349039666,        !- Coefficient2 w
@@ -34,7 +33,7 @@ Curve:QuadLinear,
     Dimensionless,           !- Input Unit Type for y
     Dimensionless;           !- Input Unit Type for z
 
-Curve:QuadLinear,
+  Curve:QuadLinear,
     TCH072_WLHP_CLG_PWRFT,   !- Name
     -5.50607022602515,       !- Coefficient1 Constant
     0.680084935528983,       !- Coefficient2 w
@@ -56,7 +55,7 @@ Curve:QuadLinear,
     Dimensionless,           !- Input Unit Type for y
     Dimensionless;           !- Input Unit Type for z
 
-Curve:QuintLinear,
+  Curve:QuintLinear,
     TCH072_WLHP_CLG_SENSCAPFT,  !- Name
     2.12513256267777,        !- Coefficient1 Constant
     20.3917558900141,        !- Coefficient2 v
@@ -82,7 +81,7 @@ Curve:QuintLinear,
     Dimensionless,           !- Input Unit Type for y
     Dimensionless;           !- Input Unit Type for z
 
-Curve:QuadLinear,
+  Curve:QuadLinear,
     TCH072_WLHP_HTG_CAPFT,   !- Name
     -2.71637233096806,       !- Coefficient1 Constant
     -1.33549673075959,       !- Coefficient2 w
@@ -104,7 +103,7 @@ Curve:QuadLinear,
     Dimensionless,           !- Input Unit Type for y
     Dimensionless;           !- Input Unit Type for z
 
-Curve:QuadLinear,
+  Curve:QuadLinear,
     TCH072_WLHP_HTG_PWRFT,   !- Name
     -4.99206122881612,       !- Coefficient1 Constant
     4.33547500723789,        !- Coefficient2 w
@@ -128,14 +127,14 @@ Curve:QuadLinear,
 
 !- ClimateMaster TCH072 - Ground source/water heat pump
 !- Performance curve based on 15% methanol antifreeze solution
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 77.72 kBtu/h at 59F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 19.37 EER at 59F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 73.08 kBtu/h at 50F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
 !-   * Heating efficiency: 4.3 COP at 50F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
-
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GSHP_CLG_CAPFT,   !- Name
     -5.33279602686482,       !- Coefficient1 Constant
     7.99362700294768,        !- Coefficient2 w
@@ -158,7 +157,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GSHP_CLG_PWRFT,   !- Name
     -5.35727788859286,       !- Coefficient1 Constant
     0.738322041870955,       !- Coefficient2 w
@@ -181,7 +181,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuintLinear,
+
+  Curve:QuintLinear,
     TCH072_GSHP_CLG_SENSCAPFT,  !- Name
     1.40770061352287,        !- Coefficient1 Constant
     20.0973296168688,        !- Coefficient2 v
@@ -208,7 +209,8 @@ Curve:QuintLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GSHP_HTG_CAPFT,   !- Name
     -3.71699256950274,       !- Coefficient1 Constant
     -1.42968976715512,       !- Coefficient2 w
@@ -231,7 +233,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GSHP_HTG_PWRFT,   !- Name
     -4.87442592004265,       !- Coefficient1 Constant
     4.3724439122695,         !- Coefficient2 w
@@ -255,14 +258,14 @@ Curve:QuadLinear,
 
 !- ClimateMaster TCH072 - Ground loop/water heat pump
 !- Performance curve based on 15% methanol antifreeze solution
-!- Rated characteristics: 
+!- Rated characteristics:
 !-   * Cooling capacity: 70.29 kBtu/h at 77F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Cooling efficiency: 14.35 EER at 77F entering water temperature, and 80.6F/66.2F entering air dry-bulb and wet-bulb
 !-   * Heating capacity: 56.14 kBtu/h at 32F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
 !-   * Heating efficiency: 3.42 COP at 32F entering water temperature, and 68F/59F entering air dry-bulb and wet-bulb
-
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GLHP_CLG_CAPFT,   !- Name
     -4.34283983721389,       !- Coefficient1 Constant
     7.95908762160623,        !- Coefficient2 w
@@ -285,7 +288,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GLHP_CLG_PWRFT,   !- Name
     -6.07162009581271,       !- Coefficient1 Constant
     0.751024641964602,       !- Coefficient2 w
@@ -308,7 +312,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuintLinear,
+
+  Curve:QuintLinear,
     TCH072_GLHP_CLG_SENSCAPFT,  !- Name
     2.07166310580595,        !- Coefficient1 Constant
     19.9313405001319,        !- Coefficient2 v
@@ -335,7 +340,8 @@ Curve:QuintLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH072_GLHP_HTG_CAPFT,   !- Name
     -4.71139387014587,       !- Coefficient1 Constant
     -1.80505473458221,       !- Coefficient2 w
@@ -358,7 +364,8 @@ Curve:QuadLinear,
     Dimensionless;           !- Input Unit Type for z
 
 !- Performance curve based on 15% methanol antifreeze solution
-Curve:QuadLinear,
+
+  Curve:QuadLinear,
     TCH07_GLHP_HTG_PWRFT,    !- Name
     -5.12615627602834,       !- Coefficient1 Constant
     4.59939579763495,        !- Coefficient2 w
@@ -379,3 +386,4 @@ Curve:QuadLinear,
     Dimensionless,           !- Input Unit Type for x
     Dimensionless,           !- Input Unit Type for y
     Dimensionless;           !- Input Unit Type for z
+

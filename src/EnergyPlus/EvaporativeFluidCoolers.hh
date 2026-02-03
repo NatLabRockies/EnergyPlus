@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -133,7 +133,8 @@ namespace EvaporativeFluidCoolers {
         bool LowSpeedFanPowerWasAutoSized = false;           // true if low speed fan power set to autosize on input
         bool LowSpeedEvapFluidCoolerUAWasAutoSized = false;  // true if low speed UA set to autosize on input
         Real64 LowSpeedEvapFluidCoolerUASizingFactor = 0.0;  // sizing factor for low speed UA []
-        Real64 DesignEnteringWaterTemp = 0.0;                // Entering water temperature at design conditions
+        Real64 DesignEnteringWaterTemp = 0.0;                // Entering water temperature at design conditions [C]
+        bool DesignEnteringWaterTempWasAutoSized = false;    // true if design entering water temp was autosized on input
         Real64 DesignExitWaterTemp = -999;                   // Leaving water temperature at design conditions [C]
         Real64 DesignEnteringAirTemp = 0.0;                  // Design inlet air dry-bulb temperature (C)
         Real64 DesignEnteringAirWetBulbTemp = 0.0;           // Design inlet air wet-bulb temperature (C)

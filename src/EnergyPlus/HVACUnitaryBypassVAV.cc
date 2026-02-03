@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1349,7 +1349,7 @@ namespace HVACUnitaryBypassVAV {
 
             state.dataHVACUnitaryBypassVAV->MyOneTimeFlag = false;
             // speed up test based on code from 16 years ago to correct cycling fan economizer defect
-            // see https://github.com/NREL/EnergyPlusArchive/commit/a2202f8a168fd0330bf3a45392833405e8bd08f2
+            // see https://github.com/NatLabRockies/EnergyPlusArchive/commit/a2202f8a168fd0330bf3a45392833405e8bd08f2
             // This test sets simple flag so air loop doesn't iterate twice each pass (reverts above change)
             // AirLoopControlInfo(AirplantLoc.loopNum).Simple = true;
         }
@@ -3408,13 +3408,13 @@ namespace HVACUnitaryBypassVAV {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 ZoneLoad = 0.0; // Total load in controlled zone [W]
-        int lastDayOfSim(0);   // used during warmup to reset changeOverTimer since need to do same thing next warmup day
 
         auto &cBVAV = state.dataHVACUnitaryBypassVAV->CBVAV(CBVAVNum);
 
         int dayOfSim = state.dataGlobal->DayOfSim; // DayOfSim increments during Warmup when it actually simulates the same day
         if (state.dataGlobal->WarmupFlag) {
             // when warmupday increments then reset timer
+            int lastDayOfSim(0); // used during warmup to reset changeOverTimer since need to do same thing next warmup day
             if (lastDayOfSim != dayOfSim) {
                 cBVAV.changeOverTimer = -1.0; // reset to default (thisTime always > -1)
             }
@@ -3858,9 +3858,8 @@ namespace HVACUnitaryBypassVAV {
                             state, thiscBVAV.HeatCoilName, FirstHVACIteration, thiscBVAV.HeatCoilIndex, QCoilActual, thiscBVAV.fanOp);
                         if (HeatCoilLoad != 0.0) {
                             return (QCoilActual - HeatCoilLoad) / HeatCoilLoad;
-                        } else { // Autodesk:Return Condition added to assure return value is set
-                            return 0.0;
-                        }
+                        } // Autodesk:Return Condition added to assure return value is set
+                        return 0.0;
                     };
                     General::SolveRoot(state, ErrTolerance, SolveMaxIter, SolFlag, HotWaterMdot, f, MinWaterFlow, MaxHotWaterFlow);
                     if (SolFlag == -1) {

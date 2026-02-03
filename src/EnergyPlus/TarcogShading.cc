@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -88,14 +88,6 @@ namespace TarcogShading {
     using namespace TARCOGGassesParams;
     using namespace TARCOGGasses90;
     using namespace TARCOGParams;
-
-    enum class CalcForcedVentilation
-    {
-        Invalid = -1,
-        Skip,
-        Allow,
-        Num
-    };
 
     // Functions
 
@@ -203,9 +195,6 @@ namespace TarcogShading {
         Real64 qv1;
         Real64 qv2;
 
-        int i;
-        int j;
-        int k;
         int nmix1;
         int nmix2;
 
@@ -217,8 +206,8 @@ namespace TarcogShading {
         // hcv = 0.0d0
 
         // main loop:
-        for (i = 1; i <= nlayer; ++i) {
-            k = 2 * i + 1;
+        for (int i = 1; i <= nlayer; ++i) {
+            // int k = 2 * i + 1;
             // if (LayerType(i).eq.VENETBLIND) then
             if (IsShadingLayer(LayerType(i))) {
                 // dr.........set Shading device geometry
@@ -233,7 +222,7 @@ namespace TarcogShading {
                 nmix2 = nmix(i + 1);
                 press1 = pressure(i);
                 press2 = pressure(i + 1);
-                for (j = 1; j <= maxgas; ++j) {
+                for (int j = 1; j <= maxgas; ++j) {
                     state.dataTarcogShading->iprop1(j) = iprop(j, i);
                     state.dataTarcogShading->iprop2(j) = iprop(j, i + 1);
                     state.dataTarcogShading->frct1(j) = frct(j, i);
@@ -381,7 +370,7 @@ namespace TarcogShading {
                     // speed1 = vvent(i)
                     // speed2 = vvent(i+1)
 
-                    if ((static_cast<int>(CalcForcedVentilation::Allow)) && ((vvent(i) != 0) || (vvent(i + 1) != 0))) {
+                    if ((vvent(i) != 0) || (vvent(i + 1) != 0)) {
                         forcedventilation(state,
                                           state.dataTarcogShading->iprop1,
                                           state.dataTarcogShading->frct1,
@@ -1140,7 +1129,7 @@ namespace TarcogShading {
             // dr...recalculate speed if forced speed exist
             // bi...skip forced vent for now
             //  if (forcedspeed.ne.0) then
-            if ((forcedspeed != 0.0) && (static_cast<int>(CalcForcedVentilation::Allow))) {
+            if ((forcedspeed != 0.0)) {
                 speed = forcedspeed;
             } else {
                 speed = (std::sqrt(pow_2(A2) + std::abs(4.0 * A * A1)) - A2) / (2.0 * A1);

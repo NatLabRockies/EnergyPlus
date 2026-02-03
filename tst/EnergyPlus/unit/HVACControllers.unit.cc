@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -272,7 +272,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
     bool SimZoneEquipment(false);
     SimAirServingZones::SimAirLoops(*state, true, SimZoneEquipment);
 
-    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num contollers on air loop)
+    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num controllers on air loop)
     ASSERT_EQ(1, state->dataAirSystemsData->PrimaryAirSystems(1).NumControllers);
     ASSERT_EQ(1, state->dataAirSystemsData->PrimaryAirSystems(1).ControllerIndex(1));
     ASSERT_EQ(1, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
@@ -306,7 +306,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_SchSetPointMgrsOrderTest)
         "	Until: 24:00, 1.0;        !- Field 3",
 
         "  Controller:WaterCoil,",
-        "    Cooling Coil Contoller,  !- Name",
+        "    Cooling Coil Controller,  !- Name",
         "    HumidityRatio,           !- Control Variable",
         "    Reverse,                 !- Action",
         "    FLOW,                    !- Actuator Variable",
@@ -345,7 +345,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_SchSetPointMgrsOrderTest)
         "  AirLoopHVAC:ControllerList,",
         "	CW Coil Controller,       !- Name",
         "	Controller:WaterCoil,     !- Controller 1 Object Type",
-        "	Cooling Coil Contoller;   !- Controller 1 Name",
+        "	Cooling Coil Controller;   !- Controller 1 Name",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1010,7 +1010,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     // and issue a warning
     SimAirServingZones::SimAirLoops(*state, true, SimZoneEquipment);
 
-    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num contollers on air loop)
+    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num controllers on air loop)
     ASSERT_EQ(1, state->dataAirSystemsData->PrimaryAirSystems(1).NumControllers);
     ASSERT_EQ(1, state->dataAirSystemsData->PrimaryAirSystems(1).ControllerIndex(1));
     ASSERT_EQ(1, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);

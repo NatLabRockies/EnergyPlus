@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -310,7 +310,7 @@ namespace Window {
 
     void W5LsqFit(std::array<Real64, numPhis> const &ivars,       // Independent variables
                   std::array<Real64, numPhis> const &dvars,       // Dependent variables
-                  std::array<Real64, Window::maxPolyCoef> &coeffs // Polynomial coeffients from fit
+                  std::array<Real64, Window::maxPolyCoef> &coeffs // Polynomial coefficients from fit
     );
 
     Real64 DiffuseAverage(std::array<Real64, numPhis> const &props); // Property value at angles of incidence
@@ -347,7 +347,7 @@ namespace Window {
     void WindowTempsForNominalCond(EnergyPlusData &state,
                                    int ConstrNum,        // Construction number
                                    Array1A<Real64> hgap, // Gap gas conductive conductance (W/m2-K)
-                                   Real64 adjRatio       // adjusment Ratio to hcin
+                                   Real64 adjRatio       // adjustment Ratio to hcin
     );
 
     void StartingWinTempsForNominalCond(EnergyPlusData &state);

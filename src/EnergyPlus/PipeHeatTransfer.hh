@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -128,7 +128,7 @@ namespace PipeHeatTransfer {
         Real64 SectionArea;            // cross sectional area [m^2]
         Real64 PipeHeatCapacity;       // heat capacity of pipe section [J/m.K]
         Real64 PipeOD;                 // pipe outside diameter [m]
-        Real64 PipeCp;                 // pipe materail Cp [J/kg.K]
+        Real64 PipeCp;                 // pipe material Cp [J/kg.K]
         Real64 PipeDensity;            // pipe material density [kg/m3]
         Real64 PipeConductivity;       // pipe material thermal conductivity [W/m.K]
         Real64 InsulationOD;           // insulation outside diameter [m]

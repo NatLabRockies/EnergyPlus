@@ -96,7 +96,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Output:Diagnostics,
     DisplayAllWarnings;      !- Key 1
@@ -387,7 +387,7 @@
     0,                       !- Coefficient3 x**2
     0.928,                   !- Coefficient4 x**3
     0,                       !- Coefficient5 x**4
-     0.0000000,              !- Minimum Value of x
+    0.0000000,               !- Minimum Value of x
     1.0,                     !- Maximum Value of x
     0.0,                     !- Minimum Curve Output
     5.0,                     !- Maximum Curve Output
@@ -456,7 +456,7 @@
     0,                       !- Coefficient3 x**2
     0.928,                   !- Coefficient4 x**3
     0,                       !- Coefficient5 x**4
-     0.0000000,              !- Minimum Value of x
+    0.0000000,               !- Minimum Value of x
     1.0,                     !- Maximum Value of x
     0.0,                     !- Minimum Curve Output
     5.0,                     !- Maximum Curve Output
@@ -525,7 +525,7 @@
     0,                       !- Coefficient3 x**2
     0.928,                   !- Coefficient4 x**3
     0,                       !- Coefficient5 x**4
-     0.0000000,              !- Minimum Value of x
+    0.0000000,               !- Minimum Value of x
     1.0,                     !- Maximum Value of x
     0.0,                     !- Minimum Curve Output
     5.0,                     !- Maximum Curve Output
@@ -594,7 +594,7 @@
     0,                       !- Coefficient3 x**2
     0.928,                   !- Coefficient4 x**3
     0,                       !- Coefficient5 x**4
-     0.0000000,              !- Minimum Value of x
+    0.0000000,               !- Minimum Value of x
     1.0,                     !- Maximum Value of x
     0.0,                     !- Minimum Curve Output
     5.0,                     !- Maximum Curve Output
@@ -663,7 +663,7 @@
     0,                       !- Coefficient3 x**2
     0.928,                   !- Coefficient4 x**3
     0,                       !- Coefficient5 x**4
-     0.0000000,              !- Minimum Value of x
+    0.0000000,               !- Minimum Value of x
     1.0,                     !- Maximum Value of x
     0.0,                     !- Minimum Curve Output
     5.0,                     !- Maximum Curve Output

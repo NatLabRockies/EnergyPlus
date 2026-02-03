@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -159,6 +159,7 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Zone1WindAC_VS_DXCoil,    !- Name",
+        "    ,                         !- Availability Schedule Name",
         "    Zone1WindACFanOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1WindACAirOutletNode,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",
@@ -584,7 +585,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
         "    ,                        !- Availability Manager List Name",
         "    WindowACSizing;          !- Design Specification ZoneHVAC Sizing Object Name",
 
-        // NOTE: Only difference here is that I'm settting a DesignSpecification:ZoneHVAC:Sizing
+        // NOTE: Only difference here is that I'm setting a DesignSpecification:ZoneHVAC:Sizing
         "  DesignSpecification:ZoneHVAC:Sizing,",
         "    WindowACSizing,          !- Name",
         "    FractionOfAutosizedCoolingAirflow,  !- Cooling Supply Air Flow Rate Method",
@@ -634,6 +635,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Zone1WindAC_VS_DXCoil,    !- Name",
+        "    ,                         !- Availability Schedule Name",
         "    Zone1WindACFanOutletNode,  !- Indoor Air Inlet Node Name",
         "    Zone1WindACAirOutletNode,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",

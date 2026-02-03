@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -104,9 +104,9 @@ namespace ChillerElectricASHRAE205 {
         int AmbientTempZone{0};           // Number of ambient zone around tank
         int AmbientTempOutsideAirNode{0}; // Number of outside air node
         Real64 AmbientTemp{0};
-        Real64 AmbientZoneGain{0};         // Internal gain to zone from losses (W)
-        Real64 AmbientZoneGainEnergy{0};   // Internal gain to zone from losses (J)
-        std::string EndUseSubcategory{""}; // identifier use for the end use subcategory
+        Real64 AmbientZoneGain{0};       // Internal gain to zone from losses (W)
+        Real64 AmbientZoneGainEnergy{0}; // Internal gain to zone from losses (J)
+        std::string EndUseSubcategory;   // identifier use for the end use subcategory
 
         // Default Constructor
         ASHRAE205ChillerSpecs() = default;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -4762,7 +4762,7 @@ void updateSystemOutputRequired(EnergyPlusData &state,
 
         default: {
         } break;
-        } // swtich
+        } // switch
 
         if (EquipPriorityNum > -1) {
             // now store remaining load at the by sequence level
@@ -4952,7 +4952,7 @@ void CalcZoneMassBalance(EnergyPlusData &state, bool const FirstHVACIteration)
             auto &airLoopFlow = state.dataAirLoop->AirLoopFlow(airDisUnit.AirLoopNum);
             airLoopFlow.SupFlow += airDisUnit.MassFlowRateSup;
             airLoopFlow.RecircFlow += airDisUnit.MassFlowRatePlenInd;
-            airLoopFlow.LeakFlow += airDisUnit.MassFlowRateDnStrLk + airDisUnit.MassFlowRateUpStrLk;
+            airLoopFlow.LeakFlow += airDisUnit.MassFlowRateDnStrLk + airDisUnit.MassFlowRateUpStrLk + airDisUnit.massFlowRateParallelPIULk;
         }
     }
 
@@ -5254,9 +5254,8 @@ void CalcZoneMassBalance(EnergyPlusData &state, bool const FirstHVACIteration)
             if (totalResidual < ConvergenceTolerance) {
                 state.dataHVACGlobal->ZoneMassBalanceHVACReSim = false;
                 break;
-            } else {
-                state.dataHVACGlobal->ZoneMassBalanceHVACReSim = true;
             }
+            state.dataHVACGlobal->ZoneMassBalanceHVACReSim = true;
         }
         if (!state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
             break;
@@ -5337,7 +5336,7 @@ void CalcZoneLeavingConditions(EnergyPlusData &state, bool const FirstHVACIterat
     //       MODIFIED       June 2003, FCW: add heat from airflow window to return air
 
     // PURPOSE OF THIS SUBROUTINE:
-    // Perform zone upate of the leaving conditions.
+    // Perform zone update of the leaving conditions.
 
     // METHODOLOGY EMPLOYED:
     // Energy Balance.
@@ -5931,7 +5930,7 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             }
         } else if (thisVentilation.ModelType == DataHeatBalance::VentilationModelType::WindAndStack) {
             Real64 Cw = 0.0;    // Opening effectivenss
-            Real64 Cd = 0.0;    // Discharge coefficent
+            Real64 Cd = 0.0;    // Discharge coefficient
             Real64 angle = 0.0; // Angle between wind direction and effective angle
             Real64 Qw = 0.0;    // Volumetric flow driven by wind
             Real64 Qst = 0.0;   // Volumetric flow driven by stack effect

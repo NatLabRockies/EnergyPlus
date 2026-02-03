@@ -137,7 +137,7 @@ Coil:Heating:WaterToAirHeatPump:EquationFit,
    N*,  \field Ratio of Rated Heating Capacity to Rated Cooling Capacity
         \note Ratio of rated heating capacity to rated cooling capacity. This
         \note input is used to calculate the heating or cooling capacity when autosizing.
-        \note This input is only used if a companion cooling coil of the same type 
+        \note This input is only used if a companion cooling coil of the same type
         \note (Coil:Cooling:WaterToAirHeatPump:EquationFit) is used. This input is only
         \note used when a sizing run for the system which uses this object is requested
         \note and when the coil capacity is autosized.

@@ -1,0 +1,1168 @@
+!-Generator IDFEditor 1.49
+!-Option SortedOrder
+!-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
+!-      Use '!' comments if they need to be retained when using the IDFEditor.
+!-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
+! GSHP-GLHE-CalcGFunctions-cpg.idf
+! Basic File Description:
+! This input file exemplifies the use of the Water to water ground source heat pump model.
+! Highlights: Simulate a heat transfer interaction with the slab
+! Simulation Location/Run:
+! Location: Chicago, IL
+! Design Days SummerDesignDay and WinterDesignDay
+! Run Period: Annual simulation
+!
+! Building: Idealized approximation of simple residential building
+! Floor Area: 100 m2
+! Number of Stories: 1
+!
+! Zone Description Details:
+! Internal gains description: None, disabled as the feature of this input file
+! is the ground coupled slab, not zone simulation.
+! Interzone Surfaces: None
+! Internal Mass: None
+! People: None
+! Lights: None
+! Windows: None
+! Detached Shading: None
+! Daylight: None
+! Natural Ventilation: None
+! Solar Distribution: None
+!
+! HVAC: ZoneHVAC:WaterToAirHeatPump
+! Purchased Air: No
+! Central Air Handling Equipment: No
+! System Equipment Autosize: Yes
+! Purchased Cooling: No
+! Purchased Heating: No
+! Boilers: No
+! Chillers: No
+! Towers: No
+!***********************************************************
+!****** SIMULATION CONTROLS ********************************
+!***********************************************************
+
+  Version,26.1;
+
+!-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
+
+  SimulationControl,
+    Yes,                     !- Do Zone Sizing Calculation
+    Yes,                     !- Do System Sizing Calculation
+    Yes,                     !- Do Plant Sizing Calculation
+    Yes,                     !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    Yes,                     !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+!-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
+
+  Building,
+    House,                   !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.05,                    !- Loads Convergence Tolerance Value {W}
+    0.05,                    !- Temperature Convergence Tolerance Value {deltaC}
+    FullInteriorAndExterior, !- Solar Distribution
+    35,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+!-   ===========  ALL OBJECTS IN CLASS: TIMESTEP ===========
+
+  Timestep,4;
+
+!-   ===========  ALL OBJECTS IN CLASS: SITE:LOCATION ===========
+
+  Site:Location,
+    Ohare Intl Ap IL USA TMY3 WMO#=725300,  !- Name
+    41.98,                   !- Latitude {deg}
+    -87.92,                  !- Longitude {deg}
+    -6,                      !- Time Zone {hr}
+    201.0;                   !- Elevation {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: SIZINGPERIOD:DESIGNDAY ===========
+
+  SizingPeriod:WeatherFileDays,
+    Full Year Weather File Sizing Period,  !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    Sunday,                  !- Day of Week for Start Day
+    No,                      !- Use Weather File Daylight Saving Period
+    No;                      !- Use Weather File Rain and Snow Indicators
+
+!-   ===========  ALL OBJECTS IN CLASS: RUNPERIOD ===========
+
+  RunPeriod,
+    Annual Run,              !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    ,                        !- End Year
+    Tuesday,                 !- Day of Week for Start Day
+    Yes,                     !- Use Weather File Holidays and Special Days
+    Yes,                     !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+!-   ===========  ALL OBJECTS IN CLASS: SITE:GROUNDTEMPERATURE:BUILDINGSURFACE ===========
+
+  Site:GroundTemperature:BuildingSurface,20.03,20.03,20.13,20.30,20.43,20.52,20.62,20.77,20.78,20.55,20.44,20.20;
+
+!-   ===========  ALL OBJECTS IN CLASS: SCHEDULETYPELIMITS ===========
+
+  ScheduleTypeLimits,
+    Temperature,             !- Name
+    -60,                     !- Lower Limit Value
+    200,                     !- Upper Limit Value
+    CONTINUOUS,              !- Numeric Type
+    Temperature;             !- Unit Type
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  ScheduleTypeLimits,
+    Fraction,                !- Name
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
+    CONTINUOUS;              !- Numeric Type
+
+  ScheduleTypeLimits,
+    HVACTemplate Any Number; !- Name
+
+!-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:COMPACT ===========
+
+  Schedule:Compact,
+    OCCUPY-1,                !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: WeekDays SummerDesignDay CustomDay1 CustomDay2, !- Field 2
+    Until: 8:00,0.0,         !- Field 3
+    Until: 11:00,1.00,       !- Field 5
+    Until: 12:00,0.80,       !- Field 7
+    Until: 13:00,0.40,       !- Field 9
+    Until: 14:00,0.80,       !- Field 11
+    Until: 18:00,1.00,       !- Field 13
+    Until: 19:00,0.50,       !- Field 15
+    Until: 24:00,0.0,        !- Field 17
+    For: Weekends WinterDesignDay Holiday, !- Field 19
+    Until: 24:00,0.0;        !- Field 20
+
+  Schedule:Compact,
+    ActSchd,                 !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,100;        !- Field 3
+
+  Schedule:Compact,
+    Htg-SetP-Sch,            !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: WeekDays CustomDay1 CustomDay2, !- Field 2
+    Until: 6:00,13.0,        !- Field 3
+    Until: 7:00,18.0,        !- Field 5
+    Until: 21:00,23.0,       !- Field 7
+    Until: 24:00,13.0,       !- Field 9
+    For: WeekEnds Holiday,   !- Field 11
+    Until: 24:00,13.0,       !- Field 12
+    For: SummerDesignDay,    !- Field 14
+    Until: 24:00,13.0,       !- Field 15
+    For: WinterDesignDay,    !- Field 17
+    Until: 24:00,23.0;       !- Field 18
+
+! For cooling, recover 1 hr early
+
+  Schedule:Compact,
+    Clg-SetP-Sch,            !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: WeekDays CustomDay1 CustomDay2, !- Field 2
+    Until: 7:00,32.0,        !- Field 3
+    Until: 21:00,24.0,       !- Field 5
+    Until: 24:00,32.0,       !- Field 7
+    For: WeekEnds Holiday,   !- Field 9
+    Until: 24:00,32.0,       !- Field 10
+    For: SummerDesignDay,    !- Field 12
+    Until: 24:00,24.0,       !- Field 13
+    For: WinterDesignDay,    !- Field 15
+    Until: 24:00,32.0;       !- Field 16
+
+  Schedule:Compact,
+    HVACTemplate-Always 4,   !- Name
+    HVACTemplate Any Number, !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,4;          !- Field 3
+
+  Schedule:Compact,
+    HVACTemplate-Always 0,   !- Name
+    HVACTemplate Any Number, !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,0;          !- Field 3
+
+  Schedule:Compact,
+    HVACTemplate-Always 1,   !- Name
+    HVACTemplate Any Number, !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,1;          !- Field 3
+
+  Schedule:Compact,
+    HVACTemplate-Always 34,  !- Name
+    HVACTemplate Any Number, !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,34;         !- Field 3
+
+  Schedule:Compact,
+    HVACTemplate-Always 20,  !- Name
+    HVACTemplate Any Number, !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,20;         !- Field 3
+
+!-   ===========  ALL OBJECTS IN CLASS: MATERIAL ===========
+
+  Material,
+    Composite 2x6 Wood Stud R19 #1,  !- Name
+    Smooth,                  !- Roughness
+    0.019,                   !- Thickness {m}
+    0.137,                   !- Conductivity {W/m-K}
+    640.0,                   !- Density {kg/m3}
+    1006,                    !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.7,                     !- Solar Absorptance
+    0.7;                     !- Visible Absorptance
+
+  Material,
+    Composite 2x6 Wood Stud R19 #2,  !- Name
+    Smooth,                  !- Roughness
+    0.133,                   !- Thickness {m}
+    0.047,                   !- Conductivity {W/m-K}
+    93.84,                   !- Density {kg/m3}
+    1006,                    !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.7,                     !- Solar Absorptance
+    0.7;                     !- Visible Absorptance
+
+  Material,
+    Composite 2x6 Wood Stud R19 #3,  !- Name
+    Smooth,                  !- Roughness
+    0.025,                   !- Thickness {m}
+    0.246,                   !- Conductivity {W/m-K}
+    492.67,                  !- Density {kg/m3}
+    1006,                    !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.7,                     !- Solar Absorptance
+    0.7;                     !- Visible Absorptance
+
+  Material,
+    Slab Material,           !- Name
+    MediumRough,             !- Roughness
+    0.15,                    !- Thickness {m}
+    1.8,                     !- Conductivity {W/m-K}
+    2400,                    !- Density {kg/m3}
+    750,                     !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.65,                    !- Solar Absorptance
+    0.65;                    !- Visible Absorptance
+
+  Material,
+    Insulation,              !- Name
+    Smooth,                  !- Roughness
+    0.0254,                  !- Thickness {m}
+    0.035,                   !- Conductivity {W/m-K}
+    265,                     !- Density {kg/m3}
+    1300,                    !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.65,                    !- Solar Absorptance
+    0.65;                    !- Visible Absorptance
+
+!-   ===========  ALL OBJECTS IN CLASS: MATERIAL:NOMASS ===========
+
+  Material:NoMass,
+    Roof Layer 1,            !- Name
+    Rough,                   !- Roughness
+    3.344,                   !- Thermal Resistance {m2-K/W}
+    0.9000000,               !- Thermal Absorptance
+    0.7500000,               !- Solar Absorptance
+    0.7500000;               !- Visible Absorptance
+
+!-   ===========  ALL OBJECTS IN CLASS: CONSTRUCTION ===========
+
+  Construction,
+    Floor Construction,      !- Name
+    Slab Material;           !- Outside Layer
+
+  Construction,
+    Roof Construction,       !- Name
+    Roof Layer 1;            !- Outside Layer
+
+! ASHRAE 1145-RP Wall Assembly 2
+! 2"x6" wood studs at 24" on center with between-stud R19 fibreglass insulation.
+! Layers are 1/2" wood siding, 1/2" plywood, 2x6 wood studs and R19 insulation, 1/2" gypsum board.
+! Area-average R-Value = 17.487 ft2-F-h/Btu (3.078 m2-K/W).
+! Total wall thickness = 7.00in (0.178m)
+! Material layer names follow:
+
+  Construction,
+    Main Floor Wall Construction,  !- Name
+    Composite 2x6 Wood Stud R19 #3,  !- Outside Layer
+    Composite 2x6 Wood Stud R19 #2,  !- Layer 2
+    Composite 2x6 Wood Stud R19 #1;  !- Layer 3
+
+!-   ===========  ALL OBJECTS IN CLASS: GLOBALGEOMETRYRULES ===========
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONE ===========
+
+  Zone,
+    Main Floor,              !- Name
+    0,                       !- Direction of Relative North {deg}
+    0,                       !- X Origin {m}
+    0,                       !- Y Origin {m}
+    0,                       !- Z Origin {m}
+    ,                        !- Type
+    ,                        !- Multiplier
+    autocalculate,           !- Ceiling Height {m}
+    autocalculate,           !- Volume {m3}
+    autocalculate,           !- Floor Area {m2}
+    Simple,                  !- Zone Inside Convection Algorithm
+    SimpleCombined,          !- Zone Outside Convection Algorithm
+    Yes;                     !- Part of Total Floor Area
+
+!-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
+
+  BuildingSurface:Detailed,
+    Main Floor Wall 1,       !- Name
+    Wall,                    !- Surface Type
+    Main Floor Wall Construction,  !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    10.0,10.0,3.1,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,3.1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Main Floor Wall 2,       !- Name
+    Wall,                    !- Surface Type
+    Main Floor Wall Construction,  !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0.0,0.0,3.1,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,3.1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Main Floor Wall 3,       !- Name
+    Wall,                    !- Surface Type
+    Main Floor Wall Construction,  !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    10.0,0.0,3.1,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Main Floor Wall 4,       !- Name
+    Wall,                    !- Surface Type
+    Main Floor Wall Construction,  !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0.0,10.0,3.1,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,3.1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Main Floor Roof,         !- Name
+    Roof,                    !- Surface Type
+    Roof Construction,       !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0.0,10.0,3.1,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.1,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.1,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Zone Floor,              !- Name
+    Floor,                   !- Surface Type
+    Floor Construction,      !- Construction Name
+    Main Floor,              !- Zone Name
+    ,                        !- Space Name
+    Ground,                  !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    autocalculate,           !- View Factor to Ground
+    4,                       !- Number of Vertices
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: PEOPLE ===========
+
+  People,
+    Main Floor= People 1,    !- Name
+    Main Floor,              !- Zone or ZoneList or Space or SpaceList Name
+    OCCUPY-1,                !- Number of People Schedule Name
+    people,                  !- Number of People Calculation Method
+    11,                      !- Number of People
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
+    0.3,                     !- Fraction Radiant
+    ,                        !- Sensible Heat Fraction
+    ActSchd;                 !- Activity Level Schedule Name
+
+!-   ===========  ALL OBJECTS IN CLASS: DESIGNSPECIFICATION:OUTDOORAIR ===========
+
+  DesignSpecification:OutdoorAir,
+    SZ DSOA Main Floor,      !- Name
+    Flow/Person,             !- Outdoor Air Method
+    0.00944,                 !- Outdoor Air Flow per Person {m3/s-person}
+    0.0,                     !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+    0.0;                     !- Outdoor Air Flow per Zone {m3/s}
+
+!-   ===========  ALL OBJECTS IN CLASS: DESIGNSPECIFICATION:ZONEAIRDISTRIBUTION ===========
+
+  DesignSpecification:ZoneAirDistribution,
+    SZ DSZAD Main Floor,     !- Name
+    1,                       !- Zone Air Distribution Effectiveness in Cooling Mode {dimensionless}
+    1;                       !- Zone Air Distribution Effectiveness in Heating Mode {dimensionless}
+
+!-   ===========  ALL OBJECTS IN CLASS: SIZING:ZONE ===========
+
+  Sizing:Zone,
+    Main Floor,              !- Zone or ZoneList Name
+    SupplyAirTemperature,    !- Zone Cooling Design Supply Air Temperature Input Method
+    14.0,                    !- Zone Cooling Design Supply Air Temperature {C}
+    11.11,                   !- Zone Cooling Design Supply Air Temperature Difference {deltaC}
+    SupplyAirTemperature,    !- Zone Heating Design Supply Air Temperature Input Method
+    50.0,                    !- Zone Heating Design Supply Air Temperature {C}
+    ,                        !- Zone Heating Design Supply Air Temperature Difference {deltaC}
+    0.008,                   !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.008,                   !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    SZ DSOA Main Floor,      !- Design Specification Outdoor Air Object Name
+    ,                        !- Zone Heating Sizing Factor
+    ,                        !- Zone Cooling Sizing Factor
+    DesignDay,               !- Cooling Design Air Flow Method
+    0,                       !- Cooling Design Air Flow Rate {m3/s}
+    ,                        !- Cooling Minimum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Cooling Minimum Air Flow {m3/s}
+    0,                       !- Cooling Minimum Air Flow Fraction
+    DesignDay,               !- Heating Design Air Flow Method
+    0,                       !- Heating Design Air Flow Rate {m3/s}
+    ,                        !- Heating Maximum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Heating Maximum Air Flow {m3/s}
+    0,                       !- Heating Maximum Air Flow Fraction
+    SZ DSZAD Main Floor,     !- Design Specification Zone Air Distribution Object Name
+    No,                      !- Account for Dedicated Outdoor Air System
+    NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
+    autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+
+!-   ===========  ALL OBJECTS IN CLASS: SIZING:PLANT ===========
+
+  Sizing:Plant,
+    Ground Loop Water Loop,  !- Plant or Condenser Loop Name
+    Condenser,               !- Loop Type
+    34,                      !- Design Loop Exit Temperature {C}
+    5.6;                     !- Loop Design Temperature Difference {deltaC}
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
+
+  ZoneControl:Thermostat,
+    Main Floor Thermostat,   !- Name
+    Main Floor,              !- Zone or ZoneList Name
+    HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
+    All Zones Dual SP Control;  !- Control 1 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: THERMOSTATSETPOINT:DUALSETPOINT ===========
+
+  ThermostatSetpoint:DualSetpoint,
+    All Zones Dual SP Control,  !- Name
+    Htg-SetP-Sch,            !- Heating Setpoint Temperature Schedule Name
+    Clg-SetP-Sch;            !- Cooling Setpoint Temperature Schedule Name
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:WATERTOAIRHEATPUMP ===========
+
+  ZoneHVAC:WaterToAirHeatPump,
+    Main Floor WAHP,         !- Name
+    ,                        !- Availability Schedule Name
+    Main Floor WAHP Return,  !- Air Inlet Node Name
+    Main Floor WAHP Supply Inlet,  !- Air Outlet Node Name
+    OutdoorAir:Mixer,        !- Outdoor Air Mixer Object Type
+    Main Floor WAHP OA Mixing Box,  !- Outdoor Air Mixer Name
+    Autosize,                !- Cooling Supply Air Flow Rate {m3/s}
+    Autosize,                !- Heating Supply Air Flow Rate {m3/s}
+    ,                        !- No Load Supply Air Flow Rate {m3/s}
+    ,                        !- No Load Supply Air Flow Rate Control Set To Low Speed
+    Autosize,                !- Cooling Outdoor Air Flow Rate {m3/s}
+    Autosize,                !- Heating Outdoor Air Flow Rate {m3/s}
+    Autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
+    Fan:OnOff,               !- Supply Air Fan Object Type
+    Main Floor WAHP Supply Fan,  !- Supply Air Fan Name
+    Coil:Heating:WaterToAirHeatPump:EquationFit,  !- Heating Coil Object Type
+    Main Floor WAHP Heating Coil,  !- Heating Coil Name
+    Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
+    Main Floor WAHP Cooling Coil,  !- Cooling Coil Name
+    Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
+    Main Floor WAHP Supp Heating Coil,  !- Supplemental Heating Coil Name
+    Autosize,                !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    20.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+    Main Floor WAHP Outside Air Inlet,  !- Outdoor Dry-Bulb Temperature Sensor Node Name
+    DrawThrough,             !- Fan Placement
+    HVACTemplate-Always 0,   !- Supply Air Fan Operating Mode Schedule Name
+    ,                        !- Availability Manager List Name
+    Cycling;                 !- Heat Pump Coil Water Flow Mode
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTLIST ===========
+
+  ZoneHVAC:EquipmentList,
+    Main Floor Equipment,    !- Name
+    ,                        !- Load Distribution Scheme
+    ZoneHVAC:WaterToAirHeatPump,  !- Zone Equipment 1 Object Type
+    Main Floor WAHP,         !- Zone Equipment 1 Name
+    1,                       !- Zone Equipment 1 Cooling Sequence
+    1,                       !- Zone Equipment 1 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+    ;                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTCONNECTIONS ===========
+
+  ZoneHVAC:EquipmentConnections,
+    Main Floor,              !- Zone Name
+    Main Floor Equipment,    !- Zone Conditioning Equipment List Name
+    Main Floor WAHP Supply Inlet,  !- Zone Air Inlet Node or NodeList Name
+    Main Floor WAHP Return,  !- Zone Air Exhaust Node or NodeList Name
+    Main Floor Zone Air Node,!- Zone Air Node Name
+    Main Floor Return Outlet;!- Zone Return Air Node or NodeList Name
+
+!-   ===========  ALL OBJECTS IN CLASS: FAN:ONOFF ===========
+
+  Fan:OnOff,
+    Main Floor WAHP Supply Fan,  !- Name
+    HVACTemplate-Always 1,   !- Availability Schedule Name
+    0.7,                     !- Fan Total Efficiency
+    75,                      !- Pressure Rise {Pa}
+    Autosize,                !- Maximum Flow Rate {m3/s}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Airstream Fraction
+    Main Floor WAHP Heating Coil Outlet,  !- Air Inlet Node Name
+    Main Floor WAHP Supply Fan Outlet;  !- Air Outlet Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:ELECTRIC ===========
+
+  Coil:Heating:Electric,
+    Main Floor WAHP Supp Heating Coil,  !- Name
+    ,                        !- Availability Schedule Name
+    1,                       !- Efficiency
+    Autosize,                !- Nominal Capacity {W}
+    Main Floor WAHP Supply Fan Outlet,  !- Air Inlet Node Name
+    Main Floor WAHP Supply Inlet;  !- Air Outlet Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: COIL:COOLING:WATERTOAIRHEATPUMP:EQUATIONFIT ===========
+! Performance coefficients assume rated Capacities and COP are at:
+! 27.0C (80.6F) entering air dry-bulb temperature, 19.0C (66.2F) entering air wet-bulb temperature
+! and 25.0C (77F) entering water temperature
+
+  Coil:Cooling:WaterToAirHeatPump:EquationFit,
+    Main Floor WAHP Cooling Coil,  !- Name
+    ,                        !- Availability Schedule Name
+    Main Floor WAHP Cooling Water Inlet Node,  !- Water Inlet Node Name
+    Main Floor WAHP Cooling Water Outlet Node,  !- Water Outlet Node Name
+    Main Floor WAHP Mixed Air Outlet,  !- Air Inlet Node Name
+    Main Floor WAHP Cooling Coil Outlet,  !- Air Outlet Node Name
+    Autosize,                !- Rated Air Flow Rate {m3/s}
+    Autosize,                !- Rated Water Flow Rate {m3/s}
+    Autosize,                !- Gross Rated Total Cooling Capacity {W}
+    Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
+    3.5,                     !- Gross Rated Cooling COP {W/W}
+    25.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
+    TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
+    CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
+    CoolPowCurve,            !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    0,                       !- Nominal Time for Condensate Removal to Begin {s}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
+
+!-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT ===========
+! Performance coefficients assume rated Capacity and COP are at:
+! 20.0C (68F) entering air dry-bulb temperature and 0.0C (32F) entering water temperature
+
+  Coil:Heating:WaterToAirHeatPump:EquationFit,
+    Main Floor WAHP Heating Coil,  !- Name
+    ,                        !- Availability Schedule Name
+    Main Floor WAHP Heating Water Inlet Node,  !- Water Inlet Node Name
+    Main Floor WAHP Heating Water Outlet Node,  !- Water Outlet Node Name
+    Main Floor WAHP Cooling Coil Outlet,  !- Air Inlet Node Name
+    Main Floor WAHP Heating Coil Outlet,  !- Air Outlet Node Name
+    Autosize,                !- Rated Air Flow Rate {m3/s}
+    Autosize,                !- Rated Water Flow Rate {m3/s}
+    Autosize,                !- Gross Rated Heating Capacity {W}
+    4.2,                     !- Gross Rated Heating COP {W/W}
+    0.0,                     !- Rated Entering Water Temperature {C}
+    20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
+    HeatCapCurve,            !- Heating Capacity Curve Name
+    HeatPowCurve,            !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
+
+  Curve:Quadratic,
+    HPACCOOLPLFFPLR,         !- Name
+    0.75,                    !- Coefficient1 Constant
+    0.25,                    !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+  Curve:Quadratic,
+    HPACHEATPLFFPLR,         !- Name
+    0.75,                    !- Coefficient1 Constant
+    0.25,                    !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+!-   ===========  ALL OBJECTS IN CLASS: CURVE:QUADLINEAR ===========
+
+  Curve:QuadLinear,
+    TotCoolCapCurve,         !- Name
+    -9.04579502522263,       !- Coefficient1 Constant
+    10.7553480046802,        !- Coefficient2 w
+    -1.69937859691413,       !- Coefficient3 x
+    0.737989300704241,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
+
+  Curve:QuadLinear,
+    CoolPowCurve,            !- Name
+    -3.50303494439906,       !- Coefficient1 Constant
+    -1.06706985019601,       !- Coefficient2 w
+    4.34837210589294,        !- Coefficient3 x
+    1.02529280547194,        !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
+
+  Curve:QuadLinear,
+    HeatCapCurve,            !- Name
+    -1.82449220450272,       !- Coefficient1 Constant
+    -3.31281616694594,       !- Coefficient2 w
+    5.59306489123436,        !- Coefficient3 x
+    0.858772212623984,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
+
+  Curve:QuadLinear,
+    HeatPowCurve,            !- Name
+    -2.4442872924394,        !- Coefficient1 Constant
+    0.934304727021879,       !- Coefficient2 w
+    1.76364353708994,        !- Coefficient3 x
+    0.775628762040029,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
+
+!-   ===========  ALL OBJECTS IN CLASS: CURVE:QUINTLINEAR ===========
+
+  Curve:QuintLinear,
+    CoolSensCapCurve,        !- Name
+    -5.17921912653132,       !- Coefficient1 Constant
+    17.0277143871191,        !- Coefficient2 v
+    -11.2617991739786,       !- Coefficient3 w
+    -0.929300603852594,      !- Coefficient4 x
+    0.72746963129094,        !- Coefficient5 y
+    0.0,                     !- Coefficient6 z
+    -100,                    !- Minimum Value of v
+    100,                     !- Maximum Value of v
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:MIXER ===========
+
+  OutdoorAir:Mixer,
+    Main Floor WAHP OA Mixing Box,  !- Name
+    Main Floor WAHP Mixed Air Outlet,  !- Mixed Air Node Name
+    Main Floor WAHP Outside Air Inlet,  !- Outdoor Air Stream Node Name
+    Main Floor WAHP Relief Air Outlet,  !- Relief Air Stream Node Name
+    Main Floor WAHP Return;  !- Return Air Stream Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: BRANCH ===========
+
+  Branch,
+    Main Floor Cooling Condenser Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Component 1 Object Type
+    Main Floor WAHP Cooling Coil,  !- Component 1 Name
+    Main Floor WAHP Cooling Water Inlet Node,  !- Component 1 Inlet Node Name
+    Main Floor WAHP Cooling Water Outlet Node;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Main Floor Heating Condenser Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Heating:WaterToAirHeatPump:EquationFit,  !- Component 1 Object Type
+    Main Floor WAHP Heating Coil,  !- Component 1 Name
+    Main Floor WAHP Heating Water Inlet Node,  !- Component 1 Inlet Node Name
+    Main Floor WAHP Heating Water Outlet Node;  !- Component 1 Outlet Node Name
+
+  Branch,
+    GHE-Vert Branch,         !- Name
+    ,                        !- Pressure Drop Curve Name
+    GroundHeatExchanger:System,  !- Component 1 Object Type
+    Vertical GHE 1x4 Std,    !- Component 1 Name
+    GLHE Inlet,              !- Component 1 Inlet Node Name
+    GLHE Outlet;             !- Component 1 Outlet Node Name
+
+  Branch,
+    Ground Loop Supply Inlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:ConstantSpeed,      !- Component 1 Object Type
+    Ground Loop Supply Pump, !- Component 1 Name
+    Ground Loop Supply Inlet,!- Component 1 Inlet Node Name
+    Ground Loop Pump Outlet; !- Component 1 Outlet Node Name
+
+  Branch,
+    Ground Loop Supply Outlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Ground Loop Supply Outlet Pipe,  !- Component 1 Name
+    Ground Loop Supply Outlet Pipe Inlet,  !- Component 1 Inlet Node Name
+    Ground Loop Supply Outlet;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Ground Loop Demand Inlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Ground Loop Demand Inlet Pipe,  !- Component 1 Name
+    Ground Loop Demand Inlet,!- Component 1 Inlet Node Name
+    Ground Loop Demand Inlet Pipe Outlet;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Ground Loop Demand Bypass Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Ground Loop Demand Side Bypass Pipe,  !- Component 1 Name
+    Ground Loop Demand Bypass Inlet,  !- Component 1 Inlet Node Name
+    Ground Loop Demand Bypass Outlet;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Ground Loop Demand Outlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Ground Loop Demand Outlet Pipe,  !- Component 1 Name
+    Ground Loop Demand Outlet Pipe Inlet,  !- Component 1 Inlet Node Name
+    Ground Loop Demand Outlet;  !- Component 1 Outlet Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: BRANCHLIST ===========
+
+  BranchList,
+    Ground Loop Supply Side Branches,  !- Name
+    Ground Loop Supply Inlet Branch,  !- Branch 1 Name
+    GHE-Vert Branch,         !- Branch 2 Name
+    Ground Loop Supply Outlet Branch;  !- Branch 3 Name
+
+  BranchList,
+    Ground Loop Demand Side Branches,  !- Name
+    Ground Loop Demand Inlet Branch,  !- Branch 1 Name
+    Main Floor Cooling Condenser Branch,  !- Branch 2 Name
+    Main Floor Heating Condenser Branch,  !- Branch 3 Name
+    Ground Loop Demand Bypass Branch,  !- Branch 4 Name
+    Ground Loop Demand Outlet Branch;  !- Branch 5 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: CONNECTOR:SPLITTER ===========
+
+  Connector:Splitter,
+    Ground Loop Supply Splitter,  !- Name
+    Ground Loop Supply Inlet Branch,  !- Inlet Branch Name
+    GHE-Vert Branch;         !- Outlet Branch 1 Name
+
+  Connector:Splitter,
+    Ground Loop Demand Splitter,  !- Name
+    Ground Loop Demand Inlet Branch,  !- Inlet Branch Name
+    Ground Loop Demand Bypass Branch,  !- Outlet Branch 1 Name
+    Main Floor Cooling Condenser Branch,  !- Outlet Branch 2 Name
+    Main Floor Heating Condenser Branch;  !- Outlet Branch 3 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: CONNECTOR:MIXER ===========
+
+  Connector:Mixer,
+    Ground Loop Supply Mixer,!- Name
+    Ground Loop Supply Outlet Branch,  !- Outlet Branch Name
+    GHE-Vert Branch;         !- Inlet Branch 1 Name
+
+  Connector:Mixer,
+    Ground Loop Demand Mixer,!- Name
+    Ground Loop Demand Outlet Branch,  !- Outlet Branch Name
+    Ground Loop Demand Bypass Branch,  !- Inlet Branch 1 Name
+    Main Floor Cooling Condenser Branch,  !- Inlet Branch 2 Name
+    Main Floor Heating Condenser Branch;  !- Inlet Branch 3 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: CONNECTORLIST ===========
+
+  ConnectorList,
+    Ground Loop Supply Side Connectors,  !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Ground Loop Supply Splitter,  !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Ground Loop Supply Mixer;!- Connector 2 Name
+
+  ConnectorList,
+    Ground Loop Demand Side Connectors,  !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Ground Loop Demand Splitter,  !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Ground Loop Demand Mixer;!- Connector 2 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: NODELIST ===========
+
+  NodeList,
+    Ground Loop Supply Setpoint Nodes,  !- Name
+    GLHE Outlet,             !- Node 1 Name
+    Ground Loop Supply Outlet;  !- Node 2 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:NODE ===========
+
+  OutdoorAir:Node,
+    Main Floor WAHP Outside Air Inlet,  !- Name
+    -1;                      !- Height Above Ground {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: PIPE:ADIABATIC ===========
+
+  Pipe:Adiabatic,
+    Ground Loop Supply Outlet Pipe,  !- Name
+    Ground Loop Supply Outlet Pipe Inlet,  !- Inlet Node Name
+    Ground Loop Supply Outlet;  !- Outlet Node Name
+
+  Pipe:Adiabatic,
+    Ground Loop Demand Inlet Pipe,  !- Name
+    Ground Loop Demand Inlet,!- Inlet Node Name
+    Ground Loop Demand Inlet Pipe Outlet;  !- Outlet Node Name
+
+  Pipe:Adiabatic,
+    Ground Loop Demand Side Bypass Pipe,  !- Name
+    Ground Loop Demand Bypass Inlet,  !- Inlet Node Name
+    Ground Loop Demand Bypass Outlet;  !- Outlet Node Name
+
+  Pipe:Adiabatic,
+    Ground Loop Demand Outlet Pipe,  !- Name
+    Ground Loop Demand Outlet Pipe Inlet,  !- Inlet Node Name
+    Ground Loop Demand Outlet;  !- Outlet Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: PUMP:CONSTANTSPEED ===========
+
+  Pump:ConstantSpeed,
+    Ground Loop Supply Pump, !- Name
+    Ground Loop Supply Inlet,!- Inlet Node Name
+    Ground Loop Pump Outlet, !- Outlet Node Name
+    autosize,                !- Design Flow Rate {m3/s}
+    179352,                  !- Design Pump Head {Pa}
+    autosize,                !- Design Power Consumption {W}
+    0.9,                     !- Motor Efficiency
+    0,                       !- Fraction of Motor Inefficiencies to Fluid Stream
+    Intermittent;            !- Pump Control Type
+
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,
+    KATemps,                 !- Name
+    1.8,                     !- Soil Thermal Conductivity {W/m-K}
+    920,                     !- Soil Density {kg/m3}
+    2200,                    !- Soil Specific Heat {J/kg-K}
+    15.5,                    !- Average Soil Surface Temperature {C}
+    3.2,                     !- Average Amplitude of Surface Temperature {deltaC}
+    8;                       !- Phase Shift of Minimum Surface Temperature {days}
+
+!-   ===========  ALL OBJECTS IN CLASS: GROUNDHEATEXCHANGER:SYSTEM ===========
+
+  GroundHeatExchanger:System,
+    Vertical GHE 1x4 Std,    !- Name
+    GLHE Inlet,              !- Inlet Node Name
+    GLHE Outlet,             !- Outlet Node Name
+    0.001,                   !- Design Flow Rate {m3/s}
+    Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
+    KATemps,                 !- Undisturbed Ground Temperature Model Name
+    2.5,                     !- Ground Thermal Conductivity {W/m-K}
+    2.5E+06,                 !- Ground Thermal Heat Capacity {J/m3-K}
+    ,                        !- GHE:Vertical:ResponseFactors Object Name
+    FullDesign,              !- g-Function Calculation Method
+    GroundHeatExchanger:Vertical:Sizing:Rectangle,  !- GHE:Vertical:Sizing Object Type
+    GHE-1-Sizing,            !- GHE:Vertical:Sizing Object Name
+    ,                        !- GHE:Vertical:Array Object Name
+    GHE-1;                   !- GHE:Vertical:Single Object Name 1
+
+!-   ===========  ALL OBJECTS IN CLASS: GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE ===========
+
+  GroundHeatExchanger:Vertical:Sizing:Rectangle,
+    GHE-1-Sizing,            !- Name
+    Full Year Weather File Sizing Period,  !- SizingPeriod:WeatherFileDays Name
+    0.0005,                  !- Design Flow Rate Per Borehole {m3/s}
+    100.0,                   !- Available Borehole Field Length {m}
+    100.0,                   !- Available Borehole Field Width {m}
+    200.0,                   !- Maximum Number of Boreholes
+    3.0,                     !- Minimum Borehole Spacing {m}
+    10.0,                    !- Maximum Borehole Spacing {m}
+    60.0,                    !- Minimum Borehole Vertical Length {m}
+    135.0,                   !- Maximum Borehole Vertical Length {m}
+    5.0,                     !- Minimum Exiting Fluid Temperature for Sizing {C}
+    35.0;                    !- Maximum Exiting Fluid Temperature for Sizing {C}
+
+!-   ===========  ALL OBJECTS IN CLASS: GROUNDHEATEXCHANGER:VERTICAL:PROPERTIES ===========
+
+  GroundHeatExchanger:Vertical:Properties,
+    GHE-1 Props,             !- Name
+    1,                       !- Depth of Top of Borehole {m}
+    100,                     !- Borehole Length {m}
+    0.114,                   !- Borehole Diameter {m}
+    0.7443,                  !- Grout Thermal Conductivity {W/m-K}
+    3.90E+06,                !- Grout Thermal Heat Capacity {J/m3-K}
+    0.3895,                  !- Pipe Thermal Conductivity {W/m-K}
+    1.77E+06,                !- Pipe Thermal Heat Capacity {J/m3-K}
+    0.03341,                 !- Pipe Outer Diameter {m}
+    0.002984,                !- Pipe Thickness {m}
+    0.04913;                 !- U-Tube Distance {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: GROUNDHEATEXCHANGER:VERTICAL:SINGLE ===========
+
+  GroundHeatExchanger:Vertical:Single,
+    GHE-1,                   !- Name
+    GHE-1 Props,             !- GHE:Vertical:Properties Object Name
+    0,                       !- X-Location {m}
+    0;                       !- Y-Location {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: PLANTLOOP ===========
+
+  PlantLoop,
+    Ground Loop Water Loop,  !- Name
+    UserDefinedFluidType,    !- Fluid Type
+    PropyleneGlycol70Percent,!- User Defined Fluid Type
+    Only Water Loop Operation,  !- Plant Equipment Operation Scheme Name
+    Ground Loop Supply Outlet,  !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    10,                      !- Minimum Loop Temperature {C}
+    autosize,                !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    autosize,                !- Plant Loop Volume {m3}
+    Ground Loop Supply Inlet,!- Plant Side Inlet Node Name
+    Ground Loop Supply Outlet,  !- Plant Side Outlet Node Name
+    Ground Loop Supply Side Branches,  !- Plant Side Branch List Name
+    Ground Loop Supply Side Connectors,  !- Plant Side Connector List Name
+    Ground Loop Demand Inlet,!- Demand Side Inlet Node Name
+    Ground Loop Demand Outlet,  !- Demand Side Outlet Node Name
+    Ground Loop Demand Side Branches,  !- Demand Side Branch List Name
+    Ground Loop Demand Side Connectors,  !- Demand Side Connector List Name
+    SequentialLoad,          !- Load Distribution Scheme
+    ,                        !- Availability Manager List Name
+    DualSetPointDeadband;    !- Plant Loop Demand Calculation Scheme
+
+!-   ===========  ALL OBJECTS IN CLASS: PLANTEQUIPMENTLIST ===========
+
+  PlantEquipmentList,
+    Only Water Loop All Cooling Equipment,  !- Name
+    GroundHeatExchanger:System,  !- Equipment 1 Object Type
+    Vertical GHE 1x4 Std;    !- Equipment 1 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: PLANTEQUIPMENTOPERATION:COOLINGLOAD ===========
+
+  PlantEquipmentOperation:CoolingLoad,
+    Only Water Loop Cool Operation All Hours,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    1000000000000000,        !- Load Range 1 Upper Limit {W}
+    Only Water Loop All Cooling Equipment;  !- Range 1 Equipment List Name
+
+!-   ===========  ALL OBJECTS IN CLASS: PLANTEQUIPMENTOPERATIONSCHEMES ===========
+
+  PlantEquipmentOperationSchemes,
+    Only Water Loop Operation,  !- Name
+    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+    Only Water Loop Cool Operation All Hours,  !- Control Scheme 1 Name
+    HVACTemplate-Always 1;   !- Control Scheme 1 Schedule Name
+
+!-   ===========  ALL OBJECTS IN CLASS: SETPOINTMANAGER:SCHEDULED:DUALSETPOINT ===========
+
+  SetpointManager:Scheduled:DualSetpoint,
+    Ground Loop Temp Manager,!- Name
+    Temperature,             !- Control Variable
+    HVACTemplate-Always 34,  !- High Setpoint Schedule Name
+    HVACTemplate-Always 20,  !- Low Setpoint Schedule Name
+    Ground Loop Supply Setpoint Nodes;  !- Setpoint Node or NodeList Name
+
+!-   ===========  ALL OBJECTS IN CLASS: FLUIDPROPERTIES:NAME ===========
+
+  FluidProperties:Name,
+    PropyleneGlycol,         !- Fluid Name
+    GLYCOL;                  !- Fluid Type
+
+!-   ===========  ALL OBJECTS IN CLASS: FLUIDPROPERTIES:GLYCOLCONCENTRATION ===========
+
+  FluidProperties:GlycolConcentration,
+    PropyleneGlycol70Percent,!- Name
+    PropyleneGlycol,         !- Glycol Type
+    ,                        !- User Defined Glycol Name
+    0.7;                     !- Glycol Concentration
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLEDICTIONARY ===========
+
+  Output:VariableDictionary,IDF;
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:TABLE:SUMMARYREPORTS ===========
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUTCONTROL:TABLE:STYLE ===========
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
+
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;
+
+  Output:Variable,*,Zone Air System Sensible Heating Rate,hourly;
+
+  Output:Variable,*,Zone Air System Sensible Cooling Rate,hourly;
+
+  Output:Variable,*,Pump Electricity Energy,hourly;
+
+  Output:Variable,*,Pump Electricity Rate,hourly;
+
+  Output:Variable,*,Pump Shaft Power,hourly;
+
+  Output:Variable,*,Pump Fluid Heat Gain Rate,hourly;
+
+  Output:Variable,*,Pump Fluid Heat Gain Energy,hourly;
+
+  Output:Variable,*,Pump Outlet Temperature,hourly;
+
+  Output:Variable,*,Pump Mass Flow Rate,hourly;
+
+  Output:Variable,*,Zone Water to Air Heat Pump Total Heating Rate,hourly;
+
+  Output:Variable,*,Zone Water to Air Heat Pump Total Cooling Rate,hourly;
+
+  Output:Variable,*,Zone Air System Sensible Heating Rate,hourly;
+
+  Output:Variable,*,Zone Air System Sensible Cooling Rate,hourly;
+
+  Output:Variable,*,Zone Air Temperature,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Average Borehole Temperature,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Inlet Temperature,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Outlet Temperature,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Mass Flow Rate,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Average Fluid Temperature,hourly;
+
+  Output:Variable,*,Ground Heat Exchanger Farfield Ground Temperature,hourly;
+
+  Output:Variable,*,Site Ground Temperature,hourly;
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:SQLITE ===========
+
+  Output:SQLite,
+    Simple;                  !- Option Type
+

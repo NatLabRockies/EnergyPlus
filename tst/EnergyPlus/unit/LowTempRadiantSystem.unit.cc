@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -430,7 +430,7 @@ TEST_F(LowTempRadiantSystemTest, SizeLowTempRadiantConstantFlow)
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).ColdWaterInNode = 3;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).ColdWaterOutNode = 4;
 
-    // Hydronic - embeded tube length autosize
+    // Hydronic - embedded tube length autosize
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).NumCircCalcMethod = CircuitCalc::Invalid;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).NumOfSurfaces = 1;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).TubeLength = AutoSize;
@@ -3104,7 +3104,7 @@ TEST_F(LowTempRadiantSystemTest, calculateOperationalFractionTest)
     functionResult = thisRadSys.calculateOperationalFraction(offTemperature, controlTemperature, throttlingRange);
     EXPECT_NEAR(expectedResult, functionResult, 0.001);
 
-    // Test 2b: Temperature Difference is not zero and negtive, throttling range is zero-->answer should be 1.0
+    // Test 2b: Temperature Difference is not zero and negative, throttling range is zero-->answer should be 1.0
     offTemperature = 14.0;
     controlTemperature = 15.0;
     throttlingRange = 0.0;

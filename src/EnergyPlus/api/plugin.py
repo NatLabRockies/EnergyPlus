@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -54,8 +54,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-if not hasattr(sys, 'argv'):
-    sys.argv = ['']
+
+if not hasattr(sys, "argv"):
+    sys.argv = [""]
 
 from typing import List
 
@@ -98,10 +99,10 @@ class EnergyPlusPlugin(object):
 
         :return: A list of function names which are overridden in the derived class instance of this base class
         """
-        self.data['i'] = 12
+        self.data["i"] = 12
         common = EnergyPlusPlugin.__dict__.keys() & self.__class__.__dict__.keys()
         diff = [m for m in common if EnergyPlusPlugin.__dict__[m] != self.__class__.__dict__[m]]
-        for known_skip in ['__init__', '__doc__', '__module__']:
+        for known_skip in ["__init__", "__doc__", "__module__"]:
             if known_skip in diff:
                 diff.remove(known_skip)
         return diff

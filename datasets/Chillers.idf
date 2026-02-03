@@ -184,9 +184,6 @@
 ! Unloading Mechanism = Inlet Vanes
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Chiller:Electric:EIR,
     ElectricEIRChiller McQuay WSC 471kW/5.89COP/Vanes,  !- Name
     471200,                  !- Reference Capacity {W}

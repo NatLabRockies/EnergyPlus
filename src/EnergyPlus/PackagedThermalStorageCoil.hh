@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -164,7 +164,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingOnlySHRFTempCurve;     // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingOnlySHRFTempObjectNum; // type of object used for curve input
-        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifer curve
+        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingOnlySHRFFlowObjectNum;
         // cooling and charge mode
@@ -208,7 +208,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndChargeChargingPLFFPLRObjectNum;
         int CoolingAndChargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
-        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndChargeSHRFFlowObjectNum;
         // cooling and discharge mode
@@ -256,7 +256,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndDischargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingAndDischargeSHRFTempObjectNum;
-        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndDischargeSHRFFlowObjectNum;
         // Charge Only Mode

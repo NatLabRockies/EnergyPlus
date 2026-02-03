@@ -7,7 +7,7 @@ Notices and Acknowledgments
 Copyright Notice
 ----------------
 
-Copyright (c) 1996-2015 The Board of Trustees of the University of
+Copyright (c) 1996-2025 The Board of Trustees of the University of
 Illinois and The Regents of the University of California through Ernest
 Orlando Lawrence Berkeley National Laboratory. All rights reserved.
 
@@ -695,14 +695,14 @@ The building-integrated photovoltaic thermal (BIPVT) model was
 contributed by CanmetENERGY-Ottawa, Natural Resources Canada
 (https://www.nrcan.gc.ca/energy/offices-labs/canmet/ottawa-research-centre/5753).
 See SolarCollectorPerformance:PhotovoltaicThermal:BIPVT and Pull Request
-9594 (https://github.com/NREL/EnergyPlus/pull/9594).
+9594 (https://github.com/NatLabRockies/EnergyPlus/pull/9594).
 
 The fuel-fired absorption heat pump
 (HeatPump:AirToWater:FuelFired:Heating and Cooling) model development
 was funded by Utilization Technology Development
 (https://www.utd-co.org) on a subcontract with GTI Energy
 (https://www.gti.energy/). See Pull Request 9405
-(https://github.com/NREL/EnergyPlus/pull/9405).
+(https://github.com/NatLabRockies/EnergyPlus/pull/9405).
 
 .. [1]
    http://www.ashrae.org/

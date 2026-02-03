@@ -85,7 +85,7 @@
 !   Environmental Emissions:        None
 !   Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -432,7 +432,7 @@
     Always On,               !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     60,                      !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0,                       !- Fraction Radiant
@@ -447,7 +447,7 @@
     Always On,               !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     0.3,                     !- Fraction Radiant

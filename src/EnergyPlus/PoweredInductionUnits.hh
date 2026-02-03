@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -196,12 +196,16 @@ namespace PoweredInductionUnits {
             HeatCntrlBehaviorType::Invalid; // heating control scheme, staged or modulated (physical devices) have different control behavior
         Real64 designHeatingDAT = 0.0;      // C, target heating discharge air temperature during second stage modulated heating behavior
         Real64 highLimitDAT = 0.0;          // C, maximum limit on heating discharge air temperature, end of third stage modulated heating behavior
-        Real64 TotMassFlowRate = 0.0;       // currrent operating total air mass flow, for reporting
+        Real64 TotMassFlowRate = 0.0;       // current operating total air mass flow, for reporting
         Real64 SecMassFlowRate = 0.0;       // current operating secondary air mass flow rate, for reporting
         Real64 PriMassFlowRate = 0.0;       // current operating primary air mass flow rate, for reporting
         Real64 DischargeAirTemp = 0.0;      // current operating discharge air temperature at outlet, for reporting
         HeatOpModeType heatingOperatingMode = HeatOpModeType::HeaterOff;
         CoolOpModeType coolingOperatingMode = CoolOpModeType::CoolerOff;
+        Real64 leakFrac;          // parallel PIU backdraft damper leakage fraction
+        Real64 leakFlow;          // parallel PIU backdraft damper leakage mass flow rate
+        int leakFracCurve;        // parallel PIU backdraft damper leakage fraction curve
+        int damperLeakageZoneNum; // zone index designated as the destination for the PIU backdraft damper leaks
 
         int CurOperationControlStage = -1; // integer reference for what stage of control the unit is in
         int plenumIndex = 0;
@@ -215,7 +219,7 @@ namespace PoweredInductionUnits {
               MaxHotWaterFlow(0.0), MaxHotSteamFlow(0.0), MinVolHotWaterFlow(0.0), MinHotSteamFlow(0.0), MinVolHotSteamFlow(0.0),
               MinHotWaterFlow(0.0), HotControlNode(0), HotCoilOutNodeNum(0), HotControlOffset(0.0), HWplantLoc{}, ADUNum(0), InducesPlenumAir(false),
               HeatingRate(0.0), HeatingEnergy(0.0), SensCoolRate(0.0), SensCoolEnergy(0.0), CtrlZoneNum(0), ctrlZoneInNodeIndex(0), AirLoopNum(0),
-              OutdoorAirFlowRate(0.0)
+              OutdoorAirFlowRate(0.0), leakFrac(0.0), leakFlow(0.0), leakFracCurve(0), damperLeakageZoneNum(0)
         {
         }
 
@@ -279,6 +283,8 @@ namespace PoweredInductionUnits {
     bool PIUnitHasMixer(EnergyPlusData &state, std::string_view CompName); // component (mixer) name
 
     void PIUInducesPlenumAir(EnergyPlusData &state, int NodeNum, int const plenumNum); // induced air node number
+
+    int getParallelPIUNumFromSecNodeNum(EnergyPlusData &state, int const zoneNum); // get parallel PIU index
 
     Real64 CalcVariableSpeedPIUHeatingResidual(EnergyPlusData &state,
                                                Real64 const fanSignal,

@@ -24,10 +24,10 @@
  - NFP Initial draft submitted November 15, 2017
  - Design document conference call on Nov 27, 2017 (EL, MW, JD, RR)
  - Update to this document based on design team conference call and review
- - 
+ -
  - As of 12/5/17, this Final NFP document now incorporates all expected code changes.
- 
- 
+
+
 
 ## Justification for New Feature ##
 
@@ -49,7 +49,7 @@ ASHRAE Standard 90.1 requirements for capacity and fan speed control as well as 
         shall be able to reduce the airflow to no greater than the larger of the following:
         • Two-thirds of the full fan speed, or
         • The volume of outdoor air required to meet the ventilation requirements of Standard 62.1.
-        
+
 *Note from the author: In part (a) above, the phrase, “At cooling demands less than or equal to 50%…” may be confusing, so the Standard 90.1 User’s Manual clarifies by stating the following:*
 
         “The term ‘cooling demand’ refers to the zone sensible cooling load.That is, when the zone
@@ -99,7 +99,7 @@ A new key was added to the four pipe fan coil Capacity Control Method field to s
          \key MultiSpeedFan
          \key ASHRAE90VariableFan
 
-The maximum and minimum fan flow threshold is determined using existing inputs for Maximum Supply Air Flow Rate and Low Speed Supply Air Flow Ratio fields. 
+The maximum and minimum fan flow threshold is determined using existing inputs for Maximum Supply Air Flow Rate and Low Speed Supply Air Flow Ratio fields.
 
     ZoneHVAC:FourPipeFanCoil,
     N1 , \field Maximum Supply Air Flow Rate
@@ -111,7 +111,7 @@ The maximum and minimum fan flow threshold is determined using existing inputs f
          \minimum> 0.0
          \default 0.33
 
-This allows modeling of two-speed and variable-speed fans. As described in the Standard, a portion of the **zone design sensible load** is used as the critical point. Using existing model inputs, the Low Speed Supply Air Flow Ratio input field is used to denote this threshold. For water coils, a value of 50% is typically used. For DX equipment, a value of 67% is typically used. 
+This allows modeling of two-speed and variable-speed fans. As described in the Standard, a portion of the **zone design sensible load** is used as the critical point. Using existing model inputs, the Low Speed Supply Air Flow Ratio input field is used to denote this threshold. For water coils, a value of 50% is typically used. For DX equipment, a value of 67% is typically used.
 
 Finally, based on conference call feedback, two additional input fields were added to the end of the fan coil object such that the user could control the temperature limits and also avoid the need for autosizing.
 
@@ -153,7 +153,7 @@ Model inputs:
 ![](FanCoil_ASHRAE901_V86.png)<br>
 Figure - ASHRAE 90.1 SZVAV Fan Control in V8.6
 
-The simulation results when using the new temperature control inputs is shown in the following figure. 
+The simulation results when using the new temperature control inputs is shown in the following figure.
 
 Apparently, this aspect of the model fell short of perfection. Although the temperature limits are enforced, the fan coil air flow rate does not increase until the load threshold is exceeded. We may consider increasing supply air flow rate once the supply air temperature reaches the limits.<br>
 ![](FanCoil_ASHRAE901_V86_SPc.png)<br>
@@ -204,7 +204,7 @@ Two existing inputs were used to specify the minimum and maximum supply air temp
 The team will apply the previously developed SZVAV modeling methodology to the zone packaged terminal unit objects.
 
 The SZVAV model is now included in fan coil units and unitary systems. Regarding future maintenance it would be better to provide a common function for use by all equipment models. Since the SZVAV model uses specific array variables based on equipment type, a method to pass the necessary information via a function call is warranted. For example, a call to a common routine could pass all necessary information as independent variables:
- 
+
     CalcSZVAVModel( EquipType, EquipName, QZnReq, Var1, Var2, Var3, Var4, ... );
     where:
     Var1 = max supply air temp
@@ -239,7 +239,7 @@ Within the common routine would be a segregation of equipment types. For example
 
       Other calculations as necessary ...
 
-    }    
+    }
 
 The implementation of the SZVAV model is intended to make the code in UnitarySystem a stand-alone function where this function could be called by the ZoneHVAC:Packaged* equipment types. This code resides at lines 7126-7531 of HVACUnitarySystem.cc. I'm not yet sure how much extra work this would be to move this code to a common function but the rewards seem large.
 
@@ -248,7 +248,7 @@ Using this type of common function would allow improvements to all equipment typ
 
 ## Testing/Validation/Data Sources ##
 
-Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption. 
+Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption.
 
 ## Input Description ##
 
@@ -502,7 +502,7 @@ To write to equipment model member variables, a reference to the member array wo
 
 Where this reference would be passed to the function as an argument:
 
-    void CalcSZVAVModel( 
+    void CalcSZVAVModel(
         Array1D< Real64 > SZVAVModel, // reference to equipment model
         static Array1D< Real64 > SZVAVInputs, // SZVAV inputs
         <Array1D< Real64 > SZVAVOutputs ) {} // SZVAV outputs

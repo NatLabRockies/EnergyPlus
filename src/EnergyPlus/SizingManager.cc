@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -575,12 +575,15 @@ void ManageSizing(EnergyPlusData &state)
                 if (!state.dataZoneEquip->ZoneEquipConfig(state.dataHeatBal->space(spaceNum).zoneNum).IsControlled) {
                     continue;
                 }
+                auto const &thisZone = state.dataHeatBal->Zone(state.dataHeatBal->space(spaceNum).zoneNum);
+                Real64 const mult = thisZone.Multiplier * thisZone.ListMultiplier;
                 reportZoneSizing(state,
                                  state.dataHeatBal->space(spaceNum),
                                  state.dataSize->FinalSpaceSizing(spaceNum),
                                  state.dataSize->CalcFinalSpaceSizing(spaceNum),
                                  state.dataSize->CalcSpaceSizing,
                                  state.dataSize->SpaceSizing,
+                                 mult,
                                  isSpace);
             }
         }
@@ -589,12 +592,15 @@ void ManageSizing(EnergyPlusData &state)
             if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
                 continue;
             }
+            auto const &thisZone = state.dataHeatBal->Zone(CtrlZoneNum);
+            Real64 const mult = thisZone.Multiplier * thisZone.ListMultiplier;
             reportZoneSizing(state,
-                             state.dataHeatBal->Zone(CtrlZoneNum),
+                             thisZone,
                              state.dataSize->FinalZoneSizing(CtrlZoneNum),
                              state.dataSize->CalcFinalZoneSizing(CtrlZoneNum),
                              state.dataSize->CalcZoneSizing,
                              state.dataSize->ZoneSizing,
+                             mult,
                              isSpace);
         }
     }
@@ -749,9 +755,8 @@ bool CalcdoLoadComponentPulseNow(EnergyPlusData const &state,
     if ((isPulseZoneSizing) && (!WarmupFlag) && (HourOfDay == HourDayToPulse) && (TimeStep == TimeStepToPulse) &&
         ((KindOfSim == Constant::KindOfSim::RunPeriodDesign) || (state.dataGlobal->DayOfSim == 1))) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void ManageSystemSizingAdjustments(EnergyPlusData &state)
@@ -3268,7 +3273,7 @@ void GetZoneSizingInput(EnergyPlusData &state)
                                             state.dataIPShortCut->cAlphaFieldNames(14),
                                             state.dataIPShortCut->cAlphaArgs(14),
                                             "Schedule will not be used and simulation continues.");
-                } else if (zoneSizingIndex.zoneRHDehumidifySched) {
+                } else if (zoneSizingIndex.zoneRHDehumidifySched != nullptr) {
                     // check max and min of each schedule and compare RHHumidify > RHDehumidify and warn
                     Real64 maxHumidify = zoneSizingIndex.zoneRHHumidifySched->getMaxVal(state);
                     Real64 minDehumidify = zoneSizingIndex.zoneRHDehumidifySched->getMinVal(state);
@@ -4170,6 +4175,7 @@ void reportZoneSizing(EnergyPlusData &state,
                       DataSizing::ZoneSizingData const &zsCalcFinalSizing,
                       Array2D<DataSizing::ZoneSizingData> const &zsCalcSizing,
                       Array2D<DataSizing::ZoneSizingData> const &zSizing,
+                      Real64 const zoneMult,
                       bool const isSpace)
 {
     std::string_view const curName = zoneOrSpace.Name;
@@ -4208,8 +4214,8 @@ void reportZoneSizing(EnergyPlusData &state,
                             zsCalcFinalSizing.CoolPeakDateHrMin,
                             TempAtPeak,
                             HumRatAtPeak,
-                            zoneOrSpace.FloorArea,
-                            zoneOrSpace.TotOccupants,
+                            zoneOrSpace.FloorArea * zoneMult,
+                            zoneOrSpace.TotOccupants * zoneMult,
                             zsFinalSizing.MinOA,
                             DOASHeatGainRateAtClPk,
                             isSpace);
@@ -4217,8 +4223,10 @@ void reportZoneSizing(EnergyPlusData &state,
             state, shift + state.dataOutRptPredefined->pdchZnClCalcDesLd, curName, zsCalcFinalSizing.DesCoolLoad);
         OutputReportPredefined::PreDefTableEntry(state, shift + state.dataOutRptPredefined->pdchZnClUserDesLd, curName, zsFinalSizing.DesCoolLoad);
         if (zoneOrSpace.FloorArea != 0.0) {
-            OutputReportPredefined::PreDefTableEntry(
-                state, shift + state.dataOutRptPredefined->pdchZnClUserDesLdPerArea, curName, zsFinalSizing.DesCoolLoad / zoneOrSpace.FloorArea);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     shift + state.dataOutRptPredefined->pdchZnClUserDesLdPerArea,
+                                                     curName,
+                                                     zsFinalSizing.DesCoolLoad / (zoneOrSpace.FloorArea * zoneMult));
         }
         OutputReportPredefined::PreDefTableEntry(
             state, shift + state.dataOutRptPredefined->pdchZnClCalcDesAirFlow, curName, zsCalcFinalSizing.DesCoolVolFlow, 3);
@@ -4281,8 +4289,8 @@ void reportZoneSizing(EnergyPlusData &state,
                             zsCalcFinalSizing.HeatPeakDateHrMin,
                             TempAtPeak,
                             HumRatAtPeak,
-                            zoneOrSpace.FloorArea,
-                            zoneOrSpace.TotOccupants,
+                            zoneOrSpace.FloorArea * zoneMult,
+                            zoneOrSpace.TotOccupants * zoneMult,
                             zsFinalSizing.MinOA,
                             DOASHeatGainRateAtHtPk,
                             isSpace);
@@ -4290,8 +4298,10 @@ void reportZoneSizing(EnergyPlusData &state,
             state, shift + state.dataOutRptPredefined->pdchZnHtCalcDesLd, curName, zsCalcFinalSizing.DesHeatLoad);
         OutputReportPredefined::PreDefTableEntry(state, shift + state.dataOutRptPredefined->pdchZnHtUserDesLd, curName, zsFinalSizing.DesHeatLoad);
         if (zoneOrSpace.FloorArea != 0.0) {
-            OutputReportPredefined::PreDefTableEntry(
-                state, shift + state.dataOutRptPredefined->pdchZnHtUserDesLdPerArea, curName, zsFinalSizing.DesHeatLoad / zoneOrSpace.FloorArea);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     shift + state.dataOutRptPredefined->pdchZnHtUserDesLdPerArea,
+                                                     curName,
+                                                     zsFinalSizing.DesHeatLoad / (zoneOrSpace.FloorArea * zoneMult));
         }
         OutputReportPredefined::PreDefTableEntry(
             state, shift + state.dataOutRptPredefined->pdchZnHtCalcDesAirFlow, curName, zsCalcFinalSizing.DesHeatVolFlow, 3);

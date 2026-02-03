@@ -123,7 +123,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1261,7 +1261,7 @@
     Lighting_Sch,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1500.0,                  !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1275,7 +1275,7 @@
     Lighting_Sch,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     45000.0,                 !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1291,7 +1291,7 @@
     Elec_Equip_Sch,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     150.0,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
@@ -1303,7 +1303,7 @@
     Register_Equip_Sch,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1500.0,                  !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
@@ -1315,7 +1315,7 @@
     Bakery_Equip_Sch,        !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     15000.0,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.05,                    !- Fraction Latent
     0.4,                     !- Fraction Radiant
@@ -1327,7 +1327,7 @@
     Elec_Equip_Sch,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     600.0,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
@@ -1456,8 +1456,8 @@
     0.8,                     !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     5.5,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name

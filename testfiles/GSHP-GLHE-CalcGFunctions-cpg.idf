@@ -42,7 +42,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -550,7 +550,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:PLANT ===========
 
@@ -660,6 +667,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Main Floor WAHP Cooling Coil,  !- Name
+    ,                        !- Availability Schedule Name
     Main Floor WAHP Cooling Water Inlet Node,  !- Water Inlet Node Name
     Main Floor WAHP Cooling Water Outlet Node,  !- Water Outlet Node Name
     Main Floor WAHP Mixed Air Outlet,  !- Air Inlet Node Name
@@ -681,12 +689,14 @@
     2.5,                     !- Maximum Cycling Rate {cycles/hr}
     60,                      !- Latent Capacity Time Constant {s}
     60;                      !- Fan Delay Time {s}
+
 !-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT ===========
 ! Performance coefficients assume rated Capacity and COP are at:
 ! 20.0C (68F) entering air dry-bulb temperature and 0.0C (32F) entering water temperature
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Main Floor WAHP Heating Coil,  !- Name
+    ,                        !- Availability Schedule Name
     Main Floor WAHP Heating Water Inlet Node,  !- Water Inlet Node Name
     Main Floor WAHP Heating Water Outlet Node,  !- Water Outlet Node Name
     Main Floor WAHP Cooling Coil Outlet,  !- Air Inlet Node Name
@@ -721,99 +731,99 @@
 !-   ===========  ALL OBJECTS IN CLASS: CURVE:QUADLINEAR ===========
 
   Curve:QuadLinear,
-    TotCoolCapCurve,      ! Curve Name
-    -9.04579502522263,            !- CoefficientC1
-    10.7553480046802,             !- CoefficientC2
-    -1.69937859691413,            !- CoefficientC3
-    0.737989300704241,             !- CoefficientC4
-    0.0,                     !- CoefficientC5
-    -100,                   ! Minimum Value of w
-    100,                 ! Maximum Value of w
-    -100,                   ! Minimum Value of x
-    100,                 ! Maximum Value of x
-    0,                   ! Minimum Value of y
-    100,                 ! Maximum Value of y
-    0,                    ! Minimum Value of z
-    100,                  ! Maximum Value of z
-    0,                   ! Minimum Curve Output
-    38;                  ! Maximum Curve Output
+    TotCoolCapCurve,         !- Name
+    -9.04579502522263,       !- Coefficient1 Constant
+    10.7553480046802,        !- Coefficient2 w
+    -1.69937859691413,       !- Coefficient3 x
+    0.737989300704241,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
 
   Curve:QuadLinear,
-    CoolPowCurve,      ! Curve Name
-    -3.50303494439906,            !- CoefficientC1
-    -1.06706985019601,            !- CoefficientC2
-    4.34837210589294,              !- CoefficientC3
-    1.02529280547194,             !- CoefficientC4
-    0.0,                     !- CoefficientC5
-    -100,                   ! Minimum Value of w
-    100,                 ! Maximum Value of w
-    -100,                   ! Minimum Value of x
-    100,                 ! Maximum Value of x
-    0,                   ! Minimum Value of y
-    100,                 ! Maximum Value of y
-    0,                    ! Minimum Value of z
-    100,                  ! Maximum Value of z
-    0,                   ! Minimum Curve Output
-    38;                  ! Maximum Curve Output
+    CoolPowCurve,            !- Name
+    -3.50303494439906,       !- Coefficient1 Constant
+    -1.06706985019601,       !- Coefficient2 w
+    4.34837210589294,        !- Coefficient3 x
+    1.02529280547194,        !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
 
   Curve:QuadLinear,
-    HeatCapCurve,      ! Curve Name
-    -1.82449220450272,            !- CoefficientC1
-    -3.31281616694594,            !- CoefficientC2
-    5.59306489123436,             !- CoefficientC3
-    0.858772212623984,             !- CoefficientC4
-    0.0,                     !- CoefficientC5
-    -100,                   ! Minimum Value of w
-    100,                 ! Maximum Value of w
-    -100,                   ! Minimum Value of x
-    100,                 ! Maximum Value of x
-    0,                   ! Minimum Value of y
-    100,                 ! Maximum Value of y
-    0,                    ! Minimum Value of z
-    100,                  ! Maximum Value of z
-    0,                   ! Minimum Curve Output
-    38;                  ! Maximum Curve Output
+    HeatCapCurve,            !- Name
+    -1.82449220450272,       !- Coefficient1 Constant
+    -3.31281616694594,       !- Coefficient2 w
+    5.59306489123436,        !- Coefficient3 x
+    0.858772212623984,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
 
   Curve:QuadLinear,
-    HeatPowCurve,      ! Curve Name
-    -2.4442872924394,      !- CoefficientC1
-    0.934304727021879,       !- CoefficientC2
-    1.76364353708994,       !- CoefficientC3
-    0.775628762040029,       !- CoefficientC4
-    0.0,               !- CoefficientC5
-    -100,                   ! Minimum Value of w
-    100,                 ! Maximum Value of w
-    -100,                   ! Minimum Value of x
-    100,                 ! Maximum Value of x
-    0,                   ! Minimum Value of y
-    100,                 ! Maximum Value of y
-    0,                    ! Minimum Value of z
-    100,                  ! Maximum Value of z
-    0,                   ! Minimum Curve Output
-    38;                  ! Maximum Curve Output
+    HeatPowCurve,            !- Name
+    -2.4442872924394,        !- Coefficient1 Constant
+    0.934304727021879,       !- Coefficient2 w
+    1.76364353708994,        !- Coefficient3 x
+    0.775628762040029,       !- Coefficient4 y
+    0.0,                     !- Coefficient5 z
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
 
 !-   ===========  ALL OBJECTS IN CLASS: CURVE:QUINTLINEAR ===========
 
   Curve:QuintLinear,
-    CoolSensCapCurve,      ! Curve Name
-    -5.17921912653132,     !- CoefficientC1
-    17.0277143871191,      !- CoefficientC2
-    -11.2617991739786,     !- CoefficientC3
-    -0.929300603852594,    !- CoefficientC4
-    0.72746963129094,      !- CoefficientC5
-    0.0,                     !- CoefficientC6
-    -100,                   ! Minimum Value of v
-    100,                 ! Maximum Value of v
-    -100,                   ! Minimum Value of w
-    100,                 ! Maximum Value of w
-    -100,                   ! Minimum Value of x
-    100,                 ! Maximum Value of x
-    0,                   ! Minimum Value of y
-    100,                 ! Maximum Value of y
-    0,                    ! Minimum Value of z
-    100,                  ! Maximum Value of z
-    0,                   ! Minimum Curve Output
-    38;                  ! Maximum Curve Output
+    CoolSensCapCurve,        !- Name
+    -5.17921912653132,       !- Coefficient1 Constant
+    17.0277143871191,        !- Coefficient2 v
+    -11.2617991739786,       !- Coefficient3 w
+    -0.929300603852594,      !- Coefficient4 x
+    0.72746963129094,        !- Coefficient5 y
+    0.0,                     !- Coefficient6 z
+    -100,                    !- Minimum Value of v
+    100,                     !- Maximum Value of v
+    -100,                    !- Minimum Value of w
+    100,                     !- Maximum Value of w
+    -100,                    !- Minimum Value of x
+    100,                     !- Maximum Value of x
+    0,                       !- Minimum Value of y
+    100,                     !- Maximum Value of y
+    0,                       !- Minimum Value of z
+    100,                     !- Maximum Value of z
+    0,                       !- Minimum Curve Output
+    38;                      !- Maximum Curve Output
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:MIXER ===========
 
@@ -1020,6 +1030,8 @@
     2.5E+06,                 !- Ground Thermal Heat Capacity {J/m3-K}
     ,                        !- GHE:Vertical:ResponseFactors Object Name
     UBHWTcalc,               !- g-Function Calculation Method
+    ,                        !- GHE:Vertical:Sizing Object Type
+    ,                        !- GHE:Vertical:Sizing Object Name
     GHE-Array;               !- GHE:Vertical:Array Object Name
 
 !-   ===========  ALL OBJECTS IN CLASS: GROUNDHEATEXCHANGER:VERTICAL:PROPERTIES ===========

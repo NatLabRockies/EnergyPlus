@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -114,6 +114,22 @@ namespace BranchInputManager {
             }
             AuditBranches(state, false);
             state.dataBranchInputManager->GetBranchInputFlag = false;
+        }
+    }
+
+    void ManageConnectorInput(EnergyPlusData &state)
+    {
+        bool hasSplitterOrMixer(false);
+        if (state.dataBranchInputManager->GetSplitterInputFlag) {
+            hasSplitterOrMixer = true;
+            GetSplitterInput(state);
+        }
+        if (state.dataBranchInputManager->GetMixerInputFlag) {
+            hasSplitterOrMixer = true;
+            GetMixerInput(state);
+        }
+        if (hasSplitterOrMixer && state.dataBranchInputManager->GetConnectorListInputFlag) {
+            GetConnectorListInput(state);
         }
     }
 
@@ -2217,7 +2233,8 @@ namespace BranchInputManager {
                 FoundPlantLoopNum = Num;
                 MatchedPlantLoop = true;
                 break;
-            } else if (Alphas(12) == BranchListName) {
+            }
+            if (Alphas(12) == BranchListName) {
                 FoundPlantLoopName = Alphas(1);
                 FoundSupplyDemand = "Demand";
                 FoundVolFlowRate = Numbers(3);
@@ -2275,7 +2292,8 @@ namespace BranchInputManager {
                 FoundCondLoopNum = Num;
                 MatchedCondLoop = true;
                 break;
-            } else if (Alphas(12) == BranchListName) {
+            }
+            if (Alphas(12) == BranchListName) {
                 FoundCondLoopName = Alphas(1);
                 FoundSupplyDemand = "Demand";
                 FoundVolFlowRate = Numbers(3);
@@ -2439,7 +2457,7 @@ namespace BranchInputManager {
         NeverFound = true;
         for (BrN = 1; BrN <= (int)state.dataBranchInputManager->Branch.size(); ++BrN) {
             int Found = 0;
-            std::string FoundBranchName = "";
+            std::string FoundBranchName;
             if (present(CompType) && present(CompName)) {
                 for (CpN = 1; CpN <= state.dataBranchInputManager->Branch(BrN).NumOfComponents; ++CpN) {
                     if (!Util::SameString(CompType(), state.dataBranchInputManager->Branch(BrN).Component(CpN).CType) ||

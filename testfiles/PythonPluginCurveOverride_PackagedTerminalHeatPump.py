@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -75,21 +75,25 @@ class CurveOverwriteMGR(EnergyPlusPlugin):
         if self.api.exchange.api_data_fully_ready(state):
             # get handles if needed
             if self.need_to_get_handles:
-                self.CoilInletDBT_handle = self.api.exchange.get_variable_handle(state, "System Node Temperature",
-                                                                                 "Zone1PTHPFanOutletNode")
+                self.CoilInletDBT_handle = self.api.exchange.get_variable_handle(
+                    state, "System Node Temperature", "Zone1PTHPFanOutletNode"
+                )
 
-                self.CoilInletW_handle = self.api.exchange.get_variable_handle(state, "System Node Humidity Ratio",
-                                                                               "Zone1PTHPFanOutletNode")
+                self.CoilInletW_handle = self.api.exchange.get_variable_handle(
+                    state, "System Node Humidity Ratio", "Zone1PTHPFanOutletNode"
+                )
 
-                self.Pressure_handle = self.api.exchange.get_variable_handle(state, "System Node Pressure",
-                                                                             "Zone1PTHPOAInNode")
+                self.Pressure_handle = self.api.exchange.get_variable_handle(
+                    state, "System Node Pressure", "Zone1PTHPOAInNode"
+                )
 
-                self.CurveOverwrite_handle = self.api.exchange.get_actuator_handle(state, "Curve",
-                                                                                   "Curve Result",
-                                                                                   "HPACCOOLCAPFT")
+                self.CurveOverwrite_handle = self.api.exchange.get_actuator_handle(
+                    state, "Curve", "Curve Result", "HPACCOOLCAPFT"
+                )
 
-                self.OAT_handle = self.api.exchange.get_variable_handle(state, "System Node Temperature",
-                                                                        "Zone1PTHPOAInNode")
+                self.OAT_handle = self.api.exchange.get_variable_handle(
+                    state, "System Node Temperature", "Zone1PTHPOAInNode"
+                )
 
                 self.need_to_get_handles = False
 
@@ -105,15 +109,17 @@ class CurveOverwriteMGR(EnergyPlusPlugin):
             C1 = 0.942567793
             C2 = 0.009543347
             C2a = 0.009543347
-            C3 = 0.00068377E0
+            C3 = 0.00068377e0
             C4 = 0.011042676
             C5 = 0.000005249
             C6 = 0.000009720
-            CurveInput = C1 + (C2 * IVOnea) + (C3 * IVOnea * IVOnea) - (C4 * IVTwo) + (C5 * IVTwo * IVTwo) - (
-                    C6 * IVThree)
+            CurveInput = (
+                C1 + (C2 * IVOnea) + (C3 * IVOnea * IVOnea) - (C4 * IVTwo) + (C5 * IVTwo * IVTwo) - (C6 * IVThree)
+            )
             if OAT > 31.0:
-                CurveInput = C1 - (C2a * IVOnea) + (C3 * IVOnea * IVOnea) - (C4 * IVTwo) + (C5 * IVTwo * IVTwo) - (
-                        C6 * IVThree)
+                CurveInput = (
+                    C1 - (C2a * IVOnea) + (C3 * IVOnea * IVOnea) - (C4 * IVTwo) + (C5 * IVTwo * IVTwo) - (C6 * IVThree)
+                )
 
             CurveOverwrite = CurveInput
             self.api.exchange.set_actuator_value(state, self.CurveOverwrite_handle, CurveOverwrite)

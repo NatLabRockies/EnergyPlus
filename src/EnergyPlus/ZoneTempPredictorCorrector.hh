@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -328,7 +328,7 @@ namespace ZoneTempPredictorCorrector {
                                     Real64 &multiplierHM, // Hybrid model thermal mass multiplier
                                     Real64 &multSumHM,    // Sum of Hybrid model thermal mass multipliers
                                     Real64 &countSumHM,   // Count of number of points in sum
-                                    Real64 &multAvgHM,    // Average of hybrid model mass multipier
+                                    Real64 &multAvgHM,    // Average of hybrid model mass multiplier
                                     int zoneNum           // Zone number for the hybrid model
     );
 

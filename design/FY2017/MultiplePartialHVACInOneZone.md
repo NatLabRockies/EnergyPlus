@@ -6,7 +6,7 @@ Improve Control of Multiple HVAC in One Zone
  - November 30, 2016 - Original NFP
  - January 4, 2017 - Revised NFP and Initial Design
  - September 29, 2017 - Final Design
- 
+
 Reviewers - Raustad, Griffith, Lee, Gu, Horowitz, Merket, Winkler, Sheier
 
 ## Table of Contents ##
@@ -52,7 +52,7 @@ For operation, however, the user can only specify the order of simulation. Each 
 
 ## Approach ##
 
-The current `ZoneHVAC:EquipmentList` object controls the order of simulation for heating and for cooling.  
+The current `ZoneHVAC:EquipmentList` object controls the order of simulation for heating and for cooling.
 ```
   ZoneHVAC:EquipmentList,
     SPACE2-1 Eq,             !- Name
@@ -98,11 +98,11 @@ Build example files and check results.
 
 *New Field: Load Distribution Scheme*
 
-This alpha field contains the Load Distribution Scheme Keyword. The Load Distribution Scheme selects the algorithm used to sequence equipment operation in order to meet the zone thermostat demand. Currently, four schemes are functional. 
+This alpha field contains the Load Distribution Scheme Keyword. The Load Distribution Scheme selects the algorithm used to sequence equipment operation in order to meet the zone thermostat demand. Currently, four schemes are functional.
 
-- **SequentialLoad** loads each piece of equipment sequentially in the order specified in the sequence fields to its maximum part load ratio and will operate the last required piece of equipment between its minimum and maximum part load ratio in order to meet the zone demand. 
-- **UniformLoad** evenly distributes the zone demand among all available components on the equipment list for a given load type. 
-- **SequentialUniformPLR** loads all operating pieces equipment to a uniform part load ratio (PLR). Components are loaded sequentially based on the order specified in the sequence fields until each component is fully loaded, at which point the next component is added and the load is distributed uniformly based on PLR between the operating  components. 
+- **SequentialLoad** loads each piece of equipment sequentially in the order specified in the sequence fields to its maximum part load ratio and will operate the last required piece of equipment between its minimum and maximum part load ratio in order to meet the zone demand.
+- **UniformLoad** evenly distributes the zone demand among all available components on the equipment list for a given load type.
+- **SequentialUniformPLR** loads all operating pieces equipment to a uniform part load ratio (PLR). Components are loaded sequentially based on the order specified in the sequence fields until each component is fully loaded, at which point the next component is added and the load is distributed uniformly based on PLR between the operating  components.
 - **UniformPLR** will load all operating pieces of equipment to a uniform part load ratio (PLR). No equipment will be loaded below its minimum PLR. If the total load is less than the sum of all equipment operating at their respective minimum PLRs, then the last item in the equipment list is dropped and the load is distributed based on a uniform PLR for the remaining plant equipment.
 
 
@@ -161,7 +161,7 @@ The current functions which set/adjust the sequenced outputs required are:
 ZoneEquipmentManager::InitZoneEquipment (allocates the sequenced output arrays)
 ZoneEquipmentManager::InitSystemOutputRequired (initializes all sequenced output = full output required)
 ZoneEquipmentManager::UpdateSystemOutputRequired (if EquipPriorityNum is passed in, then sets next sequenced output required to be the remaining load)
- 
+
 ZoneTempPredictorCorrector::InitZoneAirSetPoints (initiales all sequenced outputs to zero)
 ZoneTempPredictorCorrector::CalPredictedSystemLoad (initializes all sequenced output = full output required)
 ```
@@ -175,7 +175,7 @@ Also, because the air loop equipment is simulated before the zone equipment, the
 The function `DistributeSystemOutputRequired` allocates the curent zone load among the available pieces of zone equipment for the current load type (cooling, heating, or no-load). Because some air loop components such as AirLoopHVAC:UnitarySystem may be controlled based on a control zone load, the sequenced loads must be known prior to the final iteration of the HVAC simulation so that the air loop equipment will adjust its output accordingly. When the zone equipment list is initially read, the maximum number of equipment across all zones is used to set the number of air loop iterations required after the initial iteration, `MinAirLoopIterationsAfterFirst`. The control sequence is shown below.
 
 1. Initial iteration (`FirstHVACIteration` is true)
- 
+
     a. Set all sequenced loads to the full load required.
 
     b. Simulate air loops and zone equipment.
@@ -190,7 +190,7 @@ The function `DistributeSystemOutputRequired` allocates the curent zone load amo
       * SequentialLoad - Initially all sequenced loads are set to the full load required.
 
       * UniformLoad - The sequenced loads for all active equipment are set to the full load divided by the number of active pieces of equipment. All inactive sequenced loads are set to zero.
- 
+
       * UniformPLR - Using the current equipment capacities (stored during the initial iteration), distribute the load among the availalbe pieces of equipment, such that each one is operating at the same part load ratio (PLR).
 
       * SequentialUniformPLR - Using the current equipment capacities (stored during the initial iteration), determine how many of the available pieces of equipment are required to meet the current full load.  Then distribute the load among those pieces of equipment, such that each one is operating at the same part load ratio (PLR).
@@ -198,8 +198,8 @@ The function `DistributeSystemOutputRequired` allocates the curent zone load amo
     b. Simulate air loops.
 
     c. Simulate zone equipment.
- 
-     * If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load. 
+
+     * If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load.
 
       ( Otherwise, leave the sequenced loads as-is from the initial distribution.
 
@@ -209,7 +209,7 @@ The function `DistributeSystemOutputRequired` allocates the curent zone load amo
 
     b. Simulate zone equipment.
 
-      * If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load. 
+      * If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load.
 
       * Otherwise, leave the sequenced loads as-is from the initial distribution.
 
@@ -279,7 +279,7 @@ A new pair of fields are proposed for each piece of equipment:
 ```
 There are two ways that the schedule could be applied.
 
-### Option A - Initial Load 
+### Option A - Initial Load
 The zone equipment manager multiplies the initial load by the applicable schedule fraction before calling a given piece of equipment.  Here is an example where the radiant cooling panels meet 25% of the cooling load and the air system meets the remaining load.
 
 ```
@@ -299,13 +299,13 @@ The zone equipment manager multiplies the initial load by the applicable schedul
     ;                        !- Zone Equipment 2 Heating or No-Load Fraction Schedule Name
 ```
 
-If the current cooling load is 1000W, the cooling panel will be passed a load of 0.25 \* 1000=250W. The air distribution unit will be passed a load of 0.75 \* 1000W=750W. 
+If the current cooling load is 1000W, the cooling panel will be passed a load of 0.25 \* 1000=250W. The air distribution unit will be passed a load of 0.75 \* 1000W=750W.
 
 *Pros* - The schedule fractions are intuitive, 0.25 + 0.75 = 1.0
 
 *Cons* - If the first piece of equipment cannot provide the requested load, the next one will not try to meet to meet the unmet portion. and the zone setpoint will not be met.
 
-### Option B - Remaining Load 
+### Option B - Remaining Load
 The zone equipment manager multiplies the current remaining load by the applicable schedule fraction before calling a given piece of equipment.  Here is an example where the radiant cooling panels meet 25% of the cooling load and the air system meets the remaining load.
 
 ```

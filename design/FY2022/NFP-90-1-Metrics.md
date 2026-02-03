@@ -10,7 +10,7 @@ Update output reporting of mechanical equipment using 90.1-2019 metrics
 
 ## Justification for New Feature ##
 
-Many new metrics appear in the ASHRAE 90.1-2019 [1] standard. EnergyPlus needs to stay in sync with new metrics and thus needs to be updated. 
+Many new metrics appear in the ASHRAE 90.1-2019 [1] standard. EnergyPlus needs to stay in sync with new metrics and thus needs to be updated.
 
 ## Overview ##
 
@@ -28,13 +28,13 @@ We have identified the following commonly used metrics:
 |UEF (10 CFP 430 Appendix E)|ASHRAE 90.1-2019|Uniform Energy Factor|Water Heaters|[9]|
 |FEI (AMCA 208)|ASHRAE 90.1-2019|Fan Energy Index|Fan Energy|[10]|
 
-In the current workorder, we would focus on two metrics only and propose to focus on SEER2 and HSPF2 based on ANRI 210/240 2023. 
-In order to support the old metrics side by side with the new metrics, we proposed to refactor the calculation of SEER and HSPF2 into separate functions so they can be easily depricated when the time comes. 
+In the current workorder, we would focus on two metrics only and propose to focus on SEER2 and HSPF2 based on ANRI 210/240 2023.
+In order to support the old metrics side by side with the new metrics, we proposed to refactor the calculation of SEER and HSPF2 into separate functions so they can be easily depricated when the time comes.
 
 **1. SEER2**
 
 SEER2 is calculated based on ANSI/AHRI Standard 210/240-2023: applies to: Unitary Air-conditioners and Unitary Air-source Heat Pumps with
-capacities less than 65,000 Btu/h. 
+capacities less than 65,000 Btu/h.
 
 *For Single Stage Systems*
 
@@ -73,7 +73,7 @@ capacities less than 65,000 Btu/h.
 |C<sub>D</sub><sup>c,Full</sup><br>Default Cooling Degradation Coefficient|Default: 0.2<br>If Tests C and D are not conducted set C<sub>D</sub><sup>c,Full</sup> to the default value or use the following forumlar:<br>![grafik](https://user-images.githubusercontent.com/49325382/173117743-27b547d9-8b76-4056-9f91-7c655b387df5.png)<br>If the test is conducted use the following forumlar:<br>![grafik](https://user-images.githubusercontent.com/49325382/173117884-9f2f26f4-8ed4-496d-b6d2-4c30beca8b1d.png)<br>![grafik](https://user-images.githubusercontent.com/49325382/173117960-61d85889-c575-4b0c-b8a3-e32d591ca7d2.png)||
 |Case 4<br>![grafik](https://user-images.githubusercontent.com/49325382/173118064-7b60a4a5-97f4-4527-9e30-f9f1362c2c76.png)![grafik](https://user-images.githubusercontent.com/49325382/173118087-143d1ad3-8563-44b9-a5c0-1ebb16791c6c.png)|Building load is greater than or equal to the unit capacity||
 ||![grafik](https://user-images.githubusercontent.com/49325382/173118193-28b2fc85-c7a9-437b-8998-32d7f8a10ae2.png)||
- 
+
 *For Variable Speed System*
  |Variable Speed Systems|
 |--|
@@ -178,13 +178,13 @@ Calculation is done as follows (more details in ANSI/AHRI 210/240):
 |Case III<br>![grafik](https://user-images.githubusercontent.com/49325382/173149950-452a7920-0ccd-4ea8-b316-90e563a49037.png)|Building Load is greater than the capacity of the unit at the Full Compressor Speed||
 ||![grafik](https://user-images.githubusercontent.com/49325382/173150028-3732a2c7-bff3-4616-abb9-e1e3d735cea5.png)|
 
-There are also other variations, but I think they are not needed. E.g., Heat pumps having a Heat Comfort Controller, Heat Pump Having a Two-capacity Compressor or Heat Pump Having a Triple-Capacity Compressor 
+There are also other variations, but I think they are not needed. E.g., Heat pumps having a Heat Comfort Controller, Heat Pump Having a Two-capacity Compressor or Heat Pump Having a Triple-Capacity Compressor
 
-These temperature bin values changed in the newer version, thus we need to define two arrays one for the older and one for the newer version. 
+These temperature bin values changed in the newer version, thus we need to define two arrays one for the older and one for the newer version.
 
 ## Approach ##
 
-For each of the two metrics, we will identify a set of EnergyPlus components for which the metric applies. Replicate the code pattern of existing metrics for the new metric and write unit tests to ensure the calculation is correct. Once the metrics are calculated we can integrate them into the corresponding report code of the equipment summary table. For now we want to add those two new metrics (SEER2 and HSPF2) in addition to the existing ones (SEER and HSPF) and explain the difference in a footnote. 
+For each of the two metrics, we will identify a set of EnergyPlus components for which the metric applies. Replicate the code pattern of existing metrics for the new metric and write unit tests to ensure the calculation is correct. Once the metrics are calculated we can integrate them into the corresponding report code of the equipment summary table. For now we want to add those two new metrics (SEER2 and HSPF2) in addition to the existing ones (SEER and HSPF) and explain the difference in a footnote.
 - Extend the implementation in StandardRatings.hh & StandardRatings.cc
    - for SEER2 by adding code to the following functions
      - CalcDXCoilStandardRating
@@ -205,7 +205,7 @@ For each of the two metrics, we will identify a set of EnergyPlus components for
 
 ## Testing/Validation/Data Source(s) ##
 
-Unit tests will confirm and test the calculation of the metrics to ensure the code produces correct results and does not fail. 
+Unit tests will confirm and test the calculation of the metrics to ensure the code produces correct results and does not fail.
 Two example files will be modified to demonstrate the use of the new metrics. Simulation results will be manually checked/benchmarked using excel spreadsheet with input and output from EnergyPlus runs.
 
 ## Input Output Reference Documentation ##
@@ -215,15 +215,15 @@ The InputOutput Documentation will be expanded to include the new metrics. There
 
 ## Input Description ##
 
-There is no additional input needed. 
+There is no additional input needed.
 
 ## Outputs Description ##
 
-There will be an update to the reports to include the metrics as described above. 
+There will be an update to the reports to include the metrics as described above.
 
 ## Engineering Reference ##
 
-The EngineeringReference will be updated to include the formulas used to calculate the two metrics and be referenced from the corresponding EnergyPlus components. 
+The EngineeringReference will be updated to include the formulas used to calculate the two metrics and be referenced from the corresponding EnergyPlus components.
 
 ## Example Files and Transition Changes ##
 
@@ -246,7 +246,7 @@ Comments from call on 6/15/2022:
 
 ## Acknowledgments ##
 
-TBD 
+TBD
 
 ## References ##
 
@@ -254,7 +254,7 @@ TBD
 
 [2]	Jonestone Supply: The SEER2 Guide. 2022. URL: https://seer2.com/
 
-[3] AHRI: Air Conditioning, Heating & Refrigeration Institute. 2023 (2020) Standard for Performance Rating of Unitary Air-conditioning & Air-source Heat Pump 
+[3] AHRI: Air Conditioning, Heating & Refrigeration Institute. 2023 (2020) Standard for Performance Rating of Unitary Air-conditioning & Air-source Heat Pump
 Equipment. 2020. URL: https://www.ahrinet.org/Portals/_Appleseed/documents/Standards/AHRI%20Standard%20210.240-2023%20(2020).pdf
 
 [4] AHRI: AHRI Standard 340/360-2022 (I-P): 2022 Standard for Performance Rating of Commercial and Industrial Unitary Air-conditioning and Heat Pump Equipment. 2019. URL: https://www.ahrinet.org/Portals/Standards/AHRI%20Standard%20340-360-2022%20(I-P).pdf

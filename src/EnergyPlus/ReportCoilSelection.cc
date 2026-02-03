@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -174,8 +174,8 @@ void ReportCoilSelection::writeCoilSelectionOutput(EnergyPlusData &state)
         } else if (c->zoneName.size() > 1) {
             // make list of zone names
             std::string tmpZoneList;
-            for (std::size_t vecLoop = 0; vecLoop < c->zoneName.size(); ++vecLoop) {
-                tmpZoneList += c->zoneName[vecLoop] + "; ";
+            for (const auto &vecLoop : c->zoneName) {
+                tmpZoneList += vecLoop + "; ";
             }
             OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchCoilZoneName, c->coilName_, tmpZoneList);
             // begin std 229 New coil connections table entries
@@ -840,14 +840,12 @@ int ReportCoilSelection::getIndexForOrCreateDataObjFromCoilName(EnergyPlusData &
             if (Util::SameString(coilSelectionDataObjs[i]->coilName_, coilName)) {
                 if (Util::SameString(coilSelectionDataObjs[i]->coilObjName, coilType)) {
                     return index = i;
-                } else {
-                    // throw error  coil type does not match coil name, check for unique names across coil types
-                    ShowWarningError(state,
-                                     format("check for unique coil names across different coil types: {} occurs in both {} and {}",
-                                            coilName,
-                                            coilType,
-                                            coilSelectionDataObjs[i]->coilObjName));
-                }
+                } // throw error  coil type does not match coil name, check for unique names across coil types
+                ShowWarningError(state,
+                                 format("check for unique coil names across different coil types: {} occurs in both {} and {}",
+                                        coilName,
+                                        coilType,
+                                        coilSelectionDataObjs[i]->coilObjName));
             }
         }
     }
@@ -1308,7 +1306,7 @@ void ReportCoilSelection::setCoilCoolingCapacity(
                 }
             }
         }
-        if (c->zoneNum.size() > 0 && sumVdot > 0.0) {
+        if (!c->zoneNum.empty() && sumVdot > 0.0) {
             c->rmPeakTemp = (sumT_Vdot / sumVdot);
             c->rmPeakHumRat = (sumW_Vdot / sumVdot);
             c->rmPeakRelHum =
@@ -1575,7 +1573,7 @@ void ReportCoilSelection::setCoilHeatingCapacity(
             }
         }
 
-        if (c->zoneNum.size() > 0 && sumVdot > 0.0) {
+        if (!c->zoneNum.empty() && sumVdot > 0.0) {
             c->rmPeakTemp = (sumT_Vdot / sumVdot);
             c->rmPeakHumRat = (sumW_Vdot / sumVdot);
             c->rmPeakRelHum =
@@ -2001,7 +1999,7 @@ void ReportCoilSelection::setCoilEqNum(EnergyPlusData &state,
 
 std::string ReportCoilSelection::getTimeText(EnergyPlusData &state, int const timeStepAtPeak)
 {
-    std::string returnString = "";
+    std::string returnString;
 
     if (timeStepAtPeak == 0) {
         return returnString;
@@ -2036,17 +2034,20 @@ bool ReportCoilSelection::isCompTypeFan(std::string const &compType // string co
     // if compType name is one of the fan objects, then return true
     if (Util::SameString(compType, "Fan:SystemModel")) {
         return true;
-    } else if (Util::SameString(compType, "Fan:ComponentModel")) {
-        return true;
-    } else if (Util::SameString(compType, "Fan:OnOff")) {
-        return true;
-    } else if (Util::SameString(compType, "Fan:ConstantVolume")) {
-        return true;
-    } else if (Util::SameString(compType, "Fan:VariableVolume")) {
-        return true;
-    } else {
-        return false;
     }
+    if (Util::SameString(compType, "Fan:ComponentModel")) {
+        return true;
+    }
+    if (Util::SameString(compType, "Fan:OnOff")) {
+        return true;
+    }
+    if (Util::SameString(compType, "Fan:ConstantVolume")) {
+        return true;
+    }
+    if (Util::SameString(compType, "Fan:VariableVolume")) {
+        return true;
+    }
+    return false;
 }
 
 bool ReportCoilSelection::isCompTypeCoil(std::string const &compType // string component type, input object class name

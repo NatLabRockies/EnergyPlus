@@ -4,7 +4,7 @@ Xuan Luo, Tianzhen Hong
 
 Lawrence Berkeley National Laboratory
 
-October 26, 2018 
+October 26, 2018
 
 ## Justification for Feature Update
 
@@ -14,7 +14,7 @@ Heat emissions from buildings are a crucial component influencing climate change
 
 Quantifying heat emissions from buildings and its spatiotemporal distribution have significant implications on urban environment and climate studies. Knowing how much heat is released into atmosphere can help quantify the magnitude of its impact on urban microclimate, e.g., urban heat island effect and climate change. Spatial and temporal distribution of heat emissions can serve to locate hot spots in space and time, therefore useful for prioritizing recourse to mitigate heat emissions from buildings.
 
-We propose a bottom-up approach to calculate heat emissions from buildings with any building energy modeling programs. The scope is restricted to report the buildings’ heat directly discharged to their ambient air. As illustrated in Figure 1, we propose to include heat releases from three levels of building components: (1) building envelope - exterior surface convection and radiative heat transfer to the ambient air, (2) zone - exhaust air or exfiltration to ambient, (3) HVAC system - relief/exhaust air from AHUs, and (4) HVAC system - heat rejected by air-cooled condensers or central plants, including cooling towers of water-cooled chillers, gas-fired boilers, furnaces and water heaters. It should be noted that any under-ground zone or envelope is excluded, since heat from those spaces is rejected to ground instead of to ambient air. 
+We propose a bottom-up approach to calculate heat emissions from buildings with any building energy modeling programs. The scope is restricted to report the buildings’ heat directly discharged to their ambient air. As illustrated in Figure 1, we propose to include heat releases from three levels of building components: (1) building envelope - exterior surface convection and radiative heat transfer to the ambient air, (2) zone - exhaust air or exfiltration to ambient, (3) HVAC system - relief/exhaust air from AHUs, and (4) HVAC system - heat rejected by air-cooled condensers or central plants, including cooling towers of water-cooled chillers, gas-fired boilers, furnaces and water heaters. It should be noted that any under-ground zone or envelope is excluded, since heat from those spaces is rejected to ground instead of to ambient air.
 
 The heat emission we calculate and report measures the heat transfer from buildings to their ambient environment, and can have both positive and negative values. The positive values indicate the building injects heat to the environment, while the negative values indicate the building extracts heat from the environment.
 
@@ -109,7 +109,7 @@ Zone HVAC Forced Air Units | Window air conditioner / Packaged terminal air cond
  |  | Hybrid Unitary HVAC | System dependent; Calculated according to the equipment specification as above
 
 There are several parts of heat rejection that the system are not clear defined, and we do not consider the following part into calculation:
-1.	User defined systems have a variety of possible sources of heat emission including outdoor air relief for exhaust or a condenser outlet for heat rejection. These parts can be counted by tracing the condensing unit linked to the air connection inlet and outlet (for user defined zone HVAC and plant component). 
+1.	User defined systems have a variety of possible sources of heat emission including outdoor air relief for exhaust or a condenser outlet for heat rejection. These parts can be counted by tracing the condensing unit linked to the air connection inlet and outlet (for user defined zone HVAC and plant component).
 2.	For user defined coil, this part depends on how the coil is designed and equipped. We do not count this in report.
 3.	ThermalStorage:Ice:* do not indicate where losses go, so we neglect this.
 
@@ -138,28 +138,28 @@ Timestamp: **YYYY-MM-DD HH:MM:SS**
 **Heat Emissions Monthly Report**
 
 ENVELOPE CONVECTION [GJ] | ZONE EXFILTRATION [GJ] | ZONE EXHAUST AIR [GJ] | HVAC RELIEF AIR [GJ] | HVAC REJECT HEAT [GJ]
--------------  | -------------  |-------------  | -------------  | -------------  
-January	 | | | | 
-February | | | | 				
-March	 | | | | 				
-April	 | | | | 				
-May		 | | | | 			
-June	 | | | | 				
-July	 | | | | 				
-August	 | | | | 				
-September| | | | 					
-October	 | | | | 				
-November | | | | 					
-December | | | | 					 					
-Annual Sum or Average | | | | 					
-Minimum of Months	  | | | | 				
-Maximum of Months	  | | | | 
+-------------  | -------------  |-------------  | -------------  | -------------
+January	 | | | |
+February | | | |
+March	 | | | |
+April	 | | | |
+May		 | | | |
+June	 | | | |
+July	 | | | |
+August	 | | | |
+September| | | |
+October	 | | | |
+November | | | |
+December | | | |
+Annual Sum or Average | | | |
+Minimum of Months	  | | | |
+Maximum of Months	  | | | |
 
 ## Testing/Validation/Data Source(s):
 
 Two example files (the DOE reference small office and the large office models) will be modified to demonstrate the use of the new feature. Simulation results will be manually checked/benchmarked using excel spreadsheet with input and output from EnergyPlus runs.
 
-## IDD Object (New):       
+## IDD Object (New):
 
 N/A
 

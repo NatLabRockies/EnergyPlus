@@ -192,14 +192,14 @@ N/A (these features should already be accounted for on meters)
 WWHX report for Fluid Heat Exchanger Operation Status should provide the necessary information to understand when the HX is active as an economizer.
 
 ```
-if ((std::abs(this->HeatTransferRate) > DataHVACGlobals::SmallLoad) && (this-DemandSideLoop.InletMassFlowRate > 0.0) && 
+if ((std::abs(this->HeatTransferRate) > DataHVACGlobals::SmallLoad) && (this-DemandSideLoop.InletMassFlowRate > 0.0) &&
     (this->SupplySideLoop.InletMassFlowRate > 0.0)) {
     this->OperationStatus = 1.0;
 } else {
     this->OperationStatus = 0.0;
 }
 ```
- 
+
 ## References
 
 1) Trane Engineers Newsletter 37-3 "free" cooling using

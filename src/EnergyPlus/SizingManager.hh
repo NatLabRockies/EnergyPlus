@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -135,6 +135,7 @@ namespace SizingManager {
                           DataSizing::ZoneSizingData const &zsCalcFinalSizing,
                           Array2D<DataSizing::ZoneSizingData> const &zsCalcSizing,
                           Array2D<DataSizing::ZoneSizingData> const &zSizing,
+                          Real64 const zoneMult,
                           bool const isSpace);
 
     void reportZoneSizingEio(EnergyPlusData &state,

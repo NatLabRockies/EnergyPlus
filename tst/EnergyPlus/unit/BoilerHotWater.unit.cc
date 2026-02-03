@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,14 +74,14 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterSizingTest)
     state->dataFluid->init_state(*state); // Still necessary?
 
     // unit test for autosizing boiler nominal capacity in Boiler:HotWater
-    state->dataBoilers->Boiler.allocate(1);
+    state->dataBoilers->Boiler.emplace_back();
     // Hardsized Hot Water Boiler
-    state->dataBoilers->Boiler(1).plantLoc.loopNum = 1;
-    state->dataBoilers->Boiler(1).SizFac = 1.2;
-    state->dataBoilers->Boiler(1).NomCap = 40000.0;
-    state->dataBoilers->Boiler(1).NomCapWasAutoSized = false;
-    state->dataBoilers->Boiler(1).VolFlowRate = 1.0;
-    state->dataBoilers->Boiler(1).VolFlowRateWasAutoSized = false;
+    state->dataBoilers->Boiler[0].plantLoc.loopNum = 1;
+    state->dataBoilers->Boiler[0].SizFac = 1.2;
+    state->dataBoilers->Boiler[0].NomCap = 40000.0;
+    state->dataBoilers->Boiler[0].NomCapWasAutoSized = false;
+    state->dataBoilers->Boiler[0].VolFlowRate = 1.0;
+    state->dataBoilers->Boiler[0].VolFlowRateWasAutoSized = false;
 
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataSize->PlantSizData.allocate(1);
@@ -94,25 +94,25 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterSizingTest)
     state->dataSize->PlantSizData(1).DeltaT = 10.0;
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
     // now call sizing routine
-    state->dataBoilers->Boiler(1).SizeBoiler(*state);
+    state->dataBoilers->Boiler[0].SizeBoiler(*state);
     // see if boiler volume flow rate returned is hard-sized value
-    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler(1).VolFlowRate, 1.0);
+    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler[0].VolFlowRate, 1.0);
     // see if boiler nominal capacity returned is hard-sized value
-    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler(1).NomCap, 40000.0);
+    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler[0].NomCap, 40000.0);
 
     // Autosized Hot Water Boiler
-    state->dataBoilers->Boiler(1).NomCapWasAutoSized = true;
-    state->dataBoilers->Boiler(1).VolFlowRateWasAutoSized = true;
-    state->dataBoilers->Boiler(1).NomCap = DataSizing::AutoSize;
-    state->dataBoilers->Boiler(1).VolFlowRate = DataSizing::AutoSize;
+    state->dataBoilers->Boiler[0].NomCapWasAutoSized = true;
+    state->dataBoilers->Boiler[0].VolFlowRateWasAutoSized = true;
+    state->dataBoilers->Boiler[0].NomCap = DataSizing::AutoSize;
+    state->dataBoilers->Boiler[0].VolFlowRate = DataSizing::AutoSize;
     // now call sizing routine
-    state->dataBoilers->Boiler(1).SizeBoiler(*state);
+    state->dataBoilers->Boiler[0].SizeBoiler(*state);
     // see if boiler volume flow rate returned is autosized value
-    EXPECT_NEAR(state->dataBoilers->Boiler(1).VolFlowRate, 1.2, 0.000001);
+    EXPECT_NEAR(state->dataBoilers->Boiler[0].VolFlowRate, 1.2, 0.000001);
     // see if boiler nominal capacity returned is autosized value
-    EXPECT_NEAR(state->dataBoilers->Boiler(1).NomCap, 49376304.0, 1.0);
+    EXPECT_NEAR(state->dataBoilers->Boiler[0].NomCap, 49376304.0, 1.0);
     // clear
-    state->dataBoilers->Boiler.deallocate();
+    state->dataBoilers->Boiler.clear();
     state->dataSize->PlantSizData.deallocate();
     state->dataPlnt->PlantLoop.deallocate();
 }
@@ -121,14 +121,14 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterAutoSizeTempTest)
     state->dataFluid->init_state(*state); // Still necessary?
     // unit test for checking hot water temperature for autosizing
     // boiler nominal capacity in Boiler:HotWater
-    state->dataBoilers->Boiler.allocate(1);
+    state->dataBoilers->Boiler.emplace_back();
     // Autosized Hot Water Boiler
-    state->dataBoilers->Boiler(1).plantLoc.loopNum = 1;
-    state->dataBoilers->Boiler(1).SizFac = 1.2;
-    state->dataBoilers->Boiler(1).NomCap = DataSizing::AutoSize;
-    state->dataBoilers->Boiler(1).NomCapWasAutoSized = true;
-    state->dataBoilers->Boiler(1).VolFlowRate = DataSizing::AutoSize;
-    state->dataBoilers->Boiler(1).VolFlowRateWasAutoSized = true;
+    state->dataBoilers->Boiler[0].plantLoc.loopNum = 1;
+    state->dataBoilers->Boiler[0].SizFac = 1.2;
+    state->dataBoilers->Boiler[0].NomCap = DataSizing::AutoSize;
+    state->dataBoilers->Boiler[0].NomCapWasAutoSized = true;
+    state->dataBoilers->Boiler[0].VolFlowRate = DataSizing::AutoSize;
+    state->dataBoilers->Boiler[0].VolFlowRateWasAutoSized = true;
 
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataSize->PlantSizData.allocate(1);
@@ -141,23 +141,23 @@ TEST_F(EnergyPlusFixture, Boiler_HotWaterAutoSizeTempTest)
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
 
     // calculate nominal capacity at 60.0 C hot water temperature
-    Real64 rho = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler(1).plantLoc.loopNum)
+    Real64 rho = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler[0].plantLoc.loopNum)
                      .glycol->getDensity(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
-    Real64 Cp = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler(1).plantLoc.loopNum)
+    Real64 Cp = state->dataPlnt->PlantLoop(state->dataBoilers->Boiler[0].plantLoc.loopNum)
                     .glycol->getSpecificHeat(*state, 60.0, "Boiler_HotWaterAutoSizeTempTest");
 
     Real64 NomCapBoilerExpected =
-        rho * state->dataSize->PlantSizData(1).DesVolFlowRate * Cp * state->dataSize->PlantSizData(1).DeltaT * state->dataBoilers->Boiler(1).SizFac;
+        rho * state->dataSize->PlantSizData(1).DesVolFlowRate * Cp * state->dataSize->PlantSizData(1).DeltaT * state->dataBoilers->Boiler[0].SizFac;
 
     // now call sizing routine
-    state->dataBoilers->Boiler(1).SizeBoiler(*state);
+    state->dataBoilers->Boiler[0].SizeBoiler(*state);
     // see if boiler volume flow rate returned is autosized value
-    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler(1).VolFlowRate, 1.2);
+    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler[0].VolFlowRate, 1.2);
     // see if boiler nominal capacity returned is autosized value
-    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler(1).NomCap, NomCapBoilerExpected);
+    EXPECT_DOUBLE_EQ(state->dataBoilers->Boiler[0].NomCap, NomCapBoilerExpected);
 }
 
-// Cf: https://github.com/NREL/EnergyPlus/issues/6164
+// Cf: https://github.com/NatLabRockies/EnergyPlus/issues/6164
 // This boiler has empty field for "Design Water Flow Rate", IDD now should make default='Autosize'
 TEST_F(EnergyPlusFixture, Boiler_HotWater_BlankDesignWaterFlowRate)
 {
@@ -186,10 +186,10 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_BlankDesignWaterFlowRate)
     GetBoilerInput(*state);
 
     EXPECT_EQ(1, (int)state->dataBoilers->Boiler.size());
-    EXPECT_EQ(AutoSize, state->dataBoilers->Boiler(1).VolFlowRate);
+    EXPECT_EQ(AutoSize, state->dataBoilers->Boiler[0].VolFlowRate);
 
     // Additional tests for fuel type input
-    EXPECT_ENUM_EQ(state->dataBoilers->Boiler(1).FuelType, Constant::eFuel::NaturalGas);
+    EXPECT_ENUM_EQ(state->dataBoilers->Boiler[0].FuelType, Constant::eFuel::NaturalGas);
 }
 
 TEST_F(EnergyPlusFixture, Boiler_HotWater_ZeroNominalCapacity)
@@ -287,7 +287,7 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_BoilerEfficiency)
     }
 
     GetBoilerInput(*state);
-    auto &thisBoiler = state->dataBoilers->Boiler(1);
+    auto &thisBoiler = state->dataBoilers->Boiler[0];
 
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
     state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
@@ -322,21 +322,24 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_BoilerEfficiency)
 
 TEST_F(EnergyPlusFixture, Boiler_HotWater_Factory)
 {
-    state->dataBoilers->Boiler.allocate(3);
-    state->dataBoilers->Boiler(1).Name = "Boiler1";
-    state->dataBoilers->Boiler(2).Name = "Boiler2";
-    state->dataBoilers->Boiler(3).Name = "Boiler3";
+    state->dataBoilers->Boiler.emplace_back();
+    state->dataBoilers->Boiler.emplace_back();
+    state->dataBoilers->Boiler.emplace_back();
 
-    state->dataBoilers->Boiler(3).NomCap = 1000.0;
-    state->dataBoilers->Boiler(3).MinPartLoadRat = 0.1;
-    state->dataBoilers->Boiler(3).MaxPartLoadRat = 1.1;
-    state->dataBoilers->Boiler(3).OptPartLoadRat = 1.0;
+    state->dataBoilers->Boiler[0].Name = "Boiler1";
+    state->dataBoilers->Boiler[1].Name = "Boiler2";
+    state->dataBoilers->Boiler[2].Name = "Boiler3";
+
+    state->dataBoilers->Boiler[2].NomCap = 1000.0;
+    state->dataBoilers->Boiler[2].MinPartLoadRat = 0.1;
+    state->dataBoilers->Boiler[2].MaxPartLoadRat = 1.1;
+    state->dataBoilers->Boiler[2].OptPartLoadRat = 1.0;
 
     state->dataBoilers->getBoilerInputFlag = false;
 
     // the pointer to plant equipment is declared as PlantComponent *compPtr;
     // this unit test creates that pointer to a boiler to test that the boiler factory returns the correct reference
-    PlantComponent *compPtr = Boilers::BoilerSpecs::factory(*state, state->dataBoilers->Boiler(3).Name);
+    PlantComponent *compPtr = Boilers::BoilerSpecs::factory(*state, state->dataBoilers->Boiler[2].Name);
 
     PlantLocation Location;
     Real64 MaxLoad;
@@ -344,21 +347,21 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_Factory)
     Real64 OptLoad;
     compPtr->getDesignCapacities(*state, Location, MaxLoad, MinLoad, OptLoad);
 
-    EXPECT_EQ(MinLoad, state->dataBoilers->Boiler(3).NomCap * state->dataBoilers->Boiler(3).MinPartLoadRat);
+    EXPECT_EQ(MinLoad, state->dataBoilers->Boiler[2].NomCap * state->dataBoilers->Boiler[2].MinPartLoadRat);
     EXPECT_EQ(100.0, MinLoad);
 
-    EXPECT_EQ(MaxLoad, state->dataBoilers->Boiler(3).NomCap * state->dataBoilers->Boiler(3).MaxPartLoadRat);
+    EXPECT_EQ(MaxLoad, state->dataBoilers->Boiler[2].NomCap * state->dataBoilers->Boiler[2].MaxPartLoadRat);
     EXPECT_EQ(1100.0, MaxLoad);
 
-    EXPECT_EQ(OptLoad, state->dataBoilers->Boiler(3).NomCap * state->dataBoilers->Boiler(3).OptPartLoadRat);
+    EXPECT_EQ(OptLoad, state->dataBoilers->Boiler[2].NomCap * state->dataBoilers->Boiler[2].OptPartLoadRat);
     EXPECT_EQ(1000.0, OptLoad);
 
-    EXPECT_EQ(0.0, state->dataBoilers->Boiler(1).NomCap);
-    EXPECT_EQ(0.0, state->dataBoilers->Boiler(2).NomCap);
-    EXPECT_EQ(1000.0, state->dataBoilers->Boiler(3).NomCap);
+    EXPECT_EQ(0.0, state->dataBoilers->Boiler[0].NomCap);
+    EXPECT_EQ(0.0, state->dataBoilers->Boiler[1].NomCap);
+    EXPECT_EQ(1000.0, state->dataBoilers->Boiler[2].NomCap);
 
     // and the boiler factory now returns a boiler class pointer
-    BoilerSpecs *thisBoiler = Boilers::BoilerSpecs::factory(*state, state->dataBoilers->Boiler(2).Name);
+    BoilerSpecs *thisBoiler = Boilers::BoilerSpecs::factory(*state, state->dataBoilers->Boiler[1].Name);
     EXPECT_EQ(0.0, thisBoiler->NomCap);
-    EXPECT_EQ(thisBoiler->Name, state->dataBoilers->Boiler(2).Name);
+    EXPECT_EQ(thisBoiler->Name, state->dataBoilers->Boiler[1].Name);
 }

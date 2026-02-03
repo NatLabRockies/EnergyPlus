@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -224,7 +224,6 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
     bool ErrorsFound(false);
     int NumAlphas;        // Number of elements in the alpha array
     int NumNums;          // Number of elements in the numeric array
-    int IOStat;           // IO Status when calling get input subroutine
     int MaxNumAlphas(0);  // argument for call to GetObjectDefMaxArgs
     int MaxNumNumbers(0); // argument for call to GetObjectDefMaxArgs
     int TotalArgs(0);     // argument for call to GetObjectDefMaxArgs
@@ -256,6 +255,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
 
     if (state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs > 0) {
         state.dataPlantHXFluidToFluid->FluidHX.allocate(state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs);
+        int IOStat; // IO Status when calling get input subroutine
         for (int CompLoop = 1; CompLoop <= state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs; ++CompLoop) {
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      cCurrentModuleObject,
@@ -467,7 +467,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRejection;
             } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForCooling;
-            } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
+            } else if (endUseCat == "HEATRECOVERYFORHEATING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForHeating;
             } else if (endUseCat == "LOOPTOLOOP") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::LoopToLoop;
@@ -910,6 +910,7 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMechType, this->Name, "HeatExchanger:FluidToFluid");
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMechNomCap, this->Name, this->SupplySideLoop.MaxLoad);
     }
+    this->updateCompFlowData(state);
 }
 
 void HeatExchangerStruct::control(EnergyPlusData &state, Real64 MyLoad, bool FirstHVACIteration)
@@ -1466,7 +1467,7 @@ void HeatExchangerStruct::calculate(EnergyPlusData &state, Real64 const SupSideM
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
-    // Evalutate heat exchanger model and calculate leaving temperatures
+    // Evaluate heat exchanger model and calculate leaving temperatures
 
     // METHODOLOGY EMPLOYED:
     // apply heat transfer model depending on type of HX used
@@ -1997,6 +1998,103 @@ void HeatExchangerStruct::oneTimeInit(EnergyPlusData &state)
         }
         this->MyFlag = false;
     }
+}
+
+void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
+{
+    int demandArrayIndex = -1;
+    int supplyArrayIndex = -1;
+    auto &demandCompNames = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).plantCoilObjectNames;
+    auto &demandCompTypes = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).plantCoilObjectTypes;
+    auto &supplyCompNames = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).plantCoilObjectNames;
+    auto &supplyCompTypes = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).plantCoilObjectTypes;
+    for (size_t i = 0; i < demandCompNames.size(); ++i) {
+        if (demandCompNames[i] == this->Name && demandCompTypes[i] == this->DemandSideLoop.comp->Type) {
+            demandArrayIndex = i;
+            break;
+        }
+    }
+    for (size_t i = 0; i < supplyCompNames.size(); ++i) {
+        if (supplyCompNames[i] == this->Name && supplyCompTypes[i] == this->SupplySideLoop.comp->Type) {
+            supplyArrayIndex = i;
+            break;
+        }
+    }
+    size_t demandCompSize = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).compDesWaterFlowRate.size();
+    auto &demandCoilData = state.dataPlnt->PlantLoop(this->DemandSideLoop.loopNum).compDesWaterFlowRate;
+    size_t supplyCompSize = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate.size();
+    auto &supplyCoilData = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate;
+    std::vector<Real64> supplyFlowData;
+    supplyFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
+    for (double &i : supplyFlowData) {
+        i = 0.0;
+    }
+    if (supplyCompSize > 0) {
+        for (size_t comp = 0; comp < supplyCoilData.size(); ++comp) {
+            if (static_cast<int>(comp) == supplyArrayIndex) {
+                continue;
+            }
+            for (size_t ts = 0; ts < supplyCoilData[comp].tsDesWaterFlowRate.size(); ++ts) {
+                supplyFlowData[ts] += supplyCoilData[comp].tsDesWaterFlowRate[ts];
+            }
+            supplyFlowData[0] = -1;
+        }
+        if (demandArrayIndex == -1) {
+            demandCompNames.emplace_back(this->Name);
+            demandCompTypes.emplace_back(this->SupplySideLoop.comp->Type);
+            size_t arrayIndex = demandCoilData.size() + 1;
+            demandCoilData.resize(arrayIndex);
+            demandCoilData[arrayIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
+            demandCoilData[arrayIndex - 1].tsDesWaterFlowRate = supplyFlowData;
+        } else {
+            demandCoilData[demandArrayIndex].tsDesWaterFlowRate = supplyFlowData;
+        }
+    }
+    if (hasSupplySideTES(state)) {
+        // if the supply side of the HX contains a TES system then copy demand side coil data to supply side so TES can size on the whole load
+        std::vector<Real64> demandFlowData;
+        demandFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
+        for (double &i : demandFlowData) {
+            i = 0.0;
+        }
+        if (demandCompSize > 0) {
+            for (size_t comp = 0; comp < demandCoilData.size(); ++comp) {
+                if (static_cast<int>(comp) == demandArrayIndex) {
+                    continue;
+                }
+                for (size_t ts = 0; ts < demandCoilData.size(); ++ts) {
+                    demandFlowData[ts] += demandCoilData[comp].tsDesWaterFlowRate[ts];
+                }
+                demandFlowData[0] = -1;
+            }
+        }
+        if (demandCompSize > 0) {
+            if (supplyArrayIndex == -1) {
+                supplyCompNames.emplace_back(this->Name);
+                supplyCompTypes.emplace_back(this->SupplySideLoop.comp->Type);
+                size_t arrayIndex = supplyCoilData.size() + 1;
+                supplyCoilData.resize(arrayIndex);
+                supplyCoilData[arrayIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
+                supplyCoilData[arrayIndex - 1].tsDesWaterFlowRate = demandFlowData;
+            } else {
+                supplyCoilData[demandArrayIndex].tsDesWaterFlowRate = demandFlowData;
+            }
+        }
+    }
+}
+
+bool HeatExchangerStruct::hasSupplySideTES(EnergyPlusData &state)
+{
+    for (auto const &loopSide : state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).LoopSide) {
+        for (auto const &branch : loopSide.Branch) {
+            for (auto const &comp : branch.Comp) {
+                if (comp.Type == DataPlant::PlantEquipmentType::TS_IceDetailed || comp.Type == DataPlant::PlantEquipmentType::TS_IceSimple) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace EnergyPlus::PlantHeatExchangerFluidToFluid

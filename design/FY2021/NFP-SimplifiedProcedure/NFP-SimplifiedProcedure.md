@@ -29,7 +29,7 @@ As shown in the previous section, minimum terminal primary air flow can (be requ
 2. Add a new `Zone Minimum Air Flow Input Method` for all applicable `AirTerminal:*` objects
 
 ### Occupant diversity
-The occupant diversity, `D`, is currently calculated by EnergyPlus using user-input design levels and schedules. While this might be convenient for users, extra care should be put into developing schedules so `D`, as calculated by EnergyPlus, match a potentially expected value. Additionally, performance might be somewhat impacted by the current implementation of that routine (see [issue 6487](https://github.com/NREL/EnergyPlus/issues/6487)). We propose to make `D` a user-input in the `Sizing:System` object. If not specified by the user the current routine would be used.
+The occupant diversity, `D`, is currently calculated by EnergyPlus using user-input design levels and schedules. While this might be convenient for users, extra care should be put into developing schedules so `D`, as calculated by EnergyPlus, match a potentially expected value. Additionally, performance might be somewhat impacted by the current implementation of that routine (see [issue 6487](https://github.com/NatLabRockies/EnergyPlus/issues/6487)). We propose to make `D` a user-input in the `Sizing:System` object. If not specified by the user the current routine would be used.
 
 Letting EnergyPlus calculate `D` can potentially lead to some issues. For instance, if user-input occupancy schedules are normalized. Below is an example where two cases are compared: one using non-normalized schedules (regular case, actual occupancy fractions) and a case using normalized schedules. In both cases the actual modeled occupancy is the same. Each case leads to a different value of `D`.
 

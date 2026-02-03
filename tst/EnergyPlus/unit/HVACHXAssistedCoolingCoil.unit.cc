@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -231,6 +231,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Main Cooling Coil 1,    !- Name",
+        "    ,                       !- Availability Schedule Name",
         "    Heat Recovery Supply Outlet,  !- Indoor Air Inlet Node Name",
         "    Heat Recovery Exhuast Inlet Node,  !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",
@@ -468,7 +469,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     OutletNode = thisSys->AirOutNode;
     ControlZoneNum = thisSys->NodeNumOfControlledZone;
 
-    // set up unitary system inlet condtions
+    // set up unitary system inlet conditions
     state->dataLoopNodes->Node(InletNode).Temp = 26.666667;             // AHRI condition 80F dry-bulb temp
     state->dataLoopNodes->Node(InletNode).HumRat = 0.01117049542334198; // AHRI condition at 80F DB/67F WB lb/lb or kg/kg
     state->dataLoopNodes->Node(InletNode).Enthalpy =

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -194,7 +194,7 @@ namespace DataPhotovoltaics {
         //  coefficient  (V/°C)
         Real64 BVmp0; // Temperature coefficient for module maximum-power-voltage at reference conditions
         //   (V/°C)
-        Real64 mBVmp; // Cofficient for irradiance dependence of maximum-power-voltage-temperature
+        Real64 mBVmp; // Coefficient for irradiance dependence of maximum-power-voltage-temperature
         //   coefficient (V/°C)
         Real64 DiodeFactor; // Empirically determined 'diode factor' for individual cells (unitless)
         Real64 c_2;         // Empirical coefficients relating Vmp to Ee (unitless)

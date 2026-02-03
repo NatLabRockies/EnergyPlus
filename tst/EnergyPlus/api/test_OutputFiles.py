@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -97,14 +97,13 @@ class TestAPIFlushOutput(unittest.TestCase):
         called
         """
         tempdir = tempfile.mkdtemp()
-        cmd_args = ['-d', tempdir, '-D', idf_path]
+        cmd_args = ["-d", tempdir, "-D", idf_path]
         return_code = self.api.runtime.run_energyplus(self.state, cmd_args)
         self.assertEqual(return_code, 0)
         out_files = gb.glob(os.path.join(tempdir, "*"))
         # We need to find out files, and we expect NONE of them to be empty
         self.assertGreater(len(out_files), 10)
-        empty_files = list(filter(lambda f: os.stat(f).st_size == 0,
-                                  out_files))
+        empty_files = list(filter(lambda f: os.stat(f).st_size == 0, out_files))
         msg = f"Did not expect empty files, but found {len(empty_files)}:"
         for f in empty_files:
             msg += f"\n * {os.path.relpath(f, tempdir)}"
@@ -112,7 +111,7 @@ class TestAPIFlushOutput(unittest.TestCase):
 
         # Check that the eplusout.err is not truncated, that the last line
         # is what we expect it to be
-        with open(os.path.join(tempdir, 'eplusout.err'), 'r') as f:
+        with open(os.path.join(tempdir, "eplusout.err"), "r") as f:
             lines = f.read().splitlines()
         self.assertTrue(lines, "eplusout.err is empty!")
         self.assertIn("EnergyPlus Completed Successfully", lines[-1])
@@ -124,7 +123,7 @@ class TestAPIFlushOutput(unittest.TestCase):
         """
 
         idf_content = """
-  Version,9.0;
+  Version," + DataStringGlobals::MatchVersion + ";"
 
   Timestep,4;
 
@@ -151,19 +150,19 @@ class TestAPIFlushOutput(unittest.TestCase):
         """
 
         tempdir = tempfile.mkdtemp()
-        idf_file = os.path.join(tempdir, 'wrong_version.idf')
+        idf_file = os.path.join(tempdir, "wrong_version.idf")
 
-        with open(idf_file, 'w') as f:
+        with open(idf_file, "w") as f:
             f.write(idf_content)
 
-        cmd_args = ['-d', tempdir, '-D', idf_file]
+        cmd_args = ["-d", tempdir, "-D", idf_file]
         return_code = self.api.runtime.run_energyplus(self.state, cmd_args)
         self.assertEqual(return_code, 1)
-        with open(os.path.join(tempdir, 'eplusout.err'), 'r') as f:
+        with open(os.path.join(tempdir, "eplusout.err"), "r") as f:
             lines = f.read().splitlines()
         self.assertTrue(lines, "eplusout.err is empty!")
         self.assertIn("EnergyPlus Terminated", lines[-1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

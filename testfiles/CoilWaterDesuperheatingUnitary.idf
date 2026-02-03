@@ -103,7 +103,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     NONE,                    !- Name
@@ -976,12 +976,12 @@
 
   People,
     West Zone People,        !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     3.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -998,12 +998,12 @@
 
   People,
     EAST ZONE,               !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     3.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -1020,12 +1020,12 @@
 
   People,
     NORTH ZONE,              !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     4.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -1042,11 +1042,11 @@
 
   Lights,
     EAST ZONE Lights 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1056,11 +1056,11 @@
 
   Lights,
     NORTH ZONE Lights 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1070,11 +1070,11 @@
 
   ElectricEquipment,
     West Zone ElecEq 1,      !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1082,11 +1082,11 @@
 
   ElectricEquipment,
     EAST ZONE ElecEq 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1094,11 +1094,11 @@
 
   ElectricEquipment,
     NORTH ZONE ElecEq 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1284,42 +1284,42 @@
   AirLoopHVAC:UnitarySystem,
     GasHeat DXAC Furnace 1,  !- Name
     Load,                    !- Control Type
-    East Zone,               !- Controlling Zone
+    East Zone,               !- Controlling Zone or Thermostat Location
     None,                    !- Dehumidification Control Type
     FanAndCoilAvailSched,    !- Availability Schedule Name
-    Air Loop Inlet Node,     !- Inlet Node Name
-    Air Loop Outlet Node,    !- Outlet Node Name
+    Air Loop Inlet Node,     !- Air Inlet Node Name
+    Air Loop Outlet Node,    !- Air Outlet Node Name
     Fan:OnOff,               !- Supply Fan Object Type
     Supply Fan 1,            !- Supply Fan Name
     BlowThrough,             !- Fan Placement
     CyclingFanSchedule,      !- Supply Air Fan Operating Mode Schedule Name
     Coil:Heating:Fuel,       !- Heating Coil Object Type
     Furnace Heating Coil 1,  !- Heating Coil Name
-    ,                        !- Heating Coil Size Ratio
+    ,                        !- DX Heating Coil Sizing Ratio
     Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type
     Furnace ACDXCoil 1,      !- Cooling Coil Name
-    ,
-    ,                        !- Min
+    ,                        !- Use DOAS DX Cooling Coil
+    ,                        !- Minimum Supply Air Temperature {C}
     ,                        !- Latent Load Control
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
     SupplyAirFlowRate,       !- Cooling Supply Air Flow Rate Method
     1.3,                     !- Cooling Supply Air Flow Rate {m3/s}
-    ,                        !- Cooling Supply Air Flow Rate Per Floor Area
+    ,                        !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
     ,                        !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate
-    ,                        !- Cooling Supply Air Flow Rate Per Unit of Capacity
+    ,                        !- Cooling Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
     SupplyAirFlowRate,       !- Heating Supply Air Flow Rate Method
     1.3,                     !- Heating Supply Air Flow Rate {m3/s}
-    ,                        !- Heating Supply Air Flow Rate Per Floor Area
-    ,                        !- Heating Fraction of Autosized Cooling Supply Air Flow Rate
-    ,                        !- Heating Supply Air Flow Rate Per Unit of Capacity
+    ,                        !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
+    ,                        !- Heating Fraction of Autosized Heating Supply Air Flow Rate
+    ,                        !- Heating Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
     SupplyAirFlowRate,       !- No Load Supply Air Flow Rate Method
     0.0,                     !- No Load Supply Air Flow Rate {m3/s}
-    ,                        !- No Load Supply Air Flow Rate Per Floor Area
+    ,                        !- No Load Supply Air Flow Rate Per Floor Area {m3/s-m2}
     ,                        !- No Load Fraction of Autosized Cooling Supply Air Flow Rate
     ,                        !- No Load Fraction of Autosized Heating Supply Air Flow Rate
-    ,                        !- No Load Supply Air Flow Rate Per Unit of Cooling Capacity
-    ,                        !- No Load Supply Air Flow Rate Per Unit of Heating Capacity
+    ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation {m3/s-W}
+    ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation {m3/s-W}
     ,                        !- No Load Supply Air Flow Rate Control Set To Low Speed
     80;                      !- Maximum Supply Air Temperature {C}
 
@@ -1474,15 +1474,18 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.3,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:WaterHeating:Desuperheater,
     WaterHeatingCoil,        !- Name

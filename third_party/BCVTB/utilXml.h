@@ -111,54 +111,52 @@ derivative works thereof, in binary and source code form.
 //#include <errno.h>
 
 #if defined(__amigaos__) && defined(__USE_INLINE__)
-#include <proto/expat.h>
+#  include <proto/expat.h>
 #endif
 
 #ifdef XML_LARGE_SIZE
-#if defined(XML_USE_MSC_EXTENSIONS) && _MSC_VER < 1400
-#define XML_FMT_INT_MOD "I64"
+#  if defined(XML_USE_MSC_EXTENSIONS) && _MSC_VER < 1400
+#    define XML_FMT_INT_MOD "I64"
+#  else
+#    define XML_FMT_INT_MOD "ll"
+#  endif
 #else
-#define XML_FMT_INT_MOD "ll"
-#endif
-#else
-#define XML_FMT_INT_MOD "l"
+#  define XML_FMT_INT_MOD "l"
 #endif
 
-
-#define BUFFSIZE        8192
+#define BUFFSIZE 8192
 
 ////////////////////////////////////////////////////////////////
 ///\struct A simple stack structure to keep track of the parent elements
 ////////////////////////////////////////////////////////////////
-typedef struct Stack2 {
- char ** head;
- int top;
- int cur;
+typedef struct Stack2
+{
+  char** head;
+  int top;
+  int cur;
 } Stack2;
 
+extern Stack2 expStk;  ///< Variables for getxmlvalue function
 
-extern Stack2 expStk; ///< Variables for getxmlvalue function
-
-extern char * att; ///< Local global variable for function \c getxmlvalue
-extern char * vals;  ///< Local global variable for function \c getxmlvalue
-extern size_t * numVals; ///< Local global variable for function \c getxmlvalue
-extern int PARSEVALUE; ///< flag for parsing xml values 1 if parse, 0 if not parse
-extern int ERROR_STATUS; ///< flag for xml element handler error status settings
+extern char* att;         ///< Local global variable for function \c getxmlvalue
+extern char* vals;        ///< Local global variable for function \c getxmlvalue
+extern size_t* numVals;   ///< Local global variable for function \c getxmlvalue
+extern int PARSEVALUE;    ///< flag for parsing xml values 1 if parse, 0 if not parse
+extern int ERROR_STATUS;  ///< flag for xml element handler error status settings
 
 ////////////////////////////////////////////////////////////////
 /// local global variables for function \c getepvariables
 ////////////////////////////////////////////////////////////////
-extern char *  outputVarsName; ///< the string pointer to the parsed output variable names
-extern char *  outputVarsType; ///< the string pointer to the parsed output variable types
-extern int *   numOutputVars;  ///< the integer pointer to the number of output variables
-extern char *  inputVars;      ///< the string pointer to the input variables
-extern int *   numInputVars;   ///< the integer pointer to the number of input variables
-extern int *   inputVarsType;  ///< the integer array to store the types of each input variables
-extern char ** inputKeys;      ///< the string array to store the types of input variable types
-extern int     numInputKeys;   ///< the number of input variable types
-extern int     source;         ///< flag for function /c getepvariables 0=EnergyPlus, 1=Ptolemy
-extern size_t const * strLen;     ///< the length of string parsed to this function
-
+extern char* outputVarsName;  ///< the string pointer to the parsed output variable names
+extern char* outputVarsType;  ///< the string pointer to the parsed output variable types
+extern int* numOutputVars;    ///< the integer pointer to the number of output variables
+extern char* inputVars;       ///< the string pointer to the input variables
+extern int* numInputVars;     ///< the integer pointer to the number of input variables
+extern int* inputVarsType;    ///< the integer array to store the types of each input variables
+extern char** inputKeys;      ///< the string array to store the types of input variable types
+extern int numInputKeys;      ///< the number of input variable types
+extern int source;            ///< flag for function /c getepvariables 0=EnergyPlus, 1=Ptolemy
+extern size_t const* strLen;  ///< the length of string parsed to this function
 
 ////////////////////////////////////////////////////////////////
 ///  This method frees the local memory allocated
@@ -166,9 +164,7 @@ extern size_t const * strLen;     ///< the length of string parsed to this funct
 ///\param strArr 1D string array to be freed
 ///\param n the size of the 1D string array
 ////////////////////////////////////////////////////////////////
-void
-freeResource(char ** strArr, int n);
-
+void freeResource(char** strArr, int n);
 
 ////////////////////////////////////////////////////////////////
 ///  This method will return the input and output variable for EnergyPlus
@@ -186,19 +182,9 @@ freeResource(char ** strArr, int n);
 ///\param myStrLen The length of the string that is passed to this function.
 ///
 ////////////////////////////////////////////////////////////////
-int
-getepvariables(
- char const *	const  fileName,
- char *	const myOutputVarsName,
- char *	const myOutputVarsType,
- int *	const myNumOutputVars,
- char const *	const myInputKeys,
- int const *	const myNumInputKeys,
- char *	const myInputVars,
- int *	const myNumInputVars,
- int *	const myInputVarsType,
- size_t const *	const myStrLen
-);
+int getepvariables(char const* const fileName, char* const myOutputVarsName, char* const myOutputVarsType, int* const myNumOutputVars,
+                   char const* const myInputKeys, int const* const myNumInputKeys, char* const myInputVars, int* const myNumInputVars,
+                   int* const myInputVarsType, size_t const* const myStrLen);
 
 ////////////////////////////////////////////////////////////////
 ///  This method will return the input and output variable for EnergyPlus
@@ -217,33 +203,21 @@ getepvariables(
 ///\param myStrLen The length of the string that is passed to this function.
 ///
 ////////////////////////////////////////////////////////////////
-int
-getepvariablesFMU(
- char const *	const fileName,
- char *	const myOutputVarsName,
- char *	const myOutputVarsType,
- int *	const myNumOutputVars,
- char const *	const myInputKeys,
- int const *	const myNumInputKeys,
- char *	const myInputVars,
- int *	const myNumInputVars,
- int *	const myInputVarsType,
- size_t const *	const myStrLen
-);
+int getepvariablesFMU(char const* const fileName, char* const myOutputVarsName, char* const myOutputVarsType, int* const myNumOutputVars,
+                      char const* const myInputKeys, int const* const myNumInputKeys, char* const myInputVars, int* const myNumInputVars,
+                      int* const myInputVarsType, size_t const* const myStrLen);
 
 ////////////////////////////////////////////////////////////////
 /// Stack operation, this function will pop one element from stack
 /// and will free the resource unused
 ////////////////////////////////////////////////////////////////
-int
-stackPopBCVTB();
+int stackPopBCVTB();
 
 ////////////////////////////////////////////////////////////////
 /// Stack operation, will push one element into the stack
 /// and will allocate memory for the new element, hence is deep copy
 ////////////////////////////////////////////////////////////////
-int
-stackPushBCVTB(char const * str);
+int stackPushBCVTB(char const* str);
 
 ////////////////////////////////////////////////////////////////
 /// This is a general function that returns the value according to \c exp
@@ -262,14 +236,7 @@ stackPushBCVTB(char const * str);
 ///\param mynumVals number of values found.
 ///\param myStrLen length of the string that is passed.
 ////////////////////////////////////////////////////////////////
-int
-getxmlvalues(
- char const * const fileName,
- char const * const exp,
- char * const myVals,
- size_t * const myNumVals,
- size_t const myStrLen
-);
+int getxmlvalues(char const* const fileName, char const* const exp, char* const myVals, size_t* const myNumVals, size_t const myStrLen);
 
 ////////////////////////////////////////////////////////////////
 /// This method returns the number of xmlvalues given xPath expressions.
@@ -286,11 +253,7 @@ getxmlvalues(
 ///\param fileName the name of the xml file
 ///\param exp the xPath expression
 ////////////////////////////////////////////////////////////////
-size_t
-getnumberofxmlvalues(
- char const * const fileName,
- char const * const exp
-);
+size_t getnumberofxmlvalues(char const* const fileName, char const* const exp);
 
 ////////////////////////////////////////////////////////////////
 /// This method returns the xmlvalues parsed given xPath expressions.
@@ -318,15 +281,7 @@ getnumberofxmlvalues(
 ///\param str string to store the found values, semicolon separated.
 ///\param strLen the string length allocated
 ////////////////////////////////////////////////////////////////
-int
-getxmlvaluesf(
- char const * const fileName,
- char const * const exp,
- char const * const atrName,
- size_t * const nVal,
- char * str,
- size_t * const strLen
-);
+int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const strLen);
 
 ////////////////////////////////////////////////////////////////
 /// This method returns one xmlvalue for a given xPath expressions.
@@ -349,14 +304,7 @@ getxmlvaluesf(
 ///\param nVals number of values found.
 ///\param strLen the string length allocated.
 ////////////////////////////////////////////////////////////////
-int
-getxmlvalue(
- char const * const fileName,
- char const * const exp,
- char * const str,
- size_t * const nVals,
- int const strLen
-);
+int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const strLen);
 
 ////////////////////////////////////////////////////////////////
 /// This method checks the validity of the variables
@@ -368,7 +316,6 @@ getxmlvalue(
 ///
 ///
 ////////////////////////////////////////////////////////////////
-int
-check_variable_cfg_Validate(char const * const fileName);
+int check_variable_cfg_Validate(char const* const fileName);
 
-#endif // utilXml_h_INCLUDED
+#endif  // utilXml_h_INCLUDED

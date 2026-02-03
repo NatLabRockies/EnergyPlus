@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -438,7 +438,7 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                             *thisState, fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                         ShowContinueError(*thisState,
                                           fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller "
-                                                      "should take note that there is a risk of overwritting.",
+                                                      "should take note that there is a risk of overwriting.",
                                                       handle));
                         foundActuator = true;
                         break;
@@ -450,7 +450,7 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                                       fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                     ShowContinueError(*thisState,
                                       fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller should "
-                                                  "take note that there is a risk of overwritting.",
+                                                  "take note that there is a risk of overwriting.",
                                                   handle));
                 }
             }
@@ -487,9 +487,9 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
-        if (theActuator.RealValue) {
+        if (theActuator.RealValue != nullptr) {
             *theActuator.RealValue = value;
-        } else if (theActuator.IntValue) {
+        } else if (theActuator.IntValue != nullptr) {
             *theActuator.IntValue = static_cast<int>(std::lround(value));
         } else {
             // follow protocol from EMS manager, where 1.0 is true, 0.0 is false, and anything else is also false
@@ -516,10 +516,10 @@ Real64 getActuatorValue(EnergyPlusState state, const int handle)
     auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
-        if (theActuator.RealValue) {
+        if (theActuator.RealValue != nullptr) {
             return *theActuator.RealValue;
         }
-        if (theActuator.IntValue) {
+        if (theActuator.IntValue != nullptr) {
             return static_cast<float>(*theActuator.IntValue);
         }
         // follow protocol from EMS manager, where 1.0 is true, 0.0 is false, and anything else is also false

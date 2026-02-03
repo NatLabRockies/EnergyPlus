@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -521,7 +521,7 @@ private: // data
     std::vector<int> wiredMeterPtrs_;                  // array of "pointers" to meters wired to transformer
     std::vector<bool> specialMeter_;                   // indicates whether a meter needs special consideration
     // Electricity:Facility and Electricity:HVAC are two special
-    // meters because tranformer loss is part of them
+    // meters because transformer loss is part of them
     // calculated and from elsewhere vars
     Real64 ratedNL_;         // rated no load losses, user input or calculated [W]
     Real64 ratedLL_;         // rated load losses, user input or calculated [W]

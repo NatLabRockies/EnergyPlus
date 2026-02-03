@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -325,47 +325,44 @@ namespace SolarCollectors {
                                            state.dataIPShortCut->cAlphaArgs(3)));
                     ErrorsFound = true;
                     continue; // avoid hard crash
-                } else {
-
-                    if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
-                        ShowWarningError(state,
-                                         format("{} = {}:  Surface {} is not exposed to exterior radiation.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaArgs(1),
-                                                state.dataIPShortCut->cAlphaArgs(3)));
-                    }
-
-                    // check surface orientation, warn if upside down
-                    if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
-                        ShowWarningError(state,
-                                         format("Suspected input problem with {} = {}",
-                                                state.dataIPShortCut->cAlphaFieldNames(3),
-                                                state.dataIPShortCut->cAlphaArgs(3)));
-                        ShowContinueError(
-                            state, format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Surface used for solar collector faces down");
-                        ShowContinueError(
-                            state,
-                            format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(SurfNum).Tilt));
-                    }
-
-                    // Check to make sure other solar collectors are not using the same surface
-                    // NOTE:  Must search over all solar collector types
-                    for (int CollectorNum2 = 1; CollectorNum2 <= NumFlatPlateUnits; ++CollectorNum2) {
-                        if (state.dataSolarCollectors->Collector(CollectorNum2).Surface == SurfNum) {
-                            ShowSevereError(state,
-                                            format("{} = {}:  Surface {} is referenced by more than one {}",
-                                                   CurrentModuleObject,
-                                                   state.dataIPShortCut->cAlphaArgs(1),
-                                                   state.dataIPShortCut->cAlphaArgs(3),
-                                                   CurrentModuleObject));
-                            ErrorsFound = true;
-                            break;
-                        }
-                    } // CollectorNum2
-
-                    state.dataSolarCollectors->Collector(CollectorNum).Surface = SurfNum;
                 }
+                if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
+                    ShowWarningError(state,
+                                     format("{} = {}:  Surface {} is not exposed to exterior radiation.",
+                                            CurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            state.dataIPShortCut->cAlphaArgs(3)));
+                }
+
+                // check surface orientation, warn if upside down
+                if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
+                    ShowWarningError(state,
+                                     format("Suspected input problem with {} = {}",
+                                            state.dataIPShortCut->cAlphaFieldNames(3),
+                                            state.dataIPShortCut->cAlphaArgs(3)));
+                    ShowContinueError(state,
+                                      format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowContinueError(state, "Surface used for solar collector faces down");
+                    ShowContinueError(
+                        state, format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(SurfNum).Tilt));
+                }
+
+                // Check to make sure other solar collectors are not using the same surface
+                // NOTE:  Must search over all solar collector types
+                for (int CollectorNum2 = 1; CollectorNum2 <= NumFlatPlateUnits; ++CollectorNum2) {
+                    if (state.dataSolarCollectors->Collector(CollectorNum2).Surface == SurfNum) {
+                        ShowSevereError(state,
+                                        format("{} = {}:  Surface {} is referenced by more than one {}",
+                                               CurrentModuleObject,
+                                               state.dataIPShortCut->cAlphaArgs(1),
+                                               state.dataIPShortCut->cAlphaArgs(3),
+                                               CurrentModuleObject));
+                        ErrorsFound = true;
+                        break;
+                    }
+                } // CollectorNum2
+
+                state.dataSolarCollectors->Collector(CollectorNum).Surface = SurfNum;
 
                 // Give warning if surface area and gross area do not match within tolerance
                 if (SurfNum > 0 && ParametersNum > 0 && state.dataSolarCollectors->Parameters(ParametersNum).Area > 0.0 &&
@@ -599,47 +596,44 @@ namespace SolarCollectors {
                                            state.dataIPShortCut->cAlphaArgs(3)));
                     ErrorsFound = true;
                     continue; // avoid hard crash
-                } else {
-
-                    if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
-                        ShowWarningError(state,
-                                         format("{} = {}:  Surface {} is not exposed to exterior radiation.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaArgs(1),
-                                                state.dataIPShortCut->cAlphaArgs(3)));
-                    }
-
-                    // check surface orientation, warn if upside down
-                    if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
-                        ShowWarningError(state,
-                                         format("Suspected input problem with {} = {}",
-                                                state.dataIPShortCut->cAlphaFieldNames(3),
-                                                state.dataIPShortCut->cAlphaArgs(3)));
-                        ShowContinueError(
-                            state, format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Surface used for solar collector faces down");
-                        ShowContinueError(
-                            state,
-                            format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(SurfNum).Tilt));
-                    }
-
-                    // Check to make sure other solar collectors are not using the same surface
-                    // NOTE:  Must search over all solar collector types
-                    for (int CollectorNum2 = 1; CollectorNum2 <= state.dataSolarCollectors->NumOfCollectors; ++CollectorNum2) {
-                        if (state.dataSolarCollectors->Collector(CollectorNum2).Surface == SurfNum) {
-                            ShowSevereError(state,
-                                            format("{} = {}:  Surface {} is referenced by more than one {}",
-                                                   CurrentModuleObject,
-                                                   state.dataIPShortCut->cAlphaArgs(1),
-                                                   state.dataIPShortCut->cAlphaArgs(3),
-                                                   CurrentModuleObject));
-                            ErrorsFound = true;
-                            break;
-                        }
-                    } // ICSNum2
-
-                    state.dataSolarCollectors->Collector(CollectorNum).Surface = SurfNum;
                 }
+                if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
+                    ShowWarningError(state,
+                                     format("{} = {}:  Surface {} is not exposed to exterior radiation.",
+                                            CurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            state.dataIPShortCut->cAlphaArgs(3)));
+                }
+
+                // check surface orientation, warn if upside down
+                if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
+                    ShowWarningError(state,
+                                     format("Suspected input problem with {} = {}",
+                                            state.dataIPShortCut->cAlphaFieldNames(3),
+                                            state.dataIPShortCut->cAlphaArgs(3)));
+                    ShowContinueError(state,
+                                      format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowContinueError(state, "Surface used for solar collector faces down");
+                    ShowContinueError(
+                        state, format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(SurfNum).Tilt));
+                }
+
+                // Check to make sure other solar collectors are not using the same surface
+                // NOTE:  Must search over all solar collector types
+                for (int CollectorNum2 = 1; CollectorNum2 <= state.dataSolarCollectors->NumOfCollectors; ++CollectorNum2) {
+                    if (state.dataSolarCollectors->Collector(CollectorNum2).Surface == SurfNum) {
+                        ShowSevereError(state,
+                                        format("{} = {}:  Surface {} is referenced by more than one {}",
+                                               CurrentModuleObject,
+                                               state.dataIPShortCut->cAlphaArgs(1),
+                                               state.dataIPShortCut->cAlphaArgs(3),
+                                               CurrentModuleObject));
+                        ErrorsFound = true;
+                        break;
+                    }
+                } // ICSNum2
+
+                state.dataSolarCollectors->Collector(CollectorNum).Surface = SurfNum;
 
                 // Give warning if surface area and gross area do not match within tolerance
                 if (SurfNum > 0 && ParametersNum > 0 && state.dataSolarCollectors->Parameters(ParametersNum).Area > 0.0 &&
@@ -1285,9 +1279,8 @@ namespace SolarCollectors {
                                                       this->Name),
                                                this->IterErrIndex);
                 break;
-            } else {
-                ++Iteration;
             }
+            ++Iteration;
 
         } // Check for temperature convergence
 

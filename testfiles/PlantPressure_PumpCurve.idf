@@ -16,7 +16,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with DistrictHeating and Pressure drop components and a pump pressure curve.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -181,7 +181,7 @@
 
   PlantEquipmentList,
     Heating Plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
   BranchList,
@@ -243,7 +243,7 @@
   Branch,
     Heating Branch,          !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Supply Heating Inlet Node,  !- Component 1 Inlet Node Name
     Supply Heating Outlet Node;  !- Component 1 Outlet Node Name

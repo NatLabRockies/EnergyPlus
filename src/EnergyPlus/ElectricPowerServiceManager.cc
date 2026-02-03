@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -169,7 +169,7 @@ void ElectricPowerServiceManager::manageElectricPowerService(
     updateWholeBuildingRecords(state);
     // The transformer call should be put outside of the "Load Center" loop because
     // 1) A transformer may be for utility, not for load center
-    // 2) A tansformer may be shared by multiple load centers
+    // 2) A transformer may be shared by multiple load centers
     if (facilityPowerInTransformerPresent_) {
         facilityPowerInTransformerObj_->manageTransformers(state, 0.0);
     }
@@ -209,8 +209,6 @@ void ElectricPowerServiceManager::getPowerManagerInput(EnergyPlusData &state)
 {
     static constexpr std::string_view routineName = "ElectricPowerServiceManager::getPowerManagerInput ";
 
-    auto &s_ipsc = state.dataIPShortCut;
-
     numLoadCenters_ = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ElectricLoadCenter:Distribution");
 
     if (numLoadCenters_ > 0) {
@@ -219,7 +217,7 @@ void ElectricPowerServiceManager::getPowerManagerInput(EnergyPlusData &state)
             elecLoadCenterObjs.emplace_back(new ElectPowerLoadCenter(state, iLoadCenterNum));
         }
     } else {
-        // issue #4639. see if there are any generators, inverters, converters, or storage devcies, that really need a ElectricLoadCenter:Distribution
+        // issue #4639. see if there are any generators, inverters, converters, or storage devices, that really need a ElectricLoadCenter:Distribution
         bool errorsFound(false);
         int numGenLists = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "ElectricLoadCenter:Generators");
         if (numGenLists > 0) {
@@ -272,6 +270,7 @@ void ElectricPowerServiceManager::getPowerManagerInput(EnergyPlusData &state)
         int numNums;   // Number of elements in the numeric array
         int iOStat;    // IO Status when calling get input subroutine
         bool foundInFromGridTransformer = false;
+        auto &s_ipsc = state.dataIPShortCut;
 
         s_ipsc->cCurrentModuleObject = "ElectricLoadCenter:Transformer";
         for (int loopTransformer = 1; loopTransformer <= numTransformers_; ++loopTransformer) {
@@ -472,8 +471,8 @@ void ElectricPowerServiceManager::reinitAtBeginEnvironment()
 
 void ElectricPowerServiceManager::verifyCustomMetersElecPowerMgr(EnergyPlusData &state)
 {
-    for (std::size_t loop = 0; loop < elecLoadCenterObjs.size(); ++loop) {
-        elecLoadCenterObjs[loop]->setupLoadCenterMeterIndices(state);
+    for (const auto &elecLoadCenterObj : elecLoadCenterObjs) {
+        elecLoadCenterObj->setupLoadCenterMeterIndices(state);
     }
 }
 
@@ -683,7 +682,7 @@ void ElectricPowerServiceManager::checkLoadCenters(EnergyPlusData &state)
         }
     }
 
-    if (errorsFound) { // throw fatal, these errors could fatal out in internal gains with missleading data
+    if (errorsFound) { // throw fatal, these errors could fatal out in internal gains with misleading data
         ShowFatalError(state, "ElectricPowerServiceManager::checkLoadCenters, preceding errors terminate program.");
     }
 }
@@ -766,7 +765,7 @@ ElectPowerLoadCenter::ElectPowerLoadCenter(EnergyPlusData &state, int const obje
         }
 
         demandMeterName_ = Util::makeUPPER(s_ipsc->cAlphaArgs(5));
-        // meters may not be "loaded" yet, defered check to later subroutine
+        // meters may not be "loaded" yet, deferred check to later subroutine
 
         if (s_ipsc->cAlphaArgs(6).empty()) {
             bussType = ElectricBussType::ACBuss;
@@ -1131,7 +1130,7 @@ void ElectPowerLoadCenter::dispatchGenerators(EnergyPlusData &state,
 )
 {
 
-    // This funciton checks generator operation scheme and assigns requests to power generators
+    // This function checks generator operation scheme and assigns requests to power generators
     // the generators are called to simulate from here and passed some control data
     // the actual production from each generator is recorded and accounting tracks how much of the load is met
 
@@ -1472,7 +1471,7 @@ void ElectPowerLoadCenter::dispatchGenerators(EnergyPlusData &state,
     }
     case GeneratorOpScheme::ThermalFollowLimitElectrical: {
         //  Turn a thermal load into an electrical load for cogenerators controlled to follow heat loads.
-        //  Add intitialization of RemainingThermalLoad as in the ThermalFollow operating scheme above.
+        //  Add initialization of RemainingThermalLoad as in the ThermalFollow operating scheme above.
         Real64 remainingThermalLoad = calcLoadCenterThermalLoad(state);
         // Total current electrical demand for the building is a secondary limit.
         remainingLoad = remainingWholePowerDemand;
@@ -1559,7 +1558,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
 )
 {
 
-    // 1. resolve generator power rate into storage operation control volume, by buss type
+    // 1. resolve generator power rate into storage operation control volume, by bus type
     switch (bussType) {
     case ElectricBussType::Invalid:
     case ElectricBussType::ACBuss:
@@ -1582,7 +1581,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
     }
     default:
         assert(false);
-    } // end switch buss type
+    } // end switch bus type
 
     // 2.  determine subpanel feed in and draw requests based on storage operation control scheme
     Real64 subpanelFeedInRequest = 0.0;
@@ -1673,7 +1672,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
     }
     default:
         assert(false);
-    } // end switch buss type
+    } // end switch bus type
 
     switch (storageScheme_) {
     case StorageOpScheme::Invalid: {
@@ -2072,8 +2071,6 @@ GeneratorController::GeneratorController(EnergyPlusData &state,
 
     static constexpr std::string_view routineName = "GeneratorController constructor ";
 
-    auto &s_ipsc = state.dataIPShortCut;
-
     ErrorObjectHeader eoh{routineName, objectType, objectName};
 
     name = objectName;
@@ -2131,6 +2128,7 @@ GeneratorController::GeneratorController(EnergyPlusData &state,
         break;
     }
     default: {
+        auto &s_ipsc = state.dataIPShortCut;
         ShowSevereError(state, format("{}{} invalid entry.", routineName, s_ipsc->cCurrentModuleObject));
         ShowContinueError(state, format("Invalid {} associated with generator = {}", objectType, objectName));
         break;
@@ -2830,8 +2828,6 @@ ACtoDCConverter::ACtoDCConverter(EnergyPlusData &state, std::string const &objec
 
     static constexpr std::string_view routineName = "ACtoDCConverter constructor ";
 
-    auto &s_ipsc = state.dataIPShortCut;
-
     bool errorsFound = false;
     // if/when add object class name to input object this can be simplified. for now search all possible types
 
@@ -2841,6 +2837,7 @@ ACtoDCConverter::ACtoDCConverter(EnergyPlusData &state, std::string const &objec
         int NumAlphas; // Number of elements in the alpha array
         int NumNums;   // Number of elements in the numeric array
         int IOStat;    // IO Status when calling get input subroutine
+        auto &s_ipsc = state.dataIPShortCut;
         s_ipsc->cCurrentModuleObject = "ElectricLoadCenter:Storage:Converter";
 
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
@@ -3574,20 +3571,18 @@ Real64 checkUserEfficiencyInput(EnergyPlusData &state, Real64 userInputValue, bo
             ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the charge efficiency.");
             errorsFound = true;
             return minChargeEfficiency;
-        } else {
-            return userInputValue;
         }
-    } else { // discharging
-        if (userInputValue < minDischargeEfficiency) {
-            ShowSevereError(
-                state, format("ElectricStorage discharge efficiency was too low.  This occurred for electric storage unit named {}", deviceName));
-            ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the discharge efficiency.");
-            errorsFound = true;
-            return minDischargeEfficiency;
-        } else {
-            return userInputValue;
-        }
+        return userInputValue;
+
+    } // discharging
+    if (userInputValue < minDischargeEfficiency) {
+        ShowSevereError(state,
+                        format("ElectricStorage discharge efficiency was too low.  This occurred for electric storage unit named {}", deviceName));
+        ShowContinueError(state, "Please check your input value  for this electric storage unit and fix the discharge efficiency.");
+        errorsFound = true;
+        return minDischargeEfficiency;
     }
+    return userInputValue;
 }
 
 void checkChargeDischargeVoltageCurves(
@@ -3745,11 +3740,11 @@ void ElectricStorage::timeCheckAndUpdate(EnergyPlusData &state)
             Real64 deltaSOC2 = lastTimeStepAvailable_ + lastTimeStepBound_ - lastTwoTimeStepAvailable_ - lastTwoTimeStepBound_;
             deltaSOC2 /= maxAhCapacity_;
 
-            //     DeltaSOC2 = 0 may occur at the begining of each simulation environment.
+            //     DeltaSOC2 = 0 may occur at the beginning of each simulation environment.
             //     DeltaSOC1 * DeltaSOC2 means that the SOC from "LastTimeStep" is a peak or valley. Only peak or valley needs
             //     to call the rain flow algorithm
             if ((deltaSOC2 == 0) || ((deltaSOC1 * deltaSOC2) < 0)) {
-                //     Because we cannot determine whehter "ThisTimeStep" is a peak or valley (next time step is unknown yet), we
+                //     Because we cannot determine whether "ThisTimeStep" is a peak or valley (next time step is unknown yet), we
                 //     use the "LastTimeStep" value for battery life calculation.
                 Real64 input0 = (lastTimeStepAvailable_ + lastTimeStepBound_) / maxAhCapacity_;
                 b10_[count0_] = input0;
@@ -4379,7 +4374,7 @@ void ElectricStorage::rainflow(int const numbin,           // numbin = constant 
     X[count] = input - B1[count - 1]; // calculate the difference between two data (current and previous)
 
     // Get rid of the data if it is not peak nor valley
-    // The value of count means the number of peak or valley points added to the arrary B10/B1, not including the
+    // The value of count means the number of peak or valley points added to the array B10/B1, not including the
     // first point B10(0)/B1(0). Therefore, even if count =2, B1(count-2) is still valid.
     if (count >= 3) {
         //  The following check on peak or valley may be not necessary in most times because the same check is made in the
@@ -4404,7 +4399,7 @@ void ElectricStorage::rainflow(int const numbin,           // numbin = constant 
             X.push_back(0.0);
             --count; // The number of matrix, B1 and X1 decrease.
         }
-    } // Counting cyle end
+    } // Counting cycle end
     //*** Note: The value of "count" changes in the upper "IF LOOP"
 
     if (count >= 4) { // count 1 cycle
@@ -4809,7 +4804,7 @@ void ElectricTransformer::manageTransformers(EnergyPlusData &state, Real64 const
         break;
     }
     case TransformerUse::PowerBetweenLoadCenterAndBldg: {
-        // TODO, new configuration for transformer, really part of the specific load center and connects it to the main building bus
+        // TODO, new configuration for transformer, really part of the specific load center and connects it to the main building buss
         powerIn_ = surplusPowerOutFromLoadCenters;
         elecLoad = surplusPowerOutFromLoadCenters;
         break;

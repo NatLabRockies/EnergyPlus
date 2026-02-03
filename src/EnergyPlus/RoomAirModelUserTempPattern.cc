@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -218,36 +218,36 @@ void CalcTempDistModel(EnergyPlusData &state, int const ZoneNum) // index number
 
         return;
 
-    } else { // choose pattern and call subroutine
+    } // choose pattern and call subroutine
 
-        int CurntPatternKey = patternZoneInfo.patternSched->getCurrentVal();
+    int CurntPatternKey = patternZoneInfo.patternSched->getCurrentVal();
 
-        int CurPatrnID = FindNumberInList(CurntPatternKey, state.dataRoomAir->AirPattern, &TemperaturePattern::PatrnID);
+    int CurPatrnID = FindNumberInList(CurntPatternKey, state.dataRoomAir->AirPattern, &TemperaturePattern::PatrnID);
 
-        if (CurPatrnID == 0) {
-            // throw error here ? way to test schedules before getting to this point?
-            ShowFatalError(state, format("User defined room air pattern index not found: {}", CurntPatternKey));
-            return;
-        }
+    if (CurPatrnID == 0) {
+        // throw error here ? way to test schedules before getting to this point?
+        ShowFatalError(state, format("User defined room air pattern index not found: {}", CurntPatternKey));
+        return;
+    }
 
-        switch (state.dataRoomAir->AirPattern(CurPatrnID).PatternMode) {
-        case UserDefinedPatternType::ConstGradTemp: {
-            FigureConstGradPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::TwoGradInterp: {
-            FigureTwoGradInterpPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::NonDimenHeight: {
-            FigureHeightPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        case UserDefinedPatternType::SurfMapTemp: {
-            FigureSurfMapPattern(state, CurPatrnID, ZoneNum);
-        } break;
-        default: {
-            assert(false);
-        } break;
-        }
-    } // availability control construct
+    switch (state.dataRoomAir->AirPattern(CurPatrnID).PatternMode) {
+    case UserDefinedPatternType::ConstGradTemp: {
+        FigureConstGradPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::TwoGradInterp: {
+        FigureTwoGradInterpPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::NonDimenHeight: {
+        FigureHeightPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    case UserDefinedPatternType::SurfMapTemp: {
+        FigureSurfMapPattern(state, CurPatrnID, ZoneNum);
+    } break;
+    default: {
+        assert(false);
+    } break;
+    }
+    // availability control construct
 }
 
 void FigureSurfMapPattern(EnergyPlusData &state, int const PattrnID, int const ZoneNum)
@@ -479,13 +479,14 @@ Real64 OutdoorDryBulbGrad(Real64 DryBulbTemp, // Zone(ZoneNum).OutDryBulbTemp
 {
     if (DryBulbTemp >= UpperBound) {
         return HiGradient;
-    } else if (DryBulbTemp <= LowerBound) {
-        return LowGradient;
-    } else if ((UpperBound - LowerBound) == 0.0) {
-        return LowGradient;
-    } else {
-        return LowGradient + ((DryBulbTemp - LowerBound) / (UpperBound - LowerBound)) * (HiGradient - LowGradient);
     }
+    if (DryBulbTemp <= LowerBound) {
+        return LowGradient;
+    }
+    if ((UpperBound - LowerBound) == 0.0) {
+        return LowGradient;
+    }
+    return LowGradient + ((DryBulbTemp - LowerBound) / (UpperBound - LowerBound)) * (HiGradient - LowGradient);
 }
 
 void FigureConstGradPattern(EnergyPlusData &state, int const PattrnID, int const ZoneNum)

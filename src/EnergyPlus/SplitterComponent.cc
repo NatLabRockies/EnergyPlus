@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -527,19 +527,15 @@ namespace SplitterComponent {
 
         Real64 constexpr FlowRateToler(0.01); // Tolerance for mass flow rate convergence (in kg/s)
 
-        int InletNode;
-        int OutletNode;
-        int NodeNum;
-
         // Set the inlet node for this splitter to be used throughout subroutine for either case
-        InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
+        int InletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).InletNode;
 
         // On the FirstCall the State properties are passed through and the mass flows are not dealt with
         // except for NO flow conditions
         if (FirstCall) {
             // Set the outlet nodes for properties that just pass through & not used
-            for (NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
-                OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
+            for (int NodeNum = 1; NodeNum <= state.dataSplitterComponent->SplitterCond(SplitterNum).NumOutletNodes; ++NodeNum) {
+                int OutletNode = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletNode(NodeNum);
                 state.dataLoopNodes->Node(OutletNode).Temp = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletTemp(NodeNum);
                 state.dataLoopNodes->Node(OutletNode).HumRat = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletHumRat(NodeNum);
                 state.dataLoopNodes->Node(OutletNode).Enthalpy = state.dataSplitterComponent->SplitterCond(SplitterNum).OutletEnthalpy(NodeNum);
@@ -658,7 +654,6 @@ namespace SplitterComponent {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichSplitter;
-        int i;
 
         // Obtains and Allocates AirLoopHVAC:ZoneSplitter related parameters from input file
         if (state.dataSplitterComponent->GetSplitterInputFlag) { // First time subroutine has been entered
@@ -676,7 +671,7 @@ namespace SplitterComponent {
             SplitterNodeNumbers.allocate(state.dataSplitterComponent->SplitterCond(WhichSplitter).NumOutletNodes + 2);
             SplitterNodeNumbers(1) = state.dataSplitterComponent->SplitterCond(WhichSplitter).InletNode;
             SplitterNodeNumbers(2) = state.dataSplitterComponent->SplitterCond(WhichSplitter).NumOutletNodes;
-            for (i = 1; i <= SplitterNodeNumbers(2); ++i) {
+            for (int i = 1; i <= SplitterNodeNumbers(2); ++i) {
                 SplitterNodeNumbers(i + 2) = state.dataSplitterComponent->SplitterCond(WhichSplitter).OutletNode(i);
             }
         }

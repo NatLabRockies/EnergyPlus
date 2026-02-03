@@ -31,7 +31,7 @@ To enable a high-relative-humidity-cutoff control, a field will be added to the 
 
 ## Testing/Validation/Data Source(s)
 
-This feature will be tested and demonstrated with a test file derived from StripMallZoneEvapCooler.idf. Manual check of the time-step EnergyPlus simulation results will be conducted to confirm the added feature is working correctly. 
+This feature will be tested and demonstrated with a test file derived from StripMallZoneEvapCooler.idf. Manual check of the time-step EnergyPlus simulation results will be conducted to confirm the added feature is working correctly.
 
 ## IDD Object changes
 
@@ -147,7 +147,7 @@ N/A
 ## Proposed Report Variables:
 
 N/A
- 
+
 ## References
 
 [1] https://www.energy.gov/energysaver/evaporative-coolers <br>

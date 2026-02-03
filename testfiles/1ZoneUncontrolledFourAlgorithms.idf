@@ -85,7 +85,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,20;
 
@@ -662,8 +662,8 @@
     AlwaysOn,                !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.0,                     !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -736,7 +736,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -749,7 +749,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant

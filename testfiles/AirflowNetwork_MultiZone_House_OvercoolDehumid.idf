@@ -112,7 +112,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     House with AirflowNetwork simulation,  !- Name
@@ -530,7 +530,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA LIVING ZONE,     !- Name
@@ -1433,7 +1440,7 @@
     Lighting Sch,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     656.3,                   !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1447,7 +1454,7 @@
     Refrigerator Sch,        !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     91.09,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.35,                    !- Fraction Radiant
@@ -1460,7 +1467,7 @@
     Clothes Washer Sch,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     24.74,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.6,                     !- Fraction Radiant
@@ -1473,7 +1480,7 @@
     Clothes Dryer Sch,       !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     185.76,                  !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.05,                    !- Fraction Latent
     0.1125,                  !- Fraction Radiant
@@ -1486,7 +1493,7 @@
     Dish Washer Sch,         !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     62.57,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.20,                    !- Fraction Latent
     0.45,                    !- Fraction Radiant
@@ -1499,7 +1506,7 @@
     Range Sch,               !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     248.1,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1512,7 +1519,7 @@
     Other Plug Loads Sch,    !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     567.31,                  !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.1,                     !- Fraction Latent
     0.315,                   !- Fraction Radiant
@@ -2338,15 +2345,18 @@
     Autosize,                !- Gross Rated Sensible Heat Ratio
     4.49,                    !- Gross Rated Cooling COP {W/W}
     1.00,                    !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Air Loop Inlet Node,     !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     CentralACCoolCapFT,      !- Total Cooling Capacity Function of Temperature Curve Name
     CentralACCoolCapFFF,     !- Total Cooling Capacity Function of Flow Fraction Curve Name
     CentralACEIRFT,          !- Energy Input Ratio Function of Temperature Curve Name
     CentralACEIRFFF,         !- Energy Input Ratio Function of Flow Fraction Curve Name
-    CentralACPLFFPLR;        !- Part Load Fraction Correlation Curve Name
+    CentralACPLFFPLR,        !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Fan:OnOff,
     Supply Fan 1,            !- Name

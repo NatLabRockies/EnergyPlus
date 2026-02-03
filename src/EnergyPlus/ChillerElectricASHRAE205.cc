@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -170,7 +170,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         thisChiller.MinSequenceNumber = *(minmaxSequenceNum.first);
         thisChiller.MaxSequenceNumber = *(minmaxSequenceNum.second);
 
-        if (fields.count("rated_capacity")) {
+        if (fields.count("rated_capacity") != 0u) {
             ShowWarningError(state, format("{}{}=\"{}\"", std::string{RoutineName}, state.dataIPShortCut->cCurrentModuleObject, thisChiller.Name));
             ShowContinueError(state, "Rated Capacity field is not yet supported for ASHRAE 205 representations.");
         }
@@ -330,7 +330,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
                                                                                         DataLoopNode::ConnectionType::OutsideAirReference,
                                                                                         NodeInputManager::CompFluidStream::Primary,
                                                                                         DataLoopNode::ObjectIsNotParent);
-            if (fields.count("ambient_temperature_outdoor_air_node_name")) {
+            if (fields.count("ambient_temperature_outdoor_air_node_name") != 0u) {
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, thisChiller.AmbientTempOutsideAirNode)) {
                     ShowSevereError(state,
                                     format("{} = {}: Outdoor Air Node not on OutdoorAir:NodeList or OutdoorAir:Node",
@@ -418,14 +418,14 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         }
 
         // TODO: When implemented, add ...WasAutoSized variables
-        if (fields.count("oil_cooler_design_flow_rate")) {
+        if (fields.count("oil_cooler_design_flow_rate") != 0u) {
             thisChiller.OilCoolerVolFlowRate = fields.at("oil_cooler_design_flow_rate").get<Real64>();
         }
-        if (fields.count("auxiliary_equipment_design_flow_rate")) {
+        if (fields.count("auxiliary_equipment_design_flow_rate") != 0u) {
             thisChiller.AuxiliaryVolFlowRate = fields.at("auxiliary_equipment_design_flow_rate").get<Real64>();
         }
 
-        if (fields.count("end_use_subcategory")) {
+        if (fields.count("end_use_subcategory") != 0u) {
             thisChiller.EndUseSubcategory = s_ip->getAlphaFieldValue(fields, objectSchemaProps, "end_use_subcategory");
         } else {
             thisChiller.EndUseSubcategory = "General";
@@ -478,7 +478,7 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
         PlantUtilities::InterConnectTwoPlantLoopSides(
             state, this->CWPlantLoc, this->CDPlantLoc, DataPlant::PlantEquipmentType::Chiller_ElectricASHRAE205, true);
     }
-    if (this->OilCoolerInletNode) {
+    if (this->OilCoolerInletNode != 0) {
         PlantUtilities::ScanPlantLoopsForObject(state,
                                                 this->Name,
                                                 DataPlant::PlantEquipmentType::Chiller_ElectricASHRAE205,
@@ -490,7 +490,7 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
                                                 this->OilCoolerInletNode,
                                                 _);
     }
-    if (this->AuxiliaryHeatInletNode) {
+    if (this->AuxiliaryHeatInletNode != 0) {
         PlantUtilities::ScanPlantLoopsForObject(state,
                                                 this->Name,
                                                 DataPlant::PlantEquipmentType::Chiller_ElectricASHRAE205,
@@ -613,12 +613,12 @@ void ASHRAE205ChillerSpecs::initialize(EnergyPlusData &state, bool const RunFlag
             state.dataLoopNodes->Node(this->CondInletNodeNum).Temp = this->TempRefCondIn;
         }
         // Set mass flow rates at Oil Cooler and Aux Equipment nodes
-        if (this->OilCoolerInletNode) {
+        if (this->OilCoolerInletNode != 0) {
             Real64 rho_oil_cooler = this->OCPlantLoc.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
             this->OilCoolerMassFlowRate = rho_oil_cooler * this->OilCoolerVolFlowRate;
             PlantUtilities::InitComponentNodes(state, 0.0, this->OilCoolerMassFlowRate, this->OilCoolerInletNode, this->OilCoolerOutletNode);
         }
-        if (this->AuxiliaryHeatInletNode) {
+        if (this->AuxiliaryHeatInletNode != 0) {
             Real64 rho_aux = this->AHPlantLoc.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
             this->AuxiliaryMassFlowRate = rho_aux * this->AuxiliaryVolFlowRate;
             PlantUtilities::InitComponentNodes(state, 0.0, this->AuxiliaryMassFlowRate, this->AuxiliaryHeatInletNode, this->AuxiliaryHeatOutletNode);
@@ -646,11 +646,11 @@ void ASHRAE205ChillerSpecs::initialize(EnergyPlusData &state, bool const RunFlag
     }
 
     // Set component flow rates for Oil Cooler and Aux equipment
-    if (this->OilCoolerInletNode) {
+    if (this->OilCoolerInletNode != 0) {
         PlantUtilities::SetComponentFlowRate(
             state, this->OilCoolerMassFlowRate, this->OilCoolerInletNode, this->OilCoolerOutletNode, this->OCPlantLoc);
     }
-    if (this->AuxiliaryHeatInletNode) {
+    if (this->AuxiliaryHeatInletNode != 0) {
         PlantUtilities::SetComponentFlowRate(
             state, this->AuxiliaryMassFlowRate, this->AuxiliaryHeatInletNode, this->AuxiliaryHeatOutletNode, this->AHPlantLoc);
     }
@@ -917,11 +917,11 @@ void ASHRAE205ChillerSpecs::size([[maybe_unused]] EnergyPlusData &state)
         }
     }
 
-    if (this->OilCoolerInletNode) {
+    if (this->OilCoolerInletNode != 0) {
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->OilCoolerInletNode, this->OilCoolerVolFlowRate);
     }
 
-    if (this->AuxiliaryHeatInletNode) {
+    if (this->AuxiliaryHeatInletNode != 0) {
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->AuxiliaryHeatInletNode, this->AuxiliaryVolFlowRate);
     }
 
@@ -1472,10 +1472,10 @@ void ASHRAE205ChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, boo
     this->QOilCooler = lookupVariablesCooling.oil_cooler_heat;
     this->QAuxiliary = lookupVariablesCooling.auxiliary_heat;
     Real64 QExternallyCooled{0.0};
-    if (this->OilCoolerInletNode) {
+    if (this->OilCoolerInletNode != 0) {
         QExternallyCooled += this->QOilCooler;
     }
-    if (this->AuxiliaryHeatInletNode) {
+    if (this->AuxiliaryHeatInletNode != 0) {
         QExternallyCooled += this->QAuxiliary;
     }
     // Energy balance on the chiller system gives the amount of heat lost to the ambient zone
@@ -1485,7 +1485,7 @@ void ASHRAE205ChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, boo
     this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + condInletTemp;
 
     // Oil cooler and Auxiliary Heat delta-T calculations
-    if (this->OilCoolerInletNode) {
+    if (this->OilCoolerInletNode != 0) {
         Real64 oilCoolerDeltaTemp = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->OilCoolerMassFlowRate, this->OilCoolerInletNode, this->OilCoolerOutletNode, this->OCPlantLoc);
@@ -1500,7 +1500,7 @@ void ASHRAE205ChillerSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad, boo
         }
         state.dataLoopNodes->Node(this->OilCoolerOutletNode).Temp = state.dataLoopNodes->Node(this->OilCoolerInletNode).Temp - oilCoolerDeltaTemp;
     }
-    if (this->AuxiliaryHeatInletNode) {
+    if (this->AuxiliaryHeatInletNode != 0) {
         Real64 auxiliaryDeltaTemp = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->AuxiliaryMassFlowRate, this->AuxiliaryHeatInletNode, this->AuxiliaryHeatOutletNode, this->AHPlantLoc);
@@ -1524,10 +1524,10 @@ void ASHRAE205ChillerSpecs::update(EnergyPlusData &state, Real64 const MyLoad, b
         // Set node temperatures
         state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp = state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp;
         state.dataLoopNodes->Node(this->CondOutletNodeNum).Temp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
-        if (this->OilCoolerInletNode) {
+        if (this->OilCoolerInletNode != 0) {
             state.dataLoopNodes->Node(this->OilCoolerOutletNode).Temp = state.dataLoopNodes->Node(this->OilCoolerInletNode).Temp;
         }
-        if (this->AuxiliaryHeatInletNode) {
+        if (this->AuxiliaryHeatInletNode != 0) {
             state.dataLoopNodes->Node(this->AuxiliaryHeatOutletNode).Temp = state.dataLoopNodes->Node(this->AuxiliaryHeatInletNode).Temp;
         }
 

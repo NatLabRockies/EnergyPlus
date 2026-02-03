@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -173,9 +173,9 @@ json const &InputProcessor::getPatternProperties(EnergyPlusData &state, json con
     auto const &pattern_properties = schema_obj["patternProperties"];
     int dot_star_present = pattern_properties.count(".*");
     int no_whitespace_present = pattern_properties.count(R"(^.*\S.*$)");
-    if (dot_star_present) {
+    if (dot_star_present != 0) {
         pattern_property = ".*";
-    } else if (no_whitespace_present) {
+    } else if (no_whitespace_present != 0) {
         pattern_property = R"(^.*\S.*$)";
     } else {
         ShowFatalError(state, R"(The patternProperties value is not a valid choice (".*", "^.*\S.*$"))");
@@ -388,8 +388,8 @@ bool InputProcessor::checkForUnsupportedObjects(EnergyPlusData &state)
     // For EnergyPlus, there is no option to convert or allow these objects
     bool objectFound = false;
     std::string objectType;
-    for (size_t count = 0; count < hvacTemplateObjects.size(); ++count) {
-        objectType = hvacTemplateObjects[count];
+    for (auto hvacTemplateObject : hvacTemplateObjects) {
+        objectType = hvacTemplateObject;
         auto it = epJSON.find(objectType);
         if (it != epJSON.end()) {
             objectFound = true;
@@ -430,8 +430,8 @@ bool InputProcessor::checkForUnsupportedObjects(EnergyPlusData &state)
                                                                          "GroundHeatTransfer:Basement:ZFACE"};
 
     objectFound = false;
-    for (size_t count = 0; count < groundHTObjects.size(); ++count) {
-        objectType = groundHTObjects[count];
+    for (auto groundHTObject : groundHTObjects) {
+        objectType = groundHTObject;
         auto it = epJSON.find(objectType);
         if (it != epJSON.end()) {
             objectFound = true;
@@ -448,8 +448,8 @@ bool InputProcessor::checkForUnsupportedObjects(EnergyPlusData &state)
         "Parametric:SetValueForRun", "Parametric:Logic", "Parametric:RunControl", "Parametric:FileNameSuffix"};
 
     objectFound = false;
-    for (size_t count = 0; count < parametricObjects.size(); ++count) {
-        objectType = parametricObjects[count];
+    for (auto parametricObject : parametricObjects) {
+        objectType = parametricObject;
         auto it = epJSON.find(objectType);
         if (it != epJSON.end()) {
             objectFound = true;
@@ -528,9 +528,8 @@ int InputProcessor::getNumObjectsFound(EnergyPlusData &state, std::string_view c
             return 0;
         }
         return static_cast<int>(epJSON[tmp_umit->second].size());
-    } else {
-        return static_cast<int>(find_obj.value().size());
     }
+    return static_cast<int>(find_obj.value().size());
 
     if (schema()["properties"].find(std::string(ObjectWord)) == schema()["properties"].end()) {
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(ObjectWord));
@@ -659,7 +658,8 @@ Real64 InputProcessor::getRealFieldValue(json const &ep_object, json const &sche
         auto const &field_value = it.value();
         if (field_value.is_number()) {
             return (field_value.is_number_integer()) ? field_value.get<std::int64_t>() : field_value.get<double>();
-        } else if (!field_value.get<std::string>().empty()) {
+        }
+        if (!field_value.get<std::string>().empty()) {
             return Constant::AutoCalculate; // autosize and autocalculate
         }
     }
@@ -672,14 +672,13 @@ Real64 InputProcessor::getRealFieldValue(json const &ep_object, json const &sche
         auto const &default_val = find_default.value();
         if (default_val.is_string()) {
             return (!default_val.get<std::string>().empty()) ? Constant::AutoCalculate : 0.0;
-        } else if (default_val.is_number_integer()) {
-            return default_val.get<std::int64_t>();
-        } else {
-            return default_val.get<double>();
         }
-    } else {
-        return 0.0;
+        if (default_val.is_number_integer()) {
+            return default_val.get<std::int64_t>();
+        }
+        return default_val.get<double>();
     }
+    return 0.0;
 }
 
 int InputProcessor::getIntFieldValue(json const &ep_object, json const &schema_obj_props, std::string const &fieldName)
@@ -1090,13 +1089,12 @@ void InputProcessor::getObjectItem(EnergyPlusData &state,
 
     auto const legacy_idd_extensibles_iter = legacy_idd.find("extensibles");
     if (legacy_idd_extensibles_iter != legacy_idd.end()) {
-        size_t extensible_count = 0;
         auto const epJSON_extensions_array_itr = obj_val.find(extension_key);
         if (epJSON_extensions_array_itr != obj_val.end()) {
             auto const &legacy_idd_extensibles = legacy_idd_extensibles_iter.value();
             auto const &epJSON_extensions_array = epJSON_extensions_array_itr.value();
             auto const &schema_extension_fields = schema_obj_props[extension_key]["items"]["properties"];
-
+            size_t extensible_count = 0;
             for (auto it = epJSON_extensions_array.begin(); it != epJSON_extensions_array.end(); ++it) {
                 auto const &epJSON_extension_obj = it.value();
                 for (size_t i = 0; i < legacy_idd_extensibles.size(); i++, extensible_count++) {
@@ -1215,7 +1213,7 @@ std::vector<std::string> InputProcessor::getIDFOrderedKeys(EnergyPlusData &state
 
     // Reserve doesn't seem to work :(
     for (int i = 0; i < (int)nums.size(); ++i) {
-        keys.push_back("");
+        keys.emplace_back("");
     }
 
     // get list of saved object numbers from idf processing
@@ -1616,9 +1614,9 @@ void InputProcessor::reportIDFRecordsStats(EnergyPlusData &state)
             ++state.dataOutput->iNumberOfRecords;
 
             // Loop on all regular fields
-            for (size_t i = 0; i < legacy_idd_fields.size(); ++i) {
+            for (const auto &legacy_idd_field : legacy_idd_fields) {
 
-                std::string const field = legacy_idd_fields[i].get<std::string>();
+                std::string const field = legacy_idd_field.get<std::string>();
 
                 // This is weird, but some objects like Building have a Name default... and it's not in the patternProperties
                 if (has_idd_name_field && field == "name") {
@@ -1649,8 +1647,8 @@ void InputProcessor::reportIDFRecordsStats(EnergyPlusData &state)
 
                     for (auto it = epJSON_extensions_array.begin(); it != epJSON_extensions_array.end(); ++it) {
                         auto const &epJSON_extension_obj = it.value();
-                        for (size_t i = 0; i < legacy_idd_extensibles.size(); ++i) {
-                            std::string const &field = legacy_idd_extensibles[i].get<std::string>();
+                        for (const auto &legacy_idd_extensible : legacy_idd_extensibles) {
+                            std::string const &field = legacy_idd_extensible.get<std::string>();
                             auto const &schema_extension_field_obj = schema_extension_fields[field];
 
                             processField(field, epJSON_extension_obj, schema_extension_field_obj);
@@ -1679,7 +1677,7 @@ void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
     std::unordered_set<std::string> unused_object_types;
     unused_object_types.reserve(unusedInputs.size());
 
-    if (unusedInputs.size() && state.dataGlobal->DisplayUnusedObjects) {
+    if ((!unusedInputs.empty()) && state.dataGlobal->DisplayUnusedObjects) {
         ShowWarningError(state, "The following lines are \"Unused Objects\".  These objects are in the input");
         ShowContinueError(state, " file but are never obtained by the simulation and therefore are NOT used.");
         if (!state.dataGlobal->DisplayAllWarnings) {
@@ -1713,9 +1711,8 @@ void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
             if (found_type != unused_object_types.end()) {
                 // only show first unused named object of an object class
                 continue;
-            } else {
-                unused_object_types.emplace(object_type);
             }
+            unused_object_types.emplace(object_type);
         }
 
         if (first_iteration) {
@@ -1734,7 +1731,7 @@ void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
         }
     }
 
-    if (unusedInputs.size() && !state.dataGlobal->DisplayUnusedObjects) {
+    if ((!unusedInputs.empty()) && !state.dataGlobal->DisplayUnusedObjects) {
         u64toa(unusedInputs.size(), s);
         ShowMessage(state, "There are " + std::string(s) + " unused objects in input.");
         ShowMessage(state, "Use Output:Diagnostics,DisplayUnusedObjects; to see them.");

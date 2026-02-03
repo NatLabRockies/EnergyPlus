@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmSearch 
+Begin VB.Form frmSearch
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Search and Replace"
    ClientHeight    =   4680
@@ -13,7 +13,7 @@ Begin VB.Form frmSearch
    ScaleWidth      =   11100
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.CommandButton cmdNone 
+   Begin VB.CommandButton cmdNone
       Caption         =   "None"
       Height          =   255
       Left            =   6120
@@ -21,7 +21,7 @@ Begin VB.Form frmSearch
       Top             =   525
       Width           =   735
    End
-   Begin VB.CommandButton cmdGoto 
+   Begin VB.CommandButton cmdGoto
       Caption         =   "Go to"
       Height          =   255
       Left            =   8280
@@ -29,7 +29,7 @@ Begin VB.Form frmSearch
       Top             =   525
       Width           =   735
    End
-   Begin VB.CheckBox chkEntire 
+   Begin VB.CheckBox chkEntire
       Caption         =   "Match Entire Field Value Contents"
       Height          =   195
       Left            =   1200
@@ -37,7 +37,7 @@ Begin VB.Form frmSearch
       Top             =   600
       Width           =   2775
    End
-   Begin VB.CommandButton cmdAll 
+   Begin VB.CommandButton cmdAll
       Caption         =   "All"
       Height          =   255
       Left            =   5280
@@ -45,7 +45,7 @@ Begin VB.Form frmSearch
       Top             =   525
       Width           =   735
    End
-   Begin VB.CommandButton cmdReplace 
+   Begin VB.CommandButton cmdReplace
       Caption         =   "Replace Selected"
       Height          =   375
       Left            =   9120
@@ -53,14 +53,14 @@ Begin VB.Form frmSearch
       Top             =   4200
       Width           =   1815
    End
-   Begin VB.TextBox txtReplaceText 
+   Begin VB.TextBox txtReplaceText
       Height          =   375
       Left            =   1200
       TabIndex        =   5
       Top             =   4200
       Width           =   7815
    End
-   Begin VB.CommandButton cmdFind 
+   Begin VB.CommandButton cmdFind
       Caption         =   "Find"
       Default         =   -1  'True
       Height          =   375
@@ -69,14 +69,14 @@ Begin VB.Form frmSearch
       Top             =   120
       Width           =   1815
    End
-   Begin VB.TextBox txtSearchText 
+   Begin VB.TextBox txtSearchText
       Height          =   375
       Left            =   1200
       TabIndex        =   1
       Top             =   120
       Width           =   7815
    End
-   Begin VB.ListBox lstFindResults 
+   Begin VB.ListBox lstFindResults
       Height          =   3210
       ItemData        =   "frmSearch.frx":0000
       Left            =   120
@@ -86,7 +86,7 @@ Begin VB.Form frmSearch
       Top             =   840
       Width           =   10860
    End
-   Begin VB.Label Label2 
+   Begin VB.Label Label2
       Caption         =   "Replace with:"
       Height          =   255
       Left            =   120
@@ -94,7 +94,7 @@ Begin VB.Form frmSearch
       Top             =   4320
       Width           =   1095
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Find what:"
       Height          =   255
       Left            =   360
@@ -218,15 +218,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

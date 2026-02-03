@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -98,11 +98,12 @@ BoilerSpecs *BoilerSpecs::factory(EnergyPlusData &state, std::string const &obje
         state.dataBoilers->getBoilerInputFlag = false;
     }
     // Now look for this particular boiler in the list
-    auto myBoiler = std::find_if(state.dataBoilers->Boiler.begin(), state.dataBoilers->Boiler.end(), [&objectName](const BoilerSpecs &boiler) {
+    auto it = std::find_if(state.dataBoilers->Boiler.begin(), state.dataBoilers->Boiler.end(), [&objectName](const BoilerSpecs &boiler) {
         return boiler.Name == objectName;
     });
-    if (myBoiler != state.dataBoilers->Boiler.end()) {
-        return myBoiler;
+
+    if (it != state.dataBoilers->Boiler.end()) {
+        return &(*it);
     }
 
     // If we didn't find it, fatal
@@ -177,11 +178,9 @@ void GetBoilerInput(EnergyPlusData &state)
     }
 
     // See if load distribution manager has already gotten the input
-    if (allocated(state.dataBoilers->Boiler)) {
+    if (!state.dataBoilers->Boiler.empty()) {
         return;
     }
-
-    state.dataBoilers->Boiler.allocate(numBoilers);
 
     // LOAD ARRAYS WITH CURVE FIT Boiler DATA
 
@@ -207,7 +206,8 @@ void GetBoilerInput(EnergyPlusData &state)
         // ErrorsFound will be set to True if problem was found, left untouched otherwise
         GlobalNames::VerifyUniqueBoilerName(
             state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), ErrorsFound, s_ipsc->cCurrentModuleObject + " Name");
-        auto &thisBoiler = state.dataBoilers->Boiler(BoilerNum);
+        state.dataBoilers->Boiler.emplace_back();
+        auto &thisBoiler = state.dataBoilers->Boiler[BoilerNum - 1];
         thisBoiler.Name = s_ipsc->cAlphaArgs(1);
         thisBoiler.Type = DataPlant::PlantEquipmentType::Boiler_Simple;
 

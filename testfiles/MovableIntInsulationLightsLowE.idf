@@ -12,7 +12,7 @@
 ! Plant:    None
 ! SolDis=FullInteriorAndExterior, Aniso, Detailed Interior and Exterior Convection
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -317,7 +317,7 @@
     ON,                      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     960.0,                   !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.2000000,               !- Fraction Radiant

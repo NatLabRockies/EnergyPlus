@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -220,7 +220,7 @@ int main(int argc, const char *argv[])
     // With the Python API, we can leverage Python's introspection to find the pyenergyplus folder, and thus the E+ repo
     // For C programs that link to the API, we don't have this.
     // Of course, we do have the path to the E+ library in CMake land, but that would then require configuring this file, adding complexity
-    // For now we will call the setEnergyPlusRootDirectory function to exercise the funcional interface, but not attempt anything further
+    // For now we will call the setEnergyPlusRootDirectory function to exercise the functional interface, but not attempt anything further
     // The Python API tests will exercise the functionality of the setEnergyPlusRootDirectory implicitly
     printf("Setting EnergyPlus root directory for potential runs with auxiliary tools...\n");
     EnergyPlusState state4 = stateNew();

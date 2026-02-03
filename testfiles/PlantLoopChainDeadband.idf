@@ -13,7 +13,7 @@
 ! System:   None.
 ! Plant:    A chain of 5 plant loops that connect LoadProfile:Plant objects to DistrictCooling and DistrictHeating by heat exchangers
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -504,7 +504,8 @@
     Demand Cool Load Profile 1 Outlet Node,  !- Outlet Node Name
     Cool Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Cool Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Cool Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
   Branch,
     USE Cool Demand Outlet Branch,  !- Name
@@ -1001,7 +1002,7 @@
 
   PlantEquipmentList,
     SOURCE Heat Heating Plant,  !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     SOURCE Purchased Heating;!- Equipment 1 Name
 
   BranchList,
@@ -1054,7 +1055,7 @@
   Branch,
     SOURCE Heating Branch,   !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     SOURCE Purchased Heating,!- Component 1 Name
     SOURCE Supply Heating Inlet Node,  !- Component 1 Inlet Node Name
     SOURCE Supply Heating Outlet Node;  !- Component 1 Outlet Node Name

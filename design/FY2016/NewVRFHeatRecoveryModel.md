@@ -7,7 +7,7 @@ A New VRF Heat Recovery System Model
  - Original Date: Jan. 16, 2016
  - Revision Date: Apr. 7, 2016
  - Revision Date: Apr. 12, 2016
- 
+
 
 ## Justification for New Feature ##
 
@@ -23,7 +23,7 @@ The proposed new VRF-HR model inherits many key features of the recently impleme
 -	Allowing implementation of various control logics for different VRF-HR operational modes.
 -	Allowing further modifications of operational parameters (e.g., evaporating temperature and superheating degrees) during low load conditions.
 -	Allowing variable fan speed based on the temperature and zone load in the indoor units (IU).
--	Allowing an enhanced physics-based model to calculate piping loss in the refrigerant piping network (varies with refrigerant flow rate, operational conditions, pipe length, and pipe and insulation materials) instead of a constant correction factor. 
+-	Allowing an enhanced physics-based model to calculate piping loss in the refrigerant piping network (varies with refrigerant flow rate, operational conditions, pipe length, and pipe and insulation materials) instead of a constant correction factor.
 -	Allowing the potential simulation of demand response of VRF systems by directly slowing down the speed of compressors in the outdoor units with inverter technology.
 
 
@@ -35,23 +35,23 @@ The proposed new VRF-HR model inherits many key features of the recently impleme
 1)	How different is the proposed new HR object from the existing AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl object?
 2)	Any particular reason why the non-HR object allows a loading index up to 9 and the HR one goes to 11? Should these both be extensible? What's a typical number for loading index?
 3)	Field A1 should just be "Name" not "Heat Pump Name",  same for the old ones and the VRF terminal units and the VRF list, so do we continue the pattern or fix them all? And why did we call all of these AirConditioner:VariableRefrigerantFlow:* instead of HeatPump:VariableRefrigerantFlow:? If we decide to rename these - that should be a separate pull request with transitions etc.  But this new object could come in with the HeatPump name right from the start.
--	Reply: 
+-	Reply:
 1) The difference between the proposed VRF-FluidTCtrl-HR object and the existing VRF-FluidTCtrl-HP object lies in the fields about thermostat priority control, main pipe information, mode transition, and outdoor unit evaporator/condenser descriptions.
 2) Yes, we agree that they should be extensible. They are now put at the end of the object and thus requires little modification of the existing design. The number of compressor loading index depends on the experiment data from manufacturer, usually between 3 and 11.
 3) AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR will be used as a temporary design in the Interim Release, to be consistent with existing ones and to avoid transition issues. A poll will be held to select better names, and the selected design will be used for the next official release which will involve transition issues. This will be handled by setting a separate issue. (TBD: Renaming of the HP object (AirConditioner or HeatPump, VariableRefrigerantFlow or VRF, etc; Set up a new field to specify the system configuration: 2pipe or 3Pipe; etc. )
 
 -	Comments:
-1)	From a code organization perspective, it seems the VRF coils should be pulled out of DXCoils.cc into a separate file or into HVACVariableRefrigerantFlow.cc  Does the  VRF-FluidTCtrl model rely on any other functions in DXCoils.cc?  The DXCoils::DXCoilData struct is very ugly with some common fields across the various flavors of DX coils, but lots of fields that only apply to one coil type and are unused for others.  Seems we should be splitting this up.  
+1)	From a code organization perspective, it seems the VRF coils should be pulled out of DXCoils.cc into a separate file or into HVACVariableRefrigerantFlow.cc  Does the  VRF-FluidTCtrl model rely on any other functions in DXCoils.cc?  The DXCoils::DXCoilData struct is very ugly with some common fields across the various flavors of DX coils, but lots of fields that only apply to one coil type and are unused for others.  Seems we should be splitting this up.
 2)	Is any of this new code going to follow the new OO design guidelines?
--	Reply: 
-1) Currently Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl object for the VRF-FluidTCtrl model is handled in DXCoils.cc, to be consistent with Coil:Cooling:DX:VariableRefrigerantFlow object for the VRF-SysCurve model. A separate issue can be set up if we decide to move them out of DXCoils.cc. 
+-	Reply:
+1) Currently Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl object for the VRF-FluidTCtrl model is handled in DXCoils.cc, to be consistent with Coil:Cooling:DX:VariableRefrigerantFlow object for the VRF-SysCurve model. A separate issue can be set up if we decide to move them out of DXCoils.cc.
 2) Rongpeng will first focus on the HR algorithm implementations to ensure its functionality. Then Edwin will work with Rongpeng to implement more OO design for the VRF part. Very possibly this requires the modification of the codes for VRF-SysCurve model and VRF-FluidTCtrl-HP model, in addition to the proposed VRF-FluidTCtrl-HR model.
 
 
 •	Brent, Jan. 20. 2016
 
 -	Comments:
-This looks interesting.  I have no problems with the overall approach.  
+This looks interesting.  I have no problems with the overall approach.
 It seems to me after studying Figure 3 that there might be a reason to organize it as having 12 modes, each of your 6 modes with and without the low load modification.
 -	Reply:
 It is correct that every operational mode may be divided into sub-modes: with and without the low load modification. That will affect the operational conditions such as evaporating temperature levels, but will not change the system configurations, i.e., the piping connections and the refrigerant flow directions. We defined the 6 operational mode mainly depending on the different system configurations. We tried to keep the mode number low to make the algorithm clear and concise. So, it may not be quite necessary to increase the mode number from 6 to 12 just for the low load modifications or the some local control states.
@@ -70,14 +70,14 @@ It is correct that every operational mode may be divided into sub-modes: with an
 •	Jason Glazer, Jan. 27. 2016
 
 -	Comments:
-It would be great if either a user input or at least an output would show the ARHI Simultaneous Cooling and Heating Efficiency (SCHE) rating condition as described in AHRI 1230 and any other figures of merit that are unique for heat recovery VRF systems. Outputs of the rated IEER would be good too. 
+It would be great if either a user input or at least an output would show the ARHI Simultaneous Cooling and Heating Efficiency (SCHE) rating condition as described in AHRI 1230 and any other figures of merit that are unique for heat recovery VRF systems. Outputs of the rated IEER would be good too.
 -	Reply:
 Good suggestions. We will output this key parameter for HR operations.
 
 •	Bereket Nigusse, Jan. 27. 2016
 
 -	Comments:
-The VRF model description and the schematic diagram provided are for 3-pipe VRF-HR system.  Some VRF manufacturers use a 2-pipe VRF-HR system design. Have you considered the 2-pipe VRF-HR system model? 
+The VRF model description and the schematic diagram provided are for 3-pipe VRF-HR system.  Some VRF manufacturers use a 2-pipe VRF-HR system design. Have you considered the 2-pipe VRF-HR system model?
 -	Reply:
 The new VRF HR model is for 3-pipe systems, which is the dominant system configuration in the VRF-HR market. Most VRF manufacturers adopt 3-pipe configuration (e.g., Daikin, Samsung, Carrier, LG, Toshiba, etc; except for Mitsubishi). The 2-pipe and 3-pipe systems are very different in terms of refrigerant loop operations, piping connections and control logic, so they cannot be covered by a generic physics based model. Currently we don't have resource to add a 2-pipe VRF HR model (a very expensive process to cover algorithm development, EnergyPlus implementation, obtaining measured data, and model validation). We will document this (current model for 3-pipe system) clearly in the EnergyPlus IORef and EngRef.
 
@@ -106,7 +106,7 @@ Figure 2. System-level Heat Balance Diagram for All VRF-HR Operational Modes
 
 With the help of FWV and BS units, every operational mode has its own refrigerant piping connections to achieve different refrigerant flow directions, as shown in Table 1. This leads to different refrigerant operations (as shown in the Pressure-Enthalpy Diagrams in Table 2) and piping loss situations. The operational control logics for various modes are also different, and therefore particular algorithm needs to be designed for different operational modes in the new VRF-HR model.
 
-![](VRF-HR-Chart-Piping.PNG) 
+![](VRF-HR-Chart-Piping.PNG)
 
 ![](VRF-HR-Chart-EnthalpyPressure.PNG)
 
@@ -114,8 +114,8 @@ Similarly to the VRF-FluidTCtrl-HP model, the VRF-FluidTCtrl-HR model implements
 
 ##### Implementation of the proposed model
 
-Figure 3 shows the coding hierarchy of the existing VRF models in EnergyPlus (V8.4+), including the VRF-SystemCurve model (both HP and HR) and the VRF-FluidTCtrl model (HP only). Both the indoor unit and outdoor unit parts are described by the "HVACVariableRefrigerantFlow.cc" file, and it refers to "DXCoil.cc" file for coil performance simulations. 
- 
+Figure 3 shows the coding hierarchy of the existing VRF models in EnergyPlus (V8.4+), including the VRF-SystemCurve model (both HP and HR) and the VRF-FluidTCtrl model (HP only). Both the indoor unit and outdoor unit parts are described by the "HVACVariableRefrigerantFlow.cc" file, and it refers to "DXCoil.cc" file for coil performance simulations.
+
 The implementation of the VRF-FluidTCtrl-HR model will present additions to the existing VRF-FluidTCtrl-HP model, without changing the coding hierarchy of the key methods. Therefore, the implementation is expected to generate no or little impacts on the existing features of EnergyPlus. More specifically, the proposed algorithm will go to the method “HVACVariableRefrigerantFlow::CalcVRFCondenser_FluidTCtrl”, which was newly added in V8.4 particularly to describe the outdoor unit part of the VRF-FluidTCtrl-HP model. The indoor unit part of the current VRF-FluidTCtrl-HP model is able to handle the indoor unit performance of the HR systems, and thus will not be modified.
 
 ![](VRF-HR-CodingHierarchy.PNG)
@@ -127,9 +127,9 @@ Figure 3. Coding Hierarchy of the VRF model in the current EnergyPlus V8.4
 The holistic logics of the new VRF-HR model are illustrated in Figure 4 to show the key simulation steps for different operational modes. More detailed calculation procedures are described in the following sections. Note that the algorithms of the VRF-HR Cooling Only Mode and Heating Only Mode are the same as those in the VRF-HP Cooling Mode and Heating Mode, respectively. Therefore, this section will only focus on the description of the algorithm for VRF-HR Simultaneous Heating and Cooling Mode.
 
 ![](VRF-HR-AlgorithmOverview-Mode1.png)
-(a) Cooling Only Mode 
+(a) Cooling Only Mode
 ![](VRF-HR-AlgorithmOverview-Mode6.png)
-(b) Heating Only Mode 
+(b) Heating Only Mode
 ![](VRF-HR-AlgorithmOverview-Mode2-5.png)
 (c) Simultaneous Heating and Cooling Mode
 
@@ -138,7 +138,7 @@ Figure 4. Schematic chart of the new VRF-HR algorithm
 
 ##### Step 1: Obtaining zonal load/condition information
 
-Obtain the following information for each zone from the zone modules within EnergyPlus: 
+Obtain the following information for each zone from the zone modules within EnergyPlus:
 
 * zone sensible loads <span>$Q_{in, sensible}$</span>
 
@@ -150,7 +150,7 @@ Obtain the following information for each zone from the zone modules within Ener
 
 If there is only cooling load and no heating load, go to the VRF-HR Cooling Only Mode, the algorithms of which is the same as those for the VRF-HP Cooling Mode. If there is only heating load and no cooling load, go to the VRF-HR Heating Only Mode, the algorithms of which is the same as those for the VRF-HP Heating Mode. Otherwise, go to the VRF-HR Simultaneous Heating and Cooling Mode as described below.
 
-##### Step 2: Calculate I/U required evaporating temperature and/or the condensing temperature 
+##### Step 2: Calculate I/U required evaporating temperature and/or the condensing temperature
 Evaluate the required coil surface air temperature <span>$T_{fs}$</span> and then the required evaporator refrigerant temperature <span>$T_{e,req}$</span> for each indoor unit with cooling requirements. Likewise, evaluate the required condenser refrigerant temperature <span>${T_{c,req}}$</span> for each indoor unit with heating requirements.
 (Refer to Engineering Reference V8.4+: Step 1.2 in the VRF-FluidTCtrl-HP model for more details.)
 
@@ -169,7 +169,7 @@ In this step, the compressor discharge saturated temperature <span>$T'_c$</span>
 
 ##### Step 5: I/U evaporator side piping loss calculations
 
-This section calculates the I/U evaporator side piping loss, which occurs at Suction Gas Pipe where the refrigerant flowing from the I/U evaporators to the O/U compressor inlets. Similarly to the I/U condenser side piping loss, it includes both the refrigerant pressure drop <span>$\Delta{P_{pipe}}$</span> and heat loss <span>$Q_{pipe}$</span>. 
+This section calculates the I/U evaporator side piping loss, which occurs at Suction Gas Pipe where the refrigerant flowing from the I/U evaporators to the O/U compressor inlets. Similarly to the I/U condenser side piping loss, it includes both the refrigerant pressure drop <span>$\Delta{P_{pipe}}$</span> and heat loss <span>$Q_{pipe}$</span>.
 
 In this step, the compressor suction saturated temperature <span>$T'_e$</span> (i.e., saturated vapor temperature corresponding to compressor suction pressure) can be obtained using the calculated refrigerant pressure drop <span>$\Delta{P_{pipe}}$</span>.
 
@@ -192,7 +192,7 @@ b. Calculate the Loading Index LI_2 satisfying I/U heating load (Refer to Engine
 
 c. If LI_1 <= LI_2, the system operates at Mode 5
 
-d. If LI_1 > LI_2 and Te' < To - T_diff, the system operates at Mode 2 
+d. If LI_1 > LI_2 and Te' < To - T_diff, the system operates at Mode 2
 (To: outdoor air dry-bulb temperature; T_diff: a constant value representing the difference between OU evaporating temperature and outdoor air temperature during simultaneous heating and cooling)
 
 e. If LI_1 > LI_2 and Te' >= To - T_diff, the system operates at Mode 3 or 4 (these two modes can be handled by one set of algorithms)
@@ -473,7 +473,7 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
        \type object-list
        \object-list QuadraticCurves
        \object-list UniVariateTables
-  N21, \field Diameter of Main Pipe for Suction Gas 
+  N21, \field Diameter of Main Pipe for Suction Gas
        \note used to calculate the piping loss
        \type real
        \units m
@@ -668,7 +668,7 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
        \units dimensionless
        \minimum> 0
        \default 1.0
-       \note Describe the evaporative capacity difference because of system configuration 
+       \note Describe the evaporative capacity difference because of system configuration
        \note difference between test bed and real system.
   N46, \field Number of Compressor Loading Index Entries
        \required-field
@@ -676,8 +676,8 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
        \default 2
        \minimum 2
        \maximum 11
-       \note Load index describe the compressor operational state, 
-       \note either a single compressor or multiple compressors, at different load levels. 
+       \note Load index describe the compressor operational state,
+       \note either a single compressor or multiple compressors, at different load levels.
        \note First index represents minimal capacity operation
        \note Last index represents full capacity operation
   N47, \field Compressor Speed at Loading Index 1
@@ -792,7 +792,7 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
   A28, \field Loading Index 9 Compressor Power Multiplier Function of Temperature Curve Name
        \type object-list
        \object-list BiQuadraticCurves
-       \object-list BiVariateTables       
+       \object-list BiVariateTables
   N56, \field Compressor Speed at Loading Index 10
        \type real
        \units rev/min
@@ -817,10 +817,10 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
        \type object-list
        \object-list BiQuadraticCurves
        \object-list BiVariateTables
-     
-``` 
-	   
-	   
+
+```
+
+
 ## IDD Objects (Revised) ##
 
 We propose to rename the existing object "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl" as "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HP", in order to distinguish from the proposed "AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR" object.

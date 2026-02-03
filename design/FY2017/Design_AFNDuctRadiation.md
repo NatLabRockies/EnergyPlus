@@ -5,7 +5,7 @@ Air Duct Radiation Heat Transfer
 
 - December 6, 2016
 
-## New Feature Proposal 
+## New Feature Proposal
 Details on the justification, overview, and IDD changes of the project are provided in the NFP.
 
 ## Overview
@@ -21,7 +21,7 @@ are primarily:
 - AirflowNetworkBalanceManager.cc
 - DataAirflowNetwork.cc
 
-Most of the data structures will remain unchanged. New data structures will be added for the new object, and a few others for surfaces, ducts, and linkages will be modified to accommodate the duct radiation and user view factor changes. Little effort is expected to be given to refactorization. Changes and additions to data structures, and code changes are outlined below. 
+Most of the data structures will remain unchanged. New data structures will be added for the new object, and a few others for surfaces, ducts, and linkages will be modified to accommodate the duct radiation and user view factor changes. Little effort is expected to be given to refactorization. Changes and additions to data structures, and code changes are outlined below.
 
 ## Approach
 
@@ -152,9 +152,9 @@ if ( DisSysNumOfDuctViewFactors > 0 ) {
 			AirFlowNetworkLinkageViewFactorData( i ).surfaceName = Alphas( i + 1 ); // Surface name
 			AirFlowNetworkLinkageViewFactorData( i ).surfaceNum = FindItemInList( Alphas( i + 1 ), Surface );
 			AirFlowNetworkLinkageViewFactorData( i ).viewFactor = Numbers( i + 2 ); // Surface view factor
-		}		
+		}
 	}
-} 
+}
 
 // ~ Line 3749
 if ( AirflowNetworkCompData( i ).CompTypeNum == CompTypeNum_DVF ) CompName( 1 ) = "AirflowNetwork:Distribution:DuctViewFactors";
@@ -222,7 +222,6 @@ This will follow the pattern set out by objects such as the ```ZoneHVAC:Baseboar
 
 
 ## OOP/Refactorization
-Since the new duct view factor object described here and in the NFP are intended as a *first* step at evaluating the effects of duct radiation, no major refactorization will occur during this phase of the project. If in subsequent phases duct radiation view factors are to be calculated automatically by EnergyPlus, refactorization of the surface heat balance and airflow network will be further evaluated. Converting some of the affected list of component types, as shown [here](https://github.com/NREL/EnergyPlus/blob/ea65c6e0c28a9e40c4846062fadfbf198ede5681/src/EnergyPlus/DataAirflowNetwork.cc#L87) to ```enum``` types could be tasked given team support, though little effort for code refactorization is expected.
+Since the new duct view factor object described here and in the NFP are intended as a *first* step at evaluating the effects of duct radiation, no major refactorization will occur during this phase of the project. If in subsequent phases duct radiation view factors are to be calculated automatically by EnergyPlus, refactorization of the surface heat balance and airflow network will be further evaluated. Converting some of the affected list of component types, as shown [here](https://github.com/NatLabRockies/EnergyPlus/blob/ea65c6e0c28a9e40c4846062fadfbf198ede5681/src/EnergyPlus/DataAirflowNetwork.cc#L87) to ```enum``` types could be tasked given team support, though little effort for code refactorization is expected.
 
 Lots of spelling errors and end-of-line whitespace--correct those at a minimum.
-

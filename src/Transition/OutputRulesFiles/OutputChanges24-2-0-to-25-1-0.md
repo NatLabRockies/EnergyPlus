@@ -10,7 +10,7 @@ This will eventually become a more structured file, but currently it isn't clear
 ### Output:Constructions for WindowMaterial:Shade
 Data for Output:Constructions for WindowMaterial:Shade were misaligned with the column headings in the eio output and the table Initialization Summary report. Data has shifted one column to the left.
 
-See PR [#10750](https://github.com/NREL/EnergyPlus/pull/10750)
+See PR [#10750](https://github.com/NatLabRockies/EnergyPlus/pull/10750)
 
 ### Table Output, Sizing Output, and Output:Variable Spelling Corrections
 * "Equipment Summary" table report, sub-table "VAV DX Cooling Standard Rating Details", column heading, "Assocated Fan" --> "Associated Fan".
@@ -27,14 +27,14 @@ See PR [#10750](https://github.com/NREL/EnergyPlus/pull/10750)
 
 * eio output header for "\<ShadingProperty Reflectance\>", "Contruction" --> "Construction". Also appears in the "Initialization Summary" table output, "ShadingProperty Reflectance" sub-table, column heading.
 
-See Pull Request [#10760](https://github.com/NREL/EnergyPlus/pull/10760).
+See Pull Request [#10760](https://github.com/NatLabRockies/EnergyPlus/pull/10760).
 
 ### Table Output, Envelope Summary Report, Add Space and Zone Columns
 * Added a column for *Space* to sub-tables "Opaque Exterior" and "Opaque Interior".
 
 * Added columns for *Zone* and *Space* to sub-tables "Exterior Fenestration", "Interior Fenestration", "Exterior Door", and "Interior Door".
 
-See Pull Request [#10914](https://github.com/NREL/EnergyPlus/pull/10914).
+See Pull Request [#10914](https://github.com/NatLabRockies/EnergyPlus/pull/10914).
 
 ### Infiltration and Ventilation Output Variable Name Change and New Outputs
 * Changed the name of these output variables:
@@ -57,4 +57,4 @@ Zone Ventilation Standard Density Air Change Rate
 Zone Ventilation Outdoor Density Air Change Rate
 ```
 
-See Pull Request [#10940](https://github.com/NREL/EnergyPlus/pull/10940).
+See Pull Request [#10940](https://github.com/NatLabRockies/EnergyPlus/pull/10940).

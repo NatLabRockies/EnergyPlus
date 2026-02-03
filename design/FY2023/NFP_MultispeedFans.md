@@ -49,14 +49,14 @@ In design/FY2023/NFP_MultispeedFans.md:
 +An alternative way is to use the existing object of UnitarySystemPerformance:Multispeed. Since this object is not used only for UnitarySystem, the name of the object may be changed.
 +
 +It should be pointed out that since this object mainly specify airflow ratios at different speeds, it is OK to use the object with minor name change.
-+  
++
 </span>
 +
 +
 +	FanPerformance:Multispeed,
 +       \memo The FanPerformance object is used to specify the air flow ratio at each
-+       \memo operating speed. This object is primarily used for ZoneHVAC:WaterToAirHeatPump and 
-+       \memo ZoneHVAC:TerminalUnit:VariableRefrigerantFlow objects to allow operation at 
++       \memo operating speed. This object is primarily used for ZoneHVAC:WaterToAirHeatPump and
++       \memo ZoneHVAC:TerminalUnit:VariableRefrigerantFlow objects to allow operation at
 +       \memo different fan flow rates.
 +       \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
 @rraustad If this object is truly extensible, then the fields for Number of Speeds for Heating/Cooling should not have \maximum declared in the IDD.
@@ -72,7 +72,7 @@ These notes don't need to be repeated for every speed.
 
 ### EnergyPlus Technicalities on 11/30/22 ###
 
-The conference call focused on the issue whether we need to use the exsting object of UnitarySystemPerformance:Multispeed or not, if the FanModel object can be used to simulate multiuple fan speeds. The suggestion is to provide comparison between two objects. 
+The conference call focused on the issue whether we need to use the exsting object of UnitarySystemPerformance:Multispeed or not, if the FanModel object can be used to simulate multiuple fan speeds. The suggestion is to provide comparison between two objects.
 
 ###Action item:###
 
@@ -105,7 +105,7 @@ All:
 
 Happy New Year! I came back to the US after Christmas. I started to work from today after a China trip.
 
-The new feature proposal was discussed on Nov. 30, 2022. The main topic is if we use either Fan:SystemModel or UnitarySystemPerformance:Multispeed. I submited my response to show differences between two objects in https://github.com/NREL/EnergyPlus/pull/9746:
+The new feature proposal was discussed on Nov. 30, 2022. The main topic is if we use either Fan:SystemModel or UnitarySystemPerformance:Multispeed. I submited my response to show differences between two objects in https://github.com/NatLabRockies/EnergyPlus/pull/9746:
 
 Based on discussion in the conference call today, I revised the NFP by adding a section to show differences between between UnitarySystemPerformance:Multispeed and Fan:SystemModel for review.
 The Fan:SystemModel does not have No Load Supply Air Flow Rate Ratio, and different fan flow ratios between heating and cooling.
@@ -118,7 +118,7 @@ Please let me know your comments via E-mail.
 Thanks.
 I would like to have your feedback to let me know which object is selected, so that I can move forward.
 Thanks.
-Gu 
+Gu
 
 ####Mike comments on 1/4/22####
 
@@ -161,7 +161,7 @@ Tianzhen
 
 ## Overview ##
 
-The ZoneHVAC:FourPipeFanCoil object allows multi-speed cycling fan with constant water flow rate. MultiSpeedFan is one of choices defined in the Capacity Control Method field. The object has two fields to defind Low Speed Supply Air Flow Ratio, and Medium Speed Supply Air Flow Ratio. Therefore, it has 3 fan speeds to be applied to the object. The fan air flow cycles between adjacent speeds based on the cooling/heating capacity. It is obvious that 3 speed fan operation may not be general enough. If a user wants more or less speed operation, more fields are needed. In addition, water flow rate remains the same with different air flow rates. 
+The ZoneHVAC:FourPipeFanCoil object allows multi-speed cycling fan with constant water flow rate. MultiSpeedFan is one of choices defined in the Capacity Control Method field. The object has two fields to defind Low Speed Supply Air Flow Ratio, and Medium Speed Supply Air Flow Ratio. Therefore, it has 3 fan speeds to be applied to the object. The fan air flow cycles between adjacent speeds based on the cooling/heating capacity. It is obvious that 3 speed fan operation may not be general enough. If a user wants more or less speed operation, more fields are needed. In addition, water flow rate remains the same with different air flow rates.
 
 The AirLoopHVAC:UnitarySystem object allows multispeed coils with two fields input: Design Specification Multispeed Object Type and Design Specification Multispeed Object Name. The advatage to introduce an object to define multispeed coils is to provide more choices for users to define fan flow ratios with heating, cooling and no load conditions.
 
@@ -199,8 +199,8 @@ Since the current ZoneHVAC:TerminalUnit:VariableRefrigerantFlow only allows sing
 
 #####Coil:Heating/Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl#####
 
-Since Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl and Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl require variable speed fans, the multiple speed fans are not applied to both coils. In addition, based on description provided by LBL, the coils can handle indoor fan speed control for indoor coil/unit. No effort is needed from this new feature.  
-  
+Since Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl and Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl require variable speed fans, the multiple speed fans are not applied to both coils. In addition, based on description provided by LBL, the coils can handle indoor fan speed control for indoor coil/unit. No effort is needed from this new feature.
+
 
 ## Approach ##
 
@@ -243,7 +243,7 @@ Two optional new fields are added to allow a multiple speed fan.
        \note Enter the name of the performance specification object used to describe the multispeed coil or fan.
 
 Allowed heating and cooling coils:
- 
+
 	Coil:Cooling:DX:VariableRefrigerantFlow
 	Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl
 	Coil:Heating:DX:VariableRefrigerantFlow
@@ -322,7 +322,7 @@ The object inputs are extracted from ASHRAE901_RetailStripmall_STD2019_Denver.id
 
 ####Differences####
 
-The Fan:SystemModel does provide multiple flow fration. The UnitarySystemPerformance:Multispeed object provides more choices than the Fan:SystemModel with No Load Supply Air Flow Rate Ratio, and different fan flow ratios between heating and cooling. The latter (different flow ratios between cooling and heating) can be justified, because the real system has only a single supply fan. The real missed item is No Load Supply Air Flow Rate Ratio. As long as the No Load Supply Air Flow Rate defined in the parent object is desinged correctly, the ratio input can be avoided. 
+The Fan:SystemModel does provide multiple flow fration. The UnitarySystemPerformance:Multispeed object provides more choices than the Fan:SystemModel with No Load Supply Air Flow Rate Ratio, and different fan flow ratios between heating and cooling. The latter (different flow ratios between cooling and heating) can be justified, because the real system has only a single supply fan. The real missed item is No Load Supply Air Flow Rate Ratio. As long as the No Load Supply Air Flow Rate defined in the parent object is desinged correctly, the ratio input can be avoided.
 
 ## Testing/Validation/Data Sources ##
 
@@ -832,7 +832,7 @@ An existing eample file will be modified by adding multiple fan performance. If 
 
 • https://www.lg.com//global/business/download/airsolution/2020 MULTI V Catalogue_EU[20200713_184653935].pdf LG indoor unit documentation on pages 55-80 shows 3-speed capabilities across multiple product lines.
 
-• https://www.shareddocs.com/hvac/docs/1001/Public/0A/TCTC-E20-VRF007.pdf For Carrier VRF terminals, on page 2, the indoor unit has 3 speed fan control. 
+• https://www.shareddocs.com/hvac/docs/1001/Public/0A/TCTC-E20-VRF007.pdf For Carrier VRF terminals, on page 2, the indoor unit has 3 speed fan control.
 
 • https://www.shareddocs.com/hvac/docs/1001/Public/0B/A10-1604-3.pdf Toshiba-Carrier MMDB service manual. See pages 8 and 9 for relevant unit data. See pages 17 and 18 for multi-speed fan “auto” control explanations
 
@@ -846,7 +846,7 @@ Several functions will be modified in the UnitarySystem module to allow multiple
 
 #### Sizing ####
 
-If autosize is required, linear discrete size of fan flow rates are assigned. The cooling coil air flow size code is provide below. The heating coil flow size will be similaer. 
+If autosize is required, linear discrete size of fan flow rates are assigned. The cooling coil air flow size code is provide below. The heating coil flow size will be similaer.
 
                // airflow sizing
                 Real64 AirFlowRate = WaterToAirHeatPumpSimple::GetCoilAirFlowRate(
@@ -865,7 +865,7 @@ If autosize is required, linear discrete size of fan flow rates are assigned. Th
 
 #### Input ####
 
-##### Read inputs of UnitarySystemPerformance:Multispeed and corresponding two fields  
+##### Read inputs of UnitarySystemPerformance:Multispeed and corresponding two fields
 
                     if (getPTUnitType == 3) {
                         thisSys.m_DesignSpecMultispeedHPType =
@@ -880,7 +880,7 @@ If autosize is required, linear discrete size of fan flow rates are assigned. Th
                         }
                     }
 
-##### Set up arrays to store multuiple air flows and associated flags  
+##### Set up arrays to store multuiple air flows and associated flags
 
 Use existing array of multiple speed coils to set up heaiting and cooling volumatric and mass flow rates, speed ratios
 
@@ -924,7 +924,7 @@ If the supply heating and cooling flow rates are given in the inputs, the multip
                                             state.dataUnitarySystems->unitarySys[sysNum].Name);
 
 ##### Report output variables
- 
+
 Assign corresponding values to these output variables.
 
         case DataHVACGlobals::Coil_HeatingWaterToAirHPSimple: {
@@ -947,9 +947,9 @@ Assign corresponding values to these output variables.
 
 ###Coil:Heating/Cooling:WaterToAirHeatPump:VariableSpeedEquationFit###
 
-The example file library does not provide the test file with selected Coil:Heating/Cooling:WaterToAirHeatPump:VariableSpeedEquationFit coil under ZoneHVAC:WaterToAirHeatPump. I modified an example file of DOAToWaterToAirInlet.idf to replace Coil:Heating/Cooling:WaterToAirHeatPump:EquationFit by Cooling:WaterToAirHeatPump:VariableSpeedEquationFit. Due to mismatch of airflows, although Cooling:WaterToAirHeatPump:VariableSpeedEquationFit coils have 10 speed, the parent object does not have such capability, so that no multiple speed airflows are simulateed. 
+The example file library does not provide the test file with selected Coil:Heating/Cooling:WaterToAirHeatPump:VariableSpeedEquationFit coil under ZoneHVAC:WaterToAirHeatPump. I modified an example file of DOAToWaterToAirInlet.idf to replace Coil:Heating/Cooling:WaterToAirHeatPump:EquationFit by Cooling:WaterToAirHeatPump:VariableSpeedEquationFit. Due to mismatch of airflows, although Cooling:WaterToAirHeatPump:VariableSpeedEquationFit coils have 10 speed, the parent object does not have such capability, so that no multiple speed airflows are simulateed.
 
-The proposed revisions to adopt inputs of multiple speed fans are described below: 
+The proposed revisions to adopt inputs of multiple speed fans are described below:
 
 #### Modify input ####
 
@@ -960,7 +960,7 @@ Since the coil specifies the number of speed. The number of speed from the Unita
 
 The nuymber of speeds should match each other. If not, the number of speeds from coil prevails. In other words, the number of speed provided from UnitarySystemPerformance:Multispeed will be overridden. At the same time, a warning will be posted in the err file to let users be aware of the changes.
 
-#### Craete corresponding output variables to present the speed number, cycle ratio and speed ratio, to be consistent with other multuiple speed coils and fans.     
+#### Craete corresponding output variables to present the speed number, cycle ratio and speed ratio, to be consistent with other multuiple speed coils and fans.
 
 #### Modify the OutputControl function ####
 
@@ -1055,7 +1055,7 @@ The sizing of supply flow rates are determined in the sizing function. The rest 
         }
 
 
-#### SetAverageAirFlow 
+#### SetAverageAirFlow
 
 The currect function set up average airflow is based on system on and off flow rate adjusted by part load ratio. When multiple speed fan is used, the average flow rates may be determined by speed ratio with two consecutive fan speeds. The procedure mimics the one from UnitarySystem.
 
@@ -1078,6 +1078,4 @@ Heating
 
 #### CalcVRF ####
 
-When multiple speed fan is applied, a for loop will be used to test which speed is used for the terminal unit. The procedure mimics one from HVACAirToAirHeatPump:MUltispeed. 
-
-
+When multiple speed fan is applied, a for loop will be used to test which speed is used for the terminal unit. The procedure mimics one from HVACAirToAirHeatPump:MUltispeed.

@@ -259,9 +259,6 @@
 !  Vintage:2001
 !  Material:mc-Si
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   PhotovoltaicPerformance:Sandia,
     12-PW100095W-Array,      !- Name
     10.78,                   !- Active Area {m2}
@@ -301,8 +298,8 @@
     0.03,                    !- Sandia Database Parameter c5 {dimensionless}
     33.8,                    !- Sandia Database Parameter Ix0
     21.8,                    !- Sandia Database Parameter Ixx0
-    1.109,                   !- Sandia Database Parameter c6
-    -0.109;                  !- Sandia Database Parameter c7
+    1.109,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.109;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 16-SanyoH552BA2-Array[]
@@ -358,8 +355,8 @@
     0.0008,                  !- Sandia Database Parameter c5 {dimensionless}
     7.39,                    !- Sandia Database Parameter Ix0
     4.97,                    !- Sandia Database Parameter Ixx0
-    1.102,                   !- Sandia Database Parameter c6
-    -0.102;                  !- Sandia Database Parameter c7
+    1.102,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.102;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 32-BP380-Array[]
@@ -415,8 +412,8 @@
     0.0039,                  !- Sandia Database Parameter c5 {dimensionless}
     9.65,                    !- Sandia Database Parameter Ix0
     6.49,                    !- Sandia Database Parameter Ixx0
-    1.1549,                  !- Sandia Database Parameter c6
-    -0.1549;                 !- Sandia Database Parameter c7
+    1.1549,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1549;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 48-BP270_70W-Array[]
@@ -468,8 +465,8 @@
     0.0211,                  !- Sandia Database Parameter c5 {dimensionless}
     8.52,                    !- Sandia Database Parameter Ix0
     5.42,                    !- Sandia Database Parameter Ixx0
-    1.1468,                  !- Sandia Database Parameter c6
-    -0.1468;                 !- Sandia Database Parameter c7
+    1.1468,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1468;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 8_Sharp_167U1F_Array[]
@@ -516,8 +513,8 @@
     0.013113,                !- Sandia Database Parameter c5 {dimensionless}
     7.915,                   !- Sandia Database Parameter Ix0
     5.151,                   !- Sandia Database Parameter Ixx0
-    1.0872,                  !- Sandia Database Parameter c6
-    -0.087186;               !- Sandia Database Parameter c7
+    1.0872,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.087186;               !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 80-AstroPower_AP75-Array[]
@@ -574,8 +571,8 @@
     0.0213,                  !- Sandia Database Parameter c5 {dimensionless}
     17.7,                    !- Sandia Database Parameter Ix0
     11.6,                    !- Sandia Database Parameter Ixx0
-    1.0297,                  !- Sandia Database Parameter c6
-    -0.0297;                 !- Sandia Database Parameter c7
+    1.0297,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0297;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 8-BP275-Array[]
@@ -626,8 +623,8 @@
     0.022,                   !- Sandia Database Parameter c5 {dimensionless}
     18.1,                    !- Sandia Database Parameter Ix0
     11.8,                    !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 8-KC80-Array[]
@@ -679,8 +676,8 @@
     0.014,                   !- Sandia Database Parameter c5 {dimensionless}
     17.69,                   !- Sandia Database Parameter Ix0
     11.74,                   !- Sandia Database Parameter Ixx0
-    1.096,                   !- Sandia Database Parameter c6
-    -0.096;                  !- Sandia Database Parameter c7
+    1.096,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.096;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def 8-Shell_SM110-Array[]
@@ -730,8 +727,8 @@
     -0.0302,                 !- Sandia Database Parameter c5 {dimensionless}
     26.38,                   !- Sandia Database Parameter Ix0
     17.75,                   !- Sandia Database Parameter Ixx0
-    1.20247,                 !- Sandia Database Parameter c6
-    -0.20247;                !- Sandia Database Parameter c7
+    1.20247,                 !- Sandia Database Parameter c6 {dimensionless}
+    -0.20247;                !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Advent_Solar_160[]
@@ -782,8 +779,8 @@
     0.0026,                  !- Sandia Database Parameter c5 {dimensionless}
     5.54,                    !- Sandia Database Parameter Ix0
     3.56,                    !- Sandia Database Parameter Ixx0
-    1.1731,                  !- Sandia Database Parameter c6
-    -0.1731;                 !- Sandia Database Parameter c7
+    1.1731,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1731;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-17_100[]
@@ -840,8 +837,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     6.32,                    !- Sandia Database Parameter Ix0
     4.12,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-17_85[]
@@ -898,8 +895,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.53,                    !- Sandia Database Parameter Ix0
     3.65,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-17_92[]
@@ -956,8 +953,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.93,                    !- Sandia Database Parameter Ix0
     3.86,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-34_100[]
@@ -1013,8 +1010,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     3.16,                    !- Sandia Database Parameter Ix0
     2.06,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-34_85[]
@@ -1070,8 +1067,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.76,                    !- Sandia Database Parameter Ix0
     1.78,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-100-ATF-34_92[]
@@ -1127,8 +1124,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.96,                    !- Sandia Database Parameter Ix0
     1.92,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-17_265[]
@@ -1183,8 +1180,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     17.1,                    !- Sandia Database Parameter Ix0
     11.3,                    !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-17_285[]
@@ -1239,8 +1236,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     18.2,                    !- Sandia Database Parameter Ix0
     12,                      !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-17_300[]
@@ -1295,8 +1292,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     18.9,                    !- Sandia Database Parameter Ix0
     12.5,                    !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-50[]
@@ -1351,8 +1348,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     6.25,                    !- Sandia Database Parameter Ix0
     4.15,                    !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-50_265[]
@@ -1407,8 +1404,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     5.7,                     !- Sandia Database Parameter Ix0
     3.9,                     !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-50_285[]
@@ -1463,8 +1460,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     6.13,                    !- Sandia Database Parameter Ix0
     4.02,                    !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-300-DGF-50_300[]
@@ -1519,8 +1516,8 @@
     0.0157,                  !- Sandia Database Parameter c5 {dimensionless}
     6.43,                    !- Sandia Database Parameter Ix0
     4.24,                    !- Sandia Database Parameter Ixx0
-    1.127,                   !- Sandia Database Parameter c6
-    -0.127;                  !- Sandia Database Parameter c7
+    1.127,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.127;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-50-ALF-17[]
@@ -1576,8 +1573,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     3.075,                   !- Sandia Database Parameter Ix0
     2.009,                   !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-50-ATF-17_45[]
@@ -1633,8 +1630,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.86,                    !- Sandia Database Parameter Ix0
     1.85,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def ASE-50-ATF-17_50[]
@@ -1690,8 +1687,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     3.16,                    !- Sandia Database Parameter Ix0
     2.04,                    !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-100[]
@@ -1745,8 +1742,8 @@
     0.012,                   !- Sandia Database Parameter c5 {dimensionless}
     6.8,                     !- Sandia Database Parameter Ix0
     4.32,                    !- Sandia Database Parameter Ixx0
-    1.094,                   !- Sandia Database Parameter c6
-    -0.094;                  !- Sandia Database Parameter c7
+    1.094,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.094;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-100_27[]
@@ -1800,8 +1797,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     7,                       !- Sandia Database Parameter Ix0
     4.32,                    !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-110[]
@@ -1855,8 +1852,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     7.3,                     !- Sandia Database Parameter Ix0
     4.6,                     !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-110_29[]
@@ -1910,8 +1907,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     6.8,                     !- Sandia Database Parameter Ix0
     4.3,                     !- Sandia Database Parameter Ixx0
-    1.072,                   !- Sandia Database Parameter c6
-    -0.072;                  !- Sandia Database Parameter c7
+    1.072,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.072;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-120[]
@@ -1965,8 +1962,8 @@
     0.006,                   !- Sandia Database Parameter c5 {dimensionless}
     7.15,                    !- Sandia Database Parameter Ix0
     4.6,                     !- Sandia Database Parameter Ixx0
-    1.126,                   !- Sandia Database Parameter c6
-    -0.126;                  !- Sandia Database Parameter c7
+    1.126,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.126;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-120_31[]
@@ -2020,8 +2017,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     7.65,                    !- Sandia Database Parameter Ix0
     5,                       !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-1206[]
@@ -2074,8 +2071,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     7.265,                   !- Sandia Database Parameter Ix0
     4.672,                   !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-130[]
@@ -2129,8 +2126,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     7.26,                    !- Sandia Database Parameter Ix0
     4.59,                    !- Sandia Database Parameter Ixx0
-    1.118,                   !- Sandia Database Parameter c6
-    -0.118;                  !- Sandia Database Parameter c7
+    1.118,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.118;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-130_34[]
@@ -2184,8 +2181,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     7.51,                    !- Sandia Database Parameter Ix0
     4.9,                     !- Sandia Database Parameter Ixx0
-    1.118,                   !- Sandia Database Parameter c6
-    -0.118;                  !- Sandia Database Parameter c7
+    1.118,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.118;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-50[]
@@ -2238,8 +2235,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     3.25,                    !- Sandia Database Parameter Ix0
     2.15,                    !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-50_36[]
@@ -2292,8 +2289,8 @@
     0.008,                   !- Sandia Database Parameter c5 {dimensionless}
     3.09,                    !- Sandia Database Parameter Ix0
     1.95,                    !- Sandia Database Parameter Ixx0
-    1.109,                   !- Sandia Database Parameter c6
-    -0.109;                  !- Sandia Database Parameter c7
+    1.109,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.109;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-65[]
@@ -2347,8 +2344,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     4.47,                    !- Sandia Database Parameter Ix0
     2.78,                    !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP75[]
@@ -2405,8 +2402,8 @@
     0.0213,                  !- Sandia Database Parameter c5 {dimensionless}
     4.37,                    !- Sandia Database Parameter Ix0
     2.85,                    !- Sandia Database Parameter Ixx0
-    1.0297,                  !- Sandia Database Parameter c6
-    -0.0297;                 !- Sandia Database Parameter c7
+    1.0297,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0297;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-75[]
@@ -2460,8 +2457,8 @@
     0.023,                   !- Sandia Database Parameter c5 {dimensionless}
     4.3,                     !- Sandia Database Parameter Ix0
     2.9,                     !- Sandia Database Parameter Ixx0
-    1.036,                   !- Sandia Database Parameter c6
-    -0.036;                  !- Sandia Database Parameter c7
+    1.036,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.036;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-75_40[]
@@ -2515,8 +2512,8 @@
     0.0095,                  !- Sandia Database Parameter c5 {dimensionless}
     4.45,                    !- Sandia Database Parameter Ix0
     2.87,                    !- Sandia Database Parameter Ixx0
-    1.065,                   !- Sandia Database Parameter c6
-    -0.065;                  !- Sandia Database Parameter c7
+    1.065,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.065;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-75_41[]
@@ -2570,8 +2567,8 @@
     0.016,                   !- Sandia Database Parameter c5 {dimensionless}
     4.75,                    !- Sandia Database Parameter Ix0
     3.1,                     !- Sandia Database Parameter Ixx0
-    1.123,                   !- Sandia Database Parameter c6
-    -0.123;                  !- Sandia Database Parameter c7
+    1.123,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.123;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-75_42[]
@@ -2625,8 +2622,8 @@
     0.0095,                  !- Sandia Database Parameter c5 {dimensionless}
     4.74,                    !- Sandia Database Parameter Ix0
     3.1,                     !- Sandia Database Parameter Ixx0
-    1.065,                   !- Sandia Database Parameter c6
-    -0.065;                  !- Sandia Database Parameter c7
+    1.065,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.065;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_AP-8225[]
@@ -2679,8 +2676,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     5.6,                     !- Sandia Database Parameter Ix0
     3.6,                     !- Sandia Database Parameter Ixx0
-    1.12,                    !- Sandia Database Parameter c6
-    -0.12;                   !- Sandia Database Parameter c7
+    1.12,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.12;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-110-SL[]
@@ -2734,8 +2731,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     10.1,                    !- Sandia Database Parameter Ix0
     6.08,                    !- Sandia Database Parameter Ixx0
-    1.077,                   !- Sandia Database Parameter c6
-    -0.077;                  !- Sandia Database Parameter c7
+    1.077,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.077;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-110-SL_45[]
@@ -2789,8 +2786,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     9.97,                    !- Sandia Database Parameter Ix0
     5.97,                    !- Sandia Database Parameter Ixx0
-    1.077,                   !- Sandia Database Parameter c6
-    -0.077;                  !- Sandia Database Parameter c7
+    1.077,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.077;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-120[]
@@ -2844,8 +2841,8 @@
     0.037,                   !- Sandia Database Parameter c5 {dimensionless}
     9.24,                    !- Sandia Database Parameter Ix0
     5.33,                    !- Sandia Database Parameter Ixx0
-    1.082,                   !- Sandia Database Parameter c6
-    -0.082;                  !- Sandia Database Parameter c7
+    1.082,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.082;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-120_47[]
@@ -2899,8 +2896,8 @@
     0.037,                   !- Sandia Database Parameter c5 {dimensionless}
     8.84,                    !- Sandia Database Parameter Ix0
     5.21,                    !- Sandia Database Parameter Ixx0
-    1.082,                   !- Sandia Database Parameter c6
-    -0.082;                  !- Sandia Database Parameter c7
+    1.082,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.082;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-130[]
@@ -2954,8 +2951,8 @@
     0.037,                   !- Sandia Database Parameter c5 {dimensionless}
     9.42,                    !- Sandia Database Parameter Ix0
     5.67,                    !- Sandia Database Parameter Ixx0
-    1.082,                   !- Sandia Database Parameter c6
-    -0.082;                  !- Sandia Database Parameter c7
+    1.082,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.082;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-130_49[]
@@ -3009,8 +3006,8 @@
     0.037,                   !- Sandia Database Parameter c5 {dimensionless}
     9.54,                    !- Sandia Database Parameter Ix0
     5.6,                     !- Sandia Database Parameter Ixx0
-    1.082,                   !- Sandia Database Parameter c6
-    -0.082;                  !- Sandia Database Parameter c7
+    1.082,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.082;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-140[]
@@ -3064,8 +3061,8 @@
     0.037,                   !- Sandia Database Parameter c5 {dimensionless}
     9.91,                    !- Sandia Database Parameter Ix0
     5.84,                    !- Sandia Database Parameter Ixx0
-    1.082,                   !- Sandia Database Parameter c6
-    -0.082;                  !- Sandia Database Parameter c7
+    1.082,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.082;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-40[]
@@ -3119,8 +3116,8 @@
     0.008,                   !- Sandia Database Parameter c5 {dimensionless}
     2.82,                    !- Sandia Database Parameter Ix0
     1.7,                     !- Sandia Database Parameter Ixx0
-    1.032,                   !- Sandia Database Parameter c6
-    -0.032;                  !- Sandia Database Parameter c7
+    1.032,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.032;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-45[]
@@ -3174,8 +3171,8 @@
     0.008,                   !- Sandia Database Parameter c5 {dimensionless}
     3.1,                     !- Sandia Database Parameter Ix0
     2,                       !- Sandia Database Parameter Ixx0
-    1.032,                   !- Sandia Database Parameter c6
-    -0.032;                  !- Sandia Database Parameter c7
+    1.032,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.032;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-45_53[]
@@ -3229,8 +3226,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     2.86,                    !- Sandia Database Parameter Ix0
     1.75,                    !- Sandia Database Parameter Ixx0
-    1.12,                    !- Sandia Database Parameter c6
-    -0.12;                   !- Sandia Database Parameter c7
+    1.12,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.12;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-45_54[]
@@ -3284,8 +3281,8 @@
     0.008,                   !- Sandia Database Parameter c5 {dimensionless}
     3.16,                    !- Sandia Database Parameter Ix0
     1.7,                     !- Sandia Database Parameter Ixx0
-    1.032,                   !- Sandia Database Parameter c6
-    -0.032;                  !- Sandia Database Parameter c7
+    1.032,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.032;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-50[]
@@ -3339,8 +3336,8 @@
     0.008,                   !- Sandia Database Parameter c5 {dimensionless}
     3.38,                    !- Sandia Database Parameter Ix0
     1.9,                     !- Sandia Database Parameter Ixx0
-    1.032,                   !- Sandia Database Parameter c6
-    -0.032;                  !- Sandia Database Parameter c7
+    1.032,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.032;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-65[]
@@ -3394,8 +3391,8 @@
     0.03,                    !- Sandia Database Parameter c5 {dimensionless}
     4.54,                    !- Sandia Database Parameter Ix0
     2.79,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-65_57[]
@@ -3449,8 +3446,8 @@
     0.03,                    !- Sandia Database Parameter c5 {dimensionless}
     4.5,                     !- Sandia Database Parameter Ix0
     2.64,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-75[]
@@ -3504,8 +3501,8 @@
     0.03,                    !- Sandia Database Parameter c5 {dimensionless}
     4.68,                    !- Sandia Database Parameter Ix0
     2.99,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-75-SC[]
@@ -3559,8 +3556,8 @@
     0.03,                    !- Sandia Database Parameter c5 {dimensionless}
     9.52,                    !- Sandia Database Parameter Ix0
     5.68,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def AstroPower_APX-90[]
@@ -3613,8 +3610,8 @@
     0.033,                   !- Sandia Database Parameter c5 {dimensionless}
     5.71,                    !- Sandia Database Parameter Ix0
     3.55,                    !- Sandia Database Parameter Ixx0
-    1.12,                    !- Sandia Database Parameter c6
-    -0.12;                   !- Sandia Database Parameter c7
+    1.12,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.12;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP2140S[]
@@ -3667,8 +3664,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.41,                    !- Sandia Database Parameter Ix0
     3,                       !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP2150S[]
@@ -3721,8 +3718,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.71,                    !- Sandia Database Parameter Ix0
     3.2,                     !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP270[]
@@ -3774,8 +3771,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.4,                     !- Sandia Database Parameter Ix0
     3.02,                    !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP275[]
@@ -3827,8 +3824,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.7,                     !- Sandia Database Parameter Ix0
     3.22,                    !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP3125[]
@@ -3875,8 +3872,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     7.521236002,             !- Sandia Database Parameter Ix0
     5.097354968,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP350[]
@@ -3923,8 +3920,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     3.162111157,             !- Sandia Database Parameter Ix0
     2.074838853,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP365[]
@@ -3971,8 +3968,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     3.98007051,              !- Sandia Database Parameter Ix0
     2.649188709,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP375_E[]
@@ -4026,8 +4023,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     4.72,                    !- Sandia Database Parameter Ix0
     3.08,                    !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP380[]
@@ -4081,8 +4078,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     4.81,                    !- Sandia Database Parameter Ix0
     3.23,                    !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP380_E[]
@@ -4136,8 +4133,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     4.78,                    !- Sandia Database Parameter Ix0
     3.33,                    !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP4150[]
@@ -4184,8 +4181,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.710416667,             !- Sandia Database Parameter Ix0
     3.098355556,             !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP4160[]
@@ -4232,8 +4229,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.859166667,             !- Sandia Database Parameter Ix0
     3.234311111,             !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP4170[]
@@ -4280,8 +4277,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     5.0575,                  !- Sandia Database Parameter Ix0
     3.420355556,             !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP5130[]
@@ -4334,8 +4331,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.76,                    !- Sandia Database Parameter Ix0
     3.22,                    !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP580[]
@@ -4389,8 +4386,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     4.65,                    !- Sandia Database Parameter Ix0
     3.3,                     !- Sandia Database Parameter Ixx0
-    1.097,                   !- Sandia Database Parameter c6
-    -0.097;                  !- Sandia Database Parameter c7
+    1.097,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.097;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP580_76[]
@@ -4443,8 +4440,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.67,                    !- Sandia Database Parameter Ix0
     3.21,                    !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP585[]
@@ -4498,8 +4495,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     4.95,                    !- Sandia Database Parameter Ix0
     3.5,                     !- Sandia Database Parameter Ixx0
-    1.097,                   !- Sandia Database Parameter c6
-    -0.097;                  !- Sandia Database Parameter c7
+    1.097,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.097;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP585_78[]
@@ -4553,8 +4550,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     4.95,                    !- Sandia Database Parameter Ix0
     3.45,                    !- Sandia Database Parameter Ixx0
-    1.097,                   !- Sandia Database Parameter c6
-    -0.097;                  !- Sandia Database Parameter c7
+    1.097,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.097;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP585_79[]
@@ -4607,8 +4604,8 @@
     0.007,                   !- Sandia Database Parameter c5 {dimensionless}
     4.95,                    !- Sandia Database Parameter Ix0
     3.4,                     !- Sandia Database Parameter Ixx0
-    1.105,                   !- Sandia Database Parameter c6
-    -0.105;                  !- Sandia Database Parameter c7
+    1.105,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.105;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP980[]
@@ -4662,8 +4659,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.78,                    !- Sandia Database Parameter Ix0
     1.74,                    !- Sandia Database Parameter Ixx0
-    1.09,                    !- Sandia Database Parameter c6
-    -0.09;                   !- Sandia Database Parameter c7
+    1.09,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.09;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_BP990[]
@@ -4717,8 +4714,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.84,                    !- Sandia Database Parameter Ix0
     1.89,                    !- Sandia Database Parameter Ixx0
-    1.09,                    !- Sandia Database Parameter c6
-    -0.09;                   !- Sandia Database Parameter c7
+    1.09,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.09;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_MSX110[]
@@ -4765,8 +4762,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.502439024,             !- Sandia Database Parameter Ix0
     2.381137725,             !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_MSX120[]
@@ -4813,8 +4810,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.76,                    !- Sandia Database Parameter Ix0
     2.64,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_MSX60[]
@@ -4861,8 +4858,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.71,                    !- Sandia Database Parameter Ix0
     2.56,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_MSX64[]
@@ -4909,8 +4906,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.905263158,             !- Sandia Database Parameter Ix0
     2.677028571,             !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_SX3150[]
@@ -4957,8 +4954,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     4.738179179,             !- Sandia Database Parameter Ix0
     3.123027339,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_SX3160[]
@@ -5005,8 +5002,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     4.788054749,             !- Sandia Database Parameter Ix0
     3.266614803,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_SX3190[]
@@ -5053,8 +5050,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     8.478846951,             !- Sandia Database Parameter Ix0
     5.614269838,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def BP_Solar_SX3195[]
@@ -5101,8 +5098,8 @@
     0.0158,                  !- Sandia Database Parameter c5 {dimensionless}
     8.578598092,             !- Sandia Database Parameter Ix0
     5.714781062,             !- Sandia Database Parameter Ixx0
-    1.1442,                  !- Sandia Database Parameter c6
-    -0.1442;                 !- Sandia Database Parameter c7
+    1.1442,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1442;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Entech_22X_Concentrator[]
@@ -5157,8 +5154,8 @@
     0.0053,                  !- Sandia Database Parameter c5 {dimensionless}
     22.62,                   !- Sandia Database Parameter Ix0
     16.1,                    !- Sandia Database Parameter Ixx0
-    1.1316,                  !- Sandia Database Parameter c6
-    -0.1316;                 !- Sandia Database Parameter c7
+    1.1316,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1316;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def EPV-40[]
@@ -5212,8 +5209,8 @@
     -0.0233,                 !- Sandia Database Parameter c5 {dimensionless}
     1.055,                   !- Sandia Database Parameter Ix0
     0.63,                    !- Sandia Database Parameter Ixx0
-    1.0956,                  !- Sandia Database Parameter c6
-    -0.0956;                 !- Sandia Database Parameter c7
+    1.0956,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0956;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def First_Solar_FS-45[]
@@ -5260,8 +5257,8 @@
     -0.051,                  !- Sandia Database Parameter c5 {dimensionless}
     0.8325,                  !- Sandia Database Parameter Ix0
     0.521103896,             !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def First_Solar_FS-50[]
@@ -5315,8 +5312,8 @@
     -0.051,                  !- Sandia Database Parameter c5 {dimensionless}
     0.897,                   !- Sandia Database Parameter Ix0
     0.497,                   !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def First_Solar_FS-50_94[]
@@ -5370,8 +5367,8 @@
     -0.051,                  !- Sandia Database Parameter c5 {dimensionless}
     0.925,                   !- Sandia Database Parameter Ix0
     0.535,                   !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def First_Solar_FS-50D[]
@@ -5424,8 +5421,8 @@
     -0.014,                  !- Sandia Database Parameter c5 {dimensionless}
     1.024,                   !- Sandia Database Parameter Ix0
     0.636,                   !- Sandia Database Parameter Ixx0
-    1.131,                   !- Sandia Database Parameter c6
-    -0.131;                  !- Sandia Database Parameter c7
+    1.131,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.131;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def First_Solar_FS-55[]
@@ -5472,8 +5469,8 @@
     -0.051,                  !- Sandia Database Parameter c5 {dimensionless}
     0.925,                   !- Sandia Database Parameter Ix0
     0.583636364,             !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC120-1[]
@@ -5525,8 +5522,8 @@
     0.013,                   !- Sandia Database Parameter c5 {dimensionless}
     7.44,                    !- Sandia Database Parameter Ix0
     5.3,                     !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC120-1_98[]
@@ -5578,8 +5575,8 @@
     0.013,                   !- Sandia Database Parameter c5 {dimensionless}
     6.95,                    !- Sandia Database Parameter Ix0
     4.57,                    !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC150G[]
@@ -5633,8 +5630,8 @@
     0.005,                   !- Sandia Database Parameter c5 {dimensionless}
     6.61,                    !- Sandia Database Parameter Ix0
     4.52,                    !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC150G_100[]
@@ -5688,8 +5685,8 @@
     0.005,                   !- Sandia Database Parameter c5 {dimensionless}
     7.16,                    !- Sandia Database Parameter Ix0
     4.82,                    !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC158G[]
@@ -5743,8 +5740,8 @@
     0.005,                   !- Sandia Database Parameter c5 {dimensionless}
     7.44,                    !- Sandia Database Parameter Ix0
     4.85,                    !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC40[]
@@ -5796,8 +5793,8 @@
     0.013,                   !- Sandia Database Parameter c5 {dimensionless}
     2.46,                    !- Sandia Database Parameter Ix0
     1.7,                     !- Sandia Database Parameter Ixx0
-    1.155,                   !- Sandia Database Parameter c6
-    -0.155;                  !- Sandia Database Parameter c7
+    1.155,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.155;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC60[]
@@ -5844,8 +5841,8 @@
     0.0134,                  !- Sandia Database Parameter c5 {dimensionless}
     3.67032,                 !- Sandia Database Parameter Ix0
     2.57659,                 !- Sandia Database Parameter Ixx0
-    1.1183,                  !- Sandia Database Parameter c6
-    -0.1183;                 !- Sandia Database Parameter c7
+    1.1183,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1183;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC80[]
@@ -5897,8 +5894,8 @@
     0.006,                   !- Sandia Database Parameter c5 {dimensionless}
     4.67,                    !- Sandia Database Parameter Ix0
     3.13,                    !- Sandia Database Parameter Ixx0
-    1.102,                   !- Sandia Database Parameter c6
-    -0.102;                  !- Sandia Database Parameter c7
+    1.102,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.102;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Kyocera_KC80_105[]
@@ -5945,8 +5942,8 @@
     0.0134,                  !- Sandia Database Parameter c5 {dimensionless}
     4.89048,                 !- Sandia Database Parameter Ix0
     3.433034,                !- Sandia Database Parameter Ixx0
-    1.1183,                  !- Sandia Database Parameter c6
-    -0.1183;                 !- Sandia Database Parameter c7
+    1.1183,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1183;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF165EB3[]
@@ -5993,8 +5990,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.326205087,             !- Sandia Database Parameter Ix0
     4.714395036,             !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF165EB3_107[]
@@ -6041,8 +6038,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.4357,                  !- Sandia Database Parameter Ix0
     4.7282,                  !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF170EB4[]
@@ -6089,8 +6086,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.346113253,             !- Sandia Database Parameter Ix0
     4.783419854,             !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF170UD4[]
@@ -6137,8 +6134,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.794046988,             !- Sandia Database Parameter Ix0
     4.96288438,              !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF175UD4[]
@@ -6185,8 +6182,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.893587818,             !- Sandia Database Parameter Ix0
     5.052616642,             !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF180UD4[]
@@ -6233,8 +6230,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     7.993128648,             !- Sandia Database Parameter Ix0
     5.142348905,             !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Mitsubishi_PV-MF185UD4[]
@@ -6281,8 +6278,8 @@
     0.0164,                  !- Sandia Database Parameter c5 {dimensionless}
     8.092669478,             !- Sandia Database Parameter Ix0
     5.232081168,             !- Sandia Database Parameter Ixx0
-    1.147,                   !- Sandia Database Parameter c6
-    -0.147;                  !- Sandia Database Parameter c7
+    1.147,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.147;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_100W-12V[]
@@ -6336,8 +6333,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.98,                    !- Sandia Database Parameter Ix0
     4.4,                     !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_100W-24V[]
@@ -6391,8 +6388,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.99,                    !- Sandia Database Parameter Ix0
     2.2,                     !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_105W-12V[]
@@ -6446,8 +6443,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     6.28,                    !- Sandia Database Parameter Ix0
     4.63,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_105W-24V[]
@@ -6501,8 +6498,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     3.14,                    !- Sandia Database Parameter Ix0
     2.31,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_24V[]
@@ -6557,8 +6554,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.99,                    !- Sandia Database Parameter Ix0
     1.97,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_90W-12V[]
@@ -6612,8 +6609,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.58,                    !- Sandia Database Parameter Ix0
     4.09,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_90W-24V[]
@@ -6667,8 +6664,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.79,                    !- Sandia Database Parameter Ix0
     2.05,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_95W-12V[]
@@ -6722,8 +6719,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.78,                    !- Sandia Database Parameter Ix0
     4.25,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PW1000_95W-24V[]
@@ -6777,8 +6774,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     2.9,                     !- Sandia Database Parameter Ix0
     2.12,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX100[]
@@ -6831,8 +6828,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     0.701,                   !- Sandia Database Parameter Ix0
     0.53,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX200[]
@@ -6885,8 +6882,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     1.35,                    !- Sandia Database Parameter Ix0
     0.95,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX500[]
@@ -6939,8 +6936,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     3.04,                    !- Sandia Database Parameter Ix0
     2.05,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX500_42W[]
@@ -6993,8 +6990,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     2.64,                    !- Sandia Database Parameter Ix0
     1.86,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX500_47W[]
@@ -7047,8 +7044,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     3.05,                    !- Sandia Database Parameter Ix0
     1.99,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX500_52W[]
@@ -7101,8 +7098,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     3.25,                    !- Sandia Database Parameter Ix0
     2.15,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX750_70W[]
@@ -7156,8 +7153,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     4.42,                    !- Sandia Database Parameter Ix0
     3.14,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX750_75W[]
@@ -7211,8 +7208,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     4.67,                    !- Sandia Database Parameter Ix0
     3.21,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Photowatt_PWX750_80W[]
@@ -7266,8 +7263,8 @@
     0.01,                    !- Sandia Database Parameter c5 {dimensionless}
     4.91,                    !- Sandia Database Parameter Ix0
     3.36,                    !- Sandia Database Parameter Ixx0
-    1.133,                   !- Sandia Database Parameter c6
-    -0.133;                  !- Sandia Database Parameter c7
+    1.133,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.133;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_H168_PSEL2115[]
@@ -7320,8 +7317,8 @@
     0.0046,                  !- Sandia Database Parameter c5 {dimensionless}
     4.073,                   !- Sandia Database Parameter Ix0
     2.733,                   !- Sandia Database Parameter Ixx0
-    1.1203,                  !- Sandia Database Parameter c6
-    -0.1203;                 !- Sandia Database Parameter c7
+    1.1203,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1203;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-190BA2[]
@@ -7376,8 +7373,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     3.7035,                  !- Sandia Database Parameter Ix0
     2.5307,                  !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-190BA2_133[]
@@ -7432,8 +7429,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     3.745,                   !- Sandia Database Parameter Ix0
     2.565,                   !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-2717_27.8W[]
@@ -7488,8 +7485,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     1.82,                    !- Sandia Database Parameter Ix0
     1.205,                   !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-63S1_63W[]
@@ -7544,8 +7541,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     3.745,                   !- Sandia Database Parameter Ix0
     2.58,                    !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-6751B[]
@@ -7600,8 +7597,8 @@
     0.006,                   !- Sandia Database Parameter c5 {dimensionless}
     3.47,                    !- Sandia Database Parameter Ix0
     2.35,                    !- Sandia Database Parameter Ixx0
-    1.092,                   !- Sandia Database Parameter c6
-    -0.092;                  !- Sandia Database Parameter c7
+    1.092,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.092;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-6751B_137[]
@@ -7656,8 +7653,8 @@
     0.006,                   !- Sandia Database Parameter c5 {dimensionless}
     3.57,                    !- Sandia Database Parameter Ix0
     2.3,                     !- Sandia Database Parameter Ixx0
-    1.092,                   !- Sandia Database Parameter c6
-    -0.092;                  !- Sandia Database Parameter c7
+    1.092,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.092;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-Bifacial[]
@@ -7713,8 +7710,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     3.675,                   !- Sandia Database Parameter Ix0
     2.5,                     !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-H552BA2_175W[]
@@ -7769,8 +7766,8 @@
     0.0069,                  !- Sandia Database Parameter c5 {dimensionless}
     3.694,                   !- Sandia Database Parameter Ix0
     2.52,                    !- Sandia Database Parameter Ixx0
-    1.101,                   !- Sandia Database Parameter c6
-    -0.101;                  !- Sandia Database Parameter c7
+    1.101,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.101;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-HO97[]
@@ -7825,8 +7822,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     3.68,                    !- Sandia Database Parameter Ix0
     2.47,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-HO97_141[]
@@ -7881,8 +7878,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     3.52,                    !- Sandia Database Parameter Ix0
     2.44,                    !- Sandia Database Parameter Ixx0
-    1.069,                   !- Sandia Database Parameter c6
-    -0.069;                  !- Sandia Database Parameter c7
+    1.069,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.069;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sanyo_HIP-J54BA2_180W[]
@@ -7937,8 +7934,8 @@
     0.0084,                  !- Sandia Database Parameter c5 {dimensionless}
     3.646,                   !- Sandia Database Parameter Ix0
     2.46,                    !- Sandia Database Parameter Ixx0
-    1.0932,                  !- Sandia Database Parameter c6
-    -0.0932;                 !- Sandia Database Parameter c7
+    1.0932,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0932;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Schott_SAPC_165[]
@@ -7993,8 +7990,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.08,                    !- Sandia Database Parameter Ix0
     3.31,                    !- Sandia Database Parameter Ixx0
-    1.107,                   !- Sandia Database Parameter c6
-    -0.107;                  !- Sandia Database Parameter c7
+    1.107,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.107;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Schott_SAPC_165_144[]
@@ -8049,8 +8046,8 @@
     0.017,                   !- Sandia Database Parameter c5 {dimensionless}
     5.33,                    !- Sandia Database Parameter Ix0
     3.27,                    !- Sandia Database Parameter Ixx0
-    1.107,                   !- Sandia Database Parameter c6
-    -0.107;                  !- Sandia Database Parameter c7
+    1.107,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.107;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-123U1[]
@@ -8097,8 +8094,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     7.98622006,              !- Sandia Database Parameter Ix0
     5.024494615,             !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-167U1[]
@@ -8145,8 +8142,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     7.798888972,             !- Sandia Database Parameter Ix0
     4.982389911,             !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-167U1F[]
@@ -8193,8 +8190,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     7.907343812,             !- Sandia Database Parameter Ix0
     5.101686571,             !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-167U1F_148[]
@@ -8241,8 +8238,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     7.9034,                  !- Sandia Database Parameter Ix0
     5.1473,                  !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-208U1[]
@@ -8289,8 +8286,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     8.015798653,             !- Sandia Database Parameter Ix0
     5.122738923,             !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_ND-208U1F[]
@@ -8337,8 +8334,8 @@
     0.0153,                  !- Sandia Database Parameter c5 {dimensionless}
     7.87776522,              !- Sandia Database Parameter Ix0
     5.08765167,              !- Sandia Database Parameter Ixx0
-    1.1125,                  !- Sandia Database Parameter c6
-    -0.1125;                 !- Sandia Database Parameter c7
+    1.1125,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1125;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_NEH120E1[]
@@ -8392,8 +8389,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     4.97,                    !- Sandia Database Parameter Ix0
     3.3,                     !- Sandia Database Parameter Ixx0
-    1.126,                   !- Sandia Database Parameter c6
-    -0.126;                  !- Sandia Database Parameter c7
+    1.126,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.126;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_NEH120E1_152[]
@@ -8447,8 +8444,8 @@
     0.014,                   !- Sandia Database Parameter c5 {dimensionless}
     5.19,                    !- Sandia Database Parameter Ix0
     3.24,                    !- Sandia Database Parameter Ixx0
-    1.125,                   !- Sandia Database Parameter c6
-    -0.125;                  !- Sandia Database Parameter c7
+    1.125,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.125;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Sharp_NT-5AE3D_175W[]
@@ -8502,8 +8499,8 @@
     -0.0015,                 !- Sandia Database Parameter c5 {dimensionless}
     5.33,                    !- Sandia Database Parameter Ix0
     3.49,                    !- Sandia Database Parameter Ixx0
-    1.1493,                  !- Sandia Database Parameter c6
-    -0.1493;                 !- Sandia Database Parameter c7
+    1.1493,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1493;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_S165[]
@@ -8557,8 +8554,8 @@
     0.011,                   !- Sandia Database Parameter c5 {dimensionless}
     4.95,                    !- Sandia Database Parameter Ix0
     3.26,                    !- Sandia Database Parameter Ixx0
-    1.101,                   !- Sandia Database Parameter c6
-    -0.101;                  !- Sandia Database Parameter c7
+    1.101,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.101;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_S80[]
@@ -8612,8 +8609,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     5.19,                    !- Sandia Database Parameter Ix0
     3.43,                    !- Sandia Database Parameter Ixx0
-    1.085,                   !- Sandia Database Parameter c6
-    -0.085;                  !- Sandia Database Parameter c7
+    1.085,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.085;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_SM50-H[]
@@ -8667,8 +8664,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.36,                    !- Sandia Database Parameter Ix0
     2.31,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_SM55[]
@@ -8723,8 +8720,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.36,                    !- Sandia Database Parameter Ix0
     2.31,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_SP140[]
@@ -8779,8 +8776,8 @@
     0.019,                   !- Sandia Database Parameter c5 {dimensionless}
     4.61,                    !- Sandia Database Parameter Ix0
     3.03,                    !- Sandia Database Parameter Ixx0
-    1.143,                   !- Sandia Database Parameter c6
-    -0.143;                  !- Sandia Database Parameter c7
+    1.143,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.143;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Shell_SP150[]
@@ -8835,8 +8832,8 @@
     0.019,                   !- Sandia Database Parameter c5 {dimensionless}
     4.74,                    !- Sandia Database Parameter Ix0
     3.18,                    !- Sandia Database Parameter Ixx0
-    1.143,                   !- Sandia Database Parameter c6
-    -0.143;                  !- Sandia Database Parameter c7
+    1.143,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.143;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM10[]
@@ -8889,8 +8886,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     0.707,                   !- Sandia Database Parameter Ix0
     0.412,                   !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM20[]
@@ -8943,8 +8940,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     1.59,                    !- Sandia Database Parameter Ix0
     0.95,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM46[]
@@ -8997,8 +8994,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.34,                    !- Sandia Database Parameter Ix0
     2.37,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM50[]
@@ -9051,8 +9048,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.32,                    !- Sandia Database Parameter Ix0
     2.21,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM50-H[]
@@ -9105,8 +9102,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.345,                   !- Sandia Database Parameter Ix0
     2.36,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM55[]
@@ -9159,8 +9156,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.25,                    !- Sandia Database Parameter Ix0
     2.24,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM55_166[]
@@ -9213,8 +9210,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     3.4,                     !- Sandia Database Parameter Ix0
     2.29,                    !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM6[]
@@ -9267,8 +9264,8 @@
     -0.0105,                 !- Sandia Database Parameter c5 {dimensionless}
     0.378,                   !- Sandia Database Parameter Ix0
     0.242,                   !- Sandia Database Parameter Ixx0
-    1.137,                   !- Sandia Database Parameter c6
-    -0.137;                  !- Sandia Database Parameter c7
+    1.137,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.137;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SM6_168[]
@@ -9321,8 +9318,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     0.412,                   !- Sandia Database Parameter Ix0
     0.289,                   !- Sandia Database Parameter Ixx0
-    1.122,                   !- Sandia Database Parameter c6
-    -0.122;                  !- Sandia Database Parameter c7
+    1.122,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.122;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP130[]
@@ -9377,8 +9374,8 @@
     0.019,                   !- Sandia Database Parameter c5 {dimensionless}
     4.31,                    !- Sandia Database Parameter Ix0
     2.76,                    !- Sandia Database Parameter Ixx0
-    1.143,                   !- Sandia Database Parameter c6
-    -0.143;                  !- Sandia Database Parameter c7
+    1.143,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.143;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP130_170[]
@@ -9433,8 +9430,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.42,                    !- Sandia Database Parameter Ix0
     2.73,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP140[]
@@ -9489,8 +9486,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.66,                    !- Sandia Database Parameter Ix0
     2.99,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP150[]
@@ -9544,8 +9541,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.75,                    !- Sandia Database Parameter Ix0
     3.14,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP18_12V[]
@@ -9599,8 +9596,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     1.185,                   !- Sandia Database Parameter Ix0
     0.79,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP18_6V[]
@@ -9655,8 +9652,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     2.36,                    !- Sandia Database Parameter Ix0
     1.44,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP36_12V[]
@@ -9710,8 +9707,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     2.36,                    !- Sandia Database Parameter Ix0
     1.45,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP36_6V[]
@@ -9766,8 +9763,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.73,                    !- Sandia Database Parameter Ix0
     2.89,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP65_12V[]
@@ -9821,8 +9818,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.41,                    !- Sandia Database Parameter Ix0
     2.74,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP70_12V[]
@@ -9876,8 +9873,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.65,                    !- Sandia Database Parameter Ix0
     2.99,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP70_6V[]
@@ -9932,8 +9929,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     9.32,                    !- Sandia Database Parameter Ix0
     5.98,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP75[]
@@ -9987,8 +9984,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.54,                    !- Sandia Database Parameter Ix0
     2.97,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP75_12V[]
@@ -10042,8 +10039,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     4.77,                    !- Sandia Database Parameter Ix0
     3.12,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SP75_6V[]
@@ -10098,8 +10095,8 @@
     0.002,                   !- Sandia Database Parameter c5 {dimensionless}
     9.54,                    !- Sandia Database Parameter Ix0
     6.24,                    !- Sandia Database Parameter Ixx0
-    1.159,                   !- Sandia Database Parameter c6
-    -0.159;                  !- Sandia Database Parameter c7
+    1.159,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.159;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR100_12V[]
@@ -10154,8 +10151,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     6.24,                    !- Sandia Database Parameter Ix0
     3.85,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR100_6V[]
@@ -10210,8 +10207,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     12.48,                   !- Sandia Database Parameter Ix0
     7.72,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR50_12V[]
@@ -10265,8 +10262,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     3.17,                    !- Sandia Database Parameter Ix0
     2.11,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR50_6V[]
@@ -10321,8 +10318,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     6.36,                    !- Sandia Database Parameter Ix0
     4.19,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR90_12V[]
@@ -10377,8 +10374,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     6,                       !- Sandia Database Parameter Ix0
     3.73,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR90_12V_188[]
@@ -10433,8 +10430,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     5.36,                    !- Sandia Database Parameter Ix0
     3.53,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_SR90_6V[]
@@ -10489,8 +10486,8 @@
     0.009,                   !- Sandia Database Parameter c5 {dimensionless}
     12,                      !- Sandia Database Parameter Ix0
     7.47,                    !- Sandia Database Parameter Ixx0
-    1.142,                   !- Sandia Database Parameter c6
-    -0.142;                  !- Sandia Database Parameter c7
+    1.142,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.142;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST10[]
@@ -10545,8 +10542,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     0.626,                   !- Sandia Database Parameter Ix0
     0.381,                   !- Sandia Database Parameter Ixx0
-    1.045,                   !- Sandia Database Parameter c6
-    -0.045;                  !- Sandia Database Parameter c7
+    1.045,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.045;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST10_191[]
@@ -10601,8 +10598,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     0.71,                    !- Sandia Database Parameter Ix0
     0.434,                   !- Sandia Database Parameter Ixx0
-    1.045,                   !- Sandia Database Parameter c6
-    -0.045;                  !- Sandia Database Parameter c7
+    1.045,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.045;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST20[]
@@ -10657,8 +10654,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     1.405,                   !- Sandia Database Parameter Ix0
     0.899,                   !- Sandia Database Parameter Ixx0
-    1.045,                   !- Sandia Database Parameter c6
-    -0.045;                  !- Sandia Database Parameter c7
+    1.045,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.045;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST40[]
@@ -10713,8 +10710,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     2.55,                    !- Sandia Database Parameter Ix0
     1.71,                    !- Sandia Database Parameter Ixx0
-    1.045,                   !- Sandia Database Parameter c6
-    -0.045;                  !- Sandia Database Parameter c7
+    1.045,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.045;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST5[]
@@ -10769,8 +10766,8 @@
     0.0127,                  !- Sandia Database Parameter c5 {dimensionless}
     0.389,                   !- Sandia Database Parameter Ix0
     0.236,                   !- Sandia Database Parameter Ixx0
-    1.0896,                  !- Sandia Database Parameter c6
-    -0.0896;                 !- Sandia Database Parameter c7
+    1.0896,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0896;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Siemens_ST5_195[]
@@ -10825,8 +10822,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     0.358,                   !- Sandia Database Parameter Ix0
     0.215,                   !- Sandia Database Parameter Ixx0
-    1.045,                   !- Sandia Database Parameter c6
-    -0.045;                  !- Sandia Database Parameter c7
+    1.045,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.045;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solar_Fabrik_SF-100[]
@@ -10879,8 +10876,8 @@
     0.022,                   !- Sandia Database Parameter c5 {dimensionless}
     3.22,                    !- Sandia Database Parameter Ix0
     2.11,                    !- Sandia Database Parameter Ixx0
-    1.065,                   !- Sandia Database Parameter c6
-    -0.065;                  !- Sandia Database Parameter c7
+    1.065,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.065;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solar_Fabrik_SF-115[]
@@ -10932,8 +10929,8 @@
     0.018,                   !- Sandia Database Parameter c5 {dimensionless}
     7.46,                    !- Sandia Database Parameter Ix0
     4.88,                    !- Sandia Database Parameter Ixx0
-    1.15,                    !- Sandia Database Parameter c6
-    -0.15;                   !- Sandia Database Parameter c7
+    1.15,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.15;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MST-43LV[]
@@ -10988,8 +10985,8 @@
     -0.0124,                 !- Sandia Database Parameter c5 {dimensionless}
     3.05,                    !- Sandia Database Parameter Ix0
     1.77,                    !- Sandia Database Parameter Ixx0
-    1.1185,                  !- Sandia Database Parameter c6
-    -0.1185;                 !- Sandia Database Parameter c7
+    1.1185,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1185;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MST-43LV_199[]
@@ -11044,8 +11041,8 @@
     -0.0124,                 !- Sandia Database Parameter c5 {dimensionless}
     2.992,                   !- Sandia Database Parameter Ix0
     1.736,                   !- Sandia Database Parameter Ixx0
-    1.1185,                  !- Sandia Database Parameter c6
-    -0.1185;                 !- Sandia Database Parameter c7
+    1.1185,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1185;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MST-43MV[]
@@ -11100,8 +11097,8 @@
     -0.0122,                 !- Sandia Database Parameter c5 {dimensionless}
     0.722,                   !- Sandia Database Parameter Ix0
     0.416,                   !- Sandia Database Parameter Ixx0
-    1.0877,                  !- Sandia Database Parameter c6
-    -0.0877;                 !- Sandia Database Parameter c7
+    1.0877,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0877;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MST-43MV_201[]
@@ -11156,8 +11153,8 @@
     -0.0122,                 !- Sandia Database Parameter c5 {dimensionless}
     0.689,                   !- Sandia Database Parameter Ix0
     0.406,                   !- Sandia Database Parameter Ixx0
-    1.0877,                  !- Sandia Database Parameter c6
-    -0.0877;                 !- Sandia Database Parameter c7
+    1.0877,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0877;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-110[]
@@ -11212,8 +11209,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.59,                    !- Sandia Database Parameter Ix0
     2.41,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-120[]
@@ -11268,8 +11265,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.76,                    !- Sandia Database Parameter Ix0
     2.64,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-120_204[]
@@ -11324,8 +11321,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.69,                    !- Sandia Database Parameter Ix0
     2.61,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-240[]
@@ -11380,8 +11377,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.72,                    !- Sandia Database Parameter Ix0
     2.53,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-60[]
@@ -11436,8 +11433,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.71,                    !- Sandia Database Parameter Ix0
     2.56,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-64[]
@@ -11492,8 +11489,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.92,                    !- Sandia Database Parameter Ix0
     2.61,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-64_208[]
@@ -11548,8 +11545,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     3.81,                    !- Sandia Database Parameter Ix0
     2.52,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-64_SiNx_Proto[]
@@ -11605,8 +11602,8 @@
     0.0069,                  !- Sandia Database Parameter c5 {dimensionless}
     4.02,                    !- Sandia Database Parameter Ix0
     2.66,                    !- Sandia Database Parameter Ixx0
-    1.1038,                  !- Sandia Database Parameter c6
-    -0.1038;                 !- Sandia Database Parameter c7
+    1.1038,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.1038;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-77[]
@@ -11661,8 +11658,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     4.88,                    !- Sandia Database Parameter Ix0
     3.29,                    !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Solarex_MSX-83[]
@@ -11717,8 +11714,8 @@
     0.0144,                  !- Sandia Database Parameter c5 {dimensionless}
     5.135,                   !- Sandia Database Parameter Ix0
     3.558,                   !- Sandia Database Parameter Ixx0
-    1.116,                   !- Sandia Database Parameter c6
-    -0.116;                  !- Sandia Database Parameter c7
+    1.116,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.116;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_72_Cell_prototype[]
@@ -11767,8 +11764,8 @@
     -0.002,                  !- Sandia Database Parameter c5 {dimensionless}
     5.72,                    !- Sandia Database Parameter Ix0
     3.89,                    !- Sandia Database Parameter Ixx0
-    1.0981,                  !- Sandia Database Parameter c6
-    -0.0981;                 !- Sandia Database Parameter c7
+    1.0981,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0981;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-200[]
@@ -11820,8 +11817,8 @@
     -0.002,                  !- Sandia Database Parameter c5 {dimensionless}
     5.38,                    !- Sandia Database Parameter Ix0
     3.69,                    !- Sandia Database Parameter Ixx0
-    1.0981,                  !- Sandia Database Parameter c6
-    -0.0981;                 !- Sandia Database Parameter c7
+    1.0981,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0981;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-210[]
@@ -11873,8 +11870,8 @@
     -0.002,                  !- Sandia Database Parameter c5 {dimensionless}
     5.64,                    !- Sandia Database Parameter Ix0
     3.82,                    !- Sandia Database Parameter Ixx0
-    1.0981,                  !- Sandia Database Parameter c6
-    -0.0981;                 !- Sandia Database Parameter c7
+    1.0981,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0981;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-210_215[]
@@ -11927,8 +11924,8 @@
     0.0058,                  !- Sandia Database Parameter c5 {dimensionless}
     5.73,                    !- Sandia Database Parameter Ix0
     4,                       !- Sandia Database Parameter Ixx0
-    1.0723,                  !- Sandia Database Parameter c6
-    -0.0723;                 !- Sandia Database Parameter c7
+    1.0723,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0723;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-220_CS[]
@@ -11981,8 +11978,8 @@
     0.0034,                  !- Sandia Database Parameter c5 {dimensionless}
     5.93,                    !- Sandia Database Parameter Ix0
     4.12,                    !- Sandia Database Parameter Ixx0
-    1.0827,                  !- Sandia Database Parameter c6
-    -0.0827;                 !- Sandia Database Parameter c7
+    1.0827,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0827;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-220_PVL[]
@@ -12035,8 +12032,8 @@
     0.0054,                  !- Sandia Database Parameter c5 {dimensionless}
     5.91,                    !- Sandia Database Parameter Ix0
     4.1,                     !- Sandia Database Parameter Ixx0
-    1.0777,                  !- Sandia Database Parameter c6
-    -0.0777;                 !- Sandia Database Parameter c7
+    1.0777,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0777;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def SunPower_SPR-90[]
@@ -12088,8 +12085,8 @@
     -0.002,                  !- Sandia Database Parameter c5 {dimensionless}
     5.41,                    !- Sandia Database Parameter Ix0
     3.79,                    !- Sandia Database Parameter Ixx0
-    1.0981,                  !- Sandia Database Parameter c6
-    -0.0981;                 !- Sandia Database Parameter c7
+    1.0981,                  !- Sandia Database Parameter c6 {dimensionless}
+    -0.0981;                 !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-116[]
@@ -12136,8 +12133,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-124[]
@@ -12184,8 +12181,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.72,                    !- Sandia Database Parameter Ix0
     2.9,                     !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-128[]
@@ -12232,8 +12229,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-136[]
@@ -12280,8 +12277,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.72,                    !- Sandia Database Parameter Ix0
     2.9,                     !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-29[]
@@ -12328,8 +12325,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-58[]
@@ -12376,8 +12373,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-64[]
@@ -12424,8 +12421,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-68[]
@@ -12472,8 +12469,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.72,                    !- Sandia Database Parameter Ix0
     2.9,                     !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def Uni-solar_PVL-87[]
@@ -12520,8 +12517,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.442352941,             !- Sandia Database Parameter Ix0
     2.744390244,             !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_PVL-136[]
@@ -12577,8 +12574,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     4.72,                    !- Sandia Database Parameter Ix0
     2.9,                     !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-21[]
@@ -12633,8 +12630,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     1.47,                    !- Sandia Database Parameter Ix0
     0.88,                    !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-32[]
@@ -12689,8 +12686,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     2.22,                    !- Sandia Database Parameter Ix0
     1.37,                    !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-32_231[]
@@ -12745,8 +12742,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     2.36,                    !- Sandia Database Parameter Ix0
     1.45,                    !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-32_232[]
@@ -12801,8 +12798,8 @@
     -0.044,                  !- Sandia Database Parameter c5 {dimensionless}
     2.43,                    !- Sandia Database Parameter Ix0
     1.5,                     !- Sandia Database Parameter Ixx0
-    1.13,                    !- Sandia Database Parameter c6
-    -0.13;                   !- Sandia Database Parameter c7
+    1.13,                    !- Sandia Database Parameter c6 {dimensionless}
+    -0.13;                   !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-42[]
@@ -12857,8 +12854,8 @@
     -0.059,                  !- Sandia Database Parameter c5 {dimensionless}
     2.93,                    !- Sandia Database Parameter Ix0
     1.77,                    !- Sandia Database Parameter Ixx0
-    1.188,                   !- Sandia Database Parameter c6
-    -0.188;                  !- Sandia Database Parameter c7
+    1.188,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.188;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-64[]
@@ -12913,8 +12910,8 @@
     -0.059,                  !- Sandia Database Parameter c5 {dimensionless}
     4.78,                    !- Sandia Database Parameter Ix0
     2.87,                    !- Sandia Database Parameter Ixx0
-    1.188,                   !- Sandia Database Parameter c6
-    -0.188;                  !- Sandia Database Parameter c7
+    1.188,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.188;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-64_235[]
@@ -12969,8 +12966,8 @@
     -0.059,                  !- Sandia Database Parameter c5 {dimensionless}
     4.71,                    !- Sandia Database Parameter Ix0
     2.96,                    !- Sandia Database Parameter Ixx0
-    1.188,                   !- Sandia Database Parameter c6
-    -0.188;                  !- Sandia Database Parameter c7
+    1.188,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.188;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef
 ##def USSC_UniSolar_US-64_236[]
@@ -13025,7 +13022,7 @@
     -0.059,                  !- Sandia Database Parameter c5 {dimensionless}
     4.4,                     !- Sandia Database Parameter Ix0
     2.78,                    !- Sandia Database Parameter Ixx0
-    1.188,                   !- Sandia Database Parameter c6
-    -0.188;                  !- Sandia Database Parameter c7
+    1.188,                   !- Sandia Database Parameter c6 {dimensionless}
+    -0.188;                  !- Sandia Database Parameter c7 {dimensionless}
 
 ##enddef

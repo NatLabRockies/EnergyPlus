@@ -88,7 +88,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -380,7 +380,7 @@
 
   Output:Variable,*,Zone Mean Air Temperature,hourly;
 
-  Output:Variable,*,Zone Operative Temperature,hourly; !- Zone Average [C]
+  Output:Variable,*,Zone Operative Temperature,hourly;
 
   Output:Variable,ZONE ONE,Zone Wetbulb Globe Temperature,hourly;
 
@@ -442,7 +442,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -455,7 +455,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -463,4 +463,6 @@
 
   Schedule:Constant,AlwaysOn,On/Off,1.0;
 
-  EnergyManagementSystem:GlobalVariable,MaximumEffort;
+  EnergyManagementSystem:GlobalVariable,
+    MaximumEffort;           !- Erl Variable 1 Name
+

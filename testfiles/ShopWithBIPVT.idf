@@ -60,7 +60,7 @@
 ! Environmental Emissions:        Yes
 ! Utility Tariffs:                Yes, (circa 2004, Reliant , TX)
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,12;
 
@@ -1089,8 +1089,8 @@
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_1,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_1,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_1,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1101,13 +1101,13 @@
     4.570,4.570,5.009;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_1_Ceiling2,!- Name
+    ZN_1_FLR_1_SEC_1_Ceiling2,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_1,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_1,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_1,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1117,13 +1117,13 @@
     4.570,4.570,5.009;  !- X,Y,Z ==> Vertex 3 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_1_Ceiling3,!- Name
+    ZN_1_FLR_1_SEC_1_Ceiling3,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_1,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_1,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_1,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1145,8 +1145,8 @@
     INFIL_SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0542,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -1181,7 +1181,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1178.0879,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -1205,7 +1205,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     465.9534,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -1218,7 +1218,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     184.1006,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2000,                  !- Fraction Radiant
@@ -1255,7 +1255,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_1,!- Name
@@ -1502,8 +1509,8 @@
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_2,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_2,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_2,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1514,13 +1521,13 @@
     -4.570,4.570,5.009;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_2_Ceiling2,!- Name
+    ZN_1_FLR_1_SEC_2_Ceiling2,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_2,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_2,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_2,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1530,13 +1537,13 @@
     -4.570,13.365,5.009;  !- X,Y,Z ==> Vertex 3 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_2_Ceiling3,!- Name
+    ZN_1_FLR_1_SEC_2_Ceiling3,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_2,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_2,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_2,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1558,8 +1565,8 @@
     INFIL_SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0435,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -1594,7 +1601,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     916.1373,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -1618,7 +1625,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     362.3476,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -1631,7 +1638,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     143.1654,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2000,                  !- Fraction Radiant
@@ -1668,7 +1675,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_2,!- Name
@@ -1915,8 +1929,8 @@
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_3,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_3,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_3,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1927,13 +1941,13 @@
     0.000,4.570,5.009;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_3_Ceiling2,!- Name
+    ZN_1_FLR_1_SEC_3_Ceiling2,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_3,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_3,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_3,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1943,13 +1957,13 @@
     -4.570,4.570,5.009;  !- X,Y,Z ==> Vertex 3 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_3_Ceiling3,!- Name
+    ZN_1_FLR_1_SEC_3_Ceiling3,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_3,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_3,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_3,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -1971,8 +1985,8 @@
     INFIL_SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0542,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -2007,7 +2021,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1178.0879,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -2031,7 +2045,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     465.9534,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -2044,7 +2058,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     184.1006,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2000,                  !- Fraction Radiant
@@ -2081,7 +2095,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_3,!- Name
@@ -2328,8 +2349,8 @@
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_4,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_4,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_4,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -2340,13 +2361,13 @@
     0.000,13.365,5.009;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_4_Ceiling2,!- Name
+    ZN_1_FLR_1_SEC_4_Ceiling2,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_4,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_4,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_4,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -2356,13 +2377,13 @@
     0.000,4.570,5.009;  !- X,Y,Z ==> Vertex 3 {m}
 
   BuildingSurface:Detailed,
-    ZN_1_FLR_1_SEC_4_Ceiling3,!- Name
+    ZN_1_FLR_1_SEC_4_Ceiling3,  !- Name
     ceiling,                 !- Surface Type
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_4,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_4,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_4,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -2384,8 +2405,8 @@
     INFIL_SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0435,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -2420,7 +2441,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     916.1373,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -2444,7 +2465,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     362.3476,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -2457,7 +2478,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     143.1654,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2000,                  !- Fraction Radiant
@@ -2494,7 +2515,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_4,!- Name
@@ -2726,8 +2754,8 @@
     ASHRAE 90.1-2004_Sec 5.5-3ab_IEAD_Roof,  !- Construction Name
     ZN_1_FLR_1_SEC_5,        !- Zone Name
     ,                        !- Space Name
-    OtherSideConditionsModel,                !- Outside Boundary Condition
-    OSCM_ZN_1_FLR_1_SEC_5,                        !- Outside Boundary Condition Object
+    OtherSideConditionsModel,!- Outside Boundary Condition
+    OSCM_ZN_1_FLR_1_SEC_5,   !- Outside Boundary Condition Object
     SunExposed,              !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0.0000,                  !- View Factor to Ground
@@ -2750,8 +2778,8 @@
     INFIL_SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0354,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -2786,7 +2814,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1664.2496,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -2810,7 +2838,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     658.2385,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -2823,7 +2851,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     260.0734,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.2000,                  !- Fraction Radiant
@@ -2860,7 +2888,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_5,!- Name
@@ -3151,15 +3186,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.7835,                  !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_1:Sys_OA-ZN_1_FLR_1_SEC_1:SysCoolCNode,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_1:SysCoolC-ZN_1_FLR_1_SEC_1:SysHeatCNode,  !- Air Outlet Node Name
     Cool-Cap-fT,             !- Total Cooling Capacity Function of Temperature Curve Name
     ConstantCubic,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Cool-EIR-fT,             !- Energy Input Ratio Function of Temperature Curve Name
     ConstantCubic,           !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Cool-PLF-fPLR;           !- Part Load Fraction Correlation Curve Name
+    Cool-PLF-fPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Quadratic,
     Cool-PLF-fPLR,           !- Name
@@ -3416,15 +3454,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.7835,                  !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_2:Sys_OA-ZN_1_FLR_1_SEC_2:SysCoolCNode,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_2:SysCoolC-ZN_1_FLR_1_SEC_2:SysHeatCNode,  !- Air Outlet Node Name
     Cool-Cap-fT,             !- Total Cooling Capacity Function of Temperature Curve Name
     ConstantCubic,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Cool-EIR-fT,             !- Energy Input Ratio Function of Temperature Curve Name
     ConstantCubic,           !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Cool-PLF-fPLR;           !- Part Load Fraction Correlation Curve Name
+    Cool-PLF-fPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   OutdoorAir:Node,
     ZN_1_FLR_1_SEC_2:SysCoolCOA Ref node;  !- Name
@@ -3636,15 +3677,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.7835,                  !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_3:Sys_OA-ZN_1_FLR_1_SEC_3:SysCoolCNode,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_3:SysCoolC-ZN_1_FLR_1_SEC_3:SysHeatCNode,  !- Air Outlet Node Name
     Cool-Cap-fT,             !- Total Cooling Capacity Function of Temperature Curve Name
     ConstantCubic,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Cool-EIR-fT,             !- Energy Input Ratio Function of Temperature Curve Name
     ConstantCubic,           !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Cool-PLF-fPLR;           !- Part Load Fraction Correlation Curve Name
+    Cool-PLF-fPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   OutdoorAir:Node,
     ZN_1_FLR_1_SEC_3:SysCoolCOA Ref node;  !- Name
@@ -3856,15 +3900,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.7835,                  !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_4:Sys_OA-ZN_1_FLR_1_SEC_4:SysCoolCNode,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_4:SysCoolC-ZN_1_FLR_1_SEC_4:SysHeatCNode,  !- Air Outlet Node Name
     Cool-Cap-fT,             !- Total Cooling Capacity Function of Temperature Curve Name
     ConstantCubic,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Cool-EIR-fT,             !- Energy Input Ratio Function of Temperature Curve Name
     ConstantCubic,           !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Cool-PLF-fPLR;           !- Part Load Fraction Correlation Curve Name
+    Cool-PLF-fPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   OutdoorAir:Node,
     ZN_1_FLR_1_SEC_4:SysCoolCOA Ref node;  !- Name
@@ -4076,15 +4123,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.7835,                  !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_5:Sys_OA-ZN_1_FLR_1_SEC_5:SysCoolCNode,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_5:SysCoolC-ZN_1_FLR_1_SEC_5:SysHeatCNode,  !- Air Outlet Node Name
     Cool-Cap-fT,             !- Total Cooling Capacity Function of Temperature Curve Name
     ConstantCubic,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Cool-EIR-fT,             !- Energy Input Ratio Function of Temperature Curve Name
     ConstantCubic,           !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Cool-PLF-fPLR;           !- Part Load Fraction Correlation Curve Name
+    Cool-PLF-fPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   OutdoorAir:Node,
     ZN_1_FLR_1_SEC_5:SysCoolCOA Ref node;  !- Name
@@ -4906,31 +4956,31 @@
     1.5;                     !- Generator 10 Rated Thermal to Electrical Power Ratio
 
   PhotovoltaicPerformance:EquivalentOne-Diode,
-    SiemensSamplePVModule, !- Name
-    CrystallineSilicon, !- Cell Type
-    36, !- Number of Cells in Series [-]
-    1.0, !- Area Active [m2]
-    0.957, !- Transmittance Absorptance Product
-    1.12, !- Semiconductor Bandgap [eV]
-    1000000, !- Shunt Resistance [Ohms]
-    6.5, !- Short Circuit Current [A/K]
-    21.6, !- Open Circuit Voltage [V/K]
-    25, !- Reference Temperature [C]
-    1000, !- Reference Insolation [W/m2]
-    5.9, !- Module Current at Maximum Power [A]
-    17, !- Module Voltage at Maximum Power [V]
-    0.002, !- Temperature Coefficient of Short Circuit Current
-    -0.079, !- Temperature Coefficient of Open Circuit Voltage
-    20, !- Nominal Operating Cell Temperature Test Ambient Temperature [C]
-    45, !- Nominal Operating Cell Temperature Test Cell Temperature [C]
-    800, !- Nominal Operating Cell Temperature Test Insolation [W/m2]
-    30, !- Module Heat Loss Coefficient [W/m2.K]
-    50000; !- Total Heat Capacity [J/m2-K]
+    SiemensSamplePVModule,   !- Name
+    CrystallineSilicon,      !- Cell type
+    36,                      !- Number of Cells in Series {dimensionless}
+    1.0,                     !- Active Area {m2}
+    0.957,                   !- Transmittance Absorptance Product {dimensionless}
+    1.12,                    !- Semiconductor Bandgap {eV}
+    1000000,                 !- Shunt Resistance {ohms}
+    6.5,                     !- Short Circuit Current {A}
+    21.6,                    !- Open Circuit Voltage {V}
+    25,                      !- Reference Temperature {C}
+    1000,                    !- Reference Insolation {W/m2}
+    5.9,                     !- Module Current at Maximum Power {A}
+    17,                      !- Module Voltage at Maximum Power {V}
+    0.002,                   !- Temperature Coefficient of Short Circuit Current {A/K}
+    -0.079,                  !- Temperature Coefficient of Open Circuit Voltage {V/K}
+    20,                      !- Nominal Operating Cell Temperature Test Ambient Temperature {C}
+    45,                      !- Nominal Operating Cell Temperature Test Cell Temperature {C}
+    800,                     !- Nominal Operating Cell Temperature Test Insolation {W/m2}
+    30,                      !- Module Heat Loss Coefficient {W/m2-K}
+    50000;                   !- Total Heat Capacity {J/m2-K}
 
   SolarCollector:FlatPlate:PhotovoltaicThermal,
     PVT:ZN_1_FLR_1_SEC_1_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_1_Ceiling,!- Surface Name
-    ZN_1_FLR_1_SEC_1_CEILING_BIPVT,    !- Photovoltaic-Thermal Model Performance Name
+    ZN_1_FLR_1_SEC_1_CEILING_BIPVT,  !- Photovoltaic-Thermal Model Performance Name
     PV:ZN_1_FLR_1_SEC_1_Ceiling,  !- Photovoltaic Name
     Air,                     !- Thermal Working Fluid Type
     ,                        !- Water Inlet Node Name
@@ -4943,15 +4993,15 @@
     PV:ZN_1_FLR_1_SEC_1_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_1_Ceiling,!- Surface Name
     PhotovoltaicPerformance:EquivalentOne-Diode,  !- Photovoltaic Performance Object Type
-    SiemensSamplePVModule,  !- Module Performance Name
+    SiemensSamplePVModule,   !- Module Performance Name
     PhotovoltaicThermalSolarCollector,  !- Heat Transfer Integration Mode
-    17.0,                     !- Number of Series Strings in Parallel {dimensionless}
+    17.0,                    !- Number of Series Strings in Parallel {dimensionless}
     4.0;                     !- Number of Modules in Series {dimensionless}
 
   SolarCollector:FlatPlate:PhotovoltaicThermal,
     PVT:ZN_1_FLR_1_SEC_2_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_2_Ceiling,!- Surface Name
-    ZN_1_FLR_1_SEC_2_Ceiling_BIPVT,    !- Photovoltaic-Thermal Model Performance Name
+    ZN_1_FLR_1_SEC_2_Ceiling_BIPVT,  !- Photovoltaic-Thermal Model Performance Name
     PV:ZN_1_FLR_1_SEC_2_Ceiling,  !- Photovoltaic Name
     Air,                     !- Thermal Working Fluid Type
     ,                        !- Water Inlet Node Name
@@ -4964,15 +5014,15 @@
     PV:ZN_1_FLR_1_SEC_2_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_2_Ceiling,!- Surface Name
     PhotovoltaicPerformance:EquivalentOne-Diode,  !- Photovoltaic Performance Object Type
-    SiemensSamplePVModule,  !- Module Performance Name
-    PhotovoltaicThermalSolarCollector,               !- Heat Transfer Integration Mode
+    SiemensSamplePVModule,   !- Module Performance Name
+    PhotovoltaicThermalSolarCollector,  !- Heat Transfer Integration Mode
     4.0,                     !- Number of Series Strings in Parallel {dimensionless}
-    13.0;                     !- Number of Modules in Series {dimensionless}
+    13.0;                    !- Number of Modules in Series {dimensionless}
 
   SolarCollector:FlatPlate:PhotovoltaicThermal,
     PVT:ZN_1_FLR_1_SEC_3_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_3_Ceiling,!- Surface Name
-    ZN_1_FLR_1_SEC_3_Ceiling_BIPVT,    !- Photovoltaic-Thermal Model Performance Name
+    ZN_1_FLR_1_SEC_3_Ceiling_BIPVT,  !- Photovoltaic-Thermal Model Performance Name
     PV:ZN_1_FLR_1_SEC_3_Ceiling,  !- Photovoltaic Name
     Air,                     !- Thermal Working Fluid Type
     ,                        !- Water Inlet Node Name
@@ -4985,15 +5035,15 @@
     PV:ZN_1_FLR_1_SEC_3_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_3_Ceiling,!- Surface Name
     PhotovoltaicPerformance:EquivalentOne-Diode,  !- Photovoltaic Performance Object Type
-    SiemensSamplePVModule,  !- Module Performance Name
-    PhotovoltaicThermalSolarCollector,               !- Heat Transfer Integration Mode
-    17.0,                     !- Number of Series Strings in Parallel {dimensionless}
+    SiemensSamplePVModule,   !- Module Performance Name
+    PhotovoltaicThermalSolarCollector,  !- Heat Transfer Integration Mode
+    17.0,                    !- Number of Series Strings in Parallel {dimensionless}
     4.0;                     !- Number of Modules in Series {dimensionless}
 
   SolarCollector:FlatPlate:PhotovoltaicThermal,
     PVT:ZN_1_FLR_1_SEC_4_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_4_Ceiling,!- Surface Name
-    ZN_1_FLR_1_SEC_4_Ceiling_BIPVT,    !- Photovoltaic-Thermal Model Performance Name
+    ZN_1_FLR_1_SEC_4_Ceiling_BIPVT,  !- Photovoltaic-Thermal Model Performance Name
     PV:ZN_1_FLR_1_SEC_4_Ceiling,  !- Photovoltaic Name
     Air,                     !- Thermal Working Fluid Type
     ,                        !- Water Inlet Node Name
@@ -5006,15 +5056,15 @@
     PV:ZN_1_FLR_1_SEC_4_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_4_Ceiling,!- Surface Name
     PhotovoltaicPerformance:EquivalentOne-Diode,  !- Photovoltaic Performance Object Type
-    SiemensSamplePVModule,  !- Module Performance Name
-    PhotovoltaicThermalSolarCollector,               !- Heat Transfer Integration Mode
+    SiemensSamplePVModule,   !- Module Performance Name
+    PhotovoltaicThermalSolarCollector,  !- Heat Transfer Integration Mode
     4.0,                     !- Number of Series Strings in Parallel {dimensionless}
-    13.0;                     !- Number of Modules in Series {dimensionless}
+    13.0;                    !- Number of Modules in Series {dimensionless}
 
   SolarCollector:FlatPlate:PhotovoltaicThermal,
     PVT:ZN_1_FLR_1_SEC_5_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_5_Ceiling,!- Surface Name
-    ZN_1_FLR_1_SEC_5_Ceiling_BIPVT,    !- Photovoltaic-Thermal Model Performance Name
+    ZN_1_FLR_1_SEC_5_Ceiling_BIPVT,  !- Photovoltaic-Thermal Model Performance Name
     PV:ZN_1_FLR_1_SEC_5_Ceiling,  !- Photovoltaic Name
     Air,                     !- Thermal Working Fluid Type
     ,                        !- Water Inlet Node Name
@@ -5027,9 +5077,9 @@
     PV:ZN_1_FLR_1_SEC_5_Ceiling,  !- Name
     ZN_1_FLR_1_SEC_5_Ceiling,!- Surface Name
     PhotovoltaicPerformance:EquivalentOne-Diode,  !- Photovoltaic Performance Object Type
-    SiemensSamplePVModule,  !- Module Performance Name
-    PhotovoltaicThermalSolarCollector,               !- Heat Transfer Integration Mode
-    12.0,                     !- Number of Series Strings in Parallel {dimensionless}
+    SiemensSamplePVModule,   !- Module Performance Name
+    PhotovoltaicThermalSolarCollector,  !- Heat Transfer Integration Mode
+    12.0,                    !- Number of Series Strings in Parallel {dimensionless}
     8.0;                     !- Number of Modules in Series {dimensionless}
 
   SetpointManager:MixedAir,
@@ -5073,114 +5123,114 @@
     PVT:ZN_1_FLR_1_SEC_5_Ceiling Outlet;  !- Setpoint Node or NodeList Name
 
   SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_5_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_5,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
+    ZN_1_FLR_1_SEC_5_Ceiling_BIPVT,  !- Name
+    OSCM_ZN_1_FLR_1_SEC_5,   !- Boundary Conditions Model Name
+    ,                        !- Availability Schedule Name
+    0.1,                     !- Effective Plenum Gap Thickness Behind PV Modules {m}
+    0.957,                   !- PV Cell Normal Transmittance-Absorptance Product
+    0.87,                    !- Backing Material Normal Transmittance-Absorptance Product
+    0.85,                    !- Cladding Normal Transmittance-Absorptance Product
+    0.85,                    !- Fraction of Collector Gross Area Covered by PV Module
+    0.9,                     !- Fraction of PV Cell Area to PV Module Area
+    0.0044,                  !- PV Module Top Thermal Resistance {m2-K/W}
+    0.0039,                  !- PV Module Bottom Thermal Resistance {m2-K/W}
+    0.85,                    !- PV Module Front Longwave Emissivity
+    0.9,                     !- PV Module Back Longwave Emissivity
+    0.002,                   !- Glass Thickness {m}
+    1.526,                   !- Glass Refraction Index
+    4.0;                     !- Glass Extinction Coefficient {1/m}
 
   SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_4_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_4,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
- 
-  SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_3_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_3,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
+    ZN_1_FLR_1_SEC_4_Ceiling_BIPVT,  !- Name
+    OSCM_ZN_1_FLR_1_SEC_4,   !- Boundary Conditions Model Name
+    ,                        !- Availability Schedule Name
+    0.1,                     !- Effective Plenum Gap Thickness Behind PV Modules {m}
+    0.957,                   !- PV Cell Normal Transmittance-Absorptance Product
+    0.87,                    !- Backing Material Normal Transmittance-Absorptance Product
+    0.85,                    !- Cladding Normal Transmittance-Absorptance Product
+    0.85,                    !- Fraction of Collector Gross Area Covered by PV Module
+    0.9,                     !- Fraction of PV Cell Area to PV Module Area
+    0.0044,                  !- PV Module Top Thermal Resistance {m2-K/W}
+    0.0039,                  !- PV Module Bottom Thermal Resistance {m2-K/W}
+    0.85,                    !- PV Module Front Longwave Emissivity
+    0.9,                     !- PV Module Back Longwave Emissivity
+    0.002,                   !- Glass Thickness {m}
+    1.526,                   !- Glass Refraction Index
+    4.0;                     !- Glass Extinction Coefficient {1/m}
 
   SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_2_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_2,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
+    ZN_1_FLR_1_SEC_3_Ceiling_BIPVT,  !- Name
+    OSCM_ZN_1_FLR_1_SEC_3,   !- Boundary Conditions Model Name
+    ,                        !- Availability Schedule Name
+    0.1,                     !- Effective Plenum Gap Thickness Behind PV Modules {m}
+    0.957,                   !- PV Cell Normal Transmittance-Absorptance Product
+    0.87,                    !- Backing Material Normal Transmittance-Absorptance Product
+    0.85,                    !- Cladding Normal Transmittance-Absorptance Product
+    0.85,                    !- Fraction of Collector Gross Area Covered by PV Module
+    0.9,                     !- Fraction of PV Cell Area to PV Module Area
+    0.0044,                  !- PV Module Top Thermal Resistance {m2-K/W}
+    0.0039,                  !- PV Module Bottom Thermal Resistance {m2-K/W}
+    0.85,                    !- PV Module Front Longwave Emissivity
+    0.9,                     !- PV Module Back Longwave Emissivity
+    0.002,                   !- Glass Thickness {m}
+    1.526,                   !- Glass Refraction Index
+    4.0;                     !- Glass Extinction Coefficient {1/m}
 
   SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_1_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_1,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
+    ZN_1_FLR_1_SEC_2_Ceiling_BIPVT,  !- Name
+    OSCM_ZN_1_FLR_1_SEC_2,   !- Boundary Conditions Model Name
+    ,                        !- Availability Schedule Name
+    0.1,                     !- Effective Plenum Gap Thickness Behind PV Modules {m}
+    0.957,                   !- PV Cell Normal Transmittance-Absorptance Product
+    0.87,                    !- Backing Material Normal Transmittance-Absorptance Product
+    0.85,                    !- Cladding Normal Transmittance-Absorptance Product
+    0.85,                    !- Fraction of Collector Gross Area Covered by PV Module
+    0.9,                     !- Fraction of PV Cell Area to PV Module Area
+    0.0044,                  !- PV Module Top Thermal Resistance {m2-K/W}
+    0.0039,                  !- PV Module Bottom Thermal Resistance {m2-K/W}
+    0.85,                    !- PV Module Front Longwave Emissivity
+    0.9,                     !- PV Module Back Longwave Emissivity
+    0.002,                   !- Glass Thickness {m}
+    1.526,                   !- Glass Refraction Index
+    4.0;                     !- Glass Extinction Coefficient {1/m}
+
+  SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
+    ZN_1_FLR_1_SEC_1_Ceiling_BIPVT,  !- Name
+    OSCM_ZN_1_FLR_1_SEC_1,   !- Boundary Conditions Model Name
+    ,                        !- Availability Schedule Name
+    0.1,                     !- Effective Plenum Gap Thickness Behind PV Modules {m}
+    0.957,                   !- PV Cell Normal Transmittance-Absorptance Product
+    0.87,                    !- Backing Material Normal Transmittance-Absorptance Product
+    0.85,                    !- Cladding Normal Transmittance-Absorptance Product
+    0.85,                    !- Fraction of Collector Gross Area Covered by PV Module
+    0.9,                     !- Fraction of PV Cell Area to PV Module Area
+    0.0044,                  !- PV Module Top Thermal Resistance {m2-K/W}
+    0.0039,                  !- PV Module Bottom Thermal Resistance {m2-K/W}
+    0.85,                    !- PV Module Front Longwave Emissivity
+    0.9,                     !- PV Module Back Longwave Emissivity
+    0.002,                   !- Glass Thickness {m}
+    1.526,                   !- Glass Refraction Index
+    4.0;                     !- Glass Extinction Coefficient {1/m}
 
   SurfaceProperty:OtherSideConditionsModel,
-    OSCM_ZN_1_FLR_1_SEC_1, !- Name
-    GapConvectionRadiation; !- Type of Modeling
+    OSCM_ZN_1_FLR_1_SEC_1,   !- Name
+    GapConvectionRadiation;  !- Type of Modeling
 
   SurfaceProperty:OtherSideConditionsModel,
-    OSCM_ZN_1_FLR_1_SEC_2, !- Name
-    GapConvectionRadiation; !- Type of Modeling
+    OSCM_ZN_1_FLR_1_SEC_2,   !- Name
+    GapConvectionRadiation;  !- Type of Modeling
 
   SurfaceProperty:OtherSideConditionsModel,
-    OSCM_ZN_1_FLR_1_SEC_3, !- Name
-    GapConvectionRadiation; !- Type of Modeling
+    OSCM_ZN_1_FLR_1_SEC_3,   !- Name
+    GapConvectionRadiation;  !- Type of Modeling
 
   SurfaceProperty:OtherSideConditionsModel,
-    OSCM_ZN_1_FLR_1_SEC_4, !- Name
-    GapConvectionRadiation; !- Type of Modeling
+    OSCM_ZN_1_FLR_1_SEC_4,   !- Name
+    GapConvectionRadiation;  !- Type of Modeling
 
   SurfaceProperty:OtherSideConditionsModel,
-    OSCM_ZN_1_FLR_1_SEC_5, !- Name
-    GapConvectionRadiation; !- Type of Modeling
+    OSCM_ZN_1_FLR_1_SEC_5,   !- Name
+    GapConvectionRadiation;  !- Type of Modeling
 
 !***PLANT COLLECTOR LOOP***
 
@@ -5681,7 +5731,7 @@
   Output:Variable,ZN_1_FLR_1_SEC_1:Sys_OA-ZN_1_FLR_1_SEC_1:SysCoolCNode,System Node Temperature,timestep;
 
   Output:Variable,ZN_1_FLR_1_SEC_1:Sys_OA-ZN_1_FLR_1_SEC_1:SysCoolCNode,System Node Mass Flow Rate,timestep;
-  
+
   Output:Variable,*,Surface Other Side Conditions Modeled Convection Air Temperature,timestep;
 
   Output:Variable,*,Surface Other Side Conditions Modeled Convection Heat Transfer Coefficient,timestep;

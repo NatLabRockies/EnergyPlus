@@ -137,89 +137,88 @@ Some examples of IDF input objects follow.
 
 \begin{lstlisting}
 Fan:SystemModel,
-  VAV_1_Fan ,                          !- Name
-  HVACOperationSchd ,                  !- Availability Schedule Name
-  VAV_1_HeatC-VAV_1_FanNode,           !- Air Inlet Node Name
+  VAV_1_Fan,                  !- Name
+  HVACOperationSchd,          !- Availability Schedule Name
+  VAV_1_HeatC-VAV_1_FanNode,  !- Air Inlet Node Name
   VAV_1 Supply Equipment Outlet Node,  !- Air Outlet Node Name
-  AUTOSIZE ,                           !- Design Maximum Air Flow Rate
-  Continuous ,                         !- Speed Control Method
-  0.0,                                 !- Electric Power Minimum Flow Rate Fraction
-  1017.592,                            !- Design Pressure Rise
-  0.93 ,                               !- Motor Efficiency
-  1.0 ,                                !- Motor In Air Stream Fraction
-  AUTOSIZE,                            !- Design Electric Power Consumption
-  TotalEfficiencyAndPressure,          !- Design Power Sizing Method
-  ,                                    !- Electric Power Per Unit Flow Rate
-  ,                                    !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.6045,                              !- Fan Total Efficiency
-  VAV Fan Curve,                       !- Electric Power Function of Flow Fraction Curve Name
-  ,                                    !- Night Ventilation Mode Pressure Rise
-  ,                                    !- Night Ventilation Mode Flow Fraction
-  ,                                    !- Motor Loss Zone Name
-  ,                                    !- Motor Loss Radiative Fraction
-  Fan Energy;                          !- End-Use Subcategory
+  AUTOSIZE,                   !- Design Maximum Air Flow Rate
+  Continuous,                 !- Speed Control Method
+  0.0,                        !- Electric Power Minimum Flow Rate Fraction
+  1017.592,                   !- Design Pressure Rise
+  0.93,                       !- Motor Efficiency
+  1.0,                        !- Motor In Air Stream Fraction
+  AUTOSIZE,                   !- Design Electric Power Consumption
+  TotalEfficiencyAndPressure, !- Design Power Sizing Method
+  ,                           !- Electric Power Per Unit Flow Rate
+  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure
+  0.6045,                     !- Fan Total Efficiency
+  VAV Fan Curve,              !- Electric Power Function of Flow Fraction Curve Name
+  ,                           !- Night Ventilation Mode Pressure Rise
+  ,                           !- Night Ventilation Mode Flow Fraction
+  ,                           !- Motor Loss Zone Name
+  ,                           !- Motor Loss Radiative Fraction
+  Fan Energy;                 !- End-Use Subcategory
 
 Curve:Quartic,
-  VAV Fan Curve ,                      !- Name
-  0.0407598940 ,                       !- Coefficient1 Constant
-  0.08804497 ,                         !- Coefficient2 x
-   -0.072926120 ,                      !- Coefficient3 x**2
-  0.9437398230 ,                       !- Coefficient4 x**3
-  0.0 ,                                !- Coefficient5 x**4
-  0.0 ,                                !- Minimum Value of x
-  1.0 ,                                !- Maximum Value of x
-  0.0 ,                                !- Minimum Curve Output
-  1.0 ,                                !- Maximum Curve Output
-  Dimensionless ,                      !- Input Unit Type for X
-  Dimensionless ;                      !- Output Unit Type
+  VAV Fan Curve,              !- Name
+  0.0407598940,               !- Coefficient1 Constant
+  0.08804497,                 !- Coefficient2 x
+  -0.072926120,               !- Coefficient3 x**2
+  0.9437398230,               !- Coefficient4 x**3
+  0.0,                        !- Coefficient5 x**4
+  0.0,                        !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  0.0,                        !- Minimum Curve Output
+  1.0,                        !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless;              !- Output Unit Type
 
 Fan:SystemModel,
-  Zone1UnitHeatFan ,                   !- Name
-  UnitHeatAvailability ,               !- Availability Schedule Name
-  Zone1UnitHeatAirInletNode,           !- Air Inlet Node Name
-  Zone1UnitHeatFanOutletNode,          !- Air Outlet Node Name
-  AUTOSIZE ,                           !- Design Maximum Air Flow Rate
-  Discrete ,                           !- Speed Control Method
-  0.0,                                 !- Electric Power Minimum Flow Rate Fraction
-  75.0,                                !- Design Pressure Rise
-  0.9 ,                                !- Motor Efficiency
-  1.0 ,                                !- Motor In Air Stream Fraction
-  AUTOSIZE,                            !- Design Electric Power Consumption
-  TotalEfficiencyAndPressure,          !- Design Power Sizing Method
-  ,                                    !- Electric Power Per Unit Flow Rate
-  ,                                    !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.50;                                !- Fan Total Efficiency
+  Zone1UnitHeatFan,           !- Name
+  UnitHeatAvailability,       !- Availability Schedule Name
+  Zone1UnitHeatAirInletNode,  !- Air Inlet Node Name
+  Zone1UnitHeatFanOutletNode, !- Air Outlet Node Name
+  AUTOSIZE,                   !- Design Maximum Air Flow Rate
+  Discrete,                   !- Speed Control Method
+  0.0,                        !- Electric Power Minimum Flow Rate Fraction
+  75.0,                       !- Design Pressure Rise
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Air Stream Fraction
+  AUTOSIZE,                   !- Design Electric Power Consumption
+  TotalEfficiencyAndPressure, !- Design Power Sizing Method
+  ,                           !- Electric Power Per Unit Flow Rate
+  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure
+  0.50;                       !- Fan Total Efficiency
 
 Fan:SystemModel,
-  Zone1FanCoilFan , !- Name
-  FanAndCoilAvailSched , !- Availability Schedule Name
+  Zone1FanCoilFan,            !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
   Zone1FanCoilOAMixerOutletNode,  !- Air Inlet Node Name
   Zone1FanCoilFanOutletNode,  !- Air Outlet Node Name
-  AUTOSIZE , !- Design Maximum Air Flow Rate
-  Discrete , !- Speed Control Method
-  0.0, !- Electric Power Minimum Flow Rate Fraction
-  75.0, !- Design Pressure Rise
-  0.9 , !- Motor Efficiency
-  1.0 , !- Motor In Air Stream Fraction
-  AUTOSIZE, !- Design Electric Power Consumption
+  AUTOSIZE,                   !- Design Maximum Air Flow Rate
+  Discrete,                   !- Speed Control Method
+  0.0,                        !- Electric Power Minimum Flow Rate Fraction
+  75.0,                       !- Design Pressure Rise
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Air Stream Fraction
+  AUTOSIZE,                   !- Design Electric Power Consumption
   TotalEfficiencyAndPressure, !- Design Power Sizing Method
-  , !- Electric Power Per Unit Flow Rate
-  , !- Electric Power Per Unit Flow Rate Per Unit Pressure
-  0.50,  !- Fan Total Efficiency
-  , !- Electric Power Function of Flow Fraction Curve Name
-  , !- Night Ventilation Mode Pressure Rise
-  , !- Night Ventilation Mode Flow Fraction
-  , !- Motor Loss Zone Name
-  , !- Motor Loss Radiative Fraction
-  Fan Energy, !- End-Use Subcategory
-  3, !- Number of Speeds
-  0.33, !- Speed 1 Flow Fraction
-  0.12, !- Speed 1 Electric Power Fraction
-  0.66, !- Speed 2 Flow Fraction
-  0.51, !- Speed 2 Electric Power Fraction
-  1.0,  !- Speed 3 Flow Fraction
-  1.0;  !- Speed 3 Electric Power Fraction
-
+  ,                           !- Electric Power Per Unit Flow Rate
+  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure
+  0.50,                       !- Fan Total Efficiency
+  ,                           !- Electric Power Function of Flow Fraction Curve Name
+  ,                           !- Night Ventilation Mode Pressure Rise
+  ,                           !- Night Ventilation Mode Flow Fraction
+  ,                           !- Motor Loss Zone Name
+  ,                           !- Motor Loss Radiative Fraction
+  Fan Energy,                 !- End-Use Subcategory
+  3,                          !- Number of Speeds
+  0.33,                       !- Speed 1 Flow Fraction
+  0.12,                       !- Speed 1 Electric Power Fraction
+  0.66,                       !- Speed 2 Flow Fraction
+  0.51,                       !- Speed 2 Electric Power Fraction
+  1.0,                        !- Speed 3 Flow Fraction
+  1.0;                        !- Speed 3 Electric Power Fraction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-fansysmodel}
@@ -385,16 +384,15 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Fans'', e
 Following is an example input for an OnOff Fan.
 
 \begin{lstlisting}
-
 Fan:OnOff,
-  Supply Fan 1,                   ! Fan Name
-  FanAndCoilAvailSched,   ! Fan Schedule
-  0.7,                                     ! Fan Total Efficiency
-  600.0,                                 ! Delta Pressure [N/M^2]
-  1.3,                                     ! Max Flow Rate   [m^3/Sec]
-  0.9,                                     ! Motor Efficiency
-  1.0,                                     ! Motor in Airstream Fraction (1.0 means motor in air stream)
-  Air Loop Inlet Node, Cooling Coil Air Inlet Node;   !Inlet Node, Outlet Node
+  Supply Fan 1,               !- Fan Name
+  FanAndCoilAvailSched,       !- Fan Schedule
+  0.7,                        !- Fan Total Efficiency
+  600.0,                      !- Delta Pressure [N/M^2]
+  1.3,                        !- Max Flow Rate   [m^3/Sec]
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor in Airstream Fraction (1.0 means motor in air stream)
+  Air Loop Inlet Node, Cooling Coil Air Inlet Node;  !- Inlet Node, Outlet Node
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-011}
@@ -564,7 +562,7 @@ This fan object differs from the other fans in that it stands on its own in a zo
 
 There are several control options available for the exhaust fan including: an on/off availability schedule, interaction with system availability managers, minimum zone air temperature control limits and a variable flow fraction schedule.
 
-The way in which the exhaust fan impacts central air system can be controlled by declaring what portion of the flow has been balanced by simple airflow from infiltration, ventilation, or mixing. However, it is important to note that presence of an exhaust fan does not by itself drive any simple airflow such as infiltration, ventilation, or zone mixing. For balancing, the simple airflows need to have their own input objects that need to be coordinated with the exhaust fan. The ZoneAirMassFlowConservation object could be a possible solution that can help with balancing unbalanced airflows by triggering the zone air mass flow conservation when desired. 
+The way in which the exhaust fan impacts central air system can be controlled by declaring what portion of the flow has been balanced by simple airflow from infiltration, ventilation, or mixing. However, it is important to note that presence of an exhaust fan does not by itself drive any simple airflow such as infiltration, ventilation, or zone mixing. For balancing, the simple airflows need to have their own input objects that need to be coordinated with the exhaust fan. The ZoneAirMassFlowConservation object could be a possible solution that can help with balancing unbalanced airflows by triggering the zone air mass flow conservation when desired.
 
 \subsubsection{Inputs}\label{inputs-3-014}
 
@@ -618,7 +616,7 @@ This field is optional. If it is not used then there will be no temperature-rela
 
 \paragraph{Field: Balanced Exhaust Fraction Schedule Name}\label{field-balanced-exhaust-fraction-schedule-name}
 
-This field is optional. If it is not used, then all the exhaust air flow is assumed to be unbalanced by any simple airflows, such as infiltration, ventilation, or zone mixing. Unbalanced exhaust is then modeled as being provided by the outdoor air system in the central air system. The modeling of unbalanced will reduce the flow rates at the zone's return air node by the flow rate that is being exhausted and will ensure that the outdoor air flow rate is sufficient to serve the exhaust. If this field is used, then enter the name of a schedule with fractional values between 0.0 and 1.0, inclusive. This fraction is applied to the exhaust fan flow rate and the model tracks the portion of the exhaust that is balanced. Balanced exhaust is then modeled as being provided by simple airflows and does not impact the central air system return air or outdoor air flow rates. For example, if a kitchen zone with an exhaust fan is designed to draw half of its make up air from a neighboring dining room and the other half from the outdoor air system, then a schedule value of 0.5 could be used here. This input field must be blank when the zone air flow balance is enforced. If user specifies a schedule and zone air flow balance is enforced, then EnergyPlus throws a warning error message, ignores the schedule and simulation continues.   
+This field is optional. If it is not used, then all the exhaust air flow is assumed to be unbalanced by any simple airflows, such as infiltration, ventilation, or zone mixing. Unbalanced exhaust is then modeled as being provided by the outdoor air system in the central air system. The modeling of unbalanced will reduce the flow rates at the zone's return air node by the flow rate that is being exhausted and will ensure that the outdoor air flow rate is sufficient to serve the exhaust. If this field is used, then enter the name of a schedule with fractional values between 0.0 and 1.0, inclusive. This fraction is applied to the exhaust fan flow rate and the model tracks the portion of the exhaust that is balanced. Balanced exhaust is then modeled as being provided by simple airflows and does not impact the central air system return air or outdoor air flow rates. For example, if a kitchen zone with an exhaust fan is designed to draw half of its make up air from a neighboring dining room and the other half from the outdoor air system, then a schedule value of 0.5 could be used here. This input field must be blank when the zone air flow balance is enforced. If user specifies a schedule and zone air flow balance is enforced, then EnergyPlus throws a warning error message, ignores the schedule and simulation continues.
 
 \subsubsection{Outputs}\label{outputs-3-007}
 
@@ -656,56 +654,52 @@ These two output variables are available when the exhaust fan uses the input fie
 Examples of Fan:ConstantVolume, Fan:VariableVolume, Fan:ZoneExhaust, and , Fan:OnOff, fans in an IDF are:
 
 \begin{lstlisting}
-
 Fan:ConstantVolume,
-  Supply Fan 1,   !- Name
-  FanAndCoilAvailSched,               !- Availability Schedule Name
-  0.7,                     !- Fan Total Efficiency
-  600.0,                 !- Pressure Rise {Pa}
-  1.3,                     !- Maximum Flow Rate {m3/sec}
-  0.9,                     !- Motor Efficiency
-  1.0,                     !- Motor in Airstream Fraction
-  Air Loop Inlet Node, Cooling Coil Air Inlet Node;   !- Air Inlet Node Name, Air Outlet Node Name
+  Supply Fan 1,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.7,                        !- Fan Total Efficiency
+  600.0,                      !- Pressure Rise {Pa}
+  1.3,                        !- Maximum Flow Rate {m3/sec}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor in Airstream Fraction
+  Air Loop Inlet Node, Cooling Coil Air Inlet Node;  !- Air Inlet Node Name, Air Outlet Node Name
 
-
-  Fan:VariableVolume,
-  Var Vol Supply Fan 1,   !- Name
-  FanAndCoilAvailSched,   !-Availability Schedule Name
-  0.7,                    !- Fan Total Efficiency
-  600.0,                !- Pressure Rise {Pa}
-  1.3,                    !- Maximum Flow Rate {m3/s}
-  0.20,                   !- Minimum Flow Rate {m3/s}
-  0.9,                    !- Motor Efficiency
-  1.0,                     !- Motor in Airstream Fraction
-  0.35071223,       !- Fan Coefficient 1
-  0.30850535,       !- Fan Coefficient 2
-  -0.54137364,       !- Fan Coefficient 3
-  0.87198823,       !- Fan Coefficient 4
-  0.000,                 !- Fan Coefficient 5
+Fan:VariableVolume,
+  Var Vol Supply Fan 1,       !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.7,                        !- Fan Total Efficiency
+  600.0,                      !- Pressure Rise {Pa}
+  1.3,                        !- Maximum Flow Rate {m3/s}
+  0.20,                       !- Minimum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor in Airstream Fraction
+  0.35071223,                 !- Fan Coefficient 1
+  0.30850535,                 !- Fan Coefficient 2
+  -0.54137364,                !- Fan Coefficient 3
+  0.87198823,                 !- Fan Coefficient 4
+  0.000,                      !- Fan Coefficient 5
   Air Loop Inlet Node, Cooling Coil Air Inlet Node;  !- Air Inlet Node Name,Air Outlet Node Name
 
+Fan:ZoneExhaust,
+  Zone 2 Exhaust Fan,         !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.6,                        !- Fan Total Efficiency
+  125,                        !- Pressure Rise {Pa}
+  0.1,                        !- Maximum Flow Rate {m3/s}
+  Zone 2 Exhaust Node,        !- Air Inlet Node Name
+  Zone 2 Exhaust Fan Outlet Node,  !- Air Outlet Node Name
+  Kitchen Exhaust;            !- End-Use Subcategory
 
-  Fan:ZoneExhaust,
-  Zone 2 Exhaust Fan,                           !-Name
-  FanAndCoilAvailSched,                       !-Availability Schedule Name
-  0.6,                                                         !-Fan Total Efficiency
-  125,                                                         !-Pressure Rise {Pa}
-  0.1,                                                         !-Maximum Flow Rate {m3/s}
-  Zone 2 Exhaust Node,                         !-Air Inlet Node Name
-  Zone 2 Exhaust Fan Outlet Node,   !-Air Outlet Node Name
-  Kitchen Exhaust;                                 !- End-Use Subcategory
-
-
-  Fan:OnOff,
-  AHU 1 Supply Fan,               !- Name
-  FanAvailSched,                     !- Availability Schedule Name
-  0.7,                                         !- Fan Total Efficiency
-  600.0,                                     !- Pressure Rise {Pa}
-  2.0,                                         !- Maximum Flow Rate {m3/s}
-  0.9,                                         !- Motor Efficiency
-  1.0,                                         !- Motor in Airstream Fraction
+Fan:OnOff,
+  AHU 1 Supply Fan,           !- Name
+  FanAvailSched,              !- Availability Schedule Name
+  0.7,                        !- Fan Total Efficiency
+  600.0,                      !- Pressure Rise {Pa}
+  2.0,                        !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor in Airstream Fraction
   AHU 1 Air Loop Inlet,       !- Air Inlet Node Name
-  AHU 1 Supply Fan Outlet; !- Air Outlet Node Name
+  AHU 1 Supply Fan Outlet;    !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsection{FanPerformance:NightVentilation}\label{fanperformancenightventilation}
@@ -744,32 +738,30 @@ The fraction of the motor heat that is added to the air stream. A value of 0 mea
 An example of use in an IDF:
 
 \begin{lstlisting}
-
 Fan:VariableVolume,
-  Supply Fan 1,                       !- Name
-  FanAvailSched,                     !- Availability Schedule Name
-  0.7,                                         !- Fan Efficiency
-  600.0,                                     !- Pressure Rise {Pa}
-  autosize,                               !- Maximum Flow Rate {m3/s}
-  autosize,                               !- Minimum Flow Rate {m3/s}
-  0.9,                                         !- Motor Efficiency
-  1.0,                                         !- Motor In Airstream Fraction
-  0.35071223,                           !- Fan Coefficient 1
-  0.30850535,                           !- Fan Coefficient 2
-  -0.54137364,                         !- Fan Coefficient 3
-  0.87198823,                           !- Fan Coefficient 4
-  0.000,                                     !- Fan Coefficient 5
-  Main Heating Coil 1 Outlet Node,   !- Air Inlet Node Name
-  VAV Sys 1 Outlet Node;     !- Air Outlet Node Name
+  Supply Fan 1,               !- Name
+  FanAvailSched,              !- Availability Schedule Name
+  0.7,                        !- Fan Efficiency
+  600.0,                      !- Pressure Rise {Pa}
+  autosize,                   !- Maximum Flow Rate {m3/s}
+  autosize,                   !- Minimum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  0.35071223,                 !- Fan Coefficient 1
+  0.30850535,                 !- Fan Coefficient 2
+  -0.54137364,                !- Fan Coefficient 3
+  0.87198823,                 !- Fan Coefficient 4
+  0.000,                      !- Fan Coefficient 5
+  Main Heating Coil 1 Outlet Node,  !- Air Inlet Node Name
+  VAV Sys 1 Outlet Node;      !- Air Outlet Node Name
 
-
-  FanPerformance:NightVentilation,
-  Supply Fan 1,                       !- Fan Name
-  0.7,                                         !- Fan Total Efficiency
-  67.0,                                       !- Pressure Rise {Pa}
-  autosize,                               !- Maximum Flow Rate {m3/s}
-  0.9,                                         !- Motor Efficiency
-  1.0;                                         !- Motor in Airstream Fraction
+FanPerformance:NightVentilation,
+  Supply Fan 1,               !- Fan Name
+  0.7,                        !- Fan Total Efficiency
+  67.0,                       !- Pressure Rise {Pa}
+  autosize,                   !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0;                        !- Motor in Airstream Fraction
 \end{lstlisting}
 
 \subsection{Fan:ComponentModel}\label{fancomponentmodel}
@@ -1060,42 +1052,42 @@ An example of use in an IDF:
 
 \begin{lstlisting}
 Fan:ComponentModel,
-  Supply Fan 1,                     ! Fan Name
-  Main Heating Coil 1 Outlet Node,  ! Inlet Node Name
-  VAV Sys 1 Outlet Node,            ! Outlet Node Name
-  FanAvailSched,                    ! Fan Schedule
-  autosize,                         ! Maximum Flow Rate [m3/s]
-  autosize,                         ! Minimum Flow Rate [m3/s]
-  1.0,                              ! Fan Sizing Factor [-]
-  0.3048,                           ! Fan Wheel Diameter [m]
-  0.0873288576,                     ! Fan Outlet Area [m2]
-  0.514,                            ! Maximum Fan Static Efficiency [-]
-  9.76,                             ! Euler Number at Maximum Fan Static Efficiency [-]
-  0.160331811647483,                ! Maximum Dimensionless Fan Airflow [-]
-  autosize,                         ! Motor/Fan Pulley Ratio [-]
-  autosize,                         ! Belt Maximum Torque [N m]
-  1.0,                              ! Belt Sizing Factor [-]
-  0.167,                            ! Belt Fractional Torque Transition [-]
-  1800,                             ! Motor Maximum Speed [rpm]
-  autosize,                         ! Maximum Motor Output Power [W]
-  1.0,                              ! Motor Sizing Factor [-]
-  1.0,                              ! Motor In Airstream Fraction [-]
-  Power,                            ! VFD Efficiency Type
-  autosize,                         ! Maximum VFD Output Power [W]
-  1.0,                              ! VFD Sizing Factor [-]
-  VSD Example,                      ! Fan Pressure Rise Curve Name
-  DiagnosticSPR,                    ! Duct Static Pressure Reset Curve Name
-  FanEff120CPLANormal,              ! Fan Efficiency Curve Name     Non-Stall
-  FanEff120CPLAStall,               ! Fan Efficiency Curve Name - Stall
-  FanDimFlowNormal,                 ! Dimensionless Airflow Curve Name-Non-Stall
-  FanDimFlowStall,                  ! Dimensionless Airflow Curve Name-Stall
-  BeltMaxEffMedium,                 ! Maximum Belt Efficiency Curve Name
-  BeltPartLoadRegion1,              ! Normalized Belt Efficiency Curve Name
-  BeltPartLoadRegion2,              ! Normalized Belt Efficiency Curve Name
-  BeltPartLoadRegion3,              ! Normalized Belt Efficiency Curve Name
-  MotorMaxEffAvg,                   ! Maximum Motor Efficiency Curve Name
-  MotorPartLoad,                    ! Normalized Motor Efficiency Curve Name
-  VFDPartLoad;                      ! VFD Efficiency Curve Name
+  Supply Fan 1,               !- Fan Name
+  Main Heating Coil 1 Outlet Node,  !- Inlet Node Name
+  VAV Sys 1 Outlet Node,      !- Outlet Node Name
+  FanAvailSched,              !- Fan Schedule
+  autosize,                   !- Maximum Flow Rate [m3/s]
+  autosize,                   !- Minimum Flow Rate [m3/s]
+  1.0,                        !- Fan Sizing Factor [-]
+  0.3048,                     !- Fan Wheel Diameter [m]
+  0.0873288576,               !- Fan Outlet Area [m2]
+  0.514,                      !- Maximum Fan Static Efficiency [-]
+  9.76,                       !- Euler Number at Maximum Fan Static Efficiency [-]
+  0.160331811647483,          !- Maximum Dimensionless Fan Airflow [-]
+  autosize,                   !- Motor/Fan Pulley Ratio [-]
+  autosize,                   !- Belt Maximum Torque [N m]
+  1.0,                        !- Belt Sizing Factor [-]
+  0.167,                      !- Belt Fractional Torque Transition [-]
+  1800,                       !- Motor Maximum Speed [rpm]
+  autosize,                   !- Maximum Motor Output Power [W]
+  1.0,                        !- Motor Sizing Factor [-]
+  1.0,                        !- Motor In Airstream Fraction [-]
+  Power,                      !- VFD Efficiency Type
+  autosize,                   !- Maximum VFD Output Power [W]
+  1.0,                        !- VFD Sizing Factor [-]
+  VSD Example,                !- Fan Pressure Rise Curve Name
+  DiagnosticSPR,              !- Duct Static Pressure Reset Curve Name
+  FanEff120CPLANormal,        !- Fan Efficiency Curve Name     Non-Stall
+  FanEff120CPLAStall,         !- Fan Efficiency Curve Name - Stall
+  FanDimFlowNormal,           !- Dimensionless Airflow Curve Name-Non-Stall
+  FanDimFlowStall,            !- Dimensionless Airflow Curve Name-Stall
+  BeltMaxEffMedium,           !- Maximum Belt Efficiency Curve Name
+  BeltPartLoadRegion1,        !- Normalized Belt Efficiency Curve Name
+  BeltPartLoadRegion2,        !- Normalized Belt Efficiency Curve Name
+  BeltPartLoadRegion3,        !- Normalized Belt Efficiency Curve Name
+  MotorMaxEffAvg,             !- Maximum Motor Efficiency Curve Name
+  MotorPartLoad,              !- Normalized Motor Efficiency Curve Name
+  VFDPartLoad;                !- VFD Efficiency Curve Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-005}

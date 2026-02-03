@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -326,7 +326,7 @@ struct ThermalComfortsData : BaseGlobalStruct
     Real64 VapPress = 0.0;                  // Vapor pressure; Torr  ?? BG Oct 2005 humm, this should be kPa
     Real64 VasoconstrictFac = 0.0;          // Constriction factor of blood vessel
     Real64 VasodilationFac = 0.0;           // Dilation factor of blood vessel
-    Real64 WorkEff = 0.0;                   // Energy cosumption by external work; w/m2
+    Real64 WorkEff = 0.0;                   // Energy consumption by external work; w/m2
     int ZoneNum = 0;                        // Zone number
     Real64 TemporarySixAMTemperature = 0.0; // Temperature at 6am
 

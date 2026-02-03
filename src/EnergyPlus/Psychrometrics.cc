@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -828,7 +828,7 @@ namespace Psychrometrics {
 
         if (W < 0.0) {
             if (state.dataPsychrometrics->ReportErrors && !state.dataGlobal->WarmupFlag) {
-                if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::WFnTdbTwbPb2) == 0]) {
+                if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::WFnTdbTwbPb2)] == 0) {
                     state.dataPsychrometrics->String = format(" Dry-Bulb= {:.2T} Wet-Bulb= {:.2T} Pressure= {:.2T}", TDB, TWB, PB);
                     ShowWarningMessage(state, "Calculated Humidity Ratio Invalid (PsyWFnTdbTwbPb)");
                     if (!CalledFrom.empty()) {
@@ -1347,7 +1347,7 @@ namespace Psychrometrics {
         state.dataPsychrometrics->Press_Save = Press;
         iter = 0;
         if (state.dataPsychrometrics->useInterpolationPsychTsatFnPb) {
-            int n_sample = 1651; // sample bin size = 64 Pa; continous sample size = 1651
+            int n_sample = 1651; // sample bin size = 64 Pa; continuous sample size = 1651
             // CSpline interpolation
             tSat = CSplineint(n_sample, Press); // Cubic spline interpolation
         } else {
@@ -1448,11 +1448,11 @@ namespace Psychrometrics {
     Real64 CSplineint(int const n, // sample data size
                       Real64 x)    // given value of x
     {                              // Cubic Spline interpolation
-        // Reference: Numerical Recipies in C (pp.97)
+        // Reference: Numerical Recipes in C (pp.97)
         Real64 A, B, y;
         // find location of x in arrays without searching since array bins are equally sized
         int x_int = static_cast<int>(x);
-        //********continous sample start
+        //********continuous sample start
         int j = (x_int >> 6) - 1; // sample bin 64, sample size=1651
         if (j < 0) {
             j = 0;
@@ -1461,7 +1461,7 @@ namespace Psychrometrics {
             j = n - 2;
         }
         static constexpr Real64 h(64); // sample bin 64, sample size=1651
-        //********continous sample end
+        //********continuous sample end
         int tsat_fn_pb_x_j1 = 64 * (j + 1); // sample data for pressure
         A = (tsat_fn_pb_x_j1 - x) / h;
         B = 1 - A;

@@ -63,9 +63,6 @@
 !   Mechanical Ventilation Loads,
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Output:Table:Monthly,
     Zone Cooling Summary,    !- Name
     ,                        !- Digits After Decimal
@@ -183,9 +180,9 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Electricity:Facility,    !- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    NaturalGas:Facility,            !- Variable or Meter 3 Name
+    NaturalGas:Facility,     !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    NaturalGas:Facility,            !- Variable or Meter 4 Name
+    NaturalGas:Facility,     !- Variable or Meter 4 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 4
 
   Output:Table:Monthly,
@@ -207,13 +204,13 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Diesel:Facility,         !- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    FuelOilNo1:Facility,      !- Variable or Meter 3 Name
+    FuelOilNo1:Facility,     !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    FuelOilNo1:Facility,      !- Variable or Meter 4 Name
+    FuelOilNo1:Facility,     !- Variable or Meter 4 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 4
-    FuelOilNo2:Facility,      !- Variable or Meter 5 Name
+    FuelOilNo2:Facility,     !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
-    FuelOilNo2:Facility,      !- Variable or Meter 6 Name
+    FuelOilNo2:Facility,     !- Variable or Meter 6 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 6
 
   Output:Table:Monthly,
@@ -223,9 +220,9 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     DistrictCooling:Facility,!- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    DistrictHeatingWater:Facility,!- Variable or Meter 3 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    DistrictHeatingWater:Facility,!- Variable or Meter 4 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 4 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 4
 
   Output:Table:Monthly,
@@ -273,17 +270,17 @@
   Output:Table:Monthly,
     End-Use Energy Consumption - Natural Gas,  !- Name
     ,                        !- Digits After Decimal
-    InteriorEquipment:NaturalGas,   !- Variable or Meter 1 Name
+    InteriorEquipment:NaturalGas,  !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
-    ExteriorEquipment:NaturalGas,   !- Variable or Meter 2 Name
+    ExteriorEquipment:NaturalGas,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Heating:NaturalGas,             !- Variable or Meter 3 Name
+    Heating:NaturalGas,      !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Cooling:NaturalGas,             !- Variable or Meter 4 Name
+    Cooling:NaturalGas,      !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    WaterSystems:NaturalGas,        !- Variable or Meter 5 Name
+    WaterSystems:NaturalGas, !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
-    Cogeneration:NaturalGas,        !- Variable or Meter 6 Name
+    Cogeneration:NaturalGas, !- Variable or Meter 6 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 6
 
   Output:Table:Monthly,
@@ -305,23 +302,23 @@
     ,                        !- Digits After Decimal
     ExteriorEquipment:FuelOilNo1,  !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
-    Cooling:FuelOilNo1,       !- Variable or Meter 2 Name
+    Cooling:FuelOilNo1,      !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Heating:FuelOilNo1,       !- Variable or Meter 3 Name
+    Heating:FuelOilNo1,      !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    WaterSystems:FuelOilNo1,  !- Variable or Meter 4 Name
+    WaterSystems:FuelOilNo1, !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Cogeneration:FuelOilNo1,  !- Variable or Meter 5 Name
+    Cogeneration:FuelOilNo1, !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
     ExteriorEquipment:FuelOilNo2,  !- Variable or Meter 6 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 6
-    Cooling:FuelOilNo2,       !- Variable or Meter 7 Name
+    Cooling:FuelOilNo2,      !- Variable or Meter 7 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 7
-    Heating:FuelOilNo2,       !- Variable or Meter 8 Name
+    Heating:FuelOilNo2,      !- Variable or Meter 8 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 8
-    WaterSystems:FuelOilNo2,  !- Variable or Meter 9 Name
+    WaterSystems:FuelOilNo2, !- Variable or Meter 9 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 9
-    Cogeneration:FuelOilNo2,  !- Variable or Meter 10 Name
+    Cogeneration:FuelOilNo2, !- Variable or Meter 10 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 10
 
   Output:Table:Monthly,
@@ -423,17 +420,17 @@
   Output:Table:Monthly,
     Peak Energy End-Use - Natural Gas,  !- Name
     ,                        !- Digits After Decimal
-    InteriorEquipment:NaturalGas,   !- Variable or Meter 1 Name
+    InteriorEquipment:NaturalGas,  !- Variable or Meter 1 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 1
-    ExteriorEquipment:NaturalGas,   !- Variable or Meter 2 Name
+    ExteriorEquipment:NaturalGas,  !- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    Heating:NaturalGas,             !- Variable or Meter 3 Name
+    Heating:NaturalGas,      !- Variable or Meter 3 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 3
-    Cooling:NaturalGas,             !- Variable or Meter 4 Name
+    Cooling:NaturalGas,      !- Variable or Meter 4 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 4
-    WaterSystems:NaturalGas,        !- Variable or Meter 5 Name
+    WaterSystems:NaturalGas, !- Variable or Meter 5 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 5
-    Cogeneration:NaturalGas,        !- Variable or Meter 6 Name
+    Cogeneration:NaturalGas, !- Variable or Meter 6 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 6
 
   Output:Table:Monthly,
@@ -455,23 +452,23 @@
     ,                        !- Digits After Decimal
     ExteriorEquipment:FuelOilNo1,  !- Variable or Meter 1 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 1
-    Cooling:FuelOilNo1,       !- Variable or Meter 2 Name
+    Cooling:FuelOilNo1,      !- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    Heating:FuelOilNo1,       !- Variable or Meter 3 Name
+    Heating:FuelOilNo1,      !- Variable or Meter 3 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 3
-    WaterSystems:FuelOilNo1,  !- Variable or Meter 4 Name
+    WaterSystems:FuelOilNo1, !- Variable or Meter 4 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 4
-    Cogeneration:FuelOilNo1,  !- Variable or Meter 5 Name
+    Cogeneration:FuelOilNo1, !- Variable or Meter 5 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 5
     ExteriorEquipment:FuelOilNo2,  !- Variable or Meter 6 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 6
-    Cooling:FuelOilNo2,       !- Variable or Meter 7 Name
+    Cooling:FuelOilNo2,      !- Variable or Meter 7 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 7
-    Heating:FuelOilNo2,       !- Variable or Meter 8 Name
+    Heating:FuelOilNo2,      !- Variable or Meter 8 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 8
-    WaterSystems:FuelOilNo2,  !- Variable or Meter 9 Name
+    WaterSystems:FuelOilNo2, !- Variable or Meter 9 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 9
-    Cogeneration:FuelOilNo2,  !- Variable or Meter 10 Name
+    Cogeneration:FuelOilNo2, !- Variable or Meter 10 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 10
 
   Output:Table:Monthly,
@@ -575,11 +572,11 @@
   Output:Table:Monthly,
     Chiller Report,          !- Name
     ,                        !- Digits After Decimal
-    Chiller Electricity Energy, !- Variable or Meter 1 Name
+    Chiller Electricity Energy,  !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
-    Chiller Electricity Rate,  !- Variable or Meter 2 Name
+    Chiller Electricity Rate,!- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    Chiller Electricity Energy, !- Variable or Meter 3 Name
+    Chiller Electricity Energy,  !- Variable or Meter 3 Name
     HoursNonZero,            !- Aggregation Type for Variable or Meter 3
     Chiller Evaporator Cooling Energy,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
@@ -615,7 +612,7 @@
     ,                        !- Digits After Decimal
     Boiler Heating Energy,   !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
-    Boiler NaturalGas Energy, !- Variable or Meter 2 Name
+    Boiler NaturalGas Energy,!- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
     Boiler Heating Energy,   !- Variable or Meter 3 Name
     HoursNonZero,            !- Aggregation Type for Variable or Meter 3
@@ -871,7 +868,7 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
     Water Heater Burner Heating Energy,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Water Heater NaturalGas Energy, !- Variable or Meter 4 Name
+    Water Heater NaturalGas Energy,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
     Water Heater Total Demand Heat Transfer Energy,  !- Variable or Meter 5 Name
     HoursNonZero,            !- Aggregation Type for Variable or Meter 5
@@ -893,7 +890,7 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Generator Diesel Energy, !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Generator NaturalGas Energy,     !- Variable or Meter 3 Name
+    Generator NaturalGas Energy,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
     Generator Produced Electricity Energy,  !- Variable or Meter 4 Name
     HoursNonZero,            !- Aggregation Type for Variable or Meter 4
@@ -959,11 +956,11 @@
   Output:Table:Monthly,
     Fan Report,              !- Name
     ,                        !- Digits After Decimal
-    Fan Electricity Energy,     !- Variable or Meter 1 Name
+    Fan Electricity Energy,  !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Fan Rise in Air Temperature,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Fan Electricity Rate,      !- Variable or Meter 3 Name
+    Fan Electricity Rate,    !- Variable or Meter 3 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 3
     Fan Rise in Air Temperature,  !- Variable or Meter 4 Name
     ValueWhenMaximumOrMinimum;  !- Aggregation Type for Variable or Meter 4
@@ -971,11 +968,11 @@
   Output:Table:Monthly,
     Pump Report,             !- Name
     ,                        !- Digits After Decimal
-    Pump Electricity Energy,    !- Variable or Meter 1 Name
+    Pump Electricity Energy, !- Variable or Meter 1 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Pump Fluid Heat Gain Energy,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Pump Electricity Rate,     !- Variable or Meter 3 Name
+    Pump Electricity Rate,   !- Variable or Meter 3 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 3
     Pump Shaft Power,        !- Variable or Meter 4 Name
     ValueWhenMaximumOrMinimum,  !- Aggregation Type for Variable or Meter 4
@@ -1021,7 +1018,7 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
     Air System Electricity Energy,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Air System NaturalGas Energy,   !- Variable or Meter 5 Name
+    Air System NaturalGas Energy,  !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
     Air System Water Volume, !- Variable or Meter 6 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 6

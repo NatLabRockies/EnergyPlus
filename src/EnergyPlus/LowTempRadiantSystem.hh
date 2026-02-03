@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -162,7 +162,7 @@ namespace LowTempRadiantSystem {
         CtrlType controlType = CtrlType::MAT;                    // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
                                                                  // Surface Face Temp, Surface Interior Temp, Running Mean
                                                                  // Temp for Constant Flow systems only)
-        SetpointType setpointType = SetpointType::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
+        SetpointType setpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
         OpMode opMode = OpMode::None;                            // Operating mode currently being used (NotOperating, Heating, Cooling)
         Real64 HeatPower;                                        // heating sent to panel in Watts
         Real64 HeatEnergy;                                       // heating sent to panel in Joules
@@ -311,7 +311,7 @@ namespace LowTempRadiantSystem {
         CtrlType VarFlowControlType = CtrlType::MAT;     // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
         // Surface Face Temp, Surface Interior Temp, Running Mean Temp
         // for Constant Flow systems only)
-        SetpointType VarFlowSetpointType = SetpointType::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
+        SetpointType VarFlowSetpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
         std::string DesignHeatingCapMethodInput;
         int DesignHeatingCapMethod = 0; // - Method for Low Temp Radiant system heating capacity scaledsizing calculation (HeatingDesignCapacity,
         // CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)

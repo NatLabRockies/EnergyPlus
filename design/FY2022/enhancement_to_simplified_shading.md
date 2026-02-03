@@ -14,7 +14,7 @@ Currently, EnergyPlus models shading devices in *WindowMaterial:Shade* and *Wind
 
 The proposed new feature will enable a simplified way to specify the properties of a shading device with a multiplier for solar transmittance and visible transmittance. The multiplier can be a single fixed value or a schedule of values. An idd object *SurfaceProperty:IncidentSolarMultiplier* will be added to enable users to specify the multiplier. This multiplier resembles the SHADING-SCHEDULE in DOE-2, which can adjust the solar heat gain through windows with a multiplier schedule.
 
-This post on unmethours.com shows a need for such a simplified shading method in EnergyPlus: https://unmethours.com/question/342/what-assumptions-do-you-make-for-modeling-blinds/ 
+This post on unmethours.com shows a need for such a simplified shading method in EnergyPlus: https://unmethours.com/question/342/what-assumptions-do-you-make-for-modeling-blinds/
 
 ## Overview ##
 
@@ -44,8 +44,8 @@ A new object *SurfaceProperty:IncidentSolarMultiplier* will be created.
           \object-list SurfaceNames
           \note Enter the name of an exterior window outside surface object
       N1, \field Incident Solar Multiplier
-          \note a constant multiplier for window solar transmittance 
-          \note and visible transmittance. If the Incident Solar Multiplier Schedule Name is 
+          \note a constant multiplier for window solar transmittance
+          \note and visible transmittance. If the Incident Solar Multiplier Schedule Name is
           \note defined, the product of these two will be the final Incident Solar Multiplier.
           \type real
           \units dimensionless
@@ -53,7 +53,7 @@ A new object *SurfaceProperty:IncidentSolarMultiplier* will be created.
           \maximum 1
           \default 1.0
       A2; \field Incident Solar Multiplier Schedule Name
-          \note The schedule values should be greater than or equal 
+          \note The schedule values should be greater than or equal
           \note to 0 and less than or equal to 1.
           \type object-list
           \object-list ScheduleNames
@@ -67,4 +67,3 @@ N/A
 N/A
 
 ## References ##
-

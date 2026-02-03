@@ -71,7 +71,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     NONE,                    !- Name
@@ -92,7 +92,8 @@
   HeatBalanceAlgorithm,ConductionTransferFunction;
 
   ZoneAirHeatBalanceAlgorithm,
-    EulerMethod;             !- Algorithm
+    EulerMethod,             !- Algorithm
+    ;                        !- Do Space Heat Balance for Sizing
 
   ShadowCalculation,
     PolygonClipping,         !- Shading Calculation Method
@@ -587,7 +588,7 @@
     WorkHours ScheduleG,     !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2200,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant

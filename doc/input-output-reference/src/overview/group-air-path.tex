@@ -67,21 +67,19 @@ Unique name of the \hyperref[airloophvacreturnplenum]{AirLoopHVAC:ReturnPlenum} 
 Example inputs are shown below
 
 \begin{lstlisting}
-
 AirLoopHVAC:SupplyPath,
-  SupplyAirPath 1,              !- Name
-  Zone Equip In Node,           !- Supply Air Path Inlet Node Name
-  AirLoopHVAC:SupplyPlenum,     !- Component 1 Object Type
-  Supply-Plenum-1,              !- Component 1 Name
-  AirLoopHVAC:ZoneSplitter,     !- Component 2 Object Type
-  Zone Supply Air Splitter 1;   !- Component 2 Name
+  SupplyAirPath 1,            !- Name
+  Zone Equip In Node,         !- Supply Air Path Inlet Node Name
+  AirLoopHVAC:SupplyPlenum,   !- Component 1 Object Type
+  Supply-Plenum-1,            !- Component 1 Name
+  AirLoopHVAC:ZoneSplitter,   !- Component 2 Object Type
+  Zone Supply Air Splitter 1; !- Component 2 Name
 
-
-  AirLoopHVAC:ReturnPath,
-  ReturnAirPath1,               !- Name
-  PLENUM-1 Out Node,            !- Return Air Path Outlet Node Name
-  Zone Return Plenum,           !- Component 1 Object Type
-  Return-Plenum-1;              !- Component 1 Name
+AirLoopHVAC:ReturnPath,
+  ReturnAirPath1,             !- Name
+  PLENUM-1 Out Node,          !- Return Air Path Outlet Node Name
+  Zone Return Plenum,         !- Component 1 Object Type
+  Return-Plenum-1;            !- Component 1 Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:ReturnPlenum}\label{airloophvacreturnplenum}
@@ -125,7 +123,6 @@ The name of a plenum inlet node. There is no limit to the number of inlet nodes,
 An IDF example of a zone return plenum component specification:
 
 \begin{lstlisting}
-
 AirLoopHVAC:ReturnPlenum,
   Return-Plenum-1,            !- Name
   PLENUM-1,                   !- Zone Name
@@ -138,8 +135,7 @@ AirLoopHVAC:ReturnPlenum,
   SPACE4-1 Out Node,          !- Inlet 4 Node Name
   SPACE5-1 Out Node;          !- Inlet 5 Node Name
 
-
-  NodeList,
+NodeList,
   PLENUM-1 Induced Air Nodes, !- Name
   SPACE1-1 ATU Sec Node,      !- Node 1 Name
   SPACE2-1 ATU Sec Node,      !- Node 2 Name
@@ -150,12 +146,11 @@ AirLoopHVAC:ReturnPlenum,
 Below is an example of the \hyperref[airloophvacreturnpath]{AirLoopHVAC:ReturnPath} for the simple case shown above.
 
 \begin{lstlisting}
-
 AirLoopHVAC:ReturnPath,
-  ReturnAirPath1,              !- Name
-  PLENUM-1 Out Node,           !- Return Air Path Outlet Node Name
-  AirLoopHVAC:ReturnPlenum,    !- Component 1 Object Type
-  Return-Plenum-1;             !- Component 1 Name
+  ReturnAirPath1,             !- Name
+  PLENUM-1 Out Node,          !- Return Air Path Outlet Node Name
+  AirLoopHVAC:ReturnPlenum,   !- Component 1 Object Type
+  Return-Plenum-1;            !- Component 1 Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:SupplyPlenum}\label{airloophvacsupplyplenum}
@@ -197,26 +192,24 @@ The name of a plenum outlet node. There is no limit to the number of outlet node
 An IDF example of an AirLoopHVAC:SupplyPlenum component specification:
 
 \begin{lstlisting}
-
 AirLoopHVAC:SupplyPlenum,
-  Supply Plenum 1,                         ! Name
-  SUPPLY PLENUM ZONE,                   ! Zone Name
-  Supply Plenum 1 Zone Node,     ! Zone Node Name
-  Zone Equipment Inlet Node,     ! Inlet Node Name
-  Supply Plenum 1 Outlet Node; ! Outlet 1 Node Name
+  Supply Plenum 1,            !- Name
+  SUPPLY PLENUM ZONE,         !- Zone Name
+  Supply Plenum 1 Zone Node,  !- Zone Node Name
+  Zone Equipment Inlet Node,  !- Inlet Node Name
+  Supply Plenum 1 Outlet Node;!- Outlet 1 Node Name
 \end{lstlisting}
 
 Below is an example of the \hyperref[airloophvacsupplypath]{AirLoopHVAC:SupplyPath} for the building shown above.
 
 \begin{lstlisting}
-
 AirLoopHVAC:SupplyPath,
-  TermReheatSupplyPath,               ! Name
-  Zone Equipment Inlet Node,     ! Supply Air Path Inlet Node Name
-  AirLoopHVAC:SupplyPlenum,       ! Component 1 Object Type
-  Supply Plenum 1,                         ! Component 1 Name
-  AirLoopHVAC:ZoneSplitter,       ! Component 2 Object Type
-  Zone Supply Air Splitter;       ! Component 2 Name
+  TermReheatSupplyPath,       !- Name
+  Zone Equipment Inlet Node,  !- Supply Air Path Inlet Node Name
+  AirLoopHVAC:SupplyPlenum,   !- Component 1 Object Type
+  Supply Plenum 1,            !- Component 1 Name
+  AirLoopHVAC:ZoneSplitter,   !- Component 2 Object Type
+  Zone Supply Air Splitter;   !- Component 2 Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:ExhaustSystem}\label{airloophvacexhaustsystem}
@@ -246,18 +239,16 @@ This is a required field for the name of the central exhaust fan.
 An example of the AirLoopHVAC:ExhaustSystem input object is like this:
 
 \begin{lstlisting}
-
 AirLoopHVAC:ExhaustSystem,
-    Central Exhaust 1,           !- Name
-    AirLoopExhaustMixer1,        !- Zone Mixer Name    
-    Fan:SystemModel,             !- Fan Object Type
-    CentralExhaustFan1;          !- Fan Name
-
+  Central Exhaust 1,          !- Name
+  AirLoopExhaustMixer1,       !- Zone Mixer Name
+  Fan:SystemModel,            !- Fan Object Type
+  CentralExhaustFan1;         !- Fan Name
 \end{lstlisting}
 
 \subsubsection{Outputs}
 
-The following output will be added the to the new exhaust system: 
+The following output will be added the to the new exhaust system:
 
 \begin{itemize}
 
@@ -341,22 +332,20 @@ This field is optional. If it is not used, then all the exhaust air flow is assu
 An example of the ZoneHVAC:ExhaustControl input object is like this:
 
 \begin{lstlisting}
-
 ZoneHVAC:ExhaustControl,
-    Zone2 Exhaust System,           !-Name
-    HVACOperationSchd,              !- Availability Schedule Name
-    Zone2,                          !- Zone Name
-    Zone2 Exhaust Node,             !- Inlet Node Name
-    Zone2 ExhaustSystem Node,       !- Outlet Node Name
-    0.1,                            !- Design Flow Rate {m3/s}
-    Scheduled,                      !- Flow Control Type (Scheduled or FollowSupply)
-    Zone2 Exhaust Flow Sched,       !- Flow Fraction Schedule Name
-    ,                               !- Supply Node or NodeList Name (used with FollowSupply control type)
-    ,                               !- System Availability Manager Name
-    ,                               !- Minimum Zone Temperature Limit Schedule Name
-    Zone2 Min Exhaust Flow Sched,   !- Minimum Flow Fraction Schedule Name
-    FlowBalancedSched;              !- Balanced Exhaust Fraction Schedule Name
-
+  Zone2 Exhaust System,       !- Name
+  HVACOperationSchd,          !- Availability Schedule Name
+  Zone2,                      !- Zone Name
+  Zone2 Exhaust Node,         !- Inlet Node Name
+  Zone2 ExhaustSystem Node,   !- Outlet Node Name
+  0.1,                        !- Design Flow Rate {m3/s}
+  Scheduled,                  !- Flow Control Type (Scheduled or FollowSupply)
+  Zone2 Exhaust Flow Sched,   !- Flow Fraction Schedule Name
+  ,                           !- Supply Node or NodeList Name (used with FollowSupply control type)
+  ,                           !- System Availability Manager Name
+  ,                           !- Minimum Zone Temperature Limit Schedule Name
+  Zone2 Min Exhaust Flow Sched,  !- Minimum Flow Fraction Schedule Name
+  FlowBalancedSched;          !- Balanced Exhaust Fraction Schedule Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:ZoneSplitter}\label{airloophvaczonesplitter}
@@ -380,13 +369,12 @@ The name of a splitter outlet node. There is no limit to the number of outlet no
 An example is shown below.
 
 \begin{lstlisting}
-
 AirLoopHVAC:ZoneSplitter,
-  Zone Supply Air Splitter,     ! Name
-  Zone Equipment Inlet Node,   ! Inlet Node Name
-  Zone 1 Damper Inlet Node,     ! Outlet 1 Node Name
-  Zone 2 Damper Inlet Node,     ! Outlet 2 Node Name
-  Zone 3 Damper Inlet Node;     ! Outlet 3 Node Name
+  Zone Supply Air Splitter,   !- Name
+  Zone Equipment Inlet Node,  !- Inlet Node Name
+  Zone 1 Damper Inlet Node,   !- Outlet 1 Node Name
+  Zone 2 Damper Inlet Node,   !- Outlet 2 Node Name
+  Zone 3 Damper Inlet Node;   !- Outlet 3 Node Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:ZoneMixer}\label{airloophvaczonemixer}
@@ -410,18 +398,17 @@ The name of a mixer inlet node. There is no limit to the number of inlet nodes, 
 An input example is shown below.
 
 \begin{lstlisting}
-
 AirLoopHVAC:ZoneMixer,
-  Zone Return Air Mixer,               ! Name
-  Return Air Mixer Outlet Node, ! Outlet Node Name
-  Zone 1 Outlet Node,                     ! Inlet 1 Node Name
-  Zone 2 Outlet Node,                     ! Inlet 2 Node Name
-  Zone 3 Outlet Node;                     ! Inlet 3 Node Name
+  Zone Return Air Mixer,      !- Name
+  Return Air Mixer Outlet Node,  !- Outlet Node Name
+  Zone 1 Outlet Node,         !- Inlet 1 Node Name
+  Zone 2 Outlet Node,         !- Inlet 2 Node Name
+  Zone 3 Outlet Node;         !- Inlet 3 Node Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:DedicatedOutdoorAirSystem}\label{airloophvacdedicatedoutdoorairsystem}
 
-The AirLoopHVAC:DedicatedOutdoorAirSystem is a central dedicated outdoor air system (DOAS) and delivers outdoor air to multiple \hyperref[airloophvac]{AirLoopHVAC} systems. The amount of delivered outdoor air is based on a sum of outdoor air flow rates from outdoor air stream nodes defined in the \hyperref[outdoorairmixer]{OutdoorAir:Mixer}. These OutdoorAir:Mixer objects are a component of served multiple AirLoopHVAC systems. The central DOAS system also pretreats outdoor air before outdoor air distribution into multiple AirLoopHVAC, with given precool and preheat air conditions.
+The AirLoopHVAC:DedicatedOutdoorAirSystem is a central dedicated outdoor air system (DOAS) and delivers outdoor air to multiple \hyperref[airloophvac]{AirLoopHVAC} systems. The amount of delivered outdoor air is based on a sum of outdoor air flow rates from outdoor air stream nodes defined in the \hyperref[outdoorairmixer]{OutdoorAir:Mixer}. These OutdoorAir:Mixer objects are a component of the multiple AirLoopHVAC systems connected to the central DOAS. The central DOAS system also pretreats outdoor air before outdoor air distribution into multiple AirLoopHVAC, with given precool and preheat air conditions. The DOAS system may have a draw thorugh or blow through fan (i.e., before or after the non-fan components) and could include an exhaust fan as the last object in the DOAS system's AirLoopHVAC:OutdoorAirSystem equipment list object (ref. AirLoopHVAC:OutdoorAirSystem:EquipmentList). The exhaust fan inlet node name will be the same node name as the DOAS system's AirLoopHVAC:Mixer's outlet node name.
 
 After the object name, the object has four fields to provide the name of AirLoopHVAC:OutdoorAirSystem, system availability, and names of AirLoopHVAC:Mixer and AirLoopHVAC:Splitter. The AirLoopHVAC:OutdoorAirSystem lists a controller to perform controls, and coils and fans to pretreat outdoor air before delivery to served AirLoopHVAC. The Availability Schedule determines times when a system is operational or shutdown. The AirLoopHVAC:Mixer and AirLoopHVAC:Splitter provide connection into distribution and relief nodes, respectively.
 
@@ -470,28 +457,27 @@ The name of an AirLoopHVAC. There is no limit to the number of AirLoopHVACs, and
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
-  AirLoopHVAC:DedicatedOutdoorAirSystem,
-    AirLoopHVAC DOAS,        !- Name
-    AirLoopDOAS OA system,   !- AirLoopHVAC:OutdoorAirSystem Name
-    ALWAYS_ON,               !- Availability Schedule Name
-    AirLoopDOASMixer,        !- AirLoopHVAC:Mixer Name
-    AirLoopDOASSplitter,     !- AirLoopHVAC:Splitter Name
-    4.5,                     !- Preheat Design Temperature {C}
-    0.004,                   !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
-    17.5,                    !- Precool Design Temperature {C}
-    0.012,                   !- Precool Design Humidity Ratio {kgWater/kgDryAir}
-    5,                       !- Number of AirLoopHVAC
-    PSZ-AC:1,                !- AirLoopHVAC 1 Name
-    PSZ-AC:2,                !- AirLoopHVAC 2 Name
-    PSZ-AC:3,                !- AirLoopHVAC 3 Name
-    PSZ-AC:4,                !- AirLoopHVAC 4 Name
-    PSZ-AC:5;                !- AirLoopHVAC 5 Name
+AirLoopHVAC:DedicatedOutdoorAirSystem,
+  AirLoopHVAC DOAS,           !- Name
+  AirLoopDOAS OA system,      !- AirLoopHVAC:OutdoorAirSystem Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  AirLoopDOASMixer,           !- AirLoopHVAC:Mixer Name
+  AirLoopDOASSplitter,        !- AirLoopHVAC:Splitter Name
+  4.5,                        !- Preheat Design Temperature {C}
+  0.004,                      !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
+  17.5,                       !- Precool Design Temperature {C}
+  0.012,                      !- Precool Design Humidity Ratio {kgWater/kgDryAir}
+  5,                          !- Number of AirLoopHVAC
+  PSZ-AC:1,                   !- AirLoopHVAC 1 Name
+  PSZ-AC:2,                   !- AirLoopHVAC 2 Name
+  PSZ-AC:3,                   !- AirLoopHVAC 3 Name
+  PSZ-AC:4,                   !- AirLoopHVAC 4 Name
+  PSZ-AC:5;                   !- AirLoopHVAC 5 Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:Mixer}\label{airloophvacmixer}
 
-The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object. 
+The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object.
 
 \subsubsection{Inputs}\label{inputs-5-002}
 
@@ -510,15 +496,14 @@ The name of a mixer inlet node. There is no limit to the number of inlet nodes, 
 An input example is shown below.
 
 \begin{lstlisting}
-
-  AirLoopHVAC:Mixer,
-    AirLoopDOASMixer,        !- Name
-    AirLoopDOASMixerOutlet,  !- Outlet Node Name
-    PSZ-AC:1_OARelief Node,  !- Inlet 1 Node Name
-    PSZ-AC:2_OARelief Node,  !- Inlet 2 Node Name
-    PSZ-AC:3_OARelief Node,  !- Inlet 3 Node Name
-    PSZ-AC:4_OARelief Node,  !- Inlet 4 Node Name
-    PSZ-AC:5_OARelief Node;  !- Inlet 5 Node Name
+AirLoopHVAC:Mixer,
+  AirLoopDOASMixer,           !- Name
+  AirLoopDOASMixerOutlet,     !- Outlet Node Name
+  PSZ-AC:1_OARelief Node,     !- Inlet 1 Node Name
+  PSZ-AC:2_OARelief Node,     !- Inlet 2 Node Name
+  PSZ-AC:3_OARelief Node,     !- Inlet 3 Node Name
+  PSZ-AC:4_OARelief Node,     !- Inlet 4 Node Name
+  PSZ-AC:5_OARelief Node;     !- Inlet 5 Node Name
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:Splitter}\label{airloophvacsplitter}
@@ -542,13 +527,12 @@ The name of a splitter outlet node. There is no limit to the number of outlet no
 An input example is shown below.
 
 \begin{lstlisting}
-
-  AirLoopHVAC:Splitter,
-    AirLoopDOASSplitter,     !- Name
-    AirLoopDOASSplitterInlet, !- Inlet Node Name
-    PSZ-AC:1_OAInlet Node,  !- Outlet 1 Node Name
-    PSZ-AC:2_OAInlet Node,  !- Outlet 2 Node Name
-    PSZ-AC:3_OAInlet Node,  !- Outlet 3 Node Name
-    PSZ-AC:4_OAInlet Node,  !- Outlet 4 Node Name
-    PSZ-AC:5_OAInlet Node;  !- Outlet 5 Node Name
+AirLoopHVAC:Splitter,
+  AirLoopDOASSplitter,        !- Name
+  AirLoopDOASSplitterInlet,   !- Inlet Node Name
+  PSZ-AC:1_OAInlet Node,      !- Outlet 1 Node Name
+  PSZ-AC:2_OAInlet Node,      !- Outlet 2 Node Name
+  PSZ-AC:3_OAInlet Node,      !- Outlet 3 Node Name
+  PSZ-AC:4_OAInlet Node,      !- Outlet 4 Node Name
+  PSZ-AC:5_OAInlet Node;      !- Outlet 5 Node Name
 \end{lstlisting}

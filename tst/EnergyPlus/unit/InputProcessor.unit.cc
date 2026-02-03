@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataOutputs.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
+#include <EnergyPlus/InputProcessing/CsvParser.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 
 #include <map>
@@ -2056,7 +2057,7 @@ TEST_F(InputProcessorFixture, next_token)
 TEST_F(InputProcessorFixture, getObjectItem_json1)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Output:SQLite,SimpleAndTabular;",
     });
 
@@ -2093,11 +2094,12 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", "USEOUTPUTCONTROLTABLESTYLE"}), Alphas));
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data"}), cAlphaFields));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", "USEOUTPUTCONTROLTABLESTYLE", "YES"}), Alphas));
+    EXPECT_TRUE(compare_containers(
+        std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data", "Format Numeric Values for Tabular Data"}), cAlphaFields));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({}), cNumericFields));
     EXPECT_TRUE(compare_containers(std::vector<bool>({}), lNumericBlanks));
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks));
     EXPECT_TRUE(compare_containers(std::vector<Real64>({}), Numbers));
     EXPECT_EQ(1, NumAlphas);
     EXPECT_EQ(0, NumNumbers);
@@ -2107,7 +2109,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
 TEST_F(InputProcessorFixture, getObjectItem_json2)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2183,7 +2185,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json2)
 TEST_F(InputProcessorFixture, getObjectItem_json3)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  BuildingSurface:Detailed,",
         "    Zn001:Wall001,           !- Name",
         "    Wall,                    !- Surface Type",
@@ -2377,7 +2379,7 @@ TEST_F(InputProcessorFixture, getObjectItem_parsing_numbers_as_alpha_fields2)
 TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2489,7 +2491,7 @@ TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2579,7 +2581,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Sizing:System,",
         "  West Zone Air System,    !- AirLoop Name",
         "  Sensible,                !- Type of Load to Size On",
@@ -2677,7 +2679,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_autosize)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2763,7 +2765,7 @@ TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_a
 TEST_F(InputProcessorFixture, getObjectItem_truncated_autosize_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -3585,6 +3587,7 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
     std::string const idf_objects = delimited_string({
         "Coil:Cooling:DX:VariableSpeed,",
         "  Furnace ACDXCoil 1, !- Name",
+        "  ,                   !- Availability Schedule Name",
         "  DX Cooling Coil Air Inlet Node, !- Air Inlet Node Name",
         "  Heating Coil Air Inlet Node, !- Air Outlet Node Name",
         "  10, !- Number of Speeds{ dimensionless }",
@@ -3772,8 +3775,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_EQ(50, NumAlphas);
+    EXPECT_EQ(51, NumAlphas);
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"FURNACE ACDXCOIL 1",
+                                                             "",
                                                              "DX COOLING COIL AIR INLET NODE",
                                                              "HEATING COIL AIR INLET NODE",
                                                              "PLFFPLR",
@@ -3825,9 +3829,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                              "COOLEIRFFF"}),
                                    Alphas));
     EXPECT_TRUE(compare_containers(
-        std::vector<bool>({false, false, false, false, true,  false, false, true,  true,  true,  false, false, false, false, false, false, false,
+        std::vector<bool>({false, true,  false, false, false, true,  false, false, true,  true,  true,  false, false, false, false, false, false,
                            false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
+                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
         lAlphaBlanks));
 
     EXPECT_EQ(95, NumNumbers);
@@ -4062,7 +4066,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_biquadratic2)
     EXPECT_EQ(1, IOStatus);
 }
 
-// https://github.com/NREL/EnergyPlus/issues/6720
+// https://github.com/NatLabRockies/EnergyPlus/issues/6720
 TEST_F(InputProcessorFixture, FalseDuplicates)
 {
     std::string const idf(delimited_string({
@@ -4226,8 +4230,7 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_basic)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated
@@ -4330,8 +4333,7 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated
@@ -4845,5 +4847,45 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
 //          EXPECT_TRUE( compare_containers( std::vector< bool >( {} ), IDFRecords( index ).NumBlank ) );
 //
 //   }
+TEST_F(InputProcessorFixture, csv_import_ending_blank_line)
+{
+    std::string csv_no_empty_line_n = "\"H1\",\"H2\",\"H3\"\n"
+                                      "1,2,3\n"
+                                      "4,5,6\n"
+                                      "7,8,9\n";
+    std::string csv_with_empty_line_n = csv_no_empty_line_n + "\\n";
+    // EXPECT_TRUE(false);
+
+    std::string csv_no_empty_line_rn = "\"H1\",\"H2\",\"H3\"\r\n"
+                                       "1,2,3\r\n"
+                                       "4,5,6\r\n"
+                                       "7,8,9\r\n";
+
+    std::string csv_with_empty_line_rn = csv_no_empty_line_rn + "\r\n";
+
+    CsvParser csvParser;
+
+    // None of the following should throw errors
+
+    // No extra lines
+    std::string_view csv = csv_no_empty_line_n;
+    size_t index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with no ending blank line parse test failed";
+    csv = csv_no_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with no ending blank line parse test failed";
+
+    // testing extra blank lines at the end
+    csv = csv_with_empty_line_n;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with with an ending blank line parse test failed";
+    csv = csv_with_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with an ending blank line parse test failed";
+}
 
 } // namespace EnergyPlus

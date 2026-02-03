@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -212,7 +212,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
       ,                                    !- Dedicated Chilled Water Return Recovery HeatPump Name
       ,                                    !- Dedicated Hot Water Return Recovery HeatPump Name
       1.0;                                 !-  Dedicated Recovery Heat Pump Control Load Capacity Factor
-    
+
       PlantEquipmentOperation:CoolingLoad,
         Two AWHP Cooling Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -221,7 +221,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         50000,                             !- Load Range 2 Lower Limit {W}
         10000000000000,                    !- Load Range 2 Upper Limit {W}
         Two AWHP Cooling Equipment List;   !- Range 2 Equipment List Name
-  
+
       PlantEquipmentOperation:HeatingLoad,
         Two AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -230,13 +230,13 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         100000,                            !- Load Range 2 Lower Limit {W}
         10000000000000,                    !- Load Range 2 Upper Limit {W}
         Two AWHP Heating Equipment List;   !- Range 2 Equipment List Name
-    
+
       PlantEquipmentOperation:CoolingLoad,
         One AWHP Cooling Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
         10000000000000000,                 !- Load Range 1 Upper Limit {W}
         One AWHP Cooling Equipment List;   !- Range 1 Equipment List Name
-    
+
       PlantEquipmentOperation:HeatingLoad,
         One AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -247,25 +247,25 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
         One AWHP Heating Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 1 Object Type
         AWHP_2 Heating Side;               !- Equipment 1 Name
-  
+
       PlantEquipmentList,
         One AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side;               !- Equipment 1 Name
-    
+
       PlantEquipmentList,
         Two AWHP Heating Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 1 Object Type
         AWHP_1 Heating Side,               !- Equipment 1 Name
         HeatPump:PlantLoop:EIR:Heating,    !- Equipment 2 Object Type
-        AWHP_2 Heating Side;               !- Equipment 2 Name    
+        AWHP_2 Heating Side;               !- Equipment 2 Name
 
       PlantEquipmentList,
         Two AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side,               !- Equipment 1 Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 2 Object Type
-        AWHP_2 Cooling Side;               !- Equipment 2 Name  
+        AWHP_2 Cooling Side;               !- Equipment 2 Name
 
       ZoneList,
         This Zone List,                    !- Name
@@ -373,7 +373,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
 
     // check to see if correct plant equipment are active
     auto &eqcool = chillerHeaterSupervisor.CoolingOnlyEquipList(1).Comp(1);
-    // set cooling demand node temp above cooling set point so equipment is actived if needed
+    // set cooling demand node temp above cooling set point so equipment is activated if needed
     // heating demand temp = 0 (not initialized) so heating will be active if needed (i.e., temp < heating set point)
     state->dataLoopNodes->Node(eqcool.DemandNodeNum).Temp = 10.0;
     auto &eqheat = chillerHeaterSupervisor.HeatingOnlyEquipList(1).Comp(1);
@@ -481,12 +481,12 @@ TEST_F(DistributeEquipOpTest, SupervisoryControlLogicForAirSourcePlantsTest)
         0.0,                               !- Load Range 1 Lower Limit {W}
         10000000000000000,                 !- Load Range 1 Upper Limit {W}
         One AWHP Cooling Equipment List;   !- Range 1 Equipment List Name
-  
+
       PlantEquipmentList,
         One AWHP Cooling Equipment List,   !- Name
         HeatPump:PlantLoop:EIR:Cooling,    !- Equipment 1 Object Type
         AWHP_1 Cooling Side;               !- Equipment 1 Name
-    
+
       PlantEquipmentOperation:HeatingLoad,
         One AWHP Heating Operation Scheme, !- Name
         0.0,                               !- Load Range 1 Lower Limit {W}
@@ -572,7 +572,7 @@ TEST_F(DistributeEquipOpTest, SupervisoryControlLogicForAirSourcePlantsTest)
     auto &eqcool = chillerHeaterSupervisor.CoolingOnlyEquipList(1).Comp(1);
     auto &CoolEq1_status = state->dataPlnt->PlantLoop(1).LoopSide(eqcool.LoopSideNumPtr).Branch(eqcool.BranchNumPtr).Comp(eqcool.CompNumPtr).ON;
     auto &HeatEq1_status = state->dataPlnt->PlantLoop(2).LoopSide(eqheat.LoopSideNumPtr).Branch(eqheat.BranchNumPtr).Comp(eqheat.CompNumPtr).ON;
-    // set cooling demand node temp above cooling set point so equipment is actived if needed
+    // set cooling demand node temp above cooling set point so equipment is activated if needed
     state->dataLoopNodes->Node(eqcool.DemandNodeNum).Temp = 10.0;
     auto &zone1SysEnergyDemand = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(chillerHeaterSupervisor.ZonePtrs(1));
     auto &zone2SysEnergyDemand = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(chillerHeaterSupervisor.ZonePtrs(2));

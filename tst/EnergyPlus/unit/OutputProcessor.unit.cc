@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -5062,12 +5062,12 @@ namespace OutputProcessor {
             {"   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", invalid Output Variable or Meter Name=\"DISTRICTHEATINGWATER:FACILITY\".",
              "   **   ~~~   ** ...will not be shown with the Meter results.",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom be assigned to another "
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
              "Meter:Custom.",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", contains a reference to another Meter:Custom in field: Output Variable or Meter "
              "Name=\"CUSTOMMETER1\".",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom be assigned to another "
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
              "Meter:Custom."});
         compare_err_stream(errMsg);
     }

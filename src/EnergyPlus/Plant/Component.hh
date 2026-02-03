@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -92,6 +92,7 @@ namespace DataPlant {
         false, //	"DistrictHeating:Water" (steam is at the end)
         false, //	"ThermalStorage:Ice:Detailed"
         false, //	"ThermalStorage:Ice:Simple"
+        false, //   "ThermalStorage:PCM"
         false, //	"TemperingValve"
         false, //	"WaterHeater:Mixed"
         false, //	"WaterHeater:Stratified"
@@ -121,6 +122,7 @@ namespace DataPlant {
         false, //	"EvaporativeFluidCooler:TwoSpeed"
         false, //	"ThermalStorage:ChilledWater:Mixed"
         false, //	"ThermalStorage:ChilledWater:Stratified"
+        false, //	"ThermalStorage:HotWater:Stratified"
         false, //	"SolarCollector:FlatPlate:PhotovoltaicThermal"
         false, //	"ZoneHVAC:Baseboard:Convective:Water"
         false, //	"ZoneHVAC:Baseboard:RadiantConvective:Steam"
@@ -159,6 +161,11 @@ namespace DataPlant {
         false, //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         false, //	"HeatPump:PlantLoop:EIR:Cooling"
         false, //	"HeatPump:PlantLoop:EIR:Heating"
+        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        false, // "HEATPUMP:AIRTOWATER:COOLING",
+        false, // "HEATPUMP:AIRTOWATER:HEATING",
+        false, // "HEATPUMP:AIRTOWATER",
         false  //   "DistrictHeating:Steam"
     };
 
@@ -193,6 +200,7 @@ namespace DataPlant {
         DataPlant::CtrlType::HeatingOp, //	"DistrictHeating:Water" (steam is at the end)
         DataPlant::CtrlType::CoolingOp, //	"ThermalStorage:Ice:Detailed"
         DataPlant::CtrlType::CoolingOp, //	"ThermalStorage:Ice:Simple"
+        DataPlant::CtrlType::HeatingOp, //  "ThermalStorage:PCM"
         DataPlant::CtrlType::Invalid,   //	"TemperingValve"
         DataPlant::CtrlType::HeatingOp, //	"WaterHeater:Mixed"
         DataPlant::CtrlType::HeatingOp, //	"WaterHeater:Stratified"
@@ -222,6 +230,7 @@ namespace DataPlant {
         DataPlant::CtrlType::CoolingOp, //	"EvaporativeFluidCooler:TwoSpeed"
         DataPlant::CtrlType::CoolingOp, //	"ThermalStorage:ChilledWater:Mixed"
         DataPlant::CtrlType::CoolingOp, //	"ThermalStorage:ChilledWater:Stratified"
+        DataPlant::CtrlType::HeatingOp, //	"ThermalStorage:HotWater:Stratified"
         DataPlant::CtrlType::HeatingOp, //	"SolarCollector:FlatPlate:PhotovoltaicThermal"
         DataPlant::CtrlType::Invalid,   //	"ZoneHVAC:Baseboard:Convective:Water"
         DataPlant::CtrlType::Invalid,   //	"ZoneHVAC:Baseboard:RadiantConvective:Steam"
@@ -260,6 +269,11 @@ namespace DataPlant {
         DataPlant::CtrlType::Invalid,   //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         DataPlant::CtrlType::CoolingOp, //	"HeatPump:PlantLoop:EIR:Cooling"
         DataPlant::CtrlType::HeatingOp, //	"HeatPump:PlantLoop:EIR:Heating"
+        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:COOLING",
+        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:HEATING",
+        DataPlant::CtrlType::DualOp,    // "HEATPUMP:AIRTOWATER",
         DataPlant::CtrlType::HeatingOp  //   "DistrictHeating:Steam"
     };
 

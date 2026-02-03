@@ -102,7 +102,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
 !*********** air source integrated heat pump ***********************
 
@@ -213,6 +213,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHOutdoorDXCoilVS,     !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -234,9 +235,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -246,9 +247,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -258,9 +259,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -270,9 +271,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -282,9 +283,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -294,9 +295,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -306,9 +307,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -318,9 +319,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -330,9 +331,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -342,9 +343,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -357,6 +358,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     SCWHCoil1,               !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -378,9 +380,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -390,9 +392,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -402,9 +404,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -414,9 +416,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -426,9 +428,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -438,9 +440,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -450,9 +452,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -462,9 +464,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -474,9 +476,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -486,9 +488,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -501,6 +503,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     SCDWHWHCoil1,            !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -522,9 +525,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -534,9 +537,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -546,9 +549,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -558,9 +561,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -570,9 +573,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -582,9 +585,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -594,9 +597,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -606,9 +609,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -618,9 +621,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -630,9 +633,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -645,6 +648,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     SHDWHWHCoil1,            !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     400.0,                   !- Rated Water Heating Capacity {W}
@@ -666,9 +670,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -678,9 +682,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -690,9 +694,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -702,9 +706,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -714,9 +718,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -726,9 +730,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -738,9 +742,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -750,9 +754,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -762,9 +766,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -774,9 +778,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -913,6 +917,7 @@
 
   Coil:Heating:DX:VariableSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
+    ,                        !- Availability Schedule Name
     Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -934,96 +939,97 @@
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
     0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
     2295.5,                  !- Speed 2 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 2 Reference Unit Gross Rated Heating COP {W/W}
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
     2751.3,                  !- Speed 3 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 3 Reference Unit Gross Rated Heating COP {W/W}
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
     3659.6,                  !- Speed 4 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 4 Reference Unit Gross Rated Heating COP {W/W}
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 4 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
     4563.7,                  !- Speed 5 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 5 Reference Unit Gross Rated Heating COP {W/W}
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 5 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
     5463.3,                  !- Speed 6 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 6 Reference Unit Gross Rated Heating COP {W/W}
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 6 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 6 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 6 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 6 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
     6358.4,                  !- Speed 7 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 7 Reference Unit Gross Rated Heating COP {W/W}
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 7 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 7 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 7 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 7 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
     7248.5,                  !- Speed 8 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 8 Reference Unit Gross Rated Heating COP {W/W}
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 8 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 8 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 8 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 8 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
     8133.6,                  !- Speed 9 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 9 Reference Unit Gross Rated Heating COP {W/W}
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 9 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 9 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 9 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 9 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
     9013.2,                  !- Speed 10 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 10 Reference Unit Gross Rated Heating COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 10 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 10 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 10 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 10 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF;          !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
   Coil:Heating:DX:VariableSpeed,
     SHDWHHeatCoil1,          !- Name
+    ,                        !- Availability Schedule Name
     Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -1045,91 +1051,91 @@
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
     0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
     2295.5,                  !- Speed 2 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 2 Reference Unit Gross Rated Heating COP {W/W}
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
     2751.3,                  !- Speed 3 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 3 Reference Unit Gross Rated Heating COP {W/W}
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
     3659.6,                  !- Speed 4 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 4 Reference Unit Gross Rated Heating COP {W/W}
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 4 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
     4563.7,                  !- Speed 5 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 5 Reference Unit Gross Rated Heating COP {W/W}
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 5 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
     5463.3,                  !- Speed 6 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 6 Reference Unit Gross Rated Heating COP {W/W}
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 6 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 6 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 6 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 6 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
     6358.4,                  !- Speed 7 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 7 Reference Unit Gross Rated Heating COP {W/W}
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 7 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 7 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 7 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 7 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
     7248.5,                  !- Speed 8 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 8 Reference Unit Gross Rated Heating COP {W/W}
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 8 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 8 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 8 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 8 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
     8133.6,                  !- Speed 9 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 9 Reference Unit Gross Rated Heating COP {W/W}
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 9 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 9 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 9 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 9 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF,          !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
     9013.2,                  !- Speed 10 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 10 Reference Unit Gross Rated Heating COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 10 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 10 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 10 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
     HPACHeatCapFT,           !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    HPACHeatCapFFF,          !- Speed 10 Heating Capacity Function of Air Flow Fraction Curve Name
+    HPACHeatCapFFF,          !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     HPACHeatEIRFT,           !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     HPACHeatEIRFFF;          !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
@@ -1173,6 +1179,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     Heat Pump ACDXCoil 1,    !- Name
+    ,                        !- Availability Schedule Name
     DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -1181,9 +1188,9 @@
     1.7,                     !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
-    ,                        !- Maximum Cycling Rate
-    ,                        !- Latent Capacity Time Constant
-    ,                        !- Fan Delay Time
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     HPACCOOLPLFFPLR,         !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
@@ -1201,8 +1208,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -1213,8 +1220,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -1225,8 +1232,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -1237,8 +1244,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -1249,8 +1256,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -1261,9 +1268,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 6 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 6 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1273,9 +1280,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 7 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 7 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1285,9 +1292,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 8 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 8 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1297,9 +1304,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 9 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 9 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1309,9 +1316,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 10 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 10 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1320,6 +1327,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     SCDWHCoolCoil1,          !- Name
+    ,                        !- Availability Schedule Name
     DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -1328,9 +1336,9 @@
     1.7,                     !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
-    ,                        !- Maximum Cycling Rate
-    ,                        !- Latent Capacity Time Constant
-    ,                        !- Fan Delay Time
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     HPACCOOLPLFFPLR,         !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
@@ -1348,8 +1356,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -1360,8 +1368,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -1372,8 +1380,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -1384,8 +1392,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -1396,8 +1404,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -1408,9 +1416,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 6 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 6 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1420,9 +1428,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 7 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 7 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1432,9 +1440,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 8 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 8 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1444,9 +1452,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 9 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 9 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -1456,9 +1464,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    ,                        !- Speed 10 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    ,                        !- Speed 10 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     HPACCoolCapFT,           !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -2382,7 +2390,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -2396,7 +2404,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -2410,7 +2418,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2422,7 +2430,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2434,7 +2442,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant

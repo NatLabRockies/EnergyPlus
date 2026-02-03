@@ -79,7 +79,7 @@ ConstructionProperty:InternalHeatSource,
        \units m
        \note uniform spacing between tubes or resistance wires in direction
        \note perpendicular to main intended direction of heat transfer
-       
+
 ConstructionProperty:InternalMoistureSource,
       \memo HeatBalanceAlgorithm = CombinedHeatAndMoistureFiniteElement solution algorithm only.
       \memo Adds moisture source to selected layer inside the component.

@@ -95,7 +95,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Output:Diagnostics,
     DisplayAllWarnings;      !- Key 1
@@ -522,7 +522,8 @@
     VRFSizingRules1,         !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
 
   DesignSpecification:ZoneHVAC:Sizing,
     VRFSizingRules1,         !- Name
@@ -612,7 +613,8 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU4,                     !- Zone Terminal Unit Name
@@ -643,7 +645,8 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU3,                     !- Zone Terminal Unit Name
@@ -674,7 +677,8 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU5,                     !- Zone Terminal Unit Name
@@ -705,7 +709,8 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
 
   OutdoorAir:Mixer,
     TU1 OA Mixer,            !- Name
@@ -1020,7 +1025,8 @@
   HeatBalanceAlgorithm,ConductionTransferFunction;
 
   ZoneAirHeatBalanceAlgorithm,
-    AnalyticalSolution;      !- Algorithm
+    AnalyticalSolution,      !- Algorithm
+    ;                        !- Do Space Heat Balance for Sizing
 
   GlobalGeometryRules,
     UpperLeftCorner,         !- Starting Vertex Position
@@ -1722,8 +1728,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1748,7 +1754,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1762,7 +1768,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1937,8 +1943,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1963,7 +1969,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1977,7 +1983,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2117,8 +2123,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2143,7 +2149,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2157,7 +2163,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2312,8 +2318,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2338,7 +2344,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2352,7 +2358,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2492,8 +2498,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.031089,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2518,7 +2524,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2532,7 +2538,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2671,7 +2677,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -2707,7 +2720,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE2-1,        !- Name
@@ -2743,7 +2763,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE3-1,        !- Name
@@ -2779,7 +2806,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE4-1,        !- Name
@@ -2815,7 +2849,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE5-1,        !- Name

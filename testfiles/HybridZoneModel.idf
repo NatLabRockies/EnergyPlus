@@ -76,7 +76,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -122,8 +122,8 @@
     INFIL-SCHED,             !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.0,                     !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -136,8 +136,8 @@
     INFIL-SCHED,             !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.0,                     !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -150,8 +150,8 @@
     INFIL-SCHED,             !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.0,                     !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -164,8 +164,8 @@
     INFIL-SCHED,             !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.0,                     !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -325,7 +325,8 @@
 
   Output:VariableDictionary,regular;
 
-  Output:Table:SummaryReports,InputVerificationandResultsSummary;
+  Output:Table:SummaryReports,
+    InputVerificationandResultsSummary;  !- Report 1 Name
 
   Output:Variable,ZONE 2,Zone Infiltration Hybrid Model Air Change Rate,Timestep;
 

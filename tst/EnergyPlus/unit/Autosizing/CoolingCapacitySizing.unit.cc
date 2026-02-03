@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -104,7 +104,7 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.01); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.01); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -420,7 +420,7 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
     EXPECT_NEAR(unScaledCapacity * 0.5, sizedValue, 0.01);               // change in capacity because precool conditions mixed with return
     EXPECT_NEAR(158.33, sizer.primaryAirSystem(1).FanDesCoolLoad, 0.01); // air loop fan heat is saved in sizer class
     EXPECT_EQ(1.0, state->dataSize->DataFracOfAutosizedCoolingCapacity); // Data global is not affected
-    EXPECT_NEAR(state->dataSize->DataCoilSizingAirInTemp, 24.22, 0.01);  // does include fan heat becase PrimaryAirSys fan place is set
+    EXPECT_NEAR(state->dataSize->DataCoilSizingAirInTemp, 24.22, 0.01);  // does include fan heat because PrimaryAirSys fan place is set
     EXPECT_EQ(0.5, sizer.dataFracOfAutosizedCoolingCapacity);            // sizer class holds fractional value
     sizer.autoSizedValue = 0.0;                                          // reset for next test
 

@@ -4,7 +4,7 @@ Automatic Import of Shading from a CSV File
 
 **Original: November 2, 2017**
 
-# Justification for New Feature 
+# Justification for New Feature
 
 EnergyPlus version 8.8 added features to export the calculated shading results to an external CSV file, and allow to use shading schedules to replace internal shading calculations for exterior surfaces. Although the shading schedules can be imported from external CSV files, there needs to define all these schedules in IDF files explicitly as well as adding SurfaceProperty:LocalEnvironment objects for all exterior surfaces, which can be a significant burden for users especially for a model with many exterior surfaces. The proposed new feature will fully automate the process.
 
@@ -12,22 +12,22 @@ EnergyPlus version 8.8 added features to export the calculated shading results t
 
 N/A
 
-# Overview 
+# Overview
 
-EnergyPlus v8.8 allows to export all shading calculation results (shading fractions) to an external CSV file “eplusshading.csv”, when the field “Output External Shading Calculation Results” of the object ShadowCalculation is set to Yes. The CSV file has the time-series of shading fractions with exterior surface names represented as the column headers. 
+EnergyPlus v8.8 allows to export all shading calculation results (shading fractions) to an external CSV file “eplusshading.csv”, when the field “Output External Shading Calculation Results” of the object ShadowCalculation is set to Yes. The CSV file has the time-series of shading fractions with exterior surface names represented as the column headers.
 
-# Approaches 
+# Approaches
 
-We propose to add a new option “ImportedShading” to the field “External Shading Calculation Method” of the ShadowCalculation object, and a new filed “External Shading File Name” to specify the CSV file containing the shading fraction values for exterior surfaces. The default file name is eplusshading.csv, which is the default file name of the exported EnergyPlus shading calculation results. If an exterior surface name is missing from the header of the CSV file, the assumption is no shading. 
+We propose to add a new option “ImportedShading” to the field “External Shading Calculation Method” of the ShadowCalculation object, and a new filed “External Shading File Name” to specify the CSV file containing the shading fraction values for exterior surfaces. The default file name is eplusshading.csv, which is the default file name of the exported EnergyPlus shading calculation results. If an exterior surface name is missing from the header of the CSV file, the assumption is no shading.
 
 	ShadowCalculation,
 	  A4 , \field External Shading Calculation Method
 	       \type choice
-	       \key ScheduledShading 
+	       \key ScheduledShading
 	       \key InternalCalculation
 	       \key ImportedShading
 	       \default InternalCalculation
-	       \note If ScheduledShading is chosen, the External Shading Fraction Schedule Name in the SurfaceProperty:LocalEnvironment object is required for each exterior surface. 
+	       \note If ScheduledShading is chosen, the External Shading Fraction Schedule Name in the SurfaceProperty:LocalEnvironment object is required for each exterior surface.
 	       \note If ImportedShading is chosen, the External Shading File Name is required.
 	  A5 , \field Output External Shading Calculation Results
 	       \type choice

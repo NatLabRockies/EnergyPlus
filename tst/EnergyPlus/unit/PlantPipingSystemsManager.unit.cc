@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2325,4 +2325,34 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_FiniteDifference)
 
     EXPECT_FALSE(errorsFound);
     EXPECT_TRUE(compare_err_stream(""));
+}
+
+TEST_F(EnergyPlusFixture, calcFluxWeightingFactorTest)
+{
+    Real64 weightedFlux;
+    Real64 uniformFlux;
+    Real64 actualResult;
+    Real64 expectedResult;
+    Real64 constexpr allowedTolerance = 0.00001;
+
+    // Test 1a: Everything normal and positive, simple calculation.
+    weightedFlux = 1.0;
+    uniformFlux = 1.0;
+    expectedResult = 1.0;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
+
+    // Test 1b: Everything normal and negative, simple calculation.
+    weightedFlux = -0.1;
+    uniformFlux = -0.5;
+    expectedResult = 0.2;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
+
+    // Test 2: Zero uniform flux--the condition that caused the problem.  Return a unity value.
+    weightedFlux = 1.0;
+    uniformFlux = 0.0;
+    expectedResult = 1.0;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
 }

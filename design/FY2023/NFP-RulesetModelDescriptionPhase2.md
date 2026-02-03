@@ -10,38 +10,38 @@ Ruleset Model Description Phase 2
 
 This continues the work from 2022 to develop a script that creates a JSON file consistent with the ASHRAE Standard 229
 Ruleset Model Description schema to show the feasibility of the schema, uncover problems with implementation, and provide
-an implementation for early adopters. 
+an implementation for early adopters.
 
 The title, purpose, and scope of ASHRAE Standard 229 are:
 
-Title: 
+Title:
 
 - Protocols for Evaluating Ruleset Application in Building Performance Models
 
-Purpose: 
+Purpose:
 
-- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building 
+- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building
 performance models.
 
 Scope:
 
-- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their 
-systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:  
-- 2.1 building performance modeling software    
+- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their
+systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:
+- 2.1 building performance modeling software
 - 2.2 software that evaluates building performance models and associated information to check the application of a ruleset
 
 ASHRAE Standard 229 has not been published or even gone through public review and is under development
 by the ASHRAE SPC 229P committee. The intention of the standard is to provide code officials and rating
-authorities with files that they can use with a Ruleset Checking Tool (currently, an example is under development at 
-PNNL) to automatically check if a ruleset (such as 90.1 Appendix G, RESNET, California Title 24 performance 
-paths, or Canada National Energy Code for Buildings performance path) has been implemented correctly. 
-Since each EnergyPlus IDF file could generate an RMD file, the Ruleset Checking Tool will be able to see if the 
+authorities with files that they can use with a Ruleset Checking Tool (currently, an example is under development at
+PNNL) to automatically check if a ruleset (such as 90.1 Appendix G, RESNET, California Title 24 performance
+paths, or Canada National Energy Code for Buildings performance path) has been implemented correctly.
+Since each EnergyPlus IDF file could generate an RMD file, the Ruleset Checking Tool will be able to see if the
 changes between the RMD files correspond to rules in the ruleset by looking at both the baseline
-and proposed RMD file. 
+and proposed RMD file.
 
 The original NFP is here:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
 
 The repo for the script development is here:
 
@@ -65,13 +65,13 @@ Concern about reporting equipment performance metric values that don't match man
 
 ----
 
-From Standard 229 and RCT development perspectives, I think the highest priority is to implement RMD generation for components 
-planned for inclusion in the 229 RMD tests. As you know, these tests are based on the modified medium office prototype model. 
+From Standard 229 and RCT development perspectives, I think the highest priority is to implement RMD generation for components
+planned for inclusion in the 229 RMD tests. As you know, these tests are based on the modified medium office prototype model.
 Examples of modifications include the following:
-- support for all (or most) of Appendix G baseline HVAC system types 
-- support several commonly used system types (such as WSHP) and designs (such as DOAS + space conditioning system; 
-space conditioning system + HW baseboard). 
-- detailed window specification 
+- support for all (or most) of Appendix G baseline HVAC system types
+- support several commonly used system types (such as WSHP) and designs (such as DOAS + space conditioning system;
+space conditioning system + HW baseboard).
+- detailed window specification
 - handling of plenums (schema WG deemed that they should be aggregated with the parent space in the RMD file).
 
 -----
@@ -80,7 +80,7 @@ I would suggest adding Output data, or at least a portion of the Output since so
 
 -----
 
-I just completed the review for Section 21 and 22 rules and attached is a list of keys required in addition to system type test jsons 
+I just completed the review for Section 21 and 22 rules and attached is a list of keys required in addition to system type test jsons
 
 https://github.com/pnnl/ruleset-checking-tool/tree/develop/rct229/ruletest_engine/ruletest_jsons/ashrae9012019/system_types
 
@@ -103,14 +103,14 @@ Chiller
 - part_load_efficiency_metric
 
 FluidLoop
-- heating_design_and_control	
+- heating_design_and_control
     - design_supply_temperature
     - design_return_temperature
     - flow_control
     - operation
     - minimum_flow_fraction
-- pump_power_per_flow_rate	
-- cooling_or_condensing_design_and_control	
+- pump_power_per_flow_rate
+- cooling_or_condensing_design_and_control
     - design_supply_temperature
     - design_return_temperature
     - temperature_reset_type
@@ -139,8 +139,8 @@ Output
     - unmet_load_hours
 
 FanSystem
-- temperature_control	
-- reset_differential_temperature	
+- temperature_control
+- reset_differential_temperature
 
 Terminals
 - primary_airflow
@@ -162,8 +162,8 @@ FanSystem
 
 -----
 
-Adding more outputs to the database tables is generally not problematic, but I would suggest we get OpenStudio to do some 
-testing prior to anything merging into E+ develop branch.  Their testing on tabular outputs is above and beyond our own, 
+Adding more outputs to the database tables is generally not problematic, but I would suggest we get OpenStudio to do some
+testing prior to anything merging into E+ develop branch.  Their testing on tabular outputs is above and beyond our own,
 and they have a tendency to find issues after we've closed for IO freeze if we don't engage them early.
 
 -------
@@ -172,24 +172,24 @@ Add chillers, boilers and cooling towers to equipment summary report as separate
 
 -------
 
-Selecting the baseline system in 90.1 Appendix G is a high priority. The following data elements are needed for that: 
+Selecting the baseline system in 90.1 Appendix G is a high priority. The following data elements are needed for that:
 
-- ASHRAE229: id^, ruleset_model_instances^  
-- RulesetModelInstance: id^, buildings^, fluid_loops~, pumps~, boilers~, chillers~  
-- Building: id^, building_segments^, building_open_schedule*  
-- BuildingSegment: id^, zones^, heating_ventilating_air_conditioning_systems~  
-- Zone: id^, thermostat_cooling_setpoint_schedule*^, thermostat_heating_setpoint_schedule*^, terminals  
-- HeatingVentilatingAirConditioningSystem: id~, fan_system~, heating_system~, cooling_system~, preheat_system  
-- HeatingSystem: id~, energy_source_type*, hot_water_loop  
-- CoolingSystem: id~, chilled_water_loop  
-- FanSystem: id~, supply_fans, return_fans, fan_control*  
+- ASHRAE229: id^, ruleset_model_instances^
+- RulesetModelInstance: id^, buildings^, fluid_loops~, pumps~, boilers~, chillers~
+- Building: id^, building_segments^, building_open_schedule*
+- BuildingSegment: id^, zones^, heating_ventilating_air_conditioning_systems~
+- Zone: id^, thermostat_cooling_setpoint_schedule*^, thermostat_heating_setpoint_schedule*^, terminals
+- HeatingVentilatingAirConditioningSystem: id~, fan_system~, heating_system~, cooling_system~, preheat_system
+- HeatingSystem: id~, energy_source_type*, hot_water_loop
+- CoolingSystem: id~, chilled_water_loop
+- FanSystem: id~, supply_fans, return_fans, fan_control*
 - Fan: id
-- Terminal: id, type*, served_by_heating_ventilating_air_conditioning_system, heating_source*, heating_from_loop, 
-cooling_source*, cooling_from_loop, fan, fan_configuration*, is_supply_ducted*  
-- FluidLoop: id~, type*, child_loops  
-- Pump: id~, loop_or_piping, speed_control*~  
-- Boiler: id~, loop, energy_source_type*  
-- Chiller: id~, cooling_loop  
+- Terminal: id, type*, served_by_heating_ventilating_air_conditioning_system, heating_source*, heating_from_loop,
+cooling_source*, cooling_from_loop, fan, fan_configuration*, is_supply_ducted*
+- FluidLoop: id~, type*, child_loops
+- Pump: id~, loop_or_piping, speed_control*~
+- Boiler: id~, loop, energy_source_type*
+- Chiller: id~, cooling_loop
 
 The key below is shown for indicators:
 - '*' indicates data elements that are not connective
@@ -199,13 +199,13 @@ The key below is shown for indicators:
 --------
 
 
-Based on this feedback, the NFP was updated. 
+Based on this feedback, the NFP was updated.
 
 
 ## Overview ##
 
-The initial version did not support the full schema and needed polishing up before being used in widespread workflows.  
-For this phase, the focus is on methods to merge compliance parameters, implementing additional output reports in EnergyPlus, 
+The initial version did not support the full schema and needed polishing up before being used in widespread workflows.
+For this phase, the focus is on methods to merge compliance parameters, implementing additional output reports in EnergyPlus,
 filling in gaps in existing data groups, and supporting more data groups.
 
 Targeted data groups from the 229 RMD Schema for this effort include the HVAC portion of the schema:
@@ -225,21 +225,21 @@ Targeted data groups from the 229 RMD Schema for this effort include the HVAC po
 - Chiller
 - HeatRejection
 
-This effort will focus on trying to implement as many data groups as possible. It is unlikely that full support 
-for all data groups and data elements for these will be achieved in this phase, so the focus will again be on 
-implementing the more direct data elements within each data group so that as many data elements can be implemented 
+This effort will focus on trying to implement as many data groups as possible. It is unlikely that full support
+for all data groups and data elements for these will be achieved in this phase, so the focus will again be on
+implementing the more direct data elements within each data group so that as many data elements can be implemented
 as possible.
 
 In future efforts, related data groups will be supported:
 - FanOutputValidationPoint
-- BoilerOutputValidationPoint 
+- BoilerOutputValidationPoint
 - ChillerCapacityValidationPoint
 - ChillerPowerValidationPoint
 
 ## Approach ##
 
-The effort will continue the approach used in 2022 during the initial development of the createRMD but 
-will add more reporting to EnergyPlus to be consistent with the goal of being driven by EnergyPlus 
+The effort will continue the approach used in 2022 during the initial development of the createRMD but
+will add more reporting to EnergyPlus to be consistent with the goal of being driven by EnergyPlus
 outputs and not needing to read the IDF or epJSON files. The approach has two focuses:
 
 - Enhance EnergyPlus Tabular Output Reports
@@ -256,8 +256,8 @@ In addition, some fixes of the createRMD Python script will be incorporated from
 - Add method to merge compliance parameters (issue #14)
 - Add support for unmet load hours and peak building cooling load (issue #15)
 
-To understand how when data elements can be populated by either EnergyPlus input or 
-EnergyPlus output as the source of the RMD data elements, a specially tagged version of the 
+To understand how when data elements can be populated by either EnergyPlus input or
+EnergyPlus output as the source of the RMD data elements, a specially tagged version of the
 schema file was created here:
 
 https://github.com/open229/ruleset-model-description-schema/blob/EPtags/schema-source/ASHRAE229_extra.schema.yaml
@@ -280,27 +280,27 @@ Most of these were used previously during the 2022 effort.
 
 It is unlikely that all table enhancements and RMD data groups described in this NFP will be able to be supported
 with the budget for this task, so some prioritization of what should be in this effort versus in following efforts
-will be needed. The prioritization will link the support of the enhanced tables to the support of data elements in 
-the RMD data elements. Feedback on the priorities is welcome, either overall (air side vs. water side) or detailed, 
+will be needed. The prioritization will link the support of the enhanced tables to the support of data elements in
+the RMD data elements. Feedback on the priorities is welcome, either overall (air side vs. water side) or detailed,
 such as specific new columns and data elements that are most important.
 
 The feedback on prioritization was to first support the selection of baseline HVAC system in Appendix G which includes
 changes to or new EnergyPlus reports:
 
-- Equipment Summary – Fans
+- Equipment Summary - Fans
 - HVAC Topology
 - Equipment Summary - PlantLoop or CondenserLoop
-- Equipment Summary – AirTerminals
+- Equipment Summary - AirTerminals
 
 After that supporting additional central plant reports in EnergyPlus enhancements:
 
-- Equipment Summary – Pumps
-- Component Sizing Summary – PlantLoop
-- Equipment Summary – Chiller
-- Equipment Summary – Boiler
+- Equipment Summary - Pumps
+- Component Sizing Summary - PlantLoop
+- Equipment Summary - Chiller
+- Equipment Summary - Boiler
 - Equipment Summary - cooling towers and fluid coolers
 
-While the EnergyPlus enhancements are underway, data elements that can be supported by current outputs should be 
+While the EnergyPlus enhancements are underway, data elements that can be supported by current outputs should be
 implemented.
 
 Based on shorter deadline for the IO freeze of EnergyPlus, changes to existing reports will be implemented sooner than brand
@@ -386,15 +386,15 @@ The new columns would be:
 #### System Summary - Demand Controlled Ventilation using Controller:MechanicalVentilation ####
 
 The current columns are:
-- Controller:MechanicalVentilation Name 
-- Outdoor Air Per Person [m3/s-person] 
-- Outdoor Air Per Area [m3/s-m2] 
-- Outdoor Air Per Zone [m3/s] 
-- Outdoor Air ACH [ach] 
-- Outdoor Air Method 
-- Outdoor Air Schedule Name 
-- Air Distribution Effectiveness in Cooling Mode 
-- Air Distribution Effectiveness in Heating Mode 
+- Controller:MechanicalVentilation Name
+- Outdoor Air Per Person [m3/s-person]
+- Outdoor Air Per Area [m3/s-m2]
+- Outdoor Air Per Zone [m3/s]
+- Outdoor Air ACH [ach]
+- Outdoor Air Method
+- Outdoor Air Schedule Name
+- Air Distribution Effectiveness in Cooling Mode
+- Air Distribution Effectiveness in Heating Mode
 - Air Distribution Effectiveness Schedule Name
 
 The new columns would be:
@@ -426,7 +426,7 @@ For each Plant loop and AirLoopHVAC a table is created that has:
 - Loop side (supply side/demand side)
 - Order (2nd of 5 items on branch, items in parallel after split would have same number)
 - Branch Name
-- Split (either y/n or “split 3 of 5”)
+- Split (either y/n or split 3 of 5)
 - node name in (multiple names for mixer)
 - node name out (multiple names for splitter)
 - other control objects that reference node in as sensor (or node out?)
@@ -460,13 +460,13 @@ A new table under the current Coil Sizing Details report called "Coil Connection
 - Plant Branch Name
 - Location count on Plantloop Branch
 
-Some of these columns (shown with asterisks) are currently in the "Coils" table and could be removed from 
+Some of these columns (shown with asterisks) are currently in the "Coils" table and could be removed from
 that table since it is very wide already, or they could be kept for compatibility.
 
 #### Controls ####
 
 A new report that includes Setpoint Managers, Controllers, Availability Managers, PlantEquipmentOperation, and components
-with control options and identifies the type, where they apply, sense, and control parameters from the input. Need: 
+with control options and identifies the type, where they apply, sense, and control parameters from the input. Need:
 
 - minimum and maximum setpoint temperatures
 - minimum turndown ratio
@@ -476,7 +476,7 @@ with control options and identifies the type, where they apply, sense, and contr
 - Outdoor Low Temperature
 - Setpoint at Outdoor High Temperature
 - Outdoor High Temperature
-   
+
 This is probably a series of tables, one for each input object. The report would include the pertinent information,
 including the controls, related temperatures, and what they apply to but would generally be limited to what is already
 available within the data structure that would be useful to report. Include specifically:
@@ -498,7 +498,7 @@ A new report for Chillers.
  - Plantloop branch name
  - Condenser loop name
  - Condenser loop branch name
- - Minimum part load ratio 
+ - Minimum part load ratio
  - Fuel type
  - Rated entering condenser temperature
  - Rated leaving evaporator temperature
@@ -520,7 +520,7 @@ A new report for Boilers.
  - Rated Efficiency [W/W]
  - Plantloop name
  - Plantloop branch name
- - Minimum part load ratio 
+ - Minimum part load ratio
  - Fuel type
  - Parasitic electric load
 
@@ -596,7 +596,7 @@ We might want to add the other effectivenesses at different air flow rates to ma
 
 ## Testing/Validation/Data Sources ##
 
-Since the output JSON file needs to comply with a JSON schema, it should be easy to confirm that it is valid. 
+Since the output JSON file needs to comply with a JSON schema, it should be easy to confirm that it is valid.
 The Python jsonschema library can be used to confirm that the RMD file is consistent with the schema. Comparison
 of input and related outputs should provide the final check if the reporting is being done correctly.
 
@@ -623,7 +623,7 @@ None required.
 ## Design Document ##
 
 In general, to try to maximize the number of new data elements implemented during this phase, items should be added based
-on complexity. 
+on complexity.
 
 For EnergyPlus changes, add new columns in the following order based on difficulty:
 1. Existing tables where new output is simple echo of input or already computed and in data structure
@@ -637,10 +637,10 @@ Echos of input are indicated in the eptags schema file.
 
 Provide draft updated output from EnergyPlus for OpenStudio team to test prior to release.
 
-For the createRulesetModelDecription Python script, will continue being developed using the same approach 
+For the createRulesetModelDecription Python script, will continue being developed using the same approach
 as the 2022 work and will continue to include unit tests. This includes:
 
- - The Python utility is separate from EnergyPlus and will eventually be packaged with the EnergyPlus installer. It will 
+ - The Python utility is separate from EnergyPlus and will eventually be packaged with the EnergyPlus installer. It will
  continue to be developed in its own repository but eventually this may be merged or linked from the  EnergyPlus repository.
 
  - The Python utility reads the JSON files that EnergyPlus produces when  the output:JSON input object is used as the primary
@@ -648,21 +648,21 @@ as the 2022 work and will continue to include unit tests. This includes:
 
  - The Ruleset Model Description (RMD) format will be produced by the utility and is also a JSON format.
 
- - Verification that the RMD output produced by the new utility is consistent with the RMD schema is performed by using 
+ - Verification that the RMD output produced by the new utility is consistent with the RMD schema is performed by using
  the jsonschema Python library "validate" method.
 
  - The PathLib library is used for accessing files.
 
  - The unittest library is used for providing unit testing. The goal is to have tests for almost all of the methods.
 
- - Only a subset of data groups from the RMD schema will be generated and only data elements that are most direct will be 
+ - Only a subset of data groups from the RMD schema will be generated and only data elements that are most direct will be
  implemented. This is expected to be the first step in an ongoing effort to fully implement the RMD schema as an output format.
 
 ## References ##
 
 The original NFP is here:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
 
 The repo for the script development is here:
 
@@ -675,5 +675,3 @@ https://github.com/JasonGlazer/createRulesetModelDescription/blob/main/docs/less
 The schema is described here:
 
 https://github.com/open229/ruleset-model-description-schema/blob/main/schema-source/ASHRAE229_extra.schema.yaml
-
-

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -105,6 +105,9 @@ enum class OpScheme
     Num
 };
 
+// Adding a new item to the PlantEquipmentType enum requires similar changes to
+// Component.hh PlantEquipmentCtrlType and PlantEquipmentTypeIsPump
+// DataPlant.hh PlantEquipTypeNames, PlantEquipTypeNamesUC, and ValidLoopEquipTypes
 enum class PlantEquipmentType
 {
     Invalid = -1,
@@ -138,6 +141,7 @@ enum class PlantEquipmentType
     PurchHotWater,
     TS_IceDetailed,
     TS_IceSimple,
+    TS_PCM,
     ValveTempering,
     WtrHeaterMixed,
     WtrHeaterStratified,
@@ -167,6 +171,7 @@ enum class PlantEquipmentType
     EvapFluidCooler_TwoSpd,
     ChilledWaterTankMixed,
     ChilledWaterTankStratified,
+    HotWaterTankStratified,
     PVTSolarCollectorFlatPlate,
     Baseboard_Conv_Water,
     Baseboard_Rad_Conv_Steam,
@@ -213,6 +218,9 @@ enum class PlantEquipmentType
     PurchSteam,
     Num
 };
+// Adding a new item to the PlantEquipmentType enum (above) requires similar changes to
+// Component.hh PlantEquipmentCtrlType and PlantEquipmentTypeIsPump
+// DataPlant.hh PlantEquipTypeNames, PlantEquipTypeNamesUC, and ValidLoopEquipTypes
 
 // Parameters for component character wrt how load gets met (or not)
 //  used in %HowLoadServed to facilitate load dispatch logic

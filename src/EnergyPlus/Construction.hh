@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -143,6 +143,7 @@ namespace Construction {
         // the Material structure; LayerPoint(i)=j->Material(j)%Name,etc
         bool IsUsed = false;              // Marked true when the construction is used
         bool IsUsedCTF = false;           // Mark true when the construction is used for a surface with CTF calculations
+        bool IsCondFD = false;            // Mark true when SurfaceProperty:HeatTransferAlgorithm:Construction is set to ConductionFiniteDifference
         Real64 InsideAbsorpVis = 0.0;     // Inside Layer visible absorptance of an opaque surface; not used for windows.
         Real64 OutsideAbsorpVis = 0.0;    // Outside Layer visible absorptance of an opaque surface; not used for windows.
         Real64 InsideAbsorpSolar = 0.0;   // Inside Layer solar absorptance of an opaque surface; not used for windows.

@@ -10,7 +10,7 @@ This will eventually become a more structured file, but currently it isn't clear
 
 ### Template Title
 
-Change description goes here, use links to the PR such as [#9117](https://github.com/NREL/EnergyPlus/pull/9117/files).
+Change description goes here, use links to the PR such as [#9117](https://github.com/NatLabRockies/EnergyPlus/pull/9117/files).
 
 ### SurfaceProperty:GroundSurfaces New Object Output Variables
 
@@ -19,7 +19,7 @@ Two new output variables related to the `SurfaceProperty:GroundSurfaces` have be
 - Surfaces Property Ground Surfaces Average Temperature [C]
 - Surfaces Property Ground Surfaces Average Reflectance []
 
-See pull request [#9409](https://github.com/NREL/EnergyPlus/pull/9409) for more details.
+See pull request [#9409](https://github.com/NatLabRockies/EnergyPlus/pull/9409) for more details.
 
 ### Added a few new tables in the annual thermal/visual/CO2 resilience reporting in the tabular output. Added thermal/visual/CO2 resilience reporting for user-specified reporting period.
 
@@ -42,7 +42,7 @@ For the period-specific reports, when users choose ThermalResilienceSummary, CO2
 
 A "Reporting Period Time and Consumption" table is created to summarize the type, time range, and total electricity consumption for all reporting periods.
 
-Please see PR [#9156](https://github.com/NREL/EnergyPlus/pull/9156).
+Please see PR [#9156](https://github.com/NatLabRockies/EnergyPlus/pull/9156).
 
 ### SurfaceProperty:GroundSurfaces New Object Output Variables
 
@@ -51,7 +51,7 @@ Two new output variables related to the `SurfaceProperty:GroundSurfaces` have be
 - Surfaces Property Ground Surfaces Average Temperature [C]
 - Surfaces Property Ground Surfaces Average Reflectance []
 
-See pull request [#9409](https://github.com/NREL/EnergyPlus/pull/9409) for more details.
+See pull request [#9409](https://github.com/NatLabRockies/EnergyPlus/pull/9409) for more details.
 
 ### Tabular report changes in Output:SQLite and Output:JSON
 
@@ -98,11 +98,11 @@ The Adaptive Comfort Summary/Report was renamed to match the HTML:
 +AdaptiveComfortSummary,Time Not Meeting the Adaptive Comfort Models during Occupied Hours
 ```
 
-See pull request [#9461](https://github.com/NREL/EnergyPlus/pull/9461) for more details.
+See pull request [#9461](https://github.com/NatLabRockies/EnergyPlus/pull/9461) for more details.
 
 ### Output:Table:Monthly and Output:Table:Annual
 
-In `Output:Table:Monthly` and `Output:Table:Annual`, variables with an aggregation type such as `Maximum`, `Minimum`, `MaximumDuringHoursShown`, and `MinimumDuringHoursShown` produce an extra `<Variable of Meter Name> {TIMESTAMP}` column that had an extra trailing space in the SQL. That extra trailing space was removed. cf [#9647](https://github.com/NREL/EnergyPlus/pull/9647)
+In `Output:Table:Monthly` and `Output:Table:Annual`, variables with an aggregation type such as `Maximum`, `Minimum`, `MaximumDuringHoursShown`, and `MinimumDuringHoursShown` produce an extra `<Variable of Meter Name> {TIMESTAMP}` column that had an extra trailing space in the SQL. That extra trailing space was removed. cf [#9647](https://github.com/NatLabRockies/EnergyPlus/pull/9647)
 
 ### Latent Sizing
 
@@ -130,10 +130,10 @@ New results were added to the zone sizing results file eplusout.zsz
     Cooling Zone Temperature [C]
     Cooling Zone Relative Humidity [%]
 
-See pull request [#9406](https://github.com/NREL/EnergyPlus/pull/9406) for more details.
+See pull request [#9406](https://github.com/NatLabRockies/EnergyPlus/pull/9406) for more details.
 
 ### Envelope Summary Report - Interior Fenestration Subtable
 
 Missing Parent Surface column was added.
 
-See pull request [#9582](https://github.com/NREL/EnergyPlus/pull/9582) for more details.
+See pull request [#9582](https://github.com/NatLabRockies/EnergyPlus/pull/9582) for more details.

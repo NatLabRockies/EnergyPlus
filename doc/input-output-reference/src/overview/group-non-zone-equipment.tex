@@ -53,15 +53,14 @@ This field is used only when Plant Loop Fluid Type=Steam. The minimum value is 2
 An example of this object follows.
 
 \begin{lstlisting}
-
 LoadProfile:Plant,
-  Load Profile 1,                               !- Name
-  Demand Load Profile 1 Inlet Node,    !- Inlet Node Name
+  Load Profile 1,             !- Name
+  Demand Load Profile 1 Inlet Node,  !- Inlet Node Name
   Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
-  Load Profile 1 Load Schedule,           !- Load Schedule Name {W}
-  0.003,                                         !- Peak Flow Rate {m3/s}
-  Load Profile 1 Flow Frac Schedule,     !- Flow Rate Fraction Schedule Name
-  Water;                                        !-Plant Loop Fluid Type
+  Load Profile 1 Load Schedule,  !- Load Schedule Name {W}
+  0.003,                      !- Peak Flow Rate {m3/s}
+  Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+  Water;                      !- Plant Loop Fluid Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-020}

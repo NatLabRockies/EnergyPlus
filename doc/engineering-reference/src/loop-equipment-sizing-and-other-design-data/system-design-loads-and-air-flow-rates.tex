@@ -21,7 +21,7 @@ The data stored in \emph{SysSizing}, \emph{CalcSysSizing} and \emph{FinalSysSizi
 % table 41
 \begin{longtable}[c]{p{2.0in}p{4.0in}}
 \caption{System Sizing Data \label{table:system-sizing-data}} \tabularnewline
-\toprule 
+\toprule
 Name & Description \tabularnewline
 \midrule
 \endfirsthead
@@ -90,7 +90,7 @@ There is a logical flag \emph{SysSizingCalc} corresponding to \emph{ZoneSizingCa
 \item
   The environment (in this case, a design day) name is stored in the system sizing data structures.
 \item
-  Loop over the zones cooled by this air loop: 
+  Loop over the zones cooled by this air loop:
 \end{enumerate}
 
 {\setlength\parindent{25pt} NonCoinCoolMassFlow\(_{sys}\) = $\Sigma$ {DesCoolMassFlow\(_{zone}\)} }
@@ -100,7 +100,7 @@ There is a logical flag \emph{SysSizingCalc} corresponding to \emph{ZoneSizingCa
 \setcounter{enumi}{2}
 \tightlist
 \item
-  Loop over the zones heated by this air loop: 
+  Loop over the zones heated by this air loop:
 \end{enumerate}
 
 {\setlength\parindent{25pt} NonCoinHeatMassFlow\(_{sys}\) = $\Sigma$ {DesHeatMassFlow\(_{zone}\)} }
@@ -251,7 +251,7 @@ For coincident sizing the task is quite easy.
 \def\labelenumi{(\arabic{enumi})}
 \tightlist
 \item
-  Loop over all of the air loops. 
+  Loop over all of the air loops.
 \end{enumerate}
 
 \begin{enumerate}
@@ -280,13 +280,13 @@ For noncoincident sizing the task is harder since we don't have a single time-st
 In \emph{FinalZoneSizing} replace the value in \emph{DesCoolCoilInTemp} with the user specified \emph{CoolSupTemp\(_{sys}\)}. Do the same for \emph{DesCoolCoilInHumRat} and \emph{CoolSupHumRat}. This ensures that zone equipment connected to an air loop will use the system design supply air conditions as coil entering conditions.
 
  \emph{NonCoinCoolMassFlow\(_{sys}\)} = $\Sigma$ \emph{DesCoolMassFlow\(_{zone}\)}
-  
+
  \emph{SysCoolRetTemp} = (\emph{ZoneRetTempAtCoolPeak *DesCoolMassFlow\(_{zone}\)}) / {NonCoinCoolMassFlow\(_{sys}\)}
- 
+
  \emph{SysCoolRetHumRat} = (\emph{ZoneHumRatAtCoolPeak *} \emph{DesCoolMassFlow\(_{zone}\)}) /\emph{NonCoinCoolMassFlow\(_{sys}\)}
- 
+
  \emph{SysCoolOutTemp} = (\emph{T\(_{OA,zone\, peak}\) *DesCoolMassFlow\(_{zone}\)}) /NonCoinCoolMassFlow\(_{sys}\)
- 
+
  \emph{SysCoolOutHumRat} = (\emph{W\(_{OA,zone\\ peak}\) *DesCoolMassFlow\(_{zone}\)}) /NonCoinCoolMassFlow\(_{sys}\)
 
 At the end of the zone loop calculate mixed air conditions and the system sensible cooling capacity.
@@ -447,7 +447,7 @@ Since the flow rates have been altered the outside air fraction will change. Thi
 {\setlength\itemindent{25pt} \item \emph{DesMainVolFlow\(_{sys}\)} = \textbf{MAX}(\emph{DesCoolVolFlow\(_{sys}\)},\emph{DesHeatVolFlow\(_{sys}\)})}
 \end{enumerate}
 
-At this point, the design main flow is the larger of the cooling design flow or the heating design flow. The program stores the information for which was dominant for each airloop in the boolean data structure variables sysSizeCoolingDominant and sysSizeHeatingDominant. 
+At this point, the design main flow is the larger of the cooling design flow or the heating design flow. The program stores the information for which was dominant for each airloop in the boolean data structure variables sysSizeCoolingDominant and sysSizeHeatingDominant.
 
 \subsection{System Sizing Adjustments for Air Terminal Operation}\label{system-sizing-adjustments-for-air-terminal-operation}
 
@@ -457,15 +457,15 @@ The routine ManageSystemSizingAdjustments adjusts system sizing outcomes based o
 
 The three summed values for terminal air flows for each airloop are reported to the EIO and table summary report using the outputs "Sum of Air Terminal Maximum Heating Flow Rates [m3/s]," "Sum of Air Terminal Minimum Heating Flow Rates [m3/s]," and "Sum of Air Terminal Maximum Flow Rates [m3/s]."
 
- The summed values are used to "Adjust" the system sizing results in the following ways.  The setting for the type of zone sum to use can be either \emph{noncoincident} or \emph{coincident} (determined in the input field called Type of Zone Sum to Use in the Sizing:System input object).  For \emph{noncoincident} the design system heating flow rate is set to be the larger of the airloop heating maximum flow rate sum (from the air terminals) and the design flow rate from the load based calculations (described above).  The design system main flow rate is set to be the larger of the airloop maximum flow rate sum (from the air terminals) and the design flow rate from the larger of the cooling and heating calculations. The cooling design flow rate is set differently depending on if the air loop was cooling dominant or heating dominant.  For \emph{noncoincident} and \textbf{cooling dominant}, the cooling design air flow rate is set to the design main air flow (typically the airLoopMaxFlowRateSum). For \emph{coincident} and \textbf{heating dominant}, the cooling design air flow rate is set to the larger of the original cooling-load-based value for flow and the lowest value the air handler will really operate at (from the airLoopHeatingMinimumFlowRateSum).  
- 
- For \emph{coincident} type sums, the air terminal summation is not as useful because we generally expect that the straight sum of air terminal sizes will be larger than the coincident sum because by its very nature the straight sum is only expected to match noncoincident approach.  Therefore the adjustments are more to keep design flows within bounds set by minimum and maximum sums so that the coincident sum is within physical bounds set by how the air terminals can operate.  For \emph{coincident} and \textbf{cooling dominant} airloops,  (a) the heating design flow rate is the larger of the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum) and the design heat flow from the coincident design calculation, (b) the main design flow is not typically altered but it will be checked to be at least as large as the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum), and (c) the cooling design flow rate is set to the main design flow which we expect to be the result of the coincident design calculation.  For \emph{coincident} and \textbf{heating dominant} airloops, (a) the heating design flow rate is the larger of the heating maximum flow rate (from the airLoopHeatingMaximumFlowRateSum) and the design heat flow rate from the coincident design calculation, (b) the main design flow rate is set to be the larger of the heating maximum flow rate (from the airLoopHeatingMaximumFlowRateSum) and main design flow rate from the coincident sizing calculations, and (c) the cooling design flow rate is set to be the larger of the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum) and the cooling design flow rate from the coincident calculation. 
- 
+ The summed values are used to "Adjust" the system sizing results in the following ways.  The setting for the type of zone sum to use can be either \emph{noncoincident} or \emph{coincident} (determined in the input field called Type of Zone Sum to Use in the Sizing:System input object).  For \emph{noncoincident} the design system heating flow rate is set to be the larger of the airloop heating maximum flow rate sum (from the air terminals) and the design flow rate from the load based calculations (described above).  The design system main flow rate is set to be the larger of the airloop maximum flow rate sum (from the air terminals) and the design flow rate from the larger of the cooling and heating calculations. The cooling design flow rate is set differently depending on if the air loop was cooling dominant or heating dominant.  For \emph{noncoincident} and \textbf{cooling dominant}, the cooling design air flow rate is set to the design main air flow (typically the airLoopMaxFlowRateSum). For \emph{coincident} and \textbf{heating dominant}, the cooling design air flow rate is set to the larger of the original cooling-load-based value for flow and the lowest value the air handler will really operate at (from the airLoopHeatingMinimumFlowRateSum).
+
+ For \emph{coincident} type sums, the air terminal summation is not as useful because we generally expect that the straight sum of air terminal sizes will be larger than the coincident sum because by its very nature the straight sum is only expected to match noncoincident approach.  Therefore the adjustments are more to keep design flows within bounds set by minimum and maximum sums so that the coincident sum is within physical bounds set by how the air terminals can operate.  For \emph{coincident} and \textbf{cooling dominant} airloops,  (a) the heating design flow rate is the larger of the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum) and the design heat flow from the coincident design calculation, (b) the main design flow is not typically altered but it will be checked to be at least as large as the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum), and (c) the cooling design flow rate is set to the main design flow which we expect to be the result of the coincident design calculation.  For \emph{coincident} and \textbf{heating dominant} airloops, (a) the heating design flow rate is the larger of the heating maximum flow rate (from the airLoopHeatingMaximumFlowRateSum) and the design heat flow rate from the coincident design calculation, (b) the main design flow rate is set to be the larger of the heating maximum flow rate (from the airLoopHeatingMaximumFlowRateSum) and main design flow rate from the coincident sizing calculations, and (c) the cooling design flow rate is set to be the larger of the heating minimum flow rate (from the airLoopHeatingMinimumFlowRateSum) and the cooling design flow rate from the coincident calculation.
+
  The resulting adjusted system sizes for each airloop are reported to the EIO and table summary report using the outputs "Adjusted Heating Design Air Flow Rate [m3/s]," "Adjusted Cooling Design Air Flow Rate [m3/s]," and "Adjusted Main Design Air Flow Rate [m3/s]."
 
 \subsection{Central Heating Maximum System Air Flow Ratio Sizing}\label{central-heating-maximum-system-air-flow-ratio-sizing}
 
-The routine ManageSystemSizingAdjustments also includes calculating the ratio for the central heating maximum system air flow rate to the maximum flow rate for the airloop.  This ratio is the input field called Central Heating Maximum System Air Flow Ratio in the Sizing:System object and, as of version 8.9, can be autosized.  The value is calculated even if the input was not autosized so that inputs can be checked.  The corrected values are used to autosize the central heating flow ratio, if set to autosize by the user. The ratio is calculated by dividing the adjusted design heating flow by the adjusted design main flow. 
+The routine ManageSystemSizingAdjustments also includes calculating the ratio for the central heating maximum system air flow rate to the maximum flow rate for the airloop.  This ratio is the input field called Central Heating Maximum System Air Flow Ratio in the Sizing:System object and, as of version 8.9, can be autosized.  The value is calculated even if the input was not autosized so that inputs can be checked.  The corrected values are used to autosize the central heating flow ratio, if set to autosize by the user. The ratio is calculated by dividing the adjusted design heating flow by the adjusted design main flow.
 
 \subsection{System Design Outdoor Air Flow Rate}\label{Design-Outdoor-Air-Flow-Rate}
 

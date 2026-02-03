@@ -102,7 +102,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,24.2;
+  Version,26.1;
 
   Building,
     NONE,                    !- Name
@@ -131,15 +131,15 @@
     No,                      !- Do HVAC Sizing Simulation for Sizing Periods
     1;                       !- Maximum Number of HVAC Sizing Simulation Passes
 
-  RunPeriod,  ! July Simulation
-    July Simulation,  !- Name
-    7,  !- Begin Month
-    1,   !- Begin Day of Month
-    ,    !- Begin Year
-    7,   !- End Month
-    31,  !- End Day of Month
-    ,    !- End Year
-    ,                 !- Day of Week for Start Day
+  RunPeriod,
+    July Simulation,         !- Name
+    7,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    7,                       !- End Month
+    31,                      !- End Day of Month
+    ,                        !- End Year
+    ,                        !- Day of Week for Start Day
     Yes,                     !- Use Weather File Holidays and Special Days
     Yes,                     !- Use Weather File Daylight Saving Period
     No,                      !- Apply Weekend Holiday Rule
@@ -1020,7 +1020,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1034,7 +1034,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1048,7 +1048,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1060,7 +1060,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1072,7 +1072,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1105,7 +1105,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA West Zone,       !- Name
@@ -1141,7 +1148,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA EAST ZONE,       !- Name
@@ -1177,7 +1191,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NORTH ZONE,      !- Name
@@ -1515,8 +1536,8 @@
     Coil:Heating:DX:SingleSpeed,  !- Heating Coil Object Type
     Heat Pump DX Heating Coil 1,  !- Heating Coil Name
     ,                        !- DX Heating Coil Sizing Ratio
-    Coil:Cooling:DX:VariableSpeed,         !- Cooling Coil Object Type
-    Heat Pump ACDXCoil 1 Cooling Coil,    !- Cooling Coil Name
+    Coil:Cooling:DX:VariableSpeed,  !- Cooling Coil Object Type
+    Heat Pump ACDXCoil 1 Cooling Coil,  !- Cooling Coil Name
     ,                        !- Use DOAS DX Cooling Coil
     ,                        !- Minimum Supply Air Temperature {C}
     ,                        !- Latent Load Control
@@ -1670,311 +1691,312 @@
   OutdoorAir:Node,
     Heat Pump ACDXCoil 1 Condenser Inlet Node;  !- Name
 
-    Table:IndependentVariable,
-        Heat Pump ACDXCoil 1 Cooling Outdoor Drybulb,  !- Name
-        Linear,                                        !- Interpolation Method
-        Constant,                                      !- Extrapolation Method
-        ,                                              !- Minimum Value
-        ,                                              !- Maximum Value
-        35.00,                                         !- Normalization Reference Value
-        Temperature,                                   !- Unit Type
-        ,                                              !- External File Name
-        ,                                              !- External File Column Number
-        ,                                              !- External File Starting Row Number
-        12.78,                                         !- Value 1
-        27.78,                                         !- Value 2
-        35.00,                                         !- Value 3
-        51.67;                                         !- Value 4
+  Table:IndependentVariable,
+    Heat Pump ACDXCoil 1 Cooling Outdoor Drybulb,  !- Name
+    Linear,                  !- Interpolation Method
+    Constant,                !- Extrapolation Method
+    ,                        !- Minimum Value
+    ,                        !- Maximum Value
+    35.00,                   !- Normalization Reference Value
+    Temperature,             !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    12.78,                   !- Value 1
+    27.78,                   !- Value 2
+    35.00,                   !- <none>
+    51.67;                   !- <none>
 
-    Table:IndependentVariable,
-        Heat Pump ACDXCoil 1 Cooling Indoor Wetbulb,  !- Name
-        Linear,                                       !- Interpolation Method
-        Constant,                                     !- Extrapolation Method
-        ,                                             !- Minimum Value
-        ,                                             !- Maximum Value
-        19.44,                                        !- Normalization Reference Value
-        Temperature,                                  !- Unit Type
-        ,                                             !- External File Name
-        ,                                             !- External File Column Number
-        ,                                             !- External File Starting Row Number
-        10.00,                                        !- Value 1
-        19.44,                                        !- Value 2
-        26.67;                                        !- Value 3
+  Table:IndependentVariable,
+    Heat Pump ACDXCoil 1 Cooling Indoor Wetbulb,  !- Name
+    Linear,                  !- Interpolation Method
+    Constant,                !- Extrapolation Method
+    ,                        !- Minimum Value
+    ,                        !- Maximum Value
+    19.44,                   !- Normalization Reference Value
+    Temperature,             !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    10.00,                   !- Value 1
+    19.44,                   !- Value 2
+    26.67;                   !- <none>
 
-    Table:IndependentVariableList,
-        Heat Pump ACDXCoil 1 Cooling fT List,          !- Name
-        Heat Pump ACDXCoil 1 Cooling Indoor Wetbulb,   !- Independent Variable 1 Name
-        Heat Pump ACDXCoil 1 Cooling Outdoor Drybulb;  !- Independent Variable 2 Name
+  Table:IndependentVariableList,
+    Heat Pump ACDXCoil 1 Cooling fT List,  !- Name
+    Heat Pump ACDXCoil 1 Cooling Indoor Wetbulb,  !- Independent Variable 1 Name
+    Heat Pump ACDXCoil 1 Cooling Outdoor Drybulb;  !- Independent Variable 2 Name
 
-    Table:IndependentVariable,
-        Heat Pump ACDXCoil 1 Coil Flow Fraction,  !- Name
-        Linear,                                   !- Interpolation Method
-        Constant,                                 !- Extrapolation Method
-        ,                                         !- Minimum Value
-        ,                                         !- Maximum Value
-        1.00,                                     !- Normalization Reference Value
-        Dimensionless,                            !- Unit Type
-        ,                                         !- External File Name
-        ,                                         !- External File Column Number
-        ,                                         !- External File Starting Row Number
-        0.75,                                     !- Value 1
-        1.00,                                     !- Value 2
-        1.25;                                     !- Value 3
+  Table:IndependentVariable,
+    Heat Pump ACDXCoil 1 Coil Flow Fraction,  !- Name
+    Linear,                  !- Interpolation Method
+    Constant,                !- Extrapolation Method
+    ,                        !- Minimum Value
+    ,                        !- Maximum Value
+    1.00,                    !- Normalization Reference Value
+    Dimensionless,           !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.75,                    !- Value 1
+    1.00,                    !- Value 2
+    1.25;                    !- <none>
 
-    Table:IndependentVariableList,
-        Heat Pump ACDXCoil 1 fFF List,            !- Name
-        Heat Pump ACDXCoil 1 Coil Flow Fraction;  !- Independent Variable 1 Name
+  Table:IndependentVariableList,
+    Heat Pump ACDXCoil 1 fFF List,  !- Name
+    Heat Pump ACDXCoil 1 Coil Flow Fraction;  !- Independent Variable 1 Name
 
-    Table:IndependentVariable,
-        Heat Pump ACDXCoil 1 Heating Outdoor Drybulb,  !- Name
-        Linear,                                        !- Interpolation Method
-        Constant,                                      !- Extrapolation Method
-        ,                                              !- Minimum Value
-        ,                                              !- Maximum Value
-        8.33,                                          !- Normalization Reference Value
-        Temperature,                                   !- Unit Type
-        ,                                              !- External File Name
-        ,                                              !- External File Column Number
-        ,                                              !- External File Starting Row Number
-        -17.78,                                        !- Value 1
-        -15.00,                                        !- Value 2
-        -8.33,                                         !- Value 3
-        8.33,                                          !- Value 4
-        15.56;                                         !- Value 5
+  Table:IndependentVariable,
+    Heat Pump ACDXCoil 1 Heating Outdoor Drybulb,  !- Name
+    Linear,                  !- Interpolation Method
+    Constant,                !- Extrapolation Method
+    ,                        !- Minimum Value
+    ,                        !- Maximum Value
+    8.33,                    !- Normalization Reference Value
+    Temperature,             !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    -17.78,                  !- Value 1
+    -15.00,                  !- Value 2
+    -8.33,                   !- <none>
+    8.33,                    !- <none>
+    15.56;                   !- <none>
 
-    Table:IndependentVariable,
-        Heat Pump ACDXCoil 1 Heating Indoor Drybulb,  !- Name
-        Linear,                                       !- Interpolation Method
-        Constant,                                     !- Extrapolation Method
-        ,                                             !- Minimum Value
-        ,                                             !- Maximum Value
-        21.11,                                        !- Normalization Reference Value
-        Temperature,                                  !- Unit Type
-        ,                                             !- External File Name
-        ,                                             !- External File Column Number
-        ,                                             !- External File Starting Row Number
-        15.56,                                        !- Value 1
-        21.11,                                        !- Value 2
-        26.67;                                        !- Value 3
+  Table:IndependentVariable,
+    Heat Pump ACDXCoil 1 Heating Indoor Drybulb,  !- Name
+    Linear,                  !- Interpolation Method
+    Constant,                !- Extrapolation Method
+    ,                        !- Minimum Value
+    ,                        !- Maximum Value
+    21.11,                   !- Normalization Reference Value
+    Temperature,             !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    15.56,                   !- Value 1
+    21.11,                   !- Value 2
+    26.67;                   !- <none>
 
-    Table:IndependentVariableList,
-        Heat Pump ACDXCoil 1 Heating fT List,          !- Name
-        Heat Pump ACDXCoil 1 Heating Indoor Drybulb,   !- Independent Variable 1 Name
-        Heat Pump ACDXCoil 1 Heating Outdoor Drybulb;  !- Independent Variable 2 Name
+  Table:IndependentVariableList,
+    Heat Pump ACDXCoil 1 Heating fT List,  !- Name
+    Heat Pump ACDXCoil 1 Heating Indoor Drybulb,  !- Independent Variable 1 Name
+    Heat Pump ACDXCoil 1 Heating Outdoor Drybulb;  !- Independent Variable 2 Name
 
-    Coil:Cooling:DX:VariableSpeed,
-        Heat Pump ACDXCoil 1 Cooling Coil,              !- Name
-        DX COOLING COIL AIR INLET NODE,                 !- Air Inlet Node Name
-        Heating Coil Air Inlet Node,                    !- Air Outlet Node Name
-        2,                                              !- Number of Speeds
-        2,                                              !- Nominal Speed Level
-        27219.40,                                       !- Gross Rated Total Cooling Capacity at Selected Nominal Speed Level
-        1.45,                                           !- Rated Air Flow Rate at Selected Nominal Speed Level
-        ,                                               !- Nominal Time for Condensate Removal to Begin
-        ,                                               !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity
-    ,                                               !- Maximum Cycling Rate
-    ,                                               !- Latent Capacity Time Constant
-    ,                                               !- Fan Delay Time
-        Heat Pump ACDXCoil 1 Cooling fPLR,              !- Part Load Fraction Correlation Curve Name
-        ,                                               !- Condenser Air Inlet Node Name
-        ,                                               !- Condenser Type
-        ,                                               !- Evaporative Condenser Pump Rated Power Consumption
-        75.00,                                          !- Crankcase Heater Capacity
-    ,                                               !- Crankcase Heater Capacity Function of Temperature Curve Name
-        10.00,                                          !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation
-        ,                                               !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation
-        ,                                               !- Supply Water Storage Tank Name
-        ,                                               !- Condensate Collection Water Storage Tank Name
-        ,                                               !- Basin Heater Capacity
-        ,                                               !- Basin Heater Setpoint Temperature
-        ,                                               !- Basin Heater Operating Schedule Name
-        19554.1,                                        !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity
-        0.730,                                          !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio
-        3.899,                                          !- Speed 1 Reference Unit Gross Rated Cooling COP
-        1.0572,                                         !- Speed 1 Reference Unit Rated Air Flow Rate
+  Coil:Cooling:DX:VariableSpeed,
+    Heat Pump ACDXCoil 1 Cooling Coil,  !- Name
+    ,                        !- Availability Schedule Name
+    DX COOLING COIL AIR INLET NODE,  !- Indoor Air Inlet Node Name
+    Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name
+    2,                       !- Number of Speeds {dimensionless}
+    2,                       !- Nominal Speed Level {dimensionless}
+    27219.40,                !- Gross Rated Total Cooling Capacity At Selected Nominal Speed Level {W}
+    1.45,                    !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
+    ,                        !- Nominal Time for Condensate to Begin Leaving the Coil {s}
+    ,                        !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
+    Heat Pump ACDXCoil 1 Cooling fPLR,  !- Energy Part Load Fraction Curve Name
+    ,                        !- Condenser Air Inlet Node Name
+    ,                        !- Condenser Type
+    ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
+    75.00,                   !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
+    10.00,                   !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Supply Water Storage Tank Name
+    ,                        !- Condensate Collection Water Storage Tank Name
+    ,                        !- Basin Heater Capacity {W/K}
+    ,                        !- Basin Heater Setpoint Temperature {C}
+    ,                        !- Basin Heater Operating Schedule Name
+    19554.1,                 !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
+    0.730,                   !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
+    3.899,                   !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
+    1.0572,                  !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-        ,                                               !- Speed 1 Reference Unit Rated Condenser Air Flow Rate
-        ,                                               !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling
-        Heat Pump ACDXCoil 1 Cooling CapfT 1,           !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
-        Heat Pump ACDXCoil 1 Cooling CapfFF 1,          !- Speed 1 Total Cooling Capacity Function of Air Flow Fraction Curve Name
-        Heat Pump ACDXCoil 1 Cooling EIRfT 1,           !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
-        Heat Pump ACDXCoil 1 Cooling EIRfFF 1,          !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
-        27219.4,                                        !- Speed 2 Reference Unit Gross Rated Total Cooling Capacity
-        0.730,                                          !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio
-        4.105,                                          !- Speed 2 Reference Unit Gross Rated Cooling COP
-        1.4523,                                         !- Speed 2 Reference Unit Rated Air Flow Rate
+    ,                        !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
+    ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
+    Heat Pump ACDXCoil 1 Cooling CapfT 1,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
+    Heat Pump ACDXCoil 1 Cooling CapfFF 1,  !- Speed 1 Total Cooling Capacity Function of Air Flow Fraction Curve Name
+    Heat Pump ACDXCoil 1 Cooling EIRfT 1,  !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+    Heat Pump ACDXCoil 1 Cooling EIRfFF 1,  !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
+    27219.4,                 !- Speed 2 Reference Unit Gross Rated Total Cooling Capacity {W}
+    0.730,                   !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
+    4.105,                   !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
+    1.4523,                  !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-        ,                                               !- Speed 2 Reference Unit Rated Condenser Air Flow Rate
-        ,                                               !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling
-        Heat Pump ACDXCoil 1 Cooling CapfT 2,           !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
-        Heat Pump ACDXCoil 1 Cooling CapfFF 2,          !- Speed 2 Total Cooling Capacity Function of Air Flow Fraction Curve Name
-        Heat Pump ACDXCoil 1 Cooling EIRfT 2,           !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
-        Heat Pump ACDXCoil 1 Cooling EIRfFF 2;          !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
+    ,                        !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
+    ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
+    Heat Pump ACDXCoil 1 Cooling CapfT 2,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
+    Heat Pump ACDXCoil 1 Cooling CapfFF 2,  !- Speed 2 Total Cooling Capacity Function of Air Flow Fraction Curve Name
+    Heat Pump ACDXCoil 1 Cooling EIRfT 2,  !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+    Heat Pump ACDXCoil 1 Cooling EIRfFF 2;  !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
 
-    Curve:Linear,
-        Heat Pump ACDXCoil 1 Cooling fPLR,  !- Name
-        0.85,                               !- Coefficient1 Constant
-        0.15,                               !- Coefficient2 x
-        0.00,                               !- Minimum Value of x
-        1.00;                               !- Maximum Value of x
+  Curve:Linear,
+    Heat Pump ACDXCoil 1 Cooling fPLR,  !- Name
+    0.85,                    !- Coefficient1 Constant
+    0.15,                    !- Coefficient2 x
+    0.00,                    !- Minimum Value of x
+    1.00;                    !- Maximum Value of x
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling CapfFF 1,  !- Name
-        Heat Pump ACDXCoil 1 fFF List,          !- Independent Variable List Name
-        None,                                   !- Normalization Method
-        1.00,                                   !- Normalization Divisor
-        ,                                       !- Minimum Output
-        ,                                       !- Maximum Output
-        Dimensionless,                          !- Output Unit Type
-        ,                                       !- External File Name
-        ,                                       !- External File Column Number
-        ,                                       !- External File Starting Row Number
-        0.96,                                   !- Output Value 1
-        1.00,                                   !- Output Value 2
-        1.03;                                   !- Output Value 3
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling CapfFF 1,  !- Name
+    Heat Pump ACDXCoil 1 fFF List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.96,                    !- Output Value 1
+    1.00,                    !- Output Value 2
+    1.03;                    !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling EIRfFF 1,  !- Name
-        Heat Pump ACDXCoil 1 fFF List,          !- Independent Variable List Name
-        None,                                   !- Normalization Method
-        1.00,                                   !- Normalization Divisor
-        ,                                       !- Minimum Output
-        ,                                       !- Maximum Output
-        Dimensionless,                          !- Output Unit Type
-        ,                                       !- External File Name
-        ,                                       !- External File Column Number
-        ,                                       !- External File Starting Row Number
-        1.0366,                                 !- Output Value 1
-        1.0000,                                 !- Output Value 2
-        0.9629;                                 !- Output Value 3
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling EIRfFF 1,  !- Name
+    Heat Pump ACDXCoil 1 fFF List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    1.0366,                  !- Output Value 1
+    1.0000,                  !- Output Value 2
+    0.9629;                  !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling CapfT 1,  !- Name
-        Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
-        None,                                  !- Normalization Method
-        1.00,                                  !- Normalization Divisor
-        ,                                      !- Minimum Output
-        ,                                      !- Maximum Output
-        Dimensionless,                         !- Output Unit Type
-        ,                                      !- External File Name
-        ,                                      !- External File Column Number
-        ,                                      !- External File Starting Row Number
-        1.09,                                  !- Output Value 1
-        0.97,                                  !- Output Value 2
-        0.92,                                  !- Output Value 3
-        0.81,                                  !- Output Value 4
-        1.21,                                  !- Output Value 5
-        1.07,                                  !- Output Value 6
-        1.00,                                  !- Output Value 7
-        0.84,                                  !- Output Value 8
-        1.34,                                  !- Output Value 9
-        1.19,                                  !- Output Value 10
-        1.11,                                  !- Output Value 11
-        0.94;                                  !- Output Value 12
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling CapfT 1,  !- Name
+    Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    1.09,                    !- Output Value 1
+    0.97,                    !- Output Value 2
+    0.92,                    !- <none>
+    0.81,                    !- <none>
+    1.21,                    !- <none>
+    1.07,                    !- <none>
+    1.00,                    !- <none>
+    0.84,                    !- <none>
+    1.34,                    !- <none>
+    1.19,                    !- <none>
+    1.11,                    !- <none>
+    0.94;                    !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling EIRfT 1,  !- Name
-        Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
-        None,                                  !- Normalization Method
-        1.00,                                  !- Normalization Divisor
-        ,                                      !- Minimum Output
-        ,                                      !- Maximum Output
-        Dimensionless,                         !- Output Unit Type
-        ,                                      !- External File Name
-        ,                                      !- External File Column Number
-        ,                                      !- External File Starting Row Number
-        0.4704,                                !- Output Value 1
-        0.8474,                                !- Output Value 2
-        1.0706,                                !- Output Value 3
-        1.7026,                                !- Output Value 4
-        0.4446,                                !- Output Value 5
-        0.7958,                                !- Output Value 6
-        1.0000,                                !- Output Value 7
-        1.5955,                                !- Output Value 8
-        0.3839,                                !- Output Value 9
-        0.6930,                                !- Output Value 10
-        0.8869,                                !- Output Value 11
-        1.4684;                                !- Output Value 12
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling EIRfT 1,  !- Name
+    Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.4704,                  !- Output Value 1
+    0.8474,                  !- Output Value 2
+    1.0706,                  !- <none>
+    1.7026,                  !- <none>
+    0.4446,                  !- <none>
+    0.7958,                  !- <none>
+    1.0000,                  !- <none>
+    1.5955,                  !- <none>
+    0.3839,                  !- <none>
+    0.6930,                  !- <none>
+    0.8869,                  !- <none>
+    1.4684;                  !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling CapfFF 2,  !- Name
-        Heat Pump ACDXCoil 1 fFF List,          !- Independent Variable List Name
-        None,                                   !- Normalization Method
-        1.00,                                   !- Normalization Divisor
-        ,                                       !- Minimum Output
-        ,                                       !- Maximum Output
-        Dimensionless,                          !- Output Unit Type
-        ,                                       !- External File Name
-        ,                                       !- External File Column Number
-        ,                                       !- External File Starting Row Number
-        0.96,                                   !- Output Value 1
-        1.00,                                   !- Output Value 2
-        1.03;                                   !- Output Value 3
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling CapfFF 2,  !- Name
+    Heat Pump ACDXCoil 1 fFF List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.96,                    !- Output Value 1
+    1.00,                    !- Output Value 2
+    1.03;                    !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling EIRfFF 2,  !- Name
-        Heat Pump ACDXCoil 1 fFF List,          !- Independent Variable List Name
-        None,                                   !- Normalization Method
-        1.00,                                   !- Normalization Divisor
-        ,                                       !- Minimum Output
-        ,                                       !- Maximum Output
-        Dimensionless,                          !- Output Unit Type
-        ,                                       !- External File Name
-        ,                                       !- External File Column Number
-        ,                                       !- External File Starting Row Number
-        1.0366,                                 !- Output Value 1
-        1.0000,                                 !- Output Value 2
-        0.9629;                                 !- Output Value 3
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling EIRfFF 2,  !- Name
+    Heat Pump ACDXCoil 1 fFF List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    1.0366,                  !- Output Value 1
+    1.0000,                  !- Output Value 2
+    0.9629;                  !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling CapfT 2,  !- Name
-        Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
-        None,                                  !- Normalization Method
-        1.00,                                  !- Normalization Divisor
-        ,                                      !- Minimum Output
-        ,                                      !- Maximum Output
-        Dimensionless,                         !- Output Unit Type
-        ,                                      !- External File Name
-        ,                                      !- External File Column Number
-        ,                                      !- External File Starting Row Number
-        1.09,                                  !- Output Value 1
-        0.97,                                  !- Output Value 2
-        0.92,                                  !- Output Value 3
-        0.81,                                  !- Output Value 4
-        1.20,                                  !- Output Value 5
-        1.07,                                  !- Output Value 6
-        1.00,                                  !- Output Value 7
-        0.85,                                  !- Output Value 8
-        1.34,                                  !- Output Value 9
-        1.19,                                  !- Output Value 10
-        1.11,                                  !- Output Value 11
-        0.94;                                  !- Output Value 12
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling CapfT 2,  !- Name
+    Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    1.09,                    !- Output Value 1
+    0.97,                    !- Output Value 2
+    0.92,                    !- <none>
+    0.81,                    !- <none>
+    1.20,                    !- <none>
+    1.07,                    !- <none>
+    1.00,                    !- <none>
+    0.85,                    !- <none>
+    1.34,                    !- <none>
+    1.19,                    !- <none>
+    1.11,                    !- <none>
+    0.94;                    !- <none>
 
-    Table:Lookup,
-        Heat Pump ACDXCoil 1 Cooling EIRfT 2,  !- Name
-        Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
-        None,                                  !- Normalization Method
-        1.00,                                  !- Normalization Divisor
-        ,                                      !- Minimum Output
-        ,                                      !- Maximum Output
-        Dimensionless,                         !- Output Unit Type
-        ,                                      !- External File Name
-        ,                                      !- External File Column Number
-        ,                                      !- External File Starting Row Number
-        0.4499,                                !- Output Value 1
-        0.8401,                                !- Output Value 2
-        1.0706,                                !- Output Value 3
-        1.7218,                                !- Output Value 4
-        0.4252,                                !- Output Value 5
-        0.7890,                                !- Output Value 6
-        1.0000,                                !- Output Value 7
-        1.6135,                                !- Output Value 8
-        0.3671,                                !- Output Value 9
-        0.6871,                                !- Output Value 10
-        0.8869,                                !- Output Value 11
-        1.4849;                                !- Output Value 12
+  Table:Lookup,
+    Heat Pump ACDXCoil 1 Cooling EIRfT 2,  !- Name
+    Heat Pump ACDXCoil 1 Cooling fT List,  !- Independent Variable List Name
+    None,                    !- Normalization Method
+    1.00,                    !- Normalization Divisor
+    ,                        !- Minimum Output
+    ,                        !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.4499,                  !- Output Value 1
+    0.8401,                  !- Output Value 2
+    1.0706,                  !- <none>
+    1.7218,                  !- <none>
+    0.4252,                  !- <none>
+    0.7890,                  !- <none>
+    1.0000,                  !- <none>
+    1.6135,                  !- <none>
+    0.3671,                  !- <none>
+    0.6871,                  !- <none>
+    0.8869,                  !- <none>
+    1.4849;                  !- <none>
 
   Coil:Heating:DX:SingleSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
@@ -1982,8 +2004,8 @@
     autosize,                !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Heating Coil Air Inlet Node,  !- Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -2001,7 +2023,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    autosize;                !- Resistive Defrost Heater Capacity {W}
+    autosize,                !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
   Fan:SystemModel,
     Supply Fan 1,            !- Name
@@ -2020,7 +2047,7 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.7;                     !- Fan Total Efficiency
 
-  Output:Variable,Heating Coil Air Inlet Node,System Node Mass Flow Rate, timestep;
+  Output:Variable,Heating Coil Air Inlet Node,System Node Mass Flow Rate,timestep;
 
   Output:Variable,*,Unitary System Fan Part Load Ratio,timestep;
 
@@ -2085,7 +2112,9 @@
   Output:Variable,*,Heating Coil Defrost Electricity Energy,timestep;
 
   Output:Meter,Cooling:Electricity,timestep; !- [J]
-  
+
+  Output:Meter,Cooling:Electricity,timestep;
+
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 
   Output:Meter:MeterFileOnly,Electricity:Building,monthly;

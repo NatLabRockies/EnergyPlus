@@ -10,7 +10,7 @@
 ! Plant:    None.
 ! Modified:
 
-  Version,25.2;
+  Version,26.1;
 
   Site:Location,
     UNKNOWN,                 !- Name
@@ -52,8 +52,8 @@
     Schedule,                !- Solar Model Indicator
     Solar Data,              !- Beam Solar Day Schedule Name
     Diffuse Data,            !- Diffuse Solar Day Schedule Name
-    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
-    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    0,                       !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    0,                       !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
     1.00;                    !- Sky Clearness
 
  ! LONDON/GATWICK_GBR Annual Heating Design Conditions Wind Speed=1.5m/s Wind Dir=80
@@ -84,8 +84,8 @@
     ASHRAEClearSky,          !- Solar Model Indicator
     ,                        !- Beam Solar Day Schedule Name
     ,                        !- Diffuse Solar Day Schedule Name
-    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
-    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    0,                       !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    0,                       !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
     0.00;                    !- Sky Clearness
 
   Schedule:Day:List,
@@ -944,7 +944,7 @@
     0.04,                    !- Loads Convergence Tolerance Value {W}
     0.4,                     !- Temperature Convergence Tolerance Value {deltaC}
     FullInteriorAndExterior, !- Solar Distribution
-    ,                        !- Maximum Number of Warmup Days
+    25,                      !- Maximum Number of Warmup Days
     6;                       !- Minimum Number of Warmup Days
 
   Zone,
@@ -1095,7 +1095,7 @@
     Sch 1,                   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     297.0,                   !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.000,                   !- Fraction Latent
     0.500,                   !- Fraction Radiant
@@ -1159,8 +1159,8 @@
     Sch 2,                   !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0154,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient

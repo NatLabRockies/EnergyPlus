@@ -9,14 +9,14 @@
  - NFP Initial draft accepted April 27, 2017
  - NFP Final: submitted May 1, 2017 (same as draft)
  - Design Doc: submitted May 1, 2017
- 
+
 ## Draft NFP ##
 
 ## Justification for New Feature ##
 
-Many commercial large capacity RTUs (30-200 tons) offer from 2 to 8 stages of compression. For the constant volume version of these products the indoor fan typically has 1 or 2 fan speeds. For the variable air volume version of these products, indoor fan speed is continuously variable when a VFD is used. The use of larger number of compression stages allows finer control of capacity to match load, providing better temperature and humidity control in the space. Use of larger number of compression stages also can achieve improved equipment COP at part-load conditions. 
+Many commercial large capacity RTUs (30-200 tons) offer from 2 to 8 stages of compression. For the constant volume version of these products the indoor fan typically has 1 or 2 fan speeds. For the variable air volume version of these products, indoor fan speed is continuously variable when a VFD is used. The use of larger number of compression stages allows finer control of capacity to match load, providing better temperature and humidity control in the space. Use of larger number of compression stages also can achieve improved equipment COP at part-load conditions.
 
-The ability to model up to 8 stages of compression with independent modulation of indoor fan will allow performance of these higher IEER products to be evaluated in EnergyPlus. 
+The ability to model up to 8 stages of compression with independent modulation of indoor fan will allow performance of these higher IEER products to be evaluated in EnergyPlus.
 
 
 ## E-mail and  Conference Call Conclusions ##
@@ -26,7 +26,7 @@ E-mail notes: no comments received other than initial draft looks acceptable
 
 ## Overview ##
 
-The following IDD object (shortened for readability) is extensible yet includes only 4 fields for cooling and heating air flow rate ratios. This means that any user wanting to simulate more than for stages of heating and/or cooling must revised the IDD. Simlarly, the IDFEditor also required fields in the IDD to encompass the number of inputs specified in the object. For these reasons, the UnitarySystemPerformance:Multispeed object fields will be increased to include 10 speeds. 
+The following IDD object (shortened for readability) is extensible yet includes only 4 fields for cooling and heating air flow rate ratios. This means that any user wanting to simulate more than for stages of heating and/or cooling must revised the IDD. Simlarly, the IDFEditor also required fields in the IDD to encompass the number of inputs specified in the object. For these reasons, the UnitarySystemPerformance:Multispeed object fields will be increased to include 10 speeds.
 
 Also, there is no input for no load air flow rate ratio. If a system is autosized, there is no input for the ratio of no load operating air flow rate to maximum operating air flow rate and the result of autosizing is that the no load flow rate always equals the maximum operating air flow rate (which is unrealistic).
 
@@ -71,7 +71,7 @@ The team will:
 
 ## Testing/Validation/Data Sources ##
 
-Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption. 
+Compare simulation results with existing equipment models. Document comparison of outlet temperature and humidity ratio and power consumption.
 
 ## Input Description ##
 
@@ -79,7 +79,7 @@ Limited changes to IDD and IO Reference documents as described herein.
 
 ## Outputs Description ##
 
-No change to output reporting (although report variables of type `Speed N` will be reviewed) 
+No change to output reporting (although report variables of type `Speed N` will be reviewed)
 
 ## IDD - Input Data Dictionary ##
 
@@ -318,4 +318,3 @@ Same as draft NFP
     3) Test that number of speeds < 10 works with modified IDD
     4) Test input file without UnitarySystemPerformance:Multispeed object (should already work).
     5) Test use of UnitarySystemPerformance:Multispeed object with 10-spd DX coil object
-

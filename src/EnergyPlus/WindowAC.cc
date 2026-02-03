@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -885,7 +885,6 @@ namespace WindowAC {
         std::string const CompType = "ZoneHVAC:WindowAirConditioner"; // component name
         std::string const CompName = windowAC.Name;                   // component type
         Real64 TempSize = AutoSize;                                   // autosized value of coil input field
-        bool PrintFlag = false;                                       // TRUE when sizing information is reported in the eio file
 
         state.dataSize->DataFracOfAutosizedCoolingAirflow = 1.0;
         state.dataSize->DataFracOfAutosizedHeatingAirflow = 1.0;
@@ -902,6 +901,7 @@ namespace WindowAC {
 
         if (state.dataSize->CurZoneEqNum > 0) {
             auto &zoneEqSizing = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
+            bool PrintFlag = false; // TRUE when sizing information is reported in the eio file
 
             if (windowAC.HVACSizingIndex > 0) {
                 // N1 , \field Maximum Supply Air Flow Rate
@@ -1105,7 +1105,7 @@ namespace WindowAC {
 
         CalcWindowACOutput(state, WindACNum, FirstHVACIteration, fanOp, PartLoadFrac, HXUnitOn, QUnitOut);
 
-        // Reseting AirMassFlow to inlet node mass flow rate since inlet mass flow rate may be getting
+        // Resetting AirMassFlow to inlet node mass flow rate since inlet mass flow rate may be getting
         // manipulated in subroutine CalcWindowACOutput
 
         AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate;

@@ -4,9 +4,6 @@
 ! EnergyPlus Example Surface Color Schemes
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   OutputControl:SurfaceColorScheme,
     Default;                 !- Name
 
@@ -63,7 +60,7 @@
     174,                     !- Color for Drawing Element 11
     TubularDaylightDomes,    !- Drawing Element 12 Type
     143,                     !- Color for Drawing Element 12
-    TubularDaylightDiffusers, !- Drawing Element 13 Type
+    TubularDaylightDiffusers,!- Drawing Element 13 Type
     143,                     !- Color for Drawing Element 13
     DaylightReferencePoint1, !- Drawing Element 14 Type
     10,                      !- Color for Drawing Element 14

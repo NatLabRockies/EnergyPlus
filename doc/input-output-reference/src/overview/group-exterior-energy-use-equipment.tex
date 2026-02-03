@@ -29,13 +29,12 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Grounds Lights
 An IDF Example:
 
 \begin{lstlisting}
-
 Exterior:Lights,
-    OutsideLights,       !- Name
-    ON,                  !- SCHEDULE Name
-    1000,                !- Design Level
-    AstronomicalClock,  !- Control Option
-    Grounds Lights;      !- End-Use Subcategory
+  OutsideLights,              !- Name
+  ON,                         !- SCHEDULE Name
+  1000,                       !- Design Level
+  AstronomicalClock,          !- Control Option
+  Grounds Lights;             !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-012}
@@ -82,12 +81,11 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Fountains'', e
 IDF Examples:
 
 \begin{lstlisting}
-
 Exterior:FuelEquipment,OutsideGasEq,NaturalGas,ON,1000;
-  Exterior:FuelEquipment,OutsideCoalEq,Coal,ON,1000;
-  Exterior:FuelEquipment,OutsideFuelOilNo1Eq,FuelOilNo1,ON,1000;
-  Exterior:FuelEquipment,OutsideFuelOilNo2Eq,FuelOilNo2,ON,1000;
-  Exterior:FuelEquipment,OutsideLPGEq,Propane,ON,1000;
+Exterior:FuelEquipment,OutsideCoalEq,Coal,ON,1000;
+Exterior:FuelEquipment,OutsideFuelOilNo1Eq,FuelOilNo1,ON,1000;
+Exterior:FuelEquipment,OutsideFuelOilNo2Eq,FuelOilNo2,ON,1000;
+Exterior:FuelEquipment,OutsideLPGEq,Propane,ON,1000;
 \end{lstlisting}
 
 \subsection{Exterior:WaterEquipment}\label{exteriorwaterequipment}
@@ -117,13 +115,12 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Landscaping'',
 IDF Example:
 
 \begin{lstlisting}
-
 Exterior:WaterEquipment,
-    OutsideWaterEq,      !- Name
-    Water,               !- Fuel Use Type
-    ON,                  !- Schedule Name
-    1000.0,              !- Design Level
-    General;             !- End-Use Subcategory
+  OutsideWaterEq,             !- Name
+  Water,                      !- Fuel Use Type
+  ON,                         !- Schedule Name
+  1000.0,                     !- Design Level
+  General;                    !- End-Use Subcategory
 \end{lstlisting}
 
 

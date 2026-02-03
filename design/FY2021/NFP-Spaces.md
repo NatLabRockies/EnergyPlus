@@ -1,8 +1,8 @@
 # Adding "Spaces" to EnergyPlus #
 
-**Michael J. Witte, GARD Analytics, Inc.**  
-**Jason W. DeGraw, ORNL**  
-**With input from many more . . .**  
+**Michael J. Witte, GARD Analytics, Inc.**
+**Jason W. DeGraw, ORNL**
+**With input from many more . . .**
 
  -  Original, November 22, 2019
  -  Revised, April 1, 2020
@@ -27,7 +27,7 @@
     * Add design section
  - Revised, August 19, 2021
     * Leave ZoneInfiltration and ZoneVentilation as-is (reference Zone, not Space).
-    
+
 ## Table of Contents ##
 
 [Justification for New Feature](#justification-for-new-feature)
@@ -67,8 +67,8 @@ For standards and other purposes, reporting by space type is essential. There ar
 may be used for reporting.
 
 ### Radiant and Solar Exchange
-Other possible advantages include better surface groupings for radiant and solar exchange. For example, a private office which is part of a large 
-HVAC zone could be modeled as a space so that it does not pass solar or radiant to other surfaces in the larger zone. 
+Other possible advantages include better surface groupings for radiant and solar exchange. For example, a private office which is part of a large
+HVAC zone could be modeled as a space so that it does not pass solar or radiant to other surfaces in the larger zone.
 There are also potential computing performance advantages to dividing zones into smaller enclosures for radiant exchange and solar
 distribution, especially for large HVAC zones with many surfaces.
 
@@ -82,7 +82,7 @@ New Space object (and related objects) with minimal changes to current inputs.
  * *New optional Space object with Space Type tag and other tags.*
  * Surfaces will always reference a Zone Name (no change).
  * *Surfaces may reference a Space Name (optional)*
- * *Two space geometry options:* 
+ * *Two space geometry options:*
    * Floor surface(s): Area based on floor surface(s) attached to the Space
    * Full geometry: Define the Space with surfaces on all sides.
  * *New SpaceList object* (equivalent to ZoneList, but for Spaces).
@@ -106,34 +106,34 @@ New Space object (and related objects) with minimal changes to current inputs.
       Space Name,
       Zone Name,
       Space Type,
-      *Optional Tags for Reporting*      
+      *Optional Tags for Reporting*
       Tag 1,
       Tag 2,
       ...
-      
+
     Zone, !- No change
       Name,
       Origin,
       ...
-      
+
     Lights/People/Equipment
       Name,
       Zone, ZoneList, Space or SpaceList Name,
       Schedule Name,
       ...
-    
+
     Infiltration:* and Ventilation:*
       Name,
       Zone, ZoneList, Space or SpaceList Name,
       ...
-    
+
     Surface,
       Name,
       ...
       Zone Name,  !- Required
       Space Name, !- Optional new field
       ...
-      
+
     DesignSpecification:OutdoorAir:List  !- Optional new object
       List Name,
       Space Name 1,
@@ -141,23 +141,23 @@ New Space object (and related objects) with minimal changes to current inputs.
       Space Name 2,
       Design Specification Outdoor Air Object Name 2,
       ...
-      
-       
+
+
 ![Figure 1 Spaces by Floor Area](Space-Examples-FloorArea.png)
 
 ![Figure 2 Spaces by Full Geometry](Space-Examples-FullGeometry.png)
 
 ## Sizing Considerations ##
 
- * Zone sizing calculations and reports are all at the Zone level. 
+ * Zone sizing calculations and reports are all at the Zone level.
  * Possible future work could add Space level sizing calculations and reports for Spaces.
  * New DesignSpecification:OutdoorAir:List allows space-level OA specifications to be combined
- 
+
 ## Testing/Validation/Data Sources ##
 
-* For new example files with Spaces added, there should be no substantive diffs 
-compared to the equivalent file without Spaces. There will likely be some small diffs due to 
-changes in computational order or accumulating space-level values. 
+* For new example files with Spaces added, there should be no substantive diffs
+compared to the equivalent file without Spaces. There will likely be some small diffs due to
+changes in computational order or accumulating space-level values.
 * For the regression tests with no Spaces, all numeric results
 should stay exactly the same, but some table headings may change.
 
@@ -218,8 +218,8 @@ EnergyPlus input currently has the following (very flat) heierarchy:
         Thermostat (one per zone)
         HVAC equipment (attaches to a zone)
 
-Zones represent an air mass (air node) that exchanges heat with surfaces, internal loads, HVAC equipment, etc. 
-A Zone is essentially the "atomic unit" of the building. By default a zone has a uniform air temperature, but there are room air models 
+Zones represent an air mass (air node) that exchanges heat with surfaces, internal loads, HVAC equipment, etc.
+A Zone is essentially the "atomic unit" of the building. By default a zone has a uniform air temperature, but there are room air models
 that allow modeling of stratification and other non-uniform temperature effects. Thermostats and HVAC equipment are assigned per Zone.
 
 The internal data model adds another layer:
@@ -237,9 +237,9 @@ The internal data model adds another layer:
             HVAC equipment
 
 Enclosures are used for radiant and solar/daylighting exchange. Enclosures are primarily concerned with Surfaces, but they
-are also related to internal gains (which cast radiant and visible energy into the enclosure) and thermal comfort (MRT). 
-By default there is one Enclosure for each Zone.  By using Construction:AirBoundary, multiple zones may be grouped into a single larger Enclosure. 
-Enclosures are assigned automatically based on the zones connected by an air boundary surface. 
+are also related to internal gains (which cast radiant and visible energy into the enclosure) and thermal comfort (MRT).
+By default there is one Enclosure for each Zone.  By using Construction:AirBoundary, multiple zones may be grouped into a single larger Enclosure.
+Enclosures are assigned automatically based on the zones connected by an air boundary surface.
 
 ### Proposed model with new Space layer ###
 
@@ -264,7 +264,7 @@ So if any or all surfaces in Zone have no Space defined in input, a Space will b
             *Space Zone 2-Remainder*
                 Surfaces
                 Internal Gains (People, Lights, etc.)
-    
+
         Enclosure A  !- All of Zone 1
             *Space Zone 1-All*
                 Surfaces
@@ -274,7 +274,7 @@ So if any or all surfaces in Zone have no Space defined in input, a Space will b
             Space 2A
                 Surfaces
                 Internal Gains (People, Lights, etc.)
-    
+
         Enclosure C  !- Space 2B plus remainder of Zone 2
             Space 2B
                 Floor Surface
@@ -285,11 +285,11 @@ So if any or all surfaces in Zone have no Space defined in input, a Space will b
 
 ### Definitions
 
- * Surface - A geometric plane which is attached to a Zone and a Space. 
+ * Surface - A geometric plane which is attached to a Zone and a Space.
    * A Surface can be opaque, transparent, or an air boundary.
    * Each Surface belongs to one Zone and one Space.
    * Inter-Space Surfaces (adjacent to another Space) are modeled the same as current inter-Zone surfaces (two linked surfaces).
-   * Inter-Space surfaces connecting spaces that are part of the same Zone will see the same air temperature but may be in 
+   * Inter-Space surfaces connecting spaces that are part of the same Zone will see the same air temperature but may be in
      different enclosures. If they connect spaces that are in different Zones, then they will see different air temperatures as well.
    * Air boundary surfaces will combine one or more spaces and/or zones into an enclosure.
 
@@ -307,8 +307,8 @@ So if any or all surfaces in Zone have no Space defined in input, a Space will b
    * If no Spaces are specified for a zone, a Space will automatically be created.
    * All Surfaces and internal gains associated with the Spaces are included in the Zone.
    * Surfaces and internal gains may also be attached directly to the Zone.
-   * The Zone heat balance does not change: it has an air temperature (or a Room Air Model) and includes all Surfaces and 
-   internal gains from its Spaces. 
+   * The Zone heat balance does not change: it has an air temperature (or a Room Air Model) and includes all Surfaces and
+   internal gains from its Spaces.
    * Every Zone with HVAC connected has its own air node and its own air temperature and humidity.
 
  * Enclosure - A continuous volume connecting Surfaces for radiant, solar, and daylighting exchange.
@@ -319,7 +319,7 @@ So if any or all surfaces in Zone have no Space defined in input, a Space will b
    * Air boundaries can be used at the Space and/or Zone level to combine enclosures
    * All Surfaces and internal radiant gains associated with the Spaces are included in the Enclosure.
    * Enclosures only distribute radiant (thermal), solar, and visible energy to and from the Surfaces.
-   * There is no full heat balance at the Enclosure level. Each Enclosure only balances the radiant/solar flux on each 
+   * There is no full heat balance at the Enclosure level. Each Enclosure only balances the radiant/solar flux on each
    Surface. These fluxes then become part of the Surface inside heat balance.
 
 ## Design
@@ -340,8 +340,8 @@ show no diffs except the following:
 
 `DataSurfaces::SurfaceData`
    - Add fields to `Surface` to track the Space name and index along with the existing Zone and Enclosure fields.
- 
- * Proposed Surface ordering (same as current): 
+
+ * Proposed Surface ordering (same as current):
    - All shading surfaces are first
    - Group by Zone
    - Group by surface type within each Zone
@@ -369,7 +369,7 @@ show no diffs except the following:
       Space2-OpaqueSurface2
       Space2-Window1
 
- * Alternate Surface ordering (consider for a later phase of work): 
+ * Alternate Surface ordering (consider for a later phase of work):
    - All shading surfaces are first
    - All air boundary surfaces are next
    - Group by Enclosure (because enclosure radiant exchange is more computationally intensive than zone heat balance?)
@@ -391,21 +391,21 @@ e.g., Enclosure1 contains Space1 and Space3, Enclosure2 contains Space2.
       Space2-OpaqueSurface2
       Space2-Window1
 
-`SurfaceGeometry.::GetSurfaceData` 
+`SurfaceGeometry.::GetSurfaceData`
   * Surface input functions (`GetHTSurfaceData, GetRectSurfaces, GetHTSubSurfaceData, GetRectSubSurfaces, GetIntMassSurfaceData`)
     - Store space name and index for each surface
     - Generate automatic Space objects and assign them where needed
   * Surface sorting (lines 1608ff)
     - no change initially - continue to group surfaces by zone
   * Interzone surface checking (lines 1865ff)
-    - change warnings to reference inter"space" surfaces instead of interzone 
+    - change warnings to reference inter"space" surfaces instead of interzone
     - change test to warn when two inter"space" surfaces are in the same Space
   * Setup Zone `*SurfaceFirst/Last` indexes (lines 2286ff)
     - no change intially - continue to set  by zone
   * Set up floor areas for zones (lines 2359ff)
     - compute Space floor areas
     - set zone floor areas as sum of Space areas
-  * Check for zones with not enough surfaces (lines 2503ff)  
+  * Check for zones with not enough surfaces (lines 2503ff)
     - no change - continue to test this at the zone level
   * Set flag for exterior obstruction, and set associated surfaces for Kiva foundations (lines 2564ff)
     - no change for now
@@ -432,7 +432,7 @@ Other functions impacted by the change from zone to space:
 
 `HeatBalanceIntRadExchange::AlingInputViewFactors`
 
-Believe it or not, no changes needed in `HeatBalanceIntRadExchange::CalcInteriorRadExchange` 
+Believe it or not, no changes needed in `HeatBalanceIntRadExchange::CalcInteriorRadExchange`
 
 `DaylightingManager.cc` Many functions, replace Zone with Space
 
@@ -444,10 +444,10 @@ Believe it or not, no changes needed in `HeatBalanceIntRadExchange::CalcInterior
 
 `DataHeatBalance::PeopleData, LightsData, ZoneEquipData, ITEquipData, BBHeatData, InfiltrationData, VentilationData`
   * Add SpacePtr (and keep ZonePtr)
-  
+
 `DataHeatBalance::ZoneMassConservationData`
   * Change to Space basis??
-  
+
 `InternalHeatGains::GetInternalHeatGainsInput`
 `HeatBalanceAirManager::GetSimpleAirModelInputs`
   * Allow Space Name and SpaceList Name as well as Zone Name
@@ -456,19 +456,19 @@ Believe it or not, no changes needed in `HeatBalanceIntRadExchange::CalcInterior
   * Set enclosure index based on Space
   * Do not allow Space names for ZoneMixing and ZoneCrossMixing - keep at the zone level
   * All internal gains and simple airflow calculations remain at the zone level
-  
+
 ### Daylighting ###
 
 `DataDaylighting::ZoneDaylightingCalc`
   * Add Space pointer
-  
+
 `DaylightingManager::GetDaylightingControls`
   * Allow Space Name and SpaceList Name as well as Zone Name
   * Set enclosure index based on Space
 
 `DaylightingManager::*`
   * Change all zone-level daylighting calculations to be for Space???
-  
+
 ### Zone HVAC Sizing ###
 
 `SizingManager::GetOARequirements`
@@ -477,9 +477,9 @@ Believe it or not, no changes needed in `HeatBalanceIntRadExchange::CalcInterior
     - Require some traits of the DSOA objects in the list to be uniform?
     - Store a sigle blended DSOA object?
     - Same for Controller:MechanicalVentilation? `MixedAir.cc`
-    - Same for other places that reference OA requirements? `DataSizing, DataZoneEquipment, DualDuct, HybridEvapCoolingModel, 
-    PurchasedAirManager, SingleDuct, SimAirServingZones, ZoneEquipmentManager` 
-  
+    - Same for other places that reference OA requirements? `DataSizing, DataZoneEquipment, DualDuct, HybridEvapCoolingModel,
+    PurchasedAirManager, SingleDuct, SimAirServingZones, ZoneEquipmentManager`
+
 ### Output Reports ###
 
 `OutputProcessor.cc`

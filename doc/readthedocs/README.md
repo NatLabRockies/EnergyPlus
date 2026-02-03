@@ -24,7 +24,7 @@ The Python and C API documentation are generated directly from the API sources (
 - To add more content to the documentation that is hosted on ReadTheDocs, just add more `rst` sources or content in the `doc/readthedocs/sphinx` directory and make sure to update the root `doc/readthedocs/sphinx/index.rst` file, then rebuild.
 
 ## Updating ReadTheDocs
-ReadTheDocs will build "latest" and "stable" versions of EnergyPlus commits by default.  
+ReadTheDocs will build "latest" and "stable" versions of EnergyPlus commits by default.
 [`latest`](https://energyplus.readthedocs.io/en/latest/) always points to the latest commit made to the `develop` branch, almost always due to a pull request merge.
 [`stable`](https://energyplus.readthedocs.io/en/stable/) always points to the last release tag made to EnergyPlus.
 

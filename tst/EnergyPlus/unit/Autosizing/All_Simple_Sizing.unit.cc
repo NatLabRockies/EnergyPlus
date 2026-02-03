@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -70,7 +70,7 @@ TEST_F(AutoSizingFixture, AutoCalculateSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -184,7 +184,7 @@ TEST_F(AutoSizingFixture, MaxHeaterOutletTempSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -318,7 +318,7 @@ TEST_F(AutoSizingFixture, ZoneCoolingLoadSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -452,7 +452,7 @@ TEST_F(AutoSizingFixture, ZoneHeatingLoadSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -585,7 +585,7 @@ TEST_F(AutoSizingFixture, ASHRAEMinSATCoolingSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -752,7 +752,7 @@ TEST_F(AutoSizingFixture, ASHRAEMaxSATHeatingSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -913,7 +913,7 @@ TEST_F(AutoSizingFixture, DesiccantDehumidifierBFPerfDataFaceVelocitySizingGaunt
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING
@@ -1060,7 +1060,7 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirInletTempSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING - Zone equipment not supported
@@ -1176,7 +1176,7 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirOutletTempSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING - Zone equipment not supported
@@ -1281,7 +1281,7 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirInletHumRatSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.0001); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.0001); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING - Zone equipment not supported

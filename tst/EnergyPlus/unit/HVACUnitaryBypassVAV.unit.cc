@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -784,7 +784,7 @@ TEST_F(CBVAVSys, UnitaryBypassVAV_NoOASys)
     cbvav.AirLoopNumber = 1;
     state->dataAirLoop->AirLoopFlow.allocate(cbvav.AirLoopNumber);
 
-    // First time through GetZoneLoads CBVAV.HeatCoolMode gets set IF there is a load and won't exectute again until the simulation time increases
+    // First time through GetZoneLoads CBVAV.HeatCoolMode gets set IF there is a load and won't execute again until the simulation time increases
     // There is no load here and CBVAV.HeatCoolMode did not change so cbvav.changeOverTimer also did not get set (change) in previous call
     // so there is no need to reset cbvav.changeOverTimer here but it wouldn't hurt if it was reset to -1.0
     HVACUnitaryBypassVAV::InitCBVAV(*state, cbvavNum, FirstHVACIteration, AirLoopNum, OnOffAirFlowRatio, HXUnitOn);
@@ -1475,6 +1475,7 @@ TEST_F(EnergyPlusFixture, UnitaryBypassVAV_ParentElectricityRateTest)
 
         "  Coil:Heating:DX:VariableSpeed,",
         "    Main DX Heating Coil 1,  !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    Heating Coil Air Outlet Node,  !- Indoor Air Outlet Node Name",
         "    5.0,                     !-Number of Speeds{dimensionless}",
@@ -1541,6 +1542,7 @@ TEST_F(EnergyPlusFixture, UnitaryBypassVAV_ParentElectricityRateTest)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Main Cooling Coil 1,     !- Name",
+        "    ,                        !- Availability Schedule Name",
         "    DX Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name",
         "    Heating Coil Air Inlet Node,  !- Indoor Air Outlet Node Name",
         "    4.0,                     !- Number of Speeds {dimensionless}",

@@ -8,5 +8,3 @@ root = true
 insert_final_newline = true
 indent_size = 4
 indent_style = space
-
-

@@ -73,7 +73,7 @@
 !   Environmental Emissions:        None
 !   Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     BUILDING #1,             !- Name
@@ -2083,7 +2083,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -2097,7 +2097,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -2111,7 +2111,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -2125,7 +2125,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2137,7 +2137,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2149,7 +2149,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2158,7 +2158,7 @@
   ZoneCoolTower:Shower,
     CoolTower 1,             !- Name
     Cooltower Operation,     !- Availability Schedule Name
-    Zone 1,                  !- Zone Name
+    Zone 1,                  !- Zone or Space Name
     ,                        !- Water Supply Storage Tank Name
     WindDrivenFlow,          !- Flow Control Type
     Cooltower Operation,     !- Pump Flow Rate Schedule Name
@@ -2174,7 +2174,7 @@
   ZoneCoolTower:Shower,
     CoolTower 2,             !- Name
     Cooltower Operation,     !- Availability Schedule Name
-    Zone 2,                  !- Zone Name
+    Zone 2,                  !- Zone or Space Name
     ,                        !- Water Supply Storage Tank Name
     WaterFlowSchedule,       !- Flow Control Type
     Cooltower Operation,     !- Pump Flow Rate Schedule Name
@@ -2190,7 +2190,7 @@
   ZoneCoolTower:Shower,
     CoolTower 3,             !- Name
     Cooltower Operation,     !- Availability Schedule Name
-    Zone 3,                  !- Zone Name
+    Zone 3,                  !- Zone or Space Name
     ,                        !- Water Supply Storage Tank Name
     WindDrivenFlow,          !- Flow Control Type
     Cooltower Operation,     !- Pump Flow Rate Schedule Name

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -216,6 +216,9 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
                            state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolSens /
                                state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).RatedCapCoolTotal));
     }
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Air Flow Rate", false));
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Total Cooling Capacity", false));
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Sensible Cooling Capacity", true));
 }
 
 TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
@@ -225,6 +228,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -246,6 +250,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
 
         " Coil:Heating:WaterToAirHeatPump:EquationFit,",
         "  Sys 5 Heat Pump Heating Mode,  !- Name",
+        "  ,                              !- Availability Schedule Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name",
         "  Sys 5 Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -597,6 +602,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestWaterFlowControl)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -618,6 +624,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestWaterFlowControl)
 
         " Coil:Heating:WaterToAirHeatPump:EquationFit,",
         "  Sys 5 Heat Pump Heating Mode,  !- Name",
+        "  ,                              !- Availability Schedule Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name",
         "  Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name",
         "  Sys 5 Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -1109,6 +1116,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).RatedEntAirDrybulbTemp = 27.0;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).CompanionHeatingCoilNum = 2;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit;
+    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(1).availSched = Sched::GetScheduleAlwaysOn(*state);
 
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPType = WatertoAirHP::Heating;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatedAirVolFlowRate = AutoSize;
@@ -1121,6 +1129,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAirRatedCo
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).CompanionCoolingCoilNum = 1;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).WAHPPlantType = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).RatioRatedHeatRatedTotCoolCap = 1.23;
+    state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(2).availSched = Sched::GetScheduleAlwaysOn(*state);
 
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesCoolVolFlow = 0.20;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow = 0.20;
@@ -1530,6 +1539,7 @@ TEST_F(EnergyPlusFixture, EquationFit_Initialization)
 
         " Coil:Cooling:WaterToAirHeatPump:EquationFit,",
         "   Sys 5 Heat Pump Cooling Mode,  !- Name",
+        "   ,                              !- Availability Schedule Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name",
         "   Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name",
         "   Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -1623,8 +1633,8 @@ TEST_F(EnergyPlusFixture, EquationFit_Initialization)
     int NumAlphas = 0;
     int NumNumbers = 0;
     state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
-    EXPECT_EQ(TotalArgs, 22);
-    EXPECT_EQ(NumAlphas, 9);
+    EXPECT_EQ(TotalArgs, 23);
+    EXPECT_EQ(NumAlphas, 10);
     EXPECT_EQ(NumNumbers, 13);
 
     WaterToAirHeatPumpSimple::GetSimpleWatertoAirHPInput(*state);

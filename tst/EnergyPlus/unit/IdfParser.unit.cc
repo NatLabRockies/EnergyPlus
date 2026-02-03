@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,7 +58,7 @@ namespace EnergyPlus {
 TEST_F(IdfParserFixture, decode)
 {
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  Building,",
         "    Ref Bldg Medium Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -74,7 +74,7 @@ TEST_F(IdfParserFixture, decode)
 
     EXPECT_EQ(
         std::vector<std::vector<std::string>>(
-            {{"Version", "8.3"},
+            {{"Version", DataStringGlobals::MatchVersion},
              {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "City", "0.0400", "0.2000", "FullInteriorAndExterior", "25", "6"}}),
         output);
 }
@@ -83,7 +83,7 @@ TEST_F(IdfParserFixture, decode_success)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  Building,",
         "    Ref Bldg Medium Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -99,7 +99,7 @@ TEST_F(IdfParserFixture, decode_success)
 
     EXPECT_EQ(
         std::vector<std::vector<std::string>>(
-            {{"Version", "8.3"},
+            {{"Version", DataStringGlobals::MatchVersion},
              {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "City", "0.0400", "0.2000", "FullInteriorAndExterior", "25", "6"}}),
         output);
     EXPECT_TRUE(success);
@@ -109,7 +109,7 @@ TEST_F(IdfParserFixture, decode_success_2)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  Building,",
         "    Ref Bldg Medium Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -124,7 +124,8 @@ TEST_F(IdfParserFixture, decode_success_2)
     auto const output = IdfParser::decode(test_object, success);
 
     EXPECT_EQ(std::vector<std::vector<std::string>>(
-                  {{"Version", "8.3"}, {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "", "0.0400", "0.2000", "", "25", "6"}}),
+                  {{"Version", DataStringGlobals::MatchVersion},
+                   {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "", "0.0400", "0.2000", "", "25", "6"}}),
               output);
     EXPECT_TRUE(success);
 }
@@ -133,7 +134,7 @@ TEST_F(IdfParserFixture, decode_success_3)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  Building,",
         "    Ref Bldg Medium Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -148,7 +149,8 @@ TEST_F(IdfParserFixture, decode_success_3)
     auto const output = IdfParser::decode(test_object, success);
 
     EXPECT_EQ(std::vector<std::vector<std::string>>(
-                  {{"Version", "8.3"}, {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "", "0.0400", "0.2000", "", "25", ""}}),
+                  {{"Version", DataStringGlobals::MatchVersion},
+                   {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "", "0.0400", "0.2000", "", "25", ""}}),
               output);
     EXPECT_TRUE(success);
 }
@@ -157,15 +159,16 @@ TEST_F(IdfParserFixture, decode_success_4)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Schedule:Constant,OnSch,,1.0;",
         "Schedule:Constant,Aula people sched,,0.0;",
     }));
 
     auto const output = IdfParser::decode(test_object, success);
 
-    EXPECT_EQ(std::vector<std::vector<std::string>>(
-                  {{"Version", "8.3"}, {"Schedule:Constant", "OnSch", "", "1.0"}, {"Schedule:Constant", "Aula people sched", "", "0.0"}}),
+    EXPECT_EQ(std::vector<std::vector<std::string>>({{"Version", DataStringGlobals::MatchVersion},
+                                                     {"Schedule:Constant", "OnSch", "", "1.0"},
+                                                     {"Schedule:Constant", "Aula people sched", "", "0.0"}}),
               output);
     EXPECT_TRUE(success);
 }
@@ -174,15 +177,16 @@ TEST_F(IdfParserFixture, decode_encode)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Schedule:Constant,OnSch,,1.0;",
         "Schedule:Constant,Aula people sched,,0.0;",
     }));
 
     auto const output = IdfParser::decode(test_object, success);
 
-    EXPECT_EQ(std::vector<std::vector<std::string>>(
-                  {{"Version", "8.3"}, {"Schedule:Constant", "OnSch", "", "1.0"}, {"Schedule:Constant", "Aula people sched", "", "0.0"}}),
+    EXPECT_EQ(std::vector<std::vector<std::string>>({{"Version", DataStringGlobals::MatchVersion},
+                                                     {"Schedule:Constant", "OnSch", "", "1.0"},
+                                                     {"Schedule:Constant", "Aula people sched", "", "0.0"}}),
               output);
     EXPECT_TRUE(success);
 
@@ -195,15 +199,16 @@ TEST_F(IdfParserFixture, decode_encode_2)
 {
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Schedule:Constant,OnSch,,;",
         "Schedule:Constant,Aula people sched,,;",
     }));
 
     auto const output = IdfParser::decode(test_object, success);
 
-    EXPECT_EQ(std::vector<std::vector<std::string>>(
-                  {{"Version", "8.3"}, {"Schedule:Constant", "OnSch", "", ""}, {"Schedule:Constant", "Aula people sched", "", ""}}),
+    EXPECT_EQ(std::vector<std::vector<std::string>>({{"Version", DataStringGlobals::MatchVersion},
+                                                     {"Schedule:Constant", "OnSch", "", ""},
+                                                     {"Schedule:Constant", "Aula people sched", "", ""}}),
               output);
     EXPECT_TRUE(success);
 
@@ -217,7 +222,7 @@ TEST_F(IdfParserFixture, parse_idf)
     size_t index = 0;
     bool success = true;
     std::string const test_object(delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  Building,",
         "    Ref Bldg Medium Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -233,7 +238,7 @@ TEST_F(IdfParserFixture, parse_idf)
 
     EXPECT_EQ(
         std::vector<std::vector<std::string>>(
-            {{"Version", "8.3"},
+            {{"Version", DataStringGlobals::MatchVersion},
              {"Building", "Ref Bldg Medium Office New2004_v1.3_5.0", "0.0000", "City", "0.0400", "0.2000", "FullInteriorAndExterior", "25", "6"}}),
         output);
 

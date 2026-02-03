@@ -20,7 +20,7 @@ The header of the map file was changed from only allowing two reference points t
 
 “ RefPt1=(2.50:2.00:0.80), RefPt2=(2.50:18.00:0.80), RefPt3=(2.50:18.00:0.50)”
 
-[PR#8889](https://github.com/NREL/EnergyPlus/pull/8889) changed the output format in both the MAP file and the SQL output.
+[PR#8889](https://github.com/NatLabRockies/EnergyPlus/pull/8889) changed the output format in both the MAP file and the SQL output.
 
 ### Table Output Column Headings Changed for Central Plant:
 
@@ -32,8 +32,8 @@ The header of the map file was changed from only allowing two reference points t
  (a) "Rated Capacity [W]"
  (b) "Rated Efficiency [W/W]"
 
-See [8192](https://github.com/NREL/EnergyPlus/pull/8959/)
-See [PR#8889](https://github.com/NREL/EnergyPlus/pull/8889) changed the output format in both the MAP file and the SQL output.
+See [8192](https://github.com/NatLabRockies/EnergyPlus/pull/8959/)
+See [PR#8889](https://github.com/NatLabRockies/EnergyPlus/pull/8889) changed the output format in both the MAP file and the SQL output.
 
 ### Table outputs for Space and Space Type
 
@@ -60,7 +60,7 @@ The following table outputs are new:
 *Space Type Summary*
 
 
-See [PR#8394](https://github.com/NREL/EnergyPlus/pull/8394)
+See [PR#8394](https://github.com/NatLabRockies/EnergyPlus/pull/8394)
 
 
 ### Table Output Changes in Standard 62.1 Summary Report
@@ -68,12 +68,12 @@ The System Ventilation Requirements for Cooling/Heating tables have two new colu
 
 The Zone Ventilation Calculations for Cooling/Heating Design tables have one new column: "Is Vpz-min calculated using the Standard 62.1 Simplified Procedure?". As its name indicates, it specifies if the zone minimum primary air flow was determined using the ASHRAE Standard 62.1 Simplified Procedure.
 
-See PR [#8891](https://github.com/NREL/EnergyPlus/pull/8891).
+See PR [#8891](https://github.com/NatLabRockies/EnergyPlus/pull/8891).
 
 ### VentilationRateProcedure Name Change
 The name of the `VentilationRateProcedure` method was changed to `Standard62.1VentilationRateProcedure` to be consistent with the Standard 62.1 Summary Report. The name of the method has been changed throughout EnergyPlus and is thus reflected in the EIO files.
 
-See PR [#8891](https://github.com/NREL/EnergyPlus/pull/8891).
+See PR [#8891](https://github.com/NatLabRockies/EnergyPlus/pull/8891).
 
 ### Output:Table:Monthly and Output:Table:Annual Column Headers
 
@@ -81,7 +81,7 @@ For both objects `Output:Table:Monthly` and `Output:Table:Annual`
 
 For aggregation types `Maximum`, `Minimum`, `MaximumDuringHoursShown` and `MinimumDuringHoursShown`, a space was missing between the aggregation type and the units
 when writing the tabular report, which wasn't following the convention of other columns with different aggregation types,
-and causing the SQL table `TabularDataWithStrings` to be missing a curly brace. See issue [#8921](https://github.com/NREL/EnergyPlus/issues/8921).
+and causing the SQL table `TabularDataWithStrings` to be missing a curly brace. See issue [#8921](https://github.com/NatLabRockies/EnergyPlus/issues/8921).
 
 In the HTML file, the column headers will change:
 

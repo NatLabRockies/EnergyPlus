@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -284,7 +284,7 @@ void ControlCompOutput(EnergyPlusData &state,
                     ZoneController.CalculatedSetPoint = ZoneInterHalf.MaxFlow; // CR7253
                 }
                 // Set the Actuated node MassFlowRate with zero value
-                if (plantLoc.loopNum) { // this is a plant component
+                if (plantLoc.loopNum != 0) { // this is a plant component
                     PlantUtilities::SetActuatedBranchFlowRate(state,
                                                               ZoneController.CalculatedSetPoint,
                                                               ActuatedNode,
@@ -392,7 +392,7 @@ void ControlCompOutput(EnergyPlusData &state,
         }
 
         // Set the Actuated node MassFlowRate with the new value
-        if (plantLoc.loopNum) { // this is a plant component
+        if (plantLoc.loopNum != 0) { // this is a plant component
             PlantUtilities::SetActuatedBranchFlowRate(state,
                                                       ZoneController.CalculatedSetPoint,
                                                       ActuatedNode,
@@ -572,7 +572,8 @@ void ControlCompOutput(EnergyPlusData &state,
                                            "%",
                                            "%");
             break; // It will not converge this time
-        } else if (Iter > MaxIter * 2) {
+        }
+        if (Iter > MaxIter * 2) {
             break;
         }
 

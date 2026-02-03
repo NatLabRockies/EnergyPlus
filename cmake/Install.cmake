@@ -102,7 +102,7 @@ endif()
 set(CPACK_PACKAGE_VENDOR "US Department of Energy")
 set(CPACK_IFW_PACKAGE_PUBLISHER "${CPACK_PACKAGE_VENDOR}")
 
-set(CPACK_PACKAGE_CONTACT "Edwin Lee <edwin.lee@nrel.gov>")
+set(CPACK_PACKAGE_CONTACT "Matt Mitchell <matt.mitchell@nlr.gov>")
 set(CPACK_PACKAGE_DESCRIPTION
     "EnergyPlus is a whole building energy simulation program that engineers, architects, and researchers use to model both energy consumption and water use in buildings."
 )

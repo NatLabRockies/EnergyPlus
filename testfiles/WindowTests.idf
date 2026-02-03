@@ -122,7 +122,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -2447,7 +2447,7 @@
   FenestrationSurface:Detailed,
     Zn010:Wall003:Win001,    !- Name
     Window,                  !- Surface Type
-    DOUBLE PANE WITH SHADE:no-shade,      !- Construction Name
+    DOUBLE PANE WITH SHADE:no-shade,  !- Construction Name
     Zn010:Wall003,           !- Building Surface Name
     ,                        !- Outside Boundary Condition Object
     0.5000000,               !- View Factor to Ground
@@ -2479,7 +2479,7 @@
   FenestrationSurface:Detailed,
     Zn010:Wall004:Win001,    !- Name
     Window,                  !- Surface Type
-    DOUBLE PANE WITH SHADE:no-shade,      !- Construction Name
+    DOUBLE PANE WITH SHADE:no-shade,  !- Construction Name
     Zn010:Wall004,           !- Building Surface Name
     ,                        !- Outside Boundary Condition Object
     0.5000000,               !- View Factor to Ground
@@ -2531,7 +2531,7 @@
     On,                      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     100,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     ,                        !- Fraction Radiant
@@ -2544,7 +2544,7 @@
     On,                      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     100,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     ,                        !- Fraction Radiant

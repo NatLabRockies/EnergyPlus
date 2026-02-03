@@ -86,6 +86,9 @@ IF EXIST eplusout.sln   DEL eplusout.sln
 IF EXIST epluszsz.csv   DEL epluszsz.csv
 IF EXIST epluszsz.tab   DEL epluszsz.tab
 IF EXIST epluszsz.txt   DEL epluszsz.txt
+IF EXIST epluspsz.csv   DEL epluspsz.csv
+IF EXIST epluspsz.tab   DEL epluspsz.tab
+IF EXIST epluspsz.txt   DEL epluspsz.txt
 IF EXIST eplusspsz.csv  DEL eplusspsz.csv
 IF EXIST eplusspsz.tab  DEL eplusspsz.tab
 IF EXIST eplusspsz.txt  DEL eplusspsz.txt
@@ -160,6 +163,10 @@ IF EXIST "%output_path%%~1.Zsz" DEL "%output_path%%~1.Zsz"
 IF EXIST "%output_path%%~1Zsz.csv" DEL "%output_path%%~1Zsz.csv"
 IF EXIST "%output_path%%~1Zsz.tab" DEL "%output_path%%~1Zsz.tab"
 IF EXIST "%output_path%%~1Zsz.txt" DEL "%output_path%%~1Zsz.txt"
+IF EXIST "%output_path%%~1.Psz" DEL "%output_path%%~1.Psz"
+IF EXIST "%output_path%%~1Psz.csv" DEL "%output_path%%~1Psz.csv"
+IF EXIST "%output_path%%~1Psz.tab" DEL "%output_path%%~1Psz.tab"
+IF EXIST "%output_path%%~1Psz.txt" DEL "%output_path%%~1Psz.txt"
 IF EXIST "%output_path%%~1.Spsz" DEL "%output_path%%~1.Spsz"
 IF EXIST "%output_path%%~1Spsz.csv" DEL "%output_path%%~1Spsz.csv"
 IF EXIST "%output_path%%~1Spsz.tab" DEL "%output_path%%~1Spsz.tab"
@@ -346,6 +353,9 @@ IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe
  IF EXIST epluszsz.csv MOVE epluszsz.csv "%output_path%%~1Zsz.csv"
  IF EXIST epluszsz.tab MOVE epluszsz.tab "%output_path%%~1Zsz.tab"
  IF EXIST epluszsz.txt MOVE epluszsz.txt "%output_path%%~1Zsz.txt"
+ IF EXIST epluspsz.csv MOVE epluspsz.csv "%output_path%%~1Psz.csv"
+ IF EXIST epluspsz.tab MOVE epluspsz.tab "%output_path%%~1Psz.tab"
+ IF EXIST epluspsz.txt MOVE epluspsz.txt "%output_path%%~1Psz.txt"
  IF EXIST eplusspsz.csv MOVE eplusspsz.csv "%output_path%%~1Spsz.csv"
  IF EXIST eplusspsz.tab MOVE eplusspsz.tab "%output_path%%~1Spsz.tab"
  IF EXIST eplusspsz.txt MOVE eplusspsz.txt "%output_path%%~1Spsz.txt"

@@ -13,7 +13,7 @@
 ! 7/27/00 -- Restored 4-pane cases (had been set to 3-pane)
 ! 8/21/01 -- Add new fields to Material:WindowShade (FW)
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 

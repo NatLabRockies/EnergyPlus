@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1210,10 +1210,10 @@ TEST_F(EnergyPlusFixture, SurfaceGeometryUnitTests_findIndexOfVertex)
 
     EXPECT_EQ(0, findIndexOfVertex(a, list));
 
-    list.emplace_back(DataVectorTypes::Vector(3., 2., 4.));
-    list.emplace_back(DataVectorTypes::Vector(4., 3., 5.));
-    list.emplace_back(DataVectorTypes::Vector(8., 1., 2.));
-    list.emplace_back(DataVectorTypes::Vector(4., 7., 3.));
+    list.emplace_back(3., 2., 4.);
+    list.emplace_back(4., 3., 5.);
+    list.emplace_back(8., 1., 2.);
+    list.emplace_back(4., 7., 3.);
 
     EXPECT_EQ(0, findIndexOfVertex(a, list));
 
@@ -3121,7 +3121,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest)
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
 {
 
-    // Test for #9118. The key point is that a collinear vertex should be found on the first occurence (that is vertex 2 is collinear with 1 and 3)
+    // Test for #9118. The key point is that a collinear vertex should be found on the first occurrence (that is vertex 2 is collinear with 1 and 3)
     //      y
     //     ▲
     //     │ [5]     [4]
@@ -4141,7 +4141,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_HeatTransferAlgorithmTest)
 
     surfNum = Util::FindItemInList("ZONE1_FLOOR_4_0_10000", state->dataSurface->Surface);
     EXPECT_ENUM_EQ(DataSurfaces::HeatTransferModel::CondFD, state->dataSurface->Surface(surfNum).HeatTransferAlgorithm);
-    EXPECT_TRUE(state->dataHeatBal->AnyEMPD); // input as EMPD but then later overriden to CondFD - see error message below
+    EXPECT_TRUE(state->dataHeatBal->AnyEMPD); // input as EMPD but then later overridden to CondFD - see error message below
 
     surfNum = Util::FindItemInList("ZONE1_FLOOR_4_0_20000", state->dataSurface->Surface);
     EXPECT_ENUM_EQ(DataSurfaces::HeatTransferModel::HAMT, state->dataSurface->Surface(surfNum).HeatTransferAlgorithm);
@@ -5083,7 +5083,7 @@ TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test3)
 
 TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test4)
 {
-    // Case 4) World coordinate system & Defalut Rect. surf, coordinate system & Non-zero zone origin
+    // Case 4) World coordinate system & Default Rect. surf, coordinate system & Non-zero zone origin
 
     std::string const idf_objects = delimited_string({
 
@@ -6843,7 +6843,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
 
     // This test is designed to reproduce issue #9218 Crash with many airwalls collapsing into a single enclosure.
     // That proved difficult to reproduce, however the root cause of the crash is space enclosure nums that are not consistent
-    // with the enclosures that hold them. This test demostrates that failure.
+    // with the enclosures that hold them. This test demonstrates that failure.
     EXPECT_EQ(state->dataViewFactor->NumOfRadiantEnclosures, 3);
     EXPECT_TRUE(Util::SameString(state->dataViewFactor->EnclRadInfo(1).Name, "Radiant Enclosure 1"));
     EXPECT_TRUE(Util::SameString(state->dataViewFactor->EnclRadInfo(1).spaceNames[0], "Space 3"));
@@ -14169,7 +14169,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SurroundingSurfacesViewFactorTest)
         1,                            !- Multiplier
         autocalculate,                !- Ceiling Height {m}
         autocalculate;                !- Volume {m3}
-                          
+
 	  Material,
         Concrete Block,               !- Name
         MediumRough,                  !- Roughness
@@ -14276,7 +14276,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SurroundingSurfacesViewFactorTest)
         SrdSurfs:Surface 3,           !- Surrounding Surface 3 Name
         0.1,                          !- Surrounding Surface 3 View Factor
         Surrounding Temp Sch 3;       !- Surrounding Surface 3 Temperature Schedule Name
-							
+
       Schedule:Compact,
         Surrounding Temp Sch 1,       !- Name
         Any Number,                   !- Schedule Type Limits Name
@@ -14297,7 +14297,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SurroundingSurfacesViewFactorTest)
         Through: 12/31,               !- Field 1
         For: AllDays,                 !- Field 2
         Until: 24:00, 15.0;           !- Field 3
-	
+
     )IDF";
 
     bool ErrorsFound = false;
@@ -14383,7 +14383,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SurroundingSurfacesViewFactorTest)
 
 TEST_F(EnergyPlusFixture, Fix_checkSubSurfAzTiltNorm_Horizontal_Surf_Random)
 {
-    // Unit Test for Pull Request 10104 that addresses a potential illy functioned (or redudant) `if` condition
+    // Unit Test for Pull Request 10104 that addresses a potential illy functioned (or redundant) `if` condition
     SurfaceData BaseSurface;
     SurfaceData SubSurface;
     SurfaceData SubSurface_Same;

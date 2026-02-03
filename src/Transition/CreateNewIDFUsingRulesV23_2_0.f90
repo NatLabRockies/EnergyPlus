@@ -78,6 +78,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
   INTEGER NA
   INTEGER NN
   INTEGER CurArgs
+  INTEGER NewArgs
   INTEGER DifLfn
   INTEGER xCount
   INTEGER Num
@@ -544,11 +545,9 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                     OutArgs(12) = CoilLatentStuff(Num3)%cHPDelayTime
                     EXIT
                 END DO
-                CurArgs = CurArgs + 3
                 ! manipulate all the speeds regardless of CurArgs count
                 OutArgs(13:17)=InArgs(10:14)
                 OutArgs(18) = ''  ! new Crankcase Heater Capacity Function of Temperature Curve Name field
-                CurArgs = CurArgs + 1
                 OutArgs(19:29)=InArgs(15:25)
                 OutArgs(30) = ''  ! new speed 1 2017 rated field
                 OutArgs(31) = ''  ! new speed 1 2023 rated field
@@ -581,16 +580,18 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(139)='' ! new speed 10 2023 rated field
                 OutArgs(140:149)=InArgs(116:125)
                 ! But then only modify CurArgs based on the number of fields
-                IF (CurArgs >= 29) CurArgs = CurArgs + 2  ! this will always trigger for speed 1
-                IF (CurArgs >= 39) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 49) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 59) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 69) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 79) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 89) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 99) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 109) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs >= 119) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
+                NewArgs = 4
+                IF (CurArgs >= 25) NewArgs = NewArgs + 2  ! this will always trigger for speed 1
+                IF (CurArgs >= 35) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 45) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 55) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 65) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 75) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 85) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 95) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 105) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 115) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                CurArgs = CurArgs + NewArgs
 
               CASE('COIL:COOLING:DX:TWOSTAGEWITHHUMIDITYCONTROLMODE')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -622,7 +623,6 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ! manipulate all the speeds regardless of CurArgs count
                 OutArgs(1:13)=InArgs(1:13)
                 OutArgs(14) = ''  ! new Crankcase Heater Capacity Function of Temperature Curve Name field
-                CurArgs = CurArgs + 1
                 OutArgs(15:22)=InArgs(14:21)
                 OutArgs(23) = ''  ! new speed 1 2017 rated field
                 OutArgs(24) = ''  ! new speed 1 2023 rated field
@@ -653,18 +653,20 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(97:103)=InArgs(78:84)
                 OutArgs(104)='' ! new speed 10 2017 rated field
                 OutArgs(105)='' ! new speed 10 2023 rated field
-                OutArgs(106:CurArgs+21)=InArgs(85:CurArgs)
+                OutArgs(106:112)=InArgs(85:91)
                 ! But then only modify CurArgs based on the number of fields
-                IF (CurArgs .GE. 22) CurArgs = CurArgs + 2  ! this will always trigger for speed 1
-                IF (CurArgs .GE. 39) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 36) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 43) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 50) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 57) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 64) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 71) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 78) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
-                IF (CurArgs .GE. 85) CurArgs = CurArgs + 2  ! only do this speed if we have that many inputs
+                NewArgs = 1
+                IF (CurArgs >= 21) NewArgs = NewArgs + 2  ! this will always trigger for speed 1
+                IF (CurArgs >= 28) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 35) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 42) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 49) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 56) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 63) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 70) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 77) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                IF (CurArgs >= 84) NewArgs = NewArgs + 2  ! only do this speed if we have that many inputs
+                CurArgs = CurArgs + NewArgs
 
               CASE('COIL:WATERHEATING:AIRTOWATERHEATPUMP:PUMPED')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -690,7 +692,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(20:CurArgs+1)=InArgs(19:CurArgs)
                 CurArgs = CurArgs + 1
 
-              ! If your original object starts with D, insert the rules here              
+              ! If your original object starts with D, insert the rules here
               CASE('DISTRICTHEATING')
                 nodiff=.false.
                 ObjectName='DistrictHeating:Water'

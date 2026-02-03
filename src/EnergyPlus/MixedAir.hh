@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -368,7 +368,7 @@ namespace MixedAir {
                         bool FirstHVACIteration,
                         int &CompIndex,
                         int AirLoopNum,      // air loop index for economizer lockout coordination
-                        bool Sim,            // if TRUE, simulate component; if FALSE, just set the coil exisitence flags
+                        bool Sim,            // if TRUE, simulate component; if FALSE, just set the coil existence flags
                         int OASysNum,        // index to outside air system
                         bool &OAHeatingCoil, // TRUE indicates a heating coil has been found
                         bool &OACoolingCoil, // TRUE indicates a cooling coil has been found

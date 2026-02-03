@@ -59,7 +59,7 @@ Users can see the system timestep used if they select the ``detailed'' frequency
 And, the IDF example:
 
 \begin{lstlisting}
-Timestep, 6;  !- Suggested default for most system simulations
+Timestep, 6;                  !- Suggested default for most system simulations
 \end{lstlisting}
 
 Suggested defaults are 4 for non-HVAC simulations, 6 for simulations with HVAC, 20 is the minimum for ConductionFiniteDifference and HeatAndMoistureFiniteElement simulations. Green roof (ref: \hyperref[materialroofvegetation]{Material:RoofVegetation}) also may require more timesteps.
@@ -98,10 +98,10 @@ Use in an IDF:
 
 \begin{lstlisting}
 ConvergenceLimits,
-  0,        !- Minimum System Timestep (0 = same as zone timestep)
-  25,       !- Maximum HVAC Iterations
-  3,        !- Minimum Plant Iterations
-  9;        !- Maximum Plant Iterations
+  0,                          !- Minimum System Timestep (0 = same as zone timestep)
+  25,                         !- Maximum HVAC Iterations
+  3,                          !- Minimum Plant Iterations
+  9;                          !- Maximum Plant Iterations
 \end{lstlisting}
 
 \subsection{Building}\label{building}
@@ -263,16 +263,15 @@ This field specifies the minimum number of ``warmup'' days before EnergyPlus wil
 An example from an IDF:
 
 \begin{lstlisting}
-
 Building,
-    PSI HOUSE DORM AND OFFICES,  !- Name
-    36.87000,               !- North Axis {deg}
-    Suburbs,                !- Terrain
-    0.04,                   !- Loads Convergence Tolerance Value
-    0.4000000,              !- Temperature Convergence Tolerance Value {deltaC}
-    FullInteriorAndExterior, !- Solar Distribution
-    40,                     !- Maximum Number of Warmup Days
-    6;                      !- Minimum Number of Warmup Days
+  PSI HOUSE DORM AND OFFICES, !- Name
+  36.87000,                   !- North Axis {deg}
+  Suburbs,                    !- Terrain
+  0.04,                       !- Loads Convergence Tolerance Value
+  0.4000000,                  !- Temperature Convergence Tolerance Value {deltaC}
+  FullInteriorAndExterior,    !- Solar Distribution
+  40,                         !- Maximum Number of Warmup Days
+  6;                          !- Minimum Number of Warmup Days
 \end{lstlisting}
 
 \subsection{SurfaceConvectionAlgorithm:Inside}\label{surfaceconvectionalgorithminside}
@@ -300,7 +299,6 @@ The default is \textbf{TARP}.
 IDF Example:
 
 \begin{lstlisting}
-
 SurfaceConvectionAlgorithm:Inside,TARP;
 \end{lstlisting}
 
@@ -331,7 +329,6 @@ Note that when the surface is wet (i.e. it is raining and the surface is exposed
 IDF Example:
 
 \begin{lstlisting}
-
 SurfaceConvectionAlgorithm:Outside, AdaptiveConvectionAlgorithm;
 \end{lstlisting}
 
@@ -410,7 +407,7 @@ This optional field is used to set an overall maximum for the value of the coeff
 And, a default IDF example
 
 \begin{lstlisting}
-HeatBalanceAlgorithm,ConductionTransferFunction; ! Solution Algorithm
+HeatBalanceAlgorithm,ConductionTransferFunction;  !- Solution Algorithm
 \end{lstlisting}
 
 \subsection{HeatBalanceSettings:ConductionFiniteDifference}\label{heatbalancesettingsconductionfinitedifference}
@@ -453,10 +450,10 @@ An example IDF object follows.
 
 \begin{lstlisting}
 HeatBalanceSettings:ConductionFiniteDifference,
-  FullyImplicitFirstOrder, !- Difference Scheme
-  3.0,                     !- Space Discretization Constant
-  1.0,                     !- Relaxation Factor
-  0.002;                   !- Inside Face Surface Temperature Convergence Criteria
+  FullyImplicitFirstOrder,    !- Difference Scheme
+  3.0,                        !- Space Discretization Constant
+  1.0,                        !- Relaxation Factor
+  0.002;                      !- Inside Face Surface Temperature Convergence Criteria
 \end{lstlisting}
 
 \subsection{ZoneAirHeatBalanceAlgorithm}\label{zoneairheatbalancealgorithm}
@@ -478,7 +475,7 @@ If yes, the space-level heat balance will be calculated and reported during the 
 And, a default IDF example is shown below:
 
 \begin{lstlisting}
-ZoneAirHeatBalanceAlgorithm, ThirdOrderBackwardDifference; !- Algorithm
+ZoneAirHeatBalanceAlgorithm, ThirdOrderBackwardDifference;  !- Algorithm
 \end{lstlisting}
 
 \subsection{ZoneAirContaminantBalance}\label{zoneaircontaminantbalance}
@@ -507,10 +504,10 @@ An IDF example:
 
 \begin{lstlisting}
 ZoneAirContaminantBalance,
-  Yes,                          !- Carbon Dioxide Concentration
-  Outdoor CO2 Schedule,         !- Outdoor Carbon Dioxide Schedule Name
-  Yes,                          !- Generic Contaminant Concentration
-  Generic Contaminant Schedule; !- Outdoor Generic Contaminant Schedule Name
+  Yes,                        !- Carbon Dioxide Concentration
+  Outdoor CO2 Schedule,       !- Outdoor Carbon Dioxide Schedule Name
+  Yes,                        !- Generic Contaminant Concentration
+  Generic Contaminant Schedule;  !- Outdoor Generic Contaminant Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-033}
@@ -634,11 +631,8 @@ Examples of this object in IDF: (note this object must be unique in an IDF)
 
 \begin{lstlisting}
 ShadowCalculation, PixelCounting, Periodic, 1;
-
 ShadowCalculation, PolygonClipping, Periodic, 1, , SutherlandHodgman, , DetailedSkyDiffuseModeling;
-
 ShadowCalculation, Scheduled, Periodic, , , , , Yes;
-
 ShadowCalculation, PolygonClipping, Periodic, , , , , , , Yes, No, ShadingZoneGroup;
 \end{lstlisting}
 
@@ -731,12 +725,11 @@ Each line is limited to 100 characters and an appropriate message can be compose
 An IDF Example:
 
 \begin{lstlisting}
-
 Output:PreprocessorMessage,
-     No Preprocessor Used,     !- preprocessor name
-     Information,              !- error severity
-     Illustrative Message,     !- message line 1
-     No problems for processing;  !- message line 2
+  No Preprocessor Used,       !- preprocessor name
+  Information,                !- error severity
+  Illustrative Message,       !- message line 1
+  No problems for processing; !- message line 2
 \end{lstlisting}
 
 And would appear in output:
@@ -819,13 +812,13 @@ An IDF example:
 
 \begin{lstlisting}
 SimulationControl,
-  No,                      !- Do Zone Sizing Calculation
-  No,                      !- Do System Sizing Calculation
-  No,                      !- Do Plant Sizing Calculation
-  Yes,                     !- Run Simulation for Sizing Periods
-  Yes,                     !- Run Simulation for Weather File Run Periods
-  No,                      !- Do HVAC Sizing Simulation for Sizing Periods
-  2;                       !- Maximum Number of HVAC Sizing Simulation Passes
+  No,                         !- Do Zone Sizing Calculation
+  No,                         !- Do System Sizing Calculation
+  No,                         !- Do Plant Sizing Calculation
+  Yes,                        !- Run Simulation for Sizing Periods
+  Yes,                        !- Run Simulation for Weather File Run Periods
+  No,                         !- Do HVAC Sizing Simulation for Sizing Periods
+  2;                          !- Maximum Number of HVAC Sizing Simulation Passes
 \end{lstlisting}
 
 \subsection{PerformancePrecisionTradeoffs}\label{performanceprecisiontradeoffs}
@@ -1167,12 +1160,12 @@ An IDF example:
 
 \begin{lstlisting}
 PerformancePrecisionTradeoffs,
-Yes,                      !- Use Coil Direct Solutions
-CarrollMRT;               !- Zone Radiant Exchange Algorithm
-Mode06,                   !- Override Mode
-0.3,                      !- MaxZoneTempDiff
-0.002,                    !- MaxAllowedDelTemp
-Yes;                      !- Use Representative Surfaces for Calculations
+  Yes,                        !- Use Coil Direct Solutions
+  CarrollMRT,                 !- Zone Radiant Exchange Algorithm
+  Mode06,                     !- Override Mode
+  0.3,                        !- MaxZoneTempDiff
+  0.002,                      !- MaxAllowedDelTemp
+  Yes;                        !- Use Representative Surfaces for Calculations
 \end{lstlisting}
 
 \subsection{HVACSystemRootFindingAlgorithm}\label{hvacystemrootfindingalgorithm}
@@ -1195,8 +1188,8 @@ An IDF example:
 
 \begin{lstlisting}
 HVACSystemRootFindingAlgorithm,
-  RegulaFalsiThenBisection, !- Algorithm
-  20;                      !- Number of Iteration Before Algorithm Switch
+  RegulaFalsiThenBisection,   !- Algorithm
+  20;                         !- Number of Iteration Before Algorithm Switch
 \end{lstlisting}
 
 \subsection{Meter:Custom}\label{metercustom}
@@ -1338,47 +1331,47 @@ In the following examples, the custom meters are set up to illustrate the capabi
 
 \begin{lstlisting}
 Meter:Custom,
-  MyGeneralLights,         !- Name
-  Electricity,             !- Resource Type
-  SPACE1-1,                !- Key Name 1
+  MyGeneralLights,            !- Name
+  Electricity,                !- Resource Type
+  SPACE1-1,                   !- Key Name 1
   Lights Electricity Energy,  !- Output Variable or Meter Name 1
-  SPACE2-1,                !- Key Name 2
+  SPACE2-1,                   !- Key Name 2
   Lights Electricity Energy,  !- Output Variable or Meter Name 2
-  SPACE3-1,                !- Key Name 3
+  SPACE3-1,                   !- Key Name 3
   Lights Electricity Energy,  !- Output Variable or Meter Name 3
-  SPACE4-1,                !- Key Name 4
+  SPACE4-1,                   !- Key Name 4
   Lights Electricity Energy,  !- Output Variable or Meter Name 4
-  SPACE5-1,                !- Key Name 5
+  SPACE5-1,                   !- Key Name 5
   Lights Electricity Energy;  !- Output Variable or Meter Name 5
 
 Meter:Custom,
-  MyBuildingElectric,      !- Name
-  Electricity,             !- Resource Type
-  ,                        !- Key Name #1
-  Electricity:Building;    !- Output Variable or Meter Name #1
+  MyBuildingElectric,         !- Name
+  Electricity,                !- Resource Type
+  ,                           !- Key Name #1
+  Electricity:Building;       !- Output Variable or Meter Name #1
 
 Meter:CustomDecrement,
-  MyBuildingOther,         !- Name
-  Electricity,             !- Resource Type
-  Electricity:Building,    !- Source Meter Name
-  ,                        !- Key Name #1
-  MyGeneralLights;         !- Output Variable or Meter Name #1
+  MyBuildingOther,            !- Name
+  Electricity,                !- Resource Type
+  Electricity:Building,       !- Source Meter Name
+  ,                           !- Key Name #1
+  MyGeneralLights;            !- Output Variable or Meter Name #1
 \end{lstlisting}
 
 For an example of ``generic'' Resource type, one might put the Building Infiltration Heat Loss \& Heat Gain on a set of custom meters:
 
 \begin{lstlisting}
 Meter:Custom,
-  Building Infiltration Heat Loss,          !- Name
-  Generic,                                  !- Resource Type
-  *,                                        !- Key Name 1
-  Zone Infiltration Total Heat Loss Energy; !- Output Variable Name 1
+  Building Infiltration Heat Loss,  !- Name
+  Generic,                    !- Resource Type
+  *,                          !- Key Name 1
+  Zone Infiltration Total Heat Loss Energy;  !- Output Variable Name 1
 
 Meter:Custom,
-  Building Infiltration Heat Gain,          !- Name
-  Generic,                                  !- Resource Type
-  *,                                        !- Key Name 1
-  Zone Infiltration Total Heat Gain Energy; !- Output Variable Name 1
+  Building Infiltration Heat Gain,  !- Name
+  Generic,                    !- Resource Type
+  *,                          !- Key Name 1
+  Zone Infiltration Total Heat Gain Energy;  !- Output Variable Name 1
 \end{lstlisting}
 
 One can then report these values the same way one reports other standard meters.

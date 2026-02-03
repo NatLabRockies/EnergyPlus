@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -771,7 +771,7 @@ namespace UnitVentilator {
                         ErrorsFound = true;
                     }
 
-                    // check that air teminal mixer outlet node is the same as a zone inlet node.
+                    // check that air terminal mixer outlet node is the same as a zone inlet node.
                     ZoneNodeNotFound = true;
                     for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(unitVent.ZonePtr).NumInletNodes; ++NodeNum) {
                         if (unitVent.ATMixerOutNode == state.dataZoneEquip->ZoneEquipConfig(unitVent.ZonePtr).InletNode(NodeNum)) {
@@ -2571,11 +2571,10 @@ namespace UnitVentilator {
                                 auto f = [&state, UnitVentNum, FirstHVACIteration, fanOp](Real64 const PartLoadRatio) {
                                     Real64 QUnitOut = 0.0; // heating/Cooling provided by unit ventilator [watts]
                                     CalcUnitVentilatorComponents(state, UnitVentNum, FirstHVACIteration, QUnitOut, fanOp, PartLoadRatio);
-                                    if (state.dataUnitVentilators->QZnReq) {
+                                    if (state.dataUnitVentilators->QZnReq != 0.0) {
                                         return (QUnitOut - state.dataUnitVentilators->QZnReq) / state.dataUnitVentilators->QZnReq;
-                                    } else {
-                                        return 0.0;
                                     }
+                                    return 0.0;
                                 };
                                 General::SolveRoot(state, 0.001, MaxIter, SolFlag, PartLoadFrac, f, 0.0, 1.0);
                             }
@@ -2806,7 +2805,7 @@ namespace UnitVentilator {
 
                                     // Convert parameters to usable variables
                                     CalcUnitVentilatorComponents(state, UnitVentNum, FirstHVACIteration, QUnitOut, fanOp, PartLoadRatio);
-                                    if (state.dataUnitVentilators->QZnReq) {
+                                    if (state.dataUnitVentilators->QZnReq != 0.0) {
                                         return (QUnitOut - state.dataUnitVentilators->QZnReq) / state.dataUnitVentilators->QZnReq;
                                     }
                                     return 0.0;

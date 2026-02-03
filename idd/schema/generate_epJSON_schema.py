@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,29 +53,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import idd_parser
-import modify_schema
 import json
+import multiprocessing
 import sys
 from os import path
-import multiprocessing
+
+import idd_parser
+import modify_schema
+
 
 def generate_epJSON_schema(source_dir_path: str):
 
     print("Generating the epJSON schema!", file=sys.stderr)
     data = idd_parser.Data()
-    idd_path = path.join(source_dir_path, 'Energy+.idd')
+    idd_path = path.join(source_dir_path, "Energy+.idd")
     if path.exists(idd_path):
-        with open(idd_path, 'r') as f:
+        with open(idd_path, "r") as f:
             data.file = f.read()
     else:
         # this script is also used in the sphinx documentation, which doesn't do a CMake configuration run
         # so the runtime/Products/Energy+.idd file is not generated.  The script is just executed on the raw
         # Energy+.idd.in file in the idd folder.  So try to find the .in file if we couldn't find the
         # generated idd file.
-        idd_in_path = path.join(source_dir_path, 'Energy+.idd.in')
+        idd_in_path = path.join(source_dir_path, "Energy+.idd.in")
         if path.exists(idd_in_path):
-            with open(idd_in_path, 'r') as f:
+            with open(idd_in_path, "r") as f:
                 data.file = f.read()
         else:
             print(f"Could not find E+ IDD, looked for both: {idd_path} and {idd_in_path}.  Aborting")
@@ -90,12 +92,12 @@ def generate_epJSON_schema(source_dir_path: str):
     modify_schema.change_89_release_issues(data.schema)
     modify_schema.add_explicit_extensible_bounds(data.schema)
 
-    with open(path.join(source_dir_path, 'Energy+.schema.epJSON'), 'w') as f2:
+    with open(path.join(source_dir_path, "Energy+.schema.epJSON"), "w") as f2:
         f2.write(json.dumps(data.schema, indent=4))
 
 
 if __name__ == "__main__":
-    p = multiprocessing.Process(target=generate_epJSON_schema, args=(sys.argv[1], ))
+    p = multiprocessing.Process(target=generate_epJSON_schema, args=(sys.argv[1],))
     p.start()
 
     timeout_seconds = 60

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -990,8 +990,6 @@ namespace HWBaseboardRadiator {
         auto &hWBaseboard = state.dataHWBaseboardRad->HWBaseboard(BaseboardNum);
         if (state.dataSize->CurZoneEqNum > 0) {
             auto &zoneEqSizing = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
-
-            std::string CompType = cCMO_BBRadiator_Water;
             std::string CompName = hWBaseboard.Name;
             state.dataSize->DataHeatSizeRatio = 1.0;
             state.dataSize->DataFracOfAutosizedHeatingCapacity = 1.0;
@@ -1003,6 +1001,7 @@ namespace HWBaseboardRadiator {
             zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
             if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
                 CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
+                std::string CompType = cCMO_BBRadiator_Water;
                 if (CapSizingMethod == DataSizing::HeatingDesignCapacity) {
                     if (hWBaseboard.ScaledHeatingCapacity == DataSizing::AutoSize) {
                         CheckZoneSizing(state, CompType, CompName);

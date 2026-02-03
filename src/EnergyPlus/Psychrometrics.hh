@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -132,7 +132,7 @@ namespace Psychrometrics {
                                 // 14 - HR | 15 - max iter | 16 - HR | 17 - max iter | 18 -
                                 // PsyTwbFnTdbWPb_raw (raw calc) | 19 - PsyPsatFnTemp_raw
                                 // (raw calc)
-                                // sample bin size =64 Pa; sample size =1651 (continous)
+                                // sample bin size =64 Pa; sample size =1651 (continuous)
     static constexpr std::array<Real64, 1651> tsat_fn_pb_y = {
         -100,        -24.88812836, -17.74197121, -13.36696483, -10.17031904, -7.635747635, -5.528025298, -3.719474549, -2.132789207, -0.717496548,
         0.635182846, 1.961212857,  3.184455749,  4.320585222,  5.381890646,  6.378191532,  7.317464071,  8.206277019,  9.050107781,  9.853572827,
@@ -870,9 +870,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_cache_PsyTwbFnTdbWPb
@@ -947,9 +946,8 @@ namespace Psychrometrics {
             }
 #endif
             return 0.83; // Fix Was inside the ifdef
-        } else {
-            return V;
         }
+        return V;
     }
 
 #ifdef EP_psych_errors
@@ -995,9 +993,8 @@ namespace Psychrometrics {
             }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_cache_PsyPsatFnTemp
@@ -1210,9 +1207,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1268,9 +1264,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1330,9 +1325,8 @@ namespace Psychrometrics {
             }
 #endif
             return W1;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1388,9 +1382,8 @@ namespace Psychrometrics {
             }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1462,9 +1455,8 @@ namespace Psychrometrics {
             PsyWFnTdbTwbPb_humidity_error(state, TDB, TWB, PB, W, CalledFrom);
 #endif
             return PsyWFnTdbRhPb(state, TDB, 0.0001, PB, CalledFrom);
-        } else {
-            return W;
         }
+        return W;
     }
 
     inline Real64 PsyHFnTdbRhPb(EnergyPlusData &state,
@@ -1601,9 +1593,8 @@ namespace Psychrometrics {
             }
 #endif
             return TWB;
-        } else {
-            return TDP;
         }
+        return TDP;
     }
 
     inline Real64 F6(Real64 const X, Real64 const A0, Real64 const A1, Real64 const A2, Real64 const A3, Real64 const A4, Real64 const A5)

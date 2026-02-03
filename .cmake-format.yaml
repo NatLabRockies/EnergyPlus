@@ -152,7 +152,7 @@ markup:
   canonicalize_hashrulers: true
   _help_enable_markup:
   - enable comment markup parsing and reflow
-  enable_markup: false 
+  enable_markup: false
 _help_lint: Options affecting the linter
 lint:
   _help_disabled_codes:

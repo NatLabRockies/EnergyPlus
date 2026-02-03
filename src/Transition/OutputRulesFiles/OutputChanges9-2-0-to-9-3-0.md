@@ -11,7 +11,7 @@ This will eventually become a more structured file, but currently it isn't clear
 
 A new column "Peak Load Type to Size On" has been added to the `Coil Sizing Details:Coils` report
 
-See [7397](https://github.com/NREL/EnergyPlus/pull/7397)
+See [7397](https://github.com/NatLabRockies/EnergyPlus/pull/7397)
 
 ### Name re-ordering in the sizing labels and modified variable names for MulitSpeed DX Cooling and Heating Coils
 
@@ -76,13 +76,13 @@ Environment:Design Day Data,33.00,6.60,DefaultMultipliers,<MISSING>,<MISSING>,10
 Environment:Design Day Data,33.00,6.60,DefaultMultipliers,Enthalpy,90500.00,{J/kgDryAir},100511,220,3.2,0.00,No,No
 ```
 
-See [#PR7577](https://github.com/NREL/EnergyPlus/pull/7577)
+See [#PR7577](https://github.com/NatLabRockies/EnergyPlus/pull/7577)
 
 ### EIO output for ShadowCalculations
 
 The eio output related to `ShadowCalculations` has been changed to reflect the new input fields. See Rules9-2-0-to-9-3-0.md.
 
-See [#PR7302](https://github.com/NREL/EnergyPlus/pull/7302)
+See [#PR7302](https://github.com/NatLabRockies/EnergyPlus/pull/7302)
 
 ### End Use By Subcategory in SQL
 
@@ -135,7 +135,7 @@ SELECT RowName as "End Use&Subcategory", Value FROM TabularDataWithStrings
 | Interior Lighting:GeneralLights       | 166.67 |
 | Interior Lighting:AnotherEndUseSubCat | 83.33  |
 
-See [PR#7584](https://github.com/NREL/EnergyPlus/pull/7584).
+See [PR#7584](https://github.com/NatLabRockies/EnergyPlus/pull/7584).
 
 ### Standardize units for humidity ratio and add where missing
 
@@ -143,11 +143,11 @@ Units for humidity ratio standardized to "kgWater/kgDryAir" and "lbWater/lbDryAi
 
 Impacts eio sizing output and table reports including Coil Sizing Summary and Details.
 
-See [7571](https://github.com/NREL/EnergyPlus/pull/7571)
+See [7571](https://github.com/NatLabRockies/EnergyPlus/pull/7571)
 
 
 ### Water to Water Air-Source EIR Heat Pump
-The HeatPump:WaterToWater:EIR:Heating and HeatPump:WaterToWater:EIR:Cooling objects have been renamed to HeatPump:PlantLoop:EIR:Heating and HeatPump:PlantLoop:EIR:Cooling, and the respective output variables have been renamed from: 
+The HeatPump:WaterToWater:EIR:Heating and HeatPump:WaterToWater:EIR:Cooling objects have been renamed to HeatPump:PlantLoop:EIR:Heating and HeatPump:PlantLoop:EIR:Cooling, and the respective output variables have been renamed from:
 
 *Before*
 ```
@@ -181,7 +181,7 @@ Heat Pump Load Side Mass Flow Rate
 Heat Pump Source Side Mass Flow Rate
 ```
 
-See [7489](https://github.com/NREL/EnergyPlus/pull/7489/)
+See [7489](https://github.com/NatLabRockies/EnergyPlus/pull/7489/)
 
 ### EIO output for Environment
 
@@ -199,30 +199,30 @@ Environment,DENVER CENTENNIAL GOLDEN ANN HTG 99% CONDNS DB DEFAULT,SizingPeriod:
 Environment,DENVER CENTENNIAL GOLDEN ANN HTG 99% CONDNS DB DEFAULT,SizingPeriod:DesignDay,12/21,12/21,WinterDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A,Clark and Allen
 ```
 
-See [PR #7562](https://github.com/NREL/EnergyPlus/pull/7562)
+See [PR #7562](https://github.com/NatLabRockies/EnergyPlus/pull/7562)
 
 ### EIO output for PerformancePrecisionTradeoffs
 In the eio and table output, new lines report the status of options for the PerformancePrecisionTradeoffs object.
 
-See [PR #7743](https://github.com/NREL/EnergyPlus/pull/7743/)
+See [PR #7743](https://github.com/NatLabRockies/EnergyPlus/pull/7743/)
 
 ### Default end use subcategory to General
 In the AUBPS end-use subcategory table, the "other" row would show up whenever an end-use subcategory
 was not specified. Now unless specified, end-uses are assumed to be "general" and show up in that row.
-It is now unlikely that the "other" row will be shown. 
+It is now unlikely that the "other" row will be shown.
 
 This results in additional end-use meters, e.g. General:Cooling:Electricity which may have not been present before.
 And it results in more outputs attached to the General:* meters.
 
-See [PR #7794](https://github.com/NREL/EnergyPlus/pull/7794)
-See [7743](https://github.com/NREL/EnergyPlus/pull/7743/)
+See [PR #7794](https://github.com/NatLabRockies/EnergyPlus/pull/7794)
+See [7743](https://github.com/NatLabRockies/EnergyPlus/pull/7743/)
 
-See [7761](https://github.com/NREL/EnergyPlus/pull/7761) 
+See [7761](https://github.com/NatLabRockies/EnergyPlus/pull/7761)
 and the [NFP](https://github.com/energy-plus/EnergyPlus/blob/PerfOverrideAndReporting/design/FY2020/NFP-PerformanceOverRidesAndReporting.md)
 
 ### New _perflog.csv file as Log File for PerformancePrecisionTradeoffs
 
-A new file has been added with the suffix _perflog.csv specifically to help with 
+A new file has been added with the suffix _perflog.csv specifically to help with
 performance tuning for a specific input file. Instead of disappearing, it gets
 appended to each simulation so experimentation can be done. It appears when
 ever the PerformancePrecisionTradeoffs object is used. For each simulation a line is added
@@ -249,9 +249,5 @@ that contains the following:
 - Number of Warnings
 - Number of Severe
 
-See [7761](https://github.com/NREL/EnergyPlus/pull/7761) 
+See [7761](https://github.com/NatLabRockies/EnergyPlus/pull/7761)
 and the [NFP](https://github.com/energy-plus/EnergyPlus/blob/PerfOverrideAndReporting/design/FY2020/NFP-PerformanceOverRidesAndReporting.md)
-
-
-
-

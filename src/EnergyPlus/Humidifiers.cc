@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1273,26 +1273,25 @@ namespace Humidifiers {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 AvailTankVdot;
-        Real64 TankSupplyVdot;
         Real64 StarvedVdot;
 
         // set demand request in WaterStorage if needed.
-        if (SuppliedByWaterSystem) {
-            state.dataWaterData->WaterStorage(WaterTankID).VdotRequestDemand(WaterTankDemandARRID) = WaterConsRate;
+        if (this->SuppliedByWaterSystem) {
+            state.dataWaterData->WaterStorage(this->WaterTankID).VdotRequestDemand(this->WaterTankDemandARRID) = this->WaterConsRate;
 
-            AvailTankVdot =
-                state.dataWaterData->WaterStorage(WaterTankID).VdotAvailDemand(WaterTankDemandARRID); // check what tank can currently provide
+            AvailTankVdot = state.dataWaterData->WaterStorage(this->WaterTankID)
+                                .VdotAvailDemand(this->WaterTankDemandARRID); // check what tank can currently provide
 
             StarvedVdot = 0.0;
-            TankSupplyVdot = WaterConsRate;                                                    // init
-            if ((AvailTankVdot < WaterConsRate) && (!(state.dataGlobal->BeginTimeStepFlag))) { // calculate starved flow
-                StarvedVdot = WaterConsRate - AvailTankVdot;
-                TankSupplyVdot = AvailTankVdot;
+            this->TankSupplyVdot = this->WaterConsRate;                                              // init
+            if ((AvailTankVdot < this->WaterConsRate) && (!(state.dataGlobal->BeginTimeStepFlag))) { // calculate starved flow
+                StarvedVdot = this->WaterConsRate - AvailTankVdot;
+                this->TankSupplyVdot = AvailTankVdot;
             }
 
-            TankSupplyVol = TankSupplyVdot * TimeStepSysSec;
-            StarvedSupplyVdot = StarvedVdot;
-            StarvedSupplyVol = StarvedVdot * TimeStepSysSec;
+            this->TankSupplyVol = this->TankSupplyVdot * TimeStepSysSec;
+            this->StarvedSupplyVdot = StarvedVdot;
+            this->StarvedSupplyVol = StarvedVdot * TimeStepSysSec;
         }
     }
 
@@ -1401,11 +1400,10 @@ namespace Humidifiers {
         int WhichHumidifier = Util::FindItemInList(HumidifierName, state.dataHumidifiers->Humidifier);
         if (WhichHumidifier != 0) {
             return state.dataHumidifiers->Humidifier(WhichHumidifier).AirOutNode;
-        } else {
-            ShowSevereError(state, format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetAirInletNodeNum: Could not find Humidifier = \"{}\"", HumidifierName));
+        ErrorsFound = true;
+        return 0;
     }
 
 } // namespace Humidifiers

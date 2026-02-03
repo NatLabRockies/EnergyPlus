@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,14 +53,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_char_p, c_void_p
 import os
 import sys
+from ctypes import c_char_p, c_void_p, cdll
 
-from pyenergyplus.func import Functional
 from pyenergyplus.datatransfer import DataExchange
+from pyenergyplus.func import Functional
 from pyenergyplus.runtime import Runtime
 from pyenergyplus.state import StateManager
+
 # from pyenergyplus.autosizing import Autosizing
 
 
@@ -74,12 +75,12 @@ def api_path() -> str:
     """
     this_script_dir = os.path.dirname(os.path.realpath(__file__))
     api_dll_dir = os.path.dirname(os.path.normpath(this_script_dir))
-    if sys.platform.startswith('linux'):
-        return os.path.join(api_dll_dir, 'libenergyplusapi.so')
-    elif sys.platform.startswith('darwin'):
-        return os.path.join(api_dll_dir, 'libenergyplusapi.dylib')
+    if sys.platform.startswith("linux"):
+        return os.path.join(api_dll_dir, "libenergyplusapi.so")
+    elif sys.platform.startswith("darwin"):
+        return os.path.join(api_dll_dir, "libenergyplusapi.dylib")
     else:  # assume Windows
-        return os.path.join(api_dll_dir, 'EnergyPlusAPI.dll')
+        return os.path.join(api_dll_dir, "EnergyPlusAPI.dll")
 
 
 class EnergyPlusAPI:
@@ -152,6 +153,7 @@ class EnergyPlusAPI:
         api_version_from_ep = float(self.api.apiVersionFromEPlus(state))
         api_version_defined_here = float(self.api_version())
         if api_version_defined_here != api_version_from_ep:
-            raise Exception("API version does not match, this API version: %s; E+ is expecting version: %s" % (
-                api_version_defined_here, api_version_from_ep
-            ))
+            raise Exception(
+                "API version does not match, this API version: %s; E+ is expecting version: %s"
+                % (api_version_defined_here, api_version_from_ep)
+            )

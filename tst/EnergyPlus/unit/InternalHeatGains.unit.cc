@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -212,7 +212,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_BadFuelType)
 
     });
 
-    ASSERT_FALSE(process_idf(idf_objects, false)); // add false to supress error assertions
+    ASSERT_FALSE(process_idf(idf_objects, false)); // add false to suppress error assertions
     EXPECT_TRUE(has_err_output(false));
 
     state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
@@ -3116,7 +3116,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_39C)
     EXPECT_NEAR(state->dataGlobal->TimeStepZone, 1.0, 1e-6);
 
     // Test 2: The following test should pass in with the fix (PR9541);
-    // Witout the fix, some of the following items would fail if tested in the original develop branch
+    // Without the fix, some of the following items would fail if tested in the original develop branch
     // if (TAirIn > DBMax[EnvClass])
     EXPECT_NE(state->dataHeatBal->ZoneITEq(Loop).TimeAboveDryBulbT, state->dataGlobal->TimeStepZone);
     EXPECT_NE(state->dataHeatBal->ZoneITEq(Loop).TimeOutOfOperRange, state->dataGlobal->TimeStepZone);

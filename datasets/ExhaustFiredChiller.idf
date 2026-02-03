@@ -14,9 +14,6 @@
 ! Cooling Capacity function of temperature curve  - CoolCapfT
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Curve:Biquadratic,
     ExhAbsorb_CapFt,         !- Name
     -0.115131E+01,           !- Coefficient1 Constant

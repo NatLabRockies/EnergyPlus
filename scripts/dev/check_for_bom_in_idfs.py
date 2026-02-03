@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -55,42 +55,66 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import codecs
-import io
-import json
-import os
-import sys
+from pathlib import Path
+
+from base_hook import (
+    ROOT_DIR,
+    TESTFILES_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    exit_hook,
+    get_base_parser,
+    report_log_messages,
+)
 
 
-def usage():
-    print("""This script verifies the IDFs don\'t have byte order marks.""")
+def has_byte_order_mark(filepath: Path, do_fix: bool = False) -> LogMessage | None:
+    """Checks if the first three bytes of the file are a UTF-8 BOM."""
+    with open(filepath, "rb") as f_b:
+        bts = f_b.read(3)
+
+    if bts != codecs.BOM_UTF8:
+        return None
+
+    log_message = ErrorMessage(
+        tool="check_for_bom_in_idfs",
+        filepath=filepath,
+        line_number=1,
+        message="Byte-Order-Mark sequence detected in IDF, check editor",
+    )
+
+    if do_fix:
+        with open(filepath, newline="", encoding="utf-8-sig") as f:
+            contents = f.read()
+        with open(filepath, "w", newline="", encoding="utf-8") as f:
+            f.write(contents)
+
+    return log_message
 
 
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-test_files_dir = os.path.join(current_script_dir, '..', '..', 'testfiles')
+if __name__ == "__main__":
+    parser = get_base_parser(description="Verify that the IDFs don't have byte order marks")
+    parser.add_argument("--fix", dest="do_fix", action="store_true", default=False, help="Remove BOM")
 
-num_issues_found = 0
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in {".idf", ".imf"}]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = list(TESTFILES_DIR.glob("**/*.idf")) + list(TESTFILES_DIR.glob("**/*.imf"))
+        if args.verbose:
+            print(f"Checking {len(files)} files in {TESTFILES_DIR}")
 
-for root, dirs, files in os.walk(test_files_dir):
-    for sfile in files:
-        if sfile.endswith('.idf') or sfile.endswith('.imf'):
-            if root == test_files_dir:
-                relative_path = sfile
-            else:
-                folder = os.path.basename(os.path.normpath(root))
-                relative_path = os.path.join(folder, sfile)
-            abs_path = os.path.join(test_files_dir, relative_path)
-            with io.open(abs_path, 'rb') as fd:
-                for i, line in enumerate(fd):
-                    if codecs.BOM_UTF8 in line:
-                        print(json.dumps({
-                            'tool': 'check_for_bom_in_idfs',
-                            'filename': os.path.join('testfiles', relative_path),
-                            'file': os.path.join('testfiles', relative_path),
-                            'line': i + 1,
-                            'messagetype': 'error',
-                            'message': 'Byte-Order-Mark sequence detected in IDF, check editor'
-                        }))
-                        num_issues_found += 1
+    log_messages = []
+    for filepath in files:
+        opt_log_message = has_byte_order_mark(filepath, do_fix=args.do_fix)
+        if opt_log_message:
+            log_messages.append(opt_log_message)
 
-if num_issues_found > 0:
-    sys.exit(1)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    if args.do_fix and args.verbose:
+        print(f"Fixed BOM issues in {len(log_messages)} files")
+    exit_hook(success=success)

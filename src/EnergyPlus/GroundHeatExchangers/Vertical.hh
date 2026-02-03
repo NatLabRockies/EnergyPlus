@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,23 @@ struct EnergyPlusData;
 
 namespace GroundHeatExchangers {
 
+    struct BorefieldSizingData
+    {
+        std::string name;
+        std::string type;
+        std::string sizingPeriodName;
+        Real64 designFlowRatePerBorehole = 0.0;
+        Real64 length = 0.0;
+        Real64 width = 0.0;
+        Real64 minSpacing = 0.0;
+        Real64 maxSpacing = 0.0;
+        Real64 minLength = 0.0;
+        Real64 maxLength = 0.0;
+        unsigned int numBoreholes = 0;
+        Real64 minEFT = 0.0;
+        Real64 maxEFT = 0.0;
+    };
+
     struct GLHEVert : GLHEBase // LCOV_EXCL_LINE
     {
 
@@ -71,12 +88,23 @@ namespace GroundHeatExchangers {
         Real64 theta_3 = 0.0;
         Real64 sigma = 0.0;
 
+        std::map<Real64, Real64> loadsDuringSizingForDesign;
         std::vector<Real64> GFNC_shortTimestep;
         std::vector<Real64> LNTTS_shortTimestep;
+
+        BorefieldSizingData sizingData;
 
         GLHEVert() = default;
         GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::json const &j);
         ~GLHEVert() override = default;
+
+        void simulate([[maybe_unused]] EnergyPlusData &state,
+                      const PlantLocation &calledFromLocation,
+                      bool FirstHVACIteration,
+                      Real64 &CurLoad,
+                      bool RunFlag) override;
+        bool fullDesignLoadAccrualStarted = false; // for gFuncCalcMethod = GFuncCalcMethod::FullDesign runs, this is false until we start hvac sizing
+        bool fullDesignCompleted = false; // for gFuncCalcMethod = GFuncCalcMethod::FullDesign runs, this is false until the GHEDesigner run is done
 
         static std::vector<Real64> distances(MyCartesian const &point_i, MyCartesian const &point_j);
 
@@ -93,6 +121,12 @@ namespace GroundHeatExchangers {
         void calcGFunctions(EnergyPlusData &state) override;
 
         void calcUniformHeatFluxGFunctions(EnergyPlusData &state) const;
+
+        nlohmann::json getCommonGHEDesignerInputs(EnergyPlusData &state) const;
+
+        static fs::path runGHEDesigner(EnergyPlusData &state, nlohmann::json const &inputs);
+
+        void performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData &state, std::vector<Real64> const &hourlyLoads) const;
 
         void calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &state) const;
 

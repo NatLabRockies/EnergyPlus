@@ -1,4 +1,4 @@
-﻿
+
 
 Change EquationFit coils to reference curve objects (Issue #8352)
 ================
@@ -6,20 +6,20 @@ Change EquationFit coils to reference curve objects (Issue #8352)
 **Yueyue Zhou, NREL**
 
  - 11 Jan 2021
-  
+
 
 ## Background ##
 
-Excerpts lifted from [issue #8352](https://github.com/NREL/EnergyPlus/issues/8352)
+Excerpts lifted from [issue #8352](https://github.com/NatLabRockies/EnergyPlus/issues/8352)
 
- - The EquationFit coil objects (like `Coil:Cooling:WaterToAirHeatPump:EquationFit` and `Coil:Heating:WaterToAirHeatPump:EquationFit`) have curve coefficients embedded in them. 
-  
+ - The EquationFit coil objects (like `Coil:Cooling:WaterToAirHeatPump:EquationFit` and `Coil:Heating:WaterToAirHeatPump:EquationFit`) have curve coefficients embedded in them.
+
  - But other coil objects refer to standalone curve objects instead.
- 
+
  - Embedded coefficients limit the flexibility of using EMS to model coil performance impact when needed.
 
- - Changing EquationFit coils to reference curve objects also allows the user to use different equation forms and to use lookup tables. (From [Mike Witte](https://github.com/NREL/EnergyPlus/issues/8352#issuecomment-724140062))
- 
+ - Changing EquationFit coils to reference curve objects also allows the user to use different equation forms and to use lookup tables. (From [Mike Witte](https://github.com/NatLabRockies/EnergyPlus/issues/8352#issuecomment-724140062))
+
 ## E-mail and  Conference Call Conclusions ##
 
 *None yet.*
@@ -44,7 +44,7 @@ As described above, both quad-linear and quint-linear curves are needed for  Coi
  - Add quint-linear curves so that the curve type of every curve referred can be explicitly specified. This is a more straightforward path to move forward to.
  - Change quad-linear curves to be more general as "multi-linear" or simply replace it by quint-linear curves, regarding to the similarity between quad-linear and quint linear curves. Users can simply add 0 coefficients to whatever variables that are not important or E+ can only read specific number of coefficients for specific input. Notice that there's no tri-linear or bi-linear curve types in Energyplus which might imply some preference to this approach in its first place (Is that true? Any example of using quad-linear curve type to read in tri-linear curves?).
 
- 
+
 ## Approach ##
 
 Once the above decision are made:
@@ -107,5 +107,3 @@ There's potentially many doc changes required.
 And transition will be required.
 
  - For all of the test files that use above coil/heatpump objects.
-
-

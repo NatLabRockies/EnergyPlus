@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1265,7 +1265,7 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_AirGapOutdoorVentedTest)
     EXPECT_NEAR(T(1), 308.610, 0.001);
     EXPECT_NEAR(T(2), 306.231, 0.001);
 
-    // with solar absrobed on glazing layers
+    // with solar absorbed on glazing layers
     Source(1) = 100.0; // outside glass layer
     Source(2) = 50.0;  // inside glass layer
     ASHWAT_ThermalCalc(
@@ -1595,7 +1595,7 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_AirGapIndoorVentedTest)
     EXPECT_NEAR(T(1), 307.054, 0.001);
     EXPECT_NEAR(T(2), 304.197, 0.001);
 
-    // with solar absrobed on glazing layers
+    // with solar absorbed on glazing layers
     Source(1) = 100.0; // outside glass layer
     Source(2) = 50.0;  // inside glass layer
     ASHWAT_ThermalCalc(

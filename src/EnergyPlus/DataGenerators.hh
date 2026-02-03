@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -217,7 +217,7 @@ namespace DataGenerators {
         Real64 LHVliquid = 0.0;            // userdefined lhv for generic liquid (J/kg)
         Real64 HHV = 0.0;                  // higher heating value of fuel (J/kg)
         Real64 MW = 0.0;                   // molecular weight g/mol
-        Real64 eCO2 = 0.0;                 // mass flow based CO2 emmissions factor for complete combustion (-)
+        Real64 eCO2 = 0.0;                 // mass flow based CO2 emissions factor for complete combustion (-)
         Real64 KmolPerSecToKgPerSec = 0.0; // conversion from moles to kilograms for this fuel. (
         Real64 StoicOxygenRate = 0.0;
         Real64 TfuelIntoCompress = 0.0; // inlet fuel temperature

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -137,7 +137,7 @@ template <typename T> struct EPVector : private std::vector<T>
         std::fill(this->begin(), this->end(), v);
     }
 
-    // dimension is often used to initalize the vector instead of allocate + operator=
+    // dimension is often used to initialize the vector instead of allocate + operator=
     void dimension(std::size_t size, const T &v)
     {
         std::vector<T>::clear();
@@ -246,7 +246,7 @@ template <> struct EPVector<bool> : private std::vector<std::uint8_t>
         std::fill(this->begin(), this->end(), v);
     }
 
-    // dimension is often used to initalize the vector instead of allocate + operator=
+    // dimension is often used to initialize the vector instead of allocate + operator=
     void dimension(std::size_t size, const bool v)
     {
         std::vector<std::uint8_t>::clear();

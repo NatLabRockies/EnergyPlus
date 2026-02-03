@@ -75,7 +75,7 @@
 ! Utility Tariffs:                None
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 
@@ -444,14 +444,14 @@
     CFS_Glz_1_Tfvis,         !- Visible Optical Complex Front Transmittance Matrix Name
     CFS_Glz_1_Rbvis,         !- Visible Optical Complex Back Transmittance Matrix Name
     Glass_103_Layer,         !- Outside Layer Name
-    CFS_Glz_1_Layer_1_fAbs,  !- Outside Layer Directional Front Absoptance Matrix Name
-    CFS_Glz_1_Layer_1_bAbs,  !- Outside Layer Directional Back Absoptance Matrix Name
+    CFS_Glz_1_Layer_1_fAbs,  !- Outside Layer Directional Front Absorptance Matrix Name
+    CFS_Glz_1_Layer_1_bAbs,  !- Outside Layer Directional Back Absorptance Matrix Name
     Gap_1_Glz_1_Layer_1,     !- Gap 1 Name
-    ,                        !- CFS Gap 1 Directional Front Absoptance Matrix Name
-    ,                        !- CFS Gap 1 Directional Back Absoptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Front Absorptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Back Absorptance Matrix Name
     Shade_14_Layer,          !- Layer 2 Name
-    CFS_Glz_1_Layer_2_fAbs,  !- Layer 2 Directional Front Absoptance Matrix Name
-    CFS_Glz_1_Layer_2_bAbs;  !- Layer 2 Directional Back Absoptance Matrix Name
+    CFS_Glz_1_Layer_2_fAbs,  !- Layer 2 Directional Front Absorptance Matrix Name
+    CFS_Glz_1_Layer_2_bAbs;  !- Layer 2 Directional Back Absorptance Matrix Name
 
 !----------------------------------------------------------------------
 !         Basis Matrix
@@ -85469,7 +85469,7 @@
     LIGHT-SCHED,             !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     83.630989075,            !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.7,                     !- Fraction Radiant
@@ -85483,7 +85483,7 @@
     EQUIP-SCHED,             !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     27.876996994,            !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -85496,8 +85496,8 @@
     INFIL-SCHED,             !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -86150,7 +86150,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA COMFENZone,      !- Name
@@ -86358,8 +86365,8 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     2.777778,                !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     SYS-1 Mixed Air Outlet,  !- Air Inlet Node Name
     SYS-1 Cooling Coil Outlet,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name

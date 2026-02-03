@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -3663,7 +3663,7 @@ void CalcTESCoilDischargeOnlyMode(EnergyPlusData &state, int const TESCoilNum, R
 
     Real64 QdotDischargeLimit;     // limit for how much storage can be discharged without overshooting
     Real64 sTES = 0.0;             // state of charge of Thermal Energy Storage
-    bool TESHasSomeCharge = false; // true when there is something avaiable in storage
+    bool TESHasSomeCharge = false; // true when there is something available in storage
 
     switch (thisTESCoil.StorageMedia) {
     case MediaType::Water:

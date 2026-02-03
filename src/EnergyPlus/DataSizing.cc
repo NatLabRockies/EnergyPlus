@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -478,7 +478,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     // Reset to avoid chance that second zone equipment will size using these variables set by first zone equipment to be sized
     if (curZoneEqNum > 0) {
 
-        if (state.dataSize->ZoneEqSizing.size() == 0) {
+        if (state.dataSize->ZoneEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -505,7 +505,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
 
     if (curSysNum > 0) {
 
-        if (state.dataSize->UnitarySysEqSizing.size() == 0) {
+        if (state.dataSize->UnitarySysEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -652,23 +652,21 @@ calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
         // This is a simple DesignSpecification:OutdoorAir
         return thisDSOA.calcOAFlowRate(
             state, ActualZoneNum, UseOccSchFlag, UseMinOASchFlag, PerPersonNotSet, MaxOAVolFlowFlag, spaceNum, calcIAQMethods);
-    } else {
-        // This is a DesignSpecification:OutdoorAir:SpaceList
-        for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
-            if ((spaceNum == 0) || ((spaceNum > 0) && (spaceNum == thisDSOA.dsoaSpaceIndexes(dsoaCount)))) {
-                totOAFlowRate += state.dataSize->OARequirements(thisDSOA.dsoaIndexes(dsoaCount))
-                                     .calcOAFlowRate(state,
-                                                     ActualZoneNum,
-                                                     UseOccSchFlag,
-                                                     UseMinOASchFlag,
-                                                     PerPersonNotSet,
-                                                     MaxOAVolFlowFlag,
-                                                     thisDSOA.dsoaSpaceIndexes(dsoaCount),
-                                                     calcIAQMethods);
-            }
+    } // This is a DesignSpecification:OutdoorAir:SpaceList
+    for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
+        if ((spaceNum == 0) || ((spaceNum > 0) && (spaceNum == thisDSOA.dsoaSpaceIndexes(dsoaCount)))) {
+            totOAFlowRate += state.dataSize->OARequirements(thisDSOA.dsoaIndexes(dsoaCount))
+                                 .calcOAFlowRate(state,
+                                                 ActualZoneNum,
+                                                 UseOccSchFlag,
+                                                 UseMinOASchFlag,
+                                                 PerPersonNotSet,
+                                                 MaxOAVolFlowFlag,
+                                                 thisDSOA.dsoaSpaceIndexes(dsoaCount),
+                                                 calcIAQMethods);
         }
-        return totOAFlowRate;
     }
+    return totOAFlowRate;
 }
 
 void setHeatPumpSize(EnergyPlusData &state, Real64 &coolingCap, Real64 &heatingCap, Real64 const sizingRatio)
@@ -1183,9 +1181,9 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     case DataSizing::OAFlowCalcMethod::PCDesOcc: {
         ZoneOAPeople = 0.0;
         if (this->OAFlowMethod != DataSizing::OAFlowCalcMethod::PCDesOcc) {
-            ZoneOAPeople = curNumOccupants * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerPerson;
+            ZoneOAPeople = curNumOccupants * this->OAFlowPerPerson;
         } else {
-            ZoneOAPeople = nomTotOccupants * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerPerson;
+            ZoneOAPeople = nomTotOccupants * this->OAFlowPerPerson;
             CO2PeopleGeneration = 0.0;
             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                 // Accumulate CO2 generation from people at design occupancy and current activity level
@@ -1204,7 +1202,7 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                 }
             }
         }
-        ZoneOAArea = floorArea * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerArea;
+        ZoneOAArea = floorArea * this->OAFlowPerArea;
         ZoneOAMin = ZoneOAArea;
         ZoneOAMax = (ZoneOAArea + ZoneOAPeople);
         if (thisZone.zoneContamControllerSched != nullptr) {
@@ -1223,13 +1221,10 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
 
                         // Calculate zone maximum target CO2 concentration in PPM
                         if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
-                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 +
-                                         (CO2PeopleGeneration * thisZone.Multiplier * thisZone.ListMultiplier * 1.0e6) / ZoneOAMax;
+                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 + (CO2PeopleGeneration * 1.0e6) / ZoneOAMax;
                         } else {
-                            ZoneMaxCO2 =
-                                state.dataContaminantBalance->OutdoorCO2 + (state.dataContaminantBalance->ZoneCO2GainFromPeople(ActualZoneNum) *
-                                                                            thisZone.Multiplier * thisZone.ListMultiplier * 1.0e6) /
-                                                                               ZoneOAMax;
+                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 +
+                                         (state.dataContaminantBalance->ZoneCO2GainFromPeople(ActualZoneNum) * 1.0e6) / ZoneOAMax;
                         }
 
                         if (ZoneMaxCO2 <= ZoneMinCO2) {
@@ -1370,7 +1365,6 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     }
 
     // Apply zone multipliers and zone list multipliers
-    // TODO MJW: this looks like it's double-counting the multipliers - it *is* double counting for methods PCOccSch and PCDesOcc
     OAVolumeFlowRate *= thisZone.Multiplier * thisZone.ListMultiplier;
 
     // Apply schedule as needed. Sizing does not use schedule.

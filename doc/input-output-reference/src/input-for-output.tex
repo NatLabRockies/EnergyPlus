@@ -138,8 +138,8 @@ Examples input objects follow.
 
 \begin{lstlisting}
 Output:Surfaces:Drawing, DXF;
-  Output:Surfaces:Drawing, DXF, RegularPolyline;
-  Output:Surfaces:Drawing, DXF, Triangulate3DFace, mycolorscheme;
+Output:Surfaces:Drawing, DXF, RegularPolyline;
+Output:Surfaces:Drawing, DXF, Triangulate3DFace, mycolorscheme;
 \end{lstlisting}
 
 The above IDF specification will produce a DXF file (\textbf{eplusout.dxf}) of the surfaces in the IDF file.~ Only one DXF report can be produced. More specifics on this report can be found in the Output Details and Examples document.
@@ -179,7 +179,7 @@ Examples input objects for this report follow.
 
 \begin{lstlisting}
 Output:Surfaces:Drawing, VRML;
-  Output:Surfaces:Drawing, VRML, Triangulate3DFace;
+Output:Surfaces:Drawing, VRML, Triangulate3DFace;
 \end{lstlisting}
 
 The above IDF specification produces a VRML (Virtual Reality Modeling Language) file (\textbf{eplusout.wrl}) of the surfaces in the IDF file.~ Only one VRML report can be produced. VRML files can be viewed in many web browsers after adding a ``plug-in'' and there are some stand-alone viewers as well. More specifics on this report can be found in the Output Details and Examples document.
@@ -212,8 +212,8 @@ This is a condensed reporting that illustrates the full range of schedule values
 This field should contain the word \textbf{Hourly} or \textbf{TimeStep} to obtain the respective reports.
 
 \begin{lstlisting}
-Output:Schedules, Hourly;     ! values on hourly increments (day schedule resolution)
-  Output:Schedules, TimeStep; ! will give them at the timestep of the simulation
+Output:Schedules, Hourly;     !- values on hourly increments (day schedule resolution)
+Output:Schedules, TimeStep;   !- will give them at the timestep of the simulation
 \end{lstlisting}
 
 This report is placed on the \textbf{eplusout.eio} file. Details of this reporting are shown in the Output Details and Examples document.~ Schedule values over time can also be obtained in the EnergyPlus Standard Output (in eplusout.eso) using \hyperref[outputvariable]{Output:Variable} objects.
@@ -262,7 +262,7 @@ An example of this object follows.
 
 \begin{lstlisting}
 Output:DaylightFactors,
-  SizingDays;    !- Reporting Days
+  SizingDays;                 !- Reporting Days
 \end{lstlisting}
 
 \subsection{Output:EnergyManagementSystem}\label{outputenergymanagementsystem}
@@ -287,9 +287,9 @@ An example of this object follows.
 
 \begin{lstlisting}
 Output:EnergyManagementSystem,
-  Verbose,    ! Actuator Availability Dictionary Reporting
-  Verbose,    ! Internal Variable Availability Dictionary Reporting
-  ErrorsOnly; ! EnergyPlus Runtime Language Debug Output Level
+  Verbose,                    !- Actuator Availability Dictionary Reporting
+  Verbose,                    !- Internal Variable Availability Dictionary Reporting
+  ErrorsOnly;                 !- EnergyPlus Runtime Language Debug Output Level
 \end{lstlisting}
 
 \subsection{OutputControl:SurfaceColorScheme}\label{outputcontrolsurfacecolorscheme}
@@ -429,7 +429,7 @@ Output:Variable, * , Zone Mean Radiant Temperature, timestep;
 Output:Variable, * , Zone Air System Sensible Heating Energy, hourly;
 Output:Variable, * , Zone Air System Sensible Cooling Energy, hourly;
 Output:Variable, * , Zone Air Temperature, hourly;
-Output:Variable, * , Zone Air Temperature;  ! same as previous line
+Output:Variable, * , Zone Air Temperature;  !- same as previous line
 \end{lstlisting}
 
 
@@ -494,13 +494,13 @@ Current resource types are shown in the table below:
 	Utility/Fuel Resource Types \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Table of Metered Resource Types---Fuels \label{table:table-of-metered-resource-types-Fuels}} \tabularnewline
 	\toprule
 	Utility/Fuel Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	Electricity \tabularnewline
 	NaturalGas \tabularnewline
 	Gasoline \tabularnewline
@@ -524,13 +524,13 @@ Current resource types are shown in the table below:
 	Pollutant Resource Types \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Table of Metered Resource Types---Pollutants} \tabularnewline
 	\toprule
 	Pollutant Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	SO2 \tabularnewline
 	NOx \tabularnewline
 	N2O \tabularnewline
@@ -548,7 +548,7 @@ Current resource types are shown in the table below:
 	NuclearLow \tabularnewline
 	\bottomrule
 \end{longtable}
-	
+
 \begin{longtable}[c]{@{}l@{}}
 	\caption{Table of Metered Resource Types---Others \label{table:table-of-metered-resource-types-others}} \tabularnewline
 	\toprule
@@ -561,7 +561,7 @@ Current resource types are shown in the table below:
 	Other Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	EnergyTransfer \tabularnewline
 	ElectricityProduced \tabularnewline
 	ElectricityPurchased \tabularnewline
@@ -683,10 +683,9 @@ Similar to the output variables, meters can be reported at different frequencies
 Examples of specifying the object in the IDF follow.
 
 \begin{lstlisting}
-
 Output:Meter,Electricity:*,RunPeriod;
-  Output:Meter,ExteriorEquipment*,RunPeriod;
-  Output:Meter:Cumulative,Electricity:*,Monthly;
+Output:Meter,ExteriorEquipment*,RunPeriod;
+Output:Meter:Cumulative,Electricity:*,Monthly;
 \end{lstlisting}
 
 \subsubsection{Meter Details File (eplusout.mtd)}\label{meter-details-file-eplusout.mtd}
@@ -754,7 +753,7 @@ An example of specifying in the IDF:
 
 \begin{lstlisting}
 Output:EnvironmentalImpactFactors,
-  Monthly;  !- Reporting_Frequency
+  Monthly;                    !- Reporting_Frequency
 \end{lstlisting}
 
 \subsection{EnvironmentalImpactFactors}\label{environmentalimpactfactors}
@@ -791,12 +790,12 @@ An example of specifying in the IDF:
 
 \begin{lstlisting}
 EnvironmentalImpactFactors,
-  0.3,         !- District Heating Efficiency
-  3.0,         !- District Cooling COP
-  0.25,        !- Steam Conversion Efficiency
-  80.7272,     !- Total Carbon Equivalent Emission Factor From N2O
-  6.2727,      !- Total Carbon Equivalent Emission Factor From CH4
-  0.2727;      !- Total Carbon Equivalent Emission Factor From CO2
+  0.3,                        !- District Heating Efficiency
+  3.0,                        !- District Cooling COP
+  0.25,                       !- Steam Conversion Efficiency
+  80.7272,                    !- Total Carbon Equivalent Emission Factor From N2O
+  6.2727,                     !- Total Carbon Equivalent Emission Factor From CH4
+  0.2727;                     !- Total Carbon Equivalent Emission Factor From CO2
 \end{lstlisting}
 
 \subsection{FuelFactors}\label{fuelfactors}
@@ -992,41 +991,41 @@ Similar to the source energy calculation, this field contains the name of a sche
 An example of specifying in the IDF:
 
 \begin{lstlisting}
-FuelFactors,          !  USA national average based on eGRID, EIA 1605
-  Electricity,        !- Existing Fuel Resource Name
-  2.253,              !- Source Energy Factor {J/J}
-  ,                   !- Source Energy Schedule Name
-  168.33317,          !- CO2 Emission Factor {g/MJ}
-  ,                   !- CO2 Emission Factor Schedule Name
-  4.20616E-02,        !- CO Emission Factor {g/MJ}
-  ,                   !- CO Emission Factor Schedule Name
-  1.39858E-03,        !- CH4 Emission Factor {g/MJ}
-  ,                   !- CH4 Emission Factor Schedule Name
-  4.10753E-01,        !- NOx Emission Factor {g/MJ}
-  ,                   !- NOx Emission Factor Schedule Name
-  2.41916E-03,        !- N2O Emission Factor {g/MJ}
-  ,                   !- N2O Emission Factor Schedule Name
-  8.65731E-01,        !- SO2 Emission Factor {g/MJ}
-  ,                   !- SO2 Emission Factor Schedule Name
-  2.95827E-02,        !- PM Emission Factor {g/MJ}
-  ,                   !- PM Emission Factor Schedule Name
-  1.80450E-02,        !- PM10 Emission Factor {g/MJ}
-  ,                   !- PM10 Emission Factor Schedule Name
-  1.15377E-02,        !- PM2.5 Emission Factor {g/MJ}
-  ,                   !- PM2.5 Emission Factor Schedule Name
-  1.10837E-03,        !- NH3 Emission Factor {g/MJ}
-  ,                   !- NH3 Emission Factor Schedule Name
-  3.72332E-03,        !- NMVOC Emission Factor {g/MJ}
-  ,                   !- NMVOC Emission Factor Schedule Name
-  3.36414E-06,        !- Hg Emission Factor {g/MJ}
-  ,                   !- Hg Emission Factor Schedule Name
-  0,                  !- Pb Emission Factor {g/MJ}
-  ,                   !- Pb Emission Factor Schedule Name
-  2.10074,            !- Water Emission Factor {L/MJ}
-  ,                   !- Water Emission Factor Schedule Name
-  0,                  !- Nuclear High Level Emission Factor {g/MJ}
-  ,                   !- Nuclear High Level Emission Factor Schedule Name
-  0;                  !- Nuclear Low Level Emission Factor {m3/MJ}
+FuelFactors,                  !- USA national average based on eGRID, EIA 1605
+  Electricity,                !- Existing Fuel Resource Name
+  2.253,                      !- Source Energy Factor {J/J}
+  ,                           !- Source Energy Schedule Name
+  168.33317,                  !- CO2 Emission Factor {g/MJ}
+  ,                           !- CO2 Emission Factor Schedule Name
+  4.20616E-02,                !- CO Emission Factor {g/MJ}
+  ,                           !- CO Emission Factor Schedule Name
+  1.39858E-03,                !- CH4 Emission Factor {g/MJ}
+  ,                           !- CH4 Emission Factor Schedule Name
+  4.10753E-01,                !- NOx Emission Factor {g/MJ}
+  ,                           !- NOx Emission Factor Schedule Name
+  2.41916E-03,                !- N2O Emission Factor {g/MJ}
+  ,                           !- N2O Emission Factor Schedule Name
+  8.65731E-01,                !- SO2 Emission Factor {g/MJ}
+  ,                           !- SO2 Emission Factor Schedule Name
+  2.95827E-02,                !- PM Emission Factor {g/MJ}
+  ,                           !- PM Emission Factor Schedule Name
+  1.80450E-02,                !- PM10 Emission Factor {g/MJ}
+  ,                           !- PM10 Emission Factor Schedule Name
+  1.15377E-02,                !- PM2.5 Emission Factor {g/MJ}
+  ,                           !- PM2.5 Emission Factor Schedule Name
+  1.10837E-03,                !- NH3 Emission Factor {g/MJ}
+  ,                           !- NH3 Emission Factor Schedule Name
+  3.72332E-03,                !- NMVOC Emission Factor {g/MJ}
+  ,                           !- NMVOC Emission Factor Schedule Name
+  3.36414E-06,                !- Hg Emission Factor {g/MJ}
+  ,                           !- Hg Emission Factor Schedule Name
+  0,                          !- Pb Emission Factor {g/MJ}
+  ,                           !- Pb Emission Factor Schedule Name
+  2.10074,                    !- Water Emission Factor {L/MJ}
+  ,                           !- Water Emission Factor Schedule Name
+  0,                          !- Nuclear High Level Emission Factor {g/MJ}
+  ,                           !- Nuclear High Level Emission Factor Schedule Name
+  0;                          !- Nuclear Low Level Emission Factor {m3/MJ}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-029}
@@ -2185,6 +2184,48 @@ The option to turn on or off CBOR output. The default is \emph{No}.
 \paragraph{Field: Output MessagePack}
 The option to turn on or off MessagePack output. The default is \emph{No}.
 
+\paragraph{Field: Tabular Unit Conversion}\label{field-tabular-unit-conversion-json}
+
+This field determines if any unit conversions will be performed for the values in the tabular reports when the Option field is set to TimeSeriesAndTabular.
+
+This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+ object. Five different input options are available:
+
+\begin{itemize}
+\item
+UseOutputControlTableStyle -- use the same unit conversion as in   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+
+\item
+None -- no conversions performed
+\item
+JtoKWH -- Joules converted into kWh (1 / 3,600,000)
+\item
+JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
+\item
+JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
+\item
+InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
+\item
+InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
+\end{itemize}
+
+The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the JSON file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Codes and Standards (usually given in W or W/ft$^2$).
+
+\paragraph{Field: Format Numeric Values for Tabular Data}\label{field-format-numeric-values-for-tabular-data-json}
+
+This field determines if any rounding will be performed for the values in the tabular reports when the Option field is set to TimeSeriesAndTabular. If No, all digits are shown after the decimal point without any rounding (23.238769213). If Yes, values are rounded for readability (23.24). The number of digits will vary depending on the type of value. This formatting is only applied to the tabular reports in the JSON file. This field has no effect on the time series data.
+
+An example IDF input object follows.
+\begin{lstlisting}
+Output:JSON,
+   TimeSeriesAndTabular, !- Option Type
+   Yes,                  !- Output JSON
+   No,                   !- Output CBOR
+   No,                   !- Output MessagePack
+   None,                 !- Unit Conversion for Tabular Data
+   Yes;                  !- Format Numeric Values for Tabular Data
+\end{lstlisting}
+
 \subsection{Output:SQLite}\label{outputsqlite}
 
 Output from EnergyPlus can be written to SQLite files for manipulation outside some of the standard (such as spreadsheet) tools.
@@ -2199,29 +2240,31 @@ Currently, there are limited capabilities for specifying SQLite generation.~ The
 
 This field determines if any unit conversions will be performed for the values in the tabular reports when the Option field is set to SimpleAndTabular. These conversions are only applied to the tabular reports in the SQL file. No conversions are applied to the time series data and predefined database tables generated by the Simple option (see the list in Table \ref{table:tabular_unit_conversion_list}).
 
-This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the OutputControl:Table:Style object. Five different input options are available:
+This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+ object. Five different input options are available:
 
 \begin{itemize}
-\item 
-UseOutputControlTableStyle -- use the same unit conversion as in OutputControl:Table:Style
-\item 
+\item
+UseOutputControlTableStyle -- use the same unit conversion as in \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+
+\item
 None -- no conversions performed
-\item 
+\item
 JtoKWH -- Joules converted into kWh (1 / 3,600,000)
-\item 
+\item
 JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
 \item
 JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
-\item 
+\item
 InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
-\item 
+\item
 InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
 \end{itemize}
 
-The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the SQL file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Code and Standars (usually given in W or W/ft$^2$).
+The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the SQL file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Codes and Standards (usually given in W or W/ft$^2$).
 
-Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables. 
- 
+Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables.
+
 % table X
 {\scriptsize
 \begin{longtable}[c]{p{4in}p{1in}}
@@ -2275,11 +2318,16 @@ Zones & No \tabularnewline
 \end{longtable}
 }
 
+\paragraph{Field: Format Numeric Values for Tabular Data}\label{field-format-numeric-values-for-tabular-data}
+
+This field determines if any rounding will be performed for the values in the tabular reports when the Option field is set to SimpleAndTabular. If No, all digits are shown after the decimal point without any rounding (23.238769213). If Yes, values are rounded for readability (23.24). The number of digits will vary depending on the type of value. This formatting is only applied to the tabular reports in the SQL file. This field has no effect on the time series data and predefined database tables generated by the Simple option (see the list in Table \ref{table:tabular_unit_conversion_list}). This field is optional and, if not specified, defaults to Yes.
+
 An example IDF input object follows.
 \begin{lstlisting}
 Output:SQLite,
    SimpleAndTabular,    !- Option Type
-   InchPound;           !- Unit Conversion
+   InchPound,           !- Unit Conversion for Tabular Data
+   Yes;                 !- Format Numeric Values for Tabular Data
 \end{lstlisting}
 
 \subsection{OutputControl:Files}\label{outputcontrolfiles}
@@ -2416,37 +2464,38 @@ An example of this object follows.
 
 \begin{lstlisting}
 OutputControl:Files,
-  Yes, ! CSV
-  Yes, ! MTR
-  Yes, ! ESO
-  No , ! EIO
-  No , ! Tabular
-  No , ! SQLite
-  No , ! JSON
-  No , ! AUDIT
-  No , ! Zone Sizing
-  No , ! System Sizing
-  No , ! DXF
-  No , ! BND
-  No , ! RDD
-  No , ! MDD
-  No , ! MTD
-  Yes, ! END
-  No , ! SHD
-  No , ! DFS
-  No , ! GLHE
-  No , ! DelightIn
-  No , ! DelightELdmp
-  No , ! DelightDFdmp
-  No , ! EDD
-  No , ! DBG
-  No , ! PerfLog
-  No , ! SLN
-  No , ! SCI
-  No , ! WRL
-  No , ! Screen
-  No , ! ExtShd
-  No ; ! Tarcog
+  Yes,                        !- CSV
+  Yes,                        !- MTR
+  Yes,                        !- ESO
+  No,                         !- EIO
+  No,                         !- Tabular
+  No,                         !- SQLite
+  No,                         !- JSON
+  No,                         !- AUDIT
+  No,                         !- Zone Sizing
+  No,                         !- System Sizing
+  No,                         !- DXF
+  No,                         !- BND
+  No,                         !- RDD
+  No,                         !- MDD
+  No,                         !- MTD
+  Yes,                        !- END
+  No,                         !- SHD
+  No,                         !- DFS
+  No,                         !- GLHE
+  No,                         !- DelightIn
+  No,                         !- DelightELdmp
+  No,                         !- DelightDFdmp
+  No,                         !- EDD
+  No,                         !- DBG
+  No,                         !- PerfLog
+  No,                         !- SLN
+  No,                         !- SCI
+  No,                         !- WRL
+  No,                         !- Screen
+  No,                         !- ExtShd
+  No,                         !- Tarcog
+  No;                         !- Output Plant Component Sizing
 \end{lstlisting}
 
 \subsection{OutputControl:Timestamp}\label{outputcontrol_timestamp}
@@ -2455,7 +2504,7 @@ Controls the format of the timestamp used in the native CSV and JSON outputs whe
 as ``$MM$/$DD$ $hh$:$mm$:$ss$'', where
 
 \begin{wherelist}
-\item[MM] the two-digit month, 
+\item[MM] the two-digit month,
 \item[DD] the two-digit day of the month,
 \item[hh] the two-digit hours since the beginning of the day,
 \item[mm] the two-digit minutes since the beginning of the last hour, and
@@ -2472,7 +2521,7 @@ timestamp format is ``$YYYY$-$MM$-$DD$T$hh$:$mm$:$ss$'' where
 
 \begin{wherelist}
 \item[YYYY] the four-digit year,
-\item[MM] the two-digit month, 
+\item[MM] the two-digit month,
 \item[DD] the two-digit day of the month,
 \item[hh] the two-digit hours since the beginning of the day,
 \item[mm] the two-digit minutes since the beginning of the last hour,
@@ -2506,7 +2555,6 @@ interval (``\textbf{No}''). The default is ``\textbf{No}''.
 An example IDF input object that uses the ISO 8601 format and places the timestamp at beginning of the interval is shown below.
 \begin{lstlisting}
 OutputControl:Timestamp,
-   Yes,           !- ISO 8601 Format
-   Yes;           !- Timestamp at Beginning of Interval
+  Yes,                        !- ISO 8601 Format
+  Yes;                        !- Timestamp at Beginning of Interval
 \end{lstlisting}
-

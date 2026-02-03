@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -448,7 +448,7 @@ void ConstructionProps::calculateTransferFunction(EnergyPlusData &state, bool &E
                     RevConst = false;
                 }
 
-                if (RevConst) { // Curent construction is a reverse of
+                if (RevConst) { // Current construction is a reverse of
                     // construction Constr.  Thus, CTFs do not need to be re-
                     // calculated.  Copy CTF info for construction Constr to
                     // construction ConstrNum.
@@ -1122,7 +1122,7 @@ void ConstructionProps::calculateExponentialMatrix()
     // precision variables has been added.  The main loop for higher powers
     // of AMat is now stopped whenever these powers of AMat will no longer
     // add to the summation (AExp) instead ofstopping potentially at the
-    // artifical limit of AMat**100.
+    // artificial limit of AMat**100.
 
     // REFERENCES:
     // Seem, J.E.  "Modeling of Heat Transfer in Buildings",
@@ -1190,7 +1190,9 @@ void ConstructionProps::calculateExponentialMatrix()
 
     // Note With change to row-major arrays "row" here now means "column"
 
-    AMatRowNormMax = 0.0; // Start of Step 1 ...
+    // Start of Step 1 ...
+    // set to tiny value to avoid log(0) below
+    AMatRowNormMax = 1e-12;
 
     for (i = 1; i <= this->rcmax; ++i) {
 
@@ -1351,7 +1353,7 @@ void ConstructionProps::calculateExponentialMatrix()
                 }
             }
         }
-        // Backup is true when every item of AExp didnt pass the TinyLimit test
+        // Backup is true when every item of AExp didn't pass the TinyLimit test
         if (Backup) {
             this->AExp = AMato;
             break;
@@ -1814,7 +1816,7 @@ void ConstructionProps::calculateFinalCoefficients()
             if (rat < ConvrgLim) {
 
                 // If the ratio is less than the convergence limit, then any other
-                // terms would have a neglible impact on the CTF-based energy balances.
+                // terms would have a negligible impact on the CTF-based energy balances.
                 this->NumCTFTerms = inum;
                 CTFConvrg = true; // CTF calculations have converged--set logical.
             }
@@ -1966,7 +1968,7 @@ void ConstructionProps::reportLayers(EnergyPlusData &state)
 {
     // Report the layers for each opaque construction in predefined tabular report
     // J. Glazer March 2024
-    if (state.dataOutRptPredefined->pdchOpqConsLayCol.size() > 0) {
+    if (!state.dataOutRptPredefined->pdchOpqConsLayCol.empty()) {
         for (int i = 1; i <= this->TotLayers; ++i) {
             int layerIndex = this->LayerPoint(i);
             auto const *mat = state.dataMaterial->materials(layerIndex);
@@ -2021,14 +2023,14 @@ Real64 ConstructionProps::setUserTemperatureLocationPerpendicular(EnergyPlusData
         ShowWarningError(state, "ConstructionProperty:InternalHeatSource has a perpendicular temperature location parameter that is less than zero.");
         ShowContinueError(state, format("Construction={} has this error.  The parameter has been reset to 0.", this->Name));
         return 0.0;
-    } else if (userValue > 1.0) {
+    }
+    if (userValue > 1.0) {
         ShowWarningError(state,
                          "ConstructionProperty:InternalHeatSource has a perpendicular temperature location parameter that is greater than one.");
         ShowContinueError(state, format("Construction={} has this error.  The parameter has been reset to 1.", this->Name));
         return 1.0;
-    } else { // Valid value between 0 and 1
-        return userValue;
-    }
+    } // Valid value between 0 and 1
+    return userValue;
 }
 
 void ConstructionProps::setNodeSourceAndUserTemp(Array1D_int &Nodes)

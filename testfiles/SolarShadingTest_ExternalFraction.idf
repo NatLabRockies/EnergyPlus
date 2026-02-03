@@ -82,7 +82,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -535,8 +535,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -549,8 +549,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -563,8 +563,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -577,8 +577,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -591,8 +591,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -605,8 +605,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -619,8 +619,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -633,8 +633,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     9.4389483E-02,           !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -647,8 +647,8 @@
     CONSTANT,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2831685,               !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -673,7 +673,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:EAST SIDE TREE,   !- Name
     EAST SIDE TREE,          !- Exterior Surface Name
-    ExtShadingSch:EAST SIDE TREE,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:EAST SIDE TREE,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -692,7 +692,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:WEST SIDE TREE,   !- Name
     WEST SIDE TREE,          !- Exterior Surface Name
-    ExtShadingSch:WEST SIDE TREE,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:WEST SIDE TREE,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -711,7 +711,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL001:SHADE001,  !- Name
     ZN001:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -730,7 +730,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL001:SHADE001,  !- Name
     ZN002:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -749,7 +749,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL001:SHADE001,  !- Name
     ZN003:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -768,7 +768,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL001:SHADE001,  !- Name
     ZN004:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -787,7 +787,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL001:SHADE001,  !- Name
     ZN005:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -806,7 +806,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL001:SHADE001,  !- Name
     ZN006:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -825,7 +825,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL001:SHADE001,  !- Name
     ZN007:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -844,7 +844,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL001:SHADE001,  !- Name
     ZN008:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -863,7 +863,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL001:SHADE001,  !- Name
     ZN009:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL001:SHADE001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -882,7 +882,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL001,    !- Name
     ZN001:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -901,7 +901,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL001:WIN001,  !- Name
     ZN001:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -920,7 +920,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL002,    !- Name
     ZN001:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -939,7 +939,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL002:WIN001,  !- Name
     ZN001:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -958,7 +958,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL003,    !- Name
     ZN001:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -977,7 +977,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL004,    !- Name
     ZN001:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -996,7 +996,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL005,    !- Name
     ZN001:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1015,7 +1015,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL005:WIN001,  !- Name
     ZN001:WALL005:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL005:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL005:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1034,7 +1034,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL006,    !- Name
     ZN001:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1053,7 +1053,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:FLR001,     !- Name
     ZN001:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN001:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1072,7 +1072,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:ROOF001,    !- Name
     ZN001:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN001:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN001:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1091,7 +1091,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL001,    !- Name
     ZN002:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1110,7 +1110,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL001:WIN001,  !- Name
     ZN002:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1129,7 +1129,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL002,    !- Name
     ZN002:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1148,7 +1148,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL003,    !- Name
     ZN002:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1167,7 +1167,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:WALL004,    !- Name
     ZN002:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1186,7 +1186,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:FLR001,     !- Name
     ZN002:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN002:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1205,7 +1205,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN002:ROOF001,    !- Name
     ZN002:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN002:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN002:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1224,7 +1224,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL001,    !- Name
     ZN003:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1243,7 +1243,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL001:WIN001,  !- Name
     ZN003:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1262,7 +1262,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL002,    !- Name
     ZN003:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1281,7 +1281,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL002:WIN001,  !- Name
     ZN003:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1300,7 +1300,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL003,    !- Name
     ZN003:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1319,7 +1319,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL004,    !- Name
     ZN003:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1338,7 +1338,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL005,    !- Name
     ZN003:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1357,7 +1357,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL006,    !- Name
     ZN003:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1376,7 +1376,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL007,    !- Name
     ZN003:WALL007,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL007,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL007,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1395,7 +1395,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL007:WIN001,  !- Name
     ZN003:WALL007:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL007:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL007:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1414,7 +1414,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:WALL008,    !- Name
     ZN003:WALL008,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL008,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:WALL008,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1433,7 +1433,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:FLR001,     !- Name
     ZN003:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN003:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1452,7 +1452,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN003:ROOF001,    !- Name
     ZN003:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN003:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN003:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1471,7 +1471,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL001,    !- Name
     ZN004:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1490,7 +1490,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL001:WIN001,  !- Name
     ZN004:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1509,7 +1509,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL002,    !- Name
     ZN004:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1528,7 +1528,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL002:WIN001,  !- Name
     ZN004:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1547,7 +1547,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL003,    !- Name
     ZN004:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1566,7 +1566,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL004,    !- Name
     ZN004:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1585,7 +1585,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL005,    !- Name
     ZN004:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1604,7 +1604,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL006,    !- Name
     ZN004:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1623,7 +1623,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:WALL006:WIN001,  !- Name
     ZN004:WALL006:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL006:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:WALL006:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1642,7 +1642,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:FLR001,     !- Name
     ZN004:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN004:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1661,7 +1661,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN004:ROOF001,    !- Name
     ZN004:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN004:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN004:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1680,7 +1680,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL001,    !- Name
     ZN005:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1699,7 +1699,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL001:WIN001,  !- Name
     ZN005:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1718,7 +1718,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL002,    !- Name
     ZN005:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1737,7 +1737,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL002:WIN001,  !- Name
     ZN005:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1756,7 +1756,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL003,    !- Name
     ZN005:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1775,7 +1775,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL004,    !- Name
     ZN005:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1794,7 +1794,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL005,    !- Name
     ZN005:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1813,7 +1813,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL005:WIN001,  !- Name
     ZN005:WALL005:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL005:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL005:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1832,7 +1832,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:WALL006,    !- Name
     ZN005:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1851,7 +1851,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:FLR001,     !- Name
     ZN005:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN005:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1870,7 +1870,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN005:ROOF001,    !- Name
     ZN005:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN005:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN005:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1889,7 +1889,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL001,    !- Name
     ZN006:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1908,7 +1908,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL001:WIN001,  !- Name
     ZN006:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1927,7 +1927,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL002,    !- Name
     ZN006:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1946,7 +1946,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL003,    !- Name
     ZN006:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1965,7 +1965,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:WALL004,    !- Name
     ZN006:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -1984,7 +1984,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:FLR001,     !- Name
     ZN006:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN006:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2003,7 +2003,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN006:ROOF001,    !- Name
     ZN006:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN006:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN006:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2022,7 +2022,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL001,    !- Name
     ZN007:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2041,7 +2041,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL001:WIN001,  !- Name
     ZN007:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2060,7 +2060,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL002,    !- Name
     ZN007:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2079,7 +2079,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL002:WIN001,  !- Name
     ZN007:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2098,7 +2098,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL003,    !- Name
     ZN007:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2117,7 +2117,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL004,    !- Name
     ZN007:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2136,7 +2136,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL005,    !- Name
     ZN007:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2155,7 +2155,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL006,    !- Name
     ZN007:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2174,7 +2174,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL006:WIN001,  !- Name
     ZN007:WALL006:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL006:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL006:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2193,7 +2193,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL007,    !- Name
     ZN007:WALL007,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL007,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL007,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2212,7 +2212,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:WALL008,    !- Name
     ZN007:WALL008,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL008,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:WALL008,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2231,7 +2231,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:FLR001,     !- Name
     ZN007:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN007:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2250,7 +2250,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN007:ROOF001,    !- Name
     ZN007:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN007:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN007:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2269,7 +2269,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL001,    !- Name
     ZN008:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2288,7 +2288,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL001:WIN001,  !- Name
     ZN008:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2307,7 +2307,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL002,    !- Name
     ZN008:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2326,7 +2326,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL003,    !- Name
     ZN008:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2345,7 +2345,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:WALL004,    !- Name
     ZN008:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2364,7 +2364,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:FLR001,     !- Name
     ZN008:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN008:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2383,7 +2383,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN008:ROOF001,    !- Name
     ZN008:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN008:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN008:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2402,7 +2402,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL001,    !- Name
     ZN009:WALL001,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2421,7 +2421,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL001:WIN001,  !- Name
     ZN009:WALL001:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL001:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL001:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2440,7 +2440,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL002,    !- Name
     ZN009:WALL002,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL002,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL002,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2459,7 +2459,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL002:WIN001,  !- Name
     ZN009:WALL002:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL002:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL002:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2478,7 +2478,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL003,    !- Name
     ZN009:WALL003,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL003,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL003,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2497,7 +2497,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL004,    !- Name
     ZN009:WALL004,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL004,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL004,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2516,7 +2516,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL005,    !- Name
     ZN009:WALL005,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL005,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL005,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2535,7 +2535,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL005:WIN001,  !- Name
     ZN009:WALL005:WIN001,    !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL005:WIN001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL005:WIN001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2554,7 +2554,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:WALL006,    !- Name
     ZN009:WALL006,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL006,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:WALL006,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2573,7 +2573,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:FLR001,     !- Name
     ZN009:FLR001,            !- Exterior Surface Name
-    ExtShadingSch:ZN009:FLR001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:FLR001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2592,7 +2592,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN009:ROOF001,    !- Name
     ZN009:ROOF001,           !- Exterior Surface Name
-    ExtShadingSch:ZN009:ROOF001,  !- External Shading Fraction Schedule Name
+    ExtShadingSch:ZN009:ROOF001,  !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 

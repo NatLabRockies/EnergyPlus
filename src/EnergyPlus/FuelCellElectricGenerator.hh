@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -86,7 +86,7 @@ namespace FuelCellElectricGenerator {
         Curve::Curve *EffCurve = nullptr;      // pointer to curve for efficiency
         Real64 NomEff;                         // nominal efficiency
         Real64 NomPel;                         // nominal power rate at rating point
-        int NumCyclesAtStart = 0.0;            // number of start stop cycles at beggining of simulation (user input)
+        int NumCyclesAtStart = 0.0;            // number of start stop cycles at beginning of simulation (user input)
         int NumCycles;                         // number of start stop cycles
         Real64 CyclingDegradRat;               // rate of degradation from cycles
         Real64 NumRunHours;                    // number of hours of operation
@@ -101,8 +101,8 @@ namespace FuelCellElectricGenerator {
         Real64 ShutDownTime;                   // time to shut down [hours]
         Real64 ShutDownFuel;                   // fuel consumed during shut down
         Real64 ShutDownElectConsum;            // Elect consumed during shut down
-        Real64 ANC0;                           // Ancilliary Loads constant term
-        Real64 ANC1;                           // Ancilliary Loads linear term
+        Real64 ANC0;                           // Ancillary Loads constant term
+        Real64 ANC1;                           // Ancillary Loads linear term
         DataGenerators::SkinLoss SkinLossMode; // how are skin losses determined
         std::string ZoneName;
         int ZoneID; // "pointer" to zone with component in it

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -237,7 +237,8 @@ namespace UnitarySystems {
         bool m_Humidistat = false;
         bool m_ValidASHRAECoolCoil = false;
         bool m_ValidASHRAEHeatCoil = false;
-        bool m_SimASHRAEModel = false; // flag denoting that ASHRAE model (SZVAV) should be used
+        bool m_SimASHRAEModel = false;   // flag denoting that ASHRAE model (SZVAV) should be used
+        bool m_SimASHRAEModelOn = false; // flag denoting that the SZVAV calculation is active
         bool m_setFaultModelInput = true;
         int m_FanIndex = 0;
         HVAC::FanPlace m_FanPlace = HVAC::FanPlace::Invalid;
@@ -321,7 +322,7 @@ namespace UnitarySystems {
         int m_DesignSpecMSHPIndex = -1;
         Real64 m_NoLoadAirFlowRateRatio = 1.0;
         bool m_useNoLoadLowSpeedAirFlow = true;
-        int m_SingleMode = 0;
+        bool m_SingleMode = false;
         bool m_MultiOrVarSpeedHeatCoil = false;
         bool m_MultiOrVarSpeedCoolCoil = false;
         Real64 m_PartLoadFrac = 0.0;
@@ -910,7 +911,7 @@ namespace UnitarySystems {
                                                          Real64 airMdot,
                                                          Real64 par13_SATempTarget,
                                                          Real64 systemMaxAirFlowRate,
-                                                         Real64 par15_LoadType,
+                                                         bool isCoolingLoad,
                                                          Real64 par16_IterationMethod);
 
         void simulate(EnergyPlusData &state,
@@ -1054,7 +1055,7 @@ struct UnitarySystemsData : BaseGlobalStruct
         getInputOnceFlag = true;
         setupOutputOnce = true;
         unitarySys.clear();
-        if (designSpecMSHP.size() > 0) {
+        if (!designSpecMSHP.empty()) {
             designSpecMSHP.clear();
         }
         getInputFlag = true;

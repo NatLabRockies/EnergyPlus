@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -566,7 +566,7 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
         Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
 
-        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0); // Orignal code without PR 9907 fix would fail this one by getting an s.Azimuth of 0.0
+        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0); // Original code without PR 9907 fix would fail this one by getting an s.Azimuth of 0.0
         EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
 
         s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
@@ -588,7 +588,7 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
         Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
 
-        // Orignal code should get the same result in this case
+        // Original code should get the same result in this case
         EXPECT_DOUBLE_EQ(s.Azimuth, 180.0);
         EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
 

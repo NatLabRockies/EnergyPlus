@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -142,28 +142,29 @@ void GasAbsorberSpecs::simulate(
         if (compInletNodeNum == this->ChillReturnNodeNum) { // Operate as chiller
             brIdentity = DataPlant::BrLoopType::Chiller;
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
+        }
+        if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
             brIdentity = DataPlant::BrLoopType::Heater;
             break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
             brIdentity = DataPlant::BrLoopType::Condenser;
             break;
-        } else {
-            brIdentity = DataPlant::BrLoopType::NoMatch;
         }
+        brIdentity = DataPlant::BrLoopType::NoMatch;
     }
 
     if (brIdentity == DataPlant::BrLoopType::Chiller) {
         // Calculate Node Values
         // Calculate Equipment and Update Variables
-        this->InCoolingMode = RunFlag != 0;
+        this->InCoolingMode = RunFlag != false;
         this->initialize(state);
         this->calculateChiller(state, CurLoad);
         this->updateCoolRecords(state, CurLoad, RunFlag);
     } else if (brIdentity == DataPlant::BrLoopType::Heater) {
         // Calculate Node Values
         // Calculate Equipment and Update Variables
-        this->InHeatingMode = RunFlag != 0;
+        this->InHeatingMode = RunFlag != false;
         this->initialize(state);
         this->calculateHeater(state, CurLoad, RunFlag);
         this->updateHeatRecords(state, CurLoad, RunFlag);
@@ -206,27 +207,28 @@ void GasAbsorberSpecs::getDesignCapacities(
             OptLoad = this->NomCoolingCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
+        }
+        if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
             Real64 Sim_HeatCap = this->NomCoolingCap * this->NomHeatCoolRatio;
             MinLoad = Sim_HeatCap * this->MinPartLoadRat;
             MaxLoad = Sim_HeatCap * this->MaxPartLoadRat;
             OptLoad = Sim_HeatCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
             MinLoad = 0.0;
             MaxLoad = 0.0;
             OptLoad = 0.0;
             matchfound = true;
             break;
-        } else {
-            matchfound = false;
         }
+        matchfound = false;
     }
 
     if (!matchfound) {
         // Error, nodes do not match
-        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorbtion Chiller-Heater {}", this->Name));
+        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorption Chiller-Heater {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     } // Operate as Chiller or Heater
@@ -251,7 +253,7 @@ void GasAbsorberSpecs::onInitLoopEquip(EnergyPlusData &state, const PlantLocatio
     } else if (BranchInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
                                                                 // don't do anything here
     } else {                                                    // Error, nodes do not match
-        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorbtion Chiller-Heater {}", this->Name));
+        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorption Chiller-Heater {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     } // Operate as Chiller or Heater
@@ -280,7 +282,6 @@ void GetGasAbsorberInput(EnergyPlusData &state)
     int NumGasAbsorbers(0); // number of Absorption Chillers specified in input
 
     auto &s_ipsc = state.dataIPShortCut;
-
     s_ipsc->cCurrentModuleObject = "ChillerHeater:Absorption:DirectFired";
     NumGasAbsorbers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
@@ -353,8 +354,10 @@ void GetGasAbsorberInput(EnergyPlusData &state)
                                                                              DataLoopNode::ConnectionType::Outlet,
                                                                              NodeInputManager::CompFluidStream::Primary,
                                                                              DataLoopNode::ObjectIsNotParent);
+
         BranchNodeConnections::TestCompSet(
             state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(2), s_ipsc->cAlphaArgs(3), "Chilled Water Nodes");
+
         // Condenser node processing depends on condenser type, see below
         thisChiller.HeatReturnNodeNum = NodeInputManager::GetOnlySingleNode(state,
                                                                             s_ipsc->cAlphaArgs(6),
@@ -374,6 +377,7 @@ void GetGasAbsorberInput(EnergyPlusData &state)
                                                                             DataLoopNode::ConnectionType::Outlet,
                                                                             NodeInputManager::CompFluidStream::Tertiary,
                                                                             DataLoopNode::ObjectIsNotParent);
+
         BranchNodeConnections::TestCompSet(
             state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(6), s_ipsc->cAlphaArgs(7), "Hot Water Nodes");
         if (Get_ErrorsFound) {
@@ -465,7 +469,6 @@ void GetGasAbsorberInput(EnergyPlusData &state)
             ShowFatalError(state, format("Errors found in processing curve input for {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             Get_ErrorsFound = false;
         }
-
         if (Util::SameString(s_ipsc->cAlphaArgs(15), "LeavingCondenser")) {
             thisChiller.isEnterCondensTemp = false;
         } else if (Util::SameString(s_ipsc->cAlphaArgs(15), "EnteringCondenser")) {
@@ -1816,6 +1819,7 @@ void GasAbsorberSpecs::calculateHeater(EnergyPlusData &state, Real64 &MyLoad, bo
     int lHeatSupplyNodeNum;   // absorber steam outlet node number, water side
     Real64 lMinPartLoadRat;   // min allowed operating frac full load
     Real64 lMaxPartLoadRat;   // max allowed operating frac full load
+
     // Local copies of GasAbsorberReportVars Type
     Real64 lHeatingLoad(0.0);              // heating load on the chiller
     Real64 lCoolFuelUseRate(0.0);          // instantaneous use of gas for period for cooling
@@ -1937,7 +1941,7 @@ void GasAbsorberSpecs::calculateHeater(EnergyPlusData &state, Real64 &MyLoad, bo
         // Calculate electric parasitics used
         // for heating based on nominal capacity not available capacity
         lHeatElectricPower = lNomCoolingCap * lNomHeatCoolRatio * lElecHeatRatio * lFractionOfPeriodRunning;
-        // Coodinate electric parasitics for heating and cooling to avoid double counting
+        // Coordinate electric parasitics for heating and cooling to avoid double counting
         // Total electric is the max of heating electric or cooling electric
         // If heating electric is greater, leave cooling electric and subtract if off of heating elec
         // If cooling electric is greater, set heating electric to zero

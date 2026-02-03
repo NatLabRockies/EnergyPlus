@@ -102,7 +102,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     NONE,                    !- Name
@@ -1006,7 +1006,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1020,7 +1020,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1034,7 +1034,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1046,7 +1046,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1058,7 +1058,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1166,7 +1166,7 @@
     0.0512,                  !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
-    
+
   Curve:Linear,
     heaterCapCurve,          !- Name
     0.571428571428572,       !- Coefficient1 Constant
@@ -1481,8 +1481,8 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.7,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     HPACCoolCapFT,           !- Total Cooling Capacity Function of Temperature Curve Name
@@ -1506,12 +1506,12 @@
     ,                        !- Supply Water Storage Tank Name
     ,                        !- Condensate Collection Water Storage Tank Name
     200,                     !- Basin Heater Capacity {W/K}
-    ,                     
-    ,                     
-    ,
-    ,
-    ,                     
-    ;                     
+    ,                        !- Basin Heater Setpoint Temperature {C}
+    ,                        !- Basin Heater Operating Schedule Name
+    ,                        !- Sensible Heat Ratio Function of Temperature Curve Name
+    ,                        !- Sensible Heat Ratio Function of Flow Fraction Curve Name
+    ,                        !- Report ASHRAE Standard 127 Performance Ratings
+    ;                        !- Zone Name for Condenser Placement
 
   Coil:Heating:DX:SingleSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
@@ -1519,8 +1519,8 @@
     35000,                   !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     1.7,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Heating Coil Air Inlet Node,  !- Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1539,14 +1539,14 @@
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
     20000,                   !- Resistive Defrost Heater Capacity {W}
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ;
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ,                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
+    ,                        !- Nominal Sensible Heat Ratio of Secondary Coil {m3/s}
+    ,                        !- Sensible Heat Ratio Modifier Function of Temperature Curve Name
+    ;                        !- Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
 
   Fan:OnOff,
     Supply Fan 1,            !- Name
@@ -1560,9 +1560,13 @@
     DX Cooling Coil Air Inlet Node;  !- Air Outlet Node Name
 
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,timestep;
+
   Output:Variable,*,Cooling Coil Crankcase Heater Electricity Rate,timestep;
+
   Output:Variable,*,Cooling Coil Runtime Fraction,timestep;
+
   Output:Variable,*,Heating Coil Crankcase Heater Electricity Rate,timestep;
+
   Output:Variable,*,Heating Coil Runtime Fraction,timestep;
 
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;

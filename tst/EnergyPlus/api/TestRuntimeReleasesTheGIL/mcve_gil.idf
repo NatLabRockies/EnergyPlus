@@ -4,9 +4,9 @@
   Timestep,6;
 
   SimulationControl,
-    No,                     !- Do Zone Sizing Calculation
-    No,                     !- Do System Sizing Calculation
-    No,                     !- Do Plant Sizing Calculation
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
     Yes,                     !- Run Simulation for Sizing Periods
     No,                      !- Run Simulation for Weather File Run Periods
     No,                      !- Do HVAC Sizing Simulation for Sizing Periods
@@ -100,3 +100,4 @@
     Yes,                     !- Run During Warmup Days
     mcve_gil,                !- Python Module Name
     HeatingSetPoint;         !- Plugin Class Name
+

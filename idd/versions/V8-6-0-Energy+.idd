@@ -31068,7 +31068,7 @@ DesignSpecification:OutdoorAir,
       \note the previous four inputs. Schedule values are limited to 0 to 1. If left blank, the schedule defaults to 1.0.
       \note This schedule is ignored during sizing.  All other components which reference this design specification
       \note use the current schedule value to calculate the current outdoor air requirement. This includes
-      \note AirTerminal:SingleDuct:VAV:NoReheat, AirTerminal:SingleDuct:VAV:Reheat, AirTerminal:DualDuct:VAV:OutdoorAir, 
+      \note AirTerminal:SingleDuct:VAV:NoReheat, AirTerminal:SingleDuct:VAV:Reheat, AirTerminal:DualDuct:VAV:OutdoorAir,
       \note ZoneHVAC:FourPipeFanCoil, and ZoneHVAC:IdealLoadsAirSystem.
       \note This schedule will also be applied by Controller:MechanicalVentilation for all System Outdoor Air Methods.
 
@@ -56145,7 +56145,7 @@ Controller:OutdoorAir,
        \note Outdoor air inlet node entering the first pre-treat component if any
   N1 , \field Minimum Outdoor Air Flow Rate
        \note If there is a Mechanical Ventilation Controller (Controller:MechanicalVentilation), note
-       \note that this value times the Minimum Outdoor Air Schedule is a hard minimum that may 
+       \note that this value times the Minimum Outdoor Air Schedule is a hard minimum that may
        \note override DCV or other advanced OA controls.
        \type real
        \required-field

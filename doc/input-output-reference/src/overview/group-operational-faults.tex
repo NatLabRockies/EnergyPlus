@@ -257,56 +257,53 @@ This field specifies the inside to outside surface area ratio of the cooling or 
 \paragraph{IDF Examples}
 
 \begin{lstlisting}
-
 ! example faults for an air economizer
-
   Schedule:Compact,
-  OATSeveritySch,                   !- Name
-  On/Off,                                   !- Schedule Type Limits Name
-  Through: 6/30,                     !- Field 1
-  For: AllDays,                       !- Field 2
-  Until: 24:00,0,                   !- Field 3
-  Through: 12/31,                   !- Field 4
-  For: AllDays,                       !- Field 5
-  Until: 24:00,1;                   !- Field 6
+  OATSeveritySch,             !- Name
+  On/Off,                     !- Schedule Type Limits Name
+  Through: 6/30,              !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 24:00,0,             !- Field 3
+  Through: 12/31,             !- Field 4
+  For: AllDays,               !- Field 5
+  Until: 24:00,1;             !- Field 6
 
-  FaultModel:TemperatureSensorOffset:OutdoorAir,
-  OATFault,                                 !- Name
-  ALWAYS_ON,                               !- Availability Schedule Name
-  OATSeveritySch,                     !- Severity Schedule Name
-  Controller:OutdoorAir,       !- Controller Object Type
-  VAV_1_OA_Controller,           !- Controller Object Name
-  -2.0;                                           !- Temperature Sensor Offset, deg C
+FaultModel:TemperatureSensorOffset:OutdoorAir,
+  OATFault,                   !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  OATSeveritySch,             !- Severity Schedule Name
+  Controller:OutdoorAir,      !- Controller Object Type
+  VAV_1_OA_Controller,        !- Controller Object Name
+  -2.0;                       !- Temperature Sensor Offset, deg C
 
-  FaultModel:TemperatureSensorOffset:ReturnAir,
-  RATFault,                                 !- Name
-  ,                                                 !- Availability Schedule Name
-  ,                                                 !- Severity Schedule Name
-  Controller:OutdoorAir,       !- Controller Object Type
-  VAV_2_OA_Controller,           !- Controller Object Name
-  -2.0;                                         !- Temperature Sensor Offset, deg C
+FaultModel:TemperatureSensorOffset:ReturnAir,
+  RATFault,                   !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Controller:OutdoorAir,      !- Controller Object Type
+  VAV_2_OA_Controller,        !- Controller Object Name
+  -2.0;                       !- Temperature Sensor Offset, deg C
 
-  FaultModel:EnthalpySensorOffset:ReturnAir,
-  RAHFault,                                 !- Name
-  ,                                                 !- Availability Schedule Name
-  ,                                                 !- Severity Schedule Name
-  Controller:OutdoorAir,       !- Controller Object Type
-  VAV_2_OA_Controller,           !- Controller Object Name
-  -2000;                                       !- Enthalpy Sensor Offset, J/Kg
+FaultModel:EnthalpySensorOffset:ReturnAir,
+  RAHFault,                   !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Controller:OutdoorAir,      !- Controller Object Type
+  VAV_2_OA_Controller,        !- Controller Object Name
+  -2000;                      !- Enthalpy Sensor Offset, J/Kg
 
-  ! example faults for a fouling coil
-
+! example faults for a fouling coil
   FaultModel:Fouling:Coil,
-  CoolingCoilFault,               !- Name
-  VAV_2_CoolC,                         !- Heating or Cooling Coil Name
-  ALWAYS_ON,                             !- Availability Schedule Name
-  ,                                               !- Severity Schedule Name
-  FouledUARated,                     !- Fouling Input Method
-  3000,                                       !- UAFouled, W/K
-  ,                                               !- Water Side Fouling Factor, m2-K/W
-  ,                                               !- Air Side Fouling Factor, m2-K/W
-  ,                                               !- Outside Coil Surface Area, m2
-  ;                                               !- Inside to Outside Coil Surface Area Ratio
+  CoolingCoilFault,           !- Name
+  VAV_2_CoolC,                !- Heating or Cooling Coil Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  FouledUARated,              !- Fouling Input Method
+  3000,                       !- UAFouled, W/K
+  ,                           !- Water Side Fouling Factor, m2-K/W
+  ,                           !- Air Side Fouling Factor, m2-K/W
+  ,                           !- Outside Coil Surface Area, m2
+  ;                           !- Inside to Outside Coil Surface Area Ratio
 \end{lstlisting}
 
 \subsection{FaultModel:ThermostatOffset}\label{faultmodelthermostatoffset}
@@ -374,31 +371,30 @@ This field provides the name of a Thermostat Offset Fault object that causes the
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the thermostat/humidistat offset
+  FaultModel:ThermostatOffset,
+  Ther_Offset_Zone1,          !- Name
+  Zone 1 Thermostat,          !- Thermostat Name
+  AlwaysOn,                   !- Availability Schedule Name
+  AlwaysOne,                  !- Severity Schedule Name
+  2.0;                        !- Reference Thermostat Offset
 
-FaultModel:ThermostatOffset,
-  Ther_Offset_Zone1,   !- Name
-  Zone 1 Thermostat,   !- Thermostat Name
-  AlwaysOn,            !- Availability Schedule Name
-  AlwaysOne,           !- Severity Schedule Name
-  2.0;                 !- Reference Thermostat Offset
+FaultModel:HumidistatOffset,
+  Humi_Offset_Zone1,          !- Name
+  Zone 1 Humidistat,          !- Humidistat Name
+  ThermostatOffsetDependent,  !- Humidistat Offset Type
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  ,                           !- Reference Humidistat Offset
+  Ther_Offset_Zone1;          !- Related Thermostat Offset Fault Name
 
-  FaultModel:HumidistatOffset,
-  Humi_Offset_Zone1,   !- Name
-  Zone 1 Humidistat,   !- Humidistat Name
-  ThermostatOffsetDependent, !- Humidistat Offset Type
-  ,                    !- Availability Schedule Name
-  ,                    !- Severity Schedule Name
-  ,                    !- Reference Humidistat Offset
-  Ther_Offset_Zone1;   !- Related Thermostat Offset Fault Name
-
-  FaultModel:HumidistatOffset,
-  Humi_Offset_Zone2,   !- Name
-  Zone 2 Humidistat,   !- Humidistat Name
-  ThermostatOffsetIndependent, !- Humidistat Offset Type
-  AlwaysOn,            !- Availability Schedule Name
-  AlwaysOne,           !- Severity Schedule Name
-  10,                  !- Reference Humidistat Offset
-  ;                    !- Related Thermostat Offset Fault Name
+FaultModel:HumidistatOffset,
+  Humi_Offset_Zone2,          !- Name
+  Zone 2 Humidistat,          !- Humidistat Name
+  ThermostatOffsetIndependent,!- Humidistat Offset Type
+  AlwaysOn,                   !- Availability Schedule Name
+  AlwaysOne,                  !- Severity Schedule Name
+  10,                         !- Reference Humidistat Offset
+  ;                           !- Related Thermostat Offset Fault Name
 \end{lstlisting}
 
 \subsection{FaultModel:Fouling:AirFilter}\label{faultmodelfoulingairfilter}
@@ -436,50 +432,49 @@ This field provides the name of a fan curve for the fan associated with the faul
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the fouling air filter
+  FaultModel:Fouling:AirFilter,
+  DF_VAV_1_Fan,               !- Name
+  VAV_1_Fan,                  !- Fan Name
+  Fan:VariableVolume,         !- Fan Object Type
+  ALWAYS_ON,                  !- Availability Schedule Name
+  Pressure_Inc_Sch,           !- Pressure Fraction Schedule Name
+  VAV_1_Fan_Curve;            !- Fan Curve Name
 
-FaultModel:Fouling:AirFilter,
-  DF_VAV_1_Fan,             !- Name
-  VAV_1_Fan,                !- Fan Name
-  Fan:VariableVolume,       !- Fan Object Type
-  ALWAYS_ON,                !- Availability Schedule Name
-  Pressure_Inc_Sch,         !- Pressure Fraction Schedule Name
-  VAV_1_Fan_Curve;          !- Fan Curve Name
+Schedule:Compact,
+  Pressure_Inc_Sch,           !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 24:00,1.1;           !- Field 3
 
-  Schedule:Compact,
-  Pressure_Inc_Sch,        !- Name
-  Any Number,              !- Schedule Type Limits Name
-  Through: 12/31,          !- Field 1
-  For: AllDays,            !- Field 2
-  Until: 24:00,1.1;        !- Field 3
+Curve:Cubic,
+  VAV_1_Fan_Curve,            !- name
+  1263.1,                     !- Coefficient1 Constant
+  33.773,                     !- Coefficient2 x
+  -5.6906,                    !- Coefficient3 x**2
+  -0.2023,                    !- Coefficient4 x**3
+  4.0,                        !- Minimum Value of x
+  15.0;                       !- Maximum Value of x
 
-  Curve:Cubic,
-  VAV_1_Fan_Curve,         ! name
-  1263.1,                  ! Coefficient1 Constant
-  33.773,                  ! Coefficient2 x
-  -5.6906,                  ! Coefficient3 x**2
-  -0.2023,                  ! Coefficient4 x**3
-  4.0,                     ! Minimum Value of x
-  15.0;                    ! Maximum Value of x
-
-  Fan:VariableVolume,
-  VAV_1_Fan,               !- Name
-  HVACOperationSchd,       !- Availability Schedule Name
-  0.5915,                  !- Fan Total Efficiency
-  1109.648,                !- Pressure Rise {Pa}
-  7.5202,                  !- Maximum Flow Rate {m3/s}
-  FixedFlowRate,           !- Fan Power Minimum Flow Rate Input Method
-  ,                        !- Fan Power Minimum Flow Fraction
-  0.0000,                  !- Fan Power Minimum Air Flow Rate {m3/s}
-  0.91,                    !- Motor Efficiency
-  1.0,                     !- Motor In Airstream Fraction
-  0.0407598940,            !- Fan Power Coefficient 1
-  0.08804497,              !- Fan Power Coefficient 2
-  -0.072926120,            !- Fan Power Coefficient 3
-  0.9437398230,            !- Fan Power Coefficient 4
-  0,                       !- Fan Power Coefficient 5
+Fan:VariableVolume,
+  VAV_1_Fan,                  !- Name
+  HVACOperationSchd,          !- Availability Schedule Name
+  0.5915,                     !- Fan Total Efficiency
+  1109.648,                   !- Pressure Rise {Pa}
+  7.5202,                     !- Maximum Flow Rate {m3/s}
+  FixedFlowRate,              !- Fan Power Minimum Flow Rate Input Method
+  ,                           !- Fan Power Minimum Flow Fraction
+  0.0000,                     !- Fan Power Minimum Air Flow Rate {m3/s}
+  0.91,                       !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  0.0407598940,               !- Fan Power Coefficient 1
+  0.08804497,                 !- Fan Power Coefficient 2
+  -0.072926120,               !- Fan Power Coefficient 3
+  0.9437398230,               !- Fan Power Coefficient 4
+  0,                          !- Fan Power Coefficient 5
   VAV_1_HeatC-VAV_1_FanNode,  !- Air Inlet Node Name
   VAV_1 Supply Equipment Outlet Node,  !- Air Outlet Node Name
-  Fan Energy;              !- End-Use Subcategory
+  Fan Energy;                 !- End-Use Subcategory
 \end{lstlisting}
 
 \subsection{FaultModel:TemperatureSensorOffset:ChillerSupplyWater}\label{faultmodeltemperaturesensoroffsetchillersupplywater}
@@ -517,43 +512,41 @@ This field defines the reference offset of the temperature sensor. A positive va
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the chiller supply water temperature sensor offset
-
   Chiller:Electric:ReformulatedEIR,
-    MainChiller,             !- Name
-    AUTOSIZE,                !- Reference Capacity {W}
-    5.5,                     !- Reference COP {W/W}
-    6.67,                    !- Reference Leaving Chilled Water Temperature {C}
-    35,                      !- Reference Leaving Condenser Water Temperature {C}
-    AutoSize,                !- Reference Chilled Water Flow Rate {m3/s}
-    AutoSize,                !- Reference Condenser Water Flow Rate {m3/s}
-    WC Screw Default 90.1-2004 Cap_fT,  !- Cooling Capacity Function of Temperature Curve Name
-    WC Screw Default 90.1-2004 EIR_fT,  !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name
-    ,                        !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Type
-    ReformEIRChiller Carrier 19XR 1259kW/6.26COP/Vanes EIRFPLR,  !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
-    0.1,                     !- Minimum Part Load Ratio
-    1,                       !- Maximum Part Load Ratio
-    1,                       !- Optimum Part Load Ratio
-    0.2,                     !- Minimum Unloading Ratio
-    CoolSys1 Pump-CoolSys1 ChillerNode 1,  !- Chilled Water Inlet Node Name
-    CoolSys1 Supply Equipment Outlet Node 1,  !- Chilled Water Outlet Node Name
-    CoolSys1 Chiller Water Inlet Node 1,  !- Condenser Inlet Node Name
-    CoolSys1 Chiller Water Outlet Node 1,  !- Condenser Outlet Node Name
-    1,                       !- Fraction of Compressor Electric Consumption Rejected by Condenser
-    2,                       !- Leaving Chilled Water Lower Temperature Limit {C}
-    LeavingSetpointModulated,!- Chiller Flow Mode Type
-    ,                        !- Design Heat Recovery Water Flow Rate {m3/s}
-    ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name
-    0.5;                     !- Sizing Factor
+  MainChiller,                !- Name
+  AUTOSIZE,                   !- Reference Capacity {W}
+  5.5,                        !- Reference COP {W/W}
+  6.67,                       !- Reference Leaving Chilled Water Temperature {C}
+  35,                         !- Reference Leaving Condenser Water Temperature {C}
+  AutoSize,                   !- Reference Chilled Water Flow Rate {m3/s}
+  AutoSize,                   !- Reference Condenser Water Flow Rate {m3/s}
+  WC Screw Default 90.1-2004 Cap_fT,  !- Cooling Capacity Function of Temperature Curve Name
+  WC Screw Default 90.1-2004 EIR_fT,  !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name
+  ,                           !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Type
+  ReformEIRChiller Carrier 19XR 1259kW/6.26COP/Vanes EIRFPLR,  !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
+  0.1,                        !- Minimum Part Load Ratio
+  1,                          !- Maximum Part Load Ratio
+  1,                          !- Optimum Part Load Ratio
+  0.2,                        !- Minimum Unloading Ratio
+  CoolSys1 Pump-CoolSys1 ChillerNode 1,  !- Chilled Water Inlet Node Name
+  CoolSys1 Supply Equipment Outlet Node 1,  !- Chilled Water Outlet Node Name
+  CoolSys1 Chiller Water Inlet Node 1,  !- Condenser Inlet Node Name
+  CoolSys1 Chiller Water Outlet Node 1,  !- Condenser Outlet Node Name
+  1,                          !- Fraction of Compressor Electric Consumption Rejected by Condenser
+  2,                          !- Leaving Chilled Water Lower Temperature Limit {C}
+  LeavingSetpointModulated,   !- Chiller Flow Mode Type
+  ,                           !- Design Heat Recovery Water Flow Rate {m3/s}
+  ,                           !- Heat Recovery Inlet Node Name
+  ,                           !- Heat Recovery Outlet Node Name
+  0.5;                        !- Sizing Factor
 
-  FaultModel:TemperatureSensorOffset:ChillerSupplyWater,
-    Fault_SWT_MainChiller,   !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    Chiller:Electric:ReformulatedEIR,   !- Chiller Object Type
-    MainChiller,             !- Chiller Object Name
-    2.0;                     !- Reference Sensor Offset {deltaC}
-
+FaultModel:TemperatureSensorOffset:ChillerSupplyWater,
+  Fault_SWT_MainChiller,      !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Chiller:Electric:ReformulatedEIR,  !- Chiller Object Type
+  MainChiller,                !- Chiller Object Name
+  2.0;                        !- Reference Sensor Offset {deltaC}
 \end{lstlisting}
 
 
@@ -592,41 +585,39 @@ This field defines the reference offset of the temperature sensor. A positive va
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the condenser supply water temperature sensor offset
-
   CoolingTower:TwoSpeed,
-    Cond Tower 1,            !- Name
-    Condenser Tower 1 Outlet Node,  !- Water Inlet Node Name
-    Condenser Tower 2 Outlet Node,  !- Water Outlet Node Name
-    ,                        !- Design Water Flow Rate {m3/s}
-    8.0,                     !- High Fan Speed Air Flow Rate {m3/s}
-    500,                     !- High Fan Speed Fan Power {W}
-    ,                        !- High Fan Speed U-Factor Times Area Value {W/K}
-    4.0,                     !- Low Fan Speed Air Flow Rate {m3/s}
-    ,                        !- Low Fan Speed Air Flow Rate Sizing Factor
-    125,                     !- Low Fan Speed Fan Power {W}
-    ,                        !- Low Fan Speed Fan Power Sizing Factor
-    ,                        !- Low Fan Speed U-Factor Times Area Value {W/K}
-    ,                        !- Low Fan Speed U-Factor Times Area Sizing Factor
-    0.8,                     !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                        !- Free Convection Regime Air Flow Rate Sizing Factor
-    ,                        !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
-    NominalCapacity,         !- Performance Input Method
-    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    20000.0,                 !- High Speed Nominal Capacity {W}
-    10000.0,                 !- Low Speed Nominal Capacity {W}
-    ,                        !- Low Speed Nominal Capacity Sizing Factor
-    2000.0,                  !- Free Convection Nominal Capacity {W}
-    ;                        !- Free Convection Nominal Capacity Sizing Factor
+  Cond Tower 1,               !- Name
+  Condenser Tower 1 Outlet Node,  !- Water Inlet Node Name
+  Condenser Tower 2 Outlet Node,  !- Water Outlet Node Name
+  ,                           !- Design Water Flow Rate {m3/s}
+  8.0,                        !- High Fan Speed Air Flow Rate {m3/s}
+  500,                        !- High Fan Speed Fan Power {W}
+  ,                           !- High Fan Speed U-Factor Times Area Value {W/K}
+  4.0,                        !- Low Fan Speed Air Flow Rate {m3/s}
+  ,                           !- Low Fan Speed Air Flow Rate Sizing Factor
+  125,                        !- Low Fan Speed Fan Power {W}
+  ,                           !- Low Fan Speed Fan Power Sizing Factor
+  ,                           !- Low Fan Speed U-Factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  0.8,                        !- Free Convection Regime Air Flow Rate {m3/s}
+  ,                           !- Free Convection Regime Air Flow Rate Sizing Factor
+  ,                           !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  20000.0,                    !- High Speed Nominal Capacity {W}
+  10000.0,                    !- Low Speed Nominal Capacity {W}
+  ,                           !- Low Speed Nominal Capacity Sizing Factor
+  2000.0,                     !- Free Convection Nominal Capacity {W}
+  ;                           !- Free Convection Nominal Capacity Sizing Factor
 
-  FaultModel:TemperatureSensorOffset:CondenserSupplyWater,
-    Fault_SWT_CoolTower,     !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    CoolingTower:TwoSpeed,!- Cooling Tower Object Type
-    Cond Tower 1,            !- Cooling Tower Object Name
-    5.0;                     !- Reference Sensor Offset {deltaC}
-
+FaultModel:TemperatureSensorOffset:CondenserSupplyWater,
+  Fault_SWT_CoolTower,        !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  CoolingTower:TwoSpeed,      !- Cooling Tower Object Type
+  Cond Tower 1,               !- Cooling Tower Object Name
+  5.0;                        !- Reference Sensor Offset {deltaC}
 \end{lstlisting}
 
 
@@ -666,33 +657,31 @@ This field defines the UA reduction factor of the faulty cooling tower. The fact
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the fouling cooling tower
-
   CoolingTower:SingleSpeed,
-    Cond Tower1,             !- Name
-    Condenser Tower 1 Inlet Node,  !- Water Inlet Node Name
-    Condenser Tower 1 Outlet Node,  !- Water Outlet Node Name
-    0.0011,                  !- Design Water Flow Rate {m3/s}
-    8.0,                     !- Design Air Flow Rate {m3/s}
-    500,                     !- Design Fan Power {W}
-    175.0,                   !- Design U-Factor Times Area Value {W/K}
-    0.0,                     !- Free Convection Air Flow Rate {m3/s}
-    ,                        !- Free Convection Air Flow Rate Sizing Factor
-    0.0,                     !- Free Convection U-Factor Times Area Value {W/K}
-    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
-    UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                        !- Nominal Capacity {W}
-    ,                        !- Free Convection Capacity {W}
-    ;                        !- Free Convection Nominal Capacity Sizing Factor
+  Cond Tower1,                !- Name
+  Condenser Tower 1 Inlet Node,  !- Water Inlet Node Name
+  Condenser Tower 1 Outlet Node,  !- Water Outlet Node Name
+  0.0011,                     !- Design Water Flow Rate {m3/s}
+  8.0,                        !- Design Air Flow Rate {m3/s}
+  500,                        !- Design Fan Power {W}
+  175.0,                      !- Design U-Factor Times Area Value {W/K}
+  0.0,                        !- Free Convection Air Flow Rate {m3/s}
+  ,                           !- Free Convection Air Flow Rate Sizing Factor
+  0.0,                        !- Free Convection U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- Nominal Capacity {W}
+  ,                           !- Free Convection Capacity {W}
+  ;                           !- Free Convection Nominal Capacity Sizing Factor
 
-  FaultModel:Fouling:CoolingTower,
-    Fault_fouling_CoolTower, !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    CoolingTower:SingleSpeed,!- Cooling Tower Object Type
-    Cond Tower1,             !- Cooling Tower Object Name
-    0.7;                     !- UA Reduction Factor
-
+FaultModel:Fouling:CoolingTower,
+  Fault_fouling_CoolTower,    !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  CoolingTower:SingleSpeed,   !- Cooling Tower Object Type
+  Cond Tower1,                !- Cooling Tower Object Name
+  0.7;                        !- UA Reduction Factor
 \end{lstlisting}
 
 
@@ -733,32 +722,31 @@ This field defines the fouling factor of the faulty boiler. The factor indicates
 ! IDF examples:
 ! example faults for the fouling boilers
   Boiler:HotWater,
-    HeatSys1 Boiler,         !- Name
-    NATURALGAS,              !- Fuel Type
-    AUTOSIZE,                !- Nominal Capacity {W}
-    0.78,                    !- Nominal Thermal Efficiency
-    LeavingBoiler,           !- Efficiency Curve Temperature Evaluation Variable
-    ,                        !- Normalized Boiler Efficiency Curve Name
-    82.2000,                 !- Design Water Outlet Temperature {C}
-    AUTOSIZE,                !- Design Water Flow Rate {m3/s}
-    0.0,                     !- Minimum Part Load Ratio
-    1.2,                     !- Maximum Part Load Ratio
-    1.0,                     !- Optimum Part Load Ratio
-    HeatSys1 Pump-HeatSys1 BoilerNode,  !- Boiler Water Inlet Node Name
-    HeatSys1 Supply Equipment Outlet Node,  !- Boiler Water Outlet Node Name
-    95.0,                    !- Water Outlet Upper Temperature Limit {C}
-    LeavingSetpointModulated,!- Boiler Flow Mode
-    0.0000,                  !- On Cycle Parasitic Electric Load {W}
-    1.0000;                  !- Sizing Factor
+  HeatSys1 Boiler,            !- Name
+  NATURALGAS,                 !- Fuel Type
+  AUTOSIZE,                   !- Nominal Capacity {W}
+  0.78,                       !- Nominal Thermal Efficiency
+  LeavingBoiler,              !- Efficiency Curve Temperature Evaluation Variable
+  ,                           !- Normalized Boiler Efficiency Curve Name
+  82.2000,                    !- Design Water Outlet Temperature {C}
+  AUTOSIZE,                   !- Design Water Flow Rate {m3/s}
+  0.0,                        !- Minimum Part Load Ratio
+  1.2,                        !- Maximum Part Load Ratio
+  1.0,                        !- Optimum Part Load Ratio
+  HeatSys1 Pump-HeatSys1 BoilerNode,  !- Boiler Water Inlet Node Name
+  HeatSys1 Supply Equipment Outlet Node,  !- Boiler Water Outlet Node Name
+  95.0,                       !- Water Outlet Upper Temperature Limit {C}
+  LeavingSetpointModulated,   !- Boiler Flow Mode
+  0.0000,                     !- On Cycle Parasitic Electric Load {W}
+  1.0000;                     !- Sizing Factor
 
-  FaultModel:Fouling:Boiler,
-    Fault_Fouling_Boiler,    !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    Boiler:HotWater,         !- Boiler Object Type
-    HeatSys1 Boiler,         !- Boiler Object Name
-    0.8;                     !- Fouling Factor
-
+FaultModel:Fouling:Boiler,
+  Fault_Fouling_Boiler,       !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Boiler:HotWater,            !- Boiler Object Type
+  HeatSys1 Boiler,            !- Boiler Object Name
+  0.8;                        !- Fouling Factor
 \end{lstlisting}
 
 
@@ -798,43 +786,41 @@ This field defines the fouling factor of the faulty chiller. The factor indicate
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the fouling chillers
-
   Chiller:Electric:ReformulatedEIR,
-    CoolSys1 Chiller 1,      !- Name
-    AUTOSIZE,                !- Reference Capacity {W}
-    5.5,                     !- Reference COP {W/W}
-    6.67,                    !- Reference Leaving Chilled Water Temperature {C}
-    35,                      !- Reference Leaving Condenser Water Temperature {C}
-    AutoSize,                !- Reference Chilled Water Flow Rate {m3/s}
-    AutoSize,                !- Reference Condenser Water Flow Rate {m3/s}
-    WC Screw Default 90.1-2004 Cap_fT,  !- Cooling Capacity Function of Temperature Curve Name
-    WC Screw Default 90.1-2004 EIR_fT,  !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name
-    ,                        !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Type
-    ReformEIRChiller Carrier 19XR 1259kW/6.26COP/Vanes EIRFPLR,  !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
-    0.1,                     !- Minimum Part Load Ratio
-    1,                       !- Maximum Part Load Ratio
-    1,                       !- Optimum Part Load Ratio
-    0.2,                     !- Minimum Unloading Ratio
-    CoolSys1 Pump-CoolSys1 ChillerNode 1,  !- Chilled Water Inlet Node Name
-    CoolSys1 Supply Equipment Outlet Node 1,  !- Chilled Water Outlet Node Name
-    CoolSys1 Chiller Water Inlet Node 1,  !- Condenser Inlet Node Name
-    CoolSys1 Chiller Water Outlet Node 1,  !- Condenser Outlet Node Name
-    1,                       !- Fraction of Compressor Electric Consumption Rejected by Condenser
-    2,                       !- Leaving Chilled Water Lower Temperature Limit {C}
-    LeavingSetpointModulated,!- Chiller Flow Mode Type
-    ,                        !- Design Heat Recovery Water Flow Rate {m3/s}
-    ,                        !- Heat Recovery Inlet Node Name
-    ,                        !- Heat Recovery Outlet Node Name
-    0.5;                     !- Sizing Factor
+  CoolSys1 Chiller 1,         !- Name
+  AUTOSIZE,                   !- Reference Capacity {W}
+  5.5,                        !- Reference COP {W/W}
+  6.67,                       !- Reference Leaving Chilled Water Temperature {C}
+  35,                         !- Reference Leaving Condenser Water Temperature {C}
+  AutoSize,                   !- Reference Chilled Water Flow Rate {m3/s}
+  AutoSize,                   !- Reference Condenser Water Flow Rate {m3/s}
+  WC Screw Default 90.1-2004 Cap_fT,  !- Cooling Capacity Function of Temperature Curve Name
+  WC Screw Default 90.1-2004 EIR_fT,  !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name
+  ,                           !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Type
+  ReformEIRChiller Carrier 19XR 1259kW/6.26COP/Vanes EIRFPLR,  !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
+  0.1,                        !- Minimum Part Load Ratio
+  1,                          !- Maximum Part Load Ratio
+  1,                          !- Optimum Part Load Ratio
+  0.2,                        !- Minimum Unloading Ratio
+  CoolSys1 Pump-CoolSys1 ChillerNode 1,  !- Chilled Water Inlet Node Name
+  CoolSys1 Supply Equipment Outlet Node 1,  !- Chilled Water Outlet Node Name
+  CoolSys1 Chiller Water Inlet Node 1,  !- Condenser Inlet Node Name
+  CoolSys1 Chiller Water Outlet Node 1,  !- Condenser Outlet Node Name
+  1,                          !- Fraction of Compressor Electric Consumption Rejected by Condenser
+  2,                          !- Leaving Chilled Water Lower Temperature Limit {C}
+  LeavingSetpointModulated,   !- Chiller Flow Mode Type
+  ,                           !- Design Heat Recovery Water Flow Rate {m3/s}
+  ,                           !- Heat Recovery Inlet Node Name
+  ,                           !- Heat Recovery Outlet Node Name
+  0.5;                        !- Sizing Factor
 
-  FaultModel:Fouling:Chiller,
-    Fault_Fouling_Chiller1,  !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    Chiller:Electric:ReformulatedEIR, !- Chiller Object Type
-    CoolSys1 Chiller 1,      !- Chiller Object Name
-    0.8;                     !- Fouling Factor
-
+FaultModel:Fouling:Chiller,
+  Fault_Fouling_Chiller1,     !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Chiller:Electric:ReformulatedEIR,  !- Chiller Object Type
+  CoolSys1 Chiller 1,         !- Chiller Object Name
+  0.8;                        !- Fouling Factor
 \end{lstlisting}
 
 
@@ -874,30 +860,28 @@ This field defines the fouling factor of the faulty evaporative cooler. The fact
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the fouling evaporative coolers
-
   EvaporativeCooler:Indirect:WetCoil,
-    Evaporative Cooler 1,    !- Name
-    ALWAYS_ON,               !- Availability Schedule Name
-    0.8,                     !- Coil Maximum Efficiency
-    0.16,                    !- Coil Flow Ratio
-    55.,                     !- Recirculating Water Pump Power Consumption {W}
-    0.6,                     !- Secondary Air Fan Flow Rate {m3/s}
-    0.7,                     !- Secondary Air Fan Total Efficiency
-    200.0,                   !- Secondary Air Fan Delta Pressure {Pa}
-    Evap Cooler 1 Unit OA Inlet,  !- Primary Air Inlet Node Name
-    Evap Cooler 1 Fan Inlet Node, !- Primary Air Outlet Node Name
-    Constant,                !- Control Type
-    ,                        !- Water Supply Storage Tank Name
-    Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
+  Evaporative Cooler 1,       !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  0.8,                        !- Coil Maximum Efficiency
+  0.16,                       !- Coil Flow Ratio
+  55.,                        !- Recirculating Water Pump Power Consumption {W}
+  0.6,                        !- Secondary Air Fan Flow Rate {m3/s}
+  0.7,                        !- Secondary Air Fan Total Efficiency
+  200.0,                      !- Secondary Air Fan Delta Pressure {Pa}
+  Evap Cooler 1 Unit OA Inlet,!- Primary Air Inlet Node Name
+  Evap Cooler 1 Fan Inlet Node,  !- Primary Air Outlet Node Name
+  Constant,                   !- Control Type
+  ,                           !- Water Supply Storage Tank Name
+  Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
 
-  FaultModel:Fouling:EvaporativeCooler,
-    Fault_Fouling_EvapCooler1,!- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    EvaporativeCooler:Indirect:WetCoil, !- Evaporative Cooler Object Type
-    Evaporative Cooler 1,    !- Evaporative Cooler Object Name
-    0.7;                     !- Reference Efficiency Reduction Factor
-
+FaultModel:Fouling:EvaporativeCooler,
+  Fault_Fouling_EvapCooler1,  !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  EvaporativeCooler:Indirect:WetCoil,  !- Evaporative Cooler Object Type
+  Evaporative Cooler 1,       !- Evaporative Cooler Object Name
+  0.7;                        !- Reference Efficiency Reduction Factor
 \end{lstlisting}
 
 
@@ -940,42 +924,40 @@ This field defines the reference offset of the temperature sensor. A positive va
 \begin{lstlisting}
 ! IDF examples:
 ! example faults for the coil supply air temperature sensor offset
-
   Coil:Cooling:Water,
-    Main Cooling Coil 1,     !- Name
-    CoolingCoilAvailSched,   !- Availability Schedule Name
-    autosize,                !- Design Water Flow Rate {m3/s}
-    autosize,                !- Design Air Flow Rate {m3/s}
-    autosize,                !- Design Inlet Water Temperature {C}
-    autosize,                !- Design Inlet Air Temperature {C}
-    autosize,                !- Design Outlet Air Temperature {C}
-    autosize,                !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
-    autosize,                !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
-    Main Cooling Coil 1 Water Inlet Node,  !- Water Inlet Node Name
-    Main Cooling Coil 1 Water Outlet Node,  !- Water Outlet Node Name
-    Mixed Air Node 1,        !- Air Inlet Node Name
-    Main Cooling Coil 1 Outlet Node,  !- Air Outlet Node Name
-    SimpleAnalysis,          !- Type of Analysis
-    CrossFlow;               !- Heat Exchanger Configuration
+  Main Cooling Coil 1,        !- Name
+  CoolingCoilAvailSched,      !- Availability Schedule Name
+  autosize,                   !- Design Water Flow Rate {m3/s}
+  autosize,                   !- Design Air Flow Rate {m3/s}
+  autosize,                   !- Design Inlet Water Temperature {C}
+  autosize,                   !- Design Inlet Air Temperature {C}
+  autosize,                   !- Design Outlet Air Temperature {C}
+  autosize,                   !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
+  autosize,                   !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
+  Main Cooling Coil 1 Water Inlet Node,  !- Water Inlet Node Name
+  Main Cooling Coil 1 Water Outlet Node,  !- Water Outlet Node Name
+  Mixed Air Node 1,           !- Air Inlet Node Name
+  Main Cooling Coil 1 Outlet Node,  !- Air Outlet Node Name
+  SimpleAnalysis,             !- Type of Analysis
+  CrossFlow;                  !- Heat Exchanger Configuration
 
-  Controller:WaterCoil,
-    Central Cooling Coil Controller 1,  !- Name
-    Temperature,             !- Control Variable
-    Reverse,                 !- Action
-    FLOW,                    !- Actuator Variable
-    Main Cooling Coil 1 Outlet Node,  !- Sensor Node Name
-    Main Cooling Coil 1 Water Inlet Node,  !- Actuator Node Name
-    0.002,                   !- Controller Convergence Tolerance {deltaC}
-    autosize,                !- Maximum Actuated Flow {m3/s}
-    0.0;                     !- Minimum Actuated Flow {m3/s}
+Controller:WaterCoil,
+  Central Cooling Coil Controller 1,  !- Name
+  Temperature,                !- Control Variable
+  Reverse,                    !- Action
+  FLOW,                       !- Actuator Variable
+  Main Cooling Coil 1 Outlet Node,  !- Sensor Node Name
+  Main Cooling Coil 1 Water Inlet Node,  !- Actuator Node Name
+  0.002,                      !- Controller Convergence Tolerance {deltaC}
+  autosize,                   !- Maximum Actuated Flow {m3/s}
+  0.0;                        !- Minimum Actuated Flow {m3/s}
 
-  FaultModel:TemperatureSensorOffset:CoilSupplyAir,
-    Fault_SAT_CoolCoil1,     !- Name
-    ,                        !- Availability Schedule Name
-    ,                        !- Severity Schedule Name
-    Coil:Cooling:Water,      !- Coil Object Type
-    Main Cooling Coil 1,     !- Coil Object Name
-    Central Cooling Coil Controller 1, !- Water Coil Controller Name
-    2.0;                     !- Reference Sensor Offset {deltaC}
-
+FaultModel:TemperatureSensorOffset:CoilSupplyAir,
+  Fault_SAT_CoolCoil1,        !- Name
+  ,                           !- Availability Schedule Name
+  ,                           !- Severity Schedule Name
+  Coil:Cooling:Water,         !- Coil Object Type
+  Main Cooling Coil 1,        !- Coil Object Name
+  Central Cooling Coil Controller 1,  !- Water Coil Controller Name
+  2.0;                        !- Reference Sensor Offset {deltaC}
 \end{lstlisting}

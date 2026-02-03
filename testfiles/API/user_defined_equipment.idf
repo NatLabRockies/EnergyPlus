@@ -92,7 +92,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 
@@ -643,7 +643,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -677,7 +677,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -691,7 +691,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -725,7 +725,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -739,7 +739,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1137,7 +1137,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA West Zone,       !- Name
@@ -1173,7 +1180,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA EAST ZONE,       !- Name
@@ -1209,7 +1223,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NORTH ZONE,      !- Name
@@ -1292,7 +1313,7 @@
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating:Water,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
     Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
@@ -1448,7 +1469,7 @@
 
   PlantEquipmentList,
     heating plant,           !- Name
-    DistrictHeating:Water,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
   DistrictHeating:Water,
@@ -1737,13 +1758,9 @@
   Output:Variable,*,Zone 2 WinAC Electricity Power,hourly;
 
   ! Output:Variable,*,Zone 1 WinAC Total Cooling Rate,hourly;
-
   ! Output:Variable,Zone 1 WinAC Total Cooling Rate,PythonPlugin:OutputVariable,hourly;
-
   ! Output:Variable,*,Zone 1 WinAC Electricity Power,hourly;
-
   ! Output:Variable,Zone 1 WinAC Electricity Power,PythonPlugin:OutputVariable,hourly;
-
   ! Output:Variable,Zone 1 WinAC Electricity Consumption,PythonPlugin:OutputVariable,hourly;
 
   Output:Variable,Zone1WindACAirOutletNode,System Node Mass Flow Rate,hourly;
@@ -1840,13 +1857,11 @@
 !    Zone1_WinAC_ModelInput,  !- Program Name 1
 !    WinAC_OnFanCycCoil_Sim_Model,  !- Program Name 2
 !    Zone1_WinAC_ModelOuput;  !- Program Name 3
-
 !  PythonPlugin:Instance,
 !    Zone 1 Window AC Model Program Manager,  !- Name
 !    Yes,                     !- Run During Warmup Days
 !    PythonPluginUserDefinedWindACAuto,  !- Python Module Name
 !    Zone1WinACModel;         !- Plugin Class Name
-
 !  EnergyManagementSystem:Program,
 !    Zone1_WinAC_ModelInput,  !- Name
 !    Set PrimAir_Tinlet = Zone1WinAC_PrimAir_Tinlet,  !- Program Line 1
@@ -1954,21 +1969,18 @@
 !    Zone1WinAC_ElectPower,   !- Variable Name 1
 !    Zone1WinAC_tot_cool_Power,  !- Variable Name 2
 !    Zone1WinAC_ElectEnergy;  !- Variable Name 3
-
 !  PythonPlugin:OutputVariable,
 !    Zone 1 WinAC Electricity Power,  !- Name
 !    Zone1WinAC_ElectPower,   !- Python Plugin Variable Name
 !    Averaged,                !- Type of Data in Variable
 !    SystemTimestep,          !- Update Frequency
 !    W;                       !- Units
-
 !  PythonPlugin:OutputVariable,
 !    Zone 1 WinAC Total Cooling Rate,  !- Name
 !    Zone1WinAC_tot_cool_Power,  !- Python Plugin Variable Name
 !    Averaged,                !- Type of Data in Variable
 !    SystemTimestep,          !- Update Frequency
 !    W;                       !- Units
-
 !  EnergyManagementSystem:OutputVariable,
 !    Zone 1 WinAC Electricity Power,  !- Name
 !    Zone1WinAC_ElectPower,   !- EMS Variable Name
@@ -1986,7 +1998,6 @@
 !    Cooling,                 !- End-Use Category
 !    Window Air Conditioners, !- End-Use Subcategory
 !    J;                       !- Units
-
 !  PythonPlugin:OutputVariable,
 !    Zone 1 WinAC Electricity Consumption,  !- Name
 !    Zone1WinAC_ElectEnergy,  !- Python Plugin Variable Name

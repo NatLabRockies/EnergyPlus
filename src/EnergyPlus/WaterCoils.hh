@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -156,7 +156,7 @@ namespace WaterCoils {
         // END calculated parameters for detailed flat fin coil
         // Design Input Variables to the Design Detailed Simple inputs model
         Real64 DesInletWaterTemp;   // Entering water temperature at Design(C)
-        Real64 DesAirVolFlowRate;   // Entering Air Volume Flow Rate Design( m3/s)
+        Real64 DesAirVolFlowRate;   // Entering Air Volume Flow Rate Design (m3/s)
         Real64 DesInletAirTemp;     // Entering air dry bulb temperature at Design(C)
         Real64 DesInletAirHumRat;   // Entering air humidity ratio at design conditions
         Real64 DesTotWaterCoilLoad; // Total heat transfer rate at Design(Watt)
@@ -243,8 +243,7 @@ namespace WaterCoils {
               CondensateTankSupplyARRID(0), CondensateVdot(0.0), CondensateVol(0.0), CoilPerfInpMeth(0), FaultyCoilFoulingFlag(false),
               FaultyCoilFoulingIndex(0), FaultyCoilFoulingFactor(0.0), OriginalUACoilVariable(0.0), OriginalUACoilExternal(0.0),
               OriginalUACoilInternal(0.0), DesiccantRegenerationCoil(false), DesiccantDehumNum(0), DesignWaterDeltaTemp(0.0),
-              UseDesignWaterDeltaTemp(false), ControllerName(""), ControllerIndex(0), reportCoilFinalSizes(true), AirLoopDOASFlag(false),
-              heatRecoveryCoil(false)
+              UseDesignWaterDeltaTemp(false), ControllerIndex(0), reportCoilFinalSizes(true), AirLoopDOASFlag(false), heatRecoveryCoil(false)
         {
         }
     };
@@ -320,7 +319,7 @@ namespace WaterCoils {
                            int const CoilNum,            // Number of Coil
                            Real64 const WaterTempIn,     // Water temperature IN to this function (C)
                            Real64 const AirTempIn,       // Air dry bulb temperature IN to this function(C)
-                           Real64 const AirHumRat,       // Air Humidity Ratio IN to this funcation (C)
+                           Real64 const AirHumRat,       // Air Humidity Ratio IN to this function (C)
                            Real64 const UAInternalTotal, // Internal overall heat transfer coefficient(W/m2 C)
                            Real64 const UAExternalTotal, // External overall heat transfer coefficient(W/m2 C)
                            Real64 &OutletWaterTemp,      // Leaving water temperature (C)
@@ -376,7 +375,7 @@ namespace WaterCoils {
                                    Real64 &EnergyOutStreamTwo      // Outlet state of stream2 (C)
     );
 
-    // Subroutine for caculating outlet condition if coil is wet , for Cooling Coil
+    // Subroutine for calculating outlet condition if coil is wet , for Cooling Coil
 
     void WetCoilOutletCondition(EnergyPlusData &state,
                                 int const CoilNum,

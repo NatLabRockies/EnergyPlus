@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -446,7 +446,7 @@ TEST_F(EnergyPlusFixture, Psychrometrics_Interpolation_Sample_Test)
     Real64 error = 0.0;
     int i;
     for (i = 1; i < 1651; ++i) {
-        int tsat_fn_pb_pressure = i * 64; // sample bin size =64 Pa; sample size =1651 (continous)
+        int tsat_fn_pb_pressure = i * 64; // sample bin size =64 Pa; sample size =1651 (continuous)
         tsat_psy = PsyTsatFnPb(*state, tsat_fn_pb_pressure);
         error = max(abs(tsat_psy - tsat_fn_pb_y[i]), error);
     }

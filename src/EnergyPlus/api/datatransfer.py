@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,10 +53,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_int, c_char_p, c_void_p, POINTER, Structure, byref
-from pyenergyplus.common import RealEP, EnergyPlusException, is_number
-from typing import List, Union
+from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_void_p, cdll
 from pathlib import Path
+from typing import List, Union
+
+from pyenergyplus.common import EnergyPlusException, RealEP, is_number
+
 
 class DataExchange:
     """
@@ -85,7 +87,7 @@ class DataExchange:
     """
 
     class _APIDataEntry(Structure):
-        _fields_ = [("what", c_char_p),("name", c_char_p),("key", c_char_p),("type", c_char_p),("unit", c_char_p)]
+        _fields_ = [("what", c_char_p), ("name", c_char_p), ("key", c_char_p), ("type", c_char_p), ("unit", c_char_p)]
 
     class APIDataExchangePoint:
         """
@@ -93,6 +95,7 @@ class DataExchange:
         class could represent output variables, output meters, actuators, and more.  The "type" member variable
         can be used to filter a specific type.
         """
+
         def __init__(self, _what: str, _name: str, _key: str, _type: str, _unit: str):
             #: This variable will hold the basic type of API data point, in string form.
             #: This can be one of the following: "Actuator", "InternalVariable", "PluginGlobalVariable",
@@ -309,12 +312,13 @@ class DataExchange:
         r = self.api.getAPIData(state, byref(count))
         list_response = [
             DataExchange.APIDataExchangePoint(
-                r[i].what.decode('utf-8'),
-                r[i].name.decode('utf-8'),
-                r[i].key.decode('utf-8'),
-                r[i].type.decode('utf-8'),
-                r[i].unit.decode('utf-8'),
-            ) for i in range(count.value)
+                r[i].what.decode("utf-8"),
+                r[i].name.decode("utf-8"),
+                r[i].key.decode("utf-8"),
+                r[i].type.decode("utf-8"),
+                r[i].unit.decode("utf-8"),
+            )
+            for i in range(count.value)
         ]
         self.api.freeAPIData(r, count)  # free the underlying C memory now that we have a Python copy
         return list_response
@@ -379,7 +383,7 @@ class DataExchange:
         :return: A pathlib.Path of the input file path
         """
         c_string = self.api.inputFilePath(state)
-        res = Path(c_string.decode('utf-8'))
+        res = Path(c_string.decode("utf-8"))
         return res
 
     def get_weather_file_path(self, state: c_void_p) -> Path:
@@ -392,9 +396,8 @@ class DataExchange:
         :return: A pathlib.Path of the weather file
         """
         c_string = self.api.epwFilePath(state)
-        res = Path(c_string.decode('utf-8'))
+        res = Path(c_string.decode("utf-8"))
         return res
-
 
     def get_object_names(self, state: c_void_p, object_type_name: Union[str, bytes]) -> List[str]:
         """
@@ -405,21 +408,23 @@ class DataExchange:
         """
 
         if isinstance(object_type_name, str):
-            object_type_name = object_type_name.encode('utf-8')
+            object_type_name = object_type_name.encode("utf-8")
         elif not isinstance(object_type_name, bytes):
             raise EnergyPlusException(
                 "`get_object_names` expects `object_type_name` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(object_type_name))
+                "'{}'".format(object_type_name)
+            )
         count = c_int()
         r = self.api.getObjectNames(state, object_type_name, byref(count))
         if not r:
             return []
-        list_response = [r[i].decode('utf-8', errors='ignore') for i in range(count.value)]
+        list_response = [r[i].decode("utf-8", errors="ignore") for i in range(count.value)]
         self.api.freeObjectNames(r, count)  # free the underlying C memory now that we have a Python copy
         return list_response
 
-    def get_num_nodes_in_cond_fd_surf_layer(self, state: c_void_p, surface_name: Union[str, bytes],
-                                            material_name: Union[str, bytes]) -> None:
+    def get_num_nodes_in_cond_fd_surf_layer(
+        self, state: c_void_p, surface_name: Union[str, bytes], material_name: Union[str, bytes]
+    ) -> None:
         """
         Get the number of nodes in CondFD surface layer.
 
@@ -431,21 +436,24 @@ class DataExchange:
         :return: Nothing
         """
         if isinstance(surface_name, str):
-            surface_name = surface_name.encode('utf-8')
+            surface_name = surface_name.encode("utf-8")
         elif not isinstance(surface_name, bytes):
             raise EnergyPlusException(
                 "`get_num_nodes_in_cond_fd_surf_layer` expects `surface_name` as a `str` or UTF-8 encoded `bytes`, not"
-                " '{}'".format(surface_name))
+                " '{}'".format(surface_name)
+            )
         if isinstance(material_name, str):
-            material_name = material_name.encode('utf-8')
+            material_name = material_name.encode("utf-8")
         elif not isinstance(material_name, bytes):
             raise EnergyPlusException(
                 "`get_num_nodes_in_cond_fd_surf_layer` expects `material_name` as a `str` or UTF-8 encoded `bytes`, not"
-                " '{}'".format(material_name))
+                " '{}'".format(material_name)
+            )
         return self.api.getNumNodesInCondFDSurfaceLayer(state, surface_name, material_name)
 
-    def request_variable(self, state: c_void_p, variable_name: Union[str, bytes],
-                         variable_key: Union[str, bytes]) -> None:
+    def request_variable(
+        self, state: c_void_p, variable_name: Union[str, bytes], variable_key: Union[str, bytes]
+    ) -> None:
         """
         Request output variables so they can be accessed during a simulation.
 
@@ -464,21 +472,24 @@ class DataExchange:
         :return: Nothing
         """
         if isinstance(variable_name, str):
-            variable_name = variable_name.encode('utf-8')
+            variable_name = variable_name.encode("utf-8")
         elif not isinstance(variable_name, bytes):
             raise EnergyPlusException(
                 "`request_variable` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_name))
+                "'{}'".format(variable_name)
+            )
         if isinstance(variable_key, str):
-            variable_key = variable_key.encode('utf-8')
+            variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
                 "`request_variable` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_key))
+                "'{}'".format(variable_key)
+            )
         self.api.requestVariable(state, variable_name, variable_key)
 
-    def get_variable_handle(self, state: c_void_p, variable_name: Union[str, bytes],
-                            variable_key: Union[str, bytes]) -> int:
+    def get_variable_handle(
+        self, state: c_void_p, variable_name: Union[str, bytes], variable_key: Union[str, bytes]
+    ) -> int:
         """
         Get a handle to an output variable in a running simulation.
 
@@ -495,17 +506,19 @@ class DataExchange:
         :return: An integer ID for this output variable, or -1 if one could not be found.
         """
         if isinstance(variable_name, str):
-            variable_name = variable_name.encode('utf-8')
+            variable_name = variable_name.encode("utf-8")
         elif not isinstance(variable_name, bytes):
             raise EnergyPlusException(
                 "`get_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_name))
+                "'{}'".format(variable_name)
+            )
         if isinstance(variable_key, str):
-            variable_key = variable_key.encode('utf-8')
+            variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
                 "`get_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_key))
+                "'{}'".format(variable_key)
+            )
         return self.api.getVariableHandle(state, variable_name, variable_key)
 
     def get_meter_handle(self, state: c_void_p, meter_name: Union[str, bytes]) -> int:
@@ -524,19 +537,20 @@ class DataExchange:
         """
         meter_name = meter_name.upper()
         if isinstance(meter_name, str):
-            meter_name = meter_name.encode('utf-8')
+            meter_name = meter_name.encode("utf-8")
         elif not isinstance(meter_name, bytes):
             raise EnergyPlusException(
                 "`get_meter_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(meter_name))
+                "'{}'".format(meter_name)
+            )
         return self.api.getMeterHandle(state, meter_name)
 
     def get_actuator_handle(
-            self,
-            state: c_void_p,
-            component_type: Union[str, bytes],
-            control_type: Union[str, bytes],
-            actuator_key: Union[str, bytes]
+        self,
+        state: c_void_p,
+        component_type: Union[str, bytes],
+        control_type: Union[str, bytes],
+        actuator_key: Union[str, bytes],
     ) -> int:
         """
         Get a handle to an available actuator in a running simulation.
@@ -554,23 +568,26 @@ class DataExchange:
         :return: An integer ID for this output variable, or -1 if one could not be found.
         """
         if isinstance(component_type, str):
-            component_type = component_type.encode('utf-8')
+            component_type = component_type.encode("utf-8")
         elif not isinstance(component_type, bytes):
             raise EnergyPlusException(
                 "`get_actuator_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(component_type))
+                "'{}'".format(component_type)
+            )
         if isinstance(control_type, str):
-            control_type = control_type.encode('utf-8')
+            control_type = control_type.encode("utf-8")
         elif not isinstance(control_type, bytes):
             raise EnergyPlusException(
                 "`get_actuator_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(control_type))
+                "'{}'".format(control_type)
+            )
         if isinstance(actuator_key, str):
-            actuator_key = actuator_key.encode('utf-8')
+            actuator_key = actuator_key.encode("utf-8")
         elif not isinstance(actuator_key, bytes):
             raise EnergyPlusException(
                 "`get_actuator_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(actuator_key))
+                "'{}'".format(actuator_key)
+            )
         return self.api.getActuatorHandle(state, component_type, control_type, actuator_key)
 
     def get_variable_value(self, state: c_void_p, variable_handle: int) -> float:
@@ -586,8 +603,8 @@ class DataExchange:
         """
         if not is_number(variable_handle):
             raise EnergyPlusException(
-                "`get_variable_value` expects `variable_handle` as an `int`, not "
-                "'{}'".format(variable_handle))
+                "`get_variable_value` expects `variable_handle` as an `int`, not " "'{}'".format(variable_handle)
+            )
         return self.api.getVariableValue(state, variable_handle)
 
     def get_meter_value(self, state: c_void_p, meter_handle: int) -> float:
@@ -606,8 +623,8 @@ class DataExchange:
         """
         if not is_number(meter_handle):
             raise EnergyPlusException(
-                "`get_meter_value` expects `meter_handle` as an `int`, not "
-                "'{}'".format(meter_handle))
+                "`get_meter_value` expects `meter_handle` as an `int`, not " "'{}'".format(meter_handle)
+            )
         return self.api.getMeterValue(state, meter_handle)
 
     def set_actuator_value(self, state: c_void_p, actuator_handle: int, actuator_value: float) -> None:
@@ -629,12 +646,12 @@ class DataExchange:
         """
         if not is_number(actuator_handle):
             raise EnergyPlusException(
-                "`set_actuator_value` expects `actuator_handle` as an `int`, not "
-                "'{}'".format(actuator_handle))
+                "`set_actuator_value` expects `actuator_handle` as an `int`, not " "'{}'".format(actuator_handle)
+            )
         if not is_number(actuator_value):
             raise EnergyPlusException(
-                "`set_actuator_value` expects `actuator_value` as a `float`, not "
-                "'{}'".format(actuator_value))
+                "`set_actuator_value` expects `actuator_value` as a `float`, not " "'{}'".format(actuator_value)
+            )
         self.api.setActuatorValue(state, actuator_handle, actuator_value)
 
     def reset_actuator(self, state: c_void_p, actuator_handle: int) -> None:
@@ -648,8 +665,8 @@ class DataExchange:
         """
         if not is_number(actuator_handle):
             raise EnergyPlusException(
-                "`reset_actuator` expects `actuator_handle` as an `int`, not "
-                "'{}'".format(actuator_handle))
+                "`reset_actuator` expects `actuator_handle` as an `int`, not " "'{}'".format(actuator_handle)
+            )
         self.api.resetActuator(state, actuator_handle)
 
     def get_actuator_value(self, state: c_void_p, actuator_handle: int) -> float:
@@ -665,12 +682,13 @@ class DataExchange:
         """
         if not is_number(actuator_handle):
             raise EnergyPlusException(
-                "`get_actuator_value` expects `actuator_handle` as an `int`, not "
-                "'{}'".format(actuator_handle))
+                "`get_actuator_value` expects `actuator_handle` as an `int`, not " "'{}'".format(actuator_handle)
+            )
         return self.api.getActuatorValue(state, actuator_handle)
 
-    def get_internal_variable_handle(self, state: c_void_p, variable_type: Union[str, bytes],
-                                     variable_key: Union[str, bytes]) -> int:
+    def get_internal_variable_handle(
+        self, state: c_void_p, variable_type: Union[str, bytes], variable_key: Union[str, bytes]
+    ) -> int:
         """
         Get a handle to an internal variable in a running simulation.
 
@@ -686,17 +704,19 @@ class DataExchange:
         :return: An integer ID for this output variable, or -1 if one could not be found.
         """
         if isinstance(variable_type, str):
-            variable_type = variable_type.encode('utf-8')
+            variable_type = variable_type.encode("utf-8")
         elif not isinstance(variable_type, bytes):
             raise EnergyPlusException(
                 "`get_internal_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_type))
+                "'{}'".format(variable_type)
+            )
         if isinstance(variable_key, str):
-            variable_key = variable_key.encode('utf-8')
+            variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
                 "`get_internal_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(variable_key))
+                "'{}'".format(variable_key)
+            )
         return self.api.getInternalVariableHandle(state, variable_type, variable_key)
 
     def get_internal_variable_value(self, state: c_void_p, variable_handle: int) -> float:
@@ -713,7 +733,8 @@ class DataExchange:
         if not is_number(variable_handle):
             raise EnergyPlusException(
                 "`get_internal_variable_value` expects `variable_handle` as an `int`, not "
-                "'{}'".format(variable_handle))
+                "'{}'".format(variable_handle)
+            )
         return self.api.getInternalVariableValue(state, variable_handle)
 
     def get_construction_handle(self, state: c_void_p, var_name: Union[str, bytes]) -> int:
@@ -734,11 +755,12 @@ class DataExchange:
         :return: An integer ID for this construction, or -1 if one could not be found.
         """
         if isinstance(var_name, str):
-            var_name = var_name.encode('utf-8')
+            var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
                 "`get_construction_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(var_name))
+                "'{}'".format(var_name)
+            )
         return self.api.getConstructionHandle(state, var_name)
 
     def get_ems_global_handle(self, state: c_void_p, var_name: Union[str, bytes]) -> int:
@@ -764,11 +786,12 @@ class DataExchange:
         :return: An integer ID for this EMS global variable, or -1 if one could not be found.
         """
         if isinstance(var_name, str):
-            var_name = var_name.encode('utf-8')
+            var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
                 "`get_ems_global_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(var_name))
+                "'{}'".format(var_name)
+            )
         return self.api.getEMSGlobalVariableHandle(state, var_name)
 
     def get_ems_global_value(self, state: c_void_p, handle: int) -> float:
@@ -787,9 +810,7 @@ class DataExchange:
         :return: Floating point representation of the EMS global variable value
         """
         if not is_number(handle):
-            raise EnergyPlusException(
-                "`get_ems_global_value` expects `handle` as an `int`, not "
-                "'{}'".format(handle))
+            raise EnergyPlusException("`get_ems_global_value` expects `handle` as an `int`, not " "'{}'".format(handle))
         return self.api.getEMSGlobalVariableValue(state, handle)
 
     def set_ems_global_value(self, state: c_void_p, handle: int, value: float) -> None:
@@ -809,12 +830,10 @@ class DataExchange:
         """
         if not is_number(handle):
             raise EnergyPlusException(
-                "`set_ems_global_value` expects `variable_handle` as an `int`, not "
-                "'{}'".format(handle))
+                "`set_ems_global_value` expects `variable_handle` as an `int`, not " "'{}'".format(handle)
+            )
         if not is_number(value):
-            raise EnergyPlusException(
-                "`set_ems_global_value` expects `value` as a `float`, not "
-                "'{}'".format(value))
+            raise EnergyPlusException("`set_ems_global_value` expects `value` as a `float`, not " "'{}'".format(value))
         self.api.setEMSGlobalVariableValue(state, handle, value)
 
     def get_global_handle(self, state: c_void_p, var_name: Union[str, bytes]) -> int:
@@ -841,11 +860,12 @@ class DataExchange:
         if not self.running_as_python_plugin:
             raise EnergyPlusException("get_global_handle is only available as part of a Python Plugin workflow")
         if isinstance(var_name, str):
-            var_name = var_name.encode('utf-8')
+            var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
                 "`get_global_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(var_name))
+                "'{}'".format(var_name)
+            )
         return self.api.getPluginGlobalVariableHandle(state, var_name)
 
     def get_global_value(self, state: c_void_p, handle: int) -> float:
@@ -866,9 +886,7 @@ class DataExchange:
         if not self.running_as_python_plugin:
             raise EnergyPlusException("get_global_value is only available as part of a Python Plugin workflow")
         if not is_number(handle):
-            raise EnergyPlusException(
-                "`get_global_value` expects `handle` as an `int`, not "
-                "'{}'".format(handle))
+            raise EnergyPlusException("`get_global_value` expects `handle` as an `int`, not " "'{}'".format(handle))
         return self.api.getPluginGlobalVariableValue(state, handle)
 
     def set_global_value(self, state: c_void_p, handle: int, value: float) -> None:
@@ -890,12 +908,10 @@ class DataExchange:
             raise EnergyPlusException("set_global_handle is only available as part of a Python Plugin workflow")
         if not is_number(handle):
             raise EnergyPlusException(
-                "`set_global_value` expects `variable_handle` as an `int`, not "
-                "'{}'".format(handle))
+                "`set_global_value` expects `variable_handle` as an `int`, not " "'{}'".format(handle)
+            )
         if not is_number(value):
-            raise EnergyPlusException(
-                "`get_global_value` expects `value` as a `float`, not "
-                "'{}'".format(value))
+            raise EnergyPlusException("`get_global_value` expects `value` as a `float`, not " "'{}'".format(value))
         self.api.setPluginGlobalVariableValue(state, handle, value)
 
     def get_trend_handle(self, state: c_void_p, trend_var_name: Union[str, bytes]) -> int:
@@ -921,11 +937,12 @@ class DataExchange:
         if not self.running_as_python_plugin:
             raise EnergyPlusException("get_trend_handle is only available as part of a Python Plugin workflow")
         if isinstance(trend_var_name, str):
-            trend_var_name = trend_var_name.encode('utf-8')
+            trend_var_name = trend_var_name.encode("utf-8")
         elif not isinstance(trend_var_name, bytes):
             raise EnergyPlusException(
                 "`get_trend_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
-                "'{}'".format(trend_var_name))
+                "'{}'".format(trend_var_name)
+            )
         return self.api.getPluginTrendVariableHandle(state, trend_var_name)
 
     def get_trend_value(self, state: c_void_p, trend_handle: int, time_index: int) -> float:
@@ -950,12 +967,12 @@ class DataExchange:
             raise EnergyPlusException("get_trend_value is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_value` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_value` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(time_index):
             raise EnergyPlusException(
-                "`get_trend_value` expects `time_index` as an `int`, not "
-                "'{}'".format(time_index))
+                "`get_trend_value` expects `time_index` as an `int`, not " "'{}'".format(time_index)
+            )
         return self.api.getPluginTrendVariableValue(state, trend_handle, time_index)
 
     def get_trend_average(self, state: c_void_p, trend_handle: int, count: int) -> float:
@@ -980,12 +997,10 @@ class DataExchange:
             raise EnergyPlusException("get_trend_average is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_average` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_average` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(count):
-            raise EnergyPlusException(
-                "`get_trend_average` expects `count` as an `int`, not "
-                "'{}'".format(count))
+            raise EnergyPlusException("`get_trend_average` expects `count` as an `int`, not " "'{}'".format(count))
         return self.api.getPluginTrendVariableAverage(state, trend_handle, count)
 
     def get_trend_min(self, state: c_void_p, trend_handle: int, count: int) -> float:
@@ -1010,12 +1025,10 @@ class DataExchange:
             raise EnergyPlusException("get_trend_min is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_min` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_min` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(count):
-            raise EnergyPlusException(
-                "`get_trend_min` expects `count` as an `int`, not "
-                "'{}'".format(count))
+            raise EnergyPlusException("`get_trend_min` expects `count` as an `int`, not " "'{}'".format(count))
         return self.api.getPluginTrendVariableMin(state, trend_handle, count)
 
     def get_trend_max(self, state: c_void_p, trend_handle: int, count: int) -> float:
@@ -1040,12 +1053,10 @@ class DataExchange:
             raise EnergyPlusException("get_trend_max is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_max` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_max` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(count):
-            raise EnergyPlusException(
-                "`get_trend_max` expects `count` as an `int`, not "
-                "'{}'".format(count))
+            raise EnergyPlusException("`get_trend_max` expects `count` as an `int`, not " "'{}'".format(count))
         return self.api.getPluginTrendVariableMax(state, trend_handle, count)
 
     def get_trend_sum(self, state: c_void_p, trend_handle: int, count: int) -> float:
@@ -1070,12 +1081,10 @@ class DataExchange:
             raise EnergyPlusException("get_trend_sum is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_sum` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_sum` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(count):
-            raise EnergyPlusException(
-                "`get_trend_sum` expects `count` as an `int`, not "
-                "'{}'".format(count))
+            raise EnergyPlusException("`get_trend_sum` expects `count` as an `int`, not " "'{}'".format(count))
         return self.api.getPluginTrendVariableSum(state, trend_handle, count)
 
     def get_trend_direction(self, state: c_void_p, trend_handle: int, count: int) -> float:
@@ -1102,12 +1111,10 @@ class DataExchange:
             raise EnergyPlusException("get_trend_direction is only available as part of a Python Plugin workflow")
         if not is_number(trend_handle):
             raise EnergyPlusException(
-                "`get_trend_direction` expects `trend_handle` as an `int`, not "
-                "'{}'".format(trend_handle))
+                "`get_trend_direction` expects `trend_handle` as an `int`, not " "'{}'".format(trend_handle)
+            )
         if not is_number(count):
-            raise EnergyPlusException(
-                "`get_trend_direction` expects `count` as an `int`, not "
-                "'{}'".format(count))
+            raise EnergyPlusException("`get_trend_direction` expects `count` as an `int`, not " "'{}'".format(count))
         return self.api.getPluginTrendVariableDirection(state, trend_handle, count)
 
     def year(self, state: c_void_p) -> int:
@@ -1370,8 +1377,9 @@ class DataExchange:
         """
         return self.api.todayWeatherOutDewPointAtTime(state, hour, time_step_number)
 
-    def today_weather_outdoor_barometric_pressure_at_time(self, state: c_void_p, hour: int,
-                                                          time_step_number: int) -> float:
+    def today_weather_outdoor_barometric_pressure_at_time(
+        self, state: c_void_p, hour: int, time_step_number: int
+    ) -> float:
         """
         Gets the specified weather data at the specified hour and time step index within that hour
 
@@ -1382,8 +1390,9 @@ class DataExchange:
         """
         return self.api.todayWeatherOutBarometricPressureAtTime(state, hour, time_step_number)
 
-    def today_weather_outdoor_relative_humidity_at_time(self, state: c_void_p, hour: int,
-                                                        time_step_number: int) -> float:
+    def today_weather_outdoor_relative_humidity_at_time(
+        self, state: c_void_p, hour: int, time_step_number: int
+    ) -> float:
         """
         Gets the specified weather data at the specified hour and time step index within that hour
 
@@ -1526,8 +1535,9 @@ class DataExchange:
         """
         return self.api.tomorrowWeatherOutDewPointAtTime(state, hour, time_step_number)
 
-    def tomorrow_weather_outdoor_barometric_pressure_at_time(self, state: c_void_p, hour: int,
-                                                             time_step_number: int) -> float:
+    def tomorrow_weather_outdoor_barometric_pressure_at_time(
+        self, state: c_void_p, hour: int, time_step_number: int
+    ) -> float:
         """
         Gets the specified weather data at the specified hour and time step index within that hour
 
@@ -1538,8 +1548,9 @@ class DataExchange:
         """
         return self.api.tomorrowWeatherOutBarometricPressureAtTime(state, hour, time_step_number)
 
-    def tomorrow_weather_outdoor_relative_humidity_at_time(self, state: c_void_p, hour: int,
-                                                           time_step_number: int) -> float:
+    def tomorrow_weather_outdoor_relative_humidity_at_time(
+        self, state: c_void_p, hour: int, time_step_number: int
+    ) -> float:
         """
         Gets the specified weather data at the specified hour and time step index within that hour
 

@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -83,7 +83,7 @@ class TestAPISysExit(unittest.TestCase):
         Test for #8483 - system exit called when energyplus can't run
         """
         with tempfile.TemporaryDirectory() as tempdir:
-            cmd_args = shlex.split(f'-d {tempdir} -w empty.epw doesntexist.idf')
+            cmd_args = shlex.split(f"-d {tempdir} -w empty.epw doesntexist.idf")
             return_code = self.api.runtime.run_energyplus(self.state, cmd_args)
             self.assertEqual(return_code, 1)
 
@@ -91,19 +91,19 @@ class TestAPISysExit(unittest.TestCase):
         """
         Related #8483 - When we call ProcessArgssystem exit called when energyplus can't run
         """
-        cmd_args = shlex.split('-v')
+        cmd_args = shlex.split("-v")
 
         def message_handler(message: bytes) -> None:
             """
             Asserts energyplus doesn't try to run
             """
-            self.assertNotIn("EnergyPlus Starting", message.decode('utf-8'))
+            self.assertNotIn("EnergyPlus Starting", message.decode("utf-8"))
 
         def error_handler(severity: int, message: bytes) -> None:
             """
             Same, we shouldn't run, but this checks stderr instead
             """
-            self.assertNotIn("Input file path", message.decode('utf-8'))
+            self.assertNotIn("Input file path", message.decode("utf-8"))
 
         self.api.runtime.callback_message(self.state, message_handler)
         self.api.functional.callback_error(self.state, error_handler)
@@ -112,5 +112,5 @@ class TestAPISysExit(unittest.TestCase):
         self.assertEqual(return_code, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

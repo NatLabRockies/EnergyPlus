@@ -86,7 +86,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,4;
 
@@ -568,7 +568,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     23190.00,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -582,7 +582,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     11600.00,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -616,7 +616,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -630,7 +630,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -664,7 +664,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -678,7 +678,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -712,7 +712,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -726,7 +726,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3870.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -760,7 +760,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -774,7 +774,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant

@@ -21,7 +21,7 @@
 !           2 WATER HEATER:MIXED objects serve as storage tank and instantaneous water heater.
 !           1 VALVE:TEMPERING object to temper the hot storage water.
 
-  Version,25.2;
+  Version,26.1;
 
 !***SIMULATION CONTROL***
 

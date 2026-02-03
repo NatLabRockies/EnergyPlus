@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,12 +55,12 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/BranchInputManager.hh>
+#include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
-#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
@@ -122,7 +122,6 @@ TEST_F(EnergyPlusFixture, ParallelPIUTest1)
         "  SPACE2-1 ATU In Node,                   !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                  !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                       !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,         !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                     !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                       !- Fan Name",
         "  Coil:Heating:Electric,                  !- Reheat Coil Object Type",
@@ -165,6 +164,13 @@ TEST_F(EnergyPlusFixture, ParallelPIUTest1)
         "  AlwaysOn,                               !- Name",
         "  ,                                       !- Schedule Type Limits Name",
         "  1;                                      !- Hourly Value",
+
+        "Curve:Linear,",
+        "  constant_leakage,        !- Name",
+        "  0.1,                     !- Coefficient1 Constant",
+        "  0,                       !- Coefficient2 x",
+        "  0,                       !- Minimum Value of x",
+        "  1;                       !- Maximum Value of x",
 
     });
 
@@ -311,6 +317,31 @@ TEST_F(EnergyPlusFixture, ParallelPIUTest1)
     EXPECT_EQ(SecMaxMassFlow, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
     EXPECT_EQ(1.0, state->dataPowerInductionUnits->PIU(SysNum).PriDamperPosition);
 
+    // Nineth test - Cooling load TurnFansOn is false, yes primary flow - expecting secondary flow, leakage
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = state->dataPowerInductionUnits->PIU(SysNum).MaxPriAirMassFlow;
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRateMaxAvail = state->dataPowerInductionUnits->PIU(SysNum).MaxPriAirMassFlow;
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRateMinAvail = state->dataPowerInductionUnits->PIU(SysNum).MinPriAirMassFlow;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = -2000.0; // Cooling load
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = -2000.0;
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(1) = false;
+    state->dataHVACGlobal->TurnFansOn = false;
+    state->dataPowerInductionUnits->PIU(SysNum).leakFracCurve = Curve::GetCurveIndex(*state, "CONSTANT_LEAKAGE");
+    PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+
+    Real64 SysOutputProvided = 0.0;
+    Real64 NonAirSysOutput = 0.0;
+    Real64 LatOutputProvided = 0.0;
+    int AirDistUnitNum = 1;
+    state->dataPowerInductionUnits->GetPIUInputFlag = false;
+    ZoneAirLoopEquipmentManager::SimZoneAirLoopEquipment(*state,
+                                                         AirDistUnitNum,
+                                                         SysOutputProvided,
+                                                         NonAirSysOutput,
+                                                         LatOutputProvided,
+                                                         FirstHVACIteration,
+                                                         state->dataPowerInductionUnits->PIU(SysNum).CtrlZoneNum);
+    EXPECT_TRUE(state->dataDefineEquipment->AirDistUnit(1).MassFlowRateTU > state->dataDefineEquipment->AirDistUnit(1).MassFlowRateZSup);
+
     // Cleanup
     state->dataHeatBalFanSys->TempControlType.deallocate();
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.deallocate();
@@ -354,7 +385,6 @@ TEST_F(EnergyPlusFixture, SeriesPIUTest1)
         "  SPACE2-1 ATU In Node,    !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,   !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,        !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,  !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,      !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,        !- Fan Name",
         "  Coil:Heating:Electric,      !- Reheat Coil Object Type",
@@ -555,7 +585,7 @@ TEST_F(EnergyPlusFixture, SeriesPIUTest1)
     state->dataZoneEnergyDemand->CurDeadBandOrSetback.deallocate();
 }
 
-// cf: https://github.com/NREL/EnergyPlus/issues/7183
+// cf: https://github.com/NatLabRockies/EnergyPlus/issues/7183
 TEST_F(EnergyPlusFixture, PIUArrayOutOfBounds)
 {
 
@@ -644,7 +674,6 @@ TEST_F(EnergyPlusFixture, SeriesPIUZoneOAVolumeFlowRateTest)
         "  SPACE2-1 ATU In Node,    !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,   !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,        !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,  !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,      !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,        !- Fan Name",
         "  Coil:Heating:Electric,      !- Reheat Coil Object Type",
@@ -1254,7 +1283,6 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
         "  SeriesPIU Supply Air Inlet Node,        !- Supply Air Inlet Node Name",
         "  SeriesPIU Secondary Air Inlet Node,     !- Secondary Air Inlet Node Name",
         "  SeriesPIU Outlet Node,                  !- Outlet Node Name",
-        "  Air Terminal Single Duct Series PIU Reheat 1 Fan Outlet, !- Reheat Coil Air Inlet Node Name",
         "  Air Terminal Single Duct Series PIU Reheat 1 Mixer, !- Zone Mixer Name",
         "  Fan System Model 1,                     !- Fan Name",
         "  Coil:Heating:Electric,                  !- Reheat Coil Object Type",
@@ -2014,7 +2042,6 @@ TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
         "  SPACE2-1 ATU In Node,                   !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                  !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                       !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,         !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                     !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                       !- Fan Name",
         "  Coil:Heating:Electric,                  !- Reheat Coil Object Type",
@@ -2217,7 +2244,6 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
         "  SPACE2-1 ATU In Node,                   !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                  !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                       !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,         !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                     !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                       !- Fan Name",
         "  Coil:Heating:Electric,                  !- Reheat Coil Object Type",
@@ -2341,7 +2367,7 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // - reheat: yes
     // - discharge air temperature: DAT below design heating DAT
     // - primary air flow rate: minimum value
-    // - secondary air flow rate: minmum value
+    // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
@@ -2460,7 +2486,6 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUStagedHeat)
         "  SPACE2-1 ATU In Node,                    !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                   !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                        !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,          !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                      !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                        !- Fan Name",
         "  Coil:Heating:Electric,                   !- Reheat Coil Object Type",
@@ -2667,7 +2692,6 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
         "  SPACE2-1 ATU In Node,                    !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                   !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                        !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,          !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                      !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                        !- Fan Name",
         "  Coil:Heating:Electric,                   !- Reheat Coil Object Type",
@@ -2793,7 +2817,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // - reheat: yes
     // - discharge air temperature: DAT below design heating DAT
     // - primary air flow rate: minimum value
-    // - secondary air flow rate: minmum value
+    // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
@@ -2908,7 +2932,6 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
         "  SPACE2-1 ATU In Node,                    !- Supply Air Inlet Node Name",
         "  SPACE2-1 ATU Sec Node,                   !- Secondary Air Inlet Node Name",
         "  SPACE2-1 In Node,                        !- Outlet Node Name",
-        "  SPACE2-1 Zone Coil Air In Node,          !- Reheat Coil Air Inlet Node Name",
         "  SPACE2-1 PIU Mixer,                      !- Zone Mixer Name",
         "  SPACE2-1 PIU Fan,                        !- Fan Name",
         "  Coil:Heating:Electric,                   !- Reheat Coil Object Type",
@@ -3016,7 +3039,6 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     int SysNum = 1;
     int ZoneNodeNum = 1;
     bool FirstHVACIteration = true;
-    // Real64 SecMaxMassFlow = 0.05 * state->dataEnvrn->StdRhoAir;
     state->dataGlobal->BeginEnvrnFlag = true; // Must be true for initial pass thru InitPIU for this terminal unit
     FirstHVACIteration = true;
     PoweredInductionUnits::InitPIU(*state, SysNum, FirstHVACIteration); // Run thru init once with FirstHVACIteration set to true
@@ -3031,7 +3053,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     Real64 PriMinMassFlow = thisPIU.MinPriAirMassFlow;
 
     // first stage cooling, expects:
-    // - total flow rate: modulating between minimum and maxium value
+    // - total flow rate: modulating between minimum and maximum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = -400.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToCoolSP = -400.0;

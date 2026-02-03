@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -323,4 +323,22 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
     });
     EXPECT_TRUE(compare_err_stream(error_stringTest3, true));
     EXPECT_TRUE(gotErrors);
+}
+
+TEST_F(EnergyPlusFixture, UtilityRoutines_ShowDetailedSevereItemNotFound)
+{
+    // New error message
+    std::string detailed_error_message = "TestRoutine: MissingField = CanNotBeFound, item not found.";
+
+    // Original error message
+    std::string error_message = "TestRoutine:  =";
+
+    ErrorObjectHeader eoh{"TestRoutine", "", ""};
+    // This should output the item that's missing
+    ShowDetailedSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(detailed_error_message) != std::string::npos);
+
+    // This  should not display the item information
+    ShowSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(error_message) != std::string::npos);
 }

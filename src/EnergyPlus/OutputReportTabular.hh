@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -432,17 +432,17 @@ namespace OutputReportTabular {
     struct CompLoadTablesType
     {
         // members
-        int desDayNum = 0;              // design day number
-        int timeStepMax = 0;            // times step of the day that the maximum occurs
-        Array2D<Real64> cells;          // main component table results (column, row)
-        Array2D_bool cellUsed;          // flag if the cell is used for the table of results (column, row)
-        std::string peakDateHrMin = ""; // string containing peak timestamp
-        Real64 outsideDryBulb = 0.0;    // outside dry bulb temperature at peak
-        Real64 outsideWetBulb = 0.0;    // outside wet bulb temperature at peak
-        Real64 outsideHumRatio = 0.0;   // outside humidity ratio at peak
-        Real64 zoneDryBulb = 0.0;       // zone dry bulb temperature at peak
-        Real64 zoneRelHum = 0.0;        // zone relative humidity at peak
-        Real64 zoneHumRatio = 0.0;      // zone humidity ratio at peak
+        int desDayNum = 0;            // design day number
+        int timeStepMax = 0;          // times step of the day that the maximum occurs
+        Array2D<Real64> cells;        // main component table results (column, row)
+        Array2D_bool cellUsed;        // flag if the cell is used for the table of results (column, row)
+        std::string peakDateHrMin;    // string containing peak timestamp
+        Real64 outsideDryBulb = 0.0;  // outside dry bulb temperature at peak
+        Real64 outsideWetBulb = 0.0;  // outside wet bulb temperature at peak
+        Real64 outsideHumRatio = 0.0; // outside humidity ratio at peak
+        Real64 zoneDryBulb = 0.0;     // zone dry bulb temperature at peak
+        Real64 zoneRelHum = 0.0;      // zone relative humidity at peak
+        Real64 zoneHumRatio = 0.0;    // zone humidity ratio at peak
 
         Real64 supAirTemp = 0.0;     // supply air temperature
         Real64 mixAirTemp = 0.0;     // mixed air temperature
@@ -570,6 +570,15 @@ namespace OutputReportTabular {
     {
         std::vector<compLoadsTimeStepEncl> ts;
     };
+    struct tabularReportStyle
+    {
+        UnitsStyle unitsStyle = UnitsStyle::None;
+        bool formatReals = true;
+        bool produceTabular = true;
+        bool produceSQLite = true;
+        bool produceJSON = true;
+    };
+
     // Functions
 
     std::ofstream &open_tbl_stream(EnergyPlusData &state, int const iStyle, fs::path const &filePath, bool output_to_file = true);
@@ -699,9 +708,7 @@ namespace OutputReportTabular {
                                             Array2D<Real64> &collapsedEndUse,
                                             Array3D<Real64> &collapsedEndUseSub,
                                             Array1D_bool &needOtherRow,
-                                            const UnitsStyle unitsStyle_cur,
-                                            const bool produceTabular,
-                                            const bool produceSQLite);
+                                            const tabularReportStyle &currentStyle);
 
     std::string ResourceWarningMessage(std::string const &resource);
 
@@ -721,7 +728,7 @@ namespace OutputReportTabular {
 
     void WriteVeriSumTable(EnergyPlusData &state);
 
-    void writeVeriSumSpaceTables(EnergyPlusData &state, bool produceTabular, bool produceSQLite);
+    void writeVeriSumSpaceTables(EnergyPlusData &state, const tabularReportStyle &style);
 
     void WriteAdaptiveComfortTable(EnergyPlusData &state);
 
@@ -760,6 +767,7 @@ namespace OutputReportTabular {
                                                       const std::array<Real64, columnNum> DataHeatBalance::ZoneResilience::*memberPtr,
                                                       Array1D_string &rowHead,
                                                       Array2D_string &tableBody,
+                                                      tabularReportStyle const &style,
                                                       Real64 const unitConvMultiplier = 1.0);
 
     void WriteResilienceBinsTableReportingPeriod(EnergyPlusData &state,
@@ -773,6 +781,7 @@ namespace OutputReportTabular {
                                                  Array2D<std::vector<Real64>> const &ZoneBins,
                                                  Array1D_string &rowHead,
                                                  Array2D_string &tableBody,
+                                                 tabularReportStyle const &style,
                                                  Real64 const unitConvMultiplier = 1.0);
 
     void WriteSETHoursTableNonPreDefUseZoneData(EnergyPlusData &state,
@@ -783,6 +792,7 @@ namespace OutputReportTabular {
                                                 const std::array<Real64, 5> DataHeatBalance::ZoneResilience::*memberPtr,
                                                 Array1D_string &rowHead,
                                                 Array2D_string &tableBody,
+                                                tabularReportStyle const &style,
                                                 Real64 const unitConvMultiplier = 1.0);
 
     void WriteSETHoursTableReportingPeriod(EnergyPlusData &state,
@@ -795,6 +805,7 @@ namespace OutputReportTabular {
                                            Array2D<std::vector<Real64>> const &ZoneBins,
                                            Array1D_string &rowHead,
                                            Array2D_string &tableBody,
+                                           tabularReportStyle const &style,
                                            Real64 const unitConvMultiplier = 1.0);
 
     // return the table entry of the rowIndex-th row and columnIndex-th col
@@ -804,7 +815,8 @@ namespace OutputReportTabular {
                                 int const columnNum,
                                 std::vector<int> const &columnHead,
                                 Array1D<std::vector<Real64>> const &ZoneBins,
-                                int const dateColIdx);
+                                int const dateColIdx,
+                                tabularReportStyle const &style);
 
     void WriteHourOfSafetyTableNonPreDefUseZoneData(EnergyPlusData &state,
                                                     int const columnNum,
@@ -814,7 +826,8 @@ namespace OutputReportTabular {
                                                     const std::array<Real64, 5> DataHeatBalance::ZoneResilience::*memberPtr,
                                                     Array1D_string &rowHead,
                                                     Array2D_string &tableBody,
-                                                    int const dateColIdx);
+                                                    int const dateColIdx,
+                                                    tabularReportStyle const &style);
 
     void WriteHourOfSafetyTableReportingPeriod(EnergyPlusData &state,
                                                int const columnNum,
@@ -826,7 +839,8 @@ namespace OutputReportTabular {
                                                Array2D<std::vector<Real64>> const &ZoneBins,
                                                Array1D_string &rowHead,
                                                Array2D_string &tableBody,
-                                               int const dateColIdx);
+                                               int const dateColIdx,
+                                               tabularReportStyle const &style);
 
     void WriteHeatEmissionTable(EnergyPlusData &state);
 
@@ -936,9 +950,7 @@ namespace OutputReportTabular {
                                CompLoadTablesType const &compLoadCool,
                                CompLoadTablesType const &compLoadHeat,
                                int zoneOrAirLoopIndex,
-                               UnitsStyle unitsStyle_para,
-                               bool produceTabular_para,
-                               bool produceSQLite_para);
+                               tabularReportStyle const &style);
 
     void WriteReportHeaders(EnergyPlusData &state,
                             std::string const &reportName,
@@ -957,12 +969,7 @@ namespace OutputReportTabular {
                     bool transposeXML = false,
                     std::string_view const footnoteText = {});
 
-    bool produceDualUnitsFlags(int iUnit_Sys,
-                               EnergyPlus::OutputReportTabular::UnitsStyle unitsStyle_Tab,
-                               EnergyPlus::OutputReportTabular::UnitsStyle unitsStyle_Sql,
-                               UnitsStyle &unitsStyle_Cur,
-                               bool &produce_Tab,
-                               bool &produce_Sql);
+    void setTabularReportStyles(EnergyPlusData &state);
 
     std::string MakeAnchorName(std::string const &reportString, std::string const &objectString);
 
@@ -1040,7 +1047,7 @@ namespace OutputReportTabular {
     //======================================================================================================================
     //======================================================================================================================
 
-    std::string RealToStr(Real64 const RealIn, int const numDigits);
+    std::string RealToStr(bool const formatReals, Real64 const RealIn, int const numDigits);
 
     Real64 StrToReal(std::string_view stringIn);
 
@@ -1079,13 +1086,15 @@ namespace OutputReportTabular {
 struct OutputReportTabularData : BaseGlobalStruct
 {
 
-    OutputReportTabular::UnitsStyle unitsStyle = OutputReportTabular::UnitsStyle::None;
+    OutputReportTabular::UnitsStyle unitsStyle_Tabular = OutputReportTabular::UnitsStyle::None;
+    OutputReportTabular::UnitsStyle unitsStyle_SQLite = OutputReportTabular::UnitsStyle::NotFound;
+    OutputReportTabular::UnitsStyle unitsStyle_JSON = OutputReportTabular::UnitsStyle::NotFound;
+
     bool ip() const
     {
-        return this->unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
-               this->unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity;
+        return this->unitsStyle_Tabular == OutputReportTabular::UnitsStyle::InchPound ||
+               this->unitsStyle_Tabular == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity;
     }
-    OutputReportTabular::UnitsStyle unitsStyle_SQLite = OutputReportTabular::UnitsStyle::NotFound;
     int OutputTableBinnedCount = 0;
     int BinResultsTableCount = 0;
     int BinResultsIntervalCount = 0;
@@ -1116,6 +1125,11 @@ struct OutputReportTabularData : BaseGlobalStruct
         OutputReportTabular::maxNumStyles, OutputReportTabular::TableStyle::Invalid); // see list of parameters
 
     Real64 timeInYear = 0.0;
+    int defaultSigDigits = 2;
+    bool formatReals_Tabular = true;
+    bool formatReals_JSON = true;
+    bool formatReals_SQLite = true;
+    std::vector<OutputReportTabular::tabularReportStyle> tabularReportPasses; // unique combinations of units and real formatting
 
     // Flags for predefined tabular reports
     bool displayTabularBEPS = false;
@@ -1399,7 +1413,7 @@ struct OutputReportTabularData : BaseGlobalStruct
 
     void clear_state() override
     {
-        this->unitsStyle = OutputReportTabular::UnitsStyle::None;
+        this->unitsStyle_Tabular = OutputReportTabular::UnitsStyle::None;
         this->unitsStyle_SQLite = OutputReportTabular::UnitsStyle::NotFound;
         this->OutputTableBinnedCount = 0;
         this->BinResultsTableCount = 0;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2049,7 +2049,7 @@ TEST_F(EnergyPlusFixture, DaylightingManager_GetInputDaylightingControls_Roundin
     // It does sum up to 1.0
     EXPECT_DOUBLE_EQ(1.0, sum);
     EXPECT_FALSE(std::abs(sum - 1.0) > std::numeric_limits<double>::epsilon());
-    // Yet, if you are being very litteral, then it's slightly more
+    // Yet, if you are being very literal, then it's slightly more
     EXPECT_TRUE(sum > 1.0);
     EXPECT_FALSE(sum < 1.0);
 }

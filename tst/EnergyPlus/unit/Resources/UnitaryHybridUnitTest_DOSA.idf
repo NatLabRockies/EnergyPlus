@@ -28,7 +28,7 @@
 ! Floor Area:              232.25 m2
 ! Number of Stories:       1
 
-  Version,9.6;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -473,12 +473,12 @@
 
   People,
     SPACE1-1 People 1,       !- Name
-    Main Zone,               !- Zone or ZoneList Name
+    Main Zone,               !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     11,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd;                 !- Activity Level Schedule Name
@@ -487,12 +487,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     Main Zone Infiltration,  !- Name
-    Main Zone,               !- Zone or ZoneList Name
+    Main Zone,               !- Zone or ZoneList or Space or SpaceList Name
     System Availability Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -539,7 +539,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 

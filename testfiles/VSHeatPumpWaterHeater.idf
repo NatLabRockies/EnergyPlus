@@ -125,7 +125,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Building,                !- Name
@@ -849,8 +849,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -875,7 +875,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -889,7 +889,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1064,8 +1064,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .00717,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1090,7 +1090,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1104,7 +1104,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1244,8 +1244,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1270,7 +1270,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1284,7 +1284,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1439,8 +1439,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .00717,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1465,7 +1465,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1479,7 +1479,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1619,8 +1619,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .031089,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1645,7 +1645,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1659,7 +1659,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1799,7 +1799,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -1835,7 +1842,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE2-1,        !- Name
@@ -1871,7 +1885,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE3-1,        !- Name
@@ -1907,7 +1928,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE4-1,        !- Name
@@ -1943,7 +1971,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE5-1,        !- Name
@@ -2253,6 +2288,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHDXCoilVS,            !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -2274,9 +2310,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -2286,9 +2322,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2298,9 +2334,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2310,9 +2346,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2322,9 +2358,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2334,9 +2370,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2346,9 +2382,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2358,9 +2394,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2370,9 +2406,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2382,9 +2418,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2596,6 +2632,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     Zone4HPWHDXCoilVS,       !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -2617,9 +2654,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -2629,9 +2666,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2641,9 +2678,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2653,9 +2690,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2665,9 +2702,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2677,9 +2714,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2689,9 +2726,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2701,9 +2738,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2713,9 +2750,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2725,9 +2762,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2835,6 +2872,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHOutdoorDXCoilVS,     !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -2856,9 +2894,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -2868,9 +2906,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2880,9 +2918,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2892,9 +2930,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2904,9 +2942,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2916,9 +2954,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2928,9 +2966,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2940,9 +2978,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2952,9 +2990,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -2964,9 +3002,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3099,6 +3137,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHScheduledDXCoilVS,   !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     4000.0,                  !- Rated Water Heating Capacity {W}
@@ -3120,9 +3159,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -3132,9 +3171,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3144,9 +3183,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3156,9 +3195,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3168,9 +3207,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3180,9 +3219,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3192,9 +3231,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3204,9 +3243,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3216,9 +3255,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -3228,9 +3267,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4291,6 +4330,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
     HPWHPlantDXCoilVS,       !- Name
+    ,                        !- Availability Schedule Name
     10,                      !- Number of Speeds {dimensionless}
     10,                      !- Nominal Speed Level {dimensionless}
     25000.0,                 !- Rated Water Heating Capacity {W}
@@ -4312,9 +4352,9 @@
     5.0,                     !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWHPLFFPLR,             !- Part Load Fraction Correlation Curve Name
-    400.00,                  !- Rated Water Heating Capacity at Speed 1 {W}
-    5.0,                     !- Rated Water Heating COP at Speed 1 {W/W}
-    0.80,                    !- Rated Sensible Heat Ratio at Speed 1
+    400.00,                  !- Speed 1 Rated Water Heating Capacity {W}
+    5.0,                     !- Speed 1 Rated Water Heating COP {W/W}
+    0.80,                    !- Speed 1 Rated Sensible Heat Ratio
     0.020140,                !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000018,                !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 1 Reference Unit Water Pump Input Power At Rated Conditions {W}
@@ -4324,9 +4364,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 1 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 1 COP Function of Water Flow Fraction Curve Name
-    800.00,                  !- Rated Water Heating Capacity at Speed 2 {W}
-    4.8,                     !- Rated Water Heating COP at Speed 2 {W/W}
-    0.79,                    !- Rated Sensible Heat Ratio at Speed 2
+    800.00,                  !- Speed 2 Rated Water Heating Capacity {W}
+    4.8,                     !- Speed 2 Rated Water Heating COP {W/W}
+    0.79,                    !- Speed 2 Rated Sensible Heat Ratio
     0.040280,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000036,                !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 2 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4336,9 +4376,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 2 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 2 COP Function of Water Flow Fraction Curve Name
-    1200.00,                 !- Rated Water Heating Capacity at speed 3 {W}
-    4.4,                     !- Rated Water Heating COP at Speed 3 {W/W}
-    0.78,                    !- Rated Sensible Heat Ratio at Speed 3
+    1200.00,                 !- Speed 3 Rated Water Heating Capacity {W}
+    4.4,                     !- Speed 3 Rated Water Heating COP {W/W}
+    0.78,                    !- Speed 3 Rated Sensible Heat Ratio
     0.060420,                !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000054,                !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 3 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4348,9 +4388,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 3 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 3 COP Function of Water Flow Fraction Curve Name
-    1600.00,                 !- Rated Water Heating Capacity at Speed 4 {W}
-    4.0,                     !- Rated Water Heating COP at Speed 4 {W/W}
-    0.77,                    !- Rated Sensible Heat Ratio at Speed 4
+    1600.00,                 !- Speed 4 Rated Water Heating Capacity {W}
+    4.0,                     !- Speed 4 Rated Water Heating COP {W/W}
+    0.77,                    !- Speed 4 Rated Sensible Heat Ratio
     0.080560,                !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000072,                !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 4 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4360,9 +4400,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 4 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 4 COP Function of Water Flow Fraction Curve Name
-    2000.00,                 !- Rated Water Heating Capacity at Speed 5 {W}
-    3.8,                     !- Rated Water Heating COP at Speed 5 {W/W}
-    0.76,                    !- Rated Sensible Heat Ratio at Speed 5
+    2000.00,                 !- Speed 5 Rated Water Heating Capacity {W}
+    3.8,                     !- Speed 5 Rated Water Heating COP {W/W}
+    0.76,                    !- Speed 5 Rated Sensible Heat Ratio
     0.100700,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000090,                !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 5 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4372,9 +4412,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 5 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 5 COP Function of Water Flow Fraction Curve Name
-    2400.00,                 !- Rated Water Heating Capacity at Speed 6 {W}
-    3.4,                     !- Rated Water Heating COP at Speed 6 {W/W}
-    0.75,                    !- Rated Sensible Heat Ratio at Speed 6
+    2400.00,                 !- Speed 6 Rated Water Heating Capacity {W}
+    3.4,                     !- Speed 6 Rated Water Heating COP {W/W}
+    0.75,                    !- Speed 6 Rated Sensible Heat Ratio
     0.120840,                !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000108,                !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 6 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4384,9 +4424,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 6 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 6 COP Function of Water Flow Fraction Curve Name
-    2800.00,                 !- Rated Water Heating Capacity at Speed 7 {W}
-    3.0,                     !- Rated Water Heating COP at Speed 7 {W/W}
-    0.74,                    !- Rated Sensible Heat Ratio at Speed 7
+    2800.00,                 !- Speed 7 Rated Water Heating Capacity {W}
+    3.0,                     !- Speed 7 Rated Water Heating COP {W/W}
+    0.74,                    !- Speed 7 Rated Sensible Heat Ratio
     0.140980,                !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000126,                !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 7 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4396,9 +4436,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 7 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 7 COP Function of Water Flow Fraction Curve Name
-    3200.00,                 !- Rated Water Heating Capacity at Speed 8 {W}
-    2.6,                     !- Rated Water Heating COP at Speed 8 {W/W}
-    0.73,                    !- Rated Sensible Heat Ratio at Speed 8
+    3200.00,                 !- Speed 8 Rated Water Heating Capacity {W}
+    2.6,                     !- Speed 8 Rated Water Heating COP {W/W}
+    0.73,                    !- Speed 8 Rated Sensible Heat Ratio
     0.161120,                !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000144,                !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 8 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4408,9 +4448,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 8 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 8 COP Function of Water Flow Fraction Curve Name
-    3600.00,                 !- Rated Water Heating Capacity at Speed 9 {W}
-    2.3,                     !- Rated Water Heating COP at Speed 9 {W/W}
-    0.72,                    !- Rated Sensible Heat Ratio at Speed 9
+    3600.00,                 !- Speed 9 Rated Water Heating Capacity {W}
+    2.3,                     !- Speed 9 Rated Water Heating COP {W/W}
+    0.72,                    !- Speed 9 Rated Sensible Heat Ratio
     0.181260,                !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000162,                !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 9 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}
@@ -4420,9 +4460,9 @@
     HPWHHeatingCOPFTemp,     !- Speed 9 COP Function of Temperature Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Air Flow Fraction Curve Name
     ConstantCubic,           !- Speed 9 COP Function of Water Flow Fraction Curve Name
-    4000.00,                 !- Rated Water Heating Capacity at Speed 10 {W}
-    2.0,                     !- Rated Water Heating COP at Speed 10 {W/W}
-    0.70,                    !- Rated Sensible Heat Ratio at Speed 10
+    4000.00,                 !- Speed 10 Rated Water Heating Capacity {W}
+    2.0,                     !- Speed 10 Rated Water Heating COP {W/W}
+    0.70,                    !- Speed 10 Rated Sensible Heat Ratio
     0.201400,                !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000179,                !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     10.0,                    !- Speed 10 Reference Unit Water Pump Input Power At Rated Conditions {dimensionless}

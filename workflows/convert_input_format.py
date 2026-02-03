@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -84,40 +84,41 @@ class ConvertInputFormatWorkflow(BaseEPLaunchWorkflow1):
         return []
 
     def main(self, run_directory, file_name, args):
-        if 'workflow location' in args:
-            energyplus_root_folder, _ = os.path.split(args['workflow location'])
-            if platform.system() == 'Windows':
-                convertinputformat_binary = os.path.join(energyplus_root_folder, 'ConvertInputFormat.exe')
+        if "workflow location" in args:
+            energyplus_root_folder, _ = os.path.split(args["workflow location"])
+            if platform.system() == "Windows":
+                convertinputformat_binary = os.path.join(energyplus_root_folder, "ConvertInputFormat.exe")
             else:
-                convertinputformat_binary = os.path.join(energyplus_root_folder, 'ConvertInputFormat')
+                convertinputformat_binary = os.path.join(energyplus_root_folder, "ConvertInputFormat")
             if not os.path.exists(convertinputformat_binary):
                 return EPLaunchWorkflowResponse1(
                     success=False,
                     message="ConvertInputFormat binary not found: {}!".format(convertinputformat_binary),
-                    column_data=[]
+                    column_data=[],
                 )
         else:
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="Workflow location missing: {}!".format(args['worflow location']),
-                column_data=[]
+                success=False, message="Workflow location missing: {}!".format(args["worflow location"]), column_data=[]
             )
 
         original_with_path = os.path.join(run_directory, file_name)
         converted_file_no_ext, original_ext = os.path.splitext(original_with_path)
-        if original_ext.lower() == '.idf':
-            converted_file_with_path = converted_file_no_ext + '.epJSON'
-        elif original_ext.lower() == '.epjson':
-            converted_file_with_path = converted_file_no_ext + '.idf'
+        if original_ext.lower() == ".idf":
+            converted_file_with_path = converted_file_no_ext + ".epJSON"
+        elif original_ext.lower() == ".epjson":
+            converted_file_with_path = converted_file_no_ext + ".idf"
         else:
             return EPLaunchWorkflowResponse1(
                 success=False,
                 message="Invalid extension {} on file: {}!".format(original_ext, original_with_path),
-                column_data=[]
+                column_data=[],
             )
-        	
 
-        if os.path.exists(original_with_path) and os.path.exists(convertinputformat_binary) and os.path.exists(run_directory):
+        if (
+            os.path.exists(original_with_path)
+            and os.path.exists(convertinputformat_binary)
+            and os.path.exists(run_directory)
+        ):
 
             # execute utility
             command_line_args = [convertinputformat_binary, original_with_path]
@@ -129,16 +130,16 @@ class ConvertInputFormatWorkflow(BaseEPLaunchWorkflow1):
                 return EPLaunchWorkflowResponse1(
                     success=False,
                     message="ConvertInputFormat failed for file: %s!" % original_with_path,
-                    column_data={}
+                    column_data={},
                 )
             return EPLaunchWorkflowResponse1(
                 success=True,
                 message="Ran ConvertInputFormat OK for file: {}!".format(original_with_path),
-                column_data=[]
+                column_data=[],
             )
         else:
             return EPLaunchWorkflowResponse1(
                 success=False,
                 message="ConvertInputFormat file not found: {}!".format(original_with_path),
-                column_data=[]
+                column_data=[],
             )

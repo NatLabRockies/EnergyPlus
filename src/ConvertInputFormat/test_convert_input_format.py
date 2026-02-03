@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -61,13 +61,13 @@ Test ConvertInputFormat.
 This script aims to check that the ConvertInputFormat exe correctly
 handles periods in the name of the IDF.
 
-cf: https://github.com/NREL/EnergyPlus/issues/9419
+cf: https://github.com/NatLabRockies/EnergyPlus/issues/9419
 """
 
 import argparse
-from pathlib import Path
 import shutil
 import subprocess
+from pathlib import Path
 
 
 def parse_args():
@@ -108,14 +108,10 @@ def clean_up_directory(out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
 
 
-def run_convertinputformat(
-    convertinputformat_exe: Path, out_dir: Path, input_file: Path
-):
+def run_convertinputformat(convertinputformat_exe: Path, out_dir: Path, input_file: Path):
     """Run the program."""
     if not convertinputformat_exe.exists():
-        raise ValueError(
-            f"ConvertInputFormat exe '{convertinputformat_exe}' does not exist"
-        )
+        raise ValueError(f"ConvertInputFormat exe '{convertinputformat_exe}' does not exist")
 
     if not out_dir.exists() or not out_dir.is_dir():
         raise ValueError(f"out_dir '{out_dir}' is not a valid directory")
@@ -123,7 +119,7 @@ def run_convertinputformat(
     if not input_file.exists() or not input_file.is_file():
         raise ValueError(f"input_file '{input_file}' is not a valid file")
 
-    full_command_args = [convertinputformat_exe, '--output', out_dir, input_file]
+    full_command_args = [convertinputformat_exe, "--output", out_dir, input_file]
     command_as_strings = [str(x) for x in full_command_args]
     print(f"Running: {' '.join(command_as_strings)}")
     subprocess.check_call(command_as_strings)
@@ -142,6 +138,4 @@ if __name__ == "__main__":
     )
     out_file = args.out_dir / args.expected_filename
     if not out_file.exists() or not out_file.is_file():
-        raise ValueError(
-            f"Test Failed: output file '{out_file}' does not exist!"
-        )
+        raise ValueError(f"Test Failed: output file '{out_file}' does not exist!")

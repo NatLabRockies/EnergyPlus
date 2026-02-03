@@ -71,4 +71,4 @@ body:
           You **can supply a link to your IDF if applicable**, or rename it to in.idf.txt and upload it directly here by drag and drop.
 
           Ideally, make it a _Minimum, Complete, Verifiable, Example (MCVE)_ by including the smallest possible number of input objects to reproduce the defect.
-          A good start might be to try to reproduce your issue with one of the EnergyPlus [ExampleFiles](https://github.com/NREL/EnergyPlus/tree/develop/testfiles).
+          A good start might be to try to reproduce your issue with one of the EnergyPlus [ExampleFiles](https://github.com/NatLabRockies/EnergyPlus/tree/develop/testfiles).

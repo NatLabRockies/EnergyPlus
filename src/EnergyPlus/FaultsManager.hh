@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -170,7 +170,7 @@ namespace FaultsManager {
         std::string ControllerName; // Controller name
 
         // Default Constructor
-        FaultPropertiesEconomizer() : ControllerTypeEnum(0), ControllerID(0), ControllerType(""), ControllerName("")
+        FaultPropertiesEconomizer() : ControllerTypeEnum(0), ControllerID(0)
         {
         }
 
@@ -184,7 +184,7 @@ namespace FaultsManager {
         std::string FaultyThermostatName; // The faulty thermostat name
 
         // Default Constructor
-        FaultPropertiesThermostat() : FaultyThermostatName("")
+        FaultPropertiesThermostat()
         {
         }
 
@@ -200,7 +200,7 @@ namespace FaultsManager {
         std::string FaultyHumidistatType; // The faulty humidistat type
 
         // Default Constructor
-        FaultPropertiesHumidistat() : FaultyThermostatName(""), FaultyHumidistatName(""), FaultyHumidistatType("")
+        FaultPropertiesHumidistat()
         {
         }
 
@@ -223,8 +223,8 @@ namespace FaultsManager {
 
         // Default Constructor
         FaultPropertiesFoulingCoil()
-            : FouledCoilName(""), FouledCoilType(DataPlant::PlantEquipmentType::Invalid), FouledCoilNum(0), FoulingInputMethod(FouledCoil::Invalid),
-              UAFouled(0.0), Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
+            : FouledCoilType(DataPlant::PlantEquipmentType::Invalid), FouledCoilNum(0), FoulingInputMethod(FouledCoil::Invalid), UAFouled(0.0),
+              Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
         {
         }
 
@@ -265,7 +265,7 @@ namespace FaultsManager {
         std::string WaterCoilControllerName; // Water coil controller name
 
         // Default Constructor
-        FaultPropertiesCoilSAT() : CoilType(""), CoilName(""), WaterCoilControllerName("")
+        FaultPropertiesCoilSAT()
         {
         }
     };
@@ -277,7 +277,7 @@ namespace FaultsManager {
         std::string ChillerName; // Chiller name
 
         // Default Constructor
-        FaultPropertiesChillerSWT() : ChillerType(""), ChillerName("")
+        FaultPropertiesChillerSWT()
         {
         }
 
@@ -302,7 +302,7 @@ namespace FaultsManager {
         std::string TowerName; // Tower name
 
         // Default Constructor
-        FaultPropertiesCondenserSWT() : TowerType(""), TowerName("")
+        FaultPropertiesCondenserSWT()
         {
         }
     };
@@ -315,7 +315,7 @@ namespace FaultsManager {
         Real64 UAReductionFactor; // UA Reduction Factor
 
         // Default Constructor
-        FaultPropertiesTowerFouling() : TowerType(""), TowerName(""), UAReductionFactor(1.0)
+        FaultPropertiesTowerFouling() : UAReductionFactor(1.0)
         {
         }
 
@@ -344,7 +344,7 @@ namespace FaultsManager {
         std::string BoilerName; // Boiler name
 
         // Default Constructor
-        FaultPropertiesBoilerFouling() : BoilerType(""), BoilerName("")
+        FaultPropertiesBoilerFouling()
         {
         }
     };
@@ -356,7 +356,7 @@ namespace FaultsManager {
         std::string ChillerName; // Chiller name
 
         // Default Constructor
-        FaultPropertiesChillerFouling() : ChillerType(""), ChillerName("")
+        FaultPropertiesChillerFouling()
         {
         }
     };
@@ -368,7 +368,7 @@ namespace FaultsManager {
         std::string EvapCoolerName; // Evaporative Cooler name
 
         // Default Constructor
-        FaultPropertiesEvapCoolerFouling() : EvapCoolerType(""), EvapCoolerName("")
+        FaultPropertiesEvapCoolerFouling()
         {
         }
     };

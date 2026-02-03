@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -133,7 +133,7 @@ namespace DataZoneEnergyDemands {
         // (<0 is a dehumidify load) [kgWater/s] (multiplied)
         EPVector<Real64> SequencedOutputRequired;            // load required to meet setpoint by sequence [kgWater/s] (multiplied)
         EPVector<Real64> SequencedOutputRequiredToHumidSP;   // load required to meet humidify setpoint by sequence [kgWater/s] (multiplied)
-        EPVector<Real64> SequencedOutputRequiredToDehumidSP; // load required to meet dehumidify setpoint by sequenc [kgWater/s] (multiplied)
+        EPVector<Real64> SequencedOutputRequiredToDehumidSP; // load required to meet dehumidify setpoint by sequence [kgWater/s] (multiplied)
         Real64 predictedRate = 0.0;                          // Predicted moisture load to setpoint [kgWater/s] (unmultiplied)
         Real64 predictedHumSPRate = 0.0;                     // Predicted latent load to humidification setpoint [kgWater/s] (unmultiplied)
         Real64 predictedDehumSPRate = 0.0;                   // Predicted latent load to dehumidification setpoint [kgWater/s] (unmultiplied)

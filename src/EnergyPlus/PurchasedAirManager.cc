@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -255,13 +255,10 @@ void GetPurchasedAir(EnergyPlusData &state)
         int NumNums = 0;
         int NumAlphas = 0;
         int purchAirNum = 0;
-        std::string fieldValue = "";
-        std::string cAlphaFieldName = "";
         InitUniqueNodeCheck(state, s_ipsc->cCurrentModuleObject);
         auto const &schemaProps = s_ip->getObjectSchemaProps(state, s_ipsc->cCurrentModuleObject);
         auto &instancesValue = instances_PurchAir.value();
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
-
             ++purchAirNum;
             auto const &fields = instance.value();
             std::string thisObjectName = instance.key();
@@ -287,7 +284,7 @@ void GetPurchasedAir(EnergyPlusData &state)
             state.dataPurchasedAirMgr->PurchAirNumericFields(purchAirNum).FieldNames = s_ipsc->cNumericFieldNames;
             Util::IsNameEmpty(state, thisObjectName, s_ipsc->cCurrentModuleObject, ErrorsFound);
             PurchAir.Name = Util::makeUPPER(thisObjectName);
-            cAlphaFieldName = "Availability Schedule Name";
+            std::string cAlphaFieldName = "Availability Schedule Name";
             // get optional  availability schedule
             std::string const availSchedName = s_ip->getAlphaFieldValue(fields, schemaProps, "availability_schedule_name");
             if (availSchedName.empty()) {
@@ -364,7 +361,7 @@ void GetPurchasedAir(EnergyPlusData &state)
             PurchAir.MaxHeatSuppAirHumRat = s_ip->getRealFieldValue(fields, schemaProps, "maximum_heating_supply_air_humidity_ratio");
             PurchAir.MinCoolSuppAirHumRat = s_ip->getRealFieldValue(fields, schemaProps, "minimum_cooling_supply_air_humidity_ratio");
             cAlphaFieldName = "Heating Limit";
-            fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "heating_limit");
+            std::string fieldValue = s_ip->getAlphaFieldValue(fields, schemaProps, "heating_limit");
             PurchAir.HeatingLimit = static_cast<LimitType>(getEnumValue(limitTypeNamesUC, Util::makeUPPER(fieldValue)));
             PurchAir.MaxHeatVolFlowRate = s_ip->getRealFieldValue(fields, schemaProps, "maximum_heating_air_flow_rate");
             PurchAir.MaxHeatSensCap = s_ip->getRealFieldValue(fields, schemaProps, "maximum_sensible_heating_capacity");
@@ -414,7 +411,7 @@ void GetPurchasedAir(EnergyPlusData &state)
             }
             // If outdoor air specified, then get Outdoor air inlet node and other outdoor air inputs
             if (PurchAir.OutdoorAir) {
-                std::string cAlphaFieldName = "Outdoor Air Inlet Node Name";
+                cAlphaFieldName = "Outdoor Air Inlet Node Name";
                 std::string oaInletNodeName = s_ip->getAlphaFieldValue(fields, schemaProps, "outdoor_air_inlet_node_name");
                 if (oaInletNodeName.empty()) {
                     // If there is outdoor air and outdoor air inlet node is blank, then create one

@@ -105,7 +105,7 @@ A preliminary version of this design has been implemented and tested on the `Uni
 
 ## References ##
 
-- GitHub issue, [2 speed operation with Air Economizer in UnitarySystem](https://github.com/NREL/EnergyPlus/issues/6109)
+- GitHub issue, [2 speed operation with Air Economizer in UnitarySystem](https://github.com/NatLabRockies/EnergyPlus/issues/6109)
 - ASHRAE. 2019. ANSI/ASHRAE/IES 90.1-2019, Energy Standard for Buildings Except Low-Rise
 Residential Buildings. ASHRAE, Atlanta, GA
 - [Honeywell JADE controller](https://customer.honeywell.com/resources/techlit/TechLitDocuments/62-0000s/62-0331.pdf)

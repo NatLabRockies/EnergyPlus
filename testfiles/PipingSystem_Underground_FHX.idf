@@ -53,7 +53,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     FHX House,               !- Name
@@ -208,7 +208,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Main Floor,              !- Zone or ZoneList Name
@@ -237,7 +244,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Plant,
     Condenser Loop,          !- Plant or Condenser Loop Name
@@ -944,6 +958,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -968,6 +983,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1074,6 +1090,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1098,6 +1115,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name

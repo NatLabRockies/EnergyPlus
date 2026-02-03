@@ -124,28 +124,28 @@ Two typos were corrected in field names.
 ```
 
 # Object Change: Fuel type synonyms
-For Output:Variable, Output:Meter*, Meter:Custom, Meter:CustomDecrement, 
-Output:Table:Monthly, Output:Table:Annual, Output:Table:TimeBins, EnergyManagementSystem:Sensor, DemandManagerAssignmentList, 
+For Output:Variable, Output:Meter*, Meter:Custom, Meter:CustomDecrement,
+Output:Table:Monthly, Output:Table:Annual, Output:Table:TimeBins, EnergyManagementSystem:Sensor, DemandManagerAssignmentList,
 ElectricLoadCenter:Distribution, UtilityCost:Tariff and other objects with a Meter name or Output:Variable name as an input field:
 
 Field: Fuel Type (or similar)
 
 9.3.0:
 
-"FuelOil#1" 
+"FuelOil#1"
 "FuelOil#2"
 
-"Fuel Oil #1" 
+"Fuel Oil #1"
 "Fuel Oil #2"
 
 
 9.4.0:
 
-"FuelOilNo1" 
-"FuelOilNo2" 
+"FuelOilNo1"
+"FuelOilNo2"
 
-"Fuel Oil No 1" 
-"Fuel Oil No 2" 
+"Fuel Oil No 1"
+"Fuel Oil No 2"
 
 ### EnergyManagementSystem:Actuator Actuated Component Control Type
 
@@ -154,5 +154,5 @@ Field: Fuel Type (or similar)
 | Lights             | Electric Power Level          | Electricity Rate              |
 | ElectricEquipment  | Electric Power Level          | Electricity Rate              |
 | GasEquipment       | Gas Power Level               | NaturalGas Rate               |
- 
-See [8304](https://github.com/NREL/EnergyPlus/pull/8304)
+
+See [8304](https://github.com/NatLabRockies/EnergyPlus/pull/8304)

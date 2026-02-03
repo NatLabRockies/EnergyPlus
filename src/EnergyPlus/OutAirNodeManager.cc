@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -145,13 +145,8 @@ namespace OutAirNodeManager {
         int NumParams;
         Array1D_int NodeNums;
         int NumNodes;
-        int IOStat;  // Status flag from GetObjectItem
-        int NodeNum; // index into NodeNums
-        //  INTEGER :: OutAirNodeNum ! index into OutAirInletNodeList
-        int OutAirInletNodeListNum;  // OUTSIDE AIR INLET NODE LIST index
-        int OutsideAirNodeSingleNum; // OUTSIDE AIR NODE index
-        int AlphaNum;                // index into Alphas
-        std::size_t ListSize;        // size of OutAirInletNodeList
+        int IOStat;           // Status flag from GetObjectItem
+        std::size_t ListSize; // size of OutAirInletNodeList
         //  LOGICAL :: AlreadyInList ! flag used for checking for duplicate input
         bool ErrorsFound;
         bool ErrInList;
@@ -199,7 +194,7 @@ namespace OutAirNodeManager {
         if (NumOutAirInletNodeLists > 0) {
             // Loop over all outside air inlet nodes in the input and count them
             CurrentModuleObject = "OutdoorAir:NodeList";
-            for (OutAirInletNodeListNum = 1; OutAirInletNodeListNum <= NumOutAirInletNodeLists; ++OutAirInletNodeListNum) {
+            for (int OutAirInletNodeListNum = 1; OutAirInletNodeListNum <= NumOutAirInletNodeLists; ++OutAirInletNodeListNum) {
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                          CurrentModuleObject,
                                                                          OutAirInletNodeListNum,
@@ -213,7 +208,7 @@ namespace OutAirNodeManager {
                                                                          cAlphaFields,
                                                                          cNumericFields);
 
-                for (AlphaNum = 1; AlphaNum <= NumAlphas; ++AlphaNum) {
+                for (int AlphaNum = 1; AlphaNum <= NumAlphas; ++AlphaNum) {
                     ErrInList = false;
                     //  To support HVAC diagram, every outside inlet node must have a unique fluid stream number
                     //  GetNodeNums will increment the value across a node list, the starting value must be incremented
@@ -236,7 +231,7 @@ namespace OutAirNodeManager {
                         ShowContinueError(state, format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
                         ErrorsFound = true;
                     }
-                    for (NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
+                    for (int NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
                         // Duplicates here are not a problem, just ignore
                         if (!any_eq(TmpNums, NodeNums(NodeNum))) {
                             ++ListSize;
@@ -257,7 +252,7 @@ namespace OutAirNodeManager {
         if (NumOutsideAirNodeSingles > 0) {
             // Loop over all single outside air nodes in the input
             CurrentModuleObject = "OutdoorAir:Node";
-            for (OutsideAirNodeSingleNum = 1; OutsideAirNodeSingleNum <= NumOutsideAirNodeSingles; ++OutsideAirNodeSingleNum) {
+            for (int OutsideAirNodeSingleNum = 1; OutsideAirNodeSingleNum <= NumOutsideAirNodeSingles; ++OutsideAirNodeSingleNum) {
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                          CurrentModuleObject,
                                                                          OutsideAirNodeSingleNum,
@@ -384,13 +379,9 @@ namespace OutAirNodeManager {
         // set the outside air nodes to the outside conditions at the
         // start of every heat balance time step.
 
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int OutsideAirNodeNum;
-        int NodeNum;
-
         // Do the begin time step initialization
-        for (OutsideAirNodeNum = 1; OutsideAirNodeNum <= state.dataOutAirNodeMgr->NumOutsideAirNodes; ++OutsideAirNodeNum) {
-            NodeNum = state.dataOutAirNodeMgr->OutsideAirNodeList(OutsideAirNodeNum);
+        for (int OutsideAirNodeNum = 1; OutsideAirNodeNum <= state.dataOutAirNodeMgr->NumOutsideAirNodes; ++OutsideAirNodeNum) {
+            int NodeNum = state.dataOutAirNodeMgr->OutsideAirNodeList(OutsideAirNodeNum);
             SetOANodeValues(state, NodeNum, true);
         }
     }
@@ -489,7 +480,6 @@ namespace OutAirNodeManager {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Array1D_int TmpNums;
-        int DummyNumber;
 
         if (state.dataOutAirNodeMgr->GetOutAirNodesInputFlag) { // First time subroutine has been entered
             GetOutAirNodesInput(state);                         // Get Out Air Nodes data
@@ -515,6 +505,7 @@ namespace OutAirNodeManager {
                 state.dataOutAirNodeMgr->OutsideAirNodeList(state.dataOutAirNodeMgr->NumOutsideAirNodes) = NodeNumber;
                 TmpNums = state.dataOutAirNodeMgr->OutsideAirNodeList;
                 bool errFlag(false);
+                int DummyNumber;
                 // register new node..
                 GetNodeNums(state,
                             state.dataLoopNodes->NodeID(NodeNumber),

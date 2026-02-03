@@ -87,13 +87,13 @@ that is coupled with an error definition in a JSON-formatted file:
    "name": {
      "en" : Too Many Fans on AirLoop"
    },
-   "message": { 
+   "message": {
      "en" : [
        "{RoutineName}: An AirLoop branch, {BranchName}, has two or more fans: {Fans}",
        "The AirflowNetwork model allows a single supply fan in an AirLoop only. Please make changes in the input file accordingly."
      ]
    },
-   "documentation": { 
+   "documentation": {
      "en" : "The specified opening factor is larger than 1, which is not allowed."
    }
 }
@@ -150,7 +150,7 @@ Recurring errors are handled slightly differently. A recurring error handle is c
 Recurring errors are created and used in two steps. First, an error object is created:
 
 ```
-RecurringHandle handle = tracker.create_recurring(RecurringCode::AFNA0A, 2, 
+RecurringHandle handle = tracker.create_recurring(RecurringCode::AFNA0A, 2,
     epfmt::arg("SurfaceName", "Srf-001"));
 ```
 
@@ -164,7 +164,7 @@ The integer `2` in the call determines the number of times the error will be dis
 In this situation, the error will be shown twice and then silently tracked. Determination of the shown/not shown decision can be handled in caller code if the alternate creation function is used:
 
 ```
-RecurringHandle handle = tracker.create_infinite_recurring(RecurringCode::AFNA0A, 2, 
+RecurringHandle handle = tracker.create_infinite_recurring(RecurringCode::AFNA0A, 2,
     epfmt::arg("SurfaceName", "Srf-001"));
 ```
 

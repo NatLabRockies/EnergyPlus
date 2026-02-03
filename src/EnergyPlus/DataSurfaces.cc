@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -129,7 +129,7 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             Real64 xu(std::numeric_limits<Real64>::lowest());
             Real64 const yl(slabYs[iSlab]);
             Real64 const yu(slabYs[iSlab + 1]);
-            slabs.push_back(Slab(yl, yu));
+            slabs.emplace_back(yl, yu);
             Slab &slab(slabs.back());
             using CrossEdge = std::tuple<Real64, Real64, size_type>;
             using CrossEdges = std::vector<CrossEdge>;
@@ -147,7 +147,7 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
                     Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
-                    crossEdges.push_back(std::make_tuple(xb, xt, i));
+                    crossEdges.emplace_back(xb, xt, i);
                 }
             }
             slab.xl = xl;
@@ -363,23 +363,32 @@ ShapeCat SurfaceData::computed_shapeCat() const
 {
     if (Shape == SurfaceShape::Triangle) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::TriangularWindow) {
+    }
+    if (Shape == SurfaceShape::TriangularWindow) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::TriangularDoor) {
+    }
+    if (Shape == SurfaceShape::TriangularDoor) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::Rectangle) {
+    }
+    if (Shape == SurfaceShape::Rectangle) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularDoorWindow) {
+    }
+    if (Shape == SurfaceShape::RectangularDoorWindow) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularOverhang) {
+    }
+    if (Shape == SurfaceShape::RectangularOverhang) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularLeftFin) {
+    }
+    if (Shape == SurfaceShape::RectangularLeftFin) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularRightFin) {
+    }
+    if (Shape == SurfaceShape::RectangularRightFin) {
         return ShapeCat::Rectangular;
-    } else if (IsConvex) {
+    }
+    if (IsConvex) {
         return ShapeCat::Convex;
-    } else {
+    }
+    {
         return ShapeCat::Nonconvex;
     }
 }
@@ -434,7 +443,8 @@ Surface2D SurfaceData::computed_surface2d() const
             zu = std::max(zu, v.z);
         }
         return Surface2D(shapeCat, axis, v2d, Vertex2D(yl, zl), Vertex2D(yu, zu));
-    } else if (axis == 1) {        // Use x,z for 2D surface
+    }
+    if (axis == 1) {               // Use x,z for 2D surface
         Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
         Real64 zl(v0.z), zu(v0.z); // z coordinate ranges
         for (Vertices::size_type i = 0; i < n; ++i) {
@@ -446,19 +456,18 @@ Surface2D SurfaceData::computed_surface2d() const
             zu = std::max(zu, v.z);
         }
         return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, zl), Vertex2D(xu, zu));
-    } else {                       // Use x,y for 2D surface
-        Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
-        Real64 yl(v0.y), yu(v0.y); // y coordinate ranges
-        for (Vertices::size_type i = 0; i < n; ++i) {
-            Vector const &v(Vertex[i]);
-            v2d[i] = Vertex2D(v.x, v.y);
-            xl = std::min(xl, v.x);
-            xu = std::max(xu, v.x);
-            yl = std::min(yl, v.y);
-            yu = std::max(yu, v.y);
-        }
-        return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, yl), Vertex2D(xu, yu));
+    } // Use x,y for 2D surface
+    Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
+    Real64 yl(v0.y), yu(v0.y); // y coordinate ranges
+    for (Vertices::size_type i = 0; i < n; ++i) {
+        Vector const &v(Vertex[i]);
+        v2d[i] = Vertex2D(v.x, v.y);
+        xl = std::min(xl, v.x);
+        xu = std::max(xu, v.x);
+        yl = std::min(yl, v.y);
+        yu = std::max(yu, v.y);
     }
+    return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, yl), Vertex2D(xu, yu));
 }
 
 Real64 SurfaceData::get_average_height(EnergyPlusData &state) const

@@ -8,9 +8,9 @@
 
 GEBs (Grid-interactive efficient buildings) can respond to grid or pricing signals by adjusting the operation of lighting, plug-in equipment, and HVAC systems. Adjusting HVAC operation strategies include changing thermostat setpoints, turning equipment on/off, and adjusting the speed or capacity of variable-speed or multi-speed compressors and fans.
 
-The typical EnergyPlus approach to modeling two-speed and variable-speed coils is to have a constant setpoint without a deadband and find the appropriate speed ratio to perfectly meet the load. Deadband thermostats are already included in EnergyPlus, but new control logic is needed to model realistic coil behavior to take advantage of this feature. 
+The typical EnergyPlus approach to modeling two-speed and variable-speed coils is to have a constant setpoint without a deadband and find the appropriate speed ratio to perfectly meet the load. Deadband thermostats are already included in EnergyPlus, but new control logic is needed to model realistic coil behavior to take advantage of this feature.
 
-Previously in the 9.6.0 release, we added the EMS actuators to control the speed level of the cooling and heating multispeed coils, namely `Coil:Cooling:DX:MultiSpeed` and `Coil:Heating:DX:Multispeed`. As an enhancement, we propose to extend the EMS functionality to a more general coil type in EnergyPlus, `Coil:Cooling:DX`, which will replace the single speed, two speed, variable speed, multi-speed, and multi-stage coils going forward.  
+Previously in the 9.6.0 release, we added the EMS actuators to control the speed level of the cooling and heating multispeed coils, namely `Coil:Cooling:DX:MultiSpeed` and `Coil:Heating:DX:Multispeed`. As an enhancement, we propose to extend the EMS functionality to a more general coil type in EnergyPlus, `Coil:Cooling:DX`, which will replace the single speed, two speed, variable speed, multi-speed, and multi-stage coils going forward.
 
 ## Approach
 
@@ -28,7 +28,7 @@ actuator_key = f"{unitary_system_name}"
 
 k_handle = self.api.exchange.get_actuator_handle(state, comp_type, ctrl_type, actuator_key)
 ```
-When `Coil:Heating:DX` model is implemented for general heating coils in EnergyPlus, similar logic will be added to control the heating coil speed externally. 
+When `Coil:Heating:DX` model is implemented for general heating coils in EnergyPlus, similar logic will be added to control the heating coil speed externally.
 
 ## Testing/Validation/Data Source(s)
 
@@ -37,4 +37,3 @@ A new example file built upon the existing file, `UnitarySystem_MultiSpeedDX.idf
 ## Email Discussion
 
 The feature and implementation details were based on previous PR comments and discussions during EnergyPlus Technicality calls.
-

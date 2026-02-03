@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -88,9 +88,9 @@ namespace IndoorGreen {
         auto const &lw = state.dataIndoorGreen;
         if (lw->getInputFlag) {
             bool ErrorsFound(false);
-            const char *RoutineName("IndoorLivingWall: "); // include trailing blank space
             GetIndoorGreenInput(state, ErrorsFound);
             if (ErrorsFound) {
+                const char *RoutineName("IndoorLivingWall: "); // include trailing blank space
                 ShowFatalError(state, format("{}Errors found in input.  Program terminates.", RoutineName));
             }
             SetIndoorGreenOutput(state);
@@ -157,7 +157,7 @@ namespace IndoorGreen {
 
                 if (ig.ZonePtr <= 0 || ig.SpacePtr <= 0) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\", invalid {} entered={}, {} is not assoicated with a thermal zone or space",
+                                    format("{}=\"{}\", invalid {} entered={}, {} is not associated with a thermal zone or space",
                                            RoutineName,
                                            s_ipsc->cAlphaArgs(1),
                                            s_ipsc->cAlphaFieldNames(2),
@@ -409,9 +409,9 @@ namespace IndoorGreen {
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("ETModel: ");
         auto &lw = state.dataIndoorGreen;
-        Real64 ZonePreTemp; // Indoor air temprature (C)
+        Real64 ZonePreTemp; // Indoor air temperature (C)
         Real64 ZonePreHum;  // Indoor humidity ratio (kg moisture / kg dry air)
-        Real64 ZoneNewTemp; // Indoor air temprature (C) after ET
+        Real64 ZoneNewTemp; // Indoor air temperature (C) after ET
         Real64 ZoneNewHum;  // Indoor humidity ratio (kg moisture / kg dry air) after ET
         Real64 ZoneSatHum;  // Saturated humidity ratio
         Real64 ZoneCO2;     // Indoor zone co2 concentration (ppm)

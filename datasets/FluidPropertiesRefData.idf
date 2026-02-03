@@ -15,9 +15,6 @@
 ! =============================================================================
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   FluidProperties:Name,
     R11,                     !- Fluid Name
     Refrigerant;             !- Fluid Type
@@ -56,7 +53,7 @@
     182.000,184.000,186.000,188.000,190.000,197.960;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -84,7 +81,7 @@
     0.3491E+07,0.3595E+07,0.3703E+07,0.3812E+07,0.3925E+07,0.4408E+07;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -112,7 +109,7 @@
     0.3852E+06,0.3883E+06,0.3915E+06,0.3949E+06,0.3985E+06,0.4286E+06;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -140,7 +137,7 @@
     0.4562E+06,0.4555E+06,0.4547E+06,0.4536E+06,0.4522E+06,0.4286E+06;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -168,7 +165,7 @@
     0.9028E+03,0.8849E+03,0.8656E+03,0.8443E+03,0.8206E+03,0.5540E+03;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -196,7 +193,7 @@
     0.2423E+03,0.2558E+03,0.2708E+03,0.2878E+03,0.3074E+03,0.5540E+03;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -224,7 +221,7 @@
     0.1820E+04,0.1954E+04,0.2128E+04,0.2364E+04,0.2705E+04,0.0000E+00;
 
   FluidProperties:Saturated,
-    R11,                     !- Name
+    R11,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R11SaturatedTemperatures,!- Temperature Values Name
@@ -2492,7 +2489,7 @@
     94.000,96.000,98.000,100.000,102.000,104.000,111.970;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2517,7 +2514,7 @@
     0.2995E+07,0.3106E+07,0.3221E+07,0.3340E+07,0.3462E+07,0.3588E+07,0.4136E+07;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2542,7 +2539,7 @@
     0.3025E+06,0.3054E+06,0.3084E+06,0.3116E+06,0.3149E+06,0.3184E+06,0.3478E+06;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2567,7 +2564,7 @@
     0.3777E+06,0.3772E+06,0.3765E+06,0.3756E+06,0.3745E+06,0.3730E+06,0.3478E+06;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2592,7 +2589,7 @@
     0.9609E+03,0.9432E+03,0.9243E+03,0.9038E+03,0.8813E+03,0.8561E+03,0.5650E+03;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2617,7 +2614,7 @@
     0.2100E+03,0.2227E+03,0.2368E+03,0.2526E+03,0.2706E+03,0.2915E+03,0.5650E+03;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -2642,7 +2639,7 @@
     0.1636E+04,0.1728E+04,0.1844E+04,0.1996E+04,0.2208E+04,0.2526E+04,0.0000E+00;
 
   FluidProperties:Saturated,
-    R12,                     !- Name
+    R12,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R12SaturatedTemperatures,!- Temperature Values Name
@@ -4906,7 +4903,7 @@
     80.000,82.000,84.000,86.000,88.000,96.145;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -4930,7 +4927,7 @@
     0.3664E+07,0.3810E+07,0.3961E+07,0.4116E+07,0.4277E+07,0.4990E+07;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -4954,7 +4951,7 @@
     0.3104E+06,0.3143E+06,0.3183E+06,0.3225E+06,0.3271E+06,0.3669E+06;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -4978,7 +4975,7 @@
     0.4120E+06,0.4107E+06,0.4091E+06,0.4072E+06,0.4048E+06,0.3669E+06;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -5002,7 +4999,7 @@
     0.8937E+03,0.8754E+03,0.8555E+03,0.8335E+03,0.8088E+03,0.5238E+03;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -5026,7 +5023,7 @@
     0.1954E+03,0.2083E+03,0.2227E+03,0.2390E+03,0.2579E+03,0.5238E+03;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -5050,7 +5047,7 @@
     0.2181E+04,0.2340E+04,0.2550E+04,0.2840E+04,0.3272E+04,0.0000E+00;
 
   FluidProperties:Saturated,
-    R22,                     !- Name
+    R22,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R22SaturatedTemperatures,!- Temperature Values Name
@@ -7316,7 +7313,7 @@
     172.000,174.000,176.000,183.681;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7343,7 +7340,7 @@
     0.3034E+07,0.3134E+07,0.3236E+07,0.3662E+07;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7370,7 +7367,7 @@
     0.4000E+06,0.4036E+06,0.4074E+06,0.4374E+06;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7397,7 +7394,7 @@
     0.4624E+06,0.4617E+06,0.4607E+06,0.4374E+06;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7424,7 +7421,7 @@
     0.8774E+03,0.8557E+03,0.8312E+03,0.5500E+03;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7451,7 +7448,7 @@
     0.2503E+03,0.2672E+03,0.2869E+03,0.5500E+03;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -7478,7 +7475,7 @@
     0.2137E+04,0.2360E+04,0.2700E+04,0.4723E+08;
 
   FluidProperties:Saturated,
-    R123,                    !- Name
+    R123,                    !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R123SaturatedTemperatures,  !- Temperature Values Name
@@ -9741,7 +9738,7 @@
     92.000,94.000,101.060;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9762,7 +9759,7 @@
     0.3379E+07,0.3519E+07,0.4059E+07;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9783,7 +9780,7 @@
     0.3476E+06,0.3526E+06,0.3896E+06;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9804,7 +9801,7 @@
     0.4239E+06,0.4219E+06,0.3896E+06;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9825,7 +9822,7 @@
     0.8144E+03,0.7878E+03,0.5119E+03;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9846,7 +9843,7 @@
     0.2343E+03,0.2551E+03,0.5119E+03;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -9867,7 +9864,7 @@
     0.3072E+04,0.3567E+04,0.0000E+00;
 
   FluidProperties:Saturated,
-    R134a,                   !- Name
+    R134a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R134aSaturatedTemperatures,  !- Temperature Values Name
@@ -12124,7 +12121,7 @@
     118.000,120.000,122.000,124.000,132.250;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12145,7 +12142,7 @@
     0.8787E+07,0.9112E+07,0.9448E+07,0.9793E+07,0.1133E+08;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12166,7 +12163,7 @@
     0.8524E+06,0.8699E+06,0.8886E+06,0.9088E+06,0.1119E+07;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12187,7 +12184,7 @@
     0.1363E+07,0.1350E+07,0.1336E+07,0.1319E+07,0.1119E+07;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12208,7 +12205,7 @@
     0.3947E+03,0.3855E+03,0.3754E+03,0.3641E+03,0.2250E+03;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12229,7 +12226,7 @@
     0.9361E+02,0.1001E+03,0.1074E+03,0.1159E+03,0.2250E+03;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -12250,7 +12247,7 @@
     0.1082E+05,0.1194E+05,0.1352E+05,0.1592E+05,0.0000E+00;
 
   FluidProperties:Saturated,
-    NH3,                     !- Name
+    NH3,                     !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     NH3SaturatedTemperatures,!- Temperature Values Name
@@ -14506,7 +14503,7 @@
     320.000,330.000,340.000,350.000,360.000,370.000;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14528,7 +14525,7 @@
     0.1128E+08,0.1286E+08,0.1460E+08,0.1653E+08,0.1867E+08,0.2104E+08;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14550,7 +14547,7 @@
     0.1462E+07,0.1526E+07,0.1595E+07,0.1671E+07,0.1762E+07,0.1891E+07;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14572,7 +14569,7 @@
     0.2701E+07,0.2666E+07,0.2622E+07,0.2564E+07,0.2481E+07,0.2335E+07;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14594,7 +14591,7 @@
     0.6671E+03,0.6408E+03,0.6107E+03,0.5747E+03,0.5276E+03,0.4514E+03;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14616,7 +14613,7 @@
     0.6464E+02,0.7705E+02,0.9276E+02,0.1136E+03,0.1439E+03,0.2018E+03;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -14638,7 +14635,7 @@
     0.6537E+04,0.7186E+04,0.8208E+04,0.1012E+05,0.1500E+05,0.4516E+05;
 
   FluidProperties:Saturated,
-    Steam,                   !- Name
+    Steam,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     SteamSaturatedTemperatures,  !- Temperature Values Name
@@ -20212,7 +20209,7 @@
     54.000,57.000,60.000,63.000,66.000,69.000,72.000;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20225,7 +20222,7 @@
     2.5140E+06,2.6878E+06,2.8712E+06,3.0648E+06,3.2696E+06,3.4873E+06,3.7237E+06;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20238,7 +20235,7 @@
     2.8503E+05,2.9092E+05,2.9713E+05,3.0380E+05,3.1118E+05,3.2003E+05,3.3838E+05;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20251,7 +20248,7 @@
     3.8051E+05,3.7970E+05,3.7840E+05,3.7641E+05,3.7333E+05,3.6807E+05,3.5017E+05;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20264,7 +20261,7 @@
     8.6809E+02,8.4225E+02,8.1331E+02,7.7993E+02,7.3937E+02,6.8403E+02,5.3572E+02;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20277,7 +20274,7 @@
     1.5738E+02,1.7447E+02,1.9468E+02,2.1937E+02,2.5127E+02,2.9783E+02,4.3624E+02;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -20290,7 +20287,7 @@
     2.1155E+03,2.2842E+03,2.5312E+03,2.9356E+03,3.7387E+03,6.2011E+03,1.6723E+05;
 
   FluidProperties:Saturated,
-    R404a,                   !- Name
+    R404a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R404aSaturatedTemperatures,  !- Temperature Values Name
@@ -21508,7 +21505,7 @@
     60,65,70,75;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21518,7 +21515,7 @@
     2.6873E+6,3.0160E+6,3.3784E+6,3.7806E+6;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21528,7 +21525,7 @@
     2.9449E+5,3.0434E+5,3.1509E+5,3.2749E+5;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21538,7 +21535,7 @@
     4.1121E+5,4.0977E+5,4.0711E+5,4.0230E+5;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21548,7 +21545,7 @@
     9.4304E+2,9.0120E+2,8.5099E+2,7.8510E+2;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21558,7 +21555,7 @@
     1.4166E+2,1.6682E+2,1.9924E+2,2.4458E+2;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -21568,7 +21565,7 @@
     2.0682E+3,2.317E+3,2.7759E+3,3.9105E+3;
 
   FluidProperties:Saturated,
-    R407a,                   !- Name
+    R407a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R407aSaturatedTemperatures,  !- Temperature Values Name
@@ -22185,7 +22182,7 @@
     54.000,57.000,60.000,63.000,66.000,69.000;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22198,7 +22195,7 @@
     3.3552E+06,3.5886E+06,3.8348E+06,4.0949E+06,4.3697E+06,4.6607E+06;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22211,7 +22208,7 @@
     2.9441E+05,3.0120E+05,3.0848E+05,3.1650E+05,3.2578E+05,3.3815E+05;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22224,7 +22221,7 @@
     4.1941E+05,4.1692E+05,4.1370E+05,4.0942E+05,4.0343E+05,3.9373E+05;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22237,7 +22234,7 @@
     8.7429E+02,8.4672E+02,8.1537E+02,7.7825E+02,7.3095E+02,6.5903E+02;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22250,7 +22247,7 @@
     1.6135E+02,1.7940E+02,2.0095E+02,2.2766E+02,2.6301E+02,3.1759E+02;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -22263,7 +22260,7 @@
     2.4924E+03,2.7507E+03,3.1534E+03,3.8723E+03,5.5190E+03,1.2701E+04;
 
   FluidProperties:Saturated,
-    R410a,                   !- Name
+    R410a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R410aSaturatedTemperatures,  !- Temperature Values Name
@@ -23458,7 +23455,7 @@
     54.000,57.000,60.000,63.000,66.000,69.000;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23471,7 +23468,7 @@
     2.5818E+06,2.7594E+06,2.9469E+06,3.1451E+06,3.3548E+06,3.5779E+06;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23484,7 +23481,7 @@
     2.8494E+05,2.9091E+05,2.9726E+05,3.0416E+05,3.1203E+05,3.2251E+05;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23497,7 +23494,7 @@
     3.7581E+05,3.7480E+05,3.7320E+05,3.7074E+05,3.6678E+05,3.5902E+05;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23510,7 +23507,7 @@
     8.6498E+02,8.3742E+02,8.0612E+02,7.6915E+02,7.2211E+02,6.4788E+02;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23523,7 +23520,7 @@
     1.6727E+02,1.8605E+02,2.0863E+02,2.3698E+02,2.7557E+02,3.4101E+02;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -23536,7 +23533,7 @@
     2.1654E+03,2.3650E+03,2.6728E+03,3.2209E+03,4.5109E+03,1.1483E+04;
 
   FluidProperties:Saturated,
-    R507a,                   !- Name
+    R507a,                   !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R507aSaturatedTemperatures,  !- Temperature Values Name
@@ -24731,7 +24728,7 @@
     30.9,30.978;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     Pressure,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24745,7 +24742,7 @@
     7.3640E+6,7.3773E+6;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24759,7 +24756,7 @@
     3.2032E+5,3.3225E+5;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     Enthalpy,                !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24773,7 +24770,7 @@
     3.4541E+5,3.3225E+5;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     Density,                 !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24787,7 +24784,7 @@
     5.2118E+2,4.6760E+2;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     Density,                 !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24801,7 +24798,7 @@
     4.1579E+2,4.6760E+2;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     Fluid,                   !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name
@@ -24815,7 +24812,7 @@
     6.8973E+5,1.0207E+14;
 
   FluidProperties:Saturated,
-    R744,                    !- Name
+    R744,                    !- Fluid Name
     SpecificHeat,            !- Fluid Property Type
     FluidGas,                !- Fluid Phase
     R744SaturatedTemperatures,  !- Temperature Values Name

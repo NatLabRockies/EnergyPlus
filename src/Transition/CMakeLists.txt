@@ -39,7 +39,7 @@ set(VERSIONS
     2_0_0  2_1_0  2_2_0  3_0_0  3_1_0  4_0_0  5_0_0  6_0_0  7_0_0  7_1_0  7_2_0
     8_0_0  8_1_0  8_2_0  8_3_0  8_4_0  8_5_0  8_6_0  8_7_0  8_8_0  8_9_0
     9_0_0  9_1_0  9_2_0  9_3_0  9_4_0  9_5_0  9_6_0
-    22_1_0 22_2_0 23_1_0 23_2_0 24_1_0 24_2_0 25_1_0 25_2_0
+    22_1_0 22_2_0 23_1_0 23_2_0 24_1_0 24_2_0 25_1_0 25_2_0 26_1_0
 )
 list(LENGTH VERSIONS VERSIONS_SIZE)
 math(EXPR end "${VERSIONS_SIZE} - 1")
@@ -81,6 +81,23 @@ foreach(i RANGE 1 ${end})
 
 endforeach()
 
+set(FORMATTER_ONLY "Formatter_only")
+configure_file("${FORMATTER_ONLY}.in.f90" "${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY}.f90" @ONLY)
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY})
+set(FORMATTER_ONLY_EXECUTABLE "${FORMATTER_ONLY}-V${CMAKE_VERSION_MAJOR}-${CMAKE_VERSION_MINOR}-${CMAKE_VERSION_PATCH}")
+add_executable(${FORMATTER_ONLY_EXECUTABLE} Transition.f90 "${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY}.f90")
+target_include_directories(${FORMATTER_ONLY_EXECUTABLE} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+set_target_properties(${FORMATTER_ONLY_EXECUTABLE} PROPERTIES FOLDER Auxiliary)
+target_link_libraries(${FORMATTER_ONLY_EXECUTABLE} TransitionLib)
+install(TARGETS "${FORMATTER_ONLY_EXECUTABLE}" DESTINATION PreProcess/IDFVersionUpdater)
+if(NOT ${FORTRAN_STATIC_EXE})
+  install_target_prereqs("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater)
+endif()
+
+if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
+  register_install_codesign_target("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater Unspecified)
+endif()
 
 #######################################################################
 #             I N S T A L L    S U P P O R T    F I L E S             #
@@ -100,6 +117,7 @@ install(FILES "InputRulesFiles/Rules23-2-0-to-24-1-0.md" DESTINATION "PreProcess
 install(FILES "InputRulesFiles/Rules24-1-0-to-24-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "InputRulesFiles/Rules24-2-0-to-25-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "InputRulesFiles/Rules25-1-0-to-25-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "InputRulesFiles/Rules25-2-0-to-26-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 
 install(FILES "OutputRulesFiles/OutputChanges9-0-0-to-9-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges9-1-0-to-9-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
@@ -115,6 +133,7 @@ install(FILES "OutputRulesFiles/OutputChanges23-2-0-to-24-1-0.md" DESTINATION "P
 install(FILES "OutputRulesFiles/OutputChanges24-1-0-to-24-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges24-2-0-to-25-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges25-1-0-to-25-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "OutputRulesFiles/OutputChanges25-2-0-to-26-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 
 install(FILES "SupportFiles/Report Variables 9-0-0 to 9-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 9-1-0 to 9-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
@@ -130,4 +149,4 @@ install(FILES "SupportFiles/Report Variables 23-2-0 to 24-1-0.csv" DESTINATION "
 install(FILES "SupportFiles/Report Variables 24-1-0 to 24-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 24-2-0 to 25-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 25-1-0 to 25-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
-
+install(FILES "SupportFiles/Report Variables 25-2-0 to 26-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
