@@ -930,26 +930,23 @@ This field is the name of schedule that defines how minimum outdoor air requirem
 An IDF example:
 
 \begin{lstlisting}
-
 DesignSpecification:OutdoorAir
-      ZoneOAData,            !- Name
-      Sum,                   !- Outdoor Air Method
-      0.00944,               !- Outdoor Air Flow per Person {m3/s}
-      0.00305,               !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      ,                      !- Outdoor Air Flow per Zone {m3/s}
-      ,                      !- Outdoor Air Flow Air Changes per Hour
-      OARequirements Sched;  !- Outdoor Air Schedule Name
+  ZoneOAData,                 !- Name
+  Sum,                        !- Outdoor Air Method
+  0.00944,                    !- Outdoor Air Flow per Person {m3/s}
+  0.00305,                    !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  ,                           !- Outdoor Air Flow per Zone {m3/s}
+  ,                           !- Outdoor Air Flow Air Changes per Hour
+  OARequirements Sched;       !- Outdoor Air Schedule Name
 
-
-  Schedule:Compact,
-      OARequirements Sched,    !- Name
-      Any Number,              !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
-      Until: 24:00, 1.0,       !- Field 4
-      For: AllOtherDays,       !- Field 5
-      Until: 24:00, 0.5;       !- Field 7
-
+Schedule:Compact,
+  OARequirements Sched,       !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
+  Until: 24:00, 1.0,          !- Field 4
+  For: AllOtherDays,          !- Field 5
+  Until: 24:00, 0.5;          !- Field 7
 \end{lstlisting}
 
 \subsection{DesignSpecification:OutdoorAir:SpaceList}\label{designspecificationoutdoorairspacelist}
@@ -973,14 +970,12 @@ Reference to a \hyperref[designspecificationoutdoorair]{DesignSpecification:Outd
 An IDF example:
 
 \begin{lstlisting}
-
 DesignSpecification:OutdoorAir:SpaceList,
-    SZ DSOA Zone 5 List,     !- Name
-    Space 5 Office,          !- Space 1 Name
-    SZ DSOA Zone 5 Office,   !- Space 1 Design Specification Outdoor Air Object Name
-    Space 5 Conference,      !- Space 2 Name
-    SZ DSOA Zone 5 Conference;  !- Space 2 Design Specification Outdoor Air Object Name
-
+  SZ DSOA Zone 5 List,        !- Name
+  Space 5 Office,             !- Space 1 Name
+  SZ DSOA Zone 5 Office,      !- Space 1 Design Specification Outdoor Air Object Name
+  Space 5 Conference,         !- Space 2 Name
+  SZ DSOA Zone 5 Conference;  !- Space 2 Design Specification Outdoor Air Object Name
 \end{lstlisting}
 
 \subsection{DesignSpecification:ZoneAirDistribution}\label{designspecificationzoneairdistribution}
@@ -1023,12 +1018,11 @@ This optional input sets a minimum on the ventilation efficiency for the zone. I
 An example of this in an IDF context is shown:
 
 \begin{lstlisting}
-
 DesignSpecification:ZoneAirDistribution,
-      CM DSZAD ZN_1_FLR_1_SEC_1,  !- Name
-      1,                       !- Zone Air Distribution Effectiveness in Cooling Mode {dimensionless}
-      1,                       !- Zone Air Distribution Effectiveness in Heating Mode {dimensionless}
-      ;                        !- Zone Air Distribution Effectiveness Schedule Name
+  CM DSZAD ZN_1_FLR_1_SEC_1,  !- Name
+  1,                          !- Zone Air Distribution Effectiveness in Cooling Mode {dimensionless}
+  1,                          !- Zone Air Distribution Effectiveness in Heating Mode {dimensionless}
+  ;                           !- Zone Air Distribution Effectiveness Schedule Name
 \end{lstlisting}
 
 \subsection{Sizing:Parameters}\label{sizingparameters}
@@ -1084,17 +1078,18 @@ As described early in the document (see: EnergyPlus Output Processing), the user
 
 \begin{lstlisting}
 OutputControl:Sizing:Style,
-       \memo default style for the Sizing output files is comma -- this works well for
-       \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
-       \memo processing progams -- there tab may be a better choice.  fixed puts spaces between
-       \memo the "columns"
-       \unique-object
-   A1; \field Column Separator
-       \required-field
-       \type choice
-       \key Comma
-       \key Tab
-       \key Fixed
+  \memo default style for the Sizing output files is comma -- this works well for
+  \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
+  \memo processing progams -- there tab may be a better choice.  fixed puts spaces between
+  \memo the "columns"
+  \unique-object
+  A1; \field Column Separator
+
+\required-field
+  \type choice
+  \key Comma
+  \key Tab
+  \key Fixed
 \end{lstlisting}
 
 \subsubsection{Inputs}\label{inputs-3-009}
@@ -1312,63 +1307,62 @@ This input sets a limit to how much the heating capacity can exceed the cooling 
 An IDF example:
 
 \begin{lstlisting}
+Sizing:Zone,
+  SPACE5-1,                   !- Name of a zone
+  SupplyAirTemperature,       !- Zone cooling design supply air temperature input method
+  14.,                        !- Zone cooling design supply air temperature {C}
+  0.0,                        !- Zone cooling design supply air temperature difference {C}
+  SupplyAirTemperature,       !- Zone heating design supply air temperature input method
+  50.,                        !- Zone heating design supply air temperature {C}
+  0.0,                        !- Zone heating design supply air temperature difference {C}
+  0.009,                      !- Zone cooling design supply air humidity ratio {kg-H2O/kg-air}
+  0.004,                      !- Zone heating design supply air humidity ratio {kg-H2O/kg-air}
+  DSOA1,                      !- Design Specification Outdoor Air Object Name
+  0.0,                        !- zone heating sizing factor
+  0.0,                        !- zone cooling sizing factor
+  designdaywithlimit,         !- Cooling Design Air Flow Method
+  ,                           !- cooling design air flow rate {m3/s}
+  ,                           !- Cooling Minimum Air Flow per zone area {m3/s-m2}
+  ,                           !- Cooling Minimum Air Flow {m3/s}
+  ,                           !- fraction of the cooling design air flow rate
+  designday,                  !- Heating Design Air Flow Method
+  ,                           !- heating design air flow rate {m3/s}
+  ,                           !- heating max air flow per zone area {m3/s-m2}
+  ,                           !- heating max air flow {m3/s}
+  ,                           !- fraction of the cooling design air flow rate
+  DSZADO1,                    !- Design Specification Zone Air Distribution Object Name
+  Yes,                        !- Account for Dedicated Outside Air System
+  ColdSupplyAir,              !- Dedicated Outside Air System Control Strategy
+  12.2,                       !- Dedicated Outside Air Low Setpoint for Design
+  14.4,                       !- Dedicated Outside Air High Setpoint for Design
+  Sensible And Latent Load,   !- Zone Load Sizing Method
+  HumidityRatioDifference,    !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+  ,                           !- Zone Dehumidification Design Supply Air Humidity Ratio
+  0.005,                      !- Zone Cooling Design Supply Air Humidity Ratio Difference
+  HumidityRatioDifference,    !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+  ,                           !- Zone Humidification Design Supply Air Humidity Ratio
+  0.005,                      !- Zone Heating Design Supply Air Humidity Ratio Difference
+  ,                           !- Zone Humidistat Dehumidification Set Point Schedule Name
+  ,                           !- Zone Humidistat Humidification Set Point Schedule Name
+  Coincident,                 !- Type of Space Sum to Use
+  Cooling,                    !- Heating Coil Sizing Method
+  1.1;                        !- Maximum Heating Capacity To Cooling Load Sizing Ratio
 
-  Sizing:Zone,
-      SPACE5-1,                !- Name of a zone
-      SupplyAirTemperature,    !- Zone cooling design supply air temperature input method
-      14.,                     !- Zone cooling design supply air temperature {C}
-      0.0,                     !- Zone cooling design supply air temperature difference {C}
-      SupplyAirTemperature,    !- Zone heating design supply air temperature input method
-      50.,                     !- Zone heating design supply air temperature {C}
-      0.0,                     !- Zone heating design supply air temperature difference {C}
-      0.009,                   !- Zone cooling design supply air humidity ratio {kg-H2O/kg-air}
-      0.004,                   !- Zone heating design supply air humidity ratio {kg-H2O/kg-air}
-      DSOA1,                   !- Design Specification Outdoor Air Object Name
-      0.0,                     !- zone heating sizing factor
-      0.0,                     !- zone cooling sizing factor
-      designdaywithlimit,      !- Cooling Design Air Flow Method
-      ,                        !- cooling design air flow rate {m3/s}
-      ,                        !- Cooling Minimum Air Flow per zone area {m3/s-m2}
-      ,                        !- Cooling Minimum Air Flow {m3/s}
-      ,                        !- fraction of the cooling design air flow rate
-      designday,               !- Heating Design Air Flow Method
-      ,                        !- heating design air flow rate {m3/s}
-      ,                        !- heating max air flow per zone area {m3/s-m2}
-      ,                        !- heating max air flow {m3/s}
-      ,                        !- fraction of the cooling design air flow rate
-      DSZADO1,                 !- Design Specification Zone Air Distribution Object Name
-      Yes,                     !- Account for Dedicated Outside Air System
-      ColdSupplyAir,           !- Dedicated Outside Air System Control Strategy
-      12.2,                    !- Dedicated Outside Air Low Setpoint for Design
-      14.4,                    !- Dedicated Outside Air High Setpoint for Design
-      Sensible And Latent Load, !- Zone Load Sizing Method
-      HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-      ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-      0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
-      HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-      ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-      0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
-      ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
-      ,                        !- Zone Humidistat Humidification Set Point Schedule Name
-      Coincident,              !- Type of Space Sum to Use
-      Cooling,                 !- Heating Coil Sizing Method
-      1.1;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio
-      
-  DesignSpecification:OutdoorAir,
-      DSOA1,                   !- Name
-      SUM,                     !- Outdoor Air Method
-      0.00236,                 !- Outdoor Air Flow per Person
-      0.000305,                !- Outdoor Air Flow per Zone Floor Area
-      0.0,                     !- Outdoor Air Flow per Zone
-      0.0,                     !- Outdoor Air Flow Air Changes per Hour
-      ;                        !- Outdoor Air Flow Rate Fraction Schedule Name
+DesignSpecification:OutdoorAir,
+  DSOA1,                      !- Name
+  SUM,                        !- Outdoor Air Method
+  0.00236,                    !- Outdoor Air Flow per Person
+  0.000305,                   !- Outdoor Air Flow per Zone Floor Area
+  0.0,                        !- Outdoor Air Flow per Zone
+  0.0,                        !- Outdoor Air Flow Air Changes per Hour
+  ;                           !- Outdoor Air Flow Rate Fraction Schedule Name
 
-  DesignSpecification:ZoneAirDistribution,
-      DSZADO1,                 !- Name
-      1.0,                     !- Zone Air Distribution Effectiveness in Cooling Mode
-      1.0,                     !- Zone Air Distribution Effectiveness in Heating Mode
-      ,                        !- Zone Air Distribution Effectiveness Schedule Name
-      0.3;                     !- Zone Secondary Recirculation Fraction
+DesignSpecification:ZoneAirDistribution,
+  DSZADO1,                    !- Name
+  1.0,                        !- Zone Air Distribution Effectiveness in Cooling Mode
+  1.0,                        !- Zone Air Distribution Effectiveness in Heating Mode
+  ,                           !- Zone Air Distribution Effectiveness Schedule Name
+  0.3;                        !- Zone Secondary Recirculation Fraction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-007}
@@ -1541,110 +1535,109 @@ Enter the heating capacity per unit floor area in m3/s-m2. This field is require
 Enter the heating capacity as a fraction of the autosized heating capacity. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. This input field may be left blank if a heating coil is not included in the zone HVAC equipment or the Heating Design Capacity Method is not \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized cooling capacity and user specified fraction. Design day sizing run must be specified.
 
 \begin{lstlisting}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec1,             !- Name
+  SupplyAirFlowRate,          !- Cooling Design Air Flow Method
+  autosize,                   !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  SupplyAirFlowRate,          !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  autosize,                   !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  SupplyAirFlowRate,          !- Heating Design Air Flow Method
+  autosize,                   !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec1,          !- Name
-      SupplyAirFlowRate,       !- Cooling Design Air Flow Method
-      autosize,                !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-      SupplyAirFlowRate,       !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      autosize,                !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                     !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                     !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      SupplyAirFlowRate,       !- Heating Design Air Flow Method
-      autosize,                !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec2,             !- Name
+  FlowPerFloorArea,           !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  3.6311418E-03,              !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FlowPerFloorArea,           !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  3.6311418E-03,              !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FlowPerFloorArea,           !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  3.6311418E-03,              !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-    DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec2,          !- Name
-      FlowPerFloorArea,        !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      3.6311418E-03,           !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-      FlowPerFloorArea,        !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      3.6311418E-03,           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                     !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                     !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FlowPerFloorArea,        !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      3.6311418E-03,           !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec3,             !- Name
+  FractionOfAutosizedCoolingAirflow,  !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  0.5,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FractionOfAutosizedCoolingAirflow,  !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  0.5,                        !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FractionOfAutosizedHeatingAirflow,  !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  0.5,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec3,          !- Name
-      FractionOfAutosizedCoolingAirflow,  !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      0.5,                     !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-    FractionOfAutosizedCoolingAirflow, !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      0.5,                 !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                    !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FractionOfAutosizedHeatingAirflow,  !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      0.5,                     !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
-
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec4,          !- Name
-      FlowPerCoolingCapacity,  !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      2.9541628E-05,           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-    FractionOfAutosizedHeatingAirflow, !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                    !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      0.413231177,         !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FlowPerHeatingCapacity,  !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      2.9541628E-05,           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec4,             !- Name
+  FlowPerCoolingCapacity,     !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  2.9541628E-05,              !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FractionOfAutosizedHeatingAirflow,  !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  0.413231177,                !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FlowPerHeatingCapacity,     !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  2.9541628E-05,              !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 \end{lstlisting}
 
 \subsection{DesignSpecification:AirTerminal:Sizing}\label{designspecificationairterminalsizing}
@@ -1680,14 +1673,13 @@ The fraction of the zone minimum outdoor air requirement to be met by this termi
 An IDF example:
 
 \begin{lstlisting}
-
-  DesignSpecification:AirTerminal:Sizing,
-    Recirculation System A Terminal Sizing, !- Name
-    0.6,                     !- Fraction of Design Cooling Load
-    0.8,                     !- Cooling Design Supply Air Temperature Difference Ratio
-    1.0,                     !- Fraction of Design Heating Load
-    1.0,                     !- Heating Design Supply Air Temperature Difference Ratio
-    0.0;                     !- Fraction of Minimum Outdoor Air Flow
+DesignSpecification:AirTerminal:Sizing,
+  Recirculation System A Terminal Sizing,  !- Name
+  0.6,                        !- Fraction of Design Cooling Load
+  0.8,                        !- Cooling Design Supply Air Temperature Difference Ratio
+  1.0,                        !- Fraction of Design Heating Load
+  1.0,                        !- Heating Design Supply Air Temperature Difference Ratio
+  0.0;                        !- Fraction of Minimum Outdoor Air Flow
 \end{lstlisting}
 
 \subsection{Sizing:System}\label{sizingsystem}
@@ -1871,49 +1863,47 @@ This input sets a limit to how much the heating capacity can exceed the cooling 
 An IDF example:
 
 \begin{lstlisting}
-
 Sizing:System,
-  VAV Sys 1,               !- AirLoop Name
-  sensible,                !- Type of Load to Size On
-  autosize,                !- Design Outdoor Air Flow Rate {m3/s}
-  0.3,                     !- Minimum System Air Flow Ratio
-  4.5,                     !- Preheat Design Temperature {C}
-  .008,                    !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
-  11.0,                    !- Precool Design Temperature {C}
-  .008,                    !- Precool Design Humidity Ratio {kgWater/kgDryAir}
-  12.8,                    !- Central Cooling Design Supply Air Temperature {C}
-  16.7,                    !- Central Heating Design Supply Air Temperature {C}
-  noncoincident,           !- Sizing Option
-  no,                      !- 100% Outdoor Air in Cooling
-  no,                      !- 100% Outdoor Air in Heating
-  0.008,                   !- Central Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  0.008,                   !- Central Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  designday,               !- Cooling Supply Air Flow Rate Method
-  0,                       !- Cooling Supply Air Flow Rate {m3/s}
-  ,                        !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
-  ,                        !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate {-}
-  ,                        !- Cooling Supply Air Flow Rate Per Unit Cooling Capacity {m3/s-W}
-  designday,               !- Heating Supply Air Flow Rate Method
-  0,                       !- Heating Supply Air Flow Rate {m3/s}
-  ,                        !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
-  ,                        !- Heating Fraction of Autosized Heating Supply Air Flow Rate {-}
-  ,                        !- Heating Fraction of Autosized Cooling Supply Air Flow Rate {-}
-  ,                        !- Heating Supply Air Flow Rate Per Unit Heating Capacity {m3/s-W}
-  ZoneSum,                 !- System Outdoor Air Method
-  0.5,                     !- Zone Maximum Outdoor Air Fraction
-  CoolingDesignCapacity,   !- Cooling Design Capacity Method
-  autosize,                !- Cooling Design Capacity {W}
-  ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-  ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-  HeatingDesignCapacity,   !- Heating Design Capacity Method
-  autosize,                !- Heating Design Capacity {W}
-  ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-  ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-  ,                        !- Central Cooling Capacity Control Method
-  ,                        !- Occupant Diversity
-  ,                        !- Heating Coil Sizing Method
-  ;                        !- Maximum Heating Capacity To Cooling Capacity Sizing Ratio
-
+  VAV Sys 1,                  !- AirLoop Name
+  sensible,                   !- Type of Load to Size On
+  autosize,                   !- Design Outdoor Air Flow Rate {m3/s}
+  0.3,                        !- Minimum System Air Flow Ratio
+  4.5,                        !- Preheat Design Temperature {C}
+  .008,                       !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
+  11.0,                       !- Precool Design Temperature {C}
+  .008,                       !- Precool Design Humidity Ratio {kgWater/kgDryAir}
+  12.8,                       !- Central Cooling Design Supply Air Temperature {C}
+  16.7,                       !- Central Heating Design Supply Air Temperature {C}
+  noncoincident,              !- Sizing Option
+  no,                         !- 100% Outdoor Air in Cooling
+  no,                         !- 100% Outdoor Air in Heating
+  0.008,                      !- Central Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+  0.008,                      !- Central Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+  designday,                  !- Cooling Supply Air Flow Rate Method
+  0,                          !- Cooling Supply Air Flow Rate {m3/s}
+  ,                           !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
+  ,                           !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate {-}
+  ,                           !- Cooling Supply Air Flow Rate Per Unit Cooling Capacity {m3/s-W}
+  designday,                  !- Heating Supply Air Flow Rate Method
+  0,                          !- Heating Supply Air Flow Rate {m3/s}
+  ,                           !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
+  ,                           !- Heating Fraction of Autosized Heating Supply Air Flow Rate {-}
+  ,                           !- Heating Fraction of Autosized Cooling Supply Air Flow Rate {-}
+  ,                           !- Heating Supply Air Flow Rate Per Unit Heating Capacity {m3/s-W}
+  ZoneSum,                    !- System Outdoor Air Method
+  0.5,                        !- Zone Maximum Outdoor Air Fraction
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  ,                           !- Central Cooling Capacity Control Method
+  ,                           !- Occupant Diversity
+  ,                           !- Heating Coil Sizing Method
+  ;                           !- Maximum Heating Capacity To Cooling Capacity Sizing Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-006}
@@ -1969,15 +1959,14 @@ This field is only used if the sizing option is set to Coincident. This field co
 An IDF example:
 
 \begin{lstlisting}
-
 Sizing:Plant,
-     Chilled Water Loop, ! name of loop
-     Cooling,            ! type of loop
-     7.22,               ! chilled water supply temperature
-     6.67,               ! chilled water delta T
-  NonCoincident,      !- Sizing Option
-  1,                  !- Zone Timesteps in Averaging Window
-  GlobalCoolingSizingFactor; !- Coincident Sizing Factor Mode
+  Chilled Water Loop,         !- name of loop
+  Cooling,                    !- type of loop
+  7.22,                       !- chilled water supply temperature
+  6.67,                       !- chilled water delta T
+  NonCoincident,              !- Sizing Option
+  1,                          !- Zone Timesteps in Averaging Window
+  GlobalCoolingSizingFactor;  !- Coincident Sizing Factor Mode
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-004}

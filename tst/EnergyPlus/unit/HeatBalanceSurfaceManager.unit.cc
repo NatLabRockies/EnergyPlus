@@ -2516,7 +2516,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySrdSurfLWR)
     EXPECT_DOUBLE_EQ(0.0, state->dataHeatBalSurf->SurfQRadLWOutSrdSurfs(4));
     // LWR Exchange Coefficient check for CTF method heat balance algorithm
     EXPECT_EQ(state->dataHeatBal->OverallHeatTransferSolutionAlgo, DataSurfaces::HeatTransferModel::CTF);
-    // HSurrFD coeffcient are zeros since the heat balance algorithm is not CondFD
+    // HSurrFD coefficient are zeros since the heat balance algorithm is not CondFD
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(1));
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(2));
     EXPECT_DOUBLE_EQ(0.0, state->dataMstBal->HSurrFD(3));
@@ -7182,11 +7182,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     // set exterior surface and ground surface temperatures
     Real64 surf_TK = 20.0 + Constant::Kelvin;
     Real64 grnd_TK = 22.0 + Constant::Kelvin;
-    // calculate LWR exchange coefficent from exterior surface to ground
+    // calculate LWR exchange coefficient from exterior surface to ground
     result_LWRExchangeCoeff_surf1 = Constant::StefanBoltzmann * 0.9 * 0.5 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf2 = Constant::StefanBoltzmann * 0.9 * 0.2 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf3 = Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
-    // test LWR exchange coefficents b/n exterior wall and ground surfaces
+    // test LWR exchange coefficients b/n exterior wall and ground surfaces
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1));
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2));
     EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3));

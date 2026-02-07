@@ -407,89 +407,88 @@ This numeric field defines the heating energy time constant, in hours, used to m
 
 \begin{lstlisting}
 Following is an example input for a AirConditioner:VariableRefrigerantFlow system.
-
 AirConditioner:VariableRefrigerantFlow,
-    VRF Heat Pump,        !- Heat Pump Name
-    VRFCondAvailSched,    !- Availability Schedule Name
-    autosize,             !- Gross Rated Total Cooling Capacity {W}
-    3.16038,              !- Gross Rated Cooling COP {W}
-    -5,                   !- Minimum Condenser Inlet Node Temperature in Cooling Mode {C}
-    43,                   !- Maximum Condenser Inlet Node Temperature in Cooling Mode {C}
-    VRFCoolCapFT,         !- Cooling Capacity Ratio Modifier Function of Low Temperature Curve Name
-    VRFCoolCapFTBoundary, !- Cooling Capacity Ratio Boundary Curve Name
-    VRFCoolCapFTHi,       !- Cooling Capacity Ratio Modifier Function of High Temperature Curve Name
-    VRFCoolEIRFT,         !- Cooling Energy Input Ratio Modifier Function of Low Temperature Curve Name
-    VRFCoolEIRFTBoundary, !- Cooling Energy Input Ratio Boundary Curve Name
-    VRFCoolEIRFTHi,       !- Cooling Energy Input Ratio Modifier Function of High Temperature Curve Name
-    CoolingEIRLowPLR,     !- Cooling Energy Input Ratio Modifier Function of Low Part-Load Ratio Curve Name
-    CoolingEIRHiPLR,      !- Cooling Energy Input Ratio Modifier Function of High Part-Load Ratio Curve Name
-    CoolingCombRatio,     !- Cooling Combination Ratio Correction Factor Curve Name
-    VRFCPLFFPLR,          !- Cooling Part-Load Fraction Correlation Curve Name
-    autosize,             !- Gross Rated Heating Capacity {W}
-    ,                     !- Rated Heating Capacity Sizing Ratio (W/W)
-    3.40909,              !- Gross Rated Heating COP
-    -20,                  !- Minimum Condenser Inlet Node Temperature in Heating Mode {C}
-    15.5,                 !- Maximum Condenser Inlet Node Temperature in Heating Mode {C}
-    VRFHeatCapFT,         !- Heating Capacity Ratio Modifier Function of Low Temperature Curve Name
-    VRFHeatCapFTBoundary, !- Heating Capacity Ratio Boundary Curve Name
-    VRFHeatCapFTHi,       !- Heating Capacity Ratio Modifier Function of High Temperature Curve Name
-    VRFHeatEIRFT,         !- Heating Energy Input Ratio Modifier Function of Low Temperature Curve Name
-    VRFHeatEIRFTBoundary, !- Heating Energy Input Ratio Boundary Curve Name
-    VRFHeatEIRFTHi,       !- Heating Energy Input Ratio Modifier Function of High Temperature Curve Name
-    WetBulbTemperature,   !- Heating Performance Curve Outdoor Temperature Type
-    HeatingEIRLowPLR,     !- Heating Energy Input Ratio Modifier Function of Low Part-Load Ratio Curve Name
-    HeatingEIRHiPLR,      !- Heating Energy Input Ratio Modifier Function of High Part-Load Ratio Curve Name
-    HeatingCombRatio,     !- Heating Combination Ratio Correction Factor Curve Name
-    VRFCPLFFPLR,          !- Heating Part-Load Fraction Correlation Curve Name
-    0.25,                 !- Minimum Heat Pump Part-Load Ratio
-    SPACE1-1,             !- Zone Name for Master Thermostat Location
-    LoadPriority,         !- Master Thermostat Priority Control Type
-    ,                     !- Thermostat Priority Schedule Name
-    VRF Heat Pump TU List, !- Zone Terminal Unit List Name
-    No,                   !- Heat Pump Waste Heat Recovery
-    30,                   !- Equivalent Piping Length used for Piping Correction Factor in Cooling Mode {m}
-    10,                   !- Vertical Height used for Piping Correction Factor {m}
-    CoolingLengthCorrectionFactor,  !- Piping Correction Factor for Length in Cooling Mode Curve Name
-    -0.000386,            !- Piping Correction Factor for Height in Cooling Mode Coefficient
-    30,                   !- Equivalent Piping Length used for Piping Correction Factor in Heating Mode {m}
-    ,                     !- Piping Correction Factor for Length in Heating Mode Curve Name
-    ,                     !- Piping Correction Factor for Height in Heating Mode Coefficient
-    15,                   !- Crankcase Heater Power per Compressor {W}
-    3,                    !- Number of Compressors
-    0.33,                 !- Ratio of Compressor Size to Total Compressor Capacity
-    7,                    !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
-    Resistive,            !- Defrost Strategy
-    Timed,                !- Defrost Control
-    ,                     !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
-    ,                     !- Defrost Time Period Fraction
-    autosize,             !- Resistive Defrost Heater Capacity {W}
-    7,                    !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
-    EvaporativelyCooled,  !- Condenser Type
-    MyVRFOANode,          !- Condenser Inlet Node Name
-    ,                     !- Condenser Outlet Node Name
-    ,                     !- Water Condenser Volume Flow Rate
-    ,                     !- Evaporative Condenser Effectiveness {dimensionless}
-    autosize,             !- Evaporative Condenser Air Flow Rate {m3/s}
-    autosize,             !- Evaporative Condenser Pump Rated Power Consumption {W}
-    ,                     !- Supply Water Storage Tank Name
-    200,                  !- Basin Heater Capacity {W/K}
-    ,                     !- Basin Heater Set Point Temperature (C)
-    ,                     !- Basin Heater Operating Schedule Name
-    ,                     !- Fuel Type
-    ,                     !- Minimum Condenser Inlet Node Temperature in Heat Recovery Mode (C)
-    ,                     !- Maximum Condenser Inlet Node Temperature in Heat Recovery Mode (C)
-    ,                     !- Heat Recovery Cooling Capacity Modifier Function of Temperature Curve Name
-    ,                     !- Initial Heat Recovery Cooling Capacity Fraction
-    ,                     !- Heat Recovery Cooling Capacity Time Constant (hr)
-    ,                     !- Heat Recovery Cooling Energy Modifier Function of Temperature Curve Name
-    ,                     !- Initial Heat Recovery Cooling Energy Fraction
-    ,                     !- Heat Recovery Cooling Energy Time Constant (hr)
-    ,                     !- Heat Recovery Heating Capacity Modifier Function of Temperature Curve Name
-    ,                     !- Initial Heat Recovery Heating Capacity Fraction
-    ,                     !- Heat Recovery Heating Capacity Time Constant (hr)
-    ,                     !- Heat Recovery Heating Energy Modifier Function of Temperature Curve Name
-    ,                     !- Initial Heat Recovery Heating Energy Fraction
-    ;                     !- Heat Recovery Heating Energy Time Constant (hr)
+  VRF Heat Pump,              !- Heat Pump Name
+  VRFCondAvailSched,          !- Availability Schedule Name
+  autosize,                   !- Gross Rated Total Cooling Capacity {W}
+  3.16038,                    !- Gross Rated Cooling COP {W}
+  -5,                         !- Minimum Condenser Inlet Node Temperature in Cooling Mode {C}
+  43,                         !- Maximum Condenser Inlet Node Temperature in Cooling Mode {C}
+  VRFCoolCapFT,               !- Cooling Capacity Ratio Modifier Function of Low Temperature Curve Name
+  VRFCoolCapFTBoundary,       !- Cooling Capacity Ratio Boundary Curve Name
+  VRFCoolCapFTHi,             !- Cooling Capacity Ratio Modifier Function of High Temperature Curve Name
+  VRFCoolEIRFT,               !- Cooling Energy Input Ratio Modifier Function of Low Temperature Curve Name
+  VRFCoolEIRFTBoundary,       !- Cooling Energy Input Ratio Boundary Curve Name
+  VRFCoolEIRFTHi,             !- Cooling Energy Input Ratio Modifier Function of High Temperature Curve Name
+  CoolingEIRLowPLR,           !- Cooling Energy Input Ratio Modifier Function of Low Part-Load Ratio Curve Name
+  CoolingEIRHiPLR,            !- Cooling Energy Input Ratio Modifier Function of High Part-Load Ratio Curve Name
+  CoolingCombRatio,           !- Cooling Combination Ratio Correction Factor Curve Name
+  VRFCPLFFPLR,                !- Cooling Part-Load Fraction Correlation Curve Name
+  autosize,                   !- Gross Rated Heating Capacity {W}
+  ,                           !- Rated Heating Capacity Sizing Ratio (W/W)
+  3.40909,                    !- Gross Rated Heating COP
+  -20,                        !- Minimum Condenser Inlet Node Temperature in Heating Mode {C}
+  15.5,                       !- Maximum Condenser Inlet Node Temperature in Heating Mode {C}
+  VRFHeatCapFT,               !- Heating Capacity Ratio Modifier Function of Low Temperature Curve Name
+  VRFHeatCapFTBoundary,       !- Heating Capacity Ratio Boundary Curve Name
+  VRFHeatCapFTHi,             !- Heating Capacity Ratio Modifier Function of High Temperature Curve Name
+  VRFHeatEIRFT,               !- Heating Energy Input Ratio Modifier Function of Low Temperature Curve Name
+  VRFHeatEIRFTBoundary,       !- Heating Energy Input Ratio Boundary Curve Name
+  VRFHeatEIRFTHi,             !- Heating Energy Input Ratio Modifier Function of High Temperature Curve Name
+  WetBulbTemperature,         !- Heating Performance Curve Outdoor Temperature Type
+  HeatingEIRLowPLR,           !- Heating Energy Input Ratio Modifier Function of Low Part-Load Ratio Curve Name
+  HeatingEIRHiPLR,            !- Heating Energy Input Ratio Modifier Function of High Part-Load Ratio Curve Name
+  HeatingCombRatio,           !- Heating Combination Ratio Correction Factor Curve Name
+  VRFCPLFFPLR,                !- Heating Part-Load Fraction Correlation Curve Name
+  0.25,                       !- Minimum Heat Pump Part-Load Ratio
+  SPACE1-1,                   !- Zone Name for Master Thermostat Location
+  LoadPriority,               !- Master Thermostat Priority Control Type
+  ,                           !- Thermostat Priority Schedule Name
+  VRF Heat Pump TU List,      !- Zone Terminal Unit List Name
+  No,                         !- Heat Pump Waste Heat Recovery
+  30,                         !- Equivalent Piping Length used for Piping Correction Factor in Cooling Mode {m}
+  10,                         !- Vertical Height used for Piping Correction Factor {m}
+  CoolingLengthCorrectionFactor,  !- Piping Correction Factor for Length in Cooling Mode Curve Name
+  -0.000386,                  !- Piping Correction Factor for Height in Cooling Mode Coefficient
+  30,                         !- Equivalent Piping Length used for Piping Correction Factor in Heating Mode {m}
+  ,                           !- Piping Correction Factor for Length in Heating Mode Curve Name
+  ,                           !- Piping Correction Factor for Height in Heating Mode Coefficient
+  15,                         !- Crankcase Heater Power per Compressor {W}
+  3,                          !- Number of Compressors
+  0.33,                       !- Ratio of Compressor Size to Total Compressor Capacity
+  7,                          !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
+  Resistive,                  !- Defrost Strategy
+  Timed,                      !- Defrost Control
+  ,                           !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
+  ,                           !- Defrost Time Period Fraction
+  autosize,                   !- Resistive Defrost Heater Capacity {W}
+  7,                          !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
+  EvaporativelyCooled,        !- Condenser Type
+  MyVRFOANode,                !- Condenser Inlet Node Name
+  ,                           !- Condenser Outlet Node Name
+  ,                           !- Water Condenser Volume Flow Rate
+  ,                           !- Evaporative Condenser Effectiveness {dimensionless}
+  autosize,                   !- Evaporative Condenser Air Flow Rate {m3/s}
+  autosize,                   !- Evaporative Condenser Pump Rated Power Consumption {W}
+  ,                           !- Supply Water Storage Tank Name
+  200,                        !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Set Point Temperature (C)
+  ,                           !- Basin Heater Operating Schedule Name
+  ,                           !- Fuel Type
+  ,                           !- Minimum Condenser Inlet Node Temperature in Heat Recovery Mode (C)
+  ,                           !- Maximum Condenser Inlet Node Temperature in Heat Recovery Mode (C)
+  ,                           !- Heat Recovery Cooling Capacity Modifier Function of Temperature Curve Name
+  ,                           !- Initial Heat Recovery Cooling Capacity Fraction
+  ,                           !- Heat Recovery Cooling Capacity Time Constant (hr)
+  ,                           !- Heat Recovery Cooling Energy Modifier Function of Temperature Curve Name
+  ,                           !- Initial Heat Recovery Cooling Energy Fraction
+  ,                           !- Heat Recovery Cooling Energy Time Constant (hr)
+  ,                           !- Heat Recovery Heating Capacity Modifier Function of Temperature Curve Name
+  ,                           !- Initial Heat Recovery Heating Capacity Fraction
+  ,                           !- Heat Recovery Heating Capacity Time Constant (hr)
+  ,                           !- Heat Recovery Heating Energy Modifier Function of Temperature Curve Name
+  ,                           !- Initial Heat Recovery Heating Energy Fraction
+  ;                           !- Heat Recovery Heating Energy Time Constant (hr)
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-039}
@@ -934,192 +933,190 @@ This alpha field defines the name of a BiQuadratic curve for the VRF operational
 This alpha field defines the name of a BiQuadratic curve for the VRF operational mode corresponding to the i-th loading index. It parameterizes the variation of compressor power as a function of operating conditions, i.e., condensing (variable x) and evaporating temperatures (variable y). The output of this curve is a dimensionless multiplier to be applied on the rated compressor power to calculate the actual compressor power.
 
 \begin{lstlisting}
-
 Following is an example input for a AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl system.
-
-AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
-  VRF Heat Pump,           !- Heat Pump Name
-  VRFCondAvailSched,       !- Availability Schedule Name
-  VRF Heat Pump TU List,   !- Zone Terminal Unit List Name
-  R410A,                   !- Refrigerant Type
-  41300,                   !- Rated Evaporative Capacity {W}
-  0.344,                   !- Rated Compressor Power Per Unit of Rated Evaporative Capacity {W/W}
-  ,                        !- Minimum Outdoor Air Temperature in Cooling Mode {C}
-  ,                        !- Maximum Outdoor Air Temperature in Cooling Mode {C}
-  ,                        !- Minimum Outdoor Air Temperature in Heating Mode {C}
-  ,                        !- Maximum Outdoor Air Temperature in Heating Mode {C}
-  3,                       !- Reference Outdoor Unit Superheating Degrees {C}
-  3,                       !- Reference Outdoor Unit Subcooling Degrees {C}
-  VariableTemp,            !- Refrigerant Temperature Control Algorithm for Indoor Unit
-  ,                        !- Reference Evaporating Temperature for Indoor Unit {C}
-  ,                        !- Reference Condensing Temperature for Indoor Unit {C}
-  6,                       !- Variable Evaporating Temperature Minimum for Indoor Unit {C}
-  13,                      !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
-  42,                      !- Variable Condensing Temperature Minimum for Indoor Unit {C}
-  46,                      !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
-  4.12E-3,                 !- Outdoor Unit Fan Power Per Unit of Rated Evaporative Capacity {W/W}
-  7.26E-5,                 !- Outdoor Unit Fan Flow Rate Per Unit of Rated Evaporative Capacity {m3/s-W}
-  OUEvapTempCurve,         !- Outdoor Unit Evaporating Temperature Function of Superheating Curve Name
-  OUCondTempCurve,         !- Outdoor Unit Condensing Temperature Function of Subcooling Curve Name
-  0.0508,                  !- Diameter of main pipe connecting outdoor unit to the first branch joint {m}
-  30,                      !- Length of main pipe connecting outdoor unit to the first branch joint {m}
-  36,                      !- Equivalent length of main pipe connecting outdoor unit to the first branch joint {m}
-  5,                       !- Height difference between the outdoor unit node and indoor unit node of the main pipe {m}
-  0.02,                    !- Insulation thickness of the main pipe {m}
-  0.032,                   !- Thermal conductivity of the main pipe insulation material {W/m-K}
-  33,                      !- Crankcase Heater Power per Compressor {W}
-  1,                       !- Number of Compressors
-  0.33,                    !- Ratio of Compressor Size to Total Compressor Capacity
-  7,                       !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
-  ,                        !- Defrost Strategy
-  ,                        !- Defrost Control
-  ,                        !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
-  ,                        !- Defrost Time Period Fraction
-  ,                        !- Resistive Defrost Heater Capacity {W}
-  ,                        !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
-  4500000,                 !- Compressor maximum delta Pressure {Pa}
-  3,                       !- Number of Compressor Loading Index Entries
-  1500,                    !- Compressor Speed at Loading Index 1 {rev/min}
-  MinSpdCooling,           !- Loading Index 1 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  MinSpdPower,             !- Loading Index 1 Compressor Power Multiplier Function of Temperature Curve Name
-  3600,                    !- Compressor Speed at Loading Index 2 {rev/min}
-  Spd1Cooling,             !- Loading Index 2 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  Spd1Power,               !- Loading Index 2 Compressor Power Multiplier Function of Temperature Curve Name
-  6000,                    !- Compressor Speed at Loading Index 3 {rev/min}
-  Spd2Cooling,             !- Loading Index 3 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  Spd2Power;               !- Loading Index 3 Compressor Power Multiplier Function of Temperature Curve Name
-
-Curve:Quadratic,
-  OUEvapTempCurve,         !- Name
-  0,                       !- Coefficient1 Constant
-  6.05E-1,                 !- Coefficient2 x
-  2.50E-2,                 !- Coefficient3 x**2
-  0,                       !- Minimum Value of x
-  15,                      !- Maximum Value of x
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature;             !- Output Unit Type
+  AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
+  VRF Heat Pump,              !- Heat Pump Name
+  VRFCondAvailSched,          !- Availability Schedule Name
+  VRF Heat Pump TU List,      !- Zone Terminal Unit List Name
+  R410A,                      !- Refrigerant Type
+  41300,                      !- Rated Evaporative Capacity {W}
+  0.344,                      !- Rated Compressor Power Per Unit of Rated Evaporative Capacity {W/W}
+  ,                           !- Minimum Outdoor Air Temperature in Cooling Mode {C}
+  ,                           !- Maximum Outdoor Air Temperature in Cooling Mode {C}
+  ,                           !- Minimum Outdoor Air Temperature in Heating Mode {C}
+  ,                           !- Maximum Outdoor Air Temperature in Heating Mode {C}
+  3,                          !- Reference Outdoor Unit Superheating Degrees {C}
+  3,                          !- Reference Outdoor Unit Subcooling Degrees {C}
+  VariableTemp,               !- Refrigerant Temperature Control Algorithm for Indoor Unit
+  ,                           !- Reference Evaporating Temperature for Indoor Unit {C}
+  ,                           !- Reference Condensing Temperature for Indoor Unit {C}
+  6,                          !- Variable Evaporating Temperature Minimum for Indoor Unit {C}
+  13,                         !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
+  42,                         !- Variable Condensing Temperature Minimum for Indoor Unit {C}
+  46,                         !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
+  4.12E-3,                    !- Outdoor Unit Fan Power Per Unit of Rated Evaporative Capacity {W/W}
+  7.26E-5,                    !- Outdoor Unit Fan Flow Rate Per Unit of Rated Evaporative Capacity {m3/s-W}
+  OUEvapTempCurve,            !- Outdoor Unit Evaporating Temperature Function of Superheating Curve Name
+  OUCondTempCurve,            !- Outdoor Unit Condensing Temperature Function of Subcooling Curve Name
+  0.0508,                     !- Diameter of main pipe connecting outdoor unit to the first branch joint {m}
+  30,                         !- Length of main pipe connecting outdoor unit to the first branch joint {m}
+  36,                         !- Equivalent length of main pipe connecting outdoor unit to the first branch joint {m}
+  5,                          !- Height difference between the outdoor unit node and indoor unit node of the main pipe {m}
+  0.02,                       !- Insulation thickness of the main pipe {m}
+  0.032,                      !- Thermal conductivity of the main pipe insulation material {W/m-K}
+  33,                         !- Crankcase Heater Power per Compressor {W}
+  1,                          !- Number of Compressors
+  0.33,                       !- Ratio of Compressor Size to Total Compressor Capacity
+  7,                          !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
+  ,                           !- Defrost Strategy
+  ,                           !- Defrost Control
+  ,                           !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
+  ,                           !- Defrost Time Period Fraction
+  ,                           !- Resistive Defrost Heater Capacity {W}
+  ,                           !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
+  4500000,                    !- Compressor maximum delta Pressure {Pa}
+  3,                          !- Number of Compressor Loading Index Entries
+  1500,                       !- Compressor Speed at Loading Index 1 {rev/min}
+  MinSpdCooling,              !- Loading Index 1 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  MinSpdPower,                !- Loading Index 1 Compressor Power Multiplier Function of Temperature Curve Name
+  3600,                       !- Compressor Speed at Loading Index 2 {rev/min}
+  Spd1Cooling,                !- Loading Index 2 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  Spd1Power,                  !- Loading Index 2 Compressor Power Multiplier Function of Temperature Curve Name
+  6000,                       !- Compressor Speed at Loading Index 3 {rev/min}
+  Spd2Cooling,                !- Loading Index 3 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  Spd2Power;                  !- Loading Index 3 Compressor Power Multiplier Function of Temperature Curve Name
 
 Curve:Quadratic,
-  OUCondTempCurve,         !- Name
-  0,                       !- Coefficient1 Constant
-  -2.91,                   !- Coefficient2 x
-  1.180,                   !- Coefficient3 x**2
-  0,                       !- Minimum Value of x
-  5,                       !- Maximum Value of x
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature;             !- Output Unit Type
+  OUEvapTempCurve,            !- Name
+  0,                          !- Coefficient1 Constant
+  6.05E-1,                    !- Coefficient2 x
+  2.50E-2,                    !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  15,                         !- Maximum Value of x
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature;                !- Output Unit Type
+
+Curve:Quadratic,
+  OUCondTempCurve,            !- Name
+  0,                          !- Coefficient1 Constant
+  -2.91,                      !- Coefficient2 x
+  1.180,                      !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  5,                          !- Maximum Value of x
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature;                !- Output Unit Type
 
 Curve:Biquadratic,
-  MinSpdCooling,           !- Name
-  3.19E-01,                !- Coefficient1 Constant
-  -1.26E-03,               !- Coefficient2 x
-  -2.15E-05,               !- Coefficient3 x**2
-  1.20E-02,                !- Coefficient4 y
-  1.05E-04,                !- Coefficient5 y**2
-  -8.66E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  MinSpdCooling,              !- Name
+  3.19E-01,                   !- Coefficient1 Constant
+  -1.26E-03,                  !- Coefficient2 x
+  -2.15E-05,                  !- Coefficient3 x**2
+  1.20E-02,                   !- Coefficient4 y
+  1.05E-04,                   !- Coefficient5 y**2
+  -8.66E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  MinSpdPower,             !- Name
-  8.79E-02 ,               !- Coefficient1 Constant
-  -1.72E-04,               !- Coefficient2 x
-  6.93E-05 ,               !- Coefficient3 x**2
-  -3.38E-05,               !- Coefficient4 y
-  -8.10E-06,               !- Coefficient5 y**2
-  -1.04E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  MinSpdPower,                !- Name
+  8.79E-02,                   !- Coefficient1 Constant
+  -1.72E-04,                  !- Coefficient2 x
+  6.93E-05,                   !- Coefficient3 x**2
+  -3.38E-05,                  !- Coefficient4 y
+  -8.10E-06,                  !- Coefficient5 y**2
+  -1.04E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd1Cooling,             !- Name
-  8.12E-01 ,               !- Coefficient1 Constant
-  -4.23E-03,               !- Coefficient2 x
-  -4.11E-05,               !- Coefficient3 x**2
-  2.97E-02 ,               !- Coefficient4 y
-  2.67E-04 ,               !- Coefficient5 y**2
-  -2.23E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd1Cooling,                !- Name
+  8.12E-01,                   !- Coefficient1 Constant
+  -4.23E-03,                  !- Coefficient2 x
+  -4.11E-05,                  !- Coefficient3 x**2
+  2.97E-02,                   !- Coefficient4 y
+  2.67E-04,                   !- Coefficient5 y**2
+  -2.23E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd1Power,               !- Name
-  3.26E-01 ,               !- Coefficient1 Constant
-  -2.20E-03,               !- Coefficient2 x
-  1.42E-04 ,               !- Coefficient3 x**2
-  2.82E-03 ,               !- Coefficient4 y
-  2.86E-05 ,               !- Coefficient5 y**2
-  -3.50E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd1Power,                  !- Name
+  3.26E-01,                   !- Coefficient1 Constant
+  -2.20E-03,                  !- Coefficient2 x
+  1.42E-04,                   !- Coefficient3 x**2
+  2.82E-03,                   !- Coefficient4 y
+  2.86E-05,                   !- Coefficient5 y**2
+  -3.50E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd2Cooling,             !- Name
-  1.32E+00 ,               !- Coefficient1 Constant
-  -6.20E-03,               !- Coefficient2 x
-  -7.10E-05,               !- Coefficient3 x**2
-  4.89E-02 ,               !- Coefficient4 y
-  4.59E-04 ,               !- Coefficient5 y**2
-  -3.67E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd2Cooling,                !- Name
+  1.32E+00,                   !- Coefficient1 Constant
+  -6.20E-03,                  !- Coefficient2 x
+  -7.10E-05,                  !- Coefficient3 x**2
+  4.89E-02,                   !- Coefficient4 y
+  4.59E-04,                   !- Coefficient5 y**2
+  -3.67E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd2Power,               !- Name
-  6.56E-01 ,               !- Coefficient1 Constant
-  -3.71E-03,               !- Coefficient2 x
-  2.07E-04 ,               !- Coefficient3 x**2
-  1.05E-02 ,               !- Coefficient4 y
-  7.36E-05 ,               !- Coefficient5 y**2
-  -1.57E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd2Power,                  !- Name
+  6.56E-01,                   !- Coefficient1 Constant
+  -3.71E-03,                  !- Coefficient2 x
+  2.07E-04,                   !- Coefficient3 x**2
+  1.05E-02,                   !- Coefficient4 y
+  7.36E-05,                   !- Coefficient5 y**2
+  -1.57E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 \end{lstlisting}
 
 \subsubsection{Outputs}
@@ -1457,207 +1454,206 @@ Following is an example input for a \hyperref[airconditionervariablerefrigerantf
 
 \begin{lstlisting}
 Following is an example input for a AirConditioner:VariableRefrigerantFlow system.
-
-AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
-  VRF Heat Recovery,       !- Name
-  VRFCondAvailSched,       !- Availability Schedule Name
-  VRF HR TU List,          !- Zone Terminal Unit List Name
-  R410A,                   !- Refrigerant Type
-  autosize,                !- Rated Evaporative Capacity {W}
-  0.214,                   !- Rated Compressor Power Per Unit of Rated Evaporative Capacity {W/W}
-  -6,                      !- Minimum Outdoor Air Temperature in Cooling Only Mode {C}
-  43,                      !- Maximum Outdoor Air Temperature in Cooling Only Mode {C}
-  -20,                     !- Minimum Outdoor Air Temperature in Heating Only Mode {C}
-  26,                      !- Maximum Outdoor Air Temperature in Heating Only Mode {C}
-  -20,                     !- Minimum Outdoor Air Temperature in Heat Recovery Mode {C}
-  26,                      !- Maximum Outdoor Air Temperature in Heat Recovery Mode {C}
-  VariableTemp,            !- Refrigerant Temperature Control Algorithm for Indoor Unit
-  ,                        !- Reference Evaporating Temperature for Indoor Unit {C}
-  ,                        !- Reference Condensing Temperature for Indoor Unit {C}
-  5,                       !- Variable Evaporating Temperature Minimum for Indoor Unit {C}
-  14,                      !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
-  36,                      !- Variable Condensing Temperature Minimum for Indoor Unit {C}
-  46,                      !- Variable Condensing Temperature Maximum for Indoor Unit {C}
-  3,                       !- Outdoor Unit Evaporator Reference Superheating {C}
-  3,                       !- Outdoor Unit Condenser Reference Subcooling {C}
-  0.28,                    !- Outdoor Unit Evaporator Rated Bypass Factor
-  0.05,                    !- Outdoor Unit Condenser Rated Bypass Factor
-  ,                        !- Difference between Outdoor Unit Evaporating Temperature and Outdoor Air Temperature in Heat Recovery Mode {C}
-  0.3,                     !- Outdoor Unit Heat Exchanger Capacity Ratio
-  2.67E-2,                 !- Outdoor Unit Fan Power Per Unit of Rated Evaporative Capacity {W/W}
-  1.13E-4,                 !- Outdoor Unit Fan Flow Rate Per Unit of Rated Evaporative Capacity {m3/s-W}
-  OUEvapTempCurve,         !- Outdoor Unit Evaporating Temperature Function of Superheating Curve Name
-  OUCondTempCurve,         !- Outdoor Unit Condensing Temperature Function of Subcooling Curve Name
-  0.0349,                  !- Diameter of Main Pipe for Suction Gas {m}
-  0.0286,                  !- Diameter of Main Pipe for Discharge Gas {m}
-  30,                      !- Length of main pipe connecting outdoor unit to the first branch joint {m}
-  36,                      !- Equivalent length of main pipe connecting outdoor unit to the first branch joint {m}
-  5,                       !- Height difference between the outdoor unit node and indoor unit node of the main pipe {m}
-  0.02,                    !- Insulation thickness of the main pipe {m}
-  0.032,                   !- Thermal conductivity of the main pipe insulation material {W/m-K}
-  33,                      !- Crankcase Heater Power per Compressor {W}
-  3,                       !- Number of Compressors
-  0.33,                    !- Ratio of Compressor Size to Total Compressor Capacity
-  7,                       !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
-  ,                        !- Defrost Strategy
-  ,                        !- Defrost Control
-  ,                        !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
-  ,                        !- Defrost Time Period Fraction
-  ,                        !- Resistive Defrost Heater Capacity {W}
-  ,                        !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
-  ,                        !- Initial Heat Recovery Cooling Capacity Fraction {W/W}
-  ,                        !- Heat Recovery Cooling Capacity Time Constant {hr}
-  ,                        !- Initial Heat Recovery Cooling Energy Fraction {W/W}
-  ,                        !- Heat Recovery Cooling Energy Time Constant {hr}
-  ,                        !- Initial Heat Recovery Heating Capacity Fraction {W/W}
-  ,                        !- Heat Recovery Heating Capacity Time Constant {hr}
-  ,                        !- Initial Heat Recovery Heating Energy Fraction {W/W}
-  ,                        !- Heat Recovery Heating Energy Time Constant {hr}
-  4500000,                 !- Compressor maximum delta Pressure {Pa}
-  0.95,                    !- Compressor Inverter Efficiency
-  ,                        !- Compressor Evaporative Capacity Correction Factor
-  3,                       !- Number of Compressor Loading Index Entries
-  1500,                    !- Compressor Speed at Loading Index 1 {rev/min}
-  MinSpdCooling,           !- Loading Index 1 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  MinSpdPower,             !- Loading Index 1 Compressor Power Multiplier Function of Temperature Curve Name
-  3600,                    !- Compressor Speed at Loading Index 2 {rev/min}
-  Spd1Cooling,             !- Loading Index 2 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  Spd1Power,               !- Loading Index 2 Compressor Power Multiplier Function of Temperature Curve Name
-  6000,                    !- Compressor Speed at Loading Index 3 {rev/min}
-  Spd2Cooling,             !- Loading Index 3 Evaporative Capacity Multiplier Function of Temperature Curve Name
-  Spd2Power;               !- Loading Index 3 Compressor Power Multiplier Function of Temperature Curve Name
-
-Curve:Quadratic,
-  OUEvapTempCurve,         !- Name
-  0,                       !- Coefficient1 Constant
-  6.05E-1,                 !- Coefficient2 x
-  2.50E-2,                 !- Coefficient3 x**2
-  0,                       !- Minimum Value of x
-  15,                      !- Maximum Value of x
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature;             !- Output Unit Type
+  AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:HR,
+  VRF Heat Recovery,          !- Name
+  VRFCondAvailSched,          !- Availability Schedule Name
+  VRF HR TU List,             !- Zone Terminal Unit List Name
+  R410A,                      !- Refrigerant Type
+  autosize,                   !- Rated Evaporative Capacity {W}
+  0.214,                      !- Rated Compressor Power Per Unit of Rated Evaporative Capacity {W/W}
+  -6,                         !- Minimum Outdoor Air Temperature in Cooling Only Mode {C}
+  43,                         !- Maximum Outdoor Air Temperature in Cooling Only Mode {C}
+  -20,                        !- Minimum Outdoor Air Temperature in Heating Only Mode {C}
+  26,                         !- Maximum Outdoor Air Temperature in Heating Only Mode {C}
+  -20,                        !- Minimum Outdoor Air Temperature in Heat Recovery Mode {C}
+  26,                         !- Maximum Outdoor Air Temperature in Heat Recovery Mode {C}
+  VariableTemp,               !- Refrigerant Temperature Control Algorithm for Indoor Unit
+  ,                           !- Reference Evaporating Temperature for Indoor Unit {C}
+  ,                           !- Reference Condensing Temperature for Indoor Unit {C}
+  5,                          !- Variable Evaporating Temperature Minimum for Indoor Unit {C}
+  14,                         !- Variable Evaporating Temperature Maximum for Indoor Unit {C}
+  36,                         !- Variable Condensing Temperature Minimum for Indoor Unit {C}
+  46,                         !- Variable Condensing Temperature Maximum for Indoor Unit {C}
+  3,                          !- Outdoor Unit Evaporator Reference Superheating {C}
+  3,                          !- Outdoor Unit Condenser Reference Subcooling {C}
+  0.28,                       !- Outdoor Unit Evaporator Rated Bypass Factor
+  0.05,                       !- Outdoor Unit Condenser Rated Bypass Factor
+  ,                           !- Difference between Outdoor Unit Evaporating Temperature and Outdoor Air Temperature in Heat Recovery Mode {C}
+  0.3,                        !- Outdoor Unit Heat Exchanger Capacity Ratio
+  2.67E-2,                    !- Outdoor Unit Fan Power Per Unit of Rated Evaporative Capacity {W/W}
+  1.13E-4,                    !- Outdoor Unit Fan Flow Rate Per Unit of Rated Evaporative Capacity {m3/s-W}
+  OUEvapTempCurve,            !- Outdoor Unit Evaporating Temperature Function of Superheating Curve Name
+  OUCondTempCurve,            !- Outdoor Unit Condensing Temperature Function of Subcooling Curve Name
+  0.0349,                     !- Diameter of Main Pipe for Suction Gas {m}
+  0.0286,                     !- Diameter of Main Pipe for Discharge Gas {m}
+  30,                         !- Length of main pipe connecting outdoor unit to the first branch joint {m}
+  36,                         !- Equivalent length of main pipe connecting outdoor unit to the first branch joint {m}
+  5,                          !- Height difference between the outdoor unit node and indoor unit node of the main pipe {m}
+  0.02,                       !- Insulation thickness of the main pipe {m}
+  0.032,                      !- Thermal conductivity of the main pipe insulation material {W/m-K}
+  33,                         !- Crankcase Heater Power per Compressor {W}
+  3,                          !- Number of Compressors
+  0.33,                       !- Ratio of Compressor Size to Total Compressor Capacity
+  7,                          !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater {C}
+  ,                           !- Defrost Strategy
+  ,                           !- Defrost Control
+  ,                           !- Defrost Energy Input Ratio Modifier Function of Temperature Curve Name
+  ,                           !- Defrost Time Period Fraction
+  ,                           !- Resistive Defrost Heater Capacity {W}
+  ,                           !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
+  ,                           !- Initial Heat Recovery Cooling Capacity Fraction {W/W}
+  ,                           !- Heat Recovery Cooling Capacity Time Constant {hr}
+  ,                           !- Initial Heat Recovery Cooling Energy Fraction {W/W}
+  ,                           !- Heat Recovery Cooling Energy Time Constant {hr}
+  ,                           !- Initial Heat Recovery Heating Capacity Fraction {W/W}
+  ,                           !- Heat Recovery Heating Capacity Time Constant {hr}
+  ,                           !- Initial Heat Recovery Heating Energy Fraction {W/W}
+  ,                           !- Heat Recovery Heating Energy Time Constant {hr}
+  4500000,                    !- Compressor maximum delta Pressure {Pa}
+  0.95,                       !- Compressor Inverter Efficiency
+  ,                           !- Compressor Evaporative Capacity Correction Factor
+  3,                          !- Number of Compressor Loading Index Entries
+  1500,                       !- Compressor Speed at Loading Index 1 {rev/min}
+  MinSpdCooling,              !- Loading Index 1 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  MinSpdPower,                !- Loading Index 1 Compressor Power Multiplier Function of Temperature Curve Name
+  3600,                       !- Compressor Speed at Loading Index 2 {rev/min}
+  Spd1Cooling,                !- Loading Index 2 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  Spd1Power,                  !- Loading Index 2 Compressor Power Multiplier Function of Temperature Curve Name
+  6000,                       !- Compressor Speed at Loading Index 3 {rev/min}
+  Spd2Cooling,                !- Loading Index 3 Evaporative Capacity Multiplier Function of Temperature Curve Name
+  Spd2Power;                  !- Loading Index 3 Compressor Power Multiplier Function of Temperature Curve Name
 
 Curve:Quadratic,
-  OUCondTempCurve,         !- Name
-  0,                       !- Coefficient1 Constant
-  -2.91,                   !- Coefficient2 x
-  1.180,                   !- Coefficient3 x**2
-  0,                       !- Minimum Value of x
-  5,                       !- Maximum Value of x
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature;             !- Output Unit Type
+  OUEvapTempCurve,            !- Name
+  0,                          !- Coefficient1 Constant
+  6.05E-1,                    !- Coefficient2 x
+  2.50E-2,                    !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  15,                         !- Maximum Value of x
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature;                !- Output Unit Type
+
+Curve:Quadratic,
+  OUCondTempCurve,            !- Name
+  0,                          !- Coefficient1 Constant
+  -2.91,                      !- Coefficient2 x
+  1.180,                      !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  5,                          !- Maximum Value of x
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature;                !- Output Unit Type
 
 Curve:Biquadratic,
-  MinSpdCooling,           !- Name
-  3.19E-01,                !- Coefficient1 Constant
-  -1.26E-03,               !- Coefficient2 x
-  -2.15E-05,               !- Coefficient3 x**2
-  1.20E-02,                !- Coefficient4 y
-  1.05E-04,                !- Coefficient5 y**2
-  -8.66E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  MinSpdCooling,              !- Name
+  3.19E-01,                   !- Coefficient1 Constant
+  -1.26E-03,                  !- Coefficient2 x
+  -2.15E-05,                  !- Coefficient3 x**2
+  1.20E-02,                   !- Coefficient4 y
+  1.05E-04,                   !- Coefficient5 y**2
+  -8.66E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  MinSpdPower,             !- Name
-  8.79E-02 ,               !- Coefficient1 Constant
-  -1.72E-04,               !- Coefficient2 x
-  6.93E-05 ,               !- Coefficient3 x**2
-  -3.38E-05,               !- Coefficient4 y
-  -8.10E-06,               !- Coefficient5 y**2
-  -1.04E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  MinSpdPower,                !- Name
+  8.79E-02,                   !- Coefficient1 Constant
+  -1.72E-04,                  !- Coefficient2 x
+  6.93E-05,                   !- Coefficient3 x**2
+  -3.38E-05,                  !- Coefficient4 y
+  -8.10E-06,                  !- Coefficient5 y**2
+  -1.04E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd1Cooling,             !- Name
-  8.12E-01 ,               !- Coefficient1 Constant
-  -4.23E-03,               !- Coefficient2 x
-  -4.11E-05,               !- Coefficient3 x**2
-  2.97E-02 ,               !- Coefficient4 y
-  2.67E-04 ,               !- Coefficient5 y**2
-  -2.23E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd1Cooling,                !- Name
+  8.12E-01,                   !- Coefficient1 Constant
+  -4.23E-03,                  !- Coefficient2 x
+  -4.11E-05,                  !- Coefficient3 x**2
+  2.97E-02,                   !- Coefficient4 y
+  2.67E-04,                   !- Coefficient5 y**2
+  -2.23E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd1Power,               !- Name
-  3.26E-01 ,               !- Coefficient1 Constant
-  -2.20E-03,               !- Coefficient2 x
-  1.42E-04 ,               !- Coefficient3 x**2
-  2.82E-03 ,               !- Coefficient4 y
-  2.86E-05 ,               !- Coefficient5 y**2
-  -3.50E-05,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd1Power,                  !- Name
+  3.26E-01,                   !- Coefficient1 Constant
+  -2.20E-03,                  !- Coefficient2 x
+  1.42E-04,                   !- Coefficient3 x**2
+  2.82E-03,                   !- Coefficient4 y
+  2.86E-05,                   !- Coefficient5 y**2
+  -3.50E-05,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd2Cooling,             !- Name
-  1.32E+00 ,               !- Coefficient1 Constant
-  -6.20E-03,               !- Coefficient2 x
-  -7.10E-05,               !- Coefficient3 x**2
-  4.89E-02 ,               !- Coefficient4 y
-  4.59E-04 ,               !- Coefficient5 y**2
-  -3.67E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd2Cooling,                !- Name
+  1.32E+00,                   !- Coefficient1 Constant
+  -6.20E-03,                  !- Coefficient2 x
+  -7.10E-05,                  !- Coefficient3 x**2
+  4.89E-02,                   !- Coefficient4 y
+  4.59E-04,                   !- Coefficient5 y**2
+  -3.67E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 
 Curve:Biquadratic,
-  Spd2Power,               !- Name
-  6.56E-01 ,               !- Coefficient1 Constant
-  -3.71E-03,               !- Coefficient2 x
-  2.07E-04 ,               !- Coefficient3 x**2
-  1.05E-02 ,               !- Coefficient4 y
-  7.36E-05 ,               !- Coefficient5 y**2
-  -1.57E-04,               !- Coefficient6 x*y
-  15,                      !- Minimum Value of x
-  65,                      !- Maximum Value of x
-  -30,                     !- Minimum Value of y
-  15,                      !- Maximum Value of y
-  ,                        !- Minimum Curve Output
-  ,                        !- Maximum Curve Output
-  Temperature,             !- Input Unit Type for X
-  Temperature,             !- Input Unit Type for Y
-  Dimensionless;           !- Output Unit Type
+  Spd2Power,                  !- Name
+  6.56E-01,                   !- Coefficient1 Constant
+  -3.71E-03,                  !- Coefficient2 x
+  2.07E-04,                   !- Coefficient3 x**2
+  1.05E-02,                   !- Coefficient4 y
+  7.36E-05,                   !- Coefficient5 y**2
+  -1.57E-04,                  !- Coefficient6 x*y
+  15,                         !- Minimum Value of x
+  65,                         !- Maximum Value of x
+  -30,                        !- Minimum Value of y
+  15,                         !- Maximum Value of y
+  ,                           !- Minimum Curve Output
+  ,                           !- Maximum Curve Output
+  Temperature,                !- Input Unit Type for X
+  Temperature,                !- Input Unit Type for Y
+  Dimensionless;              !- Output Unit Type
 \end{lstlisting}
 
 \subsection{ZoneTerminalUnitList}\label{zoneterminalunitlist}
@@ -1682,12 +1678,11 @@ This alpha field defines the name of the zone terminal unit used in a variable r
 Following is an example input for a ZoneTerminalUnitList object.
 
 \begin{lstlisting}
-
 ZoneTerminalUnitList,
-     VRF Heat Pump TU List, !- Zone Terminal Unit List Name
-     TU3,                   !- Zone Terminal Unit Name 1
-     TU4,                   !- Zone Terminal Unit Name 2
-     TU1,                   !- Zone Terminal Unit Name 3
-     TU2,                   !- Zone Terminal Unit Name 4
-     TU5;                   !- Zone Terminal Unit Name 5
+  VRF Heat Pump TU List,      !- Zone Terminal Unit List Name
+  TU3,                        !- Zone Terminal Unit Name 1
+  TU4,                        !- Zone Terminal Unit Name 2
+  TU1,                        !- Zone Terminal Unit Name 3
+  TU2,                        !- Zone Terminal Unit Name 4
+  TU5;                        !- Zone Terminal Unit Name 5
 \end{lstlisting}

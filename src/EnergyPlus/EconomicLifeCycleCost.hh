@@ -478,7 +478,7 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int numResourcesUsed = 0;
     bool GetInput_GetLifeCycleCostInput = true;
 
-    // from former statics in GetInputLifeCycleCostUsePriceEscalation()
+    // from former statistics in GetInputLifeCycleCostUsePriceEscalation()
     int UsePriceEscalation_escStartYear = 0;
     int UsePriceEscalation_escNumYears = 0;
     int UsePriceEscalation_escEndYear = 0;
@@ -487,7 +487,7 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int UsePriceEscalation_curEsc = 0;
     int UsePriceEscalation_curFld = 0;
 
-    // from former statics in ExpressAsCashFlows
+    // from former statistics in ExpressAsCashFlows
     int ExpressAsCashFlows_baseMonths1900 = 0;    // number of months since 1900 for base period
     int ExpressAsCashFlows_serviceMonths1900 = 0; // number of months since 1900 for service period
 

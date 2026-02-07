@@ -137,7 +137,7 @@ template <typename T> struct EPVector : private std::vector<T>
         std::fill(this->begin(), this->end(), v);
     }
 
-    // dimension is often used to initalize the vector instead of allocate + operator=
+    // dimension is often used to initialize the vector instead of allocate + operator=
     void dimension(std::size_t size, const T &v)
     {
         std::vector<T>::clear();
@@ -246,7 +246,7 @@ template <> struct EPVector<bool> : private std::vector<std::uint8_t>
         std::fill(this->begin(), this->end(), v);
     }
 
-    // dimension is often used to initalize the vector instead of allocate + operator=
+    // dimension is often used to initialize the vector instead of allocate + operator=
     void dimension(std::size_t size, const bool v)
     {
         std::vector<std::uint8_t>::clear();

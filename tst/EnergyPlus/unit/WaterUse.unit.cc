@@ -460,7 +460,7 @@ TEST_F(EnergyPlusFixture, WaterUse_WaterTempWarnings)
 
     EXPECT_TRUE(compare_err_stream(error_string1, true));
 
-    // configuration allows hot water mixing. A target temp schedule exists with either a hot temp schedule or a connnections object
+    // configuration allows hot water mixing. A target temp schedule exists with either a hot temp schedule or a connections object
     EXPECT_TRUE(thisWaterEquipment.allowHotControl);
     EXPECT_NE(thisWaterEquipment.targetTempSched, nullptr);
     EXPECT_TRUE(thisWaterEquipment.hotTempSched != nullptr || thisWaterEquipment.Connections);
@@ -885,7 +885,7 @@ TEST_F(EnergyPlusFixture, WaterUse_Default_Target_Temperature_Test1)
     thisWaterConnections.InitConnections(*state);
     thisWaterEquipment.WaterEquipmentType::CalcEquipmentFlowRates(*state);
 
-    // The target temp will default to the hot water temperature if there exists either a hot temp schedule or a water use connnections object.
+    // The target temp will default to the hot water temperature if there exists either a hot temp schedule or a water use connections object.
     EXPECT_TRUE(thisWaterEquipment.allowHotControl);
     EXPECT_EQ(thisWaterEquipment.targetTempSched, nullptr);
     EXPECT_NEAR(thisWaterEquipment.TargetTemp, 45, 1e-5);
@@ -1255,7 +1255,7 @@ TEST_F(EnergyPlusFixture, WaterUse_Default_Target_Temperature_Test2)
     auto &thisWaterEquipment = state->dataWaterUse->WaterEquipment(WaterEquipNum);
     thisWaterEquipment.WaterEquipmentType::CalcEquipmentFlowRates(*state);
 
-    // A target temp will default to cold water temperature is there is neither a hot temp schedule nor a water use connnections object.
+    // A target temp will default to cold water temperature is there is neither a hot temp schedule nor a water use connections object.
     EXPECT_FALSE(thisWaterEquipment.allowHotControl);
     EXPECT_EQ(thisWaterEquipment.targetTempSched, nullptr);
     EXPECT_NEAR(thisWaterEquipment.TargetTemp, 15, 1e-5);

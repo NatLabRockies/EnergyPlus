@@ -50,9 +50,6 @@
 !   ACCoolingEIRFFF,         !- Energy Input Ratio Function of Flow Fraction Curve Name
 !   ACCoolingPLFFPLR;        !- Part Load Fraction Correlation Curve Name
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Curve:Biquadratic,
     ACCoolingCAPFTemp,       !- Name
     1.5509,                  !- Coefficient1 Constant

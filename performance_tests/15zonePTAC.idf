@@ -1827,8 +1827,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0252,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -1893,7 +1893,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     512.8765,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -1923,7 +1923,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     374.6477,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -1974,7 +1974,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_1,!- Name
@@ -2075,15 +2082,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_1 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_1 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_1 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_1 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_1 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_1 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_1 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_1 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_1 PTACHPACCoolCapFT,  !- Name
@@ -2337,8 +2347,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0362,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -2403,7 +2413,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     737.5980,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -2433,7 +2443,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     538.8030,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -2484,7 +2494,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_2,!- Name
@@ -2585,15 +2602,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_2 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_2 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_2 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_2 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_2 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_2 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_2 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_2 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_2 PTACHPACCoolCapFT,  !- Name
@@ -2847,8 +2867,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0351,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -2913,7 +2933,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     716.4535,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -2943,7 +2963,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     523.3573,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -2994,7 +3014,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_3,!- Name
@@ -3095,15 +3122,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_3 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_3 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_3 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_3 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_3 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_3 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_3 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_3 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_3 PTACHPACCoolCapFT,  !- Name
@@ -3357,8 +3387,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0362,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -3423,7 +3453,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     737.5980,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -3453,7 +3483,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     538.8030,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3504,7 +3534,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_4,!- Name
@@ -3605,15 +3642,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_4 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_4 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_4 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_4 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_4 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_4 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_4 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_4 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_4 PTACHPACCoolCapFT,  !- Name
@@ -3867,8 +3907,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0252,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -3933,7 +3973,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     512.8765,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -3963,7 +4003,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     374.6477,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4014,7 +4054,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_5,!- Name
@@ -4115,15 +4162,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_5 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_5 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_5 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_5 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_5 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_5 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_5 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_5 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_5 PTACHPACCoolCapFT,  !- Name
@@ -4377,8 +4427,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0855,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4443,7 +4493,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1742.2065,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -4473,7 +4523,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1272.6527,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4524,7 +4574,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_6,!- Name
@@ -4625,15 +4682,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_6 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_6 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_6 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_6 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_6 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_6 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_6 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_6 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_6 PTACHPACCoolCapFT,  !- Name
@@ -4887,8 +4947,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0252,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4953,7 +5013,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     512.8765,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -4983,7 +5043,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     374.6477,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -5034,7 +5094,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_7,!- Name
@@ -5135,15 +5202,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_7 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_7 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_7 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_7 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_7 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_7 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_7 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_7 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_7 PTACHPACCoolCapFT,  !- Name
@@ -5397,8 +5467,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0362,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -5463,7 +5533,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     737.5980,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -5493,7 +5563,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     538.8030,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -5544,7 +5614,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_8,!- Name
@@ -5645,15 +5722,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_8 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_8 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_8 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_8 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_8 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_8 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_8 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_8 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_8 PTACHPACCoolCapFT,  !- Name
@@ -5907,8 +5987,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0351,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -5973,7 +6053,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     716.4535,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -6003,7 +6083,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     523.3573,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -6054,7 +6134,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_9,!- Name
@@ -6155,15 +6242,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_9 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_9 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_9 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_9 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_9 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_9 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_9 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_9 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_9 PTACHPACCoolCapFT,  !- Name
@@ -6417,8 +6507,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0362,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -6483,7 +6573,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     737.5980,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -6513,7 +6603,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     538.8030,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -6564,7 +6654,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_10,  !- Name
@@ -6665,15 +6762,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_10 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_10 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_10 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_10 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_10 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_10 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_10 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_10 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_10 PTACHPACCoolCapFT,  !- Name
@@ -6927,8 +7027,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0252,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -6993,7 +7093,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     512.8765,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -7023,7 +7123,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     374.6477,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7074,7 +7174,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_11,  !- Name
@@ -7175,15 +7282,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_11 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_11 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_11 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_11 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_11 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_11 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_11 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_11 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_11 PTACHPACCoolCapFT,  !- Name
@@ -7437,8 +7547,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0855,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7503,7 +7613,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1742.2065,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -7533,7 +7643,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1272.6527,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7584,7 +7694,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_12,  !- Name
@@ -7685,15 +7802,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_12 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_12 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_12 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_12 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_12 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_12 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_12 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_12 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_12 PTACHPACCoolCapFT,  !- Name
@@ -7926,8 +8046,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0954,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7992,7 +8112,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1945.8341,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -8022,7 +8142,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1421.3993,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -8073,7 +8193,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_13,  !- Name
@@ -8174,15 +8301,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_13 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_13 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_13 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_13 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_13 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_13 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_13 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_13 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_13 PTACHPACCoolCapFT,  !- Name
@@ -8381,8 +8511,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0087,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8447,7 +8577,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     177.1139,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -8477,7 +8607,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     129.3787,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -8528,7 +8658,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_14,  !- Name
@@ -8629,15 +8766,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_14 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_14 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_14 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_14 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_14 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_14 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_14 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_14 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_14 PTACHPACCoolCapFT,  !- Name
@@ -8870,8 +9010,8 @@
     INFIL_SCH,               !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.0954,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8936,7 +9076,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1945.8341,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.2000,                  !- Fraction Radiant
@@ -8966,7 +9106,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1421.3993,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -9017,7 +9157,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZN_1_FLR_1_SEC_15,  !- Name
@@ -9118,15 +9265,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     3,                       !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     ZN_1_FLR_1_SEC_15 PTACDXcool inlet,  !- Air Inlet Node Name
     ZN_1_FLR_1_SEC_15 PTAC Post CC Node,  !- Air Outlet Node Name
     ZN_1_FLR_1_SEC_15 PTACHPACCoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_15 PTACHPACCoolCapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     ZN_1_FLR_1_SEC_15 PTACHPACEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     ZN_1_FLR_1_SEC_15 PTACHPACEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    ZN_1_FLR_1_SEC_15 PTACHPACPLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    ZN_1_FLR_1_SEC_15 PTACHPACPLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     ZN_1_FLR_1_SEC_15 PTACHPACCoolCapFT,  !- Name
@@ -10033,9 +10183,9 @@
     0;                       !- Nuclear Low Level Emission Factor {m3/MJ}
 
   EnvironmentalImpactFactors,
-    0.3,                     !- District Heating Efficiency
+    0.3,                     !- District Heating Water Efficiency
     3.0,                     !- District Cooling COP {W/W}
-    0.25,                    !- Steam Conversion Efficiency
+    0.25,                    !- District Heating Steam Conversion Efficiency
     80.7272,                 !- Total Carbon Equivalent Emission Factor From N2O {kg/kg}
     6.2727,                  !- Total Carbon Equivalent Emission Factor From CH4 {kg/kg}
     0.2727;                  !- Total Carbon Equivalent Emission Factor From CO2 {kg/kg}

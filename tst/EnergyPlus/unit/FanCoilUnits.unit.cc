@@ -2499,7 +2499,7 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
     EXPECT_NEAR(MinWaterFlow, 0.000015, 0.0000001);
     EXPECT_NEAR(MaxWaterFlow, 0.000150, 0.0000001);
 
-    // lower output of fan coil is around 112 W, MaxWaterFlow should be 0.001% of 1.5 = 0.000015 and MinWaterFlow should remian at 0.0
+    // lower output of fan coil is around 112 W, MaxWaterFlow should be 0.001% of 1.5 = 0.000015 and MinWaterFlow should remain at 0.0
     MinWaterFlow = 0.0;
     MaxWaterFlow = 1.5;
     QZnReq = 120.0;

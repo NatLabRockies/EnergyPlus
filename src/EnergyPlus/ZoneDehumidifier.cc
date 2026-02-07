@@ -126,7 +126,7 @@ namespace ZoneDehumidifier {
         // Simulate a zone dehumidifier.
 
         // METHODOLOGY EMPLOYED:
-        // Call appropriate subroutines to get input values, initialize variables, model performanc
+        // Call appropriate subroutines to get input values, initialize variables, model performance
         // update node information, report model outputs.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:

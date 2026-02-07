@@ -46,14 +46,13 @@ The categories are combined in following hierarchy:
 Any charges included in the EnergyCharges category are added together. The EnergyCharges, DemandCharges and ServiceCharges are added together to form the Basis. The Basis, Adjustments and Surcharges are added together to form the Subtotal. The Subtotal and Taxes are added together to be the Total. The total represents the total monthly charges on that tariff for the energy source used. The combining of categories together is performed automatically unless the user specifies the \hyperref[utilitycostcomputation]{UtilityCost:Computation}. In addition, each category, which is also a variable, may be used as a source. For example, a tax that is 5\% of the subtotal would be shown as:
 
 \begin{lstlisting}
-
 UtilityCost:Charge:Simple,
-    TaxOfFivePercent,        ! Charge Variable Name
-    TariffExample1,          ! Tariff Name
-    Subtotal,                ! Source Variable
-    Annual,                  ! Season
-    Taxes,                   ! Category Variable Name
-    0.05;                    ! Cost Per Unit Value or Variable Name
+  TaxOfFivePercent,           !- Charge Variable Name
+  TariffExample1,             !- Tariff Name
+  Subtotal,                   !- Source Variable
+  Annual,                     !- Season
+  Taxes,                      !- Category Variable Name
+  0.05;                       !- Cost Per Unit Value or Variable Name
 \end{lstlisting}
 
 As you can see, the \hyperref[utilitycostchargesimple]{UtilityCost:Charge:Simple} and \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} objects do most of the ``work'' of computing the annual energy cost. The benefit of using this categorization is that totals of each category are shown in the output reports and it organizes the charges in the monthly calculations in a logical way that fits almost all tariffs. If no categorization is desired, theoretically, all charges could be assigned to the Total category. The categories themselves are simply variable names. Charges may also be assigned to the ``NotIncluded'' category if the result of the charge is used as an intermediate calculation and should not be included in the Total.

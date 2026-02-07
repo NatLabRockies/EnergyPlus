@@ -1392,7 +1392,7 @@ namespace Fluid {
         // be produced.
 
         CurrentModuleObject = "FluidProperties:Concentration";
-        for (int InData = 1; InData <= NumOfGlyFluidPropArrays; ++InData) { // check temperatures given for specific heat are consistant
+        for (int InData = 1; InData <= NumOfGlyFluidPropArrays; ++InData) { // check temperatures given for specific heat are consistent
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      CurrentModuleObject,
                                                                      InData,
@@ -3012,7 +3012,7 @@ namespace Fluid {
 
         // PURPOSE OF THIS FUNCTION:
         // This finds enthalpy for given temperature and a quality under the vapor dome.
-        // This fucntion is only called with a valid refrigerant and quality between 0 and 1.
+        // This function is only called with a valid refrigerant and quality between 0 and 1.
 
         // METHODOLOGY EMPLOYED:
         // Calls GetInterpolatedSatProp to linearly interpolate between the saturated
@@ -3187,7 +3187,7 @@ namespace Fluid {
 
         // PURPOSE OF THIS SUBROUTINE:
         // This finds specific heat for given temperature and a quality under the vapor dome.
-        // This fucntion is only called with a valid refrigerant and quality between 0 and 1.
+        // This function is only called with a valid refrigerant and quality between 0 and 1.
 
         // METHODOLOGY EMPLOYED:
         // Calls GetInterpolatedSatProp to linearly interpolate between the saturated
@@ -4742,7 +4742,7 @@ namespace Fluid {
         auto &df = state.dataFluid;
         if (Idx > 0 && Idx <= df->glycols.isize()) {
             return df->glycols(Idx)->Name;
-        } else { // return blank - error checking in calling proceedure
+        } else { // return blank - error checking in calling procedure
             return "";
         }
     }

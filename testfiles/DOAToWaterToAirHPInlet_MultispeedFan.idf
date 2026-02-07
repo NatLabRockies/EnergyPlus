@@ -113,7 +113,7 @@
     Yes,                     !- Do System Sizing Calculation
     Yes,                     !- Do Plant Sizing Calculation
     Yes,                     !- Run Simulation for Sizing Periods
-    Yes,                      !- Run Simulation for Weather File Run Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
     No,                      !- Do HVAC Sizing Simulation for Sizing Periods
     1;                       !- Maximum Number of HVAC Sizing Simulation Passes
 
@@ -1676,7 +1676,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1690,7 +1690,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1704,7 +1704,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1718,7 +1718,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1732,7 +1732,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1748,7 +1748,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1760,7 +1760,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1772,7 +1772,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1784,7 +1784,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1796,7 +1796,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1810,8 +1810,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1824,8 +1824,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1838,8 +1838,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1852,8 +1852,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1866,8 +1866,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.031089,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1955,7 +1955,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     SPACE2-1,                !- Zone or ZoneList Name
@@ -1984,7 +1991,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     SPACE3-1,                !- Zone or ZoneList Name
@@ -2013,7 +2027,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     SPACE4-1,                !- Zone or ZoneList Name
@@ -2042,7 +2063,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     SPACE5-1,                !- Zone or ZoneList Name
@@ -2071,7 +2099,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:SYSTEM ===========
 
@@ -2263,8 +2298,8 @@
     Sys 2 WaterToAirHP System MultiSpeed Performance;  !- Design Specification Multispeed Object Name
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
-    SPACE2-1 HP Heating Mode,  !- Name
-    ,                          !- Availability Schedule Name
+    SPACE2-1 HP Heating Mode,!- Name
+    ,                        !- Availability Schedule Name
     SPACE2-1 HP Heating Water Inlet,  !- Water-to-Refrigerant HX Water Inlet Node Name
     SPACE2-1 HP Heating Water Outlet,  !- Water-to-Refrigerant HX Water Outlet Node Name
     SPACE2-1 Cooling Coil Outlet,  !- Indoor Air Inlet Node Name
@@ -2272,15 +2307,15 @@
     10.0,                    !- Number of Speeds {dimensionless}
     10.0,                    !- Nominal Speed Level {dimensionless}
     Autosize,                !- Rated Heating Capacity At Selected Nominal Speed Level {W}
-    Autosize,                     !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
-    Autosize,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
+    Autosize,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
+    Autosize,                !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2292,7 +2327,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2304,7 +2339,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2316,7 +2351,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2328,7 +2363,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2340,7 +2375,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2352,7 +2387,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2364,7 +2399,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2376,7 +2411,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2388,7 +2423,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2397,8 +2432,8 @@
     Heating wasteHeat VS Temp1 Test;  !- Speed 10 Waste Heat Function of Temperature Curve Name
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
-    SPACE2-1 HP Cooling Mode,  !- Name
-    ,                          !- Availability Schedule Name
+    SPACE2-1 HP Cooling Mode,!- Name
+    ,                        !- Availability Schedule Name
     SPACE2-1 HP Cooling Water Inlet,  !- Water-to-Refrigerant HX Water Inlet Node Name
     SPACE2-1 HP Cooling Water Outlet,  !- Water-to-Refrigerant HX Water Outlet Node Name
     SPACE2-1 Zone Unit Fan Outlet,  !- Indoor Air Inlet Node Name
@@ -2698,8 +2733,8 @@
 
   UnitarySystemPerformance:Multispeed,
     Sys 2 WaterToAirHP System MultiSpeed Performance,  !- Name
-    10,                       !- Number of Speeds for Heating
-    10,                       !- Number of Speeds for Cooling
+    10,                      !- Number of Speeds for Heating
+    10,                      !- Number of Speeds for Cooling
     No,                      !- Single Mode Operation
     ,                        !- No Load Supply Air Flow Rate Ratio
     autosize,                !- Heating Speed 1 Supply Air Flow Ratio
@@ -3058,8 +3093,8 @@
   Fan:SystemModel,
     SPACE3-1 Supply Fan,     !- Name
     FanAvailSched,           !- Availability Schedule Name
-    SPACE3-1 Heat Pump Inlet, !- Air Inlet Node Name
-    SPACE3-1 Zone Unit Fan Outlet, !- Air Outlet Node Name
+    SPACE3-1 Heat Pump Inlet,!- Air Inlet Node Name
+    SPACE3-1 Zone Unit Fan Outlet,  !- Air Outlet Node Name
     autosize,                !- Design Maximum Air Flow Rate {m3/s}
     Discrete,                !- Speed Control Method
     0.2,                     !- Electric Power Minimum Flow Rate Fraction
@@ -3166,9 +3201,9 @@
     Autosize,                !- Gross Rated Total Cooling Capacity {W}
     Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     5.12,                    !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3191,9 +3226,9 @@
     Autosize,                !- Gross Rated Total Cooling Capacity {W}
     Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     5.12,                    !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3216,9 +3251,9 @@
     Autosize,                !- Gross Rated Total Cooling Capacity {W}
     Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     5.12,                    !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3241,9 +3276,9 @@
     Autosize,                !- Gross Rated Total Cooling Capacity {W}
     Autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     5.12,                    !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3469,7 +3504,7 @@
     LatEffectivenessTable;   !- Latent Effectiveness of Cooling Air Flow Curve Name
 
   Table:IndependentVariable,
-    airFlowRatio,  !- Name
+    airFlowRatio,            !- Name
     Linear,                  !- Interpolation Method
     Linear,                  !- Extrapolation Method
     0.0,                     !- Minimum Value
@@ -3484,7 +3519,7 @@
 
   Table:IndependentVariableList,
     effectiveness_IndependentVariableList,  !- Name
-    airFlowRatio;     !- Independent Variable 1 Name
+    airFlowRatio;            !- Independent Variable 1 Name
 
   Table:Lookup,
     SenEffectivenessTable,   !- Name
@@ -4196,7 +4231,6 @@
 
   Output:Variable,SPACE1-1 HP Supp Coil,Heating Coil Heating Rate,Timestep;
 
-
   Output:Variable,SPACE2-1 Supply Inlet,System Node Mass Flow Rate,Timestep;
 
   Output:Variable,SPACE2-1 Supply Inlet,System Node Temperature,Timestep;
@@ -4256,7 +4290,6 @@
   Output:Variable,SPACE2-1 Heat Pump,Zone Water to Air Heat Pump Sensible Cooling Rate,Timestep;
 
   Output:Variable,SPACE2-1 HP Supp Coil,Heating Coil Heating Rate,Timestep;
-
 
   Output:Variable,SPACE3-1 Supply Inlet,System Node Mass Flow Rate,Timestep;
 
@@ -4347,19 +4380,29 @@
   Output:Variable,DOAS Relief Air Outlet,System Node Temperature,Timestep;
 
   Output:Variable,*,Unitary System Water Coil Multispeed Fan Cycling Ratio,Timestep;
+
   Output:Variable,*,Unitary System Water Coil Multispeed Fan Speed Ratio,Timestep;
+
   Output:Variable,*,Unitary System Water Coil Multispeed Fan Speed Level,Timestep;
 
   Output:Variable,*,Cooling Coil Upper Speed Level,Timestep;
+
   Output:Variable,*,Cooling Coil Neighboring Speed Levels Ratio,Timestep;
+
   Output:Variable,*,Heating Coil Upper Speed Level,Timestep;
+
   Output:Variable,*,Heating Coil Neighboring Speed Levels Ratio,Timestep;
 
   Output:Variable,SPACE1-1 Heat Pump Inlet,System Node Mass Flow Rate,Timestep;
+
   Output:Variable,SPACE2-1 Heat Pump Inlet,System Node Mass Flow Rate,Timestep;
+
   Output:Variable,SPACE3-1 Heat Pump Inlet,System Node Mass Flow Rate,Timestep;
+
   Output:Variable,SPACE1-1 Supply Inlet,System Node Temperature,Timestep;
+
   Output:Variable,SPACE2-1 Supply Inlet,System Node Temperature,Timestep;
+
   Output:Variable,SPACE3-1 Supply Inlet,System Node Temperature,Timestep;
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:DIAGNOSTICS ===========

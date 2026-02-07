@@ -84,17 +84,17 @@ namespace HeatBalanceHAMTManager {
     //       RE-ENGINEERED
 
     // PURPOSE OF THIS MODULE:
-    // Calculate, record and report the one dimentional heat and moisture transfer
+    // Calculate, record and report the one dimensional heat and moisture transfer
     // through a surface given the material composition of the building surface and
     // the external and internal Temperatures and Relative Humidities.
 
     // METHODOLOGY EMPLOYED:
-    // Each surface is split into "cells", where all characteristics are initiallised.
+    // Each surface is split into "cells", where all characteristics are initialised.
     // Cells are matched and links created in the initialisation routine.
     // The internal and external "surfaces" of the surface are virtual cells to allow for the
     // input of heat and vapor via heat transfer coefficients, radiation,
     // and vapor transfer coefficients
-    // Uses Forward (implicit) finite difference alogorithm. Heat transfer is caclulated first,
+    // Uses Forward (implicit) finite difference algorithm. Heat transfer is calculated first,
     // with the option of including the latent heat, then liquid and vapor transfer. The process is ittereated.
     // Once the temperatures have converged the internal surface
     // temperature and vapor densities are passed back to EnergyPlus.
@@ -1497,7 +1497,7 @@ namespace HeatBalanceHAMTManager {
                 if (denominator != 0.0) {
                     cell.rhp1 = (phiorsum + vporsum + (wcap * cell.rh) / s_hbh->deltat) / denominator;
                 } else {
-                    ShowSevereError(state, "CalcHeatBalHAMT: demoninator in calculating RH is zero.  Check material properties for accuracy.");
+                    ShowSevereError(state, "CalcHeatBalHAMT: denominator in calculating RH is zero.  Check material properties for accuracy.");
                     ShowContinueError(state, format("...Problem occurs in Material=\"{}\".", s_mat->materials(cell.matid)->Name));
                     ShowFatalError(state, "Program terminates due to preceding condition.");
                 }
@@ -1507,7 +1507,7 @@ namespace HeatBalanceHAMTManager {
                 }
             }
 
-            // Check for convergence or too many itterations
+            // Check for convergence or too many iterations
             sumtp1 = 0.0;
             for (int cid = s_hbh->Extcell(sid); cid <= s_hbh->Intcell(sid); ++cid) {
                 auto const &cell = s_hbh->cells(cid);
@@ -1547,7 +1547,7 @@ namespace HeatBalanceHAMTManager {
 
         // PURPOSE OF THIS SUBROUTINE:
         // The zone heat balance equation has converged, so now the HAMT values are to be fixed
-        // ready for the next itteration.
+        // ready for the next iteration.
         // Fill all the report variables
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:

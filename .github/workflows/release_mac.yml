@@ -186,7 +186,7 @@ jobs:
         ninja package
 
     - name: Upload Tarball as artifact for testing
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.tar.gz
         path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
@@ -195,7 +195,7 @@ jobs:
         overwrite: false
 
     - name: Upload DMG as artifact for testing
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}.dmg
         path: build/EnergyPlus-*-${{ matrix.arch }}.dmg
@@ -255,7 +255,7 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload otool info as artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: otool_infos_cpack_${{ matrix.os }}_${{ matrix.arch }}
         path: build/otool*json
@@ -313,7 +313,7 @@ jobs:
         architecture: ${{ matrix.python-arch }}
 
     - name: Gather Test Package from Artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: energyplus-${{ matrix.os }}.tar.gz
         path: package
@@ -331,7 +331,7 @@ jobs:
       run: python checkout/scripts/package_tests/runner.py --verbose ${{ matrix.test_key }} package/
 
     - name: Gather Dmg Package from Artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: energyplus-${{ matrix.os }}.dmg
         path: dmg
@@ -379,7 +379,7 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload otool info as artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: otool_info_dmg_${{ matrix.os }}_${{ matrix.arch }}
         path: dmg/otool*json

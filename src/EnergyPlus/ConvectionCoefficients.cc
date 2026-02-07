@@ -2431,7 +2431,7 @@ void CalcTrombeWallIntConvCoeff(EnergyPlusData &state,
             CalcASHRAESimpleIntConvCoeff(
                 state, SurfNum, SurfaceTemperatures(SurfNum), state.dataZoneTempPredictorCorrector->spaceHeatBalance(spaceNum).MAT);
 
-            // assign the convection coefficent to the major surfaces and any subsurfaces on them
+            // assign the convection coefficient to the major surfaces and any subsurfaces on them
             if ((surface.BaseSurf == Surf1) || (surface.BaseSurf == Surf2)) {
                 if (surface.ExtBoundCond == DataSurfaces::KivaFoundation) {
                     ShowFatalError(state, format("Trombe wall convection model not applicable for foundation surface ={}", surface.Name));
@@ -2668,7 +2668,7 @@ Real64 CalcISO15099WindowIntConvCoeff(EnergyPlusData &state,
     // correlation documented in ISO 15099, Section 8.3.2.2
 
     // REFERENCES:
-    // Internation Standard ISO 15099. Thermal performance of windows, doors and shading devices -- Detailed Calculations
+    // International Standard ISO 15099. Thermal performance of windows, doors and shading devices -- Detailed Calculations
     // First Edition 2003-11-15. ISO 15099:2003(E)
 
     // Locals
@@ -2905,7 +2905,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
     state.dataConvect->RoofLongAxisOutwardAzimuth = geoSummaryRoof.Azimuth;
 
     // Calculate facade areas, perimeters, and heights.
-    // Why are these calculations so quick and dirty while the roof calcluation is much more detailed?
+    // Why are these calculations so quick and dirty while the roof calculation is much more detailed?
     std::array<SurfaceGeometry::GeoSummary, (int)DataSurfaces::Compass8::Num> geoSummaryFacades;
 
     // first pass over surfaces for outside face params
@@ -3022,7 +3022,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
                 "Surface Convection Parameters,{},{},{:.2R},{:.2R},{:.2R},{},{:.2R},{:.2R},{:.2R},{:.2R},{},{},{}\n");
 
             // This reporting rubric (using numbers instead of strings, using negative numbers for "built-in" coefficients) is stupid,
-            // but we are maintaining compatiblity here
+            // but we are maintaining compatibility here
             int hcExtRptNum = surfExtConv.userModelNum;
             if (hcExtRptNum == 0) {
                 hcExtRptNum = -Convect::HcExtReportVals[(int)surfExtConv.model];
@@ -3910,7 +3910,7 @@ Real64 EvaluateExtHcModels(EnergyPlusData &state, int const SurfNum, HcExt const
     default: {
         assert(false);
     }
-    } // swtich (ForcedConvModelEqNum)
+    } // switch (ForcedConvModelEqNum)
 
     Real64 Hc = Hf + Hn;
 

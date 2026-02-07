@@ -95,7 +95,7 @@ namespace EnergyPlus::HeatBalanceAirManager {
 // manage the air simluation heat balance on the building.
 
 // REFERENCES:
-// The heat balance method is outlined in the "Tarp Alogorithms Manual"
+// The heat balance method is outlined in the "Tarp Algorithms Manual"
 // The methods are also summarized in many BSO Theses and papers.
 
 // OTHER NOTES:

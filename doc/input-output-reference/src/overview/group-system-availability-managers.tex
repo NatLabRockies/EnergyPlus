@@ -29,10 +29,9 @@ The name of a schedule defined elsewhere in the input. Schedule values greater t
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:Scheduled,
-  VAV Sys 1 Avail, !- Name
-  FanAvailSched;     !- Schedule Name
+  VAV Sys 1 Avail,            !- Name
+  FanAvailSched;              !- Schedule Name
 \end{lstlisting}
 
 AvailabilityManager:Scheduled Outputs
@@ -66,10 +65,9 @@ The name of a schedule defined elsewhere in the input. Schedule values greater t
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:ScheduledOn,
-  VAV Sys 1 Avail On,   !- Name
-  FanAvailSched;             !- Schedule Name
+  VAV Sys 1 Avail On,         !- Name
+  FanAvailSched;              !- Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-036}
@@ -103,10 +101,9 @@ The name of a schedule defined elsewhere in the input. Schedule values equal to 
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:ScheduledOff,
-  VAV Sys 1 Avail Off,     !- Name
-  FanAvailSched;                 !- Schedule Name
+  VAV Sys 1 Avail Off,        !- Name
+  FanAvailSched;              !- Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-027}
@@ -197,18 +194,18 @@ For the options \emph{CycleOnAnyCoolingOrHeatingZone}, \emph{CycleOnAnyHeatingZo
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:NightCycle,
-  VAV Sys 1 Avail,       !- Name
-  SysAvailApplicSch,     !- Applicability Schedule Name
-  FanAvailSched,         !- Fan Schedule Name
-  CycleOnAny,            !- Control Type
-  4.0,                   !- Temperature Tolerance {delta C}
-  7200.;                 !- Cycle Run Time {s}
-  ,                      !- Control Zone or Zone List Name
-  ,                      !- Cooling Zone or Zone List Name
-  ,                      !- Heating Control Zone or Zone List Name
-  ;                      !- Heating Zone Fans Only Zone or Zone List Name
+  VAV Sys 1 Avail,            !- Name
+  SysAvailApplicSch,          !- Applicability Schedule Name
+  FanAvailSched,              !- Fan Schedule Name
+  CycleOnAny,                 !- Control Type
+  4.0,                        !- Temperature Tolerance {delta C}
+  7200.;                      !- Cycle Run Time {s}
+
+,                             !- Control Zone or Zone List Name
+  ,                           !- Cooling Zone or Zone List Name
+  ,                           !- Heating Control Zone or Zone List Name
+  ;                           !- Heating Zone Fans Only Zone or Zone List Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-022}
@@ -256,13 +253,12 @@ Temperature difference {[}deltaC{]} between hot and cold nodes necessary to turn
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:DifferentialThermostat,
-  Differential Thermostat Availability Manager,   !- Name
-  Collector Outlet Node,                       !- Hot Node Name
-  Water Heater Source Outlet Node,   !- Cold Node Name
-  10.0,   !- Temperature Difference On Limit {delta C}
-  2.0;     !- Temperature Difference Off Limit {delta C}
+  Differential Thermostat Availability Manager,  !- Name
+  Collector Outlet Node,      !- Hot Node Name
+  Water Heater Source Outlet Node,  !- Cold Node Name
+  10.0,                       !- Temperature Difference On Limit {delta C}
+  2.0;                        !- Temperature Difference Off Limit {delta C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-020}
@@ -300,11 +296,10 @@ The setpoint temperature {[}C{]} at which the system is turned off.
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:HighTemperatureTurnOff,
-  High Temperature Turn Off Availability Manager,   !- Name
-  Water Heater Use Outlet Node,   !- Sensor Node Name
-  60.0;   !- Temperature {C}
+  High Temperature Turn Off Availability Manager,  !- Name
+  Water Heater Use Outlet Node,  !- Sensor Node Name
+  60.0;                       !- Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-017}
@@ -342,11 +337,10 @@ The setpoint temperature {[}C{]} at which the system is turned on.
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:HighTemperatureTurnOn,
-  High Temperature Turn On Availability Manager,   !- Name
-  Outside Air Inlet Node,   !- Sensor Node
-  30.0;   !- Temperature {C}
+  High Temperature Turn On Availability Manager,  !- Name
+  Outside Air Inlet Node,     !- Sensor Node
+  30.0;                       !- Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-010}
@@ -388,12 +382,11 @@ The name of a schedule defined elsewhere in the input file. This schedule determ
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:LowTemperatureTurnOff,
-  Low Temperature Turn Off Availability Manager,   !- Name
-  Outside Air Inlet Node,   !- Sensor Node Name
-  0.0,   !- Temperature {C}
-  Low Temp Control Schedule;   !- Applicability Schedule Name
+  Low Temperature Turn Off Availability Manager,  !- Name
+  Outside Air Inlet Node,     !- Sensor Node Name
+  0.0,                        !- Temperature {C}
+  Low Temp Control Schedule;  !- Applicability Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-010}
@@ -431,11 +424,10 @@ The setpoint temperature {[}C{]} at which the system is turned on.
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManager:LowTemperatureTurnOn,
-  Low Temperature Turn On Availability Manager,   !- Name
-  Collector Outlet Node,   !- Sensor Node Name
-  0.0;   !- Temperature {C}
+  Low Temperature Turn On Availability Manager,  !- Name
+  Collector Outlet Node,      !- Sensor Node Name
+  0.0;                        !- Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-010}
@@ -497,16 +489,15 @@ The name of the control zone used in the ventilation temperature difference chec
 An example of this object in an input file:
 
 \begin{lstlisting}
-
 AvailabilityManager:NightVentilation,
-  VAV Sys 1 Avail,                 !- Name
-  NightVentSched,                   !- Applicability Schedule Name
-  FanAvailSched,                     !- Fan Schedule Name
-  VentTempSched,                     !- Ventilation Temperature Schedule Name
-  2.0,                                         !- Ventilation Temperature Difference   {C}
-  15.,                                         !- Ventilation Temperature Low Limit
-  0.3333,                                   !- Night Venting Flow Fraction
-  SPACE3-1;                               !- Control Zone Name
+  VAV Sys 1 Avail,            !- Name
+  NightVentSched,             !- Applicability Schedule Name
+  FanAvailSched,              !- Fan Schedule Name
+  VentTempSched,              !- Ventilation Temperature Schedule Name
+  2.0,                        !- Ventilation Temperature Difference   {C}
+  15.,                        !- Ventilation Temperature Low Limit
+  0.3333,                     !- Night Venting Flow Fraction
+  SPACE3-1;                   !- Control Zone Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-008}
@@ -663,28 +654,26 @@ The name of a ZoneVentilation:* object whose zone name is the controlled zone na
 An example of this object in an input file:
 
 \begin{lstlisting}
-
 AvailabilityManager:HybridVentilation,
   Hybrid ventilation controller 1,  !- Name
   Typical Terminal Reheat 1,  !- HVAC Air Loop Name
-  NORTH ZONE,              !- Control Zone Name
+  NORTH ZONE,                 !- Control Zone Name
   Hybrid Control Mode Schedule,  !- Ventilation Control Mode Schedule Name
-  Yes,                     !- Use Weather File Rain Indicators
-  40.0,                    !- Maximum Wind Speed {m/s}
-  15.0,                    !- Minimum Outdoor Temperature {C}
-  35.0,                    !- Maximum Outdoor Temperature {C}
-  20000.0,                 !- Minimum Outdoor Enthalpy {J/kg}
-  30000.0,                 !- Maximum Outdoor Enthalpy {J/kg}
-  15.0,                    !- Minimum Outdoor Dewpoint {C}
-  30.0,                    !- Maximum Outdoor Dewpoint {C}
-  Outdoor air Schedule;    !- Minimum Outdoor Ventilation Air Schedule Name
-  ,                        !- Opening Factor Function of Wind Speed Curve Name
-  ,                        !- AirflowNetwork Control Type Schedule Name
-  ,                        !- Simple Airflow Control Type Schedule Name
-  ,                        !- ZoneVentilation Object Name
-  0.0,                     !- Minimum HVAC Operation Time
-  0.0;                     !- Minimum Ventilation Time
-
+  Yes,                        !- Use Weather File Rain Indicators
+  40.0,                       !- Maximum Wind Speed {m/s}
+  15.0,                       !- Minimum Outdoor Temperature {C}
+  35.0,                       !- Maximum Outdoor Temperature {C}
+  20000.0,                    !- Minimum Outdoor Enthalpy {J/kg}
+  30000.0,                    !- Maximum Outdoor Enthalpy {J/kg}
+  15.0,                       !- Minimum Outdoor Dewpoint {C}
+  30.0,                       !- Maximum Outdoor Dewpoint {C}
+  Outdoor air Schedule,       !- Minimum Outdoor Ventilation Air Schedule Name
+  ,                           !- Opening Factor Function of Wind Speed Curve Name
+  ,                           !- AirflowNetwork Control Type Schedule Name
+  ,                           !- Simple Airflow Control Type Schedule Name
+  ,                           !- ZoneVentilation Object Name
+  0.0,                        !- Minimum HVAC Operation Time
+  0.0;                        !- Minimum Ventilation Time
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-008}
@@ -798,30 +787,29 @@ This input is required if AdaptiveTemperatureGradient algorithm is selected in t
 Sample IDFs:
 
 \begin{lstlisting}
+AvailabilityManager:OptimumStart,
+  AdaptiveSetbackRecovery,    !- Name
+  AppliSch,                   !- Applicability Schedule Name
+  FanSch,                     !- Fan Schedule Name
+  ControlZone,                !- Control Type
+  MainZone,                   !- Control Zone Name
+  ,                           !- Zone List Name
+  4,                          !- Maximum Value for Optimum Start Time
+  AdaptiveTemperatureGradient,!- Control Algorithm
+  ,                           !- Constant Temperature Gradient during Cooling
+  ,                           !- Constant Temperature Gradient during Heating
+  5,                          !- Initial Temperature Gradient during Cooling
+  5;                          !- Initial Temperature Gradient during Heating
 
 AvailabilityManager:OptimumStart,
-  AdaptiveSetbackRecovery, !- Name
-  AppliSch,                                             !- Applicability Schedule Name
-  FanSch,                                                 !- Fan Schedule Name
-  ControlZone,                                       !- Control Type
-  MainZone,                                             !- Control Zone Name
-  ,                                                             !- Zone List Name
-  4,                                                           !- Maximum Value for Optimum Start Time
-  AdaptiveTemperatureGradient,       !- Control Algorithm
-  ,                                                             !- Constant Temperature Gradient during Cooling
-  ,                                                             !- Constant Temperature Gradient during Heating
-  5,                                                           !- Initial Temperature Gradient during Cooling
-  5;                                                           !- Initial Temperature Gradient during Heating
-
-  AvailabilityManager:OptimumStart,
-  SetbackRecovery,                               !- Name
-  AppliSch,                                             !- Applicability Schedule Name
-  FanSch,                                                 !- Fan Schedule Name
-  MaximumofZoneList,             !- Control Type
-  ,                                                            !- Control Zone Name
-  ZoneList,                                             !- Zone List Name
-  ,                                                             !- Maximum Value for Optimum Start Time
-  AdaptiveASHRAE;                                 !- Control Algorithm
+  SetbackRecovery,            !- Name
+  AppliSch,                   !- Applicability Schedule Name
+  FanSch,                     !- Fan Schedule Name
+  MaximumofZoneList,          !- Control Type
+  ,                           !- Control Zone Name
+  ZoneList,                   !- Zone List Name
+  ,                           !- Maximum Value for Optimum Start Time
+  AdaptiveASHRAE;             !- Control Algorithm
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-007}

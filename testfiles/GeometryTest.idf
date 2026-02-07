@@ -605,7 +605,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     518.3889,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -619,7 +619,7 @@
     Gas Eq Sch,              !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     5857.501,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -631,8 +631,8 @@
     Infiltration Sch,        !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     2.831685,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -692,7 +692,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1247.648,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -706,7 +706,7 @@
     Residence Equipment,     !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     9210.921,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -718,7 +718,7 @@
     Gas Eq Sch,              !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     29287.51,                !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -730,8 +730,8 @@
     Infiltration Sch,        !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     2.831685,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient
@@ -791,7 +791,7 @@
     Office Lighting,         !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    14,                      !- Watts per Zone Floor Area {W/m2}
+    14,                      !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -805,7 +805,7 @@
     Office Lighting,         !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    5.4,                     !- Watts per Zone Floor Area {W/m2}
+    5.4,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -817,7 +817,7 @@
     Gas Eq Sch,              !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    197,                     !- Power per Zone Floor Area {W/m2}
+    197,                     !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -829,8 +829,8 @@
     Infiltration Sch,        !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     4.7,                     !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient

@@ -422,10 +422,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,0,3.048000,            !- X,Y,Z ==> Vertex 1 {m}
-    0,0,0,                   !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,0,0,            !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,0,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    0,0,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,0,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,0,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Wall002,           !- Name
@@ -439,10 +439,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,6.096000,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 2 {m}
-    0,0,0,                   !- X,Y,Z ==> Vertex 3 {m}
-    0,0,3.048000;            !- X,Y,Z ==> Vertex 4 {m}
+    0,6.096000,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    0,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,0,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Wall003,           !- Name
@@ -456,10 +456,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 3 {m}
-    0,6.096000,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,6.096000,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Wall004,           !- Name
@@ -473,10 +473,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,0,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,0,0,            !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,0,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,0,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Flr001,            !- Name
@@ -490,10 +490,10 @@
     NoWind,                  !- Wind Exposure
     1.000000,                !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,0,0,                   !- X,Y,Z ==> Vertex 1 {m}
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,0,0;            !- X,Y,Z ==> Vertex 4 {m}
+    0,0,0,  !- X,Y,Z ==> Vertex 1 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,0,0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Roof001,           !- Name
@@ -507,10 +507,10 @@
     WindExposed,             !- Wind Exposure
     0,                       !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,6.096000,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    0,0,3.048000,            !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,0,3.048000,     !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    0,6.096000,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,0,3.048000,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,0,3.048000,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Wall001,           !- Name
@@ -524,10 +524,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    12.19200,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    12.19200,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    9.144000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    9.144000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    12.19200,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    12.19200,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    9.144000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    9.144000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Wall002,           !- Name
@@ -541,10 +541,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,0,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,0,0,            !- X,Y,Z ==> Vertex 2 {m}
-    12.19200,0,0,            !- X,Y,Z ==> Vertex 3 {m}
-    12.19200,0,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,0,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,0,0,  !- X,Y,Z ==> Vertex 2 {m}
+    12.19200,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    12.19200,0,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Wall003,           !- Name
@@ -558,10 +558,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    12.19200,0,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    12.19200,0,0,            !- X,Y,Z ==> Vertex 2 {m}
-    12.19200,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    12.19200,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    12.19200,0,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    12.19200,0,0,  !- X,Y,Z ==> Vertex 2 {m}
+    12.19200,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    12.19200,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Wall004,           !- Name
@@ -575,10 +575,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,0,0,            !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,0,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,0,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Wall005,           !- Name
@@ -592,10 +592,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    9.144000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    9.144000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    9.144000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    9.144000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Flr001,            !- Name
@@ -609,10 +609,10 @@
     NoWind,                  !- Wind Exposure
     1.000000,                !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,0,0,            !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    12.19200,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    12.19200,0,0;            !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,0,0,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    12.19200,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    12.19200,0,0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn002:Roof001,           !- Name
@@ -626,10 +626,10 @@
     WindExposed,             !- Wind Exposure
     0,                       !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,0,3.048000,     !- X,Y,Z ==> Vertex 2 {m}
-    12.19200,0,3.048000,     !- X,Y,Z ==> Vertex 3 {m}
-    12.19200,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,0,3.048000,  !- X,Y,Z ==> Vertex 2 {m}
+    12.19200,0,3.048000,  !- X,Y,Z ==> Vertex 3 {m}
+    12.19200,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Wall001,           !- Name
@@ -643,10 +643,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,12.19200,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    0,12.19200,0,            !- X,Y,Z ==> Vertex 2 {m}
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 3 {m}
-    0,6.096000,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    0,12.19200,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,12.19200,0,  !- X,Y,Z ==> Vertex 2 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,6.096000,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Wall002,           !- Name
@@ -660,10 +660,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    9.144000,12.19200,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    9.144000,12.19200,0,     !- X,Y,Z ==> Vertex 2 {m}
-    0,12.19200,0,            !- X,Y,Z ==> Vertex 3 {m}
-    0,12.19200,3.048000;     !- X,Y,Z ==> Vertex 4 {m}
+    9.144000,12.19200,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    9.144000,12.19200,0,  !- X,Y,Z ==> Vertex 2 {m}
+    0,12.19200,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,12.19200,3.048000;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Wall003,           !- Name
@@ -677,10 +677,10 @@
     WindExposed,             !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    9.144000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    9.144000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    9.144000,12.19200,0,     !- X,Y,Z ==> Vertex 3 {m}
-    9.144000,12.19200,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    9.144000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    9.144000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    9.144000,12.19200,0,  !- X,Y,Z ==> Vertex 3 {m}
+    9.144000,12.19200,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Wall004,           !- Name
@@ -694,10 +694,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,6.096000,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 2 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    6.096000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    0,6.096000,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    6.096000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Wall005,           !- Name
@@ -711,10 +711,10 @@
     NoWind,                  !- Wind Exposure
     0.5000000,               !- View Factor to Ground
     4,                       !- Number of Vertices
-    6.096000,6.096000,3.048, !- X,Y,Z ==> Vertex 1 {m}
-    6.096000,6.096000,0,     !- X,Y,Z ==> Vertex 2 {m}
-    9.144000,6.096000,0,     !- X,Y,Z ==> Vertex 3 {m}
-    9.144000,6.096000,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    6.096000,6.096000,3.048,  !- X,Y,Z ==> Vertex 1 {m}
+    6.096000,6.096000,0,  !- X,Y,Z ==> Vertex 2 {m}
+    9.144000,6.096000,0,  !- X,Y,Z ==> Vertex 3 {m}
+    9.144000,6.096000,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Flr001,            !- Name
@@ -728,10 +728,10 @@
     NoWind,                  !- Wind Exposure
     1.000000,                !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,6.096000,0,            !- X,Y,Z ==> Vertex 1 {m}
-    0,12.19200,0,            !- X,Y,Z ==> Vertex 2 {m}
-    9.144000,12.19200,0,     !- X,Y,Z ==> Vertex 3 {m}
-    9.144000,6.096000,0;     !- X,Y,Z ==> Vertex 4 {m}
+    0,6.096000,0,  !- X,Y,Z ==> Vertex 1 {m}
+    0,12.19200,0,  !- X,Y,Z ==> Vertex 2 {m}
+    9.144000,12.19200,0,  !- X,Y,Z ==> Vertex 3 {m}
+    9.144000,6.096000,0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn003:Roof001,           !- Name
@@ -745,10 +745,10 @@
     WindExposed,             !- Wind Exposure
     0,                       !- View Factor to Ground
     4,                       !- Number of Vertices
-    0,12.19200,3.048000,     !- X,Y,Z ==> Vertex 1 {m}
-    0,6.096000,3.048000,     !- X,Y,Z ==> Vertex 2 {m}
-    9.144000,6.096000,3.048, !- X,Y,Z ==> Vertex 3 {m}
-    9.144000,12.19200,3.048; !- X,Y,Z ==> Vertex 4 {m}
+    0,12.19200,3.048000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,6.096000,3.048000,  !- X,Y,Z ==> Vertex 2 {m}
+    9.144000,6.096000,3.048,  !- X,Y,Z ==> Vertex 3 {m}
+    9.144000,12.19200,3.048;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     Zn001:Wall001:Win001,    !- Name
@@ -760,10 +760,10 @@
     ,                        !- Frame and Divider Name
     1.0,                     !- Multiplier
     4,                       !- Number of Vertices
-    0.548000,0,2.5000,       !- X,Y,Z ==> Vertex 1 {m}
-    0.548000,0,0.5000,       !- X,Y,Z ==> Vertex 2 {m}
-    5.548000,0,0.5000,       !- X,Y,Z ==> Vertex 3 {m}
-    5.548000,0,2.5000;       !- X,Y,Z ==> Vertex 4 {m}
+    0.548000,0,2.5000,  !- X,Y,Z ==> Vertex 1 {m}
+    0.548000,0,0.5000,  !- X,Y,Z ==> Vertex 2 {m}
+    5.548000,0,0.5000,  !- X,Y,Z ==> Vertex 3 {m}
+    5.548000,0,2.5000;  !- X,Y,Z ==> Vertex 4 {m}
 
   ScheduleTypeLimits,
     Any Number;              !- Name
@@ -1035,7 +1035,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1049,7 +1049,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1063,7 +1063,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1075,7 +1075,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1087,7 +1087,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1121,18 +1121,18 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load,  !- Zone Load Sizing Method
-    ,                          !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Dehumidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Cooling Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Humidistat Dehumidification Set Point Schedule Name
-    ,                          !- Zone Humidistat Humidification Set Point Schedule Name
-    ,                          !- Type of Space Sum to Use
-    GreaterOfHeatingOrCooling, !- Heating Coil Sizing Method
-    1.2;                       !- Maximum Heating Capacity To Cooling Load Sizing Ratio
+    Sensible And Latent Load,!- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
+    ,                        !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Type of Space Sum to Use
+    GreaterOfHeatingOrCooling,  !- Heating Coil Sizing Method
+    1.2;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio {W/W}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA West Zone,       !- Name
@@ -1169,18 +1169,18 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load,  !- Zone Load Sizing Method
-    ,                          !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Dehumidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Cooling Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Humidistat Dehumidification Set Point Schedule Name
-    ,                          !- Zone Humidistat Humidification Set Point Schedule Name
-    ,                          !- Type of Space Sum to Use
-    GreaterOfHeatingOrCooling, !- Heating Coil Sizing Method
-    1.2;                       !- Maximum Heating Capacity To Cooling Load Sizing Ratio
+    Sensible And Latent Load,!- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
+    ,                        !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Type of Space Sum to Use
+    GreaterOfHeatingOrCooling,  !- Heating Coil Sizing Method
+    1.2;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio {W/W}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA EAST ZONE,       !- Name
@@ -1217,18 +1217,18 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load,  !- Zone Load Sizing Method
-    ,                          !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Dehumidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Cooling Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio
-    ,                          !- Zone Humidification Design Supply Air Humidity Ratio Difference
-    ,                          !- Zone Humidistat Dehumidification Set Point Schedule Name
-    ,                          !- Zone Humidistat Humidification Set Point Schedule Name
-    ,                          !- Type of Space Sum to Use
-    GreaterOfHeatingOrCooling, !- Heating Coil Sizing Method
-    1.2;                       !- Maximum Heating Capacity To Cooling Load Sizing Ratio
+    Sensible And Latent Load,!- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
+    ,                        !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Type of Space Sum to Use
+    GreaterOfHeatingOrCooling,  !- Heating Coil Sizing Method
+    1.2;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio {W/W}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NORTH ZONE,      !- Name
@@ -1276,8 +1276,8 @@
     ,                        !- Fraction of Autosized Heating Design Capacity
     VAV,                     !- Central Cooling Capacity Control Method
     ,                        !- Occupant Diversity
-    GreaterOfHeatingOrCooling, !- Heating Coil Sizing Method
-    1.2;                     !- Maximum Heating Capacity To Cooling Load Sizing Ratio
+    GreaterOfHeatingOrCooling,  !- Heating Coil Sizing Method
+    1.2;                     !- Maximum Heating Capacity To Cooling Capacity Sizing Ratio {W/W}
 
   Curve:Biquadratic,
     HPACCoolCapFT,           !- Name
@@ -1568,7 +1568,7 @@
     CyclingFanSchedule,      !- Supply Air Fan Operating Mode Schedule Name
     Coil:Heating:DX:SingleSpeed,  !- Heating Coil Object Type
     Heat Pump DX Heating Coil 1,  !- Heating Coil Name
-    1.1,                        !- DX Heating Coil Sizing Ratio
+    1.1,                     !- DX Heating Coil Sizing Ratio
     Coil:Cooling:DX,         !- Cooling Coil Object Type
     Heat Pump ACDXCoil 1,    !- Cooling Coil Name
     ,                        !- Use DOAS DX Cooling Coil
@@ -1773,8 +1773,8 @@
     autosize,                !- Gross Sensible Heat Ratio
     3.0,                     !- Gross Cooling COP {W/W}
     1.0,                     !- Active Fraction of Coil Face Area
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     1.0,                     !- Evaporative Condenser Pump Power Fraction
     ,                        !- Evaporative Condenser Effectiveness {dimensionless}
     HPACCoolCapFT,           !- Total Cooling Capacity Modifier Function of Temperature Curve Name
@@ -1793,8 +1793,8 @@
     autosize,                !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Heating Coil Air Inlet Node,  !- Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1812,7 +1812,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    autosize;                !- Resistive Defrost Heater Capacity {W}
+    autosize,                !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
   Fan:SystemModel,
     Supply Fan 1,            !- Name

@@ -67,7 +67,7 @@ namespace Avail {
 
     // The following parameters are used for system availability
     // status.  Putting this in SystemAvailabilityManager (where it
-    // belongs) creates a circular dependecy between
+    // belongs) creates a circular dependency between
     // SystemAvailabilityManager and PlantAvailablityManager which
     // needs to be resolved by unifying those two.
     enum class Status

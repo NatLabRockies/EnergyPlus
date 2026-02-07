@@ -2,8 +2,7 @@
 !
 ! - testfile derived from FourPipeBeamLargeOffice.idf
 ! - Demonstrates supervisory control of air source heat pump plants serving chilled water and hot water plants
-! - 
-
+! -
 ! Large office, new construction 90.1-2004
 ! ASHRAE Standards 90.1-2004 and 62-1999
 !
@@ -200,7 +199,8 @@
   HeatBalanceAlgorithm,ConductionTransferFunction,200.0000;
 
   ZoneAirHeatBalanceAlgorithm,
-    AnalyticalSolution;      !- Algorithm
+    AnalyticalSolution,      !- Algorithm
+    ;                        !- Do Space Heat Balance for Sizing
 
   Sizing:Parameters,
     1.33,                    !- Heating Sizing Factor
@@ -3621,7 +3621,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3636,7 +3636,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3651,7 +3651,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3666,7 +3666,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3681,7 +3681,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3696,7 +3696,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3711,7 +3711,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3726,7 +3726,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3741,7 +3741,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3756,7 +3756,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3771,7 +3771,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3786,7 +3786,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3801,7 +3801,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3816,7 +3816,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3831,7 +3831,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3846,7 +3846,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -3863,7 +3863,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3876,7 +3876,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3889,7 +3889,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3902,7 +3902,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3915,7 +3915,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3928,7 +3928,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3941,7 +3941,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3954,7 +3954,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3967,7 +3967,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3980,7 +3980,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -3993,7 +3993,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4006,7 +4006,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4019,7 +4019,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4032,7 +4032,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4045,7 +4045,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4058,7 +4058,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -4089,8 +4089,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4103,8 +4103,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4117,8 +4117,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4131,8 +4131,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4145,8 +4145,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4159,8 +4159,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4173,8 +4173,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4187,8 +4187,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4201,8 +4201,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4215,8 +4215,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4229,8 +4229,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4243,8 +4243,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4257,8 +4257,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4271,8 +4271,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4285,8 +4285,8 @@
     INFIL_QUARTER_ON_SCH,    !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000302,                !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000302,                !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -5534,7 +5534,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Basement,        !- Name
@@ -5568,7 +5575,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Core_bottom,     !- Name
@@ -5602,7 +5616,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Core_mid,        !- Name
@@ -5636,7 +5657,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Core_top,        !- Name
@@ -5670,7 +5698,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_bot_ZN_1,  !- Name
@@ -5704,7 +5739,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_bot_ZN_2,  !- Name
@@ -5738,7 +5780,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_bot_ZN_3,  !- Name
@@ -5772,7 +5821,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_bot_ZN_4,  !- Name
@@ -5806,7 +5862,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_mid_ZN_1,  !- Name
@@ -5840,7 +5903,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_mid_ZN_2,  !- Name
@@ -5874,7 +5944,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_mid_ZN_3,  !- Name
@@ -5908,7 +5985,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_mid_ZN_4,  !- Name
@@ -5942,7 +6026,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_top_ZN_1,  !- Name
@@ -5976,7 +6067,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_top_ZN_2,  !- Name
@@ -6010,7 +6108,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_top_ZN_3,  !- Name
@@ -6044,7 +6149,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Perimeter_top_ZN_4,  !- Name
@@ -7455,7 +7567,6 @@
     For: AllOtherDays,       !- Field 16
     Until: 24:00,0.0;        !- Field 17
 
-
 ! ***EQUIPMENT***
 
   Pump:VariableSpeed,
@@ -7489,7 +7600,6 @@
     0,                       !- Coefficient 4 of the Part Load Performance Curve
     0.0,                     !- Design Minimum Flow Rate {m3/s}
     Intermittent;            !- Pump Control Type
-
 
 ! ***SIZING & CONTROLS***
 
@@ -7672,112 +7782,105 @@
   PlantEquipmentOperationSchemes,
     CoolSys1 Loop Operation Scheme List,  !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
-    Two AWHP Operation Scheme,            !- Control Scheme 1 Name
+    Two AWHP Operation Scheme,  !- Control Scheme 1 Name
     ALWAYS_ON;               !- Control Scheme 1 Schedule Name
 
   PlantEquipmentOperationSchemes,
     HeatSys1 Loop Operation Scheme List,  !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
-    Two AWHP Operation Scheme,            !- Control Scheme 1 Name
+    Two AWHP Operation Scheme,  !- Control Scheme 1 Name
     ALWAYS_ON;               !- Control Scheme 1 Schedule Name
 
   PlantEquipmentOperation:ChillerHeaterChangeover,
-    Two AWHP Operation Scheme, !- Name
-    6.6 ,                                           !- Primary Cooling Plant Setpoint Temperature
-    13.7,                                           !- Secondary Distribution Cooling Plant Setpoint Temperature
-    59.8 ,                                          !- Primary Heating Plant Setpoint at Outdoor High Temperature
-    10.0,                                           !- Outdoor High Temperature
-    37.6,                                           !- Primary Heating Plant Setpoint at Outdoor Low Temperature
-    -18.0,                                          !- Outdoor Low Temperature
-    45.0,                                           !- Secondary Distribution Heating Plant Setpoint Temperature
-    All Conditioned Zones,                          !- Zone Load Polling ZoneList Name
-    Two AWHP Cooling Operation Scheme,              !- Cooling Only Load Plant Equipment Operation Cooling Load Name
-    Two AWHP Heating Operation Scheme,              !- Heating Only Load Plant Equipment Operation Heating Load Name
-    One AWHP Cooling Operation Scheme,              !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name
-    One AWHP Heating Operation Scheme,              !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
-    ,                 !- Dedicated Chilled Water Return Recovery HeatPump Name
-    ,                 !- Dedicated Hot Water Return Recovery HeatPump Name
-    ;                                            !-  Dedicated Recovery Heat Pump Control Load Capacity Factor
-    
+    Two AWHP Operation Scheme,  !- Name
+    6.6,                     !- Primary Cooling Plant Setpoint Temperature {C}
+    13.7,                    !- Secondary Distribution Cooling Plant Setpoint Temperature {C}
+    59.8,                    !- Primary Heating Plant Setpoint at Outdoor High Temperature {C}
+    10.0,                    !- Outdoor High Temperature {C}
+    37.6,                    !- Primary Heating Plant Setpoint at Outdoor Low Temperature {C}
+    -18.0,                   !- Outdoor Low Temperature {C}
+    45.0,                    !- Secondary Distribution Heating Plant Setpoint Temperature {C}
+    All Conditioned Zones,   !- Zone Load Polling ZoneList Name
+    Two AWHP Cooling Operation Scheme,  !- Cooling Only Load Plant Equipment Operation Cooling Load Name
+    Two AWHP Heating Operation Scheme,  !- Heating Only Load Plant Equipment Operation Heating Load Name
+    One AWHP Cooling Operation Scheme,  !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name
+    One AWHP Heating Operation Scheme,  !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
+    ,                        !- Dedicated Chilled Water Return Recovery Heat Pump Name
+    ,                        !- Dedicated Hot Water Return Recovery Heat Pump Name
+    ;                        !- Boiler Setpoint Temperature Offset {deltaC}
+
   PlantEquipmentOperation:CoolingLoad,
     Two AWHP Cooling Operation Scheme,  !- Name
-    0.0,                                         !- Load Range 1 Lower Limit {W}
-    50000,                                       !- Load Range 1 Upper Limit {W}
-    One AWHP Cooling Equipment List,             !- Range 1 Equipment List Name
-    50000,                                       !- Load Range 2 Lower Limit {W}
-    10000000000000,                              !- Load Range 2 Upper Limit {W}
-    Two AWHP Cooling Equipment List;             !- Range 2 Equipment List Name
-  
+    0.0,                     !- Load Range 1 Lower Limit {W}
+    50000,                   !- Load Range 1 Upper Limit {W}
+    One AWHP Cooling Equipment List,  !- Range 1 Equipment List Name
+    50000,                   !- Load Range 2 Lower Limit {W}
+    10000000000000,          !- Load Range 2 Upper Limit {W}
+    Two AWHP Cooling Equipment List;  !- Range 2 Equipment List Name
 
   PlantEquipmentList,
-    Two AWHP Cooling Equipment List, !- Name
+    Two AWHP Cooling Equipment List,  !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
-    AWHP_1 Cooling Side,             !- Equipment 1 Name
+    AWHP_1 Cooling Side,     !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 2 Object Type
-    AWHP_2 Cooling Side;             !- Equipment 2 Name  
+    AWHP_2 Cooling Side;     !- Equipment 2 Name
 
   PlantEquipmentOperation:HeatingLoad,
     Two AWHP Heating Operation Scheme,  !- Name
-    0.0,                                         !- Load Range 1 Lower Limit {W}
-    50000,                                       !- Load Range 1 Upper Limit {W}
-    One AWHP Heating Equipment List,             !- Range 1 Equipment List Name
-    100000,                                      !- Load Range 2 Lower Limit {W}
-    10000000000000,                              !- Load Range 2 Upper Limit {W}
-    Two AWHP Heating Equipment List;             !- Range 2 Equipment List Name
-    
-  PlantEquipmentList,
-    Two AWHP Heating Equipment List, !- Name
-    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
-    AWHP_1 Heating Side,             !- Equipment 1 Name
-    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
-    AWHP_2 Heating Side;             !- Equipment 2 Name    
+    0.0,                     !- Load Range 1 Lower Limit {W}
+    50000,                   !- Load Range 1 Upper Limit {W}
+    One AWHP Heating Equipment List,  !- Range 1 Equipment List Name
+    100000,                  !- Load Range 2 Lower Limit {W}
+    10000000000000,          !- Load Range 2 Upper Limit {W}
+    Two AWHP Heating Equipment List;  !- Range 2 Equipment List Name
 
+  PlantEquipmentList,
+    Two AWHP Heating Equipment List,  !- Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
+    AWHP_1 Heating Side,     !- Equipment 1 Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
+    AWHP_2 Heating Side;     !- Equipment 2 Name
 
   PlantEquipmentOperation:CoolingLoad,
     One AWHP Cooling Operation Scheme,  !- Name
-    0.0,                                         !- Load Range 1 Lower Limit {W}
-    10000000000000000,                           !- Load Range 1 Upper Limit {W}
-    One AWHP Cooling Equipment List;             !- Range 1 Equipment List Name
-    
- 
+    0.0,                     !- Load Range 1 Lower Limit {W}
+    10000000000000000,       !- Load Range 1 Upper Limit {W}
+    One AWHP Cooling Equipment List;  !- Range 1 Equipment List Name
+
   PlantEquipmentList,
-    One AWHP Cooling Equipment List, !- Name
+    One AWHP Cooling Equipment List,  !- Name
     HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
-    AWHP_1 Cooling Side;             !- Equipment 1 Name
-    
+    AWHP_1 Cooling Side;     !- Equipment 1 Name
+
   PlantEquipmentOperation:HeatingLoad,
     One AWHP Heating Operation Scheme,  !- Name
-    0.0,                                !- Load Range 1 Lower Limit {W}
-    10000000000000000,                  !- Load Range 1 Upper Limit {W}
-    One AWHP Heating Equipment List;    !- Range 1 Equipment List Name
-
+    0.0,                     !- Load Range 1 Lower Limit {W}
+    10000000000000000,       !- Load Range 1 Upper Limit {W}
+    One AWHP Heating Equipment List;  !- Range 1 Equipment List Name
 
   PlantEquipmentList,
-    One AWHP Heating Equipment List, !- Name
+    One AWHP Heating Equipment List,  !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
-    AWHP_2 Heating Side;             !- Equipment 1 Name
-  
+    AWHP_2 Heating Side;     !- Equipment 1 Name
 
   ZoneList,
-    All Conditioned Zones,
-    Basement,
-    Core_bottom,
-    Core_mid,
-    Core_top,
-    Perimeter_bot_ZN_1,
-    Perimeter_bot_ZN_2,
-    Perimeter_bot_ZN_3,
-    Perimeter_bot_ZN_4,
-    Perimeter_mid_ZN_1,
-    Perimeter_mid_ZN_2,
-    Perimeter_mid_ZN_3,
-    Perimeter_mid_ZN_4,
-    Perimeter_top_ZN_1,
-    Perimeter_top_ZN_2,
-    Perimeter_top_ZN_3,
-    Perimeter_top_ZN_4;
-
-
+    All Conditioned Zones,   !- Name
+    Basement,                !- Zone 1 Name
+    Core_bottom,             !- Zone 2 Name
+    Core_mid,                !- Zone 3 Name
+    Core_top,                !- Zone 4 Name
+    Perimeter_bot_ZN_1,      !- Zone 5 Name
+    Perimeter_bot_ZN_2,      !- Zone 6 Name
+    Perimeter_bot_ZN_3,      !- Zone 7 Name
+    Perimeter_bot_ZN_4,      !- Zone 8 Name
+    Perimeter_mid_ZN_1,      !- Zone 9 Name
+    Perimeter_mid_ZN_2,      !- Zone 10 Name
+    Perimeter_mid_ZN_3,      !- Zone 11 Name
+    Perimeter_mid_ZN_4,      !- Zone 12 Name
+    Perimeter_top_ZN_1,      !- Zone 13 Name
+    Perimeter_top_ZN_2,      !- Zone 14 Name
+    Perimeter_top_ZN_3,      !- Zone 15 Name
+    Perimeter_top_ZN_4;      !- Zone 16 Name
 
 ! ***LOOPS***
 
@@ -7823,8 +7926,6 @@
     HeatSys1 Demand Connectors,  !- Demand Side Connector List Name
     Optimal;                 !- Load Distribution Scheme
 
-
-
 ! ***CONNECTIONS***
 
   BranchList,
@@ -7843,7 +7944,7 @@
     CoolSys1 Supply Inlet Branch,  !- Branch 1 Name
     CoolSys1 Supply Equipment Branch 1,  !- Branch 2 Name
     CoolSys1 Supply Equipment Branch 2,  !- Branch 3 Name
-    CoolSys1 Supply Outlet Branch;  !- Branch 5 Name
+    CoolSys1 Supply Outlet Branch;  !- Branch 4 Name
 
   BranchList,
     HeatSys1 Demand Branches,!- Name
@@ -7861,9 +7962,9 @@
     HeatSys1 Supply Branches,!- Name
     HeatSys1 Supply Inlet Branch,  !- Branch 1 Name
     HeatSys1 Supply Equipment Branch 1,  !- Branch 2 Name
-    HeatSys1 Supply Equipment Branch 2,  !- Branch 2 Name
-    HEATSYS1 SUPPLY EQUIPMENT BYPASS BRANCH,
-    HeatSys1 Supply Outlet Branch;  !- Branch 4 Name
+    HeatSys1 Supply Equipment Branch 2,  !- Branch 3 Name
+    HEATSYS1 SUPPLY EQUIPMENT BYPASS BRANCH,  !- Branch 4 Name
+    HeatSys1 Supply Outlet Branch;  !- Branch 5 Name
 
   Branch,
     CoolSys1 Demand Bypass Branch,  !- Name
@@ -8306,7 +8407,7 @@
   PlantEquipmentOperationSchemes,
     Secondary CW Loop Operation,  !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
-    Two AWHP Operation Scheme,            !- Control Scheme 1 Name
+    Two AWHP Operation Scheme,  !- Control Scheme 1 Name
     ALways_on;               !- Control Scheme 1 Schedule Name
 
   Pump:VariableSpeed,
@@ -8392,104 +8493,104 @@
     HeatSys1 Demand Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    HeatSys1 Supply Equipment Branch 1,
-    ,
-    HeatPump:PlantLoop:EIR:Heating,
-    AWHP_1 Heating Side,
-    AWHP_1 Heating Side Inlet,
-    AWHP_1 Heating Side Outlet;
+    HeatSys1 Supply Equipment Branch 1,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
+    AWHP_1 Heating Side,     !- Component 1 Name
+    AWHP_1 Heating Side Inlet,  !- Component 1 Inlet Node Name
+    AWHP_1 Heating Side Outlet;  !- Component 1 Outlet Node Name
 
   Branch,
-    HeatSys1 Supply Equipment Branch 2,
-    ,
-    HeatPump:PlantLoop:EIR:Heating,
-    AWHP_2 Heating Side,
-    AWHP_2 Heating Side Inlet,
-    AWHP_2 Heating Side Outlet;
+    HeatSys1 Supply Equipment Branch 2,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
+    AWHP_2 Heating Side,     !- Component 1 Name
+    AWHP_2 Heating Side Inlet,  !- Component 1 Inlet Node Name
+    AWHP_2 Heating Side Outlet;  !- Component 1 Outlet Node Name
 
   Branch,
     CoolSys1 Supply Equipment Branch 1,  !- Name
     ,                        !- Pressure Drop Curve Name
-    HeatPump:PlantLoop:EIR:Cooling,
-    AWHP_1 Cooling Side,
-    AWHP_1 Cooling Side Inlet Node,
-    AWHP_1 Cooling Side Outlet Node;
+    HeatPump:PlantLoop:EIR:Cooling,  !- Component 1 Object Type
+    AWHP_1 Cooling Side,     !- Component 1 Name
+    AWHP_1 Cooling Side Inlet Node,  !- Component 1 Inlet Node Name
+    AWHP_1 Cooling Side Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
     CoolSys1 Supply Equipment Branch 2,  !- Name
     ,                        !- Pressure Drop Curve Name
-    HeatPump:PlantLoop:EIR:Cooling,
-    AWHP_2 Cooling Side,
-    AWHP_2 Cooling Side Inlet Node,
-    AWHP_2 Cooling Side Outlet Node;
+    HeatPump:PlantLoop:EIR:Cooling,  !- Component 1 Object Type
+    AWHP_2 Cooling Side,     !- Component 1 Name
+    AWHP_2 Cooling Side Inlet Node,  !- Component 1 Inlet Node Name
+    AWHP_2 Cooling Side Outlet Node;  !- Component 1 Outlet Node Name
 
   HeatPump:PlantLoop:EIR:Cooling,
-    AWHP_1 Cooling Side,             !- Name
+    AWHP_1 Cooling Side,     !- Name
     AWHP_1 Cooling Side Inlet Node,  !- Load Side Inlet Node Name
-    AWHP_1 Cooling Side Outlet Node, !- Load Side Outlet Node Name
-    AirSource,                       !- Condenser Type
+    AWHP_1 Cooling Side Outlet Node,  !- Load Side Outlet Node Name
+    AirSource,               !- Condenser Type
     AWHP_1 Cooling Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Cooling Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
-    ,                                !- Heat Recovery Inlet Node Name
-    ,                                !- Heat Recovery Outlet Node Name   
-    AWHP_1 Heating Side,             !- Companion Heat Pump Name
-    autosize,                        !- Load Side Reference Flow Rate {m3/s}
-    autosize,                        !- Source Side Reference Flow Rate {m3/s}
-    ,                                !- Heat Recovery Reference Flow Rate {m3/s}
-    autosize,                        !- Reference Capacity {W}
-    2.89,                            !- Reference Coefficient of Performance {W/W}
-    1.0,                             !- Sizing Factor
-    CoolCapCurveFuncTemp,            !- Capacity Modifier Function of Temperature Curve Name
-    CoolEIRCurveFuncTemp,            !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
-    EIRCurveFuncPLR,                 !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
-    Setpoint,                        !- Control Type
-    VariableSpeedPumping,            !- Flow Mode
-    0.2,                             !- Minimum Part Load Ratio
-    ,                                !- Minimum Source Inlet Temperature
-    ,                                !- Maximum Source Inlet Temperature
-    ,                                !- Minimum Supply Water Temperature Curve Name
-    ,                                !- Maximum Supply Water Temperature Curve Name
-    ,                                !- Maximum Heat Recovery Outlet Temperature
-    ,                                !- Heat Recovery Capacity Modifier Function of Temperature Curve Name
-    ,                                !- Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name
-    ThermosiphonCurve,               !- Thermosiphon Temperature Difference Curve Name
-    2.0;                             !- Thermosiphon Minimum Temperature Difference
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    AWHP_1 Heating Side,     !- Companion Heat Pump Name
+    autosize,                !- Load Side Reference Flow Rate {m3/s}
+    autosize,                !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    autosize,                !- Reference Capacity {W}
+    2.89,                    !- Reference Coefficient of Performance {W/W}
+    1.0,                     !- Sizing Factor
+    CoolCapCurveFuncTemp,    !- Capacity Modifier Function of Temperature Curve Name
+    CoolEIRCurveFuncTemp,    !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR,         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+    Setpoint,                !- Control Type
+    VariableSpeedPumping,    !- Flow Mode
+    0.2,                     !- Minimum Part Load Ratio
+    ,                        !- Minimum Source Inlet Temperature {C}
+    ,                        !- Maximum Source Inlet Temperature {C}
+    ,                        !- Minimum Supply Water Temperature Curve Name
+    ,                        !- Maximum Supply Water Temperature Curve Name
+    ,                        !- Maximum Heat Recovery Outlet Temperature {C}
+    ,                        !- Heat Recovery Capacity Modifier Function of Temperature Curve Name
+    ,                        !- Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    ThermosiphonCurve,       !- Thermosiphon Capacity Fraction Curve Name
+    2.0;                     !- Thermosiphon Minimum Temperature Difference
 
   OutdoorAir:Node,
-    AWHP_1 Cooling Side Condenser Air Inlet Node,
-    -1;
-  
+    AWHP_1 Cooling Side Condenser Air Inlet Node,  !- Name
+    -1;                      !- Height Above Ground {m}
+
   HeatPump:PlantLoop:EIR:Cooling,
-    AWHP_2 Cooling Side,              !- Name
-    AWHP_2 Cooling Side Inlet Node,   !- Load Side Inlet Node Name
+    AWHP_2 Cooling Side,     !- Name
+    AWHP_2 Cooling Side Inlet Node,  !- Load Side Inlet Node Name
     AWHP_2 Cooling Side Outlet Node,  !- Load Side Outlet Node Name
-    AirSource,                        !- Condenser Type
+    AirSource,               !- Condenser Type
     AWHP_2 Condenser Air Inlet Node,  !- Source Side Inlet Node Name
-    AWHP_2 Condenser Air Outlet Node, !- Source Side Outlet Node Name
-    ,                                 !- Heat Recovery Inlet Node Name
-    ,                                 !- Heat Recovery Outlet Node Name
-    AWHP_2 Heating Side,              !- Companion Heat Pump Name
-    autosize,                         !- Load Side Reference Flow Rate {m3/s}
-    autosize,                         !- Source Side Reference Flow Rate {m3/s}
-    ,                                 !- Heat Recovery Reference Flow Rate {m3/s}
-    autosize,                         !- Reference Capacity {W}
-    2.89,                             !- Reference Coefficient of Performance {W/W}
-    1.0,                              !- Sizing Factor
-    CoolCapCurveFuncTemp,             !- Capacity Modifier Function of Temperature Curve Name
-    CoolEIRCurveFuncTemp,             !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
-    EIRCurveFuncPLR,                  !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
-    Setpoint,                         !- Control Type
-    VariableSpeedPumping,             !- Flow Mode
-    0.2,                              !- Minimum Part Load Ratio
-    ,                                 !- Minimum Source Inlet Temperature
-    ,                                 !- Maximum Source Inlet Temperature
-    ,                                 !- Minimum Supply Water Temperature Curve Name
-    ,                                 !- Maximum Supply Water Temperature Curve Name
-    ,                                 !- Maximum Heat Recovery Outlet Temperature
-    ,                                 !- Heat Recovery Capacity Modifier Function of Temperature Curve Name
-    ,                                 !- Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name
-    ThermosiphonCurve,                !- Thermosiphon Temperature Difference Curve Name
-    2.0;                              !- Thermosiphon Minimum Temperature Difference
+    AWHP_2 Condenser Air Outlet Node,  !- Source Side Outlet Node Name
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    AWHP_2 Heating Side,     !- Companion Heat Pump Name
+    autosize,                !- Load Side Reference Flow Rate {m3/s}
+    autosize,                !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    autosize,                !- Reference Capacity {W}
+    2.89,                    !- Reference Coefficient of Performance {W/W}
+    1.0,                     !- Sizing Factor
+    CoolCapCurveFuncTemp,    !- Capacity Modifier Function of Temperature Curve Name
+    CoolEIRCurveFuncTemp,    !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR,         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+    Setpoint,                !- Control Type
+    VariableSpeedPumping,    !- Flow Mode
+    0.2,                     !- Minimum Part Load Ratio
+    ,                        !- Minimum Source Inlet Temperature {C}
+    ,                        !- Maximum Source Inlet Temperature {C}
+    ,                        !- Minimum Supply Water Temperature Curve Name
+    ,                        !- Maximum Supply Water Temperature Curve Name
+    ,                        !- Maximum Heat Recovery Outlet Temperature {C}
+    ,                        !- Heat Recovery Capacity Modifier Function of Temperature Curve Name
+    ,                        !- Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    ThermosiphonCurve,       !- Thermosiphon Capacity Fraction Curve Name
+    2.0;                     !- Thermosiphon Minimum Temperature Difference
 
   Curve:Linear,
     ThermosiphonCurve,       !- Name
@@ -8500,8 +8601,9 @@
     0.0,                     !- Minimum Curve Output
     1.0;                     !- Maximum Curve Output
 
-!- ACX 140 Biquadratic cooling curves provided by Trane 
-Curve:Biquadratic,
+!- ACX 140 Biquadratic cooling curves provided by Trane
+
+  Curve:Biquadratic,
     CoolCapCurveFuncTemp,    !- Name
     1.06722728893252,        !- Coefficient1 Constant
     0.0460678063570057,      !- Coefficient2 x
@@ -8536,37 +8638,37 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
-    AWHP_2 Condenser Air Inlet Node,
-    -1;
-  
+    AWHP_2 Condenser Air Inlet Node,  !- Name
+    -1;                      !- Height Above Ground {m}
+
   HeatPump:PlantLoop:EIR:Heating,
-    AWHP_1 Heating Side,            !- Name
+    AWHP_1 Heating Side,     !- Name
     AWHP_1 Heating Side Inlet,  !- Load Side Inlet Node Name
     AWHP_1 Heating Side Outlet,  !- Load Side Outlet Node Name
-    AirSource,             !- Condenser Type
+    AirSource,               !- Condenser Type
     AWHP_1 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_1 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
-    ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
-    AWHP_1 Cooling Side,            !- Companion Heat Pump Name
-    autosize,                   !- Load Side Reference Flow Rate {m3/s}
-    autosize,                   !- Source Side Reference Flow Rate {m3/s}
-    ,                           !- Heat Recovery Reference Flow Rate {m3/s}
-    autosize,                   !- Reference Capacity {W}
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    AWHP_1 Cooling Side,     !- Companion Heat Pump Name
+    autosize,                !- Load Side Reference Flow Rate {m3/s}
+    autosize,                !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    autosize,                !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
-    1.0,                        !- Sizing Factor
+    1.0,                     !- Sizing Factor
     HeatCapCurveFuncTemp,    !- Capacity Modifier Function of Temperature Curve Name
     HeatEIRCurveFuncTemp,    !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
     EIRCurveFuncPLR,         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
     1.1,                     !- Heating To Cooling Capacity Sizing Ratio
     GreaterOfHeatingOrCooling,  !- Heat Pump Sizing Method
-    Setpoint,                    !- Control Type
-    VariableSpeedPumping,            !- Flow Mode
+    Setpoint,                !- Control Type
+    VariableSpeedPumping,    !- Flow Mode
     0.2,                     !- Minimum Part Load Ratio
-    -25.0,                   !- Minimum Source Inlet Temperature
-    35.0,                    !- Maximum Source Inlet Temperature
+    -25.0,                   !- Minimum Source Inlet Temperature {C}
+    35.0,                    !- Maximum Source Inlet Temperature {C}
     MinSWTvsOAT,             !- Minimum Supply Water Temperature Curve Name
     MaxSWTvsOAT,             !- Maximum Supply Water Temperature Curve Name
     HeatDryCoilFuncOAT,      !- Dry Outdoor Correction Factor Curve Name
@@ -8574,17 +8676,17 @@ Curve:Biquadratic,
     TimedEmpirical,          !- Heat Pump Defrost Control
     0.1166667,               !- Heat Pump Defrost Time Period Fraction
     ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name
-    TimedDefrostFrequency,   !- Timed Demand Defrost Frequency Curve Name
-    TimedDefrostHeatLoad,    !- Timed Demand Defrost Heat Load Penalty Curve Name
-    TimedDefrostHeatEnergy;  !- Timed Demand Defrost Heat Input Energy Fraction Curve Name
+    TimedDefrostFrequency,   !- Timed Empirical Defrost Frequency Curve Name
+    TimedDefrostHeatLoad,    !- Timed Empirical Defrost Heat Load Penalty Curve Name
+    TimedDefrostHeatEnergy;  !- Timed Empirical Defrost Heat Input Energy Fraction Curve Name
 
   Curve:Quadratic,
     MinSWTvsOAT,             !- Name
     0.0,                     !- Coefficient1 Constant
     1.0,                     !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.77778,               !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.77778,               !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     20.0,                    !- Minimum Curve Output
     35.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
@@ -8595,43 +8697,43 @@ Curve:Biquadratic,
     53.1666666666667,        !- Coefficient1 Constant
     0.85,                    !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.777778,              !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.777778,              !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     20.0,                    !- Minimum Curve Output
     60.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature;             !- Output Unit Type
 
   OutdoorAir:Node,
-    AWHP_1 Heating Side Condenser Air Inlet Node,
-    -1;
+    AWHP_1 Heating Side Condenser Air Inlet Node,  !- Name
+    -1;                      !- Height Above Ground {m}
 
   HeatPump:PlantLoop:EIR:Heating,
-    AWHP_2 Heating Side,            !- Name
+    AWHP_2 Heating Side,     !- Name
     AWHP_2 Heating Side Inlet,  !- Load Side Inlet Node Name
     AWHP_2 Heating Side Outlet,  !- Load Side Outlet Node Name
-    AirSource,             !- Condenser Type
+    AirSource,               !- Condenser Type
     AWHP_2 Heating Side Condenser Air Inlet Node,  !- Source Side Inlet Node Name
     AWHP_2 Heating Side Condenser Air Outlet Node,  !- Source Side Outlet Node Name
-    ,                           !- Heat Recovery Inlet Node Name
-    ,                           !- Heat Recovery Outlet Node Name       
-    AWHP_2 Cooling Side,            !- Companion Heat Pump Name
-    autosize,                   !- Load Side Reference Flow Rate {m3/s}
-    autosize,                   !- Source Side Reference Flow Rate {m3/s}
-    ,                           !- Heat Recovery Reference Flow Rate {m3/s}
-    autosize,                   !- Reference Capacity {W}
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    AWHP_2 Cooling Side,     !- Companion Heat Pump Name
+    autosize,                !- Load Side Reference Flow Rate {m3/s}
+    autosize,                !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    autosize,                !- Reference Capacity {W}
     2.89,                    !- Reference Coefficient of Performance {W/W}
-    1.0,                        !- Sizing Factor
+    1.0,                     !- Sizing Factor
     HeatCapCurveFuncTemp,    !- Capacity Modifier Function of Temperature Curve Name
     HeatEIRCurveFuncTemp,    !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
     EIRCurveFuncPLR,         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
     1.1,                     !- Heating To Cooling Capacity Sizing Ratio
     GreaterOfHeatingOrCooling,  !- Heat Pump Sizing Method
-    Setpoint,                    !- Control Type
-    VariableSpeedPumping,            !- Flow Mode
+    Setpoint,                !- Control Type
+    VariableSpeedPumping,    !- Flow Mode
     0.2,                     !- Minimum Part Load Ratio
-    -25.0,                   !- Minimum Source Inlet Temperature
-    35.0,                    !- Maximum Source Inlet Temperature
+    -25.0,                   !- Minimum Source Inlet Temperature {C}
+    35.0,                    !- Maximum Source Inlet Temperature {C}
     MinSWTvsOAT,             !- Minimum Supply Water Temperature Curve Name
     MaxSWTvsOAT,             !- Maximum Supply Water Temperature Curve Name
     HeatDryCoilFuncOAT,      !- Dry Outdoor Correction Factor Curve Name
@@ -8639,12 +8741,13 @@ Curve:Biquadratic,
     TimedEmpirical,          !- Heat Pump Defrost Control
     0.1166667,               !- Heat Pump Defrost Time Period Fraction
     ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name
-    TimedDefrostFrequency,   !- Timed Demand Defrost Frequency Curve Name
-    TimedDefrostHeatLoad,    !- Timed Demand Defrost Heat Load Penalty Curve Name
-    TimedDefrostHeatEnergy;  !- Timed Demand Defrost Heat Input Energy Fraction Curve Name
+    TimedDefrostFrequency,   !- Timed Empirical Defrost Frequency Curve Name
+    TimedDefrostHeatLoad,    !- Timed Empirical Defrost Heat Load Penalty Curve Name
+    TimedDefrostHeatEnergy;  !- Timed Empirical Defrost Heat Input Energy Fraction Curve Name
 
-!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves  
-Curve:Biquadratic,
+!-ACX Heating Capacity BiQuadratic created from Trane quadratic curves
+
+  Curve:Biquadratic,
     HeatCapCurveFuncTemp,    !- Name
     0.794900878202383,       !- Coefficient1 Constant
     0.00388524034840032,     !- Coefficient2 x
@@ -8679,10 +8782,10 @@ Curve:Biquadratic,
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
-    
+
   OutdoorAir:Node,
-    AWHP_2 Heating Side Condenser Air Inlet Node,
-    -1;
+    AWHP_2 Heating Side Condenser Air Inlet Node,  !- Name
+    -1;                      !- Height Above Ground {m}
 
   Curve:Quadratic,
     EIRCurveFuncPLR,         !- Name
@@ -8691,48 +8794,46 @@ Curve:Biquadratic,
     0.0,                     !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
- 
-   Curve:Quadratic,
-     TimedDefrostHeatEnergy,  !- Name
-     0.03423,                 !- Coefficient1 Constant
-     -0.00072,                !- Coefficient2 x
-     0.0,                     !- Coefficient3 x**2
-     -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
-     10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
-   Curve:Quadratic,
-     TimedDefrostFrequency,   !- Name
-     0.71582,                 !- Coefficient1 Constant
-     -0.024822,               !- Coefficient2 x
-     0.0,                     !- Coefficient3 x**2
-     -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
-     10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
-   Curve:Quadratic,
-     TimedDefrostHeatLoad,    !- Name
-     0.08286,                 !- Coefficient1 Constant
-     -0.007812,               !- Coefficient2 x
-     0.0,                     !- Coefficient3 x**2
-     -30.0,                   !- Minimum Value of x !- defrost minimum limit? same as min OAT operating limit? use -30 for now
-     10.60675883;             !- Maximum Value of x !- heat load curve evaluates to 0 here, no more defrost required
- 
-   Curve:Quadratic,
-     HeatDryCoilFuncOAT,      !- Name
-     0.9574744,               !- Coefficient1 Constant
-     -0.00299322,             !- Coefficient2 x
-     0.000055728,             !- Coefficient3 x**2
-     -11.675,                 !- Minimum Value of x !- curve evaluates to ~1 here
-     26.6666667;              !- Maximum Value of x !- curve evaluates to min value here, ~ 0.91728
- 
-   Curve:Quadratic,
-     HeatCapCurveFuncPLR,     !- Name
-     0.0473,                  !- Coefficient1 Constant
-     0.8643,                  !- Coefficient2 x
-     0.0884,                  !- Coefficient3 x**2
-     0.0,                     !- Minimum Value of x
+
+  Curve:Quadratic,
+    TimedDefrostHeatEnergy,  !- Name
+    0.03423,                 !- Coefficient1 Constant
+    -0.00072,                !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    -30.0,                   !- Minimum Value of x
+    10.60675883;             !- Maximum Value of x
+
+  Curve:Quadratic,
+    TimedDefrostFrequency,   !- Name
+    0.71582,                 !- Coefficient1 Constant
+    -0.024822,               !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    -30.0,                   !- Minimum Value of x
+    10.60675883;             !- Maximum Value of x
+
+  Curve:Quadratic,
+    TimedDefrostHeatLoad,    !- Name
+    0.08286,                 !- Coefficient1 Constant
+    -0.007812,               !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    -30.0,                   !- Minimum Value of x
+    10.60675883;             !- Maximum Value of x
+
+  Curve:Quadratic,
+    HeatDryCoilFuncOAT,      !- Name
+    0.9574744,               !- Coefficient1 Constant
+    -0.00299322,             !- Coefficient2 x
+    0.000055728,             !- Coefficient3 x**2
+    -11.675,                 !- Minimum Value of x
+    26.6666667;              !- Maximum Value of x
+
+  Curve:Quadratic,
+    HeatCapCurveFuncPLR,     !- Name
+    0.0473,                  !- Coefficient1 Constant
+    0.8643,                  !- Coefficient2 x
+    0.0884,                  !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
-
-
 
   Branch,
     HeatSys1 Supply Equipment Bypass Branch,  !- Name
@@ -8758,27 +8859,27 @@ Curve:Biquadratic,
   Branch,
     HeatSys1 Supply Outlet Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    Boiler:HotWater,          !- Component 1 Object Type
-    Primary HW Aux Boiler,  !- Component 1 Name
-    HW Aux Boiler Inlet Node,  !- Component 1 Inlet Node Name
+    Boiler:HotWater,         !- Component 1 Object Type
+    Primary HW Aux Boiler,   !- Component 1 Name
+    HW Aux Boiler Inlet Node,!- Component 1 Inlet Node Name
     HeatSys1 Supply Outlet Node;  !- Component 1 Outlet Node Name
 
   Boiler:HotWater,
-    Primary HW Aux Boiler,         !- Name
-    Electricity,              !- Fuel Type
+    Primary HW Aux Boiler,   !- Name
+    Electricity,             !- Fuel Type
     AUTOSIZE,                !- Nominal Capacity {W}
-    1.0,                    !- Nominal Thermal Efficiency
+    1.0,                     !- Nominal Thermal Efficiency
     LeavingBoiler,           !- Efficiency Curve Temperature Evaluation Variable
     ,                        !- Normalized Boiler Efficiency Curve Name
     AUTOSIZE,                !- Design Water Flow Rate {m3/s}
     0.0,                     !- Minimum Part Load Ratio
     1.2,                     !- Maximum Part Load Ratio
     1.0,                     !- Optimum Part Load Ratio
-    HW Aux Boiler Inlet Node,  !- Boiler Water Inlet Node Name
+    HW Aux Boiler Inlet Node,!- Boiler Water Inlet Node Name
     HeatSys1 Supply Outlet Node,  !- Boiler Water Outlet Node Name
     95.0,                    !- Water Outlet Upper Temperature Limit {C}
     LeavingSetpointModulated,!- Boiler Flow Mode
-    0.0000,                  !- Parasitic Electric Load {W}
+    0.0000,                  !- On Cycle Parasitic Electric Load {W}
     1.0000;                  !- Sizing Factor
 
   ConnectorList,
@@ -8822,8 +8923,8 @@ Curve:Biquadratic,
   Connector:Splitter,
     CoolSys1 Supply Splitter,!- Name
     CoolSys1 Supply Inlet Branch,  !- Inlet Branch Name
-    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name  
-    CoolSys1 Supply Equipment Branch 2;
+    CoolSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
+    CoolSys1 Supply Equipment Branch 2;  !- Outlet Branch 2 Name
 
   Connector:Splitter,
     HeatSys1 Demand Splitter,!- Name
@@ -8840,8 +8941,8 @@ Curve:Biquadratic,
     HeatSys1 Supply Splitter,!- Name
     HeatSys1 Supply Inlet Branch,  !- Inlet Branch Name
     HeatSys1 Supply Equipment Branch 1,  !- Outlet Branch 1 Name
-    HeatSys1 Supply Equipment Branch 2,  !- Outlet Branch 1 Name    
-    HeatSys1 Supply Equipment Bypass Branch;  !- Outlet Branch 2 Name
+    HeatSys1 Supply Equipment Branch 2,  !- Outlet Branch 2 Name
+    HeatSys1 Supply Equipment Bypass Branch;  !- Outlet Branch 3 Name
 
   Connector:Mixer,
     CoolSys1 Demand Mixer,   !- Name
@@ -8874,8 +8975,8 @@ Curve:Biquadratic,
     HeatSys1 Supply Mixer,   !- Name
     HeatSys1 Supply Outlet Branch,  !- Outlet Branch Name
     HeatSys1 Supply Equipment Branch 1,  !- Inlet Branch 1 Name
-    HeatSys1 Supply Equipment Branch 2,  !- Outlet Branch 1 Name
-    HeatSys1 Supply Equipment Bypass Branch;  !- Inlet Branch 2 Name
+    HeatSys1 Supply Equipment Branch 2,  !- Inlet Branch 2 Name
+    HeatSys1 Supply Equipment Bypass Branch;  !- Inlet Branch 3 Name
 
   Pipe:Adiabatic,
     CoolSys1 Demand Bypass Pipe,  !- Name
@@ -9281,7 +9382,7 @@ Curve:Biquadratic,
   PlantEquipmentOperationSchemes,
     Secondary HW Loop Operation,  !- Name
     PlantEquipmentOperation:ChillerHeaterChangeover,  !- Control Scheme 1 Object Type
-    Two AWHP Operation Scheme,            !- Control Scheme 1 Name
+    Two AWHP Operation Scheme,  !- Control Scheme 1 Name
     ALways_on;               !- Control Scheme 1 Schedule Name
 
   PlantEquipmentOperation:Uncontrolled,
@@ -9324,7 +9425,7 @@ Curve:Biquadratic,
     Temperature,             !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00,59;       !- Field 3
+    Until: 24:00,59;         !- Field 3
 
 ! ***SWH EQUIPMENT***
 
@@ -9339,14 +9440,14 @@ Curve:Biquadratic,
     ,                        !- Heater Minimum Capacity {W}
     ,                        !- Heater Ignition Minimum Flow Rate {m3/s}
     ,                        !- Heater Ignition Delay {s}
-    Electricity,              !- Heater Fuel Type
+    Electricity,             !- Heater Fuel Type
     1.0,                     !- Heater Thermal Efficiency
     ,                        !- Part Load Factor Curve Name
     20,                      !- Off Cycle Parasitic Fuel Consumption Rate {W}
-    Electricity,              !- Off Cycle Parasitic Fuel Type
+    Electricity,             !- Off Cycle Parasitic Fuel Type
     0.8,                     !- Off Cycle Parasitic Heat Fraction to Tank
     ,                        !- On Cycle Parasitic Fuel Consumption Rate {W}
-    Electricity,              !- On Cycle Parasitic Fuel Type
+    Electricity,             !- On Cycle Parasitic Fuel Type
     ,                        !- On Cycle Parasitic Heat Fraction to Tank
     SCHEDULE,                !- Ambient Temperature Indicator
     SWHSys1 Water Heater Ambient Temperature Schedule Name,  !- Ambient Temperature Schedule Name
@@ -10234,9 +10335,9 @@ Curve:Biquadratic,
 ! ***ENVIRONMENTAL FACTORS REPORTING***
 
   EnvironmentalImpactFactors,
-    0.663,                   !- District Heating Efficiency
+    0.663,                   !- District Heating Water Efficiency
     4.18,                    !- District Cooling COP {W/W}
-    0.585,                   !- Steam Conversion Efficiency
+    0.585,                   !- District Heating Steam Conversion Efficiency
     80.7272,                 !- Total Carbon Equivalent Emission Factor From N2O {kg/kg}
     6.2727,                  !- Total Carbon Equivalent Emission Factor From CH4 {kg/kg}
     0.2727;                  !- Total Carbon Equivalent Emission Factor From CO2 {kg/kg}
@@ -10321,80 +10422,129 @@ Curve:Biquadratic,
     ,                        !- Nuclear High Level Emission Factor Schedule Name
     0;                       !- Nuclear Low Level Emission Factor {m3/MJ}
 
-  Output:Variable,*,Fluid Heat Exchanger Heat Transfer Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Fluid Heat Exchanger Operation Status,hourly; !- HVAC Average []
-  Output:Variable,*,Fluid Heat Exchanger Effectiveness,hourly; !- HVAC Average []
+  Output:Variable,*,Fluid Heat Exchanger Heat Transfer Rate,hourly;
 
-  Output:Variable,*,Supervisory Plant Heat Pump Operation Mode,hourly; !- HVAC Average [unknown]
-  Output:Variable,*,Supervisory Plant Operation Polled Building Heating Load,hourly; !- HVAC Average [W]
-  Output:Variable,*,Supervisory Plant Operation Polled Building Cooling Load,hourly; !- HVAC Average [W]
-  Output:Variable,*,Supervisory Plant Operation Primary Plant Heating Load,hourly; !- HVAC Average [W]
-  Output:Variable,*,Supervisory Plant Operation Primary Plant Cooling Load,hourly; !- HVAC Average [W]
-  Output:Variable,*,Supervisory Plant Heat Recovery Operation Mode,hourly; !- HVAC Average [unknown]
-  Output:Variable,*,Supervisory Plant Auxiliary Boiler Mode,hourly; !- HVAC Average [unknown]
-  Output:Variable,*,Supervisory Plant Operation Secondary Plant Heating Load,timestep; !- HVAC Average [W]
-  Output:Variable,*,Supervisory Plant Operation Secondary Plant Cooling Load,timestep; !- HVAC Average [W]
+  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Mass Flow Rate,hourly;
 
-  Output:Variable,*,Heat Pump Part Load Ratio,hourly; !- HVAC Average []
-  Output:Variable,*,Heat Pump Cycling Ratio,hourly; !- HVAC Average []
-  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Load Side Heat Transfer Energy,hourly; !- HVAC Sum [J]
-  Output:Variable,*,Heat Pump Source Side Heat Transfer Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Source Side Heat Transfer Energy,hourly; !- HVAC Sum [J]
-  Output:Variable,*,Heat Pump Load Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Heat Pump Load Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Heat Pump Source Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Heat Pump Source Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Heat Pump Electricity Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Load Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Heat Pump Source Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Thermosiphon Status,hourly; !- HVAC Average [kg/s]
+  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Inlet Temperature,hourly;
 
-  Output:Variable,*,Boiler Heating Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Boiler Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Boiler Outlet Temperature,hourly; !- HVAC Average [C]
+  Output:Variable,*,Fluid Heat Exchanger Loop Supply Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Fluid Heat Exchanger Loop Demand Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Fluid Heat Exchanger Operation Status,hourly;
+
+  Output:Variable,*,Fluid Heat Exchanger Effectiveness,hourly;
+
+  Output:Variable,*,Supervisory Plant Heat Pump Operation Mode,hourly;
+
+  Output:Variable,*,Supervisory Plant Operation Polled Building Heating Load,hourly;
+
+  Output:Variable,*,Supervisory Plant Operation Polled Building Cooling Load,hourly;
+
+  Output:Variable,*,Supervisory Plant Operation Primary Plant Heating Load,hourly;
+
+  Output:Variable,*,Supervisory Plant Operation Primary Plant Cooling Load,hourly;
+
+  Output:Variable,*,Supervisory Plant Heat Recovery Operation Mode,hourly;
+
+  Output:Variable,*,Supervisory Plant Auxiliary Boiler Mode,hourly;
+
+  Output:Variable,*,Supervisory Plant Operation Secondary Plant Heating Load,timestep;
+
+  Output:Variable,*,Supervisory Plant Operation Secondary Plant Cooling Load,timestep;
+
+  Output:Variable,*,Heat Pump Part Load Ratio,hourly;
+
+  Output:Variable,*,Heat Pump Cycling Ratio,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Heat Pump Source Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Heat Pump Source Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Heat Pump Source Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Heat Pump Source Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Heat Pump Electricity Rate,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Heat Pump Source Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Thermosiphon Status,hourly;
+
+  Output:Variable,*,Boiler Heating Rate,hourly;
+
+  Output:Variable,*,Boiler Inlet Temperature,hourly;
+
+  Output:Variable,*,Boiler Outlet Temperature,hourly;
+
   Output:Variable,*,Boiler Mass Flow Rate,hourly;
 
-  Output:Variable,AWHP_2 Heating Side Outlet,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,AWHP_1 Heating Side Outlet,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,AWHP_2 Cooling Side Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,AWHP_1 Cooling Side Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
+  Output:Variable,AWHP_2 Heating Side Outlet,System Node Setpoint Temperature,hourly;
 
-  Output:Variable,Secondary HW Supply Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,HeatSys1 Supply Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,Secondary CW Supply Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,CoolSys1 Supply Outlet Node,System Node Setpoint Temperature,hourly; !- HVAC Average [C]
+  Output:Variable,AWHP_1 Heating Side Outlet,System Node Setpoint Temperature,hourly;
 
-  Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly; !- Zone Average [C]
+  Output:Variable,AWHP_2 Cooling Side Outlet Node,System Node Setpoint Temperature,hourly;
 
-  Output:Variable,*,Availability Manager Night Cycle Control Status,hourly; !- HVAC Average []
+  Output:Variable,AWHP_1 Cooling Side Outlet Node,System Node Setpoint Temperature,hourly;
 
-  Output:Variable,*,Zone Heating Setpoint Not Met While Occupied Time,hourly; !- Zone Sum [hr]
-  Output:Variable,*,Zone Cooling Setpoint Not Met While Occupied Time,hourly; !- Zone Sum [hr]
-  
-  Output:Variable,*,Plant Supply Side Inlet Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Plant Supply Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Plant Supply Side Outlet Temperature,hourly; !- HVAC Average [C]
-    Output:Variable,Heating Side WSHP Source Side Inlet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Heating Side WSHP Source Side Inlet,System Node Temperature,hourly;
+  Output:Variable,Secondary HW Supply Outlet Node,System Node Setpoint Temperature,hourly;
 
-    Output:Variable,Heating Side WSHP Source Side Oulet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Heating Side WSHP Source Side Oulet,System Node Temperature,hourly;
+  Output:Variable,HeatSys1 Supply Outlet Node,System Node Setpoint Temperature,hourly;
 
-    Output:Variable,Cooling Side WSHP Source Side Inlet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Cooling Side WSHP Source Side Inlet,System Node Temperature,hourly;
+  Output:Variable,Secondary CW Supply Outlet Node,System Node Setpoint Temperature,hourly;
 
-    Output:Variable,Cooling Side WSHP Source Side Outlet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Cooling Side WSHP Source Side Outlet,System Node Temperature,hourly;
+  Output:Variable,CoolSys1 Supply Outlet Node,System Node Setpoint Temperature,hourly;
 
-    Output:Variable,Cooling Side WSHP Load Side Inlet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Cooling Side WSHP Load Side Inlet,System Node Temperature,hourly;
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;
 
-    Output:Variable,Heating Side WSHP Load Side Inlet,System Node Mass Flow Rate,hourly;
-    Output:Variable,Heating Side WSHP Load Side Inlet,System Node Temperature,hourly;
+  Output:Variable,*,Availability Manager Night Cycle Control Status,hourly;
+
+  Output:Variable,*,Zone Heating Setpoint Not Met While Occupied Time,hourly;
+
+  Output:Variable,*,Zone Cooling Setpoint Not Met While Occupied Time,hourly;
+
+  Output:Variable,*,Plant Supply Side Inlet Mass Flow Rate,hourly;
+
+  Output:Variable,*,Plant Supply Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Plant Supply Side Outlet Temperature,hourly;
+
+  Output:Variable,Heating Side WSHP Source Side Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Heating Side WSHP Source Side Inlet,System Node Temperature,hourly;
+
+  Output:Variable,Heating Side WSHP Source Side Oulet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Heating Side WSHP Source Side Oulet,System Node Temperature,hourly;
+
+  Output:Variable,Cooling Side WSHP Source Side Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Cooling Side WSHP Source Side Inlet,System Node Temperature,hourly;
+
+  Output:Variable,Cooling Side WSHP Source Side Outlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Cooling Side WSHP Source Side Outlet,System Node Temperature,hourly;
+
+  Output:Variable,Cooling Side WSHP Load Side Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Cooling Side WSHP Load Side Inlet,System Node Temperature,hourly;
+
+  Output:Variable,Heating Side WSHP Load Side Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Heating Side WSHP Load Side Inlet,System Node Temperature,hourly;
+

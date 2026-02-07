@@ -3121,7 +3121,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest)
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
 {
 
-    // Test for #9118. The key point is that a collinear vertex should be found on the first occurence (that is vertex 2 is collinear with 1 and 3)
+    // Test for #9118. The key point is that a collinear vertex should be found on the first occurrence (that is vertex 2 is collinear with 1 and 3)
     //      y
     //     ▲
     //     │ [5]     [4]
@@ -4141,7 +4141,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_HeatTransferAlgorithmTest)
 
     surfNum = Util::FindItemInList("ZONE1_FLOOR_4_0_10000", state->dataSurface->Surface);
     EXPECT_ENUM_EQ(DataSurfaces::HeatTransferModel::CondFD, state->dataSurface->Surface(surfNum).HeatTransferAlgorithm);
-    EXPECT_TRUE(state->dataHeatBal->AnyEMPD); // input as EMPD but then later overriden to CondFD - see error message below
+    EXPECT_TRUE(state->dataHeatBal->AnyEMPD); // input as EMPD but then later overridden to CondFD - see error message below
 
     surfNum = Util::FindItemInList("ZONE1_FLOOR_4_0_20000", state->dataSurface->Surface);
     EXPECT_ENUM_EQ(DataSurfaces::HeatTransferModel::HAMT, state->dataSurface->Surface(surfNum).HeatTransferAlgorithm);
@@ -5083,7 +5083,7 @@ TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test3)
 
 TEST_F(EnergyPlusFixture, WorldCoord_with_RelativeRectSurfCoord_test4)
 {
-    // Case 4) World coordinate system & Defalut Rect. surf, coordinate system & Non-zero zone origin
+    // Case 4) World coordinate system & Default Rect. surf, coordinate system & Non-zero zone origin
 
     std::string const idf_objects = delimited_string({
 
@@ -6843,7 +6843,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
 
     // This test is designed to reproduce issue #9218 Crash with many airwalls collapsing into a single enclosure.
     // That proved difficult to reproduce, however the root cause of the crash is space enclosure nums that are not consistent
-    // with the enclosures that hold them. This test demostrates that failure.
+    // with the enclosures that hold them. This test demonstrates that failure.
     EXPECT_EQ(state->dataViewFactor->NumOfRadiantEnclosures, 3);
     EXPECT_TRUE(Util::SameString(state->dataViewFactor->EnclRadInfo(1).Name, "Radiant Enclosure 1"));
     EXPECT_TRUE(Util::SameString(state->dataViewFactor->EnclRadInfo(1).spaceNames[0], "Space 3"));
@@ -14383,7 +14383,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SurroundingSurfacesViewFactorTest)
 
 TEST_F(EnergyPlusFixture, Fix_checkSubSurfAzTiltNorm_Horizontal_Surf_Random)
 {
-    // Unit Test for Pull Request 10104 that addresses a potential illy functioned (or redudant) `if` condition
+    // Unit Test for Pull Request 10104 that addresses a potential illy functioned (or redundant) `if` condition
     SurfaceData BaseSurface;
     SurfaceData SubSurface;
     SurfaceData SubSurface_Same;

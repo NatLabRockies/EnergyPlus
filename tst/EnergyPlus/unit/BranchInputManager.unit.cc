@@ -53,6 +53,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 
@@ -500,6 +501,137 @@ TEST_F(EnergyPlusFixture, BranchInputManager_GetAirBranchIndex)
     BranchIndex = GetAirBranchIndex(*state, CompType, CompName);
 
     EXPECT_EQ(0, BranchIndex);
+}
+
+TEST_F(EnergyPlusFixture, BranchInputManager_OrphanObjects)
+{
+    // Branch
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    std::string idf_objects = delimited_string({
+        "Branch,",
+        "   Heating Supply Main Branch,     !- Name",
+        "   ,                               !- Pressure Drop Curve Name",
+        "   Coil:Heating:Water,             !- Component 1 Object Type",
+        "   Heating Supply Reheat Coil,     !- Component 1 Name",
+        "   Heating Supply Inlet Node,      !- Component 1 Inlet Node Name",
+        "   Heating Supply Outlet Node;     !- Component 1 Outlet Node Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    std::string expected_error = delimited_string({
+        "   ** Severe  ** During Branch Input, Invalid Component Name input=HEATING SUPPLY REHEAT COIL",
+        "   **   ~~~   ** Component type=COIL:HEATING:WATER",
+        "   **   ~~~   ** Occurs on Branch=HEATING SUPPLY MAIN BRANCH",
+        "   ** Severe  ** AuditBranches: There are 1 branch(es) that do not appear on any BranchList.",
+        "   **   ~~~   ** Use Output:Diagnostics,DisplayExtraWarnings; for detail of each branch not on a branch list.",
+    });
+    compare_err_stream(expected_error, true);
+
+    // BranchList
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "BranchList,",
+        "   Heating Supply Branches,        !- Name",
+        "   Heating Supply Main Branch;     !- Branch 1 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetBranchListInput: BranchList=\"HEATING SUPPLY BRANCHES\", invalid data.",
+        "   **   ~~~   ** ..invalid Branch Name not found=\"HEATING SUPPLY MAIN BRANCH\".",
+        "   ** Severe  ** GetBranchListInput:  Invalid Input -- preceding condition(s) will likely cause termination.",
+    });
+    compare_err_stream(expected_error, true);
+
+    // Splitter
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "Connector:Splitter,",
+        "   Heating Supply Splitter,        !- Name",
+        "   Heating Supply Inlet Branch,    !- Inlet Branch Name",
+        "   Central Boiler Branch,          !- Outlet Branch 1 Name",
+        "   Heating Supply Bypass Branch;   !- Outlet Branch 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=HEATING SUPPLY INLET BRANCH, referenced as Inlet Branch to Connector:Splitter=HEATING "
+        "SUPPLY SPLITTER",
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=CENTRAL BOILER BRANCH, referenced as Outlet Branch # 1 to Connector:Splitter=HEATING "
+        "SUPPLY SPLITTER",
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Outlet Branch # 2 to "
+        "Connector:Splitter=HEATING SUPPLY SPLITTER",
+        "   **  Fatal  ** GetSplitterInput: Fatal Errors Found in Connector:Splitter, program terminates.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=3",
+        "   ..... Last severe error=GetSplitterInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Outlet Branch # 2 to "
+        "Connector:Splitter=HEATING SUPPLY SPLITTER",
+    });
+    compare_err_stream(expected_error, true);
+
+    // Mixer
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "Connector:Mixer,",
+        "   Heating Supply Mixer,           !- Name",
+        "   Heating Supply Outlet Branch,   !- Outlet Branch Name",
+        "   Central Boiler Branch,          !- Inlet Branch 1 Name",
+        "   Heating Supply Bypass Branch;   !- Inlet Branch 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetMixerInput: Invalid Branch=HEATING SUPPLY OUTLET BRANCH, referenced as Outlet Branch in Connector:Mixer=HEATING SUPPLY "
+        "MIXER",
+        "   ** Severe  ** GetMixerInput: Invalid Branch=CENTRAL BOILER BRANCH, referenced as Inlet Branch # 1 in Connector:Mixer=HEATING SUPPLY "
+        "MIXER",
+        "   ** Severe  ** GetMixerInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Inlet Branch # 2 in Connector:Mixer=HEATING "
+        "SUPPLY MIXER",
+        "   **  Fatal  ** GetMixerInput: Fatal Errors Found in Connector:Mixer, program terminates.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=3",
+        "   ..... Last severe error=GetMixerInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Inlet Branch # 2 in "
+        "Connector:Mixer=HEATING SUPPLY MIXER",
+    });
+    compare_err_stream(expected_error, true);
+
+    // ConnectorList
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "ConnectorList,",
+        "   Heating Supply Side Connectors, !- Name",
+        "   Connector:Splitter,             !- Connector 1 Object Type",
+        "   Heating Supply Splitter,        !- Connector 1 Name",
+        "   Connector:Mixer,                !- Connector 2 Object Type",
+        "   Heating Supply Mixer;           !- Connector 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** Invalid Connector:Splitter(none)=HEATING SUPPLY SPLITTER, referenced by ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   ** Severe  ** Invalid Connector:Mixer(none)=HEATING SUPPLY MIXER, referenced by ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   ** Severe  ** For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   **   ~~~   ** ...Item=HEATING SUPPLY SPLITTER, Type=CONNECTOR:SPLITTER was not matched.",
+        "   **   ~~~   ** The BranchList for this Connector:Splitter does not match the BranchList for its corresponding Connector:Mixer.",
+        "   ** Severe  ** For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   **   ~~~   ** ...Item=HEATING SUPPLY MIXER, Type=CONNECTOR:MIXER was not matched.",
+        "   **   ~~~   ** The BranchList for this Connector:Mixer does not match the BranchList for its corresponding Connector:Splitter.",
+        "   **  Fatal  ** GetConnectorListInput: Program terminates for preceding conditions.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=4",
+        "   ..... Last severe error=For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+    });
+    compare_err_stream(expected_error, true);
 }
 
 } // namespace EnergyPlus

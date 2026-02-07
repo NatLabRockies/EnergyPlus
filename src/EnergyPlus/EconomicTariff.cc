@@ -287,7 +287,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
     OutputProcessor::VariableType TypeVar;
     OutputProcessor::StoreType AvgSumVar;
     OutputProcessor::TimeStepType StepTypeVar;
-    Constant::Units UnitsVar = Constant::Units::None; // Units sting, may be blank
+    Constant::Units UnitsVar = Constant::Units::None; // Units string, may be blank
     Array1D_string NamesOfKeys;                       // Specific key name
     Array1D_int IndexesForKeyVar;                     // Array index
 

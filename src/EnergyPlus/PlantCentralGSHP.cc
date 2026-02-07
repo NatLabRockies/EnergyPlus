@@ -706,7 +706,7 @@ void GetWrapperInput(EnergyPlusData &state)
                 } else if ((state.dataPlantCentralGSHP->Wrapper(WrapperNum).WrapperComp(Comp).chSched =
                                 Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(loop + 2))) == nullptr) {
                     state.dataPlantCentralGSHP->Wrapper(WrapperNum).WrapperComp(Comp).chSched =
-                        Sched::GetScheduleAlwaysOn(state); // Not an availabilty schedule, but defaults to constant-1.0
+                        Sched::GetScheduleAlwaysOn(state); // Not an availability schedule, but defaults to constant-1.0
                     ShowWarningItemNotFound(state,
                                             eoh,
                                             state.dataIPShortCut->cAlphaFieldNames(loop + 2),
@@ -2306,7 +2306,7 @@ void WrapperSpecs::CalcChillerHeaterModel(EnergyPlusData &state)
                         CurrentMode = 3;
                     }
                 }
-            } // End of simulataneous clg/htg mode detemination
+            } // End of simultaneous clg/htg mode determination
 
         } else { // chiller heater is off
             IsLoadHeatRemaining = false;
@@ -3016,7 +3016,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                                     GLHEOutletMassFlowRate = 0.0;
                                     GLHEInletMassFlowRate = 0.0;
                                     GLHEOutletTemp = GLHEInletTemp;
-                                } else { // At leaset, one of chiller heater units is cooling-only mode
+                                } else { // At least, one of chiller heater units is cooling-only mode
                                          // GLHEOutletMassFlowRate = GLHEOutletMassFlowRate; // Self-assignment commented out
                                          // GLHEOutletTemp = GLHEOutletTemp; // Self-assignment commented out
                                 }
@@ -3073,7 +3073,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                             GLHEOutletTemp = GLHEInletTemp;
                         }
 
-                        // Add ancilliary power if scheduled
+                        // Add ancillary power if scheduled
                         if (this->ancillaryPowerSched != nullptr) {
                             WrapperElecPowerCool += (this->AncillaryPower * this->ancillaryPowerSched->getCurrentVal());
                         }
@@ -3131,7 +3131,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                                     GLHEOutletMassFlowRate = 0.0;
                                     GLHEInletMassFlowRate = 0.0;
                                     GLHEOutletTemp = GLHEInletTemp;
-                                } else { // At leaset, one of chiller heater units is heating only mode
+                                } else { // At least, one of chiller heater units is heating only mode
                                          // GLHEOutletMassFlowRate = GLHEOutletMassFlowRate; // Self-assignment commented out
                                          // GLHEOutletTemp = GLHEOutletTemp; // Self-assignment commented out
                                 }
@@ -3189,7 +3189,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                             GLHEOutletTemp = GLHEInletTemp;
                         }
 
-                        // Check if ancilliary power is used
+                        // Check if ancillary power is used
                         if (this->ancillaryPowerSched != nullptr) {
                             WrapperElecPowerHeat += (this->AncillaryPower * this->ancillaryPowerSched->getCurrentVal());
                         }
@@ -3257,7 +3257,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
 
                     CHWOutletTemp = CHWInletTemp;
 
-                    // Add ancilliary power if necessary
+                    // Add ancillary power if necessary
                     if (this->ancillaryPowerSched != nullptr) {
                         WrapperElecPowerHeat += (this->AncillaryPower * this->ancillaryPowerSched->getCurrentVal());
                     }

@@ -89,7 +89,7 @@ namespace HVACStandAloneERV {
         std::string ExhaustAirFanName;                 // fan name in exhaust air stream of the ERV
         int ExhaustAirFanIndex;                        // index to exhaust air fan
         Sched::Schedule *exhaustAirFanSched = nullptr; // exhaust air fan schedule
-        HVAC::FanType exhaustAirFanType;               // paramter equivalent of fan type
+        HVAC::FanType exhaustAirFanType;               // parameter equivalent of fan type
         Real64 SupplyAirVolFlow;                       // volumetric flow rate through the supply side of the ERV
         Real64 ExhaustAirVolFlow;                      // volumetric flow rate through the exhaust side of the ERV
         std::string ControllerName;                    // name of the controller for the stand alone ERV

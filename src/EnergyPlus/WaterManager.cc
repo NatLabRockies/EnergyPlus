@@ -500,7 +500,7 @@ namespace WaterManager {
                         tmpDenominator += state.dataSurface->Surface(ThisSurf).GrossArea;
                     }
                     state.dataWaterData->RainCollector(Item).HorizArea = tmpArea;
-                    // now setup vertical hieght above ground for height dependent outdoor temps
+                    // now setup vertical height above ground for height dependent outdoor temps
                     state.dataWaterData->RainCollector(Item).MeanHeight = tmpNumerator / tmpDenominator;
 
                     // now set up tank supply connection
@@ -1580,7 +1580,7 @@ namespace WaterManager {
         //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
-        // The water manger is iterating and
+        // The water manager is iterating and
         // we need to do the timestep record keeping
         // for tracking state variables.
         //  this routine updates variables

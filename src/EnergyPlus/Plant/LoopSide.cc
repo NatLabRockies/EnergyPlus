@@ -212,7 +212,7 @@ namespace DataPlant {
         int constexpr Parallel(1);
         int constexpr Outlet(2);
 
-        //~ Initialze
+        //~ Initialize
         bool EncounteredLRB = false;
         bool EncounteredNonLRBAfterLRB = false;
         int const NumParallelPaths = this->TotalBranches - 2;
@@ -1314,8 +1314,8 @@ namespace DataPlant {
         Real64 ThisBranchRequestFrac; // The request ratio
         Real64 totalMax;              // The flow available when cycling through branches
         Real64 FlowRemaining;         // The flow available when cycling through branches
-        int LastNodeOnBranch;         // intermediate value used for better readabilty
-        int FirstNodeOnBranch;        // intermediate value used for better readabilty
+        int LastNodeOnBranch;         // intermediate value used for better readability
+        int FirstNodeOnBranch;        // intermediate value used for better readability
         Real64 BranchFlowReq;
         Real64 BranchMinAvail;
         Real64 BranchMaxAvail;

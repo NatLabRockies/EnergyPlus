@@ -74,7 +74,7 @@ namespace EnergyPlus::EarthTube {
 //       DATE WRITTEN   November 2005
 
 // PURPOSE OF THIS MODULE:
-// To encapsulate the data and algorithyms required to manage the EarthTube System Component
+// To encapsulate the data and algorithm required to manage the EarthTube System Component
 
 // REFERENCES:
 // 1. M. Krarti, "Analytical Model to Predict Annual Soil Surface Temperature Variation",

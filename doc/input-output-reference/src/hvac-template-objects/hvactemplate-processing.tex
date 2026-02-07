@@ -11,7 +11,7 @@
 \item
   The EnergyPlus simulation proceeds using the expidf file as the input stream.
 \item
-  If there are error messages from EnergyPlus, they will refer to the contents of the expidf file. Specific objects referred to in error messages may exist in the original idf, but they may be objects created by ExpandObjects and only exist in the expidf. Remember that the expidf will be overwritten everytime the original idf is run using EP-Launch or RunEPlus.bat.
+  If there are error messages from EnergyPlus, they will refer to the contents of the expidf file. Specific objects referred to in error messages may exist in the original idf, but they may be objects created by ExpandObjects and only exist in the expidf. Remember that the expidf will be overwritten every time the original idf is run using EP-Launch or RunEPlus.bat.
 \end{enumerate}
 
 If you are trying to go beyond the capabilities of the HVACTemplate objects, one strategy you can use is to start your specification using the HVACTemplate objects, run EnergyPlus using EP-Launch and producing an expidf file, rename that file and start making modifications. This approach may help with getting all of the objects needed and the node names set consistently.

@@ -308,7 +308,7 @@ TEST_F(EnergyPlusFixture, RunPeriod_NoName)
 TEST_F(EnergyPlusFixture, RunPeriod_NameOfPeriodInWarning)
 {
 
-    // Case 1: has a name, but mistmatched start day and year
+    // Case 1: has a name, but mismatched start day and year
     {
 
         std::string const idf_objects = delimited_string({

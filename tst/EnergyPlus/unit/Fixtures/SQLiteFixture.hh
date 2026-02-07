@@ -198,7 +198,7 @@ protected:
         return queryVector;
     }
 
-    // Helper method that will return the first double it finds, or -10000.0 if not found (abritrarily chosen value)
+    // Helper method that will return the first double it finds, or -10000.0 if not found (arbitrarily chosen value)
     Real64 execAndReturnFirstDouble(const std::string &statement)
     {
 

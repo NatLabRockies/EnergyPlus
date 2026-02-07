@@ -615,6 +615,13 @@ namespace Sched {
                         ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                         ShowFatalError(state, "Program terminates due to previous condition.");
                     }
+                    for (const auto &[warning, isContinued] : csvParser.warnings()) {
+                        if (isContinued) {
+                            ShowContinueError(state, warning);
+                        } else {
+                            ShowWarningError(state, warning);
+                        }
+                    }
                     schedule_file_shading_result = it.first;
                 } else if (FileSystem::is_all_json_type(ext)) {
                     auto schedule_data = FileSystem::readJSON(state.files.TempFullFilePath.filePath);
@@ -1643,11 +1650,18 @@ namespace Sched {
                                 if (isContinued) {
                                     ShowContinueError(state, error);
                                 } else {
-                                    ShowSevereError(state, error);
+                                    ShowSevereCustom(state, eoh, error);
                                 }
                             }
                             ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                             ShowFatalError(state, "Program terminates due to previous condition.");
+                        }
+                        for (const auto &[warning, isContinued] : csvParser.warnings()) {
+                            if (isContinued) {
+                                ShowContinueError(state, warning);
+                            } else {
+                                ShowWarningCustom(state, eoh, warning);
+                            }
                         }
                         result = it.first;
                     } else if (FileSystem::is_all_json_type(ext)) {
@@ -1663,9 +1677,25 @@ namespace Sched {
                     }
                 }
 
+                // curcolCount is 1-indexed here
+                if (static_cast<size_t>(curcolCount) > result->second["values"].size()) {
+                    ShowSevereCustom(
+                        state, eoh, format("Requested column number {}, but found only {} columns.", curcolCount, result->second["values"].size()));
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
                 auto const &column_json = result->second["values"][curcolCount - 1];
                 rowCnt = column_json.size();
-                auto const column_values = column_json.get<std::vector<Real64>>(); // (AUTO_OK_OBJ)
+
+                std::vector<Real64> column_values;
+                try {
+                    column_values = column_json.get<std::vector<Real64>>();
+                } catch (nlohmann::json::type_error &e) {
+                    ShowSevereCustom(state, eoh, format("Column number {} has non-numeric data.", curcolCount));
+                    ShowContinueError(state, e.what());
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
 
                 // schedule values have been filled into the hourlyFileValues array.
 
@@ -1761,6 +1791,9 @@ namespace Sched {
             auto const headers = schedule_file_shading_result->second["header"].get<std::vector<std::string>>();  // (AUTO_OK_OBJ)
             auto const headers_set = schedule_file_shading_result->second["header"].get<std::set<std::string>>(); // (AUTO_OK_OBJ)
 
+            std::string const shadingFileName = schedule_file_shading_result->first.filename().string();
+            ErrorObjectHeader eoh{routineName, "Schedule:File:Shading", shadingFileName};
+
             for (auto const &header : headers_set) {
                 size_t column = 0;
                 auto column_it = std::find(headers.begin(), headers.end(), header);
@@ -1770,7 +1803,26 @@ namespace Sched {
                 if (column == 0) {
                     continue; // Skip timestamp column and any duplicate column, which will be 0 as well since it won't be found.
                 }
-                auto const column_values = values_json.at(column).get<std::vector<Real64>>(); // (AUTO_OK_OBJ)
+
+                if (column >= values_json.size()) {
+                    ShowSevereCustom(
+                        state,
+                        eoh,
+                        fmt::format(
+                            "For header '{}', Requested column number {}, but found only {} columns.", header, column + 1, values_json.size()));
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", schedule_file_shading_result->first));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
+
+                std::vector<Real64> column_values;
+                try {
+                    column_values = values_json.at(column).get<std::vector<Real64>>();
+                } catch (nlohmann::json::type_error &e) {
+                    ShowSevereCustom(state, eoh, fmt::format("Column number {} has non-numeric data.", column + 1));
+                    ShowContinueError(state, e.what());
+                    ShowContinueError(state, fmt::format("Error Occurred in {}", schedule_file_shading_result->first));
+                    ShowFatalError(state, "Program terminates due to previous condition.");
+                }
 
                 std::string curName = format("{}_shading", header);
                 std::string curNameUC = Util::makeUPPER(curName);
@@ -2390,7 +2442,7 @@ namespace Sched {
         }
 
         // In the case where DST is applied on 12/31 at 24:00, which is the case for a Southern Hemisphere location for eg
-        // (DayOfYear_Schedule is a bit weird, ScheduleManager always assumes LeapYear)
+        // (DayOfYear_Schedule is a bit weird, ScheduleManager always assumes leap year)
         if (thisDayOfYear == 367) {
             thisDayOfYear = 1;
         }

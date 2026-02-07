@@ -6722,3 +6722,300 @@ TEST_F(EnergyPlusFixture, MixedTank_PVT_Per_VolumeSizing_PerSolarCollectorArea)
     EXPECT_FALSE(std::isnan(Tank.AmbientZoneGain));
     EXPECT_DOUBLE_EQ(0.0, Tank.AmbientZoneGain); // Didn't define on/off cycle losses
 }
+
+TEST_F(EnergyPlusFixture, thermalStorageTankInputReading_Autocalculate)
+{
+    // Test for #11282
+    std::string const idf_objects = delimited_string({
+        "ThermalStorage:ChilledWater:Stratified,"
+        "  Chilled Water Storage Tank 1,  !- Name",
+        "  50.0,                    !- Tank Volume {m3}",
+        "  8.0,                     !- Tank Height {m}",
+        "  VerticalCylinder,        !- Tank Shape",
+        "  ,                        !- Tank Perimeter {m}",
+        "  CW Tank Temp Schedule,   !- Setpoint Temperature Schedule Name",
+        "  2.5,                     !- Deadband Temperature Difference {deltaC}",
+        "  6.5,                     !- Temperature Sensor Height {m}",
+        "  1.0,                     !- Minimum Temperature Limit {C}",
+        "  5000.0,                  !- Nominal Cooling Capacity {W}",
+        "  Outdoors,                !- Ambient Temperature Indicator",
+        "  ,                        !- Ambient Temperature Schedule Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  OA Node,                 !- Ambient Temperature Outdoor Air Node Name",
+        "  0.5,                     !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}",
+        "  CoolSysPrimary TES Use Inlet Node,  !- Use Side Inlet Node Name",
+        "  CoolSysPrimary TES Use Outlet Node,  !- Use Side Outlet Node Name",
+        "  1.0,                     !- Use Side Heat Transfer Effectiveness",
+        "  ALWAYS_ON,               !- Use Side Availability Schedule Name",
+        "  AutoCALCULaTe,           !- Use Side Inlet Height {m}", // <--- here
+        "  0.15,                    !- Use Side Outlet Height {m}",
+        "  Autosize,                !- Use Side Design Flow Rate {m3/s}",
+        "  ,                        !- Source Side Inlet Node Name",
+        "  ,                        !- Source Side Outlet Node Name",
+        "  0.9,                     !- Source Side Heat Transfer Effectiveness",
+        "  TES Charge Schedule,     !- Source Side Availability Schedule Name",
+        "  0.15,                    !- Source Side Inlet Height {m}",
+        "  AutoCALCULaTe,           !- Source Side Outlet Height {m}", // <--- here
+        "  5.0E-3,                  !- Source Side Design Flow Rate {m3/s}",
+        "  4.0,                     !- Tank Recovery Time {hr}",
+        "  Seeking,                 !- Inlet Mode",
+        "  6,                       !- Number of Nodes",
+        "  0.0;                     !- Additional Destratification Conductivity {W/m-K}",
+
+        "ThermalStorage:HotWater:Stratified,",
+        "  Hot Water Storage Tank 1,  !- Name",
+        "  50.0,                    !- Tank Volume {m3}",
+        "  8.0,                     !- Tank Height {m}",
+        "  VerticalCylinder,        !- Tank Shape",
+        "  ,                        !- Tank Perimeter {m}",
+        "  CW Tank Temp Top Schedule,   !- Top Setpoint Temperature Schedule Name",
+        "  CW Tank Temp Bottom Schedule,   !- Bottom Setpoint Temperature Schedule Name",
+        "  2.5,                     !- Deadband Temperature Difference {deltaC}",
+        "  8.0,                     !- Top Temperature Sensor Height {m}",
+        "  1.0,                     !- Bottom Temperature Sensor Height {m}",
+        "  1.0,                     !- Maximum Temperature Limit {C}",
+        "  5000.0,                  !- Nominal Heating Capacity {W}",
+        "  Outdoors,                !- Ambient Temperature Indicator",
+        "  ,                        !- Ambient Temperature Schedule Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  OA Node,                 !- Ambient Temperature Outdoor Air Node Name",
+        "  0.5,                     !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}",
+        "  CoolSysPrimary TES Use Inlet Node,  !- Use Side Inlet Node Name",
+        "  CoolSysPrimary TES Use Outlet Node,  !- Use Side Outlet Node Name",
+        "  ,                        !- Use Side Flow Direction Schedule",
+        "  1.0,                     !- Use Side Heat Transfer Effectiveness",
+        "  ALWAYS_ON,               !- Use Side Availability Schedule Name",
+        "  AutoCALCULaTe,           !- Use Side Inlet Height {m}", // <--- here
+        "  0.15,                    !- Use Side Outlet Height {m}",
+        "  Autosize,                !- Use Side Design Flow Rate {m3/s}",
+        "  ,                        !- Source Side Inlet Node Name",
+        "  ,                        !- Source Side Outlet Node Name",
+        "  ,                        !- Use Side Flow Direction Schedule",
+        "  0.9,                     !- Source Side Heat Transfer Effectiveness",
+        "  TES Charge Schedule,     !- Source Side Availability Schedule Name",
+        "  0.15,                    !- Source Side Inlet Height {m}",
+        "  AutoCALCULaTe,           !- Source Side Outlet Height {m}", // <--- here
+        "  5.0E-3,                  !- Source Side Design Flow Rate {m3/s}",
+        "  4.0,                     !- Tank Recovery Time {hr}",
+        "  Seeking,                 !- Inlet Mode",
+        "  6,                       !- Number of Nodes",
+        "  0.0;                     !- Additional Destratification Conductivity {W/m-K}",
+
+        "ScheduleTypeLimits,",
+        "  Any Number;              !- Name",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Schedule,   !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Top Schedule,   !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Bottom Schedule,   !- Name",
+        "  Any Number,             !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  TES Charge Schedule,     !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,1;          !- Field 3",
+
+        "Schedule:Compact,",
+        "  ALWAYS_ON,               !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,1;          !- Field 3",
+
+        "OutdoorAir:NodeList,",
+        "  OA Node;                 !- Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+    std::string const cStratifiedCWTankModuleObj = "ThermalStorage:ChilledWater:Stratified";
+    std::string const cStratifiedHWTankModuleObj = "ThermalStorage:HotWater:Stratified";
+    state->dataWaterThermalTanks->numWaterHeaterMixed = 0;
+    state->dataWaterThermalTanks->numWaterHeaterStratified = 0;
+    state->dataWaterThermalTanks->numChilledWaterMixed = 0;
+    state->dataWaterThermalTanks->numChilledWaterStratified = 1;
+    state->dataWaterThermalTanks->numHotWaterStratified = 1;
+    state->dataWaterThermalTanks->WaterThermalTank.allocate(2);
+    EXPECT_NO_THROW(WaterThermalTanks::getWaterTankStratifiedInput(*state, cStratifiedCWTankModuleObj));
+    compare_err_stream("");
+
+    auto &TankChilled = state->dataWaterThermalTanks->WaterThermalTank(1);
+    EXPECT_EQ(TankChilled.Name, "CHILLED WATER STORAGE TANK 1");
+    EXPECT_EQ(8.0, TankChilled.Height);
+    EXPECT_EQ(TankChilled.Height, TankChilled.UseInletHeight);
+    EXPECT_EQ(TankChilled.Height, TankChilled.SourceOutletHeight);
+
+    EXPECT_NO_THROW(WaterThermalTanks::getWaterTankStratifiedInput(*state, cStratifiedHWTankModuleObj));
+    compare_err_stream("");
+
+    auto &TankHot = state->dataWaterThermalTanks->WaterThermalTank(2);
+    EXPECT_EQ(TankHot.Name, "HOT WATER STORAGE TANK 1");
+    EXPECT_EQ(8.0, TankHot.Height);
+    EXPECT_EQ(TankHot.Height, TankHot.UseInletHeight);
+    EXPECT_EQ(TankHot.Height, TankHot.SourceOutletHeight);
+}
+
+TEST_F(EnergyPlusFixture, thermalStorageTankInputReading_Autosize)
+{
+    // Test for #11282
+    std::string const idf_objects = delimited_string({
+
+        "ThermalStorage:ChilledWater:Stratified,"
+        "  Chilled Water Storage Tank 1,  !- Name",
+        "  50.0,                    !- Tank Volume {m3}",
+        "  8.0,                     !- Tank Height {m}",
+        "  VerticalCylinder,        !- Tank Shape",
+        "  ,                        !- Tank Perimeter {m}",
+        "  CW Tank Temp Schedule,   !- Setpoint Temperature Schedule Name",
+        "  2.5,                     !- Deadband Temperature Difference {deltaC}",
+        "  6.5,                     !- Temperature Sensor Height {m}",
+        "  1.0,                     !- Minimum Temperature Limit {C}",
+        "  autosize,                !- Nominal Cooling Capacity {W}",
+        "  Outdoors,                !- Ambient Temperature Indicator",
+        "  ,                        !- Ambient Temperature Schedule Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  OA Node,                 !- Ambient Temperature Outdoor Air Node Name",
+        "  0.5,                     !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}",
+        "  CoolSysPrimary TES Use Inlet Node,  !- Use Side Inlet Node Name",
+        "  CoolSysPrimary TES Use Outlet Node,  !- Use Side Outlet Node Name",
+        "  1.0,                     !- Use Side Heat Transfer Effectiveness",
+        "  ALWAYS_ON,               !- Use Side Availability Schedule Name",
+        "  7.85,                    !- Use Side Inlet Height {m}",
+        "  0.15,                    !- Use Side Outlet Height {m}",
+        "  Autosize,                !- Use Side Design Flow Rate {m3/s}",
+        "  ,                        !- Source Side Inlet Node Name",
+        "  ,                        !- Source Side Outlet Node Name",
+        "  0.9,                     !- Source Side Heat Transfer Effectiveness",
+        "  TES Charge Schedule,     !- Source Side Availability Schedule Name",
+        "  0.15,                    !- Source Side Inlet Height {m}",
+        "  7.85,                    !- Source Side Outlet Height {m}",
+        "  5.0E-3,                  !- Source Side Design Flow Rate {m3/s}",
+        "  4.0,                     !- Tank Recovery Time {hr}",
+        "  Seeking,                 !- Inlet Mode",
+        "  6,                       !- Number of Nodes",
+        "  0.0;                     !- Additional Destratification Conductivity {W/m-K}",
+
+        "ThermalStorage:HotWater:Stratified,",
+        "  Hot Water Storage Tank 1,  !- Name",
+        "  50.0,                    !- Tank Volume {m3}",
+        "  8.0,                     !- Tank Height {m}",
+        "  VerticalCylinder,        !- Tank Shape",
+        "  ,                        !- Tank Perimeter {m}",
+        "  CW Tank Temp Top Schedule,   !- Top Setpoint Temperature Schedule Name",
+        "  CW Tank Temp Bottom Schedule,   !- Bottom Setpoint Temperature Schedule Name",
+        "  2.5,                     !- Deadband Temperature Difference {deltaC}",
+        "  8.0,                     !- Top Temperature Sensor Height {m}",
+        "  1.0,                     !- Bottom Temperature Sensor Height {m}",
+        "  1.0,                     !- Maximum Temperature Limit {C}",
+        "  Autosize,                !- Nominal Heating Capacity {W}",
+        "  Outdoors,                !- Ambient Temperature Indicator",
+        "  ,                        !- Ambient Temperature Schedule Name",
+        "  ,                        !- Ambient Temperature Zone Name",
+        "  OA Node,                 !- Ambient Temperature Outdoor Air Node Name",
+        "  0.5,                     !- Uniform Skin Loss Coefficient per Unit Area to Ambient Temperature {W/m2-K}",
+        "  CoolSysPrimary TES Use Inlet Node,  !- Use Side Inlet Node Name",
+        "  CoolSysPrimary TES Use Outlet Node,  !- Use Side Outlet Node Name",
+        "  ,                        !- Use Side Flow Direction Schedule",
+        "  1.0,                     !- Use Side Heat Transfer Effectiveness",
+        "  ALWAYS_ON,               !- Use Side Availability Schedule Name",
+        "  7.85,                    !- Use Side Inlet Height {m}",
+        "  0.15,                    !- Use Side Outlet Height {m}",
+        "  Autosize,                !- Use Side Design Flow Rate {m3/s}",
+        "  ,                        !- Source Side Inlet Node Name",
+        "  ,                        !- Source Side Outlet Node Name",
+        "  ,                        !- Use Side Flow Direction Schedule",
+        "  0.9,                     !- Source Side Heat Transfer Effectiveness",
+        "  TES Charge Schedule,     !- Source Side Availability Schedule Name",
+        "  0.15,                    !- Source Side Inlet Height {m}",
+        "  7.85,                    !- Source Side Outlet Height {m}",
+        "  5.0E-3,                  !- Source Side Design Flow Rate {m3/s}",
+        "  4.0,                     !- Tank Recovery Time {hr}",
+        "  Seeking,                 !- Inlet Mode",
+        "  6,                       !- Number of Nodes",
+        "  0.0;                     !- Additional Destratification Conductivity {W/m-K}",
+
+        "ScheduleTypeLimits,",
+        "  Any Number;              !- Name",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Schedule,   !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Top Schedule,   !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  CW Tank Temp Bottom Schedule,   !- Name",
+        "  Any Number,             !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,50;         !- Field 3",
+
+        "Schedule:Compact,",
+        "  TES Charge Schedule,     !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,1;          !- Field 3",
+
+        "Schedule:Compact,",
+        "  ALWAYS_ON,               !- Name",
+        "  Any Number,              !- Schedule Type Limits Name",
+        "  Through: 12/31,          !- Field 1",
+        "  For: AllDays,            !- Field 2",
+        "  Until: 24:00,1;          !- Field 3",
+
+        "OutdoorAir:NodeList,",
+        "  OA Node;                 !- Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+    std::string const cStratifiedCWTankModuleObj = "ThermalStorage:ChilledWater:Stratified";
+    std::string const cStratifiedHWTankModuleObj = "ThermalStorage:HotWater:Stratified";
+    state->dataWaterThermalTanks->numWaterHeaterMixed = 0;
+    state->dataWaterThermalTanks->numWaterHeaterStratified = 0;
+    state->dataWaterThermalTanks->numChilledWaterMixed = 0;
+    state->dataWaterThermalTanks->numChilledWaterStratified = 1;
+    state->dataWaterThermalTanks->numHotWaterStratified = 1;
+    state->dataWaterThermalTanks->WaterThermalTank.allocate(2);
+
+    EXPECT_ANY_THROW(WaterThermalTanks::GetWaterThermalTankInput(*state)); // This throws a FatalError if ErrorsFound
+    EXPECT_TRUE(compare_err_stream_substring("   ** Severe  ** ThermalStorage:ChilledWater:Stratified='CHILLED WATER STORAGE TANK 1' has heater "
+                                             "capacity set to Autosize but it is missing associated WaterHeater:Sizing object",
+                                             false));
+    EXPECT_TRUE(
+        compare_err_stream_substring("   ** Severe  ** ThermalStorage:HotWater:Stratified='HOT WATER STORAGE TANK 1' has heater capacity set to "
+                                     "Autosize but it is missing associated WaterHeater:Sizing object",
+                                     false));
+    EXPECT_TRUE(
+        compare_err_stream_substring("   **  Fatal  ** GetWaterThermalTankInput: Errors found in processing Water Thermal Tank input.", true));
+}

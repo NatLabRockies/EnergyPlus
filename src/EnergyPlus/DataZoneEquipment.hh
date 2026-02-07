@@ -329,7 +329,7 @@ namespace DataZoneEquipment {
         Array1D_bool FixedReturnFlow;         // true if return node is fixed and cannot be adjusted in CalcZoneReturnFlows
         Array1D_int ReturnNodePlenumNum;      // number of the return plenum attached to this return node (zero if none)
         Array1D_int ReturnFlowBasisNode;      // return air flow basis nodes
-        Array1D_int ReturnNodeExhaustNodeNum; // Exhaust node number flow to a corrsponding return node due to light heat gain
+        Array1D_int ReturnNodeExhaustNodeNum; // Exhaust node number flow to a corresponding return node due to light heat gain
         Array1D<LightReturnExhaustConfig>
             SharedExhaustNode; // Exhaust node number shared by return nodes 0 No exhaust; 1 No share; > 1 shared; -1 use the exhaust node value
         Array1D_int returnNodeSpaceMixerIndex; // index to SpaceHVAC:ZoneReturnMixer that feeds this return node (-1 if there is none)

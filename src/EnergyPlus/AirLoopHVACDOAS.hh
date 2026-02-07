@@ -54,9 +54,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
 
@@ -72,7 +70,6 @@ namespace AirLoopHVACDOAS {
     struct AirLoopMixer
     {
         std::string name;
-        static AirLoopMixer *factory(EnergyPlusData &state, int object_type_of_num, std::string const &objectName);
         int numOfInletNodes = 0;
         int m_AirLoopMixer_Num = 0;
         int OutletNodeNum = 0;
@@ -81,6 +78,7 @@ namespace AirLoopHVACDOAS {
         std::vector<int> InletNodeNum;
         Real64 OutletTemp = 0.0;
 
+        static AirLoopMixer *factory(EnergyPlusData &state, int objectNum, std::string const &objectName);
         static void getAirLoopMixer(EnergyPlusData &state);
         void CalcAirLoopMixer(EnergyPlusData &state);
     };
@@ -88,7 +86,6 @@ namespace AirLoopHVACDOAS {
     struct AirLoopSplitter
     {
         std::string name;
-        static AirLoopSplitter *factory(EnergyPlusData &state, int object_type_of_num, std::string const &objectName);
         int numOfOutletNodes = 0;
         int m_AirLoopSplitter_Num = 0;
         std::string InletNodeName;
@@ -97,8 +94,9 @@ namespace AirLoopHVACDOAS {
         Real64 InletTemp = 0.0;
         int InletNodeNum = 0;
 
+        static AirLoopSplitter *factory(EnergyPlusData &state, int objectNum, std::string const &objectName);
         static void getAirLoopSplitter(EnergyPlusData &state);
-        void CalcAirLoopSplitter(EnergyPlusData &state, Real64 Temp, Real64 Humrat);
+        void CalcAirLoopSplitter(const EnergyPlusData &state, Real64 Temp, Real64 HumRat);
     };
 
     struct AirLoopDOAS
@@ -175,7 +173,7 @@ namespace AirLoopHVACDOAS {
 
 } // namespace AirLoopHVACDOAS
 
-struct AirLoopHVACDOASData : BaseGlobalStruct
+struct AirLoopHVACDOASData final : BaseGlobalStruct
 {
     bool GetInputOnceFlag = true;
     bool getAirLoopMixerInputOnceFlag = true;

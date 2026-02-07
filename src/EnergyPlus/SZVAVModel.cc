@@ -61,6 +61,7 @@
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/SZVAVModel.hh>
+#include <EnergyPlus/SizingManager.hh>
 #include <EnergyPlus/UnitarySystem.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -275,7 +276,7 @@ namespace SZVAVModel {
 
         } else {
 
-            // Step 2: Load is greater then allowed in region 1, determine boundary load for region 3
+            // Step 2: Load is greater than allowed in region 1, determine boundary load for region 3
             // only difference in this calculation is using maxAirMassFlow instead of minAirMassFlow, just use the ratio to adjust previous
             // calculation
             highBoundaryLoad = lowBoundaryLoad * maxAirMassFlow / minAirMassFlow;
@@ -642,6 +643,7 @@ namespace SZVAVModel {
         int OutletNode = SZVAVModel.AirOutNode;
         Real64 ZoneTemp = state.dataLoopNodes->Node(SZVAVModel.NodeNumOfControlledZone).Temp;
         Real64 ZoneHumRat = state.dataLoopNodes->Node(SZVAVModel.NodeNumOfControlledZone).HumRat;
+        SZVAVModel.m_SimASHRAEModelOn = true;
 
         // model attempts to control air flow rate and coil capacity in specific operating regions:
         // Region 1 (R1) - minimum air flow rate at modulated coil capacity (up to min/max temperature limits)
@@ -848,8 +850,64 @@ namespace SZVAVModel {
                                                                                           1.0);
                 };
                 General::SolveRoot(state, 0.001, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
-                if (SolFlag < 0) {
-                    MessagePrefix = "Step 2: ";
+                if (SolFlag == -2 && ((CoolingLoad && SZVAVModel.m_CoolingSpeedNum < SZVAVModel.m_NumOfSpeedCooling) ||
+                                      (HeatingLoad && SZVAVModel.m_HeatingSpeedNum < SZVAVModel.m_NumOfSpeedHeating))) {
+                    // attempt to meet the load with the next speed
+                    Real64 sysLoad = 0.0;
+                    int szVAVModelSpeed = 0;
+                    int szVAVModelSpeedMax = 0;
+                    if (CoolingLoad) {
+                        szVAVModelSpeed = SZVAVModel.m_CoolingSpeedNum + 1;
+                        szVAVModelSpeedMax = SZVAVModel.m_NumOfSpeedCooling;
+                        sysLoad = CoolingLoad;
+                    } else {
+                        szVAVModelSpeed = SZVAVModel.m_HeatingSpeedNum + 1;
+                        szVAVModelSpeedMax = SZVAVModel.m_NumOfSpeedHeating;
+                    }
+                    for (int szVAVSpeed = szVAVModelSpeed; szVAVSpeed <= szVAVModelSpeedMax; ++szVAVSpeed) {
+                        if (CoolingLoad) {
+                            SZVAVModel.m_CoolingSpeedNum = szVAVSpeed;
+                        } else {
+                            SZVAVModel.m_HeatingSpeedNum = szVAVSpeed;
+                        }
+                        auto f = [&state,
+                                  SysIndex,
+                                  FirstHVACIteration,
+                                  ZoneLoad,
+                                  &SZVAVModel,
+                                  OnOffAirFlowRatio,
+                                  AirLoopNum,
+                                  coilFluidInletNode,
+                                  lowSpeedFanRatio,
+                                  AirMassFlow,
+                                  maxAirMassFlow,
+                                  sysLoad,
+                                  maxCoilFluidFlow](Real64 const PartLoadRatio) {
+                            return UnitarySystems::UnitarySys::calcUnitarySystemWaterFlowResidual(state,
+                                                                                                  PartLoadRatio,
+                                                                                                  SysIndex,
+                                                                                                  FirstHVACIteration,
+                                                                                                  ZoneLoad,
+                                                                                                  SZVAVModel.AirInNode,
+                                                                                                  OnOffAirFlowRatio,
+                                                                                                  AirLoopNum,
+                                                                                                  coilFluidInletNode,
+                                                                                                  maxCoilFluidFlow,
+                                                                                                  lowSpeedFanRatio,
+                                                                                                  AirMassFlow,
+                                                                                                  0.0,
+                                                                                                  maxAirMassFlow,
+                                                                                                  sysLoad,
+                                                                                                  1.0);
+                        };
+                        General::SolveRoot(state, 0.001, MaxIter, SolFlag, PartLoadRatio, f, 0.0, 1.0);
+                        if (SolFlag > 0) {
+                            break;
+                        }
+                    }
+                    if (SolFlag < 0) {
+                        MessagePrefix = "Step 2: ";
+                    }
                 }
 
             } else { // in region 3 of figure

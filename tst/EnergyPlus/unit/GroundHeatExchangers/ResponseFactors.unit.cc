@@ -87,6 +87,8 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_GetResponseFactor)
         "    2.4957E+06,         !- Ground Thermal Heat Capacity {J/m3-K}",
         "    ,                   !- Response Factors Object Name",
         "    UHFCalc,            !- g-Function Calculation Method",
+        "    ,                   !- GHE Vertical Sizing Object Type",
+        "    ,                   !- GHE Vertical Sizing Object Name",
         "    GHE-Array;          !- GHE Array Object Name",
 
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",

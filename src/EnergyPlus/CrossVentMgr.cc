@@ -739,7 +739,7 @@ namespace RoomAir {
 
         // REFERENCES:
         // Model developed by Paul Linden (UCSD), G. Carrilho da Graca (UCSD) and P. Haves (LBL).
-        // Work funded by the California Energy Comission. More information on the model can found in:
+        // Work funded by the California Energy Commission. More information on the model can found in:
         // "Simplified Models for Heat Transfer in Rooms" G. Carrilho da Graca, Ph.D. thesis UCSD. December 2003.
 
         auto const &zone = state.dataHeatBal->Zone(ZoneNum);

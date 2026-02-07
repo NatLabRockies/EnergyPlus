@@ -538,6 +538,7 @@ namespace EIRPlantLoopHeatPumps {
         void setUpEMS(EnergyPlusData &state) override;
         static PlantComponent *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType hp_type, const std::string &hp_name);
         static void processInputForEIRPLHP(EnergyPlusData &state);
+        void sizeLoadSide(EnergyPlusData &state);
     }; // HeatPumpAirToWater
 } // namespace EIRPlantLoopHeatPumps
 

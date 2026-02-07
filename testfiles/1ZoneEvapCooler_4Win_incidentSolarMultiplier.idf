@@ -370,10 +370,10 @@
     ,                        !- Frame and Divider Name
     1.0,                     !- Multiplier
     4,                       !- Number of Vertices
-    0,15.24000,4.5720,  !- X,Y,Z ==> Vertex 4 {m}
-    0,15.24000,0.1000,  !- X,Y,Z ==> Vertex 3 {m}
-    0,0,0.2000,  !- X,Y,Z ==> Vertex 2 {m}
-    0,0,4.5720;  !- X,Y,Z ==> Vertex 1 {m}
+    0,15.24000,4.5720,  !- X,Y,Z ==> Vertex 1 {m}
+    0,15.24000,0.1000,  !- X,Y,Z ==> Vertex 2 {m}
+    0,0,0.2000,  !- X,Y,Z ==> Vertex 3 {m}
+    0,0,4.5720;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Zn001:Flr001,            !- Name
@@ -400,7 +400,7 @@
     ,                        !- Space Name
     Outdoors,                !- Outside Boundary Condition
     ,                        !- Outside Boundary Condition Object
-    NoSun,              !- Sun Exposure
+    NoSun,                   !- Sun Exposure
     WindExposed,             !- Wind Exposure
     0,                       !- View Factor to Ground
     4,                       !- Number of Vertices
@@ -410,35 +410,35 @@
     15.24000,15.24000,4.572;  !- X,Y,Z ==> Vertex 4 {m}
 
   SurfaceProperty:IncidentSolarMultiplier,
-    Zn001:Wall001:Win001,     !- Surface Name
-    0.5,                      !- Shading Multiplier
-    SolarMultConst;           !- Shading Multiplier Schedule Name
+    Zn001:Wall001:Win001,    !- Surface Name
+    0.5,                     !- Incident Solar Multiplier {dimensionless}
+    SolarMultConst;          !- Incident Solar Multiplier Schedule Name
 
   SurfaceProperty:IncidentSolarMultiplier,
-    Zn001:Wall002:Win002,     !- Surface Name
-    0.5,                      !- Shading Multiplier
-    SolarMultConst;           !- Shading Multiplier Schedule Name
+    Zn001:Wall002:Win002,    !- Surface Name
+    0.5,                     !- Incident Solar Multiplier {dimensionless}
+    SolarMultConst;          !- Incident Solar Multiplier Schedule Name
 
   SurfaceProperty:IncidentSolarMultiplier,
-    Zn001:Wall003:Win003,     !- Surface Name
-    0.5,                      !- Shading Multiplier
-    SolarMultConst;           !- Shading Multiplier Schedule Name
+    Zn001:Wall003:Win003,    !- Surface Name
+    0.5,                     !- Incident Solar Multiplier {dimensionless}
+    SolarMultConst;          !- Incident Solar Multiplier Schedule Name
 
   SurfaceProperty:IncidentSolarMultiplier,
-    Zn001:Wall004:Win004,     !- Surface Name
-    0.5,                      !- Shading Multiplier
-    SolarMultConst;           !- Shading Multiplier Schedule Name
+    Zn001:Wall004:Win004,    !- Surface Name
+    0.5,                     !- Incident Solar Multiplier {dimensionless}
+    SolarMultConst;          !- Incident Solar Multiplier Schedule Name
 
   Schedule:Constant,SolarMultConst,Fraction,1.0;
 
   ZoneInfiltration:DesignFlowRate,
     Main Zone Infiltration,  !- Name
-    Main Zone,               !- Zone or ZoneList Name
+    Main Zone,               !- Zone or ZoneList or Space or SpaceList Name
     System Availability Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -681,13 +681,21 @@
   Output:Constructions,Constructions;
 
   Output:Variable,*,Surface Outside Face Incident Solar Radiation Rate per Area,hourly;
+
   Output:Variable,*,Surface Outside Face Incident Beam Solar Radiation Rate per Area,hourly;
+
   Output:Variable,*,Surface Outside Face Incident Sky Diffuse Solar Radiation Rate per Area,hourly;
+
   Output:Variable,*,Surface Outside Face Incident Ground Diffuse Solar Radiation Rate per Area,hourly;
+
   Output:Variable,*,Surface Window Transmitted Solar Radiation Rate,hourly;
+
   Output:Variable,*,Surface Window Transmitted Beam Solar Radiation Rate,hourly;
+
   Output:Variable,*,Surface Window Transmitted Diffuse Solar Radiation Rate;
+
   Output:Variable,*,Zone Air System Sensible Heating Energy,hourly;
+
   Output:Variable,*,Zone Air System Sensible Cooling Energy,hourly;
 
   OutputControl:Table:Style,

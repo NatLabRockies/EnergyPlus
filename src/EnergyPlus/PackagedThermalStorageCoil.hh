@@ -164,7 +164,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingOnlySHRFTempCurve;     // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingOnlySHRFTempObjectNum; // type of object used for curve input
-        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifer curve
+        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingOnlySHRFFlowObjectNum;
         // cooling and charge mode
@@ -208,7 +208,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndChargeChargingPLFFPLRObjectNum;
         int CoolingAndChargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
-        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndChargeSHRFFlowObjectNum;
         // cooling and discharge mode
@@ -256,7 +256,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndDischargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingAndDischargeSHRFTempObjectNum;
-        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndDischargeSHRFFlowObjectNum;
         // Charge Only Mode

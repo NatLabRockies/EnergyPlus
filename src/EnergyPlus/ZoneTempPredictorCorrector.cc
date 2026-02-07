@@ -5182,7 +5182,7 @@ void ZoneSpaceHeatBalanceData::calcZoneOrSpaceSums(EnergyPlusData &state,
         if (thisZone.IsControlled) {
             auto const &zsec = (isSpaceControlled ? state.dataZoneEquip->spaceEquipConfig(spaceNum) : state.dataZoneEquip->ZoneEquipConfig(zoneNum));
             for (int NodeNum = 1, NodeNum_end = zsec.NumInletNodes; NodeNum <= NodeNum_end; ++NodeNum) {
-                // Get node conditions, this next block is of interest to irratic system loads... maybe nodes are not accurate at time of call?
+                // Get node conditions, this next block is of interest to erratic system loads... maybe nodes are not accurate at time of call?
                 //  how can we tell?  predict step must be lagged ?  correct step, systems have run.
                 auto const &node(state.dataLoopNodes->Node(zsec.InletNode(NodeNum)));
                 Real64 CpAir = Psychrometrics::PsyCpAirFnW(this->airHumRat);
@@ -6863,7 +6863,7 @@ void ZoneSpaceHeatBalanceData::calcPredictedSystemLoad(EnergyPlusData &state, Re
         default: {
             assert(false);
         } break;
-        } // swtich (Algo)
+        } // switch (Algo)
 
         if (RAFNFrac > 0.0) {
             LoadToHeatingSetPoint = LoadToHeatingSetPoint / RAFNFrac;
@@ -6908,7 +6908,7 @@ void ZoneSpaceHeatBalanceData::calcPredictedSystemLoad(EnergyPlusData &state, Re
         default: {
             assert(false);
         } break;
-        } // swtich (Algo)
+        } // switch (Algo)
 
         ZoneSetPoint = zoneTstatSetpt.setpt;
         if (RAFNFrac > 0.0) {
@@ -7066,7 +7066,7 @@ void ZoneSpaceHeatBalanceData::calcPredictedSystemLoad(EnergyPlusData &state, Re
 
     default: {
     } break;
-    } // swtich (setptType)
+    } // switch (setptType)
 
     int systemNodeNumber = 0;
     int stageNum = 0;

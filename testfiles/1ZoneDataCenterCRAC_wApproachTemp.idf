@@ -389,8 +389,8 @@
     0.83,                    !- Gross Rated Sensible Heat Ratio
     4.5669,                  !- Gross Rated Cooling COP {W/W}
     8.5,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Supply Inlet Node,       !- Air Inlet Node Name
     Main Cooling Coil 1 Outlet Node,  !- Air Outlet Node Name
     Cool Cap Mod func of Temperature,  !- Total Cooling Capacity Function of Temperature Curve Name
@@ -580,8 +580,8 @@
     26.55556,                !- <none>
     29.33333,                !- <none>
     32.11111,                !- <none>
-    34.88889,                !- Extended Field
-    50.00000;                !- Extended Field
+    34.88889,                !- <none>
+    50.00000;                !- <none>
 
   Table:IndependentVariableList,
     Liebert Econophase EIR Func T_IndependentVariableList,  !- Name
@@ -803,7 +803,7 @@
     Watts/Unit,              !- Design Power Input Calculation Method
     500,                     !- Watts per Unit {W}
     100,                     !- Number of Units
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     Data Center Operation Schedule,  !- Design Power Input Schedule Name
     Data Center CPU Loading Schedule,  !- CPU Loading  Schedule Name
     Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
@@ -1050,7 +1050,9 @@
   Output:Variable,*,ITE Standard Density Air Volume Flow Rate,Hourly;
 
   Output:Variable,*,ITE Air Mass Flow Rate,Hourly;
+
   Output:Variable,*,Zone ITE Standard Density Air Volume Flow Rate,Hourly;
+
   Output:Variable,*,Zone ITE Air Mass Flow Rate,Hourly;
 
   Output:Variable,*,ITE Air Inlet Dry-Bulb Temperature,Hourly;

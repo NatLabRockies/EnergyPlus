@@ -585,7 +585,7 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
         "    ,                        !- Availability Manager List Name",
         "    WindowACSizing;          !- Design Specification ZoneHVAC Sizing Object Name",
 
-        // NOTE: Only difference here is that I'm settting a DesignSpecification:ZoneHVAC:Sizing
+        // NOTE: Only difference here is that I'm setting a DesignSpecification:ZoneHVAC:Sizing
         "  DesignSpecification:ZoneHVAC:Sizing,",
         "    WindowACSizing,          !- Name",
         "    FractionOfAutosizedCoolingAirflow,  !- Cooling Supply Air Flow Rate Method",

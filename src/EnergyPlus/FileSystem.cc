@@ -173,7 +173,7 @@ namespace FileSystem {
         }
 
         fs::path result;
-        // `p` now is absolute, but it isn't necessarilly canonical.
+        // `p` now is absolute, but it isn't necessarily canonical.
         // If you have <filesystem>, you can use `fs::weakly_canonical`. <experimental/filesystem> does **not** have `weakly_canonical` though
         // This block resolves a canonical path, even if it doesn't exist (yet?) on disk.
         for (fs::path::iterator it = p.begin(); it != p.end(); ++it) {

@@ -4659,13 +4659,13 @@ namespace LowTempRadiantSystem {
         Real64 Cp;                    // Intermediate calculational variable for specific heat of water
         Real64 DewPointTemp;          // Dew-point temperature based on the zone air conditions
         Real64 EpsMdotCp;             // Epsilon (heat exchanger terminology) times water mass flow rate times water specific heat
-        Real64 LoopTerm;              // Intermeidate calculation variable for determining the water inlet temperature
+        Real64 LoopTerm;              // Intermediate calculation variable for determining the water inlet temperature
         Real64 Mdot;                  // Intermediate calculation variable for mass flow rate in a surface within the radiant system
-        Real64 RecircTerm;            // Intermeidate calculation variable for determining the water inlet temperature
+        Real64 RecircTerm;            // Intermediate calculation variable for determining the water inlet temperature
         Real64 SumFlowFracCkCm;       // Summation of surface flow fraction, Ck, and Cm product for each surface in the system
         Real64 SumFlowFracOneMinusCm; // Summation of surface flow fraction times (1-Cm) for each surface in the radiant system
         Real64 TotalRadSysPower;      // Total heat source/sink to radiant system
-        Real64 TwiCoeff;              // Intermeidate calculation variable for determining the water inlet temperature
+        Real64 TwiCoeff;              // Intermediate calculation variable for determining the water inlet temperature
         Real64 WaterMassFlow;         // Water mass flow rate in the radiant system, kg/s
         Real64 WaterOutletTempCheck;  // Radiant system water outlet temperature (calculated from mixing all outlet streams together)
         Real64 WaterTempIn;           // Temperature of the water entering the radiant system, in C

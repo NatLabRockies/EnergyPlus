@@ -149,7 +149,7 @@ jobs:
       run: cmake --build . --target package -j 4 --config $BUILD_TYPE
 
     - name: Upload Zip as artifact for testing
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: energyplus-${{ matrix.package-arch }}
         path: build/EnergyPlus-*-Windows-${{ matrix.package-arch }}.zip
@@ -193,7 +193,7 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Gather Test Package from Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: energyplus-x86_64
           path: package

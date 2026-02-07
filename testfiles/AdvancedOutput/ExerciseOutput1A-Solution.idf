@@ -979,7 +979,7 @@
     Sch 1,                   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     200.0,                   !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.000,                   !- Fraction Latent
     0.600,                   !- Fraction Radiant
@@ -993,8 +993,8 @@
     Sch 1,                   !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.018,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0,                     !- Constant Term Coefficient
     0.0,                     !- Temperature Term Coefficient
@@ -1031,7 +1031,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA ZONE ONE,        !- Name
@@ -1356,15 +1363,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     AHU 1 Heating Coil Outlet,  !- Air Inlet Node Name
     AHU 1 Air Loop Outlet,   !- Air Outlet Node Name
     AHU 1 DX Coil Cap-FT,    !- Total Cooling Capacity Function of Temperature Curve Name
     AHU 1 DX Coil Cap-FF,    !- Total Cooling Capacity Function of Flow Fraction Curve Name
     AHU 1 DX Coil EIR-FT,    !- Energy Input Ratio Function of Temperature Curve Name
     AHU 1 DX Coil EIR-FF,    !- Energy Input Ratio Function of Flow Fraction Curve Name
-    AHU 1 DX Coil PLF;       !- Part Load Fraction Correlation Curve Name
+    AHU 1 DX Coil PLF,       !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 !-   ===========  ALL OBJECTS IN CLASS: FAN:SIMPLE:ONOFF ===========
 
@@ -1480,45 +1490,45 @@
 
   Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,Annual;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Timestep;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Timestep;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Hourly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Hourly;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Daily;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Daily;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Monthly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Monthly;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Annual;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,Annual;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Timestep;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Timestep;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Hourly;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Hourly;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Daily;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Daily;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Monthly;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Monthly;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Annual;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,Annual;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Timestep;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Timestep;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Hourly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Hourly;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Daily;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Daily;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Monthly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Monthly;
 
-  Output:Variable,*, Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Annual;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Annual;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Timestep;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Timestep;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Hourly;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Hourly;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Daily;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Daily;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Monthly;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Monthly;
 
-  Output:Variable,*, Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Annual;
+  Output:Variable,*,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Annual;
 
   Output:Variable,*,Zone Windows Total Heat Gain Rate,Timestep;
 

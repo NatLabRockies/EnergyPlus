@@ -1342,7 +1342,7 @@ namespace WaterToAirHeatPump {
                             1.0 / ((heatPump.SourceSideHTR1 * std::pow(SourceSideVolFlowRate, -0.8)) / DegradFactor + heatPump.SourceSideHTR2);
                     }
 
-                    // Determine Source Side Tempertaure (Condensing Temp in this case)
+                    // Determine Source Side Temperature (Condensing Temp in this case)
                     SourceSideTemp = heatPump.InletWaterTemp + state.dataWaterToAirHeatPump->initialQSource_calc /
                                                                    (SourceSideEffect * CpFluid * heatPump.InletWaterMassFlowRate);
 
@@ -1754,11 +1754,11 @@ namespace WaterToAirHeatPump {
                         1.0 / ((heatPump.SourceSideHTR1 * std::pow(SourceSideVolFlowRate, -0.8)) / DegradFactor + heatPump.SourceSideHTR2);
                 }
 
-                // Determine Source Side Tempertaure (Evap. Temp for this mode)
+                // Determine Source Side Temperature (Evap. Temp for this mode)
                 SourceSideTemp = heatPump.InletWaterTemp -
                                  state.dataWaterToAirHeatPump->initialQSource / (SourceSideEffect * CpFluid * heatPump.InletWaterMassFlowRate);
 
-                // Determine Load Side Tempertaure (Condensing Temp for this mode)
+                // Determine Load Side Temperature (Condensing Temp for this mode)
                 LoadSideTemp = heatPump.InletAirDBTemp + state.dataWaterToAirHeatPump->initialQLoad * LoadSideEffect_CpAir_MassFlowRate_inv;
 
                 // Determine the Load Side and Source Side Saturated Temp (evaporating and condensing pressures)
@@ -2157,13 +2157,14 @@ namespace WaterToAirHeatPump {
             Toffa = Toff;
         }
 
-        //  Use sucessive substitution to solve for To
+        //  Use successive substitution to solve for To
         aa = (Gamma * Toffa) - (0.25 / Twet) * pow_2(Gamma) * pow_2(Toffa);
-
         To1 = aa + heatPump.LatentCapacityTimeConstant;
         Error = 1.0;
         while (Error > 0.001) {
-            To2 = aa - heatPump.LatentCapacityTimeConstant * std::expm1(-To1 / heatPump.LatentCapacityTimeConstant);
+            //  Floating overflow errors occur when -To1/LatentCapacityTimeConstant is a large positive number.
+            //  Cap upper limit at 700 to avoid the overflow errors.
+            To2 = aa - heatPump.LatentCapacityTimeConstant * std::expm1(min(700.0, -To1 / heatPump.LatentCapacityTimeConstant));
             Error = std::abs((To2 - To1) / To1);
             To1 = To2;
         }

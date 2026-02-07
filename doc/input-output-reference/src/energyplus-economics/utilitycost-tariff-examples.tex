@@ -15,27 +15,25 @@ Energy Charge:~~~ 5.5342 cents/kWh
 This tariff would use a single \hyperref[utilitycostchargesimple]{UtilityCost:Charge:Simple} object. The monthly charge is part of the \hyperref[utilitycosttariff]{UtilityCost:Tariff} object.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleA,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    kWh,                          ! Conversion Factor Choice
-    ,                             ! Energy Conversion Factor
-    ,                             ! Demand Conversion Factor
-    ,                             ! Time of Use Period Schedule Name
-    ,                             ! Season Schedule Name
-    ,                             ! Month Schedule Name
-    ,                             ! Demand Window Length
-    2.51;                         ! Monthly Charge or Variable Name
+  ExampleA,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  2.51;                       !- Monthly Charge or Variable Name
 
-
-  UtilityCost:Charge:Simple,
-    FlatEnergyCharge,             ! Charge Variable Name
-    ExampleA,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Annual,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    0.055342;                     ! Cost Per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  FlatEnergyCharge,           !- Charge Variable Name
+  ExampleA,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.055342;                   !- Cost Per Unit Value or Variable Name
 \end{lstlisting}
 
 \subsubsection{Example B -- Block Energy Charge}\label{example-b-block-energy-charge}
@@ -53,34 +51,32 @@ Energy Charge:~~~~~~~ 7.231 cents/kWh for first 200 kWh
 This tariff would use a single \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} object. The monthly charge is part of the \hyperref[utilitycosttariff]{UtilityCost:Tariff} object. Note that the block sizes are every other field at the bottom of the object and the that final block size references a built in variable called ``remaining'' that contains a very large number.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleB,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    kWh,                          ! Conversion Factor Choice
-    ,                             ! Energy Conversion Factor
-    ,                             ! Demand Conversion Factor
-    ,                             ! Time of Use Period Schedule Name
-    ,                             ! Season Schedule Name
-    ,                             ! Month Schedule Name
-    ,                             ! Demand Window Length
-    5.75;                         ! Monthly Charge or Variable Name
+  ExampleB,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  5.75;                       !- Monthly Charge or Variable Name
 
-
-  UtilityCost:Charge:Block,
-    BlockEnergyCharge,            ! Charge Variable Name
-    ExampleB,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Annual,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    ,                             ! Block Size Multiplier Value or Variable Name
-    200,                          ! Block Size 1 Value or Variable Name
-    0.07231,                      ! Block 1 Cost per Unit Value or Variable Name
-    1000,                         ! Block Size 2 Value or Variable Name
-    0.06656,                      ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    0.05876;                      ! Block 3 Cost per Unit Value or Variable Name
+UtilityCost:Charge:Block,
+  BlockEnergyCharge,          !- Charge Variable Name
+  ExampleB,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  200,                        !- Block Size 1 Value or Variable Name
+  0.07231,                    !- Block 1 Cost per Unit Value or Variable Name
+  1000,                       !- Block Size 2 Value or Variable Name
+  0.06656,                    !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  0.05876;                    !- Block 3 Cost per Unit Value or Variable Name
 \end{lstlisting}
 
 \subsubsection{Example C -- Block Energy and Demand Charges}\label{example-c-block-energy-and-demand-charges}
@@ -102,43 +98,40 @@ Demand Charge:~~~~~ 5.38 dollars per kW for first 20 kW
 This tariff would use two \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} objects. No monthly charge is shown so the \hyperref[utilitycosttariff]{UtilityCost:Tariff} object can include just the first four fields. Note that the block sizes are every other field at the bottom of the object and the that final block size references a built in variable called ``remaining'' that contains a very large number.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleC,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    KWh;                          ! Conversion Factor Choice
+  ExampleC,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  KWh;                        !- Conversion Factor Choice
 
+UtilityCost:Charge:Block,
+  BlockEnergyCharge,          !- Charge Variable Name
+  ExampleC,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  20000,                      !- Block Size 1 Value or Variable Name
+  0.0474,                     !- Block 1 Cost per Unit Value or Variable Name
+  180000,                     !- Block Size 2 Value or Variable Name
+  0.0424,                     !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  0.0383;                     !- Block 3 Cost per Unit Value or Variable Name
 
-  UtilityCost:Charge:Block,
-    BlockEnergyCharge,            ! Charge Variable Name
-    ExampleC,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Annual,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    ,                             ! Block Size Multiplier Value or Variable Name
-    20000,                        ! Block Size 1 Value or Variable Name
-    0.0474,                       ! Block 1 Cost per Unit Value or Variable Name
-    180000,                       ! Block Size 2 Value or Variable Name
-    0.0424,                       ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    0.0383;                       ! Block 3 Cost per Unit Value or Variable Name
-
-
-  UtilityCost:Charge:Block,
-    BlockDemandCharge,            ! Charge Variable Name
-    ExampleC,                     ! Tariff Name
-    totalDemand,                  ! Source Variable
-    Annual,                       ! Season
-    DemandCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    ,                             ! Block Size Multiplier Value or Variable Name
-    20,                           ! Block Size 1 Value or Variable Name
-    5.38,                         ! Block 1 Cost per Unit Value or Variable Name
-    80,                           ! Block Size 2 Value or Variable Name
-    4.23,                         ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    3.60;                         ! Block 3 Cost per Unit Value or Variable Name
+UtilityCost:Charge:Block,
+  BlockDemandCharge,          !- Charge Variable Name
+  ExampleC,                   !- Tariff Name
+  totalDemand,                !- Source Variable
+  Annual,                     !- Season
+  DemandCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  20,                         !- Block Size 1 Value or Variable Name
+  5.38,                       !- Block 1 Cost per Unit Value or Variable Name
+  80,                         !- Block Size 2 Value or Variable Name
+  4.23,                       !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  3.60;                       !- Block 3 Cost per Unit Value or Variable Name
 \end{lstlisting}
 
 \subsubsection{Example D - Seasonal Energy Charges with Minimum Charge}\label{example-d---seasonal-energy-charges-with-minimum-charge}
@@ -166,52 +159,48 @@ Energy Charge:~~~~~~~ 8.385 cents/kWh for first 650 kWh
 This tariff would use two \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} objects. The monthly charge is part of the \hyperref[utilitycosttariff]{UtilityCost:Tariff} object. Note that the block sizes are every other field at the bottom of the object and the that final block size references a built in variable called ``remaining'' that contains a very large number.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleD,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    KWh,                          ! Conversion Factor Choice
-    ,                             ! Energy Conversion Factor
-    ,                             ! Demand Conversion Factor
-    ,                             ! Time of Use Period Schedule Name
-    TwoSeasonSchedule,            ! Season Schedule Name
-    ,                             ! Month Schedule Name
-    ,                             ! Demand Window Length
-    ,                             ! Monthly Charge or Variable Name
-    7.00;                         ! Minimum Monthly Charge or Variable Name
+  ExampleD,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  KWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  TwoSeasonSchedule,          !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  ,                           !- Monthly Charge or Variable Name
+  7.00;                       !- Minimum Monthly Charge or Variable Name
 
+UtilityCost:Charge:Block,
+  WinterEnergyCost,           !- Charge Variable Name
+  ExampleD,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Winter,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  650,                        !- Block Size 1 Value or Variable Name
+  0.04385,                    !- Block 1 Cost per Unit Value or Variable Name
+  350,                        !- Block Size 2 Value or Variable Name
+  0.03763,                    !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  0.03704;                    !- Block 3 Cost per Unit Value or Variable Name
 
-  UtilityCost:Charge:Block,
-    WinterEnergyCost,             ! Charge Variable Name
-    ExampleD,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Winter,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    ,                             ! Block Size Multiplier Value or Variable Name
-    650,                          ! Block Size 1 Value or Variable Name
-    0.04385,                      ! Block 1 Cost per Unit Value or Variable Name
-    350,                          ! Block Size 2 Value or Variable Name
-    0.03763,                      ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    0.03704;                      ! Block 3 Cost per Unit Value or Variable Name
-
-
-  UtilityCost:Charge:Block,
-    SummerEnergyCost,             ! Charge Variable Name
-    ExampleD,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Summer,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    ,                             ! Block Size Multiplier Value or Variable Name
-    650,                          ! Block Size 1 Value or Variable Name
-    0.08385,                      ! Block 1 Cost per Unit Value or Variable Name
-    350,                          ! Block Size 2 Value or Variable Name
-    0.07588,                      ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    0.07103;                      ! Block 3 Cost per Unit Value or Variable Name
-
+UtilityCost:Charge:Block,
+  SummerEnergyCost,           !- Charge Variable Name
+  ExampleD,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Summer,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  650,                        !- Block Size 1 Value or Variable Name
+  0.08385,                    !- Block 1 Cost per Unit Value or Variable Name
+  350,                        !- Block Size 2 Value or Variable Name
+  0.07588,                    !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  0.07103;                    !- Block 3 Cost per Unit Value or Variable Name
 
   Schedule:Compact, TwoSeasonSchedule, number,
   Through: 5/31, For: AllDays, Until: 24:00, 1,
@@ -234,34 +223,32 @@ Energy Charge:~~ 8.756 cents/kWh for all consumption not greater than 200 hours 
 This tariff would use a single ~\hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} object. The monthly charge is part of the ~\hyperref[utilitycosttariff]{UtilityCost:Tariff} object. In this case the Block Size Multiplier Value (or Variable) is set to the totalDemand variable.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleE,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    KWh,                          ! Conversion Factor Choice
-    ,                             ! Energy Conversion Factor
-    ,                             ! Demand Conversion Factor
-    ,                             ! Time of Use Period Schedule Name
-    ,                             ! Season Schedule Name
-    ,                             ! Month Schedule Name
-    ,                             ! Demand Window Length
-    14;                           ! Monthly Charge or Variable Name
+  ExampleE,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  KWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  14;                         !- Monthly Charge or Variable Name
 
-
-  UtilityCost:Charge:Block,
-    BlockEnergyCharge,            ! Charge Variable Name
-    ExampleE,                     ! Tariff Name
-    totalEnergy,                  ! Source Variable
-    Annual,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    ,                             ! Remaining Into Variable
-    totalDemand,                  ! Block Size Multiplier Value or Variable Name
-    200,                          ! Block Size 1 Value or Variable Name
-    0.08756,                      ! Block 1 Cost per Unit Value or Variable Name
-    200,                          ! Block Size 2 Value or Variable Name
-    0.06812,                      ! Block 2 Cost per Unit Value or Variable Name
-    remaining,                    ! Block Size 3 Value or Variable Name
-    0.05029;                      ! Block 3 Cost per Unit Value or Variable Name
+UtilityCost:Charge:Block,
+  BlockEnergyCharge,          !- Charge Variable Name
+  ExampleE,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  totalDemand,                !- Block Size Multiplier Value or Variable Name
+  200,                        !- Block Size 1 Value or Variable Name
+  0.08756,                    !- Block 1 Cost per Unit Value or Variable Name
+  200,                        !- Block Size 2 Value or Variable Name
+  0.06812,                    !- Block 2 Cost per Unit Value or Variable Name
+  remaining,                  !- Block Size 3 Value or Variable Name
+  0.05029;                    !- Block 3 Cost per Unit Value or Variable Name
 \end{lstlisting}
 
 \subsubsection{Example F -- Seasonal Time of Use Energy}\label{example-f-seasonal-time-of-use-energy}
@@ -289,72 +276,64 @@ The tariff is only applicable for customers that use 50KW for at least one month
 This tariff uses four different \hyperref[utilitycostchargesimple]{UtilityCost:Charge:Simple} objects to capture the variation with time of the energy cost. The monthly charge is part of the \hyperref[utilitycosttariff]{UtilityCost:Tariff} object.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    ExampleF,                     ! Name
-    Electricity:Facility,         ! Output Meter Name
-    kWh,                          ! Conversion Factor Choice
-    ,                             ! Energy Conversion Factor
-    ,                             ! Demand Conversion Factor
-    TimeOfDaySchedule,            ! Time of Use Period Schedule Name
-    TwoSeasonSchedule,            ! Season Schedule Name
-    ,                             ! Month Schedule Name
-    ,                             ! Demand Window Length
-    37.75;                        ! Monthly Charge or Variable Name
+  ExampleF,                   !- Name
+  Electricity:Facility,       !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  TimeOfDaySchedule,          !- Time of Use Period Schedule Name
+  TwoSeasonSchedule,          !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  37.75;                      !- Monthly Charge or Variable Name
 
+UtilityCost:Charge:Simple,
+  SummerOnPeak,               !- Charge Variable Name
+  ExampleF,                   !- Tariff Name
+  peakEnergy,                 !- Source Variable
+  Summer,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.14009;                    !- Cost per Unit Value or Variable Name
 
-  UtilityCost:Charge:Simple,
-    SummerOnPeak,                 ! Charge Variable Name
-    ExampleF,                     ! Tariff Name
-    peakEnergy,                   ! Source Variable
-    Summer,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    0.14009;                      ! Cost per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  SummerOffPeak,              !- Charge Variable Name
+  ExampleF,                   !- Tariff Name
+  offPeakEnergy,              !- Source Variable
+  Summer,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.06312;                    !- Cost per Unit Value or Variable Name
 
+UtilityCost:Charge:Simple,
+  WinterOnPeak,               !- Charge Variable Name
+  ExampleF,                   !- Tariff Name
+  peakEnergy,                 !- Source Variable
+  Winter,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.08315;                    !- Cost per Unit Value or Variable Name
 
-  UtilityCost:Charge:Simple,
-    SummerOffPeak,                ! Charge Variable Name
-    ExampleF,                     ! Tariff Name
-    offPeakEnergy,                ! Source Variable
-    Summer,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    0.06312;                      ! Cost per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  WinterOffPeak,              !- Charge Variable Name
+  ExampleF,                   !- Tariff Name
+  offPeakEnergy,              !- Source Variable
+  Winter,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.02420;                    !- Cost per Unit Value or Variable Name
 
-
-  UtilityCost:Charge:Simple,
-    WinterOnPeak,                 ! Charge Variable Name
-    ExampleF,                     ! Tariff Name
-    peakEnergy,                   ! Source Variable
-    Winter,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    0.08315;                      ! Cost per Unit Value or Variable Name
-
-
-  UtilityCost:Charge:Simple,
-    WinterOffPeak,                ! Charge Variable Name
-    ExampleF,                     ! Tariff Name
-    offPeakEnergy,                ! Source Variable
-    Winter,                       ! Season
-    EnergyCharges,                ! Category Variable Name
-    0.02420;                      ! Cost per Unit Value or Variable Name
-
-
-  UtilityCost:Qualify,
-    MinDemand,                    ! Name
-    ExampleF,                     ! Tariff Name
-    TotalDemand,                  ! Variable Name
-    Minimum,                      ! Qualify Type
-    50,                           ! Threshold Value or Variable Name
-    Annual,                       ! Season
-    Count,                        ! Threshold Test
-    1;                            ! Number of Months
-
+UtilityCost:Qualify,
+  MinDemand,                  !- Name
+  ExampleF,                   !- Tariff Name
+  TotalDemand,                !- Variable Name
+  Minimum,                    !- Qualify Type
+  50,                         !- Threshold Value or Variable Name
+  Annual,                     !- Season
+  Count,                      !- Threshold Test
+  1;                          !- Number of Months
 
   Schedule:Compact, TwoSeasonSchedule, number,
   Through: 5/31, For: AllDays,  Until: 24:00, 1,
   Through: 9/30, For: AllDays,  Until: 24:00, 3,
   Through: 12/31, For: AllDays, Until: 24:00, 1;
-
 
   Schedule:Compact, TimeOfDaySchedule, number,
   Through: 5/31, For: AllDays,  Until: 15:00, 3,
@@ -391,62 +370,58 @@ Energy Charge:~~~ For all consumption not greater than 200 hours times the deman
 To set up this ``block within a block'' a \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} is first used to separate out the first 200 kWh/kW. The ``EnergyFirst200kWhPerkW'' charge performs this. It uses demand to multiply the first block size by 200 and the ``cost'' for the block is simply 1 since it passes through the energy to the variable ``EnergyFirst200kWhPerkW''. The remaining energy goes into the ``restOfEnergy'' variable as specified as the ``Remaining Into Variable'' field. After this is evaluated we have two new variables that hold energy. Each of these variables are then separately used in \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block} objects to evaluate the different parts of the example tariff. By using the ``Remaining Into Variable'' along with the concept of variables, many very complex tariffs may be modeled.
 
 \begin{lstlisting}
+UtilityCost:Tariff,
+  ExampleG,                   !- Name
+  ElectricityPurchased:Facility,  !- Output Meter Name
+  KWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  35;                         !- Monthly Charge or Variable Name
 
-  UtilityCost:Tariff,
-      ExampleG,                !- Name
-      ElectricityPurchased:Facility,  !- Output Meter Name
-      KWh,                     !- Conversion Factor Choice
-      ,                        !- Energy Conversion Factor
-      ,                        !- Demand Conversion Factor
-      ,                        !- Time of Use Period Schedule Name
-      ,                        !- Season Schedule Name
-      ,                        !- Month Schedule Name
-      ,                        !- Demand Window Length
-      35;                      !- Monthly Charge or Variable Name
+UtilityCost:Charge:Block,
+  EnergyFirst200kWhPerkW,     !- Charge Variable Name
+  ExampleG,                   !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  NotIncluded,                !- Category Variable Name
+  restOfEnergy,               !- Remaining Into Variable
+  totalDemand,                !- Block Size Multiplier Value or Variable Name
+  200,                        !- Block Size 1 Value or Variable Name
+  1;                          !- Block 1 Cost Per Unit Value or Variable Name
 
+UtilityCost:Charge:Block,
+  CostOfFirst200kWhPerkW,     !- Charge Variable Name
+  ExampleG,                   !- Tariff Name
+  EnergyFirst200kWhPerkW,     !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  ,                           !- Block Size Multiplier Value or Variable Name
+  1000,                       !- Block Size 1 Value or Variable Name
+  0.1032,                     !- Block 1 Cost Per Unit Value or Variable Name
+  4000,                       !- Block Size 2 Value or Variable Name
+  0.0743,                     !- Block 2 Cost Per Unit Value or Variable Name
+  5000,                       !- Block Size 3 Value or Variable Name
+  0.0623,                     !- Block 3 Cost Per Unit Value or Variable Name
+  remaining,                  !- Block Size 4 Value or Variable Name
+  0.0427;                     !- Block 4 Cost Per Unit Value or Variable Name
 
-    UtilityCost:Charge:Block,
-      EnergyFirst200kWhPerkW,  !- Charge Variable Name
-      ExampleG,                !- Tariff Name
-      totalEnergy,             !- Source Variable
-      Annual,                  !- Season
-      NotIncluded,             !- Category Variable Name
-      restOfEnergy,            !- Remaining Into Variable
-      totalDemand,             !- Block Size Multiplier Value or Variable Name
-      200,                     !- Block Size 1 Value or Variable Name
-      1;                       !- Block 1 Cost Per Unit Value or Variable Name
-
-
-    UtilityCost:Charge:Block,
-      CostOfFirst200kWhPerkW,  !- Charge Variable Name
-      ExampleG,                !- Tariff Name
-      EnergyFirst200kWhPerkW,  !- Source Variable
-      Annual,                  !- Season
-      EnergyCharges,           !- Category Variable Name
-      ,                        !- Remaining Into Variable
-      ,                        !- Block Size Multiplier Value or Variable Name
-      1000,                    !- Block Size 1 Value or Variable Name
-      0.1032,                  !- Block 1 Cost Per Unit Value or Variable Name
-      4000,                    !- Block Size 2 Value or Variable Name
-      0.0743,                  !- Block 2 Cost Per Unit Value or Variable Name
-      5000,                    !- Block Size 3 Value or Variable Name
-      0.0623,                  !- Block 3 Cost Per Unit Value or Variable Name
-      remaining,               !- Block Size 4 Value or Variable Name
-      0.0427;                  !- Block 4 Cost Per Unit Value or Variable Name
-
-
-    UtilityCost:Charge:Block,
-      CostOfRestOfEnergy,      !- Charge Variable Name
-      ExampleG,                !- Tariff Name
-      restOfEnergy,            !- Source Variable
-      Annual,                  !- Season
-      EnergyCharges,           !- Category Variable Name
-      ,                        !- Remaining Into Variable
-      totalDemand,             !- Block Size Multiplier Value or Variable Name
-      200,                     !- Block Size 1 Value or Variable Name
-      0.0682,                  !- Block 1 Cost Per Unit Value or Variable Name
-      remaining,               !- Block Size 2 Value or Variable Name
-      0.0503;                  !- Block 2 Cost Per Unit Value or Variable Name
+UtilityCost:Charge:Block,
+  CostOfRestOfEnergy,         !- Charge Variable Name
+  ExampleG,                   !- Tariff Name
+  restOfEnergy,               !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  ,                           !- Remaining Into Variable
+  totalDemand,                !- Block Size Multiplier Value or Variable Name
+  200,                        !- Block Size 1 Value or Variable Name
+  0.0682,                     !- Block 1 Cost Per Unit Value or Variable Name
+  remaining,                  !- Block Size 2 Value or Variable Name
+  0.0503;                     !- Block 2 Cost Per Unit Value or Variable Name
 \end{lstlisting}
 
 \subsubsection{Example H -- Real Time Pricing}\label{example-h-real-time-pricing}
@@ -458,52 +433,50 @@ Example H, shown below, is an example of how to use the \hyperref[utilitycosttar
 !~ EXAMPLE H - Real Time Pricing (RTP)
 
 \begin{lstlisting}
+UtilityCost:Tariff,
+  ExampleH,                   !- Name
+  ElectricityPurchased:Facility,  !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  37.75,                      !- Monthly Charge or Variable Name
+  ,                           !- Minimum Monthly Charge or Variable Name
+  RTPpriceSchedule-H,         !- Real Time Pricing Charge Schedule Name
+  ,                           !- Customer Baseline Load Schedule Name
+  ,                           !- Group Name
+  buyFromUtility;             !- Buy Or Sell
 
-  UtilityCost:Tariff,
-      ExampleH,                !- Name
-      ElectricityPurchased:Facility,  !- Output Meter Name
-      kWh,                     !- Conversion Factor Choice
-      ,                        !- Energy Conversion Factor
-      ,                        !- Demand Conversion Factor
-      ,                        !- Time of Use Period Schedule Name
-      ,                        !- Season Schedule Name
-      ,                        !- Month Schedule Name
-      ,                        !- Demand Window Length
-      37.75,                   !- Monthly Charge or Variable Name
-      ,                        !- Minimum Monthly Charge or Variable Name
-      RTPpriceSchedule-H,      !- Real Time Pricing Charge Schedule Name
-      ,                        !- Customer Baseline Load Schedule Name
-      ,                        !- Group Name
-      buyFromUtility;          !- Buy Or Sell
-
-
-    Schedule:Compact,
-      RTPpriceSchedule-H,      !- Name
-      Any Number,              !- Schedule Type Limits Name
-      Through: 5/31,           !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 15:00,            !- Field 3
-      0.02420,                 !- Field 4
-      Until: 22:00,            !- Field 5
-      0.08315,                 !- Field 6
-      Until: 24:00,            !- Field 7
-      0.02420,                 !- Field 8
-      Through: 9/30,           !- Field 9
-      For: AllDays,            !- Field 10
-      Until: 10:00,            !- Field 11
-      0.06312,                 !- Field 12
-      Until: 19:00,            !- Field 13
-      0.14009,                 !- Field 14
-      Until: 24:00,            !- Field 15
-      0.06312,                 !- Field 16
-      Through: 12/31,          !- Field 17
-      For: AllDays,            !- Field 18
-      Until: 15:00,            !- Field 19
-      0.02420,                 !- Field 20
-      Until: 22:00,            !- Field 21
-      0.08315,                 !- Field 22
-      Until: 24:00,            !- Field 23
-      0.02420;                 !- Field 24
+Schedule:Compact,
+  RTPpriceSchedule-H,         !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 5/31,              !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 15:00,               !- Field 3
+  0.02420,                    !- Field 4
+  Until: 22:00,               !- Field 5
+  0.08315,                    !- Field 6
+  Until: 24:00,               !- Field 7
+  0.02420,                    !- Field 8
+  Through: 9/30,              !- Field 9
+  For: AllDays,               !- Field 10
+  Until: 10:00,               !- Field 11
+  0.06312,                    !- Field 12
+  Until: 19:00,               !- Field 13
+  0.14009,                    !- Field 14
+  Until: 24:00,               !- Field 15
+  0.06312,                    !- Field 16
+  Through: 12/31,             !- Field 17
+  For: AllDays,               !- Field 18
+  Until: 15:00,               !- Field 19
+  0.02420,                    !- Field 20
+  Until: 22:00,               !- Field 21
+  0.08315,                    !- Field 22
+  Until: 24:00,               !- Field 23
+  0.02420;                    !- Field 24
 \end{lstlisting}
 
 \subsubsection{Example I -- Selling and Net-Metering}\label{example-i-selling-and-net-metering}
@@ -517,73 +490,66 @@ The second tariff needs to be defined with the ``Buy or Sell'' field set to ``se
 !~ EXAMPLE I - Selling
 
 \begin{lstlisting}
+UtilityCost:Charge:Simple,
+  GeneratedElectricSold,      !- Charge Variable Name
+  ExampleI-Sell,              !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  -0.02;                      !- Cost Per Unit Value (or Variable)
 
-  UtilityCost:Charge:Simple,
-      GeneratedElectricSold,   !- Charge Variable Name
-      ExampleI-Sell,           !- Tariff Name
-      totalEnergy,             !- Source Variable
-      Annual,                  !- Season
-      EnergyCharges,           !- Category Variable Name
-      -0.02;                   !- Cost Per Unit Value (or Variable)
+UtilityCost:Tariff,
+  ExampleI-Sell,              !- Name
+  ElectricitySurplusSold:Facility,  !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  ,                           !- Monthly Charge or Variable Name
+  ,                           !- Minimum Monthly Charge or Variable Name
+  ,                           !- Real Time Pricing Charge Schedule Name
+  ,                           !- Customer Baseline Load Schedule Name
+  ,                           !- Group Name
+  sellToUtility;              !- Buy Or Sell
 
-
-    UtilityCost:Tariff,
-      ExampleI-Sell,           !- Name
-      ElectricitySurplusSold:Facility,  !- Output Meter Name
-      kWh,                     !- Conversion Factor Choice
-      ,                        !- Energy Conversion Factor
-      ,                        !- Demand Conversion Factor
-      ,                        !- Time of Use Period Schedule Name
-      ,                        !- Season Schedule Name
-      ,                        !- Month Schedule Name
-      ,                        !- Demand Window Length
-      ,                        !- Monthly Charge or Variable Name
-      ,                        !- Minimum Monthly Charge or Variable Name
-      ,                        !- Real Time Pricing Charge Schedule Name
-      ,                        !- Customer Baseline Load Schedule Name
-      ,                        !- Group Name
-      sellToUtility;           !- Buy Or Sell
-
-
-    UtilityCost:Charge:Simple,
-      GeneratedElectricSold,   !- Charge Variable Name
-      ExampleI-Sell,           !- Tariff Name
-      totalEnergy,             !- Source Variable
-      Annual,                  !- Season
-      EnergyCharges,           !- Category Variable Name
-      -0.02;                   !- Cost Per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  GeneratedElectricSold,      !- Charge Variable Name
+  ExampleI-Sell,              !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  -0.02;                      !- Cost Per Unit Value or Variable Name
 \end{lstlisting}
 
 The next part of this example is a rate that uses net-metering. With net metering the meter conceptually turns backwards when the energy is being sold to the utility directly reducing the energy consumption being charged.~ Effectively, the rate charge for purchased electricity is the same as the rate credited for electricity sold to the utility. In this the ``Buy or Sell'' field should be set to ``netMetering.''~ It is also important the ``Output Meter'' is set to a meter that represents net metering such as ``ElectricityNet:Facility.'' The following example shows a simple example tariff using net metering with a single UtilityCost:Charge:Simple:
 
 \begin{lstlisting}
-
 !  EXAMPLE I – Net Metering
+  UtilityCost:Tariff,
+  ExampleI-NetMeter,          !- Name
+  ElectricityNet:Facility,    !- Output Meter Name
+  kWh,                        !- Conversion Factor Choice
+  ,                           !- Energy Conversion Factor
+  ,                           !- Demand Conversion Factor
+  ,                           !- Time of Use Period Schedule Name
+  ,                           !- Season Schedule Name
+  ,                           !- Month Schedule Name
+  ,                           !- Demand Window Length
+  30.00,                      !- Monthly Charge or Variable Name
+  ,                           !- Minimum Monthly Charge or Variable Name
+  ,                           !- Real Time Pricing Charge Schedule Name
+  ,                           !- Customer Baseline Load Schedule Name
+  ,                           !- Group Name
+  netMetering;                !- Buy Or Sell
 
-
-    UtilityCost:Tariff,
-      ExampleI-NetMeter,       !- Name
-      ElectricityNet:Facility, !- Output Meter Name
-      kWh,                     !- Conversion Factor Choice
-      ,                        !- Energy Conversion Factor
-      ,                        !- Demand Conversion Factor
-      ,                        !- Time of Use Period Schedule Name
-      ,                        !- Season Schedule Name
-      ,                        !- Month Schedule Name
-      ,                        !- Demand Window Length
-      30.00,                   !- Monthly Charge or Variable Name
-      ,                        !- Minimum Monthly Charge or Variable Name
-      ,                        !- Real Time Pricing Charge Schedule Name
-      ,                        !- Customer Baseline Load Schedule Name
-      ,                        !- Group Name
-      netMetering;             !- Buy Or Sell
-
-
-    UtilityCost:Charge:Simple,
-      NetMeteredCharge,        !- Charge Variable Name
-      ExampleI-NetMeter,       !- Tariff Name
-      totalEnergy,             !- Source Variable
-      Annual,                  !- Season
-      EnergyCharges,           !- Category Variable Name
-      0.065;                   !- Cost Per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  NetMeteredCharge,           !- Charge Variable Name
+  ExampleI-NetMeter,          !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.065;                      !- Cost Per Unit Value or Variable Name
 \end{lstlisting}

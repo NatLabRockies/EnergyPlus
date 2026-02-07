@@ -2439,7 +2439,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2957.0000,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -2464,7 +2464,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     4032.0000,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -2492,7 +2492,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     400.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -2543,7 +2543,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA units_gr_lf,     !- Name
@@ -2996,7 +3003,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     4435.0000,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3021,7 +3028,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     6048.0000,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3049,7 +3056,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     600.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3100,7 +3107,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA units_gr_rt,     !- Name
@@ -3378,7 +3392,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     662.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3403,7 +3417,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     903.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3431,7 +3445,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     100.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3482,7 +3496,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA unit_s_g,        !- Name
@@ -3760,7 +3781,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     662.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3785,7 +3806,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     903.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3813,7 +3834,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     100.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3864,7 +3885,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA unit_n_g,        !- Name
@@ -4175,15 +4203,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.6,                     !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     FURNACE_PACU_CAV:1_Unitary_PackageCoolCoil air inlet,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:1_Unitary_PackageHeatCoil air inlet,  !- Air Outlet Node Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    FURNACE_PACU_CAV:1_Unitary_PackagecoolPLR;  !- Part Load Fraction Correlation Curve Name
+    FURNACE_PACU_CAV:1_Unitary_PackagecoolPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Name
@@ -4478,15 +4509,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.6,                     !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     FURNACE_PACU_CAV:2_Unitary_PackageCoolCoil air inlet,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:2_Unitary_PackageHeatCoil air inlet,  !- Air Outlet Node Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    FURNACE_PACU_CAV:2_Unitary_PackagecoolPLR;  !- Part Load Fraction Correlation Curve Name
+    FURNACE_PACU_CAV:2_Unitary_PackagecoolPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Name
@@ -4806,15 +4840,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.6,                     !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     FURNACE_PACU_CAV:3_Unitary_PackageCoolCoil air inlet,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:3_Unitary_PackageHeatCoil air inlet,  !- Air Outlet Node Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    FURNACE_PACU_CAV:3_Unitary_PackagecoolPLR;  !- Part Load Fraction Correlation Curve Name
+    FURNACE_PACU_CAV:3_Unitary_PackagecoolPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Name
@@ -5134,15 +5171,18 @@
     AUTOSIZE,                !- Gross Rated Sensible Heat Ratio
     2.6,                     !- Gross Rated Cooling COP {W/W}
     AUTOSIZE,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     FURNACE_PACU_CAV:4_Unitary_PackageCoolCoil air inlet,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:4_Unitary_PackageHeatCoil air inlet,  !- Air Outlet Node Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolEIRFT,  !- Energy Input Ratio Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolEIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    FURNACE_PACU_CAV:4_Unitary_PackagecoolPLR;  !- Part Load Fraction Correlation Curve Name
+    FURNACE_PACU_CAV:4_Unitary_PackagecoolPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Curve:Biquadratic,
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Name

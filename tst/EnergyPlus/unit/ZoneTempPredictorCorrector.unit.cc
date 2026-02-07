@@ -783,7 +783,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_AdaptiveThermostat)
         "  Until: 24:00,24.0;                     !- Field 3",
     });
 
-    ASSERT_TRUE(process_idf(idf_objects)); // Tstat should show if the idf is legel
+    ASSERT_TRUE(process_idf(idf_objects)); // Tstat should show if the idf is legal
 
     state->init_state(*state);
 

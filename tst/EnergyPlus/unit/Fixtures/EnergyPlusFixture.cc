@@ -223,11 +223,13 @@ bool EnergyPlusFixture::compare_err_stream(std::string const &expected_string, b
     return are_equal;
 }
 
-bool EnergyPlusFixture::compare_err_stream_substring(std::string const &search_string, bool reset_stream)
+bool EnergyPlusFixture::compare_err_stream_substring(std::string const &search_string, bool reset_stream, bool call_expect)
 {
     auto const stream_str = this->err_stream->str();
     bool const found = stream_str.find(search_string) != std::string::npos;
-    EXPECT_TRUE(found) << "Not found in:" << "\n" << stream_str;
+    if (call_expect) {
+        EXPECT_TRUE(found) << "Not found in:" << "\n" << stream_str;
+    }
     if (reset_stream) {
         this->err_stream->str(std::string());
     }
@@ -243,6 +245,15 @@ bool EnergyPlusFixture::compare_cout_stream(std::string const &expected_string, 
         this->m_cout_buffer->str(std::string());
     }
     return are_equal;
+}
+bool EnergyPlusFixture::compare_cout_stream_substring(std::string const &search_string, bool reset_stream)
+{
+    auto const stream_str = this->m_cout_buffer->str();
+    bool const found = stream_str.find(search_string) != std::string::npos;
+    if (reset_stream) {
+        this->m_cout_buffer->str(std::string());
+    }
+    return found;
 }
 
 bool EnergyPlusFixture::compare_cerr_stream(std::string const &expected_string, bool reset_stream)

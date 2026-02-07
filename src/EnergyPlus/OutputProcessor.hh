@@ -455,7 +455,7 @@ namespace OutputProcessor {
         std::string name = "";           // Name of Variable
         std::string nameUC = "";         // Name of Variable with out key in uppercase
         std::string key = "";            // Name of key only
-        std::string keyUC = "";          // Name of key only witht out variable in uppercase
+        std::string keyUC = "";          // Name of key only with out variable in uppercase
 
         Constant::Units units = Constant::Units::Invalid; // Units for Variable
         std::string unitNameCustomEMS;                    // name of units when customEMS is used for EMS variables that are unusual
@@ -679,6 +679,8 @@ namespace OutputProcessor {
 
     void UpdateMeters(EnergyPlusData &state, int TimeStamp); // Current TimeStamp (for max/min)
 
+    void ResetAccumulationWhenWarmupComplete(EnergyPlusData &state);
+
     void ReportTSMeters(EnergyPlusData &state,
                         Real64 StartMinute,      // Start Minute for TimeStep
                         Real64 EndMinute,        // End Minute for TimeStep
@@ -798,7 +800,7 @@ void SetupOutputVariable(
     std::string const &spaceType = {},                                          // Space type (applicable for Building group only)
     int const indexGroupKey = -999,                                             // Group identifier for SQL output
     std::string_view const customUnitName = {},                                 // the custom name for the units from EMS definition of units
-    OutputProcessor::ReportFreq reportFreq = OutputProcessor::ReportFreq::Hour  // Internal use -- causes reporting at this freqency
+    OutputProcessor::ReportFreq reportFreq = OutputProcessor::ReportFreq::Hour  // Internal use -- causes reporting at this frequency
 );
 
 void SetupOutputVariable(EnergyPlusData &state,
@@ -809,7 +811,7 @@ void SetupOutputVariable(EnergyPlusData &state,
                          OutputProcessor::StoreType VariableType,                             // State, Average=1, NonState, Sum=2
                          std::string const &KeyedValue,                                       // Associated Key for this variable
                          int const indexGroupKey = -999,                                      // Group identifier for SQL output
-                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this freqency
+                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this frequency
 );
 
 // A helper to be able to cast an enum to an int& for use in the above function
@@ -822,7 +824,7 @@ void SetupOutputVariable(EnergyPlusData &state,
                          OutputProcessor::StoreType VariableType,                             // State, Average=1, NonState, Sum=2
                          std::string const &KeyedValue,                                       // Associated Key for this variable
                          int const indexGroupKey = -999,                                      // Group identifier for SQL output
-                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this freqency
+                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this frequency
 )
 {
 #if defined(__GNUC__) || defined(__clang__)
@@ -833,7 +835,7 @@ void SetupOutputVariable(EnergyPlusData &state,
 #if defined(__GNUC__) || defined(__clang__)
 #    pragma GCC diagnostic pop
 #endif
-};
+}
 
 void UpdateDataandReport(EnergyPlusData &state, OutputProcessor::TimeStepType TimeStepTypeKey); // What kind of data to update (Zone, HVAC)
 

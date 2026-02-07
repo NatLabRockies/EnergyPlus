@@ -1128,7 +1128,7 @@ TEST_F(EnergyPlusFixture, ColdestSetPointMgrInSingleDuct)
         "  AirLoopHVAC:ControllerList,",
         "    VAV Sys 1 Controllers,   !- Name",
         "    Controller:WaterCoil,    !- Controller 1 Object Type",
-        "    Central Cooling Coil Contoller 1;  !- Controller 1 Name",
+        "    Central Cooling Coil Controller 1;  !- Controller 1 Name",
 
         "  BranchList,",
         "    VAV Sys 1 Branches,      !- Name",
@@ -1221,7 +1221,7 @@ TEST_F(EnergyPlusFixture, ColdestSetPointMgrInSingleDuct)
         "    VAV Sys 1 Outlet Node;   !- Air Outlet Node Name",
 
         "  Controller:WaterCoil,",
-        "    Central Cooling Coil Contoller 1,  !- Name",
+        "    Central Cooling Coil Controller 1,  !- Name",
         "    Temperature,             !- Control Variable",
         "    Reverse,                 !- Action",
         "    FLOW,                    !- Actuator Variable",

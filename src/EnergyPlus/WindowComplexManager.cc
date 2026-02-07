@@ -1081,7 +1081,8 @@ namespace WindowComplexManager {
                         Lamda = Constant::Pi * pow_2(std::sin(UpperTheta));
                         SolAng = 2.0 * Constant::Pi * (1.0 - std::cos(UpperTheta));
                     } else {
-                        Lamda = 0.5 * DPhi * (pow_2(std::sin(UpperTheta)) - pow_2(std::sin(LowerTheta))); // For W6 basis, lamda is funct of Theta and
+                        Lamda =
+                            0.5 * DPhi * (pow_2(std::sin(UpperTheta)) - pow_2(std::sin(LowerTheta))); // For W6 basis, lambda is funct of Theta and
                         // NPhis, not individual Phi
                         SolAng = DPhi * (std::cos(LowerTheta) - std::cos(UpperTheta));
                     }
@@ -1153,7 +1154,8 @@ namespace WindowComplexManager {
                         Lamda = Constant::Pi * pow_2(std::sin(UpperTheta));
                         SolAng = 2.0 * Constant::Pi * (1.0 - std::cos(UpperTheta));
                     } else {
-                        Lamda = 0.5 * DPhi * (pow_2(std::sin(UpperTheta)) - pow_2(std::sin(LowerTheta))); // For W6 basis, lamda is funct of Theta and
+                        Lamda =
+                            0.5 * DPhi * (pow_2(std::sin(UpperTheta)) - pow_2(std::sin(LowerTheta))); // For W6 basis, lambda is funct of Theta and
                         // NPhis, not individual Phi
                         SolAng = DPhi * (std::cos(LowerTheta) - std::cos(UpperTheta));
                     }
@@ -1250,7 +1252,7 @@ namespace WindowComplexManager {
         //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Define all the geometric quantites for a complex fenestration state
+        // Define all the geometric quantities for a complex fenestration state
 
         using namespace Vectors;
 
@@ -1548,7 +1550,7 @@ namespace WindowComplexManager {
         //   in order of increasing distance, up to the first opaque surface.
         //  Rays that intesect one or more schedulable transmittance but no opaque
         //  surfaces (therefore may reach the sky or ground) are left out of the sky/ground
-        //  calcuation.  A correction for these rays could/should be made after the
+        //  calculation.  A correction for these rays could/should be made after the
         //  shading calculation.
         // Now calculate weights for averaging the transmittance matrix
         // Sky Weights
@@ -2530,7 +2532,7 @@ namespace WindowComplexManager {
                                   Real64 &SurfInsideTemp,     // Inside window surface temperature
                                   Real64 &SurfOutsideTemp,    // Outside surface temperature (C)
                                   Real64 &SurfOutsideEmiss,
-                                  DataBSDFWindow::Condition const CalcCondition // Calucation condition (summer, winter or no condition)
+                                  DataBSDFWindow::Condition const CalcCondition // Calculation condition (summer, winter or no condition)
     )
     {
 
@@ -2653,7 +2655,7 @@ namespace WindowComplexManager {
         //    1 - perform deflection calculation (input is Pressure/Temp)
         //    2 - perform deflection calculation (input is measured deflection)
         Real64 Pa;        // Atmospheric (outside/inside) pressure (used onlu if CalcDeflection = 1)
-        Real64 Pini;      // Initial presssure at time of fabrication (used only if CalcDeflection = 1)
+        Real64 Pini;      // Initial pressure at time of fabrication (used only if CalcDeflection = 1)
         Real64 Tini;      // Initial temperature at time of fabrication (used only if CalcDeflection = 1)
         Real64 hin(0.0);  // Indoor combined film coefficient (if non-zero) [W/m^2.K]
         Real64 hout(0.0); // Outdoor combined film coefficient (if non-zero) [W/m^2.K]
@@ -2859,7 +2861,7 @@ namespace WindowComplexManager {
             ibc(1) = 2;           // prescribed convective film coeff on outdoor side
             tilt = state.dataSurface->Surface(SurfNum).Tilt;
             height = state.dataSurface->Surface(SurfNum).Height;
-            heightt = height; // for now put same window and glazing pocket hights
+            heightt = height; // for now put same window and glazing pocket heights
             width = state.dataSurface->Surface(SurfNum).Width;
 
             // indoor mean radiant temperature.
@@ -2878,7 +2880,7 @@ namespace WindowComplexManager {
             }
 
             // indoor wind speed
-            wsi = 0.0; // assumuption (TODO, what to use for inside air velocity?)
+            wsi = 0.0; // assumption (TODO, what to use for inside air velocity?)
 
             fclr = 1.0 - state.dataEnvrn->CloudFraction;
         }
@@ -3242,9 +3244,9 @@ namespace WindowComplexManager {
             // Sum1 = 0.0d0
             // Sum2 = 0.0d0
             // do  j = 1 , ComplexWind(SurfNum)%Geom%Inc%NBasis     !Incident ray loop
-            //  Sum2 = Sum2 + ComplexWind(SurfNum)%Geom%Inc%Lamda (j)
+            //  Sum2 = Sum2 + ComplexWind(SurfNum)%Geom%Inc%Lambda (j)
             //  do  m = 1 , ComplexWind(SurfNum)%Geom%Trn%NBasis     !Outgoing ray loop
-            //    Sum1 =Sum1 + ComplexWind(SurfNum)%Geom%Inc%Lamda(j) * ComplexWind(SurfNum)%Geom%Trn%Lamda(m) * &
+            //    Sum1 =Sum1 + ComplexWind(SurfNum)%Geom%Inc%Lambda(j) * ComplexWind(SurfNum)%Geom%Trn%Lambda(m) * &
             //      & Construct(ConstrNum)%BSDFInput%SolFrtTrans ( j , m )
             //  end do      !Outgoing ray loop
             // end do      !Incident ray loop

@@ -245,7 +245,7 @@ int EnergyPlusPgm(const std::vector<std::string> &args, std::string const &filep
 void commonInitialize(EnergyPlus::EnergyPlusData &state)
 {
     using namespace EnergyPlus;
-    // Disable C++ i/o synching with C methods for speed
+    // Disable C++ i/o syncing with C methods for speed
     // std::ios_base::sync_with_stdio(false);
     // std::cin.tie(nullptr); // Untie cin and cout: Could cause odd behavior for interactive prompts
 

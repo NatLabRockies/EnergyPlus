@@ -51,6 +51,8 @@
 #include <ObjexxFCL/Array.functions.hh>
 
 // EnergyPlus Headers
+#include "AirflowNetwork/Solver.hpp"
+
 #include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/CurveManager.hh>
@@ -201,17 +203,20 @@ namespace VariableSpeedCoils {
             CalcVarSpeedCoilCooling(
                 state, coilNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
             UpdateVarSpeedCoil(state, coilNum);
+            varSpeedCoil.RunFracCool = varSpeedCoil.RunFrac;
         } else if ((varSpeedCoil.coilType == HVAC::CoilType::HeatingWAHPVariableSpeedEquationFit) ||
                    (varSpeedCoil.coilType == HVAC::CoilType::HeatingDXVariableSpeed)) {
             // Heating mode
             InitVarSpeedCoil(state, coilNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
             CalcVarSpeedCoilHeating(state, coilNum, fanOp, SensLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
             UpdateVarSpeedCoil(state, coilNum);
+            varSpeedCoil.RunFracHeat = varSpeedCoil.RunFrac;
         } else if (varSpeedCoil.coilType == HVAC::CoilType::WaterHeatingAWHPVariableSpeed) {
             // Heating mode
             InitVarSpeedCoil(state, coilNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
             CalcVarSpeedHPWH(state, coilNum, PartLoadFrac, SpeedRatio, SpeedNum, fanOp);
             UpdateVarSpeedCoil(state, coilNum);
+            // No need to do the RunFracHeat thing here?
         } else {
             ShowFatalError(state, "SimVariableSpeedCoils: WatertoAir heatpump not in either HEATING or COOLING mode");
         }
@@ -219,6 +224,10 @@ namespace VariableSpeedCoils {
         // two additional output variables
         varSpeedCoil.SpeedNumReport = SpeedCal;
         varSpeedCoil.SpeedRatioReport = SpeedRatio;
+
+        if (varSpeedCoil.AirLoopNum > 0 && state.afn->distribution_simulated) {
+            state.dataAirLoop->AirLoopAFNInfo(varSpeedCoil.AirLoopNum).AFNLoopDXCoilRTF = max(varSpeedCoil.RunFracCool, varSpeedCoil.RunFracHeat);
+        }
     }
 
     void GetVarSpeedCoilInput(EnergyPlusData &state)
@@ -3496,7 +3505,7 @@ namespace VariableSpeedCoils {
                     // Check for valid range of (Rated Air Volume Flow Rate / Rated Total Capacity)
                     RatedVolFlowPerRatedTotCap = varSpeedCoil.MSRatedAirVolFlowRate(Mode) / varSpeedCoil.MSRatedTotCap(Mode);
                 }
-                // call coil model with everthing set at rating point
+                // call coil model with everything set at rating point
                 varSpeedCoil.InletAirDBTemp = RatedInletAirTempHeat;
                 varSpeedCoil.InletAirHumRat =
                     Psychrometrics::PsyWFnTdbTwbPb(state, RatedInletAirTempHeat, RatedInletWetBulbTemp, DataEnvironment::StdPressureSeaLevel);
@@ -3868,7 +3877,7 @@ namespace VariableSpeedCoils {
         Real64 WaterMassFlowRatio;    // water mass flow rate
         Real64 RatedSourceTempCool;   // rated source temperature, space cooling mode
         std::string CurrentObjSubfix; // Object subfix type for printing
-        bool HardSizeNoDesRun;        // Indicator to hardsize withouth sizing runs
+        bool HardSizeNoDesRun;        // Indicator to hardsize without sizing runs
         bool SizingDesRunThisAirSys;  // true if a particular air system had a Sizing:System object and system sizing done
         bool SizingDesRunThisZone;    // true if a particular zone had a Sizing:Zone object and zone sizing was done
         Real64 HPInletAirHumRat;      // Rated inlet air humidity ratio for heat pump water heater [kgWater/kgDryAir]
@@ -4074,7 +4083,7 @@ namespace VariableSpeedCoils {
 
                         // design fan heat will be added to coil load
                         Real64 FanCoolLoad = DataAirSystems::calcFanDesignHeatGain(state, state.dataSize->DataFanIndex, VolFlowRate);
-                        // inlet/outlet temp is adjusted after enthalpy is calculcated so fan heat is not double counted
+                        // inlet/outlet temp is adjusted after enthalpy is calculated so fan heat is not double counted
                         Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
                         if (state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).supFanPlace == HVAC::FanPlace::BlowThru) {
                             MixTemp += FanCoolLoad / (CpAir * rhoair * VolFlowRate);
@@ -4154,7 +4163,7 @@ namespace VariableSpeedCoils {
 
                     // design fan heat will be added to coil load
                     Real64 FanCoolLoad = DataAirSystems::calcFanDesignHeatGain(state, state.dataSize->DataFanIndex, VolFlowRate);
-                    // inlet/outlet temp is adjusted after enthalpy is calculcated so fan heat is not double counted
+                    // inlet/outlet temp is adjusted after enthalpy is calculated so fan heat is not double counted
                     Real64 CpAir = Psychrometrics::PsyCpAirFnW(MixHumRat);
 
                     if (state.dataSize->DataFanPlacement == HVAC::FanPlace::BlowThru) {
@@ -4648,7 +4657,7 @@ namespace VariableSpeedCoils {
                                          "Design Size Rated Water Flow Rate [m3/s]",
                                          RatedWaterVolFlowRateDes);
             // Ensure water flow rate at lower speed must be lower or
-            // equal to the flow rate at higher speed. Otherwise, a severe error is isssued.
+            // equal to the flow rate at higher speed. Otherwise, a severe error is issued.
             for (Mode = 1; Mode <= varSpeedCoil.NumOfSpeeds - 1; ++Mode) {
                 if (varSpeedCoil.MSRatedWaterVolFlowRate(Mode) > varSpeedCoil.MSRatedWaterVolFlowRate(Mode + 1) * 1.05) {
                     ShowWarningError(
@@ -6310,7 +6319,7 @@ namespace VariableSpeedCoils {
         varSpeedCoil.CrankcaseHeaterConsumption = varSpeedCoil.CrankcaseHeaterPower * TimeStepSysSec;
         varSpeedCoil.EvapWaterConsump = 0.0;
         varSpeedCoil.BasinHeaterConsumption = 0.0;
-        // re-use EvapCondPumpElecConsumption to store WH pump energy consumption
+        // reuse EvapCondPumpElecConsumption to store WH pump energy consumption
         varSpeedCoil.EvapCondPumpElecConsumption = varSpeedCoil.HPWHCondPumpElecNomPower * TimeStepSysSec;
         if (varSpeedCoil.RunFrac == 0.0) {
             varSpeedCoil.COP = 0.0;
@@ -7538,13 +7547,14 @@ namespace VariableSpeedCoils {
             Toffa = Toff;
         }
 
-        //  Use sucessive substitution to solve for To
+        //  Use successive substitution to solve for To
         aa = (Gamma * Toffa) - (0.25 / Twet) * pow_2(Gamma) * pow_2(Toffa);
-
         To1 = aa + LatentCapacityTimeConstant;
         Error = 1.0;
         while (Error > 0.001) {
-            To2 = aa - LatentCapacityTimeConstant * (std::exp(-To1 / LatentCapacityTimeConstant) - 1.0);
+            //  Floating overflow errors occur when -To1/LatentCapacityTimeConstant is a large positive number.
+            //  Cap upper limit at 700 to avoid the overflow errors.
+            To2 = aa - LatentCapacityTimeConstant * std::expm1(min(700.0, -To1 / LatentCapacityTimeConstant));
             Error = std::abs((To2 - To1) / To1);
             To1 = To2;
         }
@@ -7735,16 +7745,17 @@ namespace VariableSpeedCoils {
         return state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).PartLoadRatio;
     }
 
+
     int GetCoilIndex(EnergyPlusData &state, std::string const &coilName)
     {
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
+        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) {
             GetVarSpeedCoilInput(state);
             state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
         }
 
         return Util::FindItemInList(coilName, state.dataVariableSpeedCoils->VarSpeedCoil);
     }
-
+       
     int GetCoilPLFFPLR(EnergyPlusData &state, int const coilNum)
     {
         assert(coilNum > 0 && coilNum <= state.dataVariableSpeedCoils->NumVarSpeedCoils);
@@ -7851,6 +7862,11 @@ namespace VariableSpeedCoils {
         return state.dataVariableSpeedCoils->VarSpeedCoil(coilNum).CondenserInletNodeNum;
     }
 
+    void SetVarSpeedDXCoilAirLoopNumber(EnergyPlusData &state, int const coilNum, int const AirLoopNum)
+    {
+        assert(coilNum > 0 && coilNum <= state.dataVariableSpeedCoils->NumVarSpeedCoils);
+        state.dataVariableSpeedCoils->VarSpeedCoil(coilNum).AirLoopNum = AirLoopNum;
+    }
 } // namespace VariableSpeedCoils
 
 } // namespace EnergyPlus

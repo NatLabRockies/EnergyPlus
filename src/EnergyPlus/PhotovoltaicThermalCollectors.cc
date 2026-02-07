@@ -1344,7 +1344,7 @@ namespace PhotovoltaicThermalCollectors {
 
         // Weather/thermodynamic state/air properties/heat transfer
         Real64 g(0.0);                                // Solar incident on surface of BIPVT collector (W/m^2)
-        Real64 tsurr, tsurrK;                         // surrouding temperature (DegC, DegK)
+        Real64 tsurr, tsurrK;                         // surrounding temperature (DegC, DegK)
         Real64 t1, t1K, t1_new;                       // temperature of pv backing surface (DegC, DegK, DegC)
         Real64 tpv_new;                               // temperature of pv surface (DegC, DegC)
         Real64 tpvg, tpvgK, tpvg_new;                 // temperature of pv glass cover (DegC, DegK,DegC)
@@ -1415,7 +1415,7 @@ namespace PhotovoltaicThermalCollectors {
         std::array<Real64, 9> jj = {0.0};                                     // 3x3 array for coefficient matrix
         std::array<Real64, 3> f = {0.0};                                      // 3 element array for constant term
         std::array<Real64, 3> y = {0.0};                                      // solution array for tpvg,tpv, and t1
-        int m(3);                                                             // parameter for number of unknwons
+        int m(3);                                                             // parameter for number of unknowns
         int i;                                                                // index
         int iter(0);                                                          // iteration counter
 
@@ -1506,7 +1506,7 @@ namespace PhotovoltaicThermalCollectors {
                 }
             }
 
-            // forced conv htc derived from results from Gorman et al 2019 - Charact. lenght is: Roof - length along flow direction, windward and
+            // forced conv htc derived from results from Gorman et al 2019 - Charact. length is: Roof - length along flow direction, windward and
             // leeawrd vert - hydraulic perimeter of surface, vert sides - length of surface along flow direction
             hconvt_forced = extHTCcoeff * std::pow((v_wind), extHTCexp) / (std::pow(l, 1.0 - extHTCexp)); // derived correlation for forced convection
 
@@ -1727,7 +1727,7 @@ namespace PhotovoltaicThermalCollectors {
         Real64 theta_r(0.0);
         Real64 taoalpha(0.0);
 
-        if (theta == 0.0) // if theta is zero, set to very small positive, otehrwise, taoalpha calculation causes division by zero
+        if (theta == 0.0) // if theta is zero, set to very small positive, otherwise, taoalpha calculation causes division by zero
         {
             theta = 0.000000001;
         }

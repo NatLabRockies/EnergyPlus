@@ -11064,7 +11064,7 @@ void RefrigCaseData::CalculateCase(EnergyPlusData &state) // Absolute pointer to
         Real64 DeltaStockingEnergy = (StockingLoad * state.dataGlobal->TimeStepZoneSec);
         this->StockingEnergy += DeltaStockingEnergy;
     } // warm up
-    // CALCULTE ALL LOADS INFLUENCED BY ZONE TEMPERATURE AND RH
+    // CALCULATE ALL LOADS INFLUENCED BY ZONE TEMPERATURE AND RH
     // Anti-sweat heater capacity
     switch (this->AntiSweatControlType) {
     case ASHtrCtrlType::None: {
@@ -12706,7 +12706,7 @@ void RefrigSystemData::CalculateCondensers(EnergyPlusData &state, int const SysN
                 "time step and heat recovery at the system time step. In that case, and ONLY if it occurs a large number of times",
                 CondCreditWarnIndex5);
             ShowRecurringContinueErrorAtEnd(
-                state, "(relative to the number of time steps in the simulation), there may be a mis-match between the", CondCreditWarnIndex6);
+                state, "(relative to the number of time steps in the simulation), there may be a mismatch between the", CondCreditWarnIndex6);
             ShowRecurringContinueErrorAtEnd(
                 state, "operating schedules of the refrigeration system and the heat recovery load.", CondCreditWarnIndex7);
         } // not warmup

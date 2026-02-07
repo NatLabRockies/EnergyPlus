@@ -516,7 +516,8 @@
 !- =========== ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
 
   ZoneAirHeatBalanceAlgorithm,
-    AnalyticalSolution;      !- Algorithm
+    AnalyticalSolution,      !- Algorithm
+    ;                        !- Do Space Heat Balance for Sizing
 
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;
 

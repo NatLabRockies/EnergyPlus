@@ -235,7 +235,7 @@ namespace UserDefinedComponents {
         void report(EnergyPlusData &state);
     };
 
-    struct UserZoneHVACForcedAirComponentStruct
+    struct UserAirComponentStruct
     {
         // Members
         std::string Name;           // user identifier
@@ -245,7 +245,6 @@ namespace UserDefinedComponents {
         int simPluginLocation;      // If Python Plugins are used to simulate this, this defines the location in the plugin structure
         int initCallbackIndex = -1; // If API callbacks are used to init this, this defines the location in the vector
         int simCallbackIndex = -1;  // If API callbacks are used to simulate this, this defines the location in the vector
-        AirConnectionStruct ZoneAir;
         AirConnectionStruct SourceAir;
         int NumPlantConnections;             // count of how many plant loop (demand) connections there are
         Array1D<PlantConnectionStruct> Loop; // collect data for each plant loop connection
@@ -256,55 +255,46 @@ namespace UserDefinedComponents {
         Real64 RemainingOutputReqToHumidSP;   // latent load remaining for device, to humidification setpoint [kg/s]
         Real64 RemainingOutputReqToDehumidSP; // latent load remaining for device, Negative means dehumidify [kg/s]
         bool myOneTimeFlag;
+        AirConnectionStruct AirConnection;
 
         // Default Constructor
-        UserZoneHVACForcedAirComponentStruct()
+        UserAirComponentStruct()
             : ErlSimProgramMngr(0), ErlInitProgramMngr(0), initPluginLocation(-1), simPluginLocation(-1), NumPlantConnections(0),
               RemainingOutputToHeatingSP(0.0), RemainingOutputToCoolingSP(0.0), RemainingOutputReqToHumidSP(0.0), RemainingOutputReqToDehumidSP(0.0),
               myOneTimeFlag(true)
         {
         }
 
-        void initialize(EnergyPlusData &state, int ZoneNum);
+        virtual ~UserAirComponentStruct() = default;
 
-        void report(EnergyPlusData &state);
+        virtual void initialize(EnergyPlusData &state, int ZoneNum) = 0;
+
+        virtual void report(EnergyPlusData &state) = 0;
     };
 
-    struct UserAirTerminalComponentStruct
+    struct UserZoneHVACForcedAirComponentStruct : public UserAirComponentStruct
     {
-        // Members
-        std::string Name; // user identifier
-        int ActualCtrlZoneNum;
-        int ADUNum;                 // index of corresponding air distribution unit
-        int ErlSimProgramMngr;      // EMS:ProgramManager to always run when this model is called
-        int ErlInitProgramMngr;     // EMS:ProgramManager to  run when this model is initialized and setup
-        int initPluginLocation;     // If Python Plugins are used to init this, this defines the location in the plugin structure
-        int simPluginLocation;      // If Python Plugins are used to simulate this, this defines the location in the plugin structure
-        int initCallbackIndex = -1; // If API callbacks are used to init this, this defines the location in the vector
-        int simCallbackIndex = -1;  // If API callbacks are used to simulate this, this defines the location in the vector
-        AirConnectionStruct AirLoop;
-        AirConnectionStruct SourceAir;
-        int NumPlantConnections;             // count of how many plant loop (demand) connections there are
-        Array1D<PlantConnectionStruct> Loop; // collect data for each plant loop connection
-        WaterUseTankConnectionStruct Water;
-        ZoneInternalGainsStruct Zone;         // for skin losses
-        Real64 RemainingOutputToHeatingSP;    // sensible load remaining for device, to heating setpoint [W]
-        Real64 RemainingOutputToCoolingSP;    // sensible load remaining for device, negative means cooling [W]
-        Real64 RemainingOutputReqToHumidSP;   // latent load remaining for device, to humidification setpoint [kg/s]
-        Real64 RemainingOutputReqToDehumidSP; // latent load remaining for device, Negative means dehumidify [kg/s]
-        bool myOneTimeFlag;
-
-        // Default Constructor
-        UserAirTerminalComponentStruct()
-            : ActualCtrlZoneNum(0), ADUNum(0), ErlSimProgramMngr(0), ErlInitProgramMngr(0), initPluginLocation(-1), simPluginLocation(-1),
-              NumPlantConnections(0), RemainingOutputToHeatingSP(0.0), RemainingOutputToCoolingSP(0.0), RemainingOutputReqToHumidSP(0.0),
-              RemainingOutputReqToDehumidSP(0.0), myOneTimeFlag(true)
+        UserZoneHVACForcedAirComponentStruct() : UserAirComponentStruct()
         {
         }
 
-        void initialize(EnergyPlusData &state, int ZoneNum);
+        void initialize(EnergyPlusData &state, int ZoneNum) override;
 
-        void report(EnergyPlusData &state);
+        void report(EnergyPlusData &state) override;
+    };
+
+    struct UserAirTerminalComponentStruct : public UserAirComponentStruct
+    {
+        int ActualCtrlZoneNum;
+        int ADUNum; // index of corresponding air distribution unit
+
+        UserAirTerminalComponentStruct() : UserAirComponentStruct(), ActualCtrlZoneNum(0), ADUNum(0)
+        {
+        }
+
+        void initialize(EnergyPlusData &state, int ZoneNum) override;
+
+        void report(EnergyPlusData &state) override;
     };
 
     void SimCoilUserDefined(EnergyPlusData &state,
@@ -335,11 +325,13 @@ namespace UserDefinedComponents {
 
     void GetUserDefinedComponents(EnergyPlusData &state);
 
+    void GetUserDefinedAirComponent(EnergyPlusData &state);
 #ifdef OLD_API
+
     void GetUserDefinedCoilIndex(
         EnergyPlusData &state, std::string const &CoilName, int &CoilIndex, bool &ErrorsFound, std::string const &CurrentModuleObject);
 
-   void GetUserDefinedCoilAirInletNode(
+    void GetUserDefinedCoilAirInletNode(
         EnergyPlusData &state, std::string const &CoilName, int &CoilAirInletNode, bool &ErrorsFound, std::string const &CurrentModuleObject);
 
     void GetUserDefinedCoilAirOutletNode(
@@ -362,6 +354,7 @@ struct UserDefinedComponentsData : BaseGlobalStruct
     int NumUserAirTerminals = 0;
 
     bool GetInput = true;
+    bool GetAirTerminalInput = true;
     bool GetPlantCompInput = true;
 
     Array1D_bool CheckUserPlantCompName;

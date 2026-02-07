@@ -812,7 +812,7 @@ namespace Util {
                                        bool &errorFound);                // set to true if an error is found
 
     // Two structs for case insensitive containers.
-    // Eg: for unordered_map, we need to have a case insenstive hasher and a case insensitive comparator
+    // Eg: for unordered_map, we need to have a case insensitive hasher and a case insensitive comparator
     // (The default allocator for unordered_map is fine)
     // For map, you'd only need the comparator
     struct case_insensitive_hasher

@@ -7477,4 +7477,36 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     EXPECT_NEAR(thisOutletNode.GenContam, thisInletNode.GenContam, closeEnough);
 }
 
+TEST_F(EnergyPlusFixture, VariableSpeedCoils_CalcEffectiveSHR)
+{
+    // Actual values from IDF debugging
+    // int constexpr DXCoilNum = 1;
+    // Real64 constexpr SHRss = 0.74500128770610874;
+    // HVAC::FanOp constexpr fanOp = HVAC::FanOp::Cycling;
+    // Real64 constexpr RTF = 0.079499919947310219;
+    // Real64 constexpr QLatRated = 197242.22114414035;
+    // Real64 constexpr QLatActual = 149769.74983225350;
+    // Real64 constexpr EnteringDB = -4.5144144221489846;
+    // Real64 constexpr EnteringWB = -4.5144119262695312;
+
+    // Test values
+    int constexpr DXCoilNum = 1;
+    Real64 constexpr SHRss = 0.75;
+    HVAC::FanOp constexpr fanOp = HVAC::FanOp::Cycling;
+    Real64 constexpr RTF = 0.08;
+    Real64 constexpr QLatRated = 20000;
+    Real64 constexpr QLatActual = 15000;
+    Real64 constexpr EnteringDB = -4.5;
+    Real64 constexpr EnteringWB = -4.0;
+
+    state->dataVariableSpeedCoils->VarSpeedCoil.allocate(DXCoilNum);
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Twet_Rated = 1000;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).Gamma_Rated = 1.5;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).MaxONOFFCyclesperHour = 2.5;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).LatentCapacityTimeConstant = 60;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).FanDelayTime = 60;
+
+    EXPECT_EQ(VariableSpeedCoils::CalcEffectiveSHR(*state, DXCoilNum, SHRss, fanOp, RTF, QLatRated, QLatActual, EnteringDB, EnteringWB), 0.75);
+}
+
 } // namespace EnergyPlus

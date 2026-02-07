@@ -540,7 +540,7 @@ namespace HybridEvapCoolingModel {
             }
         }
         //
-        // A26, \field Mode0 System Second Fuel Consumption Lookup Table Nam
+        // A26, \field Mode0 System Second Fuel Consumption Lookup Table Name
         inter_Alpha = inter_Alpha + 1;
         curveID = -1;
         if (lAlphaBlanks(inter_Alpha)) {
@@ -1771,7 +1771,7 @@ namespace HybridEvapCoolingModel {
         }
     }
 
-    // doStep is passed some variables that could have just used the class members, but this adds clarity about whats needed, especially helpful in
+    // doStep is passed some variables that could have just used the class members, but this adds clarity about what's needed, especially helpful in
     // unit testing
     void Model::doStep(EnergyPlusData &state,
                        Real64 RequestedCoolingLoad,       // in joules, cooling load as negative

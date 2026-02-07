@@ -155,7 +155,7 @@ namespace HVACVariableRefrigerantFlow {
         Real64 WaterCondenserDesignMassFlow;   // plant data for water-cooled only
         Real64 WaterCondenserMassFlow;         // Water condenser flow rate (kg/s)
         Real64 QCondenser;                     // Water condenser heat rejection/absorption (W)
-        Real64 QCondEnergy;                    // Water condenser heat rejection/aborption energy (J)
+        Real64 QCondEnergy;                    // Water condenser heat rejection/absorption energy (J)
         Real64 CondenserSideOutletTemp;        // Water condenser outlet temp (C)
         Sched::Schedule *availSched = nullptr; // Pointer to the correct schedule // LOL
         Real64 CoolingCapacity;                // Nominal VRF heat pump cooling capacity (W)
@@ -265,19 +265,19 @@ namespace HVACVariableRefrigerantFlow {
         int HRCAPFTCool;                // Index to cool capacity as a function of temperature curve for heat recovery
         Real64 HRCAPFTCoolConst;        // constant used if curve is blank
         Real64 HRInitialCoolCapFrac;    // Fractional cooling degradation at the start of heat recovery from cooling mode
-        Real64 HRCoolCapTC;             // Time constant used to recover from intial degratation in cooling heat recovery
+        Real64 HRCoolCapTC;             // Time constant used to recover from initial degratation in cooling heat recovery
         int HREIRFTCool;                // Index to cool EIR as a function of temperature curve for heat recovery
         Real64 HREIRFTCoolConst;        // constant used if curve is blank
         Real64 HRInitialCoolEIRFrac;    // Fractional EIR degradation at the start of heat recovery from cooling mode
-        Real64 HRCoolEIRTC;             // Time constant used to recover from intial degratation in cooling heat recovery
+        Real64 HRCoolEIRTC;             // Time constant used to recover from initial degratation in cooling heat recovery
         int HRCAPFTHeat;                // Index to heat capacity as a function of temperature curve for heat recovery
         Real64 HRCAPFTHeatConst;        // constant used if curve is blank
         Real64 HRInitialHeatCapFrac;    // Fractional heating degradation at the start of heat recovery from heating mode
-        Real64 HRHeatCapTC;             // Time constant used to recover from intial degratation in heating heat recovery
+        Real64 HRHeatCapTC;             // Time constant used to recover from initial degratation in heating heat recovery
         int HREIRFTHeat;                // Index to heat EIR as a function of temperature curve for heat recovery
         Real64 HREIRFTHeatConst;        // constant used if curve is blank
         Real64 HRInitialHeatEIRFrac;    // Fractional EIR degradation at the start of heat recovery from heating mode
-        Real64 HRHeatEIRTC;             // Time constant used to recover from intial degratation in heating heat recovery
+        Real64 HRHeatEIRTC;             // Time constant used to recover from initial degratation in heating heat recovery
         bool HRCoolingActive;           // heat recovery mode active in cooling mode
         bool HRHeatingActive;           // heat recovery mode active in heating mode
         bool ModeChange;                // tracks changes in operating mode
@@ -318,7 +318,7 @@ namespace HVACVariableRefrigerantFlow {
         int LowLoadTeError = 0;
         int LowLoadTeErrorIndex = 0; // warning message index
         // The following are for the Algorithm Type: VRF model based on physics, applicable for Fluid Temperature Control
-        int AlgorithmIUCtrl;             // VRF indoor unit contrl algorithm, 1-High sensible, 2-Te/Tc constant
+        int AlgorithmIUCtrl;             // VRF indoor unit control algorithm, 1-High sensible, 2-Te/Tc constant
         Array1D<Real64> CompressorSpeed; // compressor speed array [rps]
         Real64 CondensingTemp;           // VRV system outdoor unit condensing temperature [C]
         Real64 CondTempFixed;            // Inddor unit condensing temperature, fixed, for AlgorithmIUCtrl is 2-Te/Tc constant [C]
@@ -380,8 +380,8 @@ namespace HVACVariableRefrigerantFlow {
         Real64 SCHE;                      // Simultaneous Cooling and Heating Efficiency [Btu/h/W]
         Real64 SHLow;                     // VRF outdoor unit superheating degrees lower limit [C]
         Real64 SCLow;                     // VRF outdoor unit subcooling degrees lower limit [C]
-        Real64 SHHigh;                    // VRF outdoor unit superheating degrees uppler limit [C]
-        Real64 SCHigh;                    // VRF outdoor unit subcooling degrees uppler limit [C]
+        Real64 SHHigh;                    // VRF outdoor unit superheating degrees upper limit [C]
+        Real64 SCHigh;                    // VRF outdoor unit subcooling degrees upper limit [C]
         Real64 VRFOperationSimPath;       // simulation path indicating the VRF operation mode [--]
         bool checkPlantCondTypeOneTime;
         int CondenserCapErrIdx; // recurring condenser capacity error index

@@ -396,6 +396,11 @@ namespace DataPlant {
         LoopType::Plant, //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         LoopType::Both,  //	"HeatPump:PlantLoop:EIR:Cooling"
         LoopType::Both,  //	"HeatPump:PlantLoop:EIR:Heating"
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:COOLING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:HEATING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER",
         LoopType::Both   //	"DistrictHeating:Steam"
     };
 } // namespace DataPlant

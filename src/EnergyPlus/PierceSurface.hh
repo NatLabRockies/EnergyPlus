@@ -65,7 +65,7 @@
 //  This has been carefully designed for speed but is probably not be optimal yet
 //   For EnergyPlus most surfaces are rectangular so that is the most important for performance
 //   Inlining, storing preprocessed values in Surface, 2D projection, & short circuiting are used here for speed
-//   Agressive inlining options may be needed to get peak performance
+//   Aggressive inlining options may be needed to get peak performance
 //   Don't make changes here without validating the performance impact
 
 // EnergyPlus Headers

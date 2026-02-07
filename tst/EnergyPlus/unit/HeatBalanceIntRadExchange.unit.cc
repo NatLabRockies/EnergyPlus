@@ -129,6 +129,56 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_CarrollMRT)
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
     CalcFp(N, EMISS, FMRT, Fp);
+
+    int ENCLOSURES = 1;
+    int SURFACES = 6;
+    int HISTORY = 1;
+
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataHeatBalIntRadExchg->CarrollMethod = true;
+
+    state->dataConstruction->Construct.allocate(SURFACES);
+
+    state->dataSurface->TotSurfaces = SURFACES;
+    state->dataSurface->Surface.allocate(SURFACES);
+    state->dataSurface->SurfaceWindow.allocate(SURFACES);
+    state->dataSurface->SurfWinIRfromParentZone.allocate(SURFACES);
+    state->dataSurface->SurfWinShadingFlag.allocate(SURFACES);
+    state->dataSurface->SurfWinWindowModelType.allocate(SURFACES);
+
+    state->dataViewFactor->NumOfRadiantEnclosures = ENCLOSURES;
+    state->dataViewFactor->EnclRadInfo.allocate(ENCLOSURES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).NumOfSurfaces = SURFACES;
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Emissivity.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).FMRT.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Fp.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).SurfacePtr.allocate(SURFACES);
+
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(SURFACES);
+    state->dataHeatBalSurf->SurfInsideTempHist.allocate(HISTORY);
+    state->dataHeatBalSurf->SurfInsideTempHist(HISTORY).allocate(SURFACES);
+    state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea.allocate(SURFACES);
+
+    state->dataHeatBalIntRadExchg->MaxNumOfRadEnclosureSurfs = SURFACES;
+    state->dataHeatBalIntRadExchg->SurfaceEmiss.allocate(SURFACES);
+    state->dataHeatBalIntRadExchg->SurfaceTempInKto4th.allocate(SURFACES);
+    state->dataHeatBalIntRadExchg->SurfaceTempRad.allocate(SURFACES);
+
+    for (int surfaceNum = 1; surfaceNum <= SURFACES; surfaceNum++) {
+        state->dataSurface->Surface(surfaceNum).Construction = surfaceNum;
+
+        state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area(surfaceNum) = 10;
+        state->dataViewFactor->EnclRadInfo(ENCLOSURES).SurfacePtr(surfaceNum) = surfaceNum;
+
+        state->dataHeatBalSurf->SurfAbsThermalInt(surfaceNum) = 0.9;
+        state->dataHeatBalSurf->SurfInsideTempHist(1)(surfaceNum) = 293.15 + (surfaceNum % 2);
+    }
+
+    CalcFMRT(*state, SURFACES, state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area, state->dataViewFactor->EnclRadInfo(ENCLOSURES).FMRT);
+    CalcInteriorRadExchange(*state, state->dataHeatBalSurf->SurfInsideTempHist(HISTORY), 0, state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea);
+
+    EXPECT_NEAR(sum(state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea), 0, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_FixViewFactorsTest)

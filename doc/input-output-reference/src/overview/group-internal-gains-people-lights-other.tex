@@ -18,52 +18,54 @@ One exception to this is \hyperref[electricequipmentiteaircooled]{ElectricEquipm
 which only allows Zone or Space Name. If a Zone Name is specified which contains more than one Space, the same rules apply.
 
 As an example, assume that Zone 1 contains Space 1A and Space 1B, and Zone 2 contains only Space 2 (objects are abbreviated for clarity):
+
 \begin{lstlisting}
 Space,
-Space 1A, !- Name
-Zone 1,   !- Zone Name
-75.0,     !- Floor Area
+  Space 1A,                   !- Name
+  Zone 1,                     !- Zone Name
+  75.0;                       !- Floor Area
 
 Space,
-Space 1B, !- Name
-Zone 1;   !- Zone Name
-25.0,     !- Floor Area
+  Space 1B,                   !- Name
+  Zone 1,                     !- Zone Name
+  25.0;                       !- Floor Area
 
 Space,
-Space 2,  !- Name
-Zone 2,   !- Zone Name
+  Space 2,                    !- Name
+  Zone 2;                     !- Zone Name
 
 SpaceList,
-All Spaces, !- Name
-Space 1A,   !- Space 1 Name
-Space 1B,   !- Space 2 Name
-Space 2,    !- Space 3 Name
+  All Spaces,                 !- Name
+  Space 1A,                   !- Space 1 Name
+  Space 1B,                   !- Space 2 Name
+  Space 2;                    !- Space 3 Name
 
 People,
-Office People, !- Name
-Zone 1,     !- Zone or ZoneList or Space or SpaceList Name
-100.0,      !- Number of People
+  Office People,              !- Name
+  Zone 1,                     !- Zone or ZoneList or Space or SpaceList Name
+  100.0;                      !- Number of People
 
 People,
-Lunchroom People, !- Name
-Zone 2,     !- Zone or ZoneList or Space or SpaceList Name
-50.0,       !- Number of People
+  Lunchroom People,           !- Name
+  Zone 2,                     !- Zone or ZoneList or Space or SpaceList Name
+  50.0;                       !- Number of People
 
 People,
-Cleaning Crew, !- Name
-All Spaces, !- Zone or ZoneList or Space or SpaceList Name
-2.0,        !- Number of People
+  Cleaning Crew,              !- Name
+  All Spaces,                 !- Zone or ZoneList or Space or SpaceList Name
+  2.0;                        !- Number of People
+\end{lstlisting}
 
 Resulting instances of People:
 
-Space 1A Office People, 75 people. (concatenated name, apportioned by space floor area)
-Space 1B Office People, 25 people. (concatenated name, apportioned by space floor area)
-Lunchroom People, 50 people.       (simple object name for a single space)
-Space 1A Cleaning Crew, 2 people.  (full load applied to each space in SpaceList)
-Space 1B Cleaning Crew, 2 people.
-Space 2 Cleaning Crew, 2 people.
-
-\end{lstlisting}
+\begin{itemize}
+  \item  Space 1A Office People, 75 people. (concatenated name, apportioned by space floor area)
+  \item  Space 1B Office People, 25 people. (concatenated name, apportioned by space floor area)
+  \item  Lunchroom People, 50 people.       (simple object name for a single space)
+  \item  Space 1A Cleaning Crew, 2 people.  (full load applied to each space in SpaceList)
+  \item  Space 1B Cleaning Crew, 2 people.
+  \item  Space 2 Cleaning Crew, 2 people.
+\end{itemize}
 
 
 \subsection{People}\label{people}
@@ -302,88 +304,86 @@ specified, 86$^\circ$F (or 30$^\circ$C) will be used as the default temperature 
 The following IDF example allows for a maximum of 31 people with scheduled occupancy of ``Office Occupancy'', 60\% radiant using an Activity Schedule of ``Activity Sch''. The example allows for thermal comfort reporting.
 
 \begin{lstlisting}
-
 People,
-  Kitchen_ZN_1_FLR_1,   !- Name
-  Kitchen_ZN_1_FLR_1,   !- Zone or ZoneList or Space or SpaceList Name
-  BLDG_OCC_SCH,         !- Number of People Schedule Name
-  People,               !- Number of People Calculation Method
-  25.2000,,,            !- Number of People, People per Zone Floor Area, Zone Floor Area per Person
-  0.3000,               !- Fraction Radiant
-  AUTOCALCULATE,        !- Sensible Heat Fraction
-  ACTIVITY_SCH,         !- Activity Level Schedule Name
-  3.82E-8,              !- Carbon Dioxide Generation Rate {m3/s-W}
-  No,                   !- Enable ASHRAE 55 Comfort Warnings
-  EnclosureAveraged,    !- Mean Radiant Temperature Calculation Type
-  ,                     !- Surface Name/Angle Factor List Name
-  WORK_EFF_SCH,         !- Work Efficiency Schedule Name
+  Kitchen_ZN_1_FLR_1,         !- Name
+  Kitchen_ZN_1_FLR_1,         !- Zone or ZoneList or Space or SpaceList Name
+  BLDG_OCC_SCH,               !- Number of People Schedule Name
+  People,                     !- Number of People Calculation Method
+  25.2000,,,                  !- Number of People, People per Zone Floor Area, Zone Floor Area per Person
+  0.3000,                     !- Fraction Radiant
+  AUTOCALCULATE,              !- Sensible Heat Fraction
+  ACTIVITY_SCH,               !- Activity Level Schedule Name
+  3.82E-8,                    !- Carbon Dioxide Generation Rate {m3/s-W}
+  No,                         !- Enable ASHRAE 55 Comfort Warnings
+  EnclosureAveraged,          !- Mean Radiant Temperature Calculation Type
+  ,                           !- Surface Name/Angle Factor List Name
+  WORK_EFF_SCH,               !- Work Efficiency Schedule Name
   ClothingInsulationSchedule, !- Clothing Insulation Calculation Method
-  ,                     !- Clothing Insulation Calculation Method Schedule Name
-  CLOTHING_SCH,         !- Clothing Insulation Schedule Name
-  AIR_VELO_SCH,         !- Air Velocity Schedule Name
-  Fanger;               !- Thermal Comfort Model 1 Type
+  ,                           !- Clothing Insulation Calculation Method Schedule Name
+  CLOTHING_SCH,               !- Clothing Insulation Schedule Name
+  AIR_VELO_SCH,               !- Air Velocity Schedule Name
+  Fanger;                     !- Thermal Comfort Model 1 Type
 \end{lstlisting}
 
 A simpler example, without using the thermal comfort reporting option:
 
 \begin{lstlisting}
 People,
-  RIGHT FORK,     !- Name
-  RIGHT FORK,     !- Zone or ZoneListName
-  Dorm Occupancy, !- Number of People Schedule Name
-  people,         !- Number of People Calculation Method
-  8.00000,        !- Number of People,
-  ,               !- People per Zone Floor Area
-  ,               !- Zone Floor Area per Person
-  0.6000000,      !- Fraction Radiant
-  Autocalculate,  !- Sensible Heat Fraction
-  Activity Sch,   !- Activity level Schedule Name
+  RIGHT FORK,                 !- Name
+  RIGHT FORK,                 !- Zone or ZoneListName
+  Dorm Occupancy,             !- Number of People Schedule Name
+  people,                     !- Number of People Calculation Method
+  8.00000,                    !- Number of People,
+  ,                           !- People per Zone Floor Area
+  ,                           !- Zone Floor Area per Person
+  0.6000000,                  !- Fraction Radiant
+  Autocalculate,              !- Sensible Heat Fraction
+  Activity Sch,               !- Activity level Schedule Name
 \end{lstlisting}
 
 And with the sensible fraction specified:
 
 \begin{lstlisting}
 People,
-  SPACE1-1 People 1,    !- Name
-  SPACE1-1,             !- Zone or ZoneListName
-  OCCUPY-1,             !- Number of People Schedule Name
-  people,               !- Number of People Calculation Method
-  11,                   !- Number of People
-  ,                     !- People per Zone Floor Area
-  ,                     !- Zone Floor Area per Person
-  0.3,                  !- Fraction Radiant
-  0.55,                 !- Sensible Heat Fraction
-  ActSchd;              !- Activity level Schedule Name
+  SPACE1-1 People 1,          !- Name
+  SPACE1-1,                   !- Zone or ZoneListName
+  OCCUPY-1,                   !- Number of People Schedule Name
+  people,                     !- Number of People Calculation Method
+  11,                         !- Number of People
+  ,                           !- People per Zone Floor Area
+  ,                           !- Zone Floor Area per Person
+  0.3,                        !- Fraction Radiant
+  0.55,                       !- Sensible Heat Fraction
+  ActSchd;                    !- Activity level Schedule Name
 \end{lstlisting}
 
 Global People Object:
 
 \begin{lstlisting}
 ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
 People,
-  AllZones with People, !- Name
-  AllOccupiedZones,     !- Zone or ZoneList or Space or SpaceList Name
-  OCCUPY-1,             !- Number of People Schedule Name
-  People/Area,          !- Number of People Calculation Method
-  ,                     !- Number of People
-  .11,                  !- People per Floor Area {person/m2}
-  ,                     !- Floor Area per Person {m2/person}
-  0.3,                  !- Fraction Radiant
-  ,                     !- Sensible Heat Fraction
-  ActSchd,              !- Activity Level Schedule Name
-  3.82E-8,              !- Carbon Dioxide Generation Rate {m3/s-W}
-  No,                   !- Enable ASHRAE 55 Comfort Warnings
-  surfaceweighted,      !- Mean Radiant Temperature Calculation Type
-  Zn001:Wall001,        !- Surface Name/Angle Factor List Name
-  Work Eff Sch,         !- Work Efficiency Schedule Name
-  ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
-  ,                     !- Clothing Insulation Calculation Method Schedule Name
-  Clothing Sch,         !- Clothing Insulation Schedule Name
-  Air Velo Sch,         !- Air Velocity Schedule Name
-  FANGER,               !- Thermal Comfort Model 1 Type
-  PIERCE,               !- Thermal Comfort Model 2 Type
-  KSU;                  !- Thermal Comfort Model 3 Type
+  AllZones with People,       !- Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  OCCUPY-1,                   !- Number of People Schedule Name
+  People/Area,                !- Number of People Calculation Method
+  ,                           !- Number of People
+  .11,                        !- People per Floor Area {person/m2}
+  ,                           !- Floor Area per Person {m2/person}
+  0.3,                        !- Fraction Radiant
+  ,                           !- Sensible Heat Fraction
+  ActSchd,                    !- Activity Level Schedule Name
+  3.82E-8,                    !- Carbon Dioxide Generation Rate {m3/s-W}
+  No,                         !- Enable ASHRAE 55 Comfort Warnings
+  surfaceweighted,            !- Mean Radiant Temperature Calculation Type
+  Zn001:Wall001,              !- Surface Name/Angle Factor List Name
+  Work Eff Sch,               !- Work Efficiency Schedule Name
+  ClothingInsulationSchedule, !- Clothing Insulation Calculation Method
+  ,                           !- Clothing Insulation Calculation Method Schedule Name
+  Clothing Sch,               !- Clothing Insulation Schedule Name
+  Air Velo Sch,               !- Air Velocity Schedule Name
+  FANGER,                     !- Thermal Comfort Model 1 Type
+  PIERCE,                     !- Thermal Comfort Model 2 Type
+  KSU;                        !- Thermal Comfort Model 3 Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-017}
@@ -839,13 +839,13 @@ An example IDF with an electric low temperature radiant system is shown below.
 
 \begin{lstlisting}
 ComfortViewFactorAngles,
-  South Zone Angle Factors, !- name of angle factor list
-  Zn001:Flr001,         !- Surface name 1
-  0.75,                 !- Angle factor for surface 1
-  Zn001:Wall001,        !- Surface name 2
-  0.15,                 !- Angle factor for surface 2
-  Zn001:Roof001,        !- Surface name 3
-  0.10;                 !- Angle factor for surface 3
+  South Zone Angle Factors,   !- name of angle factor list
+  Zn001:Flr001,               !- Surface name 1
+  0.75,                       !- Angle factor for surface 1
+  Zn001:Wall001,              !- Surface name 2
+  0.15,                       !- Angle factor for surface 2
+  Zn001:Roof001,              !- Surface name 3
+  0.10;                       !- Angle factor for surface 3
 \end{lstlisting}
 
 \subsection{Lights}\label{lights-000}
@@ -1021,38 +1021,37 @@ An IDF example:
 
 \begin{lstlisting}
 Lights,
-  RIGHT FORK Lights 1,  !- Name
-  RIGHT FORK,           !- Zone Name
-  Office Lighting,      !- SCHEDULE Name
-  LightingLevel,        !- Design Level calculation method
-  1039.706,             !- Lighting Level {W}
-  ,                     !- Watts per Floor Area {W/m2}
-  ,                     !- Watts per Person {W/person}
-  0.0000000E+00,        !- Return Air Fraction
-  0.4000000,            !- Fraction Radiant
-  0.2000000,            !- Fraction Visible
-  1.0,                  !- Fraction Replaceable
-  GeneralLights;        !- End-Use Subcategory
+  RIGHT FORK Lights 1,        !- Name
+  RIGHT FORK,                 !- Zone Name
+  Office Lighting,            !- SCHEDULE Name
+  LightingLevel,              !- Design Level calculation method
+  1039.706,                   !- Lighting Level {W}
+  ,                           !- Watts per Floor Area {W/m2}
+  ,                           !- Watts per Person {W/person}
+  0.0000000E+00,              !- Return Air Fraction
+  0.4000000,                  !- Fraction Radiant
+  0.2000000,                  !- Fraction Visible
+  1.0,                        !- Fraction Replaceable
+  GeneralLights;              !- End-Use Subcategory
 \end{lstlisting}
 
 Global Lights Object:
 
 \begin{lstlisting}
 ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
 Lights,
-  AllZones with Lights, !- Name
-  AllOccupiedZones,     !- Zone or ZoneList or Space or SpaceList Name
-  LIGHTS-1,             !- Schedule Name
-  Watts/Area,           !- Design Level Calculation Method
-  ,                     !- Lighting Level {W}
-  16,                   !- Watts per Zone Floor Area {W/m2}
-  ,                     !- Watts per Person {W/person}
-  0.2,                  !- Return Air Fraction
-  0.59,                 !- Fraction Radiant
-  0.2,                  !- Fraction Visible
-  0,                    !- Fraction Replaceable
-  GeneralLights;        !- End-Use Subcategory
+  AllZones with Lights,       !- Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  LIGHTS-1,                   !- Schedule Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Lighting Level {W}
+  16,                         !- Watts per Zone Floor Area {W/m2}
+  ,                           !- Watts per Person {W/person}
+  0.2,                        !- Return Air Fraction
+  0.59,                       !- Fraction Radiant
+  0.2,                        !- Fraction Visible
+  0,                          !- Fraction Replaceable
+  GeneralLights;              !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-012}
@@ -1317,35 +1316,34 @@ An IDF example:
 
 \begin{lstlisting}
 ElectricEquipment,
-  DORM ROOMS AND COMMON AREAS ElecEq 1, !- Name
-  DORM ROOMS AND COMMON AREAS,          !- Zone Name
-  Residence Equipment,                  !- SCHEDULE Name
-  EquipmentLevel,                       !- Design Level calculation method
-  9210.921,                             !- Design Level {W}
-  ,                                     !- Watts per Zone Floor Area {watts/m2}
-  ,                                     !- Watts per Person {watts/person}
-  0.0000000E+00,                        !- Fraction Latent
-  0.3000000,                            !- Fraction Radiant
-  0.0000000E+00,                        !- Fraction Lost
-  Computers;                            !- End-use Subcategory
+  DORM ROOMS AND COMMON AREAS ElecEq 1,  !- Name
+  DORM ROOMS AND COMMON AREAS,!- Zone Name
+  Residence Equipment,        !- SCHEDULE Name
+  EquipmentLevel,             !- Design Level calculation method
+  9210.921,                   !- Design Level {W}
+  ,                           !- Watts per Zone Floor Area {watts/m2}
+  ,                           !- Watts per Person {watts/person}
+  0.0000000E+00,              !- Fraction Latent
+  0.3000000,                  !- Fraction Radiant
+  0.0000000E+00,              !- Fraction Lost
+  Computers;                  !- End-use Subcategory
 \end{lstlisting}
 
 Global ElectricEquipment example:
 
 \begin{lstlisting}
 ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
-
 ElectricEquipment,
-  AllZones with Electric Equipment,     !- Name
-  AllOccupiedZones,                     !- Zone or ZoneList or Space or SpaceList Name
-  EQUIP-1,                              !- Schedule Name
-  Watts/Person,                         !- Design Level Calculation Method
-  ,                                     !- Design Level {W}
-  ,                                     !- Watts per Zone Floor Area {W/m2}
-  96,                                   !- Watts per Person {W/person}
-  0,                                    !- Fraction Latent
-  0.3,                                  !- Fraction Radiant
-  0;                                    !- Fraction Lost
+  AllZones with Electric Equipment,  !- Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- Schedule Name
+  Watts/Person,               !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  ,                           !- Watts per Zone Floor Area {W/m2}
+  96,                         !- Watts per Person {W/person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0;                          !- Fraction Lost
 \end{lstlisting}
 
 \subsection{GasEquipment}\label{gasequipment}
@@ -1441,35 +1439,34 @@ An IDF example:
 \begin{lstlisting}
 GasEquipment,
   DORM ROOMS AND COMMON AREAS GasEq 1,  !- Name
-  DORM ROOMS AND COMMON AREAS,          !- Zone or ZoneList or Space or SpaceList Name
-  Gas Eq Sch,                           !-Schedule Name
-  EquipmentLevel,                       !- Design Level Calculation Method
-  29287.51,                             !- Design Level {W}
-  ,                                     !- Power per Floor Area {W/m2}
-  ,                                     !- Power per Person {W/Person}
-  0,                                    !- Fraction Latent
-  0.3,                                  !- Fraction Radiant
-  0,                                    !- Fraction Lost
-  0,                                    !- Carbon Dioxide Generation Rate {m3/s-W}
-  Cooking;                              !- End-Use Subcategory
+  DORM ROOMS AND COMMON AREAS,!- Zone or ZoneList or Space or SpaceList Name
+  Gas Eq Sch,                 !- Schedule Name
+  EquipmentLevel,             !- Design Level Calculation Method
+  29287.51,                   !- Design Level {W}
+  ,                           !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/Person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0,                          !- Fraction Lost
+  0,                          !- Carbon Dioxide Generation Rate {m3/s-W}
+  Cooking;                    !- End-Use Subcategory
 \end{lstlisting}
 
 Global Gas Equipment example:
 
 \begin{lstlisting}
 ZoneList,OfficeZones,Left Fork, Middle Fork, Right Fork;
-
 GasEquipment,
-  Office Zones with Gas,                !- Name
-  OfficeZones,                          !- Zone or ZoneList or Space or SpaceList Name
-  Gas Eq Sch,                           !- Schedule Name
-  Watts/Area,                           !- Design Level Calculation Method
-  ,                                     !- Design Level {W}
-  197,                                  !- Power per Floor Area {W/m2}
-  ,                                     !- Power per Person {W/Person}
-  0.0000000E+00,                        !- Fraction Latent
-  0.3000000,                            !- Fraction Radiant
-  0.0000000E+00;                        !- Fraction Lost
+  Office Zones with Gas,      !- Name
+  OfficeZones,                !- Zone or ZoneList or Space or SpaceList Name
+  Gas Eq Sch,                 !- Schedule Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  197,                        !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/Person}
+  0.0000000E+00,              !- Fraction Latent
+  0.3000000,                  !- Fraction Radiant
+  0.0000000E+00;              !- Fraction Lost
 \end{lstlisting}
 
 \subsection{HotWaterEquipment}\label{hotwaterequipment}
@@ -1560,35 +1557,34 @@ IDF Examples:
 
 \begin{lstlisting}
 HotWaterEquipment,
-  SPACE2-1 HWEq 1,    !- Name
-  SPACE2-1,           !- Zone or ZoneList or Space or SpaceList Name
-  EQUIP-1,            !- SCHEDULE Name
-  EquipmentLevel,     !- Design Level calculation method
-  300,                !- Design Level {W}
-  ,                   !- Power per Floor Area {watts/m2}
-  ,                   !- Power per Person {watts/person}
-  0.2,                !- Fraction Latent
-  0.1,                !- Fraction Radiant
-  0.5,                !- Fraction Lost
-  Dishwashing;        !- End-Use Subcategory
+  SPACE2-1 HWEq 1,            !- Name
+  SPACE2-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- SCHEDULE Name
+  EquipmentLevel,             !- Design Level calculation method
+  300,                        !- Design Level {W}
+  ,                           !- Power per Floor Area {watts/m2}
+  ,                           !- Power per Person {watts/person}
+  0.2,                        !- Fraction Latent
+  0.1,                        !- Fraction Radiant
+  0.5,                        !- Fraction Lost
+  Dishwashing;                !- End-Use Subcategory
 \end{lstlisting}
 
 Global Hot Water Equipment example:
 
 \begin{lstlisting}
 ZoneList,OfficeZones,Left Fork, Middle Fork, Right Fork;
-
 HotWaterEquipment,
-  Office Zones with HoWater Equipment,!- Name
-  OfficeZones,                        !- Zone or ZoneList or Space or SpaceList Name
-  HotWater Eq Sch,                    !- Schedule Name
-  Watts/Area,                         !- Design Level Calculation Method
-  ,                                   !- Design Level {W}
-  50,                                 !- Power per Floor Area {W/m2}
-  ,                                   !- Power per Person {W/Person}
-  0.0000000E+00,                      !- Fraction Latent
-  0.3000000,                          !- Fraction Radiant
-  0.0000000E+00;                      !- Fraction Lost
+  Office Zones with HoWater Equipment,  !- Name
+  OfficeZones,                !- Zone or ZoneList or Space or SpaceList Name
+  HotWater Eq Sch,            !- Schedule Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  50,                         !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/Person}
+  0.0000000E+00,              !- Fraction Latent
+  0.3000000,                  !- Fraction Radiant
+  0.0000000E+00;              !- Fraction Lost
 \end{lstlisting}
 
 \subsection{SteamEquipment}\label{steamequipment}
@@ -1678,19 +1674,18 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Cooking'', ``C
 IDF Examples:
 
 \begin{lstlisting}
-
 SteamEquipment,
-  SPACE4-1 ElecEq 1, !- Name
-  SPACE4-1,          !- Zone or ZoneList or Space or SpaceList Name
-  EQUIP-1,           !- SCHEDULE Name
-  EquipmentLevel,    !- Design Level calculation method
-  1050,              !- Design Level {W}
-  ,                  !- Power per Floor Area {watts/m2}
-  ,                  !- Power per Person {watts/person}
-  0.5,               !- Fraction Latent
-  0.3,               !- Fraction Radiant
-  0,                 !- Fraction Lost
-  Laundry;           !- End-Use Subcategory
+  SPACE4-1 ElecEq 1,          !- Name
+  SPACE4-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- SCHEDULE Name
+  EquipmentLevel,             !- Design Level calculation method
+  1050,                       !- Design Level {W}
+  ,                           !- Power per Floor Area {watts/m2}
+  ,                           !- Power per Person {watts/person}
+  0.5,                        !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0,                          !- Fraction Lost
+  Laundry;                    !- End-Use Subcategory
 \end{lstlisting}
 
 \subsection{OtherEquipment}\label{otherequipment}
@@ -1790,19 +1785,19 @@ IDF Examples
 
 \begin{lstlisting}
 OtherEquipment,
-	BASE-1 OthEq 1, !- Name
-	Propane,  !- Fuel Use Type
-	BASE-1, !- Zone or ZoneList or Space or SpaceList Name
-	ALWAYSON, !- SCHEDULE Name
-	EquipmentLevel, !- Design Level calculation method
-	6766., !- Design Level {W}
-	, !- Power per Floor Area {watts/m2}
-	, !- Power per Person {watts/person}
-	0, !- Fraction Latent
-	0.3, !- Fraction Radiant
-	0, !- Fraction Lost
-	1.2E-7, !- Carbon Dioxide Generation Rate
-	SubCategory1; !- End-Use Subcategory
+  BASE-1 OthEq 1,             !- Name
+  Propane,                    !- Fuel Use Type
+  BASE-1,                     !- Zone or ZoneList or Space or SpaceList Name
+  ALWAYSON,                   !- SCHEDULE Name
+  EquipmentLevel,             !- Design Level calculation method
+  6766.,                      !- Design Level {W}
+  ,                           !- Power per Floor Area {watts/m2}
+  ,                           !- Power per Person {watts/person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0,                          !- Fraction Lost
+  1.2E-7,                     !- Carbon Dioxide Generation Rate
+  SubCategory1;               !- End-Use Subcategory
 \end{lstlisting}
 
 \subsection{Internal Gain Equipment Outputs}\label{outputs-5-004}
@@ -2404,14 +2399,14 @@ An IDF example:
 
 \begin{lstlisting}
 IndoorLivingWall,
-  Space1-1IndoorLivingWall,   !-Name
-  SPACE1-1SouthPartition,     !-Surface Name
-  AlwaysOn,                   !-Schedule Name
-  Penman-Monteith,            !-ET Calculation Method
-  LED,                        !-Lighting Method
-  AlwaysOff,                  !-LED Intensity Schedule Name
-  ,                           !-Daylighting Control Name
-  ,                           !-LED - Daylight Targeted Lighting Intensity Schedule Name
+  Space1-1IndoorLivingWall,   !- Name
+  SPACE1-1SouthPartition,     !- Surface Name
+  AlwaysOn,                   !- Schedule Name
+  Penman-Monteith,            !- ET Calculation Method
+  LED,                        !- Lighting Method
+  AlwaysOff,                  !- LED Intensity Schedule Name
+  ,                           !- Daylighting Control Name
+  ,                           !- LED - Daylight Targeted Lighting Intensity Schedule Name
   30,                         !- Total Leaf Area {m2}
   32.5,                       !- LED Nominal Intensity {umol/m2-s}
   640,                        !- LED Nominal Power {W}
@@ -2678,74 +2673,73 @@ The difference schedule of the actual AHU return air temperature to the IT equip
 An IDF example:
 
 \begin{lstlisting}
-
 ElectricEquipment:ITE:AirCooled,
-  Data Center Servers,     !- Name
-  Main Zone,               !- Zone or Space Name
-  FlowFromSystem,          !- Air Flow Calculation Method
-  Watts/Unit,              !- Design Power Input Calculation Method
-  500,                     !- Watts per Unit {W}
-  200,                     !- Number of Units
-  ,                        !- Watts per Floor Area {W/m2}
+  Data Center Servers,        !- Name
+  Main Zone,                  !- Zone or Space Name
+  FlowFromSystem,             !- Air Flow Calculation Method
+  Watts/Unit,                 !- Design Power Input Calculation Method
+  500,                        !- Watts per Unit {W}
+  200,                        !- Number of Units
+  ,                           !- Watts per Floor Area {W/m2}
   Data Center Operation Schedule,  !- Design Power Input Schedule Name
   Data Center CPU Loading Schedule,  !- CPU Loading  Schedule Name
-  Model 5250 Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
-  0.4,                     !- Design Fan Power Input Fraction
-  0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}
+  Model 5250 Power fLoadTemp, !- CPU Power Input Function of Loading and Air Temperature Curve Name
+  0.4,                        !- Design Fan Power Input Fraction
+  0.0001,                     !- Design Fan Air Flow Rate per Power Input {m3/s-W}
   Model 5250 AifFlow fLoadTemp,  !- Air Flow Function of Loading and Air Temperature Curve Name
-  ECM FanPower fFlow,      !- Fan Power Input Function of Flow Curve Name
-  15,                      !- Design Entering Air Temperature {C}
-  A3,                      !- Environmental Class
-  AdjustedSupply,          !- Air Inlet Connection Type
-  ,                        !- Air Inlet Room Air Model Node Name
-  ,                        !- Air Outlet Room Air Model Node Name
-  Main Zone Inlet Node,    !- Supply Air Node Name
-  0.1,                     !- Design Recirculation Fraction
+  ECM FanPower fFlow,         !- Fan Power Input Function of Flow Curve Name
+  15,                         !- Design Entering Air Temperature {C}
+  A3,                         !- Environmental Class
+  AdjustedSupply,             !- Air Inlet Connection Type
+  ,                           !- Air Inlet Room Air Model Node Name
+  ,                           !- Air Outlet Room Air Model Node Name
+  Main Zone Inlet Node,       !- Supply Air Node Name
+  0.1,                        !- Design Recirculation Fraction
   Data Center Recirculation fLoadTemp,  !- Recirculation Function of Loading and Supply Temperature Curve Name
-  0.9,                     !- Design Electric Power Supply Efficiency
-  UPS Efficiency fPLR,     !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
-  1,                       !- Fraction of Electric Power Supply Losses to Zone
-  ITE-CPU,                 !- CPU End-Use Subcategory
-  ITE-Fans,                !- Fan End-Use Subcategory
-  ITE-UPS;                 !- Electric Power Supply End-Use Subcategory
+  0.9,                        !- Design Electric Power Supply Efficiency
+  UPS Efficiency fPLR,        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
+  1,                          !- Fraction of Electric Power Supply Losses to Zone
+  ITE-CPU,                    !- CPU End-Use Subcategory
+  ITE-Fans,                   !- Fan End-Use Subcategory
+  ITE-UPS;                    !- Electric Power Supply End-Use Subcategory
 \end{lstlisting}
 
 Another IDF example when Air Flow Calculation Method = FlowControlWithApproachTemperatures:
 
 \begin{lstlisting}
-  ElectricEquipment:ITE:AirCooled,
-    SmallDataCenter ComputerRoom Elec Equip,     !- Name
-    ComputerRoom ZN,                             !- Zone or Space Name
-    FlowControlWithApproachTemperatures,         !- Air Flow Calculation Method
-    Watts/Area,                      !- Design Power Input Calculation Method
-    ,                                !- Watts per Unit {W}
-    ,                                !- Number of Units
-    430.556416668389,                !- Watts per Floor Area {W/m2}
-    Data Center Operation Schedule,  !- Design Power Input Schedule Name
-    DataCenter Equipment_SCH,  !- CPU Loading  Schedule Name
-    Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
-    0.4,                     !- Design Fan Power Input Fraction
-    0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}
-    Data Center Servers Airflow fLoadTemp,  !- Air Flow Function of Loading and Air Temperature Curve Name
-    ECM FanPower fFlow,      !- Fan Power Input Function of Flow Curve Name
-    15,                      !- Design Entering Air Temperature {C}
-    A3,                      !- Environmental Class
-    AdjustedSupply,          !- Air Inlet Connection Type
-    ,                        !- Air Inlet Room Air Model Node Name
-    ,                        !- Air Outlet Room Air Model Node Name
-    Node 6, 			     !- Supply Air Node Name
-    0,                     !- Design Recirculation Fraction
-    Data Center Recirculation fLoadTemp,  !- Recirculation Function of Loading and Supply Temperature Curve Name
-    0.9,                     !- Design Electric Power Supply Efficiency
-    UPS Efficiency fPLR,     !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
-    1,                       !- Fraction of Electric Power Supply Losses to Zone
-    ITE-CPU,                 !- CPU End-Use Subcategory
-    ITE-Fans,                !- Fan End-Use Subcategory
-    ITE-UPS,                 !- Electric Power Supply End-Use Subcategory
-    3,                       !- field Supply Approach Temperature
-    ,                        !- field Supply Approach Temperature Schedule
-    -3,                      !- field Return Approach Temperature
-    ;                        !- field Return Approach Temperature Schedule
+ElectricEquipment:ITE:AirCooled,
+  SmallDataCenter ComputerRoom Elec Equip,  !- Name
+  ComputerRoom ZN,            !- Zone or Space Name
+  FlowControlWithApproachTemperatures,  !- Air Flow Calculation Method
+  Watts/Area,                 !- Design Power Input Calculation Method
+  ,                           !- Watts per Unit {W}
+  ,                           !- Number of Units
+  430.556416668389,           !- Watts per Floor Area {W/m2}
+  Data Center Operation Schedule,  !- Design Power Input Schedule Name
+  DataCenter Equipment_SCH,   !- CPU Loading  Schedule Name
+  Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
+  0.4,                        !- Design Fan Power Input Fraction
+  0.0001,                     !- Design Fan Air Flow Rate per Power Input {m3/s-W}
+  Data Center Servers Airflow fLoadTemp,  !- Air Flow Function of Loading and Air Temperature Curve Name
+  ECM FanPower fFlow,         !- Fan Power Input Function of Flow Curve Name
+  15,                         !- Design Entering Air Temperature {C}
+  A3,                         !- Environmental Class
+  AdjustedSupply,             !- Air Inlet Connection Type
+  ,                           !- Air Inlet Room Air Model Node Name
+  ,                           !- Air Outlet Room Air Model Node Name
+  Node 6,                     !- Supply Air Node Name
+  0,                          !- Design Recirculation Fraction
+  Data Center Recirculation fLoadTemp,  !- Recirculation Function of Loading and Supply Temperature Curve Name
+  0.9,                        !- Design Electric Power Supply Efficiency
+  UPS Efficiency fPLR,        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
+  1,                          !- Fraction of Electric Power Supply Losses to Zone
+  ITE-CPU,                    !- CPU End-Use Subcategory
+  ITE-Fans,                   !- Fan End-Use Subcategory
+  ITE-UPS,                    !- Electric Power Supply End-Use Subcategory
+  3,                          !- field Supply Approach Temperature
+  ,                           !- field Supply Approach Temperature Schedule
+  -3,                         !- field Return Approach Temperature
+  ;                           !- field Return Approach Temperature Schedule
 \end{lstlisting}
 
 \subsubsection{Outputs}
@@ -3204,16 +3198,16 @@ An IDF example:
 
 \begin{lstlisting}
 ZoneBaseboard:OutdoorTemperatureControlled,
-  SPACE4-1 BBHeat 1,  !- Name
-  SPACE4-1,           !- Zone Name
-  EQUIP-1,            !- SCHEDULE Name
-  1500,               !- Capacity at low temperature {W}
-  0,                  !- Low Temperature {C}
-  500,                !- Capacity at high temperature {W}
-  10,                 !- High Temperature {C}
-  0.5,                !- Fraction Radiant
-  Baseboard Heat,     !- End-Use Subcategory
-  20;                 !- Design Zone Heating Setpoint {C}
+  SPACE4-1 BBHeat 1,          !- Name
+  SPACE4-1,                   !- Zone Name
+  EQUIP-1,                    !- SCHEDULE Name
+  1500,                       !- Capacity at low temperature {W}
+  0,                          !- Low Temperature {C}
+  500,                        !- Capacity at high temperature {W}
+  10,                         !- High Temperature {C}
+  0.5,                        !- Fraction Radiant
+  Baseboard Heat,             !- End-Use Subcategory
+  20;                         !- Design Zone Heating Setpoint {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-14-002}
@@ -3431,26 +3425,25 @@ This field defines the amount of heat given off by an average person in the pool
 An example of an indoor swimming pool definition is:
 
 \begin{lstlisting}
-
 SwimmingPool:Indoor,
-  Test Pool,             !- Name
-  F1-1,                  !- Surface Name
-  1.5,                   !- Average Depth {m}
-  PoolActivitySched,     !- Pool Activity Schedule
-  MakeUpWaterSched,      !- MakeUp Water Temperature Schedule
-  PoolCoverSched,        !- Pool Cover Schedule
-  0.0,                   !- Cover Evaporation Factor
-  0.2,                   !- Cover Convection Factor
-  0.9,                   !- Cover Short-Wavelength Radiation Factor
-  0.5,                   !- Cover Long-Wavelength Radiation Factor
-  Pool Water Inlet Node,    !- Water Inlet Node (Plant/Heater)
-  Pool Water Outlet Node,   !- Water Outlet Node (Plant/Heater)
-  0.1,                   !- Maximum flow rate from water heating system {m3/s}
-  0.6,                   !- Miscellaneous Equipment Power Factor {W/(m3/s)}
-  PoolSetpointTempSched, !- Pool Water Setpoint Temperature Schedule
-  15,                    !- Maximum Number of People in Pool
-  PoolOccupancySched,    !- Pool People Schedule
-  PoolOccHeatGainSched;  !- Pool People Heat Gain Schedule
+  Test Pool,                  !- Name
+  F1-1,                       !- Surface Name
+  1.5,                        !- Average Depth {m}
+  PoolActivitySched,          !- Pool Activity Schedule
+  MakeUpWaterSched,           !- MakeUp Water Temperature Schedule
+  PoolCoverSched,             !- Pool Cover Schedule
+  0.0,                        !- Cover Evaporation Factor
+  0.2,                        !- Cover Convection Factor
+  0.9,                        !- Cover Short-Wavelength Radiation Factor
+  0.5,                        !- Cover Long-Wavelength Radiation Factor
+  Pool Water Inlet Node,      !- Water Inlet Node (Plant/Heater)
+  Pool Water Outlet Node,     !- Water Outlet Node (Plant/Heater)
+  0.1,                        !- Maximum flow rate from water heating system {m3/s}
+  0.6,                        !- Miscellaneous Equipment Power Factor {W/(m3/s)}
+  PoolSetpointTempSched,      !- Pool Water Setpoint Temperature Schedule
+  15,                         !- Maximum Number of People in Pool
+  PoolOccupancySched,         !- Pool People Schedule
+  PoolOccHeatGainSched;       !- Pool People Heat Gain Schedule
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-007}
@@ -3615,12 +3608,11 @@ This field is the name of the schedule (ref: Schedules) that modifies the design
 An IDF example is provided below:
 
 \begin{lstlisting}
-
 ZoneContaminantSourceAndSink:CarbonDioxide,
-  NORTH_ZONE CO2,       !- Name
-  NORTH_ZONE,           !- Zone Name
-  1.e-6,                !- Design Generation Rate {m3/s}
-  CO2 Source Schedule;  !- Schedule Name
+  NORTH_ZONE CO2,             !- Name
+  NORTH_ZONE,                 !- Zone Name
+  1.e-6,                      !- Design Generation Rate {m3/s}
+  CO2 Source Schedule;        !- Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-004}
@@ -3692,12 +3684,12 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 ZoneContaminantSourceAndSink:Generic:Constant,
-  NORTH ZONE GC,        !- Name
-  NORTH ZONE,           !- Zone Name
-  1.0E-6,               !- Design Generation Rate {m3/s}
-  GC Source Schedule,   !- Generation Schedule Name
-  1.0E-7,               !- Design Removal Coefficient {m3/s}
-  GC Removal Schedule;  !- Removal Schedule Name
+  NORTH ZONE GC,              !- Name
+  NORTH ZONE,                 !- Zone Name
+  1.0E-6,                     !- Design Generation Rate {m3/s}
+  GC Source Schedule,         !- Generation Schedule Name
+  1.0E-7,                     !- Design Removal Coefficient {m3/s}
+  GC Removal Schedule;        !- Removal Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-004}
@@ -3754,11 +3746,11 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 SurfaceContaminantSourceAndSink:Generic:PressureDriven,
-  WEST ZONE GC BLD,     !- Name
-  Zn001:Wall001,        !- Surface Name
-  1.0E-6,               !- Design Generation Rate Coefficient {m3/s}
-  GC Source Schedule,   !- Generation Schedule Name
-  0.5;                  !- Generation Exponent
+  WEST ZONE GC BLD,           !- Name
+  Zn001:Wall001,              !- Surface Name
+  1.0E-6,                     !- Design Generation Rate Coefficient {m3/s}
+  GC Source Schedule,         !- Generation Schedule Name
+  0.5;                        !- Generation Exponent
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-003}
@@ -3823,11 +3815,11 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 ZoneContaminantSourceAndSink:Generic:CutoffModel,
-  NORTH ZONE GC CutoffModel,            !- Name
-  NORTH ZONE,                           !- Zone Name
-  1.0E-5,                               !- Design Generation Rate Coefficient {m3/s}
-  GC Source Schedule,                   !- Schedule Name
-  100000;                               !- Cutoff Generic Contaminant at which Emission Ceases {ppm}
+  NORTH ZONE GC CutoffModel,  !- Name
+  NORTH ZONE,                 !- Zone Name
+  1.0E-5,                     !- Design Generation Rate Coefficient {m3/s}
+  GC Source Schedule,         !- Schedule Name
+  100000;                     !- Cutoff Generic Contaminant at which Emission Ceases {ppm}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-003}
@@ -3890,11 +3882,11 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 ZoneContaminantSourceAndSink:Generic:DecaySource,
-  WEST ZONE GC DecaySource, !- Name
-  WEST ZONE,              !- Zone Name
-  1.0E-5,                 !- Initial Emission Rate {m3/s}
-  GC Source Schedule,     !- Schedule Name
-  100000;                 !- Delay Time Constant {s}
+  WEST ZONE GC DecaySource,   !- Name
+  WEST ZONE,                  !- Zone Name
+  1.0E-5,                     !- Initial Emission Rate {m3/s}
+  GC Source Schedule,         !- Schedule Name
+  100000;                     !- Delay Time Constant {s}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-003}
@@ -3967,11 +3959,11 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 SurfaceContaminantSourceAndSink:Generic:BoundaryLayerDiffusion,
-  WEST ZONE GC BLD,     !- Name
-  Zn001:Wall001,        !- Surface Name
-  1.0E-2,               !- Mass Transfer Coefficient {m/s}
-  GC Source Schedule,   !- Schedule Name
-  2.0;                  !- Henry adsorption constant or partition coefficient
+  WEST ZONE GC BLD,           !- Name
+  Zn001:Wall001,              !- Surface Name
+  1.0E-2,                     !- Mass Transfer Coefficient {m/s}
+  GC Source Schedule,         !- Schedule Name
+  2.0;                        !- Henry adsorption constant or partition coefficient
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-11-003}
@@ -4040,10 +4032,10 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 SurfaceContaminantSourceAndSink:Generic:DepositionVelocitySink,
-  EAST ZONE GC DVS,     !- Name
-  Zn002:Wall001,        !- Surface Name
-  1.0E-3,               !- Deposition Velocity {m/s}
-  GC Source Schedule;   !- Schedule Name
+  EAST ZONE GC DVS,           !- Name
+  Zn002:Wall001,              !- Surface Name
+  1.0E-3,                     !- Deposition Velocity {m/s}
+  GC Source Schedule;         !- Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12-003}
@@ -4106,10 +4098,10 @@ An IDF example is provided below:
 
 \begin{lstlisting}
 ZoneContaminantSourceAndSink:Generic:DepositionRateSink,
-  NORTH ZONE GC DRS,  !- Name
-  NORTH ZONE,         !- Zone Name
-  1.0E-5,             !- Deposition Rate {m3/s}
-  GC Source Schedule; !- Schedule Name
+  NORTH ZONE GC DRS,          !- Name
+  NORTH ZONE,                 !- Zone Name
+  1.0E-5,                     !- Deposition Rate {m3/s}
+  GC Source Schedule;         !- Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-13-002}
@@ -4125,4 +4117,3 @@ When the ZoneContaminantSourceAndSink:Generic:DepositionRateSink object is speci
 \paragraph{Generic Air Contaminant Deposition Rate Removal Volume Flow Rate {[}m3/s{]}}\label{generic-air-contaminant-deposition-rate-removal-volume-flow-rate-m3s}
 
 This output is the average generic contaminant generation rate from each Zone\-Contaminant\-Source\-And\-Sink:\-Generic:\-Deposition\-Rate\-Sink object.
-

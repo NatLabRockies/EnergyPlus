@@ -476,7 +476,7 @@ ENERGYPLUSLIB_API Real64 getPluginTrendVariableDirection(EnergyPlusState state, 
 
 /// \brief Returns the current year of the simulation, taken from the EPW.
 /// \details This is directly read from the EPW, and as such, if the EPW is for example a TMY3 file
-///          the year could be set to an abritrary number and change from one timestep to the next. See calendarYear for an alternative
+///          the year could be set to an arbitrary number and change from one timestep to the next. See calendarYear for an alternative
 /// \param[in] state An active EnergyPlusState instance created with `stateNew`.
 /// \remark The behavior of this function is not well-defined until the `apiDataFullyReady` function returns true.
 /// \see apiDataFullyReady

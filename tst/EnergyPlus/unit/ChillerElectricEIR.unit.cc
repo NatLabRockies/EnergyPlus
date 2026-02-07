@@ -71,6 +71,140 @@ using namespace EnergyPlus;
 using namespace EnergyPlus::ChillerElectricEIR;
 using namespace EnergyPlus::DataLoopNode;
 
+TEST_F(EnergyPlusFixture, ChillerElectricEIR_TestNegativeCurveRoundingError)
+{
+    state->dataPlnt->TotNumLoops = 2;
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataEnvrn->StdRhoAir = 1.20;
+
+    std::string const idf_objects = delimited_string({
+        "Chiller:Electric:EIR,",
+        "    Big Chiller,             !- Name",
+        "    25000,                   !- Reference Capacity {W}",
+        "    2.75,                    !- Reference COP {W/W}",
+        "    6.67,                    !- Reference Leaving Chilled Water Temperature {C}",
+        "    29.4,                    !- Reference Entering Condenser Fluid Temperature {C}",
+        "    0.001075,                !- Reference Chilled Water Flow Rate {m3/s}",
+        "    0.001345,                !- Reference Condenser Fluid Flow Rate {m3/s}",
+        "    ChillerCentCapFT,        !- Cooling Capacity Function of Temperature Curve Name",
+        "    ChillerCentEIRFT,        !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name",
+        "    ChillerCentEIRFPLR,      !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name",
+        "    0.15,                    !- Minimum Part Load Ratio",
+        "    1.0,                     !- Maximum Part Load Ratio",
+        "    1.0,                     !- Optimum Part Load Ratio",
+        "    0.25,                    !- Minimum Unloading Ratio",
+        "    Big Chiller Inlet Node,  !- Chilled Water Inlet Node Name",
+        "    Big Chiller Outlet Node, !- Chilled Water Outlet Node Name",
+        "    Big Chiller Condenser Inlet Node,  !- Condenser Inlet Node Name",
+        "    Big Chiller Condenser Outlet Node,  !- Condenser Outlet Node Name",
+        "    WaterCooled,             !- Condenser Type",
+        "    ,                        !- Condenser Fan Power Ratio {W/W}",
+        "    ,                        !- Fraction of Compressor Electric Consumption Rejected by Condenser",
+        "    5,                       !- Leaving Chilled Water Lower Temperature Limit {C}",
+        "    NotModulated,            !- Chiller Flow Mode",
+        "    0.0,                     !- Design Heat Recovery Water Flow Rate {m3/s}",
+        "    ,                        !- Heat Recovery Inlet Node Name",
+        "    ;                        !- Heat Recovery Outlet Node Name",
+        "  Curve:Biquadratic,",
+        "    ChillerCentCapFT,        !- Name",
+        "    0.257896E+00,            !- Coefficient1 Constant",
+        "    0.389016E-01,            !- Coefficient2 x",
+        "    -0.217080E-03,           !- Coefficient3 x**2",
+        "    0.468684E-01,            !- Coefficient4 y",
+        "    -0.942840E-03,           !- Coefficient5 y**2",
+        "    -0.343440E-03,           !- Coefficient6 x*y",
+        "    5.0,                     !- Minimum Value of x",
+        "    10.0,                    !- Maximum Value of x",
+        "    24.0,                    !- Minimum Value of y",
+        "    35.0,                    !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+        "  Curve:Biquadratic,",
+        "    ChillerCentEIRFT,        !- Name",
+        "    0.933884E+00,            !- Coefficient1 Constant",
+        "    -0.582120E-01,           !- Coefficient2 x",
+        "    0.450036E-02,            !- Coefficient3 x**2",
+        "    0.243000E-02,            !- Coefficient4 y",
+        "    0.486000E-03,            !- Coefficient5 y**2",
+        "    -0.121500E-02,           !- Coefficient6 x*y",
+        "    5.0,                     !- Minimum Value of x",
+        "    10.0,                    !- Maximum Value of x",
+        "    24.0,                    !- Minimum Value of y",
+        "    35.0,                    !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+        "  Curve:Quadratic,",
+        "    ChillerCentEIRFPLR,      !- Name",
+        "    -0.11519596634680696,                     !- Coefficient1 Constant",
+        "    0.6582045440515927,                     !- Coefficient2 x",
+        "    0.3663655959196781,                     !- Coefficient3 x**2",
+        "    0.15,                     !- Minimum Value of x",
+        "    1.0;                     !- Maximum Value of x",
+        "  Curve:Biquadratic,",
+        "    ChillerRecipCapFT,       !- Name",
+        "    0.507883E+00,            !- Coefficient1 Constant",
+        "    0.145228E+00,            !- Coefficient2 x",
+        "    -0.625644E-02,           !- Coefficient3 x**2",
+        "    -0.111780E-02,           !- Coefficient4 y",
+        "    -0.129600E-03,           !- Coefficient5 y**2",
+        "    -0.281880E-03,           !- Coefficient6 x*y",
+        "    5.0,                     !- Minimum Value of x",
+        "    10.0,                    !- Maximum Value of x",
+        "    24.0,                    !- Minimum Value of y",
+        "    35.0,                    !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+        "  Curve:Biquadratic,",
+        "    ChillerRecipEIRFT,       !- Name",
+        "    0.103076E+01,            !- Coefficient1 Constant",
+        "    -0.103536E+00,           !- Coefficient2 x",
+        "    0.710208E-02,            !- Coefficient3 x**2",
+        "    0.931860E-02,            !- Coefficient4 y",
+        "    0.317520E-03,            !- Coefficient5 y**2",
+        "    -0.104328E-02,           !- Coefficient6 x*y",
+        "    5.0,                     !- Minimum Value of x",
+        "    10.0,                    !- Maximum Value of x",
+        "    24.0,                    !- Minimum Value of y",
+        "    35.0,                    !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+        "  Curve:Quadratic,",
+        "    ChillerRecipEIRFPLR,     !- Name",
+        "    0.088065,                !- Coefficient1 Constant",
+        "    1.137742,                !- Coefficient2 x",
+        "    -0.225806,               !- Coefficient3 x**2",
+        "    0.0,                     !- Minimum Value of x",
+        "    1.0;                     !- Maximum Value of x",
+    });
+
+    EXPECT_TRUE(process_idf(idf_objects, false));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+
+    state->init_state(*state);
+    // This should throw a negative value error, check that the display isn't 0 0,
+    // but instead displays the negative number
+    // An error is expected with this data
+    EXPECT_THROW(GetElectricEIRChillerInput(*state), EnergyPlus::FatalError);
+
+    // Check to see if there are two zeros in a row, if so, then the formatting is truncating too much
+    EXPECT_EQ(compare_err_stream_substring("0.00,   0.00", true, false), false);
+}
+
 TEST_F(EnergyPlusFixture, ChillerElectricEIR_TestOutletNodeConditions)
 {
     state->dataChillerElectricEIR->ElectricEIRChiller.allocate(1);

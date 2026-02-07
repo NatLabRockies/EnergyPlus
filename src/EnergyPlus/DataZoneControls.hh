@@ -238,8 +238,8 @@ namespace DataZoneControls {
         Array1D<Real64> CoolTOffset;                   // Cooling temperature offset
         Real64 HeatSetPoint;                           // Heating throttling tempeature range
         Real64 CoolSetPoint;                           // Cooling throttling tempeature range
-        int StageErrCount;                             // Staged setpoint erro count
-        int StageErrIndex;                             // Staged setpoint erro index
+        int StageErrCount;                             // Staged setpoint error count
+        int StageErrIndex;                             // Staged setpoint error index
 
         // Default Constructor
         ZoneStagedControls()

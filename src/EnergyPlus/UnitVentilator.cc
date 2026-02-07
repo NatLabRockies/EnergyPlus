@@ -749,7 +749,7 @@ namespace UnitVentilator {
                         ErrorsFound = true;
                     }
 
-                    // check that air teminal mixer outlet node is the same as a zone inlet node.
+                    // check that air terminal mixer outlet node is the same as a zone inlet node.
                     ZoneNodeNotFound = true;
                     for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(unitVent.ZonePtr).NumInletNodes; ++NodeNum) {
                         if (unitVent.ATMixerOutNode == state.dataZoneEquip->ZoneEquipConfig(unitVent.ZonePtr).InletNode(NodeNum)) {

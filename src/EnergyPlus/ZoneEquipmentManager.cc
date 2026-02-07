@@ -4762,7 +4762,7 @@ void updateSystemOutputRequired(EnergyPlusData &state,
 
         default: {
         } break;
-        } // swtich
+        } // switch
 
         if (EquipPriorityNum > -1) {
             // now store remaining load at the by sequence level
@@ -5337,7 +5337,7 @@ void CalcZoneLeavingConditions(EnergyPlusData &state, bool const FirstHVACIterat
     //       MODIFIED       June 2003, FCW: add heat from airflow window to return air
 
     // PURPOSE OF THIS SUBROUTINE:
-    // Perform zone upate of the leaving conditions.
+    // Perform zone update of the leaving conditions.
 
     // METHODOLOGY EMPLOYED:
     // Energy Balance.
@@ -5931,7 +5931,7 @@ void CalcAirFlowSimple(EnergyPlusData &state,
             }
         } else if (thisVentilation.ModelType == DataHeatBalance::VentilationModelType::WindAndStack) {
             Real64 Cw = 0.0;    // Opening effectivenss
-            Real64 Cd = 0.0;    // Discharge coefficent
+            Real64 Cd = 0.0;    // Discharge coefficient
             Real64 angle = 0.0; // Angle between wind direction and effective angle
             Real64 Qw = 0.0;    // Volumetric flow driven by wind
             Real64 Qst = 0.0;   // Volumetric flow driven by stack effect

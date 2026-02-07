@@ -347,15 +347,15 @@ namespace Material {
 
     // This may seem like an overly complicated way to handle a set of
     // multi-dimensional variables, but I think that it is actually
-    // cleaner than either a multi-dimensional array (and certaily
+    // cleaner than either a multi-dimensional array (and certainly
     // faster) and also better than just a long list of variables.
 
     // Blind-properties essentially have four dimensions: property
     // type (transmittance, reflectance, absorptance), beam or
     // diffuse, front or back, solar or visible (maybe solar or
     // visible or thermal/IR).  Rather than coming up with and
-    // enforcing a consistent namming scheme for these variables,
-    // arranging them into nested structres keeps the ordering (as
+    // enforcing a consistent naming scheme for these variables,
+    // arranging them into nested structures keeps the ordering (as
     // well as the naming) of the dimensions consistent, and also
     // inserts periods between the dimensions to help with
     // readability.  In this case, I chose the struct nesting to be
@@ -369,7 +369,7 @@ namespace Material {
     // single offset like it loads every other variable in an object.
     // This is another downside of references in C++.  Accessing
     // variables in structures (even nested structures) is fast.
-    // Acessing variables through pointer indirection is slow.
+    // Accessing variables through pointer indirection is slow.
     // W->X->Y->Z is slower than W.X.Y.Z.  References are pointers,
     // but they use the . notation rather than -> for accessing
     // fields.  So if W.X.Y.Z is implemented using nested structures

@@ -979,7 +979,7 @@ namespace HeatingCoils {
 
             // HeatingCoil(CoilNum)%Efficiency       = Numbers(1)
             //(Numbers(1)) error limits checked and defaults applied on efficiency after
-            //       identifying souce type.
+            //       identifying source type.
 
             heatingCoil.AirInletNodeNum = GetOnlySingleNode(state,
                                                             Alphas(3),
@@ -1296,7 +1296,7 @@ namespace HeatingCoils {
         heatingCoil.ElecUseLoad = 0.0;
         heatingCoil.RTF = 0.0;
 
-        // If a temperature setpoint controlled coil must set the desired outlet temp everytime
+        // If a temperature setpoint controlled coil must set the desired outlet temp every time
         if (ControlNodeNum == 0) {
             heatingCoil.DesiredOutletTemp = 0.0;
         } else {
@@ -1531,7 +1531,7 @@ namespace HeatingCoils {
         //       RE-ENGINEERED  Mar 2014 FSEC, moved calculations to common routine in BaseSizer
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine is for sizing Heating Coil Components for which nominal capcities have not been
+        // This subroutine is for sizing Heating Coil Components for which nominal capacities have not been
         // specified in the input.
 
         // METHODOLOGY EMPLOYED:
@@ -1813,7 +1813,7 @@ namespace HeatingCoils {
                    (QCoilReq == DataLoopNode::SensedLoadFlagValue) && (std::abs(TempSetPoint - TempAirIn) > HVAC::TempControlTol)) {
 
             QCoilCap = CapacitanceAir * (TempSetPoint - TempAirIn);
-            // check to see if setpoint above enetering temperature. If not, set
+            // check to see if setpoint above entering temperature. If not, set
             // output to zero.
             if (QCoilCap <= 0.0) {
                 QCoilCap = 0.0;

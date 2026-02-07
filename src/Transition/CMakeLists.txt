@@ -81,6 +81,23 @@ foreach(i RANGE 1 ${end})
 
 endforeach()
 
+set(FORMATTER_ONLY "Formatter_only")
+configure_file("${FORMATTER_ONLY}.in.f90" "${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY}.f90" @ONLY)
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY})
+set(FORMATTER_ONLY_EXECUTABLE "${FORMATTER_ONLY}-V${CMAKE_VERSION_MAJOR}-${CMAKE_VERSION_MINOR}-${CMAKE_VERSION_PATCH}")
+add_executable(${FORMATTER_ONLY_EXECUTABLE} Transition.f90 "${CMAKE_CURRENT_BINARY_DIR}/${FORMATTER_ONLY}.f90")
+target_include_directories(${FORMATTER_ONLY_EXECUTABLE} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+set_target_properties(${FORMATTER_ONLY_EXECUTABLE} PROPERTIES FOLDER Auxiliary)
+target_link_libraries(${FORMATTER_ONLY_EXECUTABLE} TransitionLib)
+install(TARGETS "${FORMATTER_ONLY_EXECUTABLE}" DESTINATION PreProcess/IDFVersionUpdater)
+if(NOT ${FORTRAN_STATIC_EXE})
+  install_target_prereqs("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater)
+endif()
+
+if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
+  register_install_codesign_target("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater Unspecified)
+endif()
 
 #######################################################################
 #             I N S T A L L    S U P P O R T    F I L E S             #

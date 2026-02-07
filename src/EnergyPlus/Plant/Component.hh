@@ -161,6 +161,11 @@ namespace DataPlant {
         false, //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         false, //	"HeatPump:PlantLoop:EIR:Cooling"
         false, //	"HeatPump:PlantLoop:EIR:Heating"
+        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        false, // "HEATPUMP:AIRTOWATER:COOLING",
+        false, // "HEATPUMP:AIRTOWATER:HEATING",
+        false, // "HEATPUMP:AIRTOWATER",
         false  //   "DistrictHeating:Steam"
     };
 
@@ -264,6 +269,11 @@ namespace DataPlant {
         DataPlant::CtrlType::Invalid,   //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         DataPlant::CtrlType::CoolingOp, //	"HeatPump:PlantLoop:EIR:Cooling"
         DataPlant::CtrlType::HeatingOp, //	"HeatPump:PlantLoop:EIR:Heating"
+        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:COOLING",
+        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:HEATING",
+        DataPlant::CtrlType::DualOp,    // "HEATPUMP:AIRTOWATER",
         DataPlant::CtrlType::HeatingOp  //   "DistrictHeating:Steam"
     };
 

@@ -1182,8 +1182,8 @@ void InitZoneContSetPoints(EnergyPlusData &state)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     Real64 GCGain; // Zone generic contaminant gain
-    Real64 Pi;     // Pressue at zone i
-    Real64 Pj;     // Pressue at zone j
+    Real64 Pi;     // Pressure at zone i
+    Real64 Pj;     // Pressure at zone j
     Real64 Sch;    // Schedule value
 
     if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
@@ -1512,7 +1512,7 @@ void InitZoneContSetPoints(EnergyPlusData &state)
             con.GenRate = GCGain;
         }
 
-        // From boudary layer diffusion
+        // From boundary layer diffusion
         for (auto &con : state.dataContaminantBalance->ZoneContamGenericBLDiff) {
             int SurfNum = con.SurfNum;
             int ZoneNum = state.dataSurface->Surface(SurfNum).Zone;
@@ -2226,7 +2226,7 @@ void CorrectZoneContaminants(EnergyPlusData &state,
             }
         }
 
-        // Start to calculate zone CO2 and genric contaminant levels
+        // Start to calculate zone CO2 and generic contaminant levels
         Real64 CO2MassFlowRate = 0.0;
         Real64 GCMassFlowRate = 0.0;
         Real64 ZoneMassFlowRate = 0.0;
@@ -2336,7 +2336,7 @@ void CorrectZoneContaminants(EnergyPlusData &state,
             CO2Gain = state.dataContaminantBalance->ZoneCO2Gain(ZoneNum) * RhoAir * 1.0e6;
         }
         if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
-            CO2GainExceptPeople = state.dataContaminantBalance->ZoneCO2GainExceptPeople(ZoneNum) * RhoAir * 1.0e6; // Addded for hybrid model
+            CO2GainExceptPeople = state.dataContaminantBalance->ZoneCO2GainExceptPeople(ZoneNum) * RhoAir * 1.0e6; // Added for hybrid model
         }
         if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
             GCGain = state.dataContaminantBalance->ZoneGCGain(ZoneNum) * RhoAir * 1.0e6;

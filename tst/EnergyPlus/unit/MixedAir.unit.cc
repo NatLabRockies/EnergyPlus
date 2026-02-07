@@ -1567,7 +1567,7 @@ TEST_F(EnergyPlusFixture, MixedAir_TestHXinOASystem)
         state->dataLoopNodes->Node(i).Press = 101250.0;
     }
 
-    // simulate OA system, common node property is propogated
+    // simulate OA system, common node property is propagated
     ManageOutsideAirSystem(*state, "OA Sys 1", true, AirloopNum, OASysNum);
 
     // change node property at OA inlet and mixer inlet
@@ -5807,7 +5807,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
     EXPECT_EQ(1, GetNumOAControllers(*state));
     EXPECT_EQ(18, GetOAMixerReliefNodeNumber(*state, 1));
 
-    // indexes can be found in  OAMixer array for these feild names
+    // indexes can be found in  OAMixer array for these field names
     EXPECT_EQ(1, GetOAMixerIndex(*state, "SPACE1-1 OA Mixing Box"));
     EXPECT_EQ(2, GetOAMixerIndex(*state, "SPACE2-1 OA Mixing Box"));
     EXPECT_EQ(3, GetOAMixerIndex(*state, "SPACE3-1 OA Mixing Box"));

@@ -179,9 +179,9 @@
   RunPeriod,
     Run Period 1,            !- Name
     1,                       !- Begin Month
-    1,                      !- Begin Day of Month
+    1,                       !- Begin Day of Month
     ,                        !- Begin Year
-    12,                       !- End Month
+    12,                      !- End Month
     31,                      !- End Day of Month
     ,                        !- End Year
     Tuesday,                 !- Day of Week for Start Day
@@ -1577,7 +1577,7 @@
     INT-WALL-1,              !- Construction Name
     SPACE4-1,                !- Zone Name
     ,                        !- Space Name
-    Adiabatic,                 !- Outside Boundary Condition
+    Adiabatic,               !- Outside Boundary Condition
     SB54,                    !- Outside Boundary Condition Object
     NoSun,                   !- Sun Exposure
     NoWind,                  !- Wind Exposure
@@ -1742,7 +1742,7 @@
     INT-WALL-1,              !- Construction Name
     SPACE5-1,                !- Zone Name
     ,                        !- Space Name
-    Adiabatic,                 !- Outside Boundary Condition
+    Adiabatic,               !- Outside Boundary Condition
     SB45,                    !- Outside Boundary Condition Object
     NoSun,                   !- Sun Exposure
     NoWind,                  !- Wind Exposure
@@ -2435,10 +2435,10 @@
     0.0,                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
     0.0001,                  !- Convergence Tolerance
     VariableSpeed,           !- Fan Control Type
-    0.5,                     !- Minimum Fan Turn Down Ratio
+    0.5,                     !- Minimum Fan Turn Down Ratio {dimensionless}
     Modulated,               !- Heating Control Type
-    ,                        !- Design Heating Discharge Air Temperature
-    ;                        !- High Limit Heating Discharge Air Temperature
+    ,                        !- Design Heating Discharge Air Temperature {C}
+    ;                        !- High Limit Heating Discharge Air Temperature {C}
 
   Fan:SystemModel,
     SPACE1-1 PIU Fan,        !- Name
@@ -2511,15 +2511,15 @@
     0.0,                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
     0.0001,                  !- Convergence Tolerance
     VariableSpeed,           !- Fan Control Type
-    0.3,                     !- Minimum Fan Turn Down Ratio
+    0.3,                     !- Minimum Fan Turn Down Ratio {dimensionless}
     Modulated,               !- Heating Control Type
-    ,                        !- Design Heating Discharge Air Temperature
-    ;                        !- High Limit Heating Discharge Air Temperature
+    ,                        !- Design Heating Discharge Air Temperature {C}
+    ;                        !- High Limit Heating Discharge Air Temperature {C}
 
   Fan:SystemModel,
     SPACE2-1 PIU Fan,        !- Name
     ReheatCoilAvailSched,    !- Availability Schedule Name
-    SPACE2-1 ATU Sec Node,  !- Air Inlet Node Name
+    SPACE2-1 ATU Sec Node,   !- Air Inlet Node Name
     SPACE2-1 ATU Fan Outlet Node,  !- Air Outlet Node Name
     AUTOSIZE,                !- Design Maximum Air Flow Rate {m3/s}
     Continuous,              !- Speed Control Method
@@ -2575,10 +2575,10 @@
     0.0,                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
     0.0001,                  !- Convergence Tolerance
     VariableSpeed,           !- Fan Control Type
-    0.5,                     !- Minimum Fan Turn Down Ratio
+    0.5,                     !- Minimum Fan Turn Down Ratio {dimensionless}
     Staged,                  !- Heating Control Type
-    ,                        !- Design Heating Discharge Air Temperature
-    ;                        !- High Limit Heating Discharge Air Temperature
+    ,                        !- Design Heating Discharge Air Temperature {C}
+    ;                        !- High Limit Heating Discharge Air Temperature {C}
 
   Fan:SystemModel,
     SPACE3-1 PIU Fan,        !- Name
@@ -2640,10 +2640,10 @@
     0.0,                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
     0.0001,                  !- Convergence Tolerance
     VariableSpeed,           !- Fan Control Type
-    0.5,                     !- Minimum Fan Turn Down Ratio
+    0.5,                     !- Minimum Fan Turn Down Ratio {dimensionless}
     Staged,                  !- Heating Control Type
-    ,                        !- Design Heating Discharge Air Temperature
-    ;                        !- High Limit Heating Discharge Air Temperature
+    ,                        !- Design Heating Discharge Air Temperature {C}
+    ;                        !- High Limit Heating Discharge Air Temperature {C}
 
   Fan:SystemModel,
     SPACE4-1 PIU Fan,        !- Name
@@ -2736,8 +2736,8 @@
 
   NodeList,
     PLENUM-1 Induced Air Nodes,  !- Name
-    SPACE1-1 ATU Sec Node,       !- Node 1 Name
-    SPACE4-1 ATU SEC NODE;       !- Node 2 Name
+    SPACE1-1 ATU Sec Node,   !- Node 1 Name
+    SPACE4-1 ATU SEC NODE;   !- Node 2 Name
 
   AirLoopHVAC:SupplyPath,
     Zone Supply Air Path 1,  !- Name
@@ -3490,87 +3490,158 @@
     INTERMITTENT,            !- Pump Control Type
     CoolingPumpAvailSched;   !- Pump Flow Rate Schedule Name
 
-  !- This object is used to virtually increase the 
+  !- This object is used to virtually increase the
   !- temeprature of the plenum zone to showcase the
   !- first stage of the `staged` variable speed control
   !- of the terminal PIUs
+
   OtherEquipment,
-    PlenumHG,
-    None,
-    PLENUM-1,
-    AlwaysOn,
-    EquipmentLevel,
-    5500,,,0,0.5,0;
+    PlenumHG,                !- Name
+    None,                    !- Fuel Type
+    PLENUM-1,                !- Zone or ZoneList or Space or SpaceList Name
+    AlwaysOn,                !- Schedule Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    5500,                    !- Design Level {W}
+    ,                        !- Power per Floor Area {W/m2}
+    ,                        !- Power per Person {W/person}
+    0,                       !- Fraction Latent
+    0.5,                     !- Fraction Radiant
+    0;                       !- Fraction Lost
 
   Schedule:Constant,AlwaysOn,Fraction,1;
-  
 
   Output:Variable,*,Zone Air Temperature,detailed;
+
   Output:Variable,*,Zone Air System Sensible Cooling Rate,detailed;
+
   Output:Variable,*,Zone Air System Sensible Heating Rate,detailed;
+
   Output:Variable,*,Heating Coil Heating Rate,detailed;
+
   Output:Variable,*,Cooling Coil Total Cooling Rate,detailed;
+
   Output:Variable,*,Cooling Coil Sensible Cooling Rate,detailed;
+
   Output:Variable,*,Zone Air Terminal Primary Damper Position,detailed;
+
   Output:Variable,VAV Sys 1 Outlet Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,VAV Sys 1 Outlet Node,System Node Temperature,detailed;
+
   Output:Variable,*,Plant Supply Side Cooling Demand Rate,detailed;
+
   Output:Variable,*,Plant Supply Side Heating Demand Rate,detailed;
+
   Output:Variable,*,Boiler NaturalGas Rate,detailed;
+
   Output:Variable,*,Boiler Heating Rate,detailed;
+
   Output:Variable,*,Chiller Electricity Rate,detailed;
+
   Output:Variable,*,Chiller Evaporator Cooling Rate,detailed;
+
   Output:Variable,*,Chiller Evaporator Inlet Temperature,detailed;
+
   Output:Variable,*,Chiller Evaporator Outlet Temperature,detailed;
+
   Output:Variable,*,Chiller Evaporator Mass Flow Rate,detailed;
+
   Output:Variable,*,Chiller Condenser Heat Transfer Rate,detailed;
+
   Output:Variable,*,Pump Mass Flow Rate,detailed;
+
   Output:Variable,*,Pump Outlet Temperature,detailed;
+
   Output:Variable,Outside Air Inlet Node 1,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Outside Air Inlet Node 1,System Node Temperature,detailed;
+
   Output:Variable,Mixed Air Node 1,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Mixed Air Node 1,System Node Temperature,detailed;
+
   Output:Variable,Space4-1 ATU In Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Space4-1 ATU In Node,System Node Temperature,detailed;
+
   Output:Variable,SPACE4-1 Zone Coil Air In Node,System Node Temperature,detailed;
+
   Output:Variable,Space4-1 In Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Space4-1 In Node,System Node Temperature,detailed;
+
   Output:Variable,Plenum-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,PLENUM-1 Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Plenum-1 Out Node,System Node Temperature,detailed;
+
   Output:Variable,SPACE1-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE2-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE3-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE4-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE5-1 Out Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE1-1 ATU Sec Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,SPACE4-1 ATU Sec Node,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Relief Fan Air Outlet Node 1,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Relief Fan Air Outlet Node 1,System Node Temperature,detailed;
+
   Output:Variable,Relief Air Outlet Node 1,System Node Mass Flow Rate,detailed;
+
   Output:Variable,Relief Air Outlet Node 1,System Node Temperature,detailed;
-  Output:Variable,*,Zone Air System Sensible Heating Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Zone Air System Sensible Cooling Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Zone Heating Setpoint Not Met Time,detailed; !- Zone Sum [hr]
-  Output:Variable,*,Zone Heating Setpoint Not Met While Occupied Time,detailed; !- Zone Sum [hr]
-  Output:Variable,*,Zone Cooling Setpoint Not Met Time,detailed; !- Zone Sum [hr]
-  Output:Variable,*,Zone Cooling Setpoint Not Met While Occupied Time,detailed; !- Zone Sum [hr]
-  Output:Variable,*,Fan Electricity Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Fan Rise in Air Temperature,detailed; !- HVAC Average [deltaC]
-  Output:Variable,*,Fan Heat Gain to Air,detailed; !- HVAC Average [W]
-  Output:Variable,*,Fan Air Mass Flow Rate,detailed; !- HVAC Average [kg/s]
-  Output:Variable,*,Zone Air Terminal Primary Damper Position,detailed; !- HVAC Average []
-  Output:Variable,*,Zone Air Terminal Heating Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Zone Air Terminal Heating Energy,detailed; !- HVAC Sum [J]
-  Output:Variable,*,Zone Air Terminal Outdoor Air Volume Flow Rate,detailed; !- HVAC Average [m3/s]
-  Output:Variable,*,Zone Air Terminal Total Air Mass Flow Rate,detailed; !- HVAC Average [kg/s]
-  Output:Variable,*,Zone Air Terminal Primary Air Mass Flow Rate,detailed; !- HVAC Average [kg/s]
-  Output:Variable,*,Zone Air Terminal Secondary Air Mass Flow Rate,detailed; !- HVAC Average [kg/s]
-  Output:Variable,*,Zone Air Terminal Outlet Discharge Air Temperature,detailed; !- HVAC Average [C]
-  Output:Variable,*,Zone Air Terminal Current Operation Control Stage,detailed; !- HVAC Average [unknown]
-  Output:Variable,*,Zone Predicted Sensible Load to Setpoint Heat Transfer Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate,detailed; !- HVAC Average [W]
-  Output:Variable,*,Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate,detailed; !- HVAC Average [W]
+
+  Output:Variable,*,Zone Air System Sensible Heating Rate,detailed;
+
+  Output:Variable,*,Zone Air System Sensible Cooling Rate,detailed;
+
+  Output:Variable,*,Zone Heating Setpoint Not Met Time,detailed;
+
+  Output:Variable,*,Zone Heating Setpoint Not Met While Occupied Time,detailed;
+
+  Output:Variable,*,Zone Cooling Setpoint Not Met Time,detailed;
+
+  Output:Variable,*,Zone Cooling Setpoint Not Met While Occupied Time,detailed;
+
+  Output:Variable,*,Fan Electricity Rate,detailed;
+
+  Output:Variable,*,Fan Rise in Air Temperature,detailed;
+
+  Output:Variable,*,Fan Heat Gain to Air,detailed;
+
+  Output:Variable,*,Fan Air Mass Flow Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Primary Damper Position,detailed;
+
+  Output:Variable,*,Zone Air Terminal Heating Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Heating Energy,detailed;
+
+  Output:Variable,*,Zone Air Terminal Outdoor Air Volume Flow Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Total Air Mass Flow Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Primary Air Mass Flow Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Secondary Air Mass Flow Rate,detailed;
+
+  Output:Variable,*,Zone Air Terminal Outlet Discharge Air Temperature,detailed;
+
+  Output:Variable,*,Zone Air Terminal Current Operation Control Stage,detailed;
+
+  Output:Variable,*,Zone Predicted Sensible Load to Setpoint Heat Transfer Rate,detailed;
+
+  Output:Variable,*,Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate,detailed;
+
+  Output:Variable,*,Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate,detailed;
+
   Output:Variable,ReheatCoilAvailSched,Schedule Value,detailed;
 
   Output:VariableDictionary,IDF;
@@ -3589,3 +3660,4 @@
   OutputControl:ReportingTolerances,
     0.73,                    !- Tolerance for Time Heating Setpoint Not Met {deltaC}
     0.73;                    !- Tolerance for Time Cooling Setpoint Not Met {deltaC}
+

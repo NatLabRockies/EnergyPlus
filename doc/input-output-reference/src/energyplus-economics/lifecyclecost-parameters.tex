@@ -180,19 +180,18 @@ The default value is None.
 An example of this object in an IDF:
 
 \begin{lstlisting}
-
 LifeCycleCost:Parameters,
-      TypicalLCC,              !- Name
-      EndOfYear,               !- Discounting Convention
-      ConstantDollar,          !- Inflation Approach
-      0.034314,                !- Real Discount Rate
-      ,                        !- Nominal Discount Rate
-      ,                        !- Inflation
-      January,                 !- Base Date Month
-      2010,                    !- Base Date Year
-      January,                 !- Service Date Month
-      2010,                    !- Service Date Year
-      25,                      !- Length of Study Period in Years
-      0.39,                    !- Tax rate
-      StraightLine-39year;     !- Depreciation Method
+  TypicalLCC,                 !- Name
+  EndOfYear,                  !- Discounting Convention
+  ConstantDollar,             !- Inflation Approach
+  0.034314,                   !- Real Discount Rate
+  ,                           !- Nominal Discount Rate
+  ,                           !- Inflation
+  January,                    !- Base Date Month
+  2010,                       !- Base Date Year
+  January,                    !- Service Date Month
+  2010,                       !- Service Date Year
+  25,                         !- Length of Study Period in Years
+  0.39,                       !- Tax rate
+  StraightLine-39year;        !- Depreciation Method
 \end{lstlisting}

@@ -65,7 +65,7 @@ using namespace EnergyPlus::SortAndStringUtilities;
 
 TEST_F(EnergyPlusFixture, SortAndStringUtilitiesTest_Basic)
 {
-    Array1D_string Alphas({"ZEBRA", "LION", "RACOON", "BOA", "LEMUR"});
+    Array1D_string Alphas({"ZEBRA", "LION", "RACCOON", "BOA", "LEMUR"});
     Array1D_int iAlphas(5);
     SetupAndSort(Alphas, iAlphas);
     EXPECT_TRUE(eq(Array1D_int({4, 5, 2, 3, 1}), iAlphas));

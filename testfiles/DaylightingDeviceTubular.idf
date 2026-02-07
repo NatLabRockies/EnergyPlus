@@ -807,7 +807,7 @@
     AlwaysOnSchedule,        !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     800,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.40,                    !- Fraction Radiant
@@ -821,7 +821,7 @@
     AlwaysOnSchedule,        !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     800,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.40,                    !- Fraction Radiant
@@ -951,7 +951,7 @@
 
   Output:IlluminanceMap,
     Daylit Map,              !- Name
-    Daylit Zone,             !- Zone Name
+    Daylit Zone,             !- Zone or Space Name
     0.8,                     !- Z height {m}
     0.1,                     !- X Minimum Coordinate {m}
     4.9,                     !- X Maximum Coordinate {m}

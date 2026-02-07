@@ -74,7 +74,7 @@ TEST_F(AutoSizingFixture, HeatingWaterflowSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.01); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.01); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // test auto calculate
@@ -82,7 +82,7 @@ TEST_F(AutoSizingFixture, HeatingWaterflowSizingGauntlet)
     state->dataSize->DataConstantUsedForSizing = 1.0;
     sizer.initializeWithinEP(*this->state, HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater], "MyWaterCoil", printFlag, routineName);
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
-    // developer errror, DataFractionUsedForSizing = 0 and Constant > 0
+    // developer error, DataFractionUsedForSizing = 0 and Constant > 0
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType1, sizer.errorType);
     EXPECT_FALSE(sizer.wasAutoSized);
     EXPECT_NEAR(0.0, sizedValue, 0.01);
@@ -96,7 +96,7 @@ TEST_F(AutoSizingFixture, HeatingWaterflowSizingGauntlet)
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_FALSE(sizer.wasAutoSized);
     EXPECT_NEAR(0.0, sizedValue, 0.01);          // auto calculates to 0
-    EXPECT_NEAR(5.0, sizer.originalValue, 0.01); // developer errror, DataFractionUsedForSizing = 0 and Constant > 0
+    EXPECT_NEAR(5.0, sizer.originalValue, 0.01); // developer error, DataFractionUsedForSizing = 0 and Constant > 0
     sizer.autoSizedValue = 0.0;                  // reset for next test
 
     state->dataSize->DataFractionUsedForSizing = 1.0;

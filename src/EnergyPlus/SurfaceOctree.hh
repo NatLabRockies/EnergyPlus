@@ -459,7 +459,7 @@ public: // Methods
         return lineIntersectsCube(a, dir, safe_inverse(dir)); // Inefficient if called in loop with same dir
     }
 
-    // Surfaces Outer Cube Initilization
+    // Surfaces Outer Cube Initialization
     void init(EPVector<Surface> &surfaces);
 
     // Surfaces that Line Segment Intersects Cube's Enclosing Sphere

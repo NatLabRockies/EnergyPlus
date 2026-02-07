@@ -2547,7 +2547,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_VRFOU_Compressor)
     // Run and Check: VRFOU_CalcComp
     {
         //   Test the method VRFOU_CalcCompH, which simulates the compressor performance at given oprtaional conditions. More specifically, it
-        //   sepcifies the compressor speed to provide sufficient evaporative capacity, and calculate the power of the compressor running at the
+        //   specifies the compressor speed to provide sufficient evaporative capacity, and calculate the power of the compressor running at the
         //   specified speed. Note that it may be needed to manipulate the operational conditions to further adjust system capacity at low load
         //   conditions. The low load modification logics are different for cooling mode and heating mode.
 
@@ -3207,7 +3207,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_CalcVRFIUTeTc)
     state->dataHVACVarRefFlow->VRFTU(2).fanPlace = HVAC::FanPlace::BlowThru;
     // system is on in cooling mode
     state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).CalcVRFIUTeTc_FluidTCtrl(*state);
-    // fan heat added to coil inlet temp, coil surface temp should also be lower to overcome additional heat tranfer
+    // fan heat added to coil inlet temp, coil surface temp should also be lower to overcome additional heat transfer
     EXPECT_LT(state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).IUEvaporatingTemp, saveCoolingEvapTemp);
     // default value, coil inlet temps lower than default
     EXPECT_EQ(state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).IUCondensingTemp, 42);
@@ -3245,7 +3245,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_CalcVRFIUTeTc)
     state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).CalcVRFIUTeTc_FluidTCtrl(*state);
     // default value, coil inlet temps higher than default
     EXPECT_EQ(state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).IUEvaporatingTemp, 15);
-    // fan heat added to coil inlet temp, coil surface temp should also be lower to account for less heat tranfer
+    // fan heat added to coil inlet temp, coil surface temp should also be lower to account for less heat transfer
     EXPECT_LT(state->dataHVACVarRefFlow->VRF(IndexVRFCondenser).IUCondensingTemp, saveHeatingCondTemp);
 
     // Clean up
@@ -13556,7 +13556,7 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest_HREIRFTHeat)
     EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecCoolingPower, 0.0);
 
     // make adjustment for heat recovery startup degradation
-    // Ensure HREIRFTConst / HRCAPFTHeatConst are assigned the right curve ouput
+    // Ensure HREIRFTConst / HRCAPFTHeatConst are assigned the right curve output
     Real64 HREIRFTConst = state->dataHVACVarRefFlow->VRF(VRFCond).HREIRFTHeatConst;
     EXPECT_EQ(HREIRFTConst, 0.9); // It's normal that it works, it's the internal variable that's messed up
     EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).HRCAPFTHeatConst, 0.8);
@@ -13576,7 +13576,7 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest_HREIRFTHeat)
     //                                  * HREIRAdjustment * VRFRTF * InputPowerMultiplier;
     //
     // TotHeatCapTempModFac and TotHeatEIRTempModFac are 1 because CAPFT/EIRFT curves aren't assigned,
-    // and anyways they wouldn't be used since VRF(VRFCond).HeatingPerformanceOATType isn't specifyied
+    // and anyways they wouldn't be used since VRF(VRFCond).HeatingPerformanceOATType isn't specified
     // VRFRTF = 1.0 because not cycling below min PLR
     // EIRFPLRModFac is 1 because EIRFPLR curve output is constant as 1.0 above
     // InputPowerMultiplier is 1 because no defrost
@@ -23085,7 +23085,7 @@ TEST_F(EnergyPlusFixture, VRFHP_CondenserCalc_PLR_Issue_Test)
     EXPECT_FALSE(vrf.ModeChange);
     EXPECT_FALSE(vrf.HRModeChange);
     EXPECT_EQ(vrf.ElecCoolingPower, 0.0);
-    // Here also need to do furthe check to see if it is expected:
+    // Here also need to do further check to see if it is expected:
     EXPECT_EQ(vrf.ElecHeatingPower, vrf.RatedHeatingPower * Curve::CurveValue(*state, vrf.HeatEIRFPLR1, max(vrf.MinPLR, vrf.VRFCondPLR)));
 }
 

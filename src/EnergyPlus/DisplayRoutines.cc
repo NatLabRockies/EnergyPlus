@@ -135,7 +135,7 @@ void DisplayNumberAndString(EnergyPlusData &state,
     // during program parsing.
 
     // METHODOLOGY EMPLOYED:
-    // usage:= call DisplayNumberAndString(numbr,string)
+    // usage:= call DisplayNumberAndString(number,string)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     std::stringstream sstm;

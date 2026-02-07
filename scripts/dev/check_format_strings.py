@@ -54,214 +54,379 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import re
 import sys
-from pathlib import Path
-from typing import List
+import tempfile
 import unittest
+from pathlib import Path
+from typing import List, Tuple, Dict, Any
+
+# ----------- Match ...::format( followed by a string literal ("..." or R"...") -----------
+FORMAT_START = re.compile(r'\b(?:\w+::)*format\(\s*(?=(?:"|R"))', re.S)
+
+# Count each placeholder start {  (ignores literal {{ )
+PLACEHOLDER_START = re.compile(r'(?<!{)\{(?!\{)')
 
 
-verbose = True
+# ========================= Low-level scanners =========================
+def _scan_cxx_string(src: str, i: int) -> int:
+    """Return index just after a normal C++ string starting at src[i] == '\"'."""
+    i += 1
+    n = len(src)
+    while i < n:
+        ch = src[i]
+        if ch == '\\':
+            i += 2
+        elif ch == '"':
+            return i + 1
+        else:
+            i += 1
+    return i
 
 
-def process_all_format_lines(f_path: Path, lines: list, fmt_line_nos: list) -> int:
-    num_errors = 0
+def _scan_cxx_char(src: str, i: int) -> int:
+    """Return index just after a C++ char literal starting at src[i] == '\\''."""
+    i += 1
+    n = len(src)
+    while i < n:
+        ch = src[i]
+        if ch == '\\':
+            i += 2
+        elif ch == "'":
+            return i + 1
+        else:
+            i += 1
+    return i
 
-    # process format lines
-    for line_no in fmt_line_nos:
-        line = ""
-        line_no_counter = line_no
 
-        # collect multiline statements
-        while True:
-            line += lines[line_no_counter]
-            # get rid of escaped parentheses
-            line = line.replace("\\\"", "")
-            if line[-1] != ";":
-                line_no_counter += 1
-            else:
-                break
+def _scan_cxx_raw_string_end(src: str, i: int) -> int:
+    """
+    Return index just after a C++ raw string literal starting at src[i] == 'R' and src[i+1] == '"'.
+    Supports arbitrary delimiters: R"delim( ... )delim"
+    """
+    n = len(src)
+    i += 2  # skip R"
+    delim_start = i
+    while i < n and src[i] != '(':
+        i += 1
+    delim = src[delim_start:i]
+    if i < n and src[i] == '(':
+        i += 1
+    closing = ')' + delim + '"'
+    l = len(closing)
+    while i + l <= n:
+        if src[i:i + l] == closing:
+            return i + l
+        i += 1
+    return n
 
-        # replace parens '""' next to each other in case of wrapped lines
-        line = line.replace("\"\"", "")
 
-        # throw away front
-        tokens = line.split("format", 1)
-        line = tokens[1]
+def _grab_balanced_call(src: str, open_paren_idx: int) -> int | None:
+    """
+    Given src with src[open_paren_idx] == '(',
+    return the index AFTER the matching closing ')', scanning strings/chars/raw strings properly.
+    """
+    i = open_paren_idx + 1
+    n = len(src)
+    depth = 1
+    while i < n:
+        ch = src[i]
+        if ch == '"':
+            i = _scan_cxx_string(src, i)
+            continue
+        if ch == "'":
+            i = _scan_cxx_char(src, i)
+            continue
+        if ch == 'R' and i + 1 < n and src[i + 1] == '"':
+            i = _scan_cxx_raw_string_end(src, i)
+            continue
+        if ch == '(':
+            depth += 1
+            i += 1
+            continue
+        if ch == ')':
+            depth -= 1
+            i += 1
+            if depth == 0:
+                return i
+            continue
+        i += 1
+    return None
 
-        # process the rest
-        num_open_paren = 0
-        num_close_paren = 0
-        num_quote = 0
-        start_fmt = 0
-        end_fmt = 0
-        fmt_str = ""
-        args = ""
-        for idx_fmt, c in enumerate(line):
 
-            # get fmt string
-            if c == "\"":
-                num_quote += 1
-                if num_quote == 1:
-                    start_fmt = idx_fmt + 1
+def _split_top_level_commas(s: str) -> List[str]:
+    """Split s on commas not inside strings, raw strings, char literals, or parentheses."""
+    parts, buf = [], []
+    depth = 0
+    i, n = 0, len(s)
+    while i < n:
+        ch = s[i]
+        if ch == '"':
+            j = _scan_cxx_string(s, i)
+            buf.append(s[i:j])
+            i = j
+            continue
+        if ch == "'":
+            j = _scan_cxx_char(s, i)
+            buf.append(s[i:j])
+            i = j
+            continue
+        if ch == 'R' and i + 1 < n and s[i + 1] == '"':
+            j = _scan_cxx_raw_string_end(s, i)
+            buf.append(s[i:j])
+            i = j
+            continue
+        if ch == '(':
+            depth += 1
+            buf.append(ch)
+            i += 1
+            continue
+        if ch == ')':
+            depth -= 1
+            buf.append(ch)
+            i += 1
+            continue
+        if ch == ',' and depth == 0:
+            parts.append(''.join(buf).strip())
+            buf = []
+            i += 1
+            continue
+        buf.append(ch)
+        i += 1
+    if buf:
+        parts.append(''.join(buf).strip())
+    return [p for p in parts if p]
+
+
+# ========================= Comment removal (preserve newlines) =========================
+def remove_cpp_comments(f_path: Path) -> Tuple[str, List[int]]:
+    """
+    Remove all C/C++ comments while preserving ALL original newlines.
+    Returns:
+      cleaned             – comment-free source (same line count as original)
+      non_comment_lines   – list of original 1-based line numbers that contain non-comment text
+    """
+    s = f_path.read_text(encoding='utf-8')
+    i, n = 0, len(s)
+    out: List[str] = []
+    non_comment_lines: List[int] = []
+    line_idx = 1
+    line_has_code = False
+
+    def push(ch: str):
+        nonlocal line_idx, line_has_code
+        out.append(ch)
+        if ch == '\n':
+            if line_has_code:
+                non_comment_lines.append(line_idx)
+            line_idx += 1
+            line_has_code = False
+        elif not ch.isspace():
+            line_has_code = True
+
+    def push_chunk(chunk: str):
+        for ch in chunk:
+            push(ch)
+
+    while i < n:
+        ch = s[i]
+
+        # Always keep newlines as-is for perfect line mapping
+        if ch == '\n':
+            push('\n')
+            i += 1
+            continue
+
+        # Line comment //
+        if ch == '/' and i + 1 < n and s[i + 1] == '/':
+            i += 2
+            while i < n and s[i] != '\n':
+                i += 1
+            # newline (if any) will be handled by the main loop
+            continue
+
+        # Block comment /* ... */
+        if ch == '/' and i + 1 < n and s[i + 1] == '*':
+            i += 2
+            while i < n:
+                if s[i] == '\n':
+                    push('\n')
+                    i += 1
                     continue
-                elif num_quote == 2:
-                    end_fmt = idx_fmt
-                    fmt_str = line[start_fmt:end_fmt]
-                    continue
-
-            # skip if we're inside the fmt string
-            if 0 < num_quote < 2:
-                continue
-
-            # find the end of the args
-            if c == "(":
-                num_open_paren += 1
-            elif c == ")":
-                num_close_paren += 1
-
-            # found full args string
-            if (num_open_paren - num_close_paren) == 0:
-                args_str = line[end_fmt + 2:idx_fmt]
-                args_str = args_str.strip()
-                num_quote = 0
-                args = []
-                args_idx = 0
-
-                # partial process args
-                for a in args_str:
-                    if (a == "\"") and (num_quote > 0):
-                        num_quote -= 1
-                        continue
-                    elif (a == "\"") and (num_quote == 0):
-                        num_quote += 1
-
-                    if (a == ",") and (num_quote == 0):
-                        args_idx += 1
-                        continue
-
-                    try:
-                        args[args_idx] += a
-                    except IndexError:
-                        args.append(a)
-
-                break
-
-        # fmt strings need further processing for escaped curly braces
-        fmt_str = fmt_str.replace("{{", "")
-        fmt_str = fmt_str.replace("}}", "")
-
-        # args need further processing to recombine things that shouldn't have been separated
-        while True:
-            args_copy = args
-            for idx_args, a in enumerate(args):
-                if a.count("(") != a.count(")"):
-                    args_copy[idx_args:idx_args +
-                              2] = [','.join(args[idx_args:idx_args + 2])]
+                if s[i] == '*' and i + 1 < n and s[i + 1] == '/':
+                    i += 2
                     break
-            args = args_copy
-            if all([y == 0 for y in [x.count("(") - x.count(")") for x in args]]):
-                break
-
-        # Finally, we can do some error checking.
-        # check for unbalanced curly braces
-        if fmt_str.count("{") != fmt_str.count("}"):
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' has unbalanced curly braces.")
-            num_errors += 1
-
-        # check for unbalanced curly braces placeholders and arguments
-        if fmt_str.count("{") != len(args):
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' arg count {args} is not matched.")
-            num_errors += 1
-
-        # check for when no args are parsed
-        if len(args) == 0:
-            if verbose:
-                print(f"File: {str(f_path)}, line: {line_no + 1}, Format '{fmt_str}' has no arguments. Remove format.")
-            num_errors += 1
-
-    return num_errors
-
-
-def get_sorted_file_list(search_path: Path) -> List[Path]:
-    files_to_search = []
-    for p in [search_path]:
-        for root, _, files in os.walk(p):
-            for file in files:
-                f_path = Path(root) / Path(file)
-                f_extension = f_path.suffix
-                if f_extension == ".hh":
-                    files_to_search.append(f_path)
-                elif f_extension == ".cc":
-                    files_to_search.append(f_path)
-    files_to_search.sort()
-    return files_to_search
-
-
-def get_format_line_numbers_from_lines(lines: List[str]) -> List[int]:
-    format_line_nos = []
-    for idx, line in enumerate(lines):
-        # skip blank lines
-        if line == "":
+                i += 1
             continue
-        # skip comment lines
-        if line[0:2] == "//":
+
+        # Normal / Raw strings / Char literals
+        if ch == '"':
+            j = _scan_cxx_string(s, i)
+            push_chunk(s[i:j])
+            i = j
             continue
-        # strip trailing comments
-        if "//" in line:
-            tokens = line.split("//")
-            line = tokens[0].strip()
-        # find 'format' line numbers first
-        if "format(\"" in line:
-            format_line_nos.append(idx)
-    return format_line_nos
+        if ch == "'":
+            j = _scan_cxx_char(s, i)
+            push_chunk(s[i:j])
+            i = j
+            continue
+        if ch == 'R' and i + 1 < n and s[i + 1] == '"':
+            j = _scan_cxx_raw_string_end(s, i)
+            push_chunk(s[i:j])
+            i = j
+            continue
+
+        # Regular code
+        push(ch)
+        i += 1
+
+    if line_has_code:
+        non_comment_lines.append(line_idx)
+
+    cleaned = ''.join(out)
+    return cleaned, non_comment_lines
 
 
-def check_format_strings(search_path: Path) -> int:
+# ========================= Format finder & parser =========================
+def _format_matches_iter(text: str):
+    """
+    Yield FORMAT_START matches that are NOT:
+      - after '//' on the same line, or
+      - raw strings starting with R"idf(
+    """
+    for m in FORMAT_START.finditer(text):
+        bol = text.rfind('\n', 0, m.start()) + 1
+        # Skip if there's a '//' comment before on the same line
+        if text.find('//', bol, m.start()) != -1:
+            continue
+        # Skip if it's a raw string with an idf-style delimiter like R"idf(
+        raw_prefix = text[m.end(): m.end() + 20]  # small window after 'format('
+        if re.match(r'\s*R"idf', raw_prefix):
+            continue
+        yield m
+
+
+def find_and_parse_format_calls(text: str) -> List[Dict[str, Any]]:
+    """
+    Find calls and return dicts:
+      start, end, line, full, fmt_expr, args_text, args_list
+    """
+    results = []
+    for m in _format_matches_iter(text):
+        open_paren = m.end() - 1
+        end_idx = _grab_balanced_call(text, open_paren)
+        if end_idx is None:
+            continue
+
+        # Cleaned text preserves all original newlines => direct line computation is accurate
+        line_num = text.count('\n', 0, m.start()) + 1
+
+        full = text[m.start():end_idx]
+        inner = text[open_paren + 1:end_idx - 1].strip()
+
+        if not inner:
+            results.append({
+                'start': m.start(), 'end': end_idx, 'line': line_num,
+                'full': full, 'fmt_expr': '', 'args_text': None, 'args_list': []
+            })
+            continue
+
+        pieces = _split_top_level_commas(inner)
+        fmt_expr = pieces[0] if pieces else ''
+        args_text = inner[len(fmt_expr):].lstrip()
+        if args_text.startswith(','):
+            args_text = args_text[1:].lstrip()
+        args_list = _split_top_level_commas(args_text) if args_text else []
+
+        results.append({
+            'start': m.start(), 'end': end_idx, 'line': line_num,
+            'full': full, 'fmt_expr': fmt_expr, 'args_text': args_text, 'args_list': args_list
+        })
+    return results
+
+
+# ========================= Placeholder counting & checks =========================
+def count_placeholders(fmt_string: str) -> int:
+    """
+    Count placeholders by counting unescaped '{' after removing literal braces.
+    """
+    fmt_no_literals = fmt_string.replace("{{", "").replace("}}", "")
+    return len(PLACEHOLDER_START.findall(fmt_no_literals))
+
+
+def check_format_statement(f_path: Path, fmt_dict: Dict[str, Any]) -> int:
+    num_placeholders = count_placeholders(fmt_dict['fmt_expr'])
+    num_args = len(fmt_dict['args_list'])
+    if num_args != num_placeholders:
+        print(f"{f_path}:{fmt_dict['line']}: placeholders={num_placeholders}, args={num_args}")
+        print(f"  {fmt_dict['full']}")
+        return 1
+    return 0
+
+
+def check_format_statements(file_to_check: List[Path]) -> int:
     num_errors = 0
-    files_to_search = get_sorted_file_list(search_path)
-    for f_path in files_to_search:
-        with open(f_path, "r") as f:
-            lines = f.readlines()
-            lines = [x.strip() for x in lines]
-        format_line_nos = get_format_line_numbers_from_lines(lines)
-        num_errors += process_all_format_lines(f_path, lines, format_line_nos)
-    return num_errors
+    for f_path in file_to_check:
+        try:
+            cleaned, _ = remove_cpp_comments(f_path)
+        except UnicodeDecodeError:
+            # Skip files with unexpected encoding
+            continue
+        for fmt_dict in find_and_parse_format_calls(cleaned):
+            num_errors += check_format_statement(f_path, fmt_dict)
+    return 1 if num_errors > 0 else 0
 
 
-class TestFormatCheck(unittest.TestCase):
-    def test_valid_format_chunk(self):
-        self.assertEqual(
-            0,  # number of errors encountered
-            process_all_format_lines(
-                Path('/dummy/path'),
-                [  # actual file content lines
-                    'line 1',
-                    'line 2',
-                    'format(\"hi{}\", varName);'
-                ],
-                [  # lines containing actual format statements
-                    2
-                ]
-            )
-        )
+# ========================= File discovery & CLI =========================
+def get_sorted_file_list(search_path: Path) -> List[Path]:
+    out: List[Path] = []
+    for root, _, files in os.walk(search_path):
+        for file in files:
+            if file.endswith(('.hh', '.cc')):
+                out.append(Path(root) / file)
+    out.sort()
+    return out
 
-    def test_invalid_format_chunk(self):
-        self.assertEqual(
-            1,  # number of errors encountered
-            process_all_format_lines(
-                Path('/dummy/path'),
-                [  # actual file content lines
-                    'line 1',
-                    'line 2',
-                    'format(\"hi{\", varName);'
-                ],
-                [  # lines containing actual format statements
-                    2
-                ]
-            )
-        )
+
+class TestCheckFormatStrings(unittest.TestCase):
+    PASS = 0
+    FAIL = 1
+
+    def test_valid_cases(self):
+        test_options = [
+            'format("{}", arg1)',
+            'format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1))',
+            'fmt::format("PLR          = {:7." + std::to_string(DecimalPrecision) + "F}", fmt::join(PLRArray, ","))',
+            'format("...{} is < 2 {{C}}. Freezing could occur.", cNumericFields(17))',
+            'format(R"({}="{}" invalid {}="{}" not found.)",\n CurrentModuleObject,\n ventSlab.Name,\n cAlphaFields(4),\n state.dataIPShortCut->cAlphaArgs(4))',
+            'format("{}{}{}{}{}{}", "Occurs for Node=", NodeName, ", ObjectType=", ObjectType, ", ObjectName=", ObjectName)',
+            'format("{}{}", RoutineName, "Node registered for both Parent and \"not\" Parent")'
+            'format("{}\n", EnergyPlus::Constant::unitNames[(int)meter->units])'
+        ]
+
+        tmp_dir = Path(tempfile.mkdtemp())
+        tmp_file = tmp_dir / "valid.cc"
+
+        with open(tmp_file, 'w') as f:
+            for line in test_options:
+                f.write(line)
+
+        self.assertEqual(self.PASS, check_format_statements([tmp_file]))
+
+    def test_invalid_cases(self):
+        test_options = [
+            'format("{}", arg1, arg2)',
+            'format("{}{}=\"{}\"")',
+        ]
+
+        tmp_dir = Path(tempfile.mkdtemp())
+        tmp_file = tmp_dir / "invalid.cc"
+
+        with open(tmp_file, 'w') as f:
+            for line in test_options:
+                f.write(line)
+
+        self.assertEqual(self.FAIL, check_format_statements([tmp_file]))
 
 
 if __name__ == "__main__":
@@ -271,8 +436,7 @@ if __name__ == "__main__":
 
     root_path = Path(__file__).parent.parent.parent
     src_path = root_path / "src" / "EnergyPlus"
-    errors_found = check_format_strings(src_path)
+    files = get_sorted_file_list(src_path)
     tst_path = root_path / "tst" / "EnergyPlus"
-    errors_found += check_format_strings(tst_path)
-    if errors_found > 0:
-        sys.exit(1)
+    files.extend(get_sorted_file_list(tst_path))
+    sys.exit(check_format_statements(files))

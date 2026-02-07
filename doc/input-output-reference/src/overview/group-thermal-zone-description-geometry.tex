@@ -74,12 +74,11 @@ The name of the SpaceList object. This name must be unique across Zone, Space, Z
 Reference to a Space object.
 
 \begin{lstlisting}
-
 SpaceList,
-  Mid Floor List,   !- Name
-  Mid West Space,   !- Space 1 Name
-  Mid Center Space, !- Space 2 Name
-  Mid East Space;   !- Space 3 Name
+  Mid Floor List,             !- Name
+  Mid West Space,             !- Space 1 Name
+  Mid Center Space,           !- Space 2 Name
+  Mid East Space;             !- Space 3 Name
 \end{lstlisting}
 
 
@@ -157,17 +156,16 @@ This optional field defaults to Yes if not specified. The field is used to show 
 And, an IDF example:
 
 \begin{lstlisting}
-
-  Zone,
-      DORM ROOMS AND COMMON AREAS,  !- Name
-      0.0000000E+00,           !- Direction of Relative North {deg}
-      0.0000000E+00,           !- X Origin {m}
-      6.096000,                !- Y Origin {m}
-      0.0000000E+00,           !- Z Origin {m}
-      1,                       !- Type
-      1,                       !- Multiplier
-      autocalculate,           !-Ceiling Height {m}
-      autocalculate;           !- Volume {m3}
+Zone,
+  DORM ROOMS AND COMMON AREAS,!- Name
+  0.0000000E+00,              !- Direction of Relative North {deg}
+  0.0000000E+00,              !- X Origin {m}
+  6.096000,                   !- Y Origin {m}
+  0.0000000E+00,              !- Z Origin {m}
+  1,                          !- Type
+  1,                          !- Multiplier
+  autocalculate,              !- Ceiling Height {m}
+  autocalculate;              !- Volume {m3}
 \end{lstlisting}
 
 \subsubsection{Zone Outputs}\label{outputs-037}
@@ -713,12 +711,11 @@ The name of the ZoneList object. This name must be unique across Zone, Space, Zo
 Reference to a Zone object. This object is extensible, so additional fields of this type can be added to the end of this object.
 
 \begin{lstlisting}
-
 ZoneList,
-  Mid Floor List,  !- Name
-  Mid West Zone,   !- Zone 1 Name
-  Mid Center Zone, !- Zone 2 Name
-  Mid East Zone;   !- Zone 3 Name
+  Mid Floor List,             !- Name
+  Mid West Zone,              !- Zone 1 Name
+  Mid Center Zone,            !- Zone 2 Name
+  Mid East Zone;              !- Zone 3 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-028}
@@ -774,11 +771,10 @@ Reference to a \hyperref[zonelist]{ZoneList} object. The zones in the list const
 An integer multiplier. Zone List Multiplier is designed as a ``multiplier'' for floor area, zone loads, and energy consumed by internal gains. It takes the calculated load for the zone and multiplies it, sending the multiplied load to the attached HVAC system. The HVAC system size is specified to meet the entire multiplied zone load and will report the amount of the load met in the Zone Air System Sensible Heating or Cooling Energy/Rate output variable. Autosizing automatically accounts for multipliers. Metered energy consumption by internal gains objects such as Lights or Electric Equipment will be multiplied. The default is 1.
 
 \begin{lstlisting}
-
 ZONE GROUP,
-    Mid Floor,  !- Zone Group Name
-    Mid Floor List,  !- Zone List Name
-    8;  !- Zone List Multiplier
+  Mid Floor,                  !- Zone Group Name
+  Mid Floor List,             !- Zone List Name
+  8;                          !- Zone List Multiplier
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-023}
@@ -1886,87 +1882,86 @@ This field is the height of the door in meters.
 Examples of the rectangular surfaces are found in the example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2. Some examples:
 
 \begin{lstlisting}
+Wall:Exterior,
+  Zn001:Wall001,              !- Name
+  EXTERIOR,                   !- Construction Name
+  ZONE 1,                     !- Zone Name
+  180,                        !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  10;                         !- Height {m}
 
-  Wall:Exterior,
-      Zn001:Wall001,           !- Name
-      EXTERIOR,                !- Construction Name
-      ZONE 1,                  !- Zone Name
-      180,                     !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      10;                      !- Height {m}
+Window,
+  Zn001:Wall001:Win001,       !- Name
+  SINGLE PANE HW WINDOW,      !- Construction Name
+  Zn001:Wall001,              !- Building Surface Name
+  ,                           !- Frame and Divider Name
+  1,                          !- Multiplier
+  4,                          !- Starting X Coordinate {m}
+  3,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 
-    Window,
-      Zn001:Wall001:Win001,    !- Name
-      SINGLE PANE HW WINDOW,   !- Construction Name
-      Zn001:Wall001,           !- Building Surface Name
-      ,                        !- Frame and Divider Name
-      1,                       !- Multiplier
-      4,                       !- Starting X Coordinate {m}
-      3,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Door,
+  Zn001:Wall001:Door001,      !- Name
+  HOLLOW WOOD DOOR,           !- Construction Name
+  Zn001:Wall001,              !- Building Surface Name
+  1,                          !- Multiplier
+  14,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 
-    Door,
-      Zn001:Wall001:Door001,   !- Name
-      HOLLOW WOOD DOOR,        !- Construction Name
-      Zn001:Wall001,           !- Building Surface Name
-      1,                       !- Multiplier
-      14,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Wall:Adiabatic,
+  Zn001:Wall004,              !- Name
+  INTERIOR,                   !- Construction Name
+  ZONE 1,                     !- Zone Name
+  90,                         !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  20,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  10;                         !- Height {m}
 
-    Wall:Adiabatic,
-      Zn001:Wall004,           !- Name
-      INTERIOR,                !- Construction Name
-      ZONE 1,                  !- Zone Name
-      90,                      !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      20,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      10;                      !- Height {m}
+Floor:Adiabatic,
+  Zn001:Flr001,               !- Name
+  FLOOR,                      !- Construction Name
+  ZONE 1,                     !- Zone Name
+  90,                         !- Azimuth Angle {deg}
+  180,                        !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  20;                         !- Width {m}
 
-    Floor:Adiabatic,
-      Zn001:Flr001,            !- Name
-      FLOOR,                   !- Construction Name
-      ZONE 1,                  !- Zone Name
-      90,                      !- Azimuth Angle {deg}
-      180,                     !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      20;                      !- Width {m}
+Ceiling:Interzone,
+  Zn001:Roof001,              !- Name
+  CEILING34,                  !- Construction Name
+  ZONE 1,                     !- Zone Name
+  Zn003:Flr001,               !- Outside Boundary Condition Object
+  180,                        !- Azimuth Angle {deg}
+  0,                          !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  10,                         !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  20;                         !- Width {m}
 
-    Ceiling:Interzone,
-      Zn001:Roof001,           !- Name
-      CEILING34,               !- Construction Name
-      ZONE 1,                  !- Zone Name
-      Zn003:Flr001,            !- Outside Boundary Condition Object
-      180,                     !- Azimuth Angle {deg}
-      0,                       !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      10,                      !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      20;                      !- Width {m}
-
-    Window,
-      Zn002:Wall001:Win001,    !- Name
-      SINGLE PANE HW WINDOW,   !- Construction Name
-      Zn002:Wall001,           !- Building Surface Name
-      ,                        !- Frame and Divider Name
-      1,                       !- Multiplier
-      4,                       !- Starting X Coordinate {m}
-      3,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Window,
+  Zn002:Wall001:Win001,       !- Name
+  SINGLE PANE HW WINDOW,      !- Construction Name
+  Zn002:Wall001,              !- Building Surface Name
+  ,                           !- Frame and Divider Name
+  1,                          !- Multiplier
+  4,                          !- Starting X Coordinate {m}
+  3,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 \end{lstlisting}
 
 \subsection{Surface Vertices}\label{surface-vertices}
@@ -2007,12 +2002,13 @@ use the same vertex input. The numeric parameters indicated below are taken from
 The figure above will help illustrate Surface Vertex entry. The convention used in ``\hyperref[globalgeometryrules]{GlobalGeometryRules}'' dictates the order of the vertices (ref: \hyperref[globalgeometryrules]{GlobalGeometryRules}). In this example, the conventions used are Starting Vertex Position = UpperLeftCorner and Vertex Entry Direction = CounterClockwise. The surfaces for this single zone are:
 
 \begin{lstlisting}
-4,0,0,H, 0,0,0, A,0,0, A,0,H; ! (4 vertices, South Wall)
-4,A,0,H,A,0,0,A,B,0,A,B,H; ! (4 vertices, East Wall)
-     ignore other walls that are not shown in this figure
-4,C,0,J,A,0,H,A,B,H,C,B,J; ! (4 vertices, roof)
-3,C,0,J,0,0,H,A,0,H; ! (3 vertices, gable end)
-4,0,0,H, 0,0,0, A,0,0, A,0,H; ! (4 vertices, South Wall)
+4,0,0,H, 0,0,0, A,0,0, A,0,H; !- (4 vertices, South Wall)
+4,A,0,H,A,0,0,A,B,0,A,B,H;    !- (4 vertices, East Wall)
+ignore other walls that are not shown in this figure
+  4,C,0,J,A,0,H,A,B,H,C,B,J;  !- (4 vertices, roof)
+
+3,C,0,J,0,0,H,A,0,H;          !- (3 vertices, gable end)
+4,0,0,H, 0,0,0, A,0,0, A,0,H; !- (4 vertices, South Wall)
 \end{lstlisting}
 
 Note that in this example, point 1 of the entry is the Upper Left Corner of the rectangular surfaces and the point of the triangle for the 3 sided surface. The east wall shows the order of vertex entry. For horizontal surfaces, any vertex may be chosen as the starting position, but the Vertex Entry Direction convention must be followed. The surface details report (Output: Surfaces:List, Details;) is very useful for reviewing the accuracy of surface geometry inputs (ref: Surface Output Variables/Reports and Variable Dictionary Reports).
@@ -2379,51 +2375,50 @@ This field specifies the number of sides in the surface (number of X,Y,Z vertex 
 Some examples of using these objects:
 
 \begin{lstlisting}
-
 Floor:Detailed,
-      Floor_NorthZone_1stFloor,!- Name
-      FLOOR-SLAB-ASSEMBLY,     !- Construction Name
-      NorthZone_1stFloor,      !- Zone Name
-      Ground,                  !- Outside Boundary Condition
-      ,                        !- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0.0,                     !- View Factor to Ground
-      4,                       !- Number of Vertices
-      0, 11, 0,                           !- X,Y,Z  1 {m}
-      25, 11, 0,                          !- X,Y,Z  2 {m}
-      25, 5.5, 0,                         !- X,Y,Z  3 {m}
-     0, 5.5, 0;                          !- X,Y,Z  4 {m}
+  Floor_NorthZone_1stFloor,   !- Name
+  FLOOR-SLAB-ASSEMBLY,        !- Construction Name
+  NorthZone_1stFloor,         !- Zone Name
+  Ground,                     !- Outside Boundary Condition
+  ,                           !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0, 11, 0,                   !- X,Y,Z  1 {m}
+  25, 11, 0,                  !- X,Y,Z  2 {m}
+  25, 5.5, 0,                 !- X,Y,Z  3 {m}
+  0, 5.5, 0;                  !- X,Y,Z  4 {m}
 
-  RoofCeiling:Detailed,
-      Ceiling_SouthZone_1stFloor,  !- Name
-      CEILING-FLOOR-ASSEMBLY,  !- Construction Name
-      SouthZone_1stFloor,      !- Zone Name
-      Surface,                 !- Outside Boundary Condition
-      Floor_SouthZone_2ndFloor,!- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0.0,                     !- View Factor to Ground
-      4,                       !- Number of Vertices
-      0, 0, 3.4,                          !- X,Y,Z  1 {m}
-      25, 0, 3.4,                         !- X,Y,Z  2 {m}
-      25, 5.5, 3.4,                       !- X,Y,Z  3 {m}
-     0, 5.5, 3.4;                        !- X,Y,Z  4 {m}
+RoofCeiling:Detailed,
+  Ceiling_SouthZone_1stFloor, !- Name
+  CEILING-FLOOR-ASSEMBLY,     !- Construction Name
+  SouthZone_1stFloor,         !- Zone Name
+  Surface,                    !- Outside Boundary Condition
+  Floor_SouthZone_2ndFloor,   !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0, 0, 3.4,                  !- X,Y,Z  1 {m}
+  25, 0, 3.4,                 !- X,Y,Z  2 {m}
+  25, 5.5, 3.4,               !- X,Y,Z  3 {m}
+  0, 5.5, 3.4;                !- X,Y,Z  4 {m}
 
-  Wall:Detailed,
-      InteriorWall_SouthZone_1stFloor,  !- Name
-      INTERIOR-WALL-ASSEMBLY,  !- Construction Name
-      SouthZone_1stFloor,      !- Zone Name
-      Surface,                 !- Outside Boundary Condition
-      InteriorWall_NorthZone_1stFloor,  !- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0,                       !- View Factor to Ground
-      4,                       !- Number of Vertices
-      25, 5.5, 3.7,                       !- X,Y,Z  1 {m}
-      25, 5.5, 0,                         !- X,Y,Z  2 {m}
-      0, 5.5, 0,                          !- X,Y,Z  3 {m}
-     0, 5.5, 3.7;                        !- X,Y,Z  4 {m}
+Wall:Detailed,
+  InteriorWall_SouthZone_1stFloor,  !- Name
+  INTERIOR-WALL-ASSEMBLY,     !- Construction Name
+  SouthZone_1stFloor,         !- Zone Name
+  Surface,                    !- Outside Boundary Condition
+  InteriorWall_NorthZone_1stFloor,  !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0,                          !- View Factor to Ground
+  4,                          !- Number of Vertices
+  25, 5.5, 3.7,               !- X,Y,Z  1 {m}
+  25, 5.5, 0,                 !- X,Y,Z  2 {m}
+  0, 5.5, 0,                  !- X,Y,Z  3 {m}
+  0, 5.5, 3.7;                !- X,Y,Z  4 {m}
 \end{lstlisting}
 
 \subsection{BuildingSurface:Detailed}\label{buildingsurfacedetailed}
@@ -2554,45 +2549,44 @@ This field specifies the number of sides in the surface (number of X,Y,Z vertex 
 IDF example of three walls (first is an exterior wall, second and third are interzone partitions):
 
 \begin{lstlisting}
-
 BuildingSurface:Detailed,Zn001:Wall001,  !- Base Surface Name
-    Wall,EXTERIOR,  !- Class and Construction Name
-    ZONE 1 @ 200 601 0 T,  !- Zone
-    Outdoors,,  !- Outside Boundary Condition  and Target (if applicable)
-     SunExposed,  !- Solar Exposure
-     WindExposed,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-    0.0000000E+00,  0.0000000E+00,   3.048000    ,
-    0.0000000E+00,  0.0000000E+00,  0.0000000E+00,
-     6.096000    ,  0.0000000E+00,  0.0000000E+00,
-     6.096000    ,  0.0000000E+00,   3.048000    ;
+  Wall,EXTERIOR,              !- Class and Construction Name
+  ZONE 1 @ 200 601 0 T,       !- Zone
+  Outdoors,,                  !- Outside Boundary Condition  and Target (if applicable)
+  SunExposed,                 !- Solar Exposure
+  WindExposed,                !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  0.0000000E+00,  0.0000000E+00,   3.048000,
+  0.0000000E+00,  0.0000000E+00,  0.0000000E+00,
+  6.096000    ,  0.0000000E+00,  0.0000000E+00,
+  6.096000    ,  0.0000000E+00,   3.048000;
 
-  BuildingSurface:Detailed,Zn001:Wall006,  !-Base Surface Name
-    Wall,INTERIOR,  !- Class and Construction Name
-    HEARTLAND AREA,  !- Zone
-    Surface,Zn004:Wall005,  !- Outside Boundary Conditions and Target (if applicable)
-     NoSun,  !- Solar Exposure
-     NoWind,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-     38.01000    ,   28.25000    ,   10.00000    ,
-     38.01000    ,   28.25000    ,  0.0000000E+00,
-     38.01000    ,   18.25000    ,  0.0000000E+00,
-     38.01000    ,   18.25000    ,   10.00000    ;
+BuildingSurface:Detailed,Zn001:Wall006,  !- Base Surface Name
+  Wall,INTERIOR,              !- Class and Construction Name
+  HEARTLAND AREA,             !- Zone
+  Surface,Zn004:Wall005,      !- Outside Boundary Conditions and Target (if applicable)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  38.01000    ,   28.25000    ,   10.00000,
+  38.01000    ,   28.25000    ,  0.0000000E+00,
+  38.01000    ,   18.25000    ,  0.0000000E+00,
+  38.01000    ,   18.25000    ,   10.00000;
 
-  BuildingSurface:Detailed,Zn001:Wall007,  !- Base Surface Name
-    Wall,INTERIOR,  !- Class and Construction Name
-    HEARTLAND AREA,  !- Zone
-    Surface,Zn003:Wall006,  !- Outside Boundary Conditions and Target (if applicable)
-     NoSun,  !- Solar Exposure
-     NoWind,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-     58.01000    ,   18.25000    ,   10.00000    ,
-     58.01000    ,   18.25000    ,  0.0000000E+00,
-     58.01000    ,   28.25000    ,  0.0000000E+00,
-     58.01000    ,   28.25000    ,   10.00000    ;
+BuildingSurface:Detailed,Zn001:Wall007,  !- Base Surface Name
+  Wall,INTERIOR,              !- Class and Construction Name
+  HEARTLAND AREA,             !- Zone
+  Surface,Zn003:Wall006,      !- Outside Boundary Conditions and Target (if applicable)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  58.01000    ,   18.25000    ,   10.00000,
+  58.01000    ,   18.25000    ,  0.0000000E+00,
+  58.01000    ,   28.25000    ,  0.0000000E+00,
+  58.01000    ,   28.25000    ,   10.00000;
 \end{lstlisting}
 
 \subsection{FenestrationSurface:Detailed}\label{fenestrationsurfacedetailed}
@@ -2690,20 +2684,19 @@ For triangular windows the first vertex listed can be any of the three vertices,
 An IDF example of a rectangular subsurface (Window):
 
 \begin{lstlisting}
-
 FenestrationSurface:Detailed,
-   Zn001:Wall001:Win001,  !- SubSurface Name
-    Window,SINGLE PANE HW WINDOW,  !- Class and Construction Name
-    Zn001:Wall001,,         !- Base Surface Name and Target (if applicable)
-    0.5000000    ,          !- VF to Ground
-    WINDOW-CONTROL-DRAPES,  !- Window Shading Control
-    TestFrameAndDivider,    !- Frame/Divider name
-    5,                      !- Multiplier
-    4,                      !- Rectangle (number of sides)
-     1.524000    ,  0.1520000    ,   2.743000    ,
-     1.524000    ,  0.1520000    ,  0.3050000    ,
-     4.572000    ,  0.1520000    ,  0.3050000    ,
-     4.572000    ,  0.1520000    ,   2.743000    ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,SINGLE PANE HW WINDOW,  !- Class and Construction Name
+  Zn001:Wall001,,             !- Base Surface Name and Target (if applicable)
+  0.5000000,                  !- VF to Ground
+  WINDOW-CONTROL-DRAPES,      !- Window Shading Control
+  TestFrameAndDivider,        !- Frame/Divider name
+  5,                          !- Multiplier
+  4,                          !- Rectangle (number of sides)
+  1.524000    ,  0.1520000    ,   2.743000,
+  1.524000    ,  0.1520000    ,  0.3050000,
+  4.572000    ,  0.1520000    ,  0.3050000,
+  4.572000    ,  0.1520000    ,   2.743000;
 \end{lstlisting}
 
 \subsection{Window Modeling Options}\label{window-modeling-options}
@@ -2794,18 +2787,18 @@ IDF examples of Internal Mass surfaces:
 
 \begin{lstlisting}
 InternalMass,
-  Zn002:IntM001,                !- Surface Name
-  INTERIOR,                     !- Construction Name
-  DORM ROOMS AND COMMON AREAS,  !- Zone or ZoneList Name
-  ,                             !- Space or SpaceList Name
-  408.7734;                     !- Surface Area {m2}
+  Zn002:IntM001,              !- Surface Name
+  INTERIOR,                   !- Construction Name
+  DORM ROOMS AND COMMON AREAS,!- Zone or ZoneList Name
+  ,                           !- Space or SpaceList Name
+  408.7734;                   !- Surface Area {m2}
 
 InternalMass,
-  Zn002:IntM002,                !- Surface Name
-  PARTITION02,                  !- Construction Name
-  DORM ROOMS AND COMMON AREAS,  !- Zone or ZoneList Name
-  ,                             !- Space or SpaceList Name
-  371.6122;                     !- Surface Area {m2}
+  Zn002:IntM002,              !- Surface Name
+  PARTITION02,                !- Construction Name
+  DORM ROOMS AND COMMON AREAS,!- Zone or ZoneList Name
+  ,                           !- Space or SpaceList Name
+  371.6122;                   !- Surface Area {m2}
 \end{lstlisting}
 
 \subsection{Surface Output Variables/Reports}\label{surface-output-variablesreports}
@@ -3102,7 +3095,7 @@ This is the temperature of the surface's inside face, in degrees Celsius. Former
 This is the temperature of movable insulation installed on the inside of the construction at the movable insulation's inside face (the one facing the zone), in degrees Celsius. This variable is only valid when the surface has movable insulation and the movable insulation is actually scheduled to be present.  For surfaces that have no movable insulation or the movable insulation is not scheduled to be present, the value of this variable is set to the Surface Inside Face Temperature.  It should be noted that users can limit how often this output variable is generating by using a schedule to control when this output is produced.  For example, this user could add the following syntax to an input file that includes movable insulation:
 
 \begin{lstlisting}
-  Output:Variable,Zone1:WestWall,Surface Inside Face Interior Movable Insulation Temperature,timestep,MovableInsulationSchedule;
+Output:Variable,Zone1:WestWall,Surface Inside Face Interior Movable Insulation Temperature,timestep,MovableInsulationSchedule;
 \end{lstlisting}
 
 In this example, interior movable insulation is used on the west wall of zone 1 and is only present when the schedule (MovableInsulationSchedule) is greater than zero.  Adding this output variable syntax to the input file reports the temperature at the inside face of the interior movable insulation only when the movable insulation is present.  The use of the movable insulation schedule in the output variable designation limits when this value shows up in the EnergyPlus output file to when it is actually scheduled to be present.  At other times, no value will be reported.  The limiting of when the output is generated allows the user to generate useful statistics instead of having those statistics influenced by values for when the movable insulation is not present.  If the user does not use the output variable schedule feature, the output for this variable will equal the surface inside face temperature when the movable insulation is not present.
@@ -3901,7 +3894,6 @@ This report produces a special file (\textbf{eplusout.dxf}) in the industry stan
 EnergyPlus produces this file from the Report command:
 
 \begin{lstlisting}
-
 Output:Reports, Surfaces, DXF;
 \end{lstlisting}
 
@@ -4004,26 +3996,25 @@ This field is the width of the shade in meters.
 Examples of these (can be found in example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2.idf)
 
 \begin{lstlisting}
+Shading:Building,
+  Bushes-East,                !- Name
+  90,                         !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  45,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  50,                         !- Length {m}
+  1;                          !- Height {m}
 
-  Shading:Building,
-      Bushes-East,             !- Name
-      90,                      !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      45,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      50,                      !- Length {m}
-      1;                       !- Height {m}
-
-    Shading:Site,
-      Bushes-North,            !- Name
-      0,                       !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      45,                      !- Starting X Coordinate {m}
-      50,                      !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      50,                      !- Length {m}
-      1;                       !- Height {m}
+Shading:Site,
+  Bushes-North,               !- Name
+  0,                          !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  45,                         !- Starting X Coordinate {m}
+  50,                         !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  50,                         !- Length {m}
+  1;                          !- Height {m}
 \end{lstlisting}
 
 \subsection{Shading:Site:Detailed, Shading:Building:Detailed}\label{shadingsitedetailed-shadingbuildingdetailed}
@@ -4070,22 +4061,21 @@ The number of sides in the surface (number of X,Y,Z vertex groups). For further 
 IDF example of Detached Shading Surfaces:
 
 \begin{lstlisting}
+Shading:Building:Detailed,
+  EAST SIDE TREE,             !- Detached Shading
+  ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
+  3,                          !- Triangle
+  33.52800    ,   10.66800    ,   10.05800,
+  33.52800    ,   13.71600    ,  0.9140000,
+  33.52800    ,   4.572000    ,  0.9140000;
 
 Shading:Building:Detailed,
-     EAST SIDE TREE,  !- Detached Shading
-     ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
-     3, !-Triangle
-     33.52800    ,   10.66800    ,   10.05800    ,
-     33.52800    ,   13.71600    ,  0.9140000    ,
-     33.52800    ,   4.572000    ,  0.9140000    ;
-
-  Shading:Building:Detailed,
-     WEST SIDE TREE,  !- Detached Shading
-     ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
-     3, !-Triangle
-    -3.048000    ,   7.620000    ,   10.05800    ,
-    -3.048000    ,   4.572000    ,  0.9140000    ,
-    -3.048000    ,   13.71600    ,  0.9140000    ;
+  WEST SIDE TREE,             !- Detached Shading
+  ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
+  3,                          !- Triangle
+  -3.048000    ,   7.620000    ,   10.05800,
+  -3.048000    ,   4.572000    ,  0.9140000,
+  -3.048000    ,   13.71600    ,  0.9140000;
 \end{lstlisting}
 
 \subsection{Attached Shading Surfaces}\label{attached-shading-surfaces}
@@ -4271,38 +4261,37 @@ This field is the fraction of the window/door width to specify as the depth of t
 Examples of these (can be found in example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2.idf)
 
 \begin{lstlisting}
+Shading:Overhang:Projection,
+  Zn001:Wall001:Win001:Shade001,  !- Name
+  Zn001:Wall001:Win001,       !- Window or Door Name
+  .7,                         !- Height above Window or Door {m}
+  90,                         !- Tilt Angle from Window/Door {deg}
+  .2,                         !- Left extension from Window/Door Width {m}
+  .2,                         !- Right extension from Window/Door Width {m}
+  .6;                         !- Depth as Fraction of Window/Door Height {m}
 
-  Shading:Overhang:Projection,
-      Zn001:Wall001:Win001:Shade001,  !- Name
-      Zn001:Wall001:Win001,    !- Window or Door Name
-      .7,                      !- Height above Window or Door {m}
-      90,                      !- Tilt Angle from Window/Door {deg}
-      .2,                      !- Left extension from Window/Door Width {m}
-      .2,                      !- Right extension from Window/Door Width {m}
-      .6;                      !- Depth as Fraction of Window/Door Height {m}
+Shading:Overhang,
+  Zn001:Wall001:Door001:Shade001,  !- Name
+  Zn001:Wall001:Door001,      !- Window or Door Name
+  .6,                         !- Height above Window or Door {m}
+  90,                         !- Tilt Angle from Window/Door {deg}
+  0,                          !- Left extension from Window/Door Width {m}
+  0,                          !- Right extension from Window/Door Width {m}
+  3;                          !- Depth {m}
 
-    Shading:Overhang,
-      Zn001:Wall001:Door001:Shade001,  !- Name
-      Zn001:Wall001:Door001,   !- Window or Door Name
-      .6,                      !- Height above Window or Door {m}
-      90,                      !- Tilt Angle from Window/Door {deg}
-      0,                       !- Left extension from Window/Door Width {m}
-      0,                       !- Right extension from Window/Door Width {m}
-      3;                       !- Depth {m}
-
-    Shading:Fin:Projection,
-      Zn001:Wall001:Shade003,  !- Name
-      Zn001:Wall001:Win001,    !- Window or Door Name
-      .1,                      !- Left Extension from Window/Door {m}
-      .1,                   !- Left Distance Above Top of Window {m}
-      .1,                   !- Left Distance Below Bottom of Window {m}
-      90,                   !- Left Tilt Angle from Window/Door {deg}
-      .6,                   !- Left Depth as Fraction of Window/Door Width {m}
-      .1,                   !- Right Extension from Window/Door {m}
-      .1,                   !- Right Distance Above Top of Window {m}
-      .1,                   !- Right Distance Below Bottom of Window {m}
-      90,                   !- Right Tilt Angle from Window/Door {deg}
-      .6;                   !- Right Depth as Fraction of Window/Door Width {m}
+Shading:Fin:Projection,
+  Zn001:Wall001:Shade003,     !- Name
+  Zn001:Wall001:Win001,       !- Window or Door Name
+  .1,                         !- Left Extension from Window/Door {m}
+  .1,                         !- Left Distance Above Top of Window {m}
+  .1,                         !- Left Distance Below Bottom of Window {m}
+  90,                         !- Left Tilt Angle from Window/Door {deg}
+  .6,                         !- Left Depth as Fraction of Window/Door Width {m}
+  .1,                         !- Right Extension from Window/Door {m}
+  .1,                         !- Right Distance Above Top of Window {m}
+  .1,                         !- Right Distance Below Bottom of Window {m}
+  90,                         !- Right Tilt Angle from Window/Door {deg}
+  .6;                         !- Right Depth as Fraction of Window/Door Width {m}
 \end{lstlisting}
 
 \subsection{Shading:Zone:Detailed}\label{shadingzonedetailed-000}
@@ -4374,34 +4363,34 @@ IDF example of attached shading surfaces (overhang, fin):
 
 \begin{lstlisting}
 Shading:Zone:Detailed,
-  Zn001:Wall001:Shade001,       !- Surface Name
-  Zn001:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0001,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularOverhang
+  Zn001:Wall001:Shade001,     !- Surface Name
+  Zn001:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0001,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularOverhang
   1.524000 , -0.3050000    , 2.865000,
   1.524000 ,  0.0000000E+00, 2.865000,
   4.572000 ,  0.0000000E+00, 2.865000,
   4.572000 , -0.3050000    , 2.865000;
 
 Shading:Zone:Detailed,
-  Zn003:Wall001:Shade001,       !- Surface Name
-  Zn003:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0001,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularLeftFin
-  57.97000 ,   8.450000    ,10.00000      ,
+  Zn003:Wall001:Shade001,     !- Surface Name
+  Zn003:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0001,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularLeftFin
+  57.97000 ,   8.450000    ,10.00000,
   57.97000 ,   8.450000    , 0.0000000E+00,
   57.97000 ,   6.450000    , 0.0000000E+00,
-  57.97000 ,   6.450000    ,10.00000      ;
+  57.97000 ,   6.450000    ,10.00000;
 
 Shading:Zone:Detailed,
-  Zn003:Wall001:Shade002,       !- Surface Name
-  Zn003:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0003,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularRightFin
-  77.97000 ,   6.450000    ,10.00000      ,
+  Zn003:Wall001:Shade002,     !- Surface Name
+  Zn003:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0003,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularRightFin
+  77.97000 ,   6.450000    ,10.00000,
   77.97000 ,   6.450000    , 0.0000000E+00,
   77.97000 ,   8.450000    , 0.0000000E+00,
-  77.97000 ,   8.450000    ,10.00000      ;
+  77.97000 ,   8.450000    ,10.00000;
 \end{lstlisting}
 
 \subsection{ShadingProperty:Reflectance}\label{shadingpropertyreflectance}
@@ -4443,45 +4432,41 @@ The name of the construction of the windows on the shading surface. Required if 
 IDF example of Shading Surface Reflectance for shading surface with specular reflection
 
 \begin{lstlisting}
-
 Shading:Site:Detailed,
-  Adjacent Glazed Facade,  !- User Supplied Surface Name
-  ,   !- Shadowing Transmittance Schedule
-  4,  !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
-  0,-24,30, !- Vertex 1 X,Y,Z coordinates
-  0,-24,0,  !- Vertex 2 X,Y,Z coordinates
-  0,0,0,    !- Vertex 3 X,Y,Z coordinates
-  0,0,30;   !-Vertex 3 X,Y,Z coordinates
+  Adjacent Glazed Facade,     !- User Supplied Surface Name
+  ,                           !- Shadowing Transmittance Schedule
+  4,                          !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
+  0,-24,30,                   !- Vertex 1 X,Y,Z coordinates
+  0,-24,0,                    !- Vertex 2 X,Y,Z coordinates
+  0,0,0,                      !- Vertex 3 X,Y,Z coordinates
+  0,0,30;                     !- Vertex 3 X,Y,Z coordinates
 
-
-  ShadingProperty:Reflectance,
-  Adjacent Glazed Facade, !- Name of Surface:Shading Object
-  0.3,  !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
-  0.3,  !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
-  0.7,  !- Fraction of Shading Surface That Is Glazed
-  GlassCon-1; !- Name of Glazing Construction
+ShadingProperty:Reflectance,
+  Adjacent Glazed Facade,     !- Name of Surface:Shading Object
+  0.3,                        !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
+  0.3,                        !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
+  0.7,                        !- Fraction of Shading Surface That Is Glazed
+  GlassCon-1;                 !- Name of Glazing Construction
 \end{lstlisting}
 
 IDF example of Shading Surface Reflectance for shading surface without specular reflection
 
 \begin{lstlisting}
-
 Shading:Site:Detailed,
-  Adjacent Blank Facade,  !- User Supplied Surface Name
-  ,   !- Shadowing Transmittance Schedule
-  4,  !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
+  Adjacent Blank Facade,      !- User Supplied Surface Name
+  ,                           !- Shadowing Transmittance Schedule
+  4,                          !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
   0,-24,30,
   0,-24,0,
   0,0,0,
   0,0,30;
 
-
-  ShadingProperty:Reflectance,
-  Adjacent Blank Facade, !- Name of Surface:Shading Object
-  0.4,  !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
-  0.4,  !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
-  0.0,  !- Fraction of Shading Surface That Is Glazed
-  ;     !- Name of glazing construction
+ShadingProperty:Reflectance,
+  Adjacent Blank Facade,      !- Name of Surface:Shading Object
+  0.4,                        !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
+  0.4,                        !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
+  0.0,                        !- Fraction of Shading Surface That Is Glazed
+  ;                           !- Name of glazing construction
 \end{lstlisting}
 
 \subsection{WindowShadingControl}\label{windowpropertyshadingcontrol}
@@ -4741,148 +4726,146 @@ An IDF example: window with interior roll shade that is deployed when solar inci
 \begin{lstlisting}
 ! Example 1: Interior movable shade specified by giving name of shaded construction
 ! in WindowShadingControl
-
-WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
-       SpectralAverage,! Optical data type {SpectralAverage or Spectral}
-       ,               ! Name of spectral data set when Optical Data Type = Spectral
-       0.003        ,  !- Thickness {m}
-       0.837        ,  !- Solar Transmittance at Normal Incidence
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Front Side
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Back Side
-       0.898        ,  !- Visible Transmittance at Normal Incidence
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Front Side
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Back Side
-       0.0          ,  !- IR Transmittance
-       0.8400000    ,  !- IR Emissivity: Front Side
-       0.8400000    ,  !- IR Emissivity: Back Side
-       0.9000000    ;  !- Conductivity {W/m-K}
+  WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
+  SpectralAverage,            !- Optical data type {SpectralAverage or Spectral}
+  ,                           !- Name of spectral data set when Optical Data Type = Spectral
+  0.003,                      !- Thickness {m}
+  0.837,                      !- Solar Transmittance at Normal Incidence
+  0.075,                      !- Solar Reflectance at Normal Incidence: Front Side
+  0.075,                      !- Solar Reflectance at Normal Incidence: Back Side
+  0.898,                      !- Visible Transmittance at Normal Incidence
+  0.081,                      !- Visible Reflectance at Normal Incidence: Front Side
+  0.081,                      !- Visible Reflectance at Normal Incidence: Back Side
+  0.0,                        !- IR Transmittance
+  0.8400000,                  !- IR Emissivity: Front Side
+  0.8400000,                  !- IR Emissivity: Back Side
+  0.9000000;                  !- Conductivity {W/m-K}
 
 WindowMaterial:Shade, ROLL SHADE,  !- Material Name
-       0.3          ,   !- Solar Transmittance at normal incidence
-       0.5000000    ,   !- Solar Reflectance (same for front and back side)
-       0.3          ,   !- Visible Transmittance at normal incidence
-       0.5000000    ,   !- Visible reflectance (same for front and back side)
-       0.9000000    ,   !- IR Emissivity (same for front and back side)
-       0.05         ,   !- IR Transmittance
-       0.003        ,   !- Thickness
-       0.1          ,   !- Conductivity {W/m-K}
-       0.0          ,   !- Top Opening Multiplier
-       0.0          ,   !- Bottom Opening Multiplier
-       0.5          ,   !- Left-Side Opening Multiplier
-       0.5          ,   !- Right-Side Opening Multiplier
-       0.0          ;   !- Air-Flow Permeability
+  0.3,                        !- Solar Transmittance at normal incidence
+  0.5000000,                  !- Solar Reflectance (same for front and back side)
+  0.3,                        !- Visible Transmittance at normal incidence
+  0.5000000,                  !- Visible reflectance (same for front and back side)
+  0.9000000,                  !- IR Emissivity (same for front and back side)
+  0.05,                       !- IR Transmittance
+  0.003,                      !- Thickness
+  0.1,                        !- Conductivity {W/m-K}
+  0.0,                        !- Top Opening Multiplier
+  0.0,                        !- Bottom Opening Multiplier
+  0.5,                        !- Left-Side Opening Multiplier
+  0.5,                        !- Right-Side Opening Multiplier
+  0.0;                        !- Air-Flow Permeability
 
-Construction, SINGLE PANE WITH NO SHADE,  ! Name of construction without shade
-       GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
+Construction, SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
 
-Construction, SINGLE PANE WITH INT SHADE, ! Name of construction with shade
-       GLASS - CLEAR SHEET 1 / 8 IN,  !- First material layer
-       ROLL SHADE                  ;  !- Second material layer
+Construction, SINGLE PANE WITH INT SHADE,  !- Name of construction with shade
+  GLASS - CLEAR SHEET 1 / 8 IN,  !- First material layer
+  ROLL SHADE;                 !- Second material layer
 
 WindowShadingControl,
-       CONTROL ON INCIDENT SOLAR,    !- Name
-       West Zone,                    !- Zone Name
-       1,                            !- Shading Control Sequence Number
-       InteriorShade,                !- Shading Type
-       SINGLE PANE WITH INT SHADE,   !- Name of construction with shading device
-       OnIfHighSolarOnWindow,        !- Shading Control Type
-       ,                             !- Schedule name
-       50.0,                         !- Setpoint {W/m2}
-       NO,                           !- Shading Control Is Scheduled
-       NO,                           !- Glare Control Is Active
-       ,                             !- Material Name of Shading Device
-       ,                             !- Type of Slat Angle Control for Blinds
-       ,                             !- Slat Angle Schedule Name
-       ,                             !- Setpoint 2 {W/m2, deg C or cd/m2}
-       West Zone_DaylCtrl,           !- Daylighting Control Object Name
-       Sequential,                   !- Multiple Surface Control Type
-       Zn001:Wall001:Win001;         !- Fenestration Surface 1 Name
+  CONTROL ON INCIDENT SOLAR,  !- Name
+  West Zone,                  !- Zone Name
+  1,                          !- Shading Control Sequence Number
+  InteriorShade,              !- Shading Type
+  SINGLE PANE WITH INT SHADE, !- Name of construction with shading device
+  OnIfHighSolarOnWindow,      !- Shading Control Type
+  ,                           !- Schedule name
+  50.0,                       !- Setpoint {W/m2}
+  NO,                         !- Shading Control Is Scheduled
+  NO,                         !- Glare Control Is Active
+  ,                           !- Material Name of Shading Device
+  ,                           !- Type of Slat Angle Control for Blinds
+  ,                           !- Slat Angle Schedule Name
+  ,                           !- Setpoint 2 {W/m2, deg C or cd/m2}
+  West Zone_DaylCtrl,         !- Daylighting Control Object Name
+  Sequential,                 !- Multiple Surface Control Type
+  Zn001:Wall001:Win001;       !- Fenestration Surface 1 Name
 
 FenestrationSurface:Detailed,
-       Zn001:Wall001:Win001,         !- SubSurface Name
-       Window                   ,    !- Class
-       SINGLE PANE WITH NO SHADE,    !- Name of construction without shading device
-       Zn001:Wall001            ,    !- Base Surface Name
-       ,                             !- Target
-       0.5000000                ,    !- VF to Ground
-       ,                             !- Frame/Divider name
-       1.0                      ,    !- Multiplier
-       4                        ,    !- Number of vertices (assumed rectangular)
-       0.548 ,  0.0 ,   2.5     ,    !- x,y,z of vertices {m}
-       0.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   2.5     ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,                     !- Class
+  SINGLE PANE WITH NO SHADE,  !- Name of construction without shading device
+  Zn001:Wall001,              !- Base Surface Name
+  ,                           !- Target
+  0.5000000,                  !- VF to Ground
+  ,                           !- Frame/Divider name
+  1.0,                        !- Multiplier
+  4,                          !- Number of vertices (assumed rectangular)
+  0.548 ,  0.0 ,   2.5,       !- x,y,z of vertices {m}
+  0.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   2.5;
 \end{lstlisting}
 
 \begin{lstlisting}
 ! Example 2: Interior movable shade specified by giving name of shading device in WindowShadingControl
-
-WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
-       SpectralAverage,! Optical data type {SpectralAverage or Spectral}
-       ,               ! Name of spectral data set when Optical Data Type = Spectral
-       0.003        ,  !- Thickness {m}
-       0.837        ,  !- Solar Transmittance at Normal Incidence
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Front Side
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Back Side
-       0.898        ,  !- Visible Transmittance at Normal Incidence
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Front Side
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Back Side
-       0.0          ,  !- IR Transmittance
-       0.8400000    ,  !- IR Emissivity: Front Side
-       0.8400000    ,  !- IR Emissivity: Back Side
-       0.9000000    ;  !- Conductivity {W/m-K}
+  WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
+  SpectralAverage,            !- Optical data type {SpectralAverage or Spectral}
+  ,                           !- Name of spectral data set when Optical Data Type = Spectral
+  0.003,                      !- Thickness {m}
+  0.837,                      !- Solar Transmittance at Normal Incidence
+  0.075,                      !- Solar Reflectance at Normal Incidence: Front Side
+  0.075,                      !- Solar Reflectance at Normal Incidence: Back Side
+  0.898,                      !- Visible Transmittance at Normal Incidence
+  0.081,                      !- Visible Reflectance at Normal Incidence: Front Side
+  0.081,                      !- Visible Reflectance at Normal Incidence: Back Side
+  0.0,                        !- IR Transmittance
+  0.8400000,                  !- IR Emissivity: Front Side
+  0.8400000,                  !- IR Emissivity: Back Side
+  0.9000000;                  !- Conductivity {W/m-K}
 
 WindowMaterial:Shade, ROLL SHADE,  !- Material Name
-       0.3          ,   !- Solar Transmittance at normal incidence
-       0.5000000    ,   !- Solar Reflectance (same for front and back side)
-       0.3          ,   !- Visible Transmittance at normal incidence
-       0.5000000    ,   !- Visible reflectance (same for front and back side)
-       0.9000000    ,   !- IR Emissivity (same for front and back side)
-       0.05         ,   !- IR Transmittance
-       0.003        ,   !- Thickness
-       0.1          ,   !- Conductivity {W/m-K}
-       0.0          ,   !- Top Opening Multiplier
-       0.0          ,   !- Bottom Opening Multiplier
-       0.5          ,   !- Left-Side Opening Multiplier
-       0.5          ,   !- Right-Side Opening Multiplier
-       0.0          ;   !- Air-Flow Permeability
+  0.3,                        !- Solar Transmittance at normal incidence
+  0.5000000,                  !- Solar Reflectance (same for front and back side)
+  0.3,                        !- Visible Transmittance at normal incidence
+  0.5000000,                  !- Visible reflectance (same for front and back side)
+  0.9000000,                  !- IR Emissivity (same for front and back side)
+  0.05,                       !- IR Transmittance
+  0.003,                      !- Thickness
+  0.1,                        !- Conductivity {W/m-K}
+  0.0,                        !- Top Opening Multiplier
+  0.0,                        !- Bottom Opening Multiplier
+  0.5,                        !- Left-Side Opening Multiplier
+  0.5,                        !- Right-Side Opening Multiplier
+  0.0;                        !- Air-Flow Permeability
 
-Construction, SINGLE PANE WITH NO SHADE,  ! Name of construction without shade
-       GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
+Construction, SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
 
 WindowShadingControl,
-       CONTROL ON INCIDENT SOLAR,    !- Name
-       West Zone,                    !- Zone Name
-       1,                            !- Shading Control Sequence Number
-       InteriorShade,                !- Shading Type
-       ,                             !- Name of shaded construction
-       OnIfHighSolarOnWindow,        !- Shading Control Type
-       ,                             !- Schedule name
-       50.0,                         !- Setpoint {W/m2}
-       NO,                           !- Shading Control Is Scheduled
-       NO,                           !- Glare Control Is Active
-       ROLL SHADE,                   !- Material Name of Shading Device
-       ,                             !- Type of Slat Angle Control for Blinds
-       ,                             !- Slat Angle Schedule Name
-       ,                             !- Setpoint 2 {W/m2, deg C or cd/m2}
-       West Zone_DaylCtrl,           !- Daylighting Control Object Name
-       Sequential,                   !- Multiple Surface Control Type
-       Zn001:Wall001:Win001;         !- Fenestration Surface 1 Name
+  CONTROL ON INCIDENT SOLAR,  !- Name
+  West Zone,                  !- Zone Name
+  1,                          !- Shading Control Sequence Number
+  InteriorShade,              !- Shading Type
+  ,                           !- Name of shaded construction
+  OnIfHighSolarOnWindow,      !- Shading Control Type
+  ,                           !- Schedule name
+  50.0,                       !- Setpoint {W/m2}
+  NO,                         !- Shading Control Is Scheduled
+  NO,                         !- Glare Control Is Active
+  ROLL SHADE,                 !- Material Name of Shading Device
+  ,                           !- Type of Slat Angle Control for Blinds
+  ,                           !- Slat Angle Schedule Name
+  ,                           !- Setpoint 2 {W/m2, deg C or cd/m2}
+  West Zone_DaylCtrl,         !- Daylighting Control Object Name
+  Sequential,                 !- Multiple Surface Control Type
+  Zn001:Wall001:Win001;       !- Fenestration Surface 1 Name
 
 FenestrationSurface:Detailed,
-       Zn001:Wall001:Win001,         !- SubSurface Name
-       Window                   ,    !- Class
-       SINGLE PANE WITH NO SHADE,    !- Name of construction without shade
-       Zn001:Wall001            ,    !- Base Surface Name
-       ,                             !- Target
-       0.5000000                ,    !- VF to Ground
-       ,                             !- Frame/Divider name
-       1.0                      ,    !- Multiplier
-       4                        ,    !- Number of vertices (assumed rectangular)
-       0.548 ,  0.0 ,   2.5     ,    !- x,y,z of vertices {m}
-       0.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   2.5     ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,                     !- Class
+  SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  Zn001:Wall001,              !- Base Surface Name
+  ,                           !- Target
+  0.5000000,                  !- VF to Ground
+  ,                           !- Frame/Divider name
+  1.0,                        !- Multiplier
+  4,                          !- Number of vertices (assumed rectangular)
+  0.548 ,  0.0 ,   2.5,       !- x,y,z of vertices {m}
+  0.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   2.5;
 \end{lstlisting}
 
 \subsection{WindowProperty:FrameAndDivider}\label{windowpropertyframeanddivider}
@@ -5099,34 +5082,33 @@ The selection made for this field corresponds to NFRC 100 ``Procedure for Determ
 An IDF example:
 
 \begin{lstlisting}
-
-  WindowProperty:FrameAndDivider,
-        TestFrameAndDivider, ! Frame/Divider Name
-        0.05, ! Frame Width
-        0.04, ! Frame Outside Projection
-        0.03, ! Frame Inside Projection
-        5.0,  ! Frame Conductance
-        1.3,  ! Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance
-        0.8,  ! Frame Solar Absorptance
-        0.8,  ! Frame Visible Absorptance
-        0.9,  ! Frame Thermal Emissivity
-        DividedLite, ! Divider Type
-        0.03, ! Divider Width
-        2,    ! Number of Horizontal Dividers
-        2,    ! Number of Vertical Dividers
-        0.03, ! Divider Outside Projection
-        0.03, ! Divider Inside Projection
-        5.0,  ! Divider Conductance
-        1.3,  ! Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance
-        0.8,  ! Divider Solar Absorptance
-        0.8,  ! Divider Visible Absorptance
-        0.9,  ! Divider Thermal Emissivity
-        0.7,  ! Outside Reveal Solar Absorptance
-        0.25, ! Inside Sill Depth (m)
-        0.6,  ! Inside Sill Solar Absorptance
-        0.2,  ! Inside Reveal Depth (m)
-        0.5,  ! Inside Reveal Solar Absorptance
-        ProjectingSingle; ! NFRC Product Type for Assembly Calculations
+WindowProperty:FrameAndDivider,
+  TestFrameAndDivider,        !- Frame/Divider Name
+  0.05,                       !- Frame Width
+  0.04,                       !- Frame Outside Projection
+  0.03,                       !- Frame Inside Projection
+  5.0,                        !- Frame Conductance
+  1.3,                        !- Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance
+  0.8,                        !- Frame Solar Absorptance
+  0.8,                        !- Frame Visible Absorptance
+  0.9,                        !- Frame Thermal Emissivity
+  DividedLite,                !- Divider Type
+  0.03,                       !- Divider Width
+  2,                          !- Number of Horizontal Dividers
+  2,                          !- Number of Vertical Dividers
+  0.03,                       !- Divider Outside Projection
+  0.03,                       !- Divider Inside Projection
+  5.0,                        !- Divider Conductance
+  1.3,                        !- Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance
+  0.8,                        !- Divider Solar Absorptance
+  0.8,                        !- Divider Visible Absorptance
+  0.9,                        !- Divider Thermal Emissivity
+  0.7,                        !- Outside Reveal Solar Absorptance
+  0.25,                       !- Inside Sill Depth (m)
+  0.6,                        !- Inside Sill Solar Absorptance
+  0.2,                        !- Inside Reveal Depth (m)
+  0.5,                        !- Inside Reveal Solar Absorptance
+  ProjectingSingle;           !- NFRC Product Type for Assembly Calculations
 \end{lstlisting}
 
 \subsection{WindowProperty:AirflowControl}\label{windowpropertyairflowcontrol}
@@ -5221,14 +5203,15 @@ An IDF example: window with a constant airflow from inside to outside at 0.008 m
 
 \begin{lstlisting}
 WindowProperty:AirflowControl,
-      Zn001:Wall001:Win002,   !- Name
-      InsideAir,              !- Airflow Source
-      OutsideAir,             !- Airflow Destination
-      0.008,                  !- Maximum Flow Rate {m3/s-m}
-      AlwaysOnAtMaxFlow,      !- Airflow Control Type
-      No,                     !- Airflow Is Scheduled
-      ;                       !- Airflow Multiplier Schedule Name
-      ,                       !- Airflow Return Air Node Name
+  Zn001:Wall001:Win002,       !- Name
+  InsideAir,                  !- Airflow Source
+  OutsideAir,                 !- Airflow Destination
+  0.008,                      !- Maximum Flow Rate {m3/s-m}
+  AlwaysOnAtMaxFlow,          !- Airflow Control Type
+  No,                         !- Airflow Is Scheduled
+  ;                           !- Airflow Multiplier Schedule Name
+
+,                             !- Airflow Return Air Node Name
 \end{lstlisting}
 
 \subsection{WindowProperty:StormWindow}\label{windowpropertystormwindow}
@@ -5305,13 +5288,13 @@ An IDF example of WindowProperty:StormWindow. The storm window is put in place o
 
 \begin{lstlisting}
 WindowProperty:StormWindow,
-   Window1, !- Name of Window to Which Storm Window Glass Layer is Applied
-   GlassA,  !- Name of Material:WindowGlass or MATERIAL:WindowGlass:AltInput that is the storm window layer
-   0.060,   !- Distance from storm window to adjacent glass (m)
-   10,      !- Month that Storm Window Is Put On
-   15,      !- Day of Month that Storm Window Is Put On
-   5,       !- Month that Storm Window Is Taken Off
-   1;       !- Day of Month that Storm Window Is Taken Off
+  Window1,                    !- Name of Window to Which Storm Window Glass Layer is Applied
+  GlassA,                     !- Name of Material:WindowGlass or MATERIAL:WindowGlass:AltInput that is the storm window layer
+  0.060,                      !- Distance from storm window to adjacent glass (m)
+  10,                         !- Month that Storm Window Is Put On
+  15,                         !- Day of Month that Storm Window Is Put On
+  5,                          !- Month that Storm Window Is Taken Off
+  1;                          !- Day of Month that Storm Window Is Taken Off
 \end{lstlisting}
 
 \subsection{Importing Windows from WINDOW program}\label{importing-windows-from-window-program}
@@ -5358,7 +5341,7 @@ In EnergyPlus, the Window data file is searched for each ``\hyperref[constructio
 \begin{lstlisting}
 Construction:WindowDataFile,
   ConstructionName,
-  FileName; ! Default is Window5DataFile.dat in the ``run'' folder.
+  FileName;                   !- Default is Window5DataFile.dat in the ``run'' folder.
 \end{lstlisting}
 
 If there is a window called ConstructionName on the Window data file, the data for that window is read from the file and the following EnergyPlus objects and their names are created. The ``W5'' prefixed to these names indicates that the object originated in the Window data file.
@@ -5368,5 +5351,5 @@ This is new windows simulation engine that will be used in both EnergyPlus and B
 
 \begin{lstlisting}
 WindowsCalculationEngine,
-ExternalWindowsModel;
+  ExternalWindowsModel;
 \end{lstlisting}

@@ -284,14 +284,13 @@ Branch name in the list.~ As noted above, Branches in BranchList objects MUST be
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 BranchList, Cooling Supply Side Branches,
-       CW Pump Branch,
-       Little Chiller Branch,
-       Big Chiller Branch,
-       Purchased Cooling Branch,
-       Supply Bypass Branch,
-       Cooling Supply Outlet;
+  CW Pump Branch,
+  Little Chiller Branch,
+  Big Chiller Branch,
+  Purchased Cooling Branch,
+  Supply Bypass Branch,
+  Cooling Supply Outlet;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-016}
@@ -339,31 +338,29 @@ This field references an outlet node name that will be found in the actual compo
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Branch,
-      Air Loop Main Branch,    !- Branch Name
-      ,                        !- Pressure Drop Curve Name
-      AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass,  !- Comp1 Type
-      GasHeat CBVAV System,    !- Comp1 Name
-      Air Loop Inlet Node,     !- Comp1 Inlet Node Name
-      Air Loop Outlet Node;    !- Comp1 Outlet Node Name
+  Air Loop Main Branch,       !- Branch Name
+  ,                           !- Pressure Drop Curve Name
+  AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass,  !- Comp1 Type
+  GasHeat CBVAV System,       !- Comp1 Name
+  Air Loop Inlet Node,        !- Comp1 Inlet Node Name
+  Air Loop Outlet Node;       !- Comp1 Outlet Node Name
 \end{lstlisting}
 
 And a more complex one:
 
 \begin{lstlisting}
-
-  BRANCH,
-      Air Loop Main Branch,    !- Branch Name
-      ,                        !- Pressure Drop Curve Name
-      FAN:ConstantVolume,      !- Comp1 Type
-      Supply Fan 1,            !- Comp1 Name
-      Air Loop Inlet Node,     !- Comp1 Inlet Node Name
-      Cooling Coil Air Inlet Node,  !- Comp1 Outlet Node Name
-      COIL:Water:DetailedFlatCooling,  !- Comp2 Type
-      Detailed Cooling Coil,   !- Comp2 Name
-      Cooling Coil Air Inlet Node,  !- Comp2 Inlet Node Name
-      Air Loop Outlet Node;    !- Comp2 Outlet Node Name
+BRANCH,
+  Air Loop Main Branch,       !- Branch Name
+  ,                           !- Pressure Drop Curve Name
+  FAN:ConstantVolume,         !- Comp1 Type
+  Supply Fan 1,               !- Comp1 Name
+  Air Loop Inlet Node,        !- Comp1 Inlet Node Name
+  Cooling Coil Air Inlet Node,!- Comp1 Outlet Node Name
+  COIL:Water:DetailedFlatCooling,  !- Comp2 Type
+  Detailed Cooling Coil,      !- Comp2 Name
+  Cooling Coil Air Inlet Node,!- Comp2 Inlet Node Name
+  Air Loop Outlet Node;       !- Comp2 Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-014}
@@ -433,10 +430,9 @@ This field is an identifying name for the connector. It will be used by other ob
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ConnectorList LIST, Cooling Supply Side Connectors,
-      Connector:Splitter, CW Loop Splitter,
-      Connector:Mixer, CW Loop Mixer;
+  Connector:Splitter, CW Loop Splitter,
+  Connector:Mixer, CW Loop Mixer;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-012}
@@ -488,21 +484,21 @@ This alpha field contains the identifying names for the Mixer Inlet Branches and
 An example of these statements in an IDF is:
 
 \begin{lstlisting}
-
 Connector:Splitter,
-               CW Loop Splitter,
-               CW Pump Branch,
-               Little Chiller Branch,
-               Big Chiller Branch,
-               Purchased Cooling Branch,
-               Supply Bypass Branch;
-  Connector:Mixer,
-               CW Loop Mixer,
-               Cooling Supply Outlet,
-               Little Chiller Branch,
-               Big Chiller Branch,
-               Purchased Cooling Branch,
-               Supply Bypass Branch;
+  CW Loop Splitter,
+  CW Pump Branch,
+  Little Chiller Branch,
+  Big Chiller Branch,
+  Purchased Cooling Branch,
+  Supply Bypass Branch;
+
+Connector:Mixer,
+  CW Loop Mixer,
+  Cooling Supply Outlet,
+  Little Chiller Branch,
+  Big Chiller Branch,
+  Purchased Cooling Branch,
+  Supply Bypass Branch;
 \end{lstlisting}
 
 \subsection{Pipe:Adiabatic}\label{pipeadiabatic}
@@ -526,11 +522,10 @@ This alpha field is used as an identifying field for the pipe outlet node.
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Pipe:Adiabatic,
-      Demand Side Inlet Pipe,
-      CW Demand Inlet Node,
-      CW Demand Entrance Pipe Outlet Node;
+  Demand Side Inlet Pipe,
+  CW Demand Inlet Node,
+  CW Demand Entrance Pipe Outlet Node;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-009}
@@ -558,11 +553,10 @@ This alpha field is used as an identifying field for the steampipe outlet node.
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Pipe:Adiabatic:Steam,
-      Steam Demand 1 Steam Inlet Pipe,            !- PipeName
-      Steam Demand 1 Steam Demand Inlet Node,     !- Inlet Node Name
-      Steam Demand 1 Steam Demand Entrance Pipe Outlet Node;  !- Outlet Node Name
+  Steam Demand 1 Steam Inlet Pipe,  !- PipeName
+  Steam Demand 1 Steam Demand Inlet Node,  !- Inlet Node Name
+  Steam Demand 1 Steam Demand Entrance Pipe Outlet Node;  !- Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-005}
@@ -620,16 +614,15 @@ This field is used to enter the length of the pipe in units of m. Pipe length mu
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 Pipe:Indoor,
-      Pipe Heat Transfer Towers,    !- name of outside panel heat exchanger
-      Insulated Pipe,                      !- Construction name
-      Condenser Tower Outlet Node,  !- Comp1 Inlet Node Name
-      HTPipe Outlet Node,           !- Comp1 Outlet Node Name
-      Water,                               !- Fluid name
-      Zone,                         !- field Ambient Temperature Outside Air Node name
-      0.05,                                !- Pipe Inside Diameter (thickness in construction data)
-      100.0;                               !- pipe length
+  Pipe Heat Transfer Towers,  !- name of outside panel heat exchanger
+  Insulated Pipe,             !- Construction name
+  Condenser Tower Outlet Node,!- Comp1 Inlet Node Name
+  HTPipe Outlet Node,         !- Comp1 Outlet Node Name
+  Water,                      !- Fluid name
+  Zone,                       !- field Ambient Temperature Outside Air Node name
+  0.05,                       !- Pipe Inside Diameter (thickness in construction data)
+  100.0;                      !- pipe length
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-005}
@@ -720,16 +713,15 @@ This field is used to enter the length of the pipe in units of m. Pipe length mu
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Pipe:Outdoor,
-      Pipe Heat Transfer Towers,    !- name of outside panel heat exchanger
-      Insulated Pipe,                      !- Construction name
-      Condenser Tower Outlet Node, !- Comp1 Inlet Node Name
-      HTPipe Outlet Node,           !- Comp1 Outlet Node Name
-      Water,                               !- Fluid name
-      PipeHeatTransfer Inlet Node,     !- field Ambient Temperature Outside Air Node name
-      0.05,                         !- Pipe Inside Diameter (thickness given in construction data)
-      100.0;                               !- pipe length
+  Pipe Heat Transfer Towers,  !- name of outside panel heat exchanger
+  Insulated Pipe,             !- Construction name
+  Condenser Tower Outlet Node,!- Comp1 Inlet Node Name
+  HTPipe Outlet Node,         !- Comp1 Outlet Node Name
+  Water,                      !- Fluid name
+  PipeHeatTransfer Inlet Node,!- field Ambient Temperature Outside Air Node name
+  0.05,                       !- Pipe Inside Diameter (thickness given in construction data)
+  100.0;                      !- pipe length
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-005}
@@ -820,35 +812,34 @@ This is the name of the undisturbed ground temperature object that is used to de
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
 Pipe:Underground,
-      Pipe Heat Transfer Towers,          !- Name of Pipe
-      Insulated Buried Pipe,              !- Construction Name
-      Condenser Tower Outlet Node,        !- Inlet Node Name
-      HTPipe Outlet Node,                 !- Outlet Node Name
-      Water,                              !- Fluid Name
-      SunExposed,                         !- Sun Exposure
-      0.05,                               !- Pipe Inside Diameter
-      20.0,                               !- Pipe Length
-      Buried Pipe Soil,                   !- Soil Material
-      Site:GroundTemperature:Undisturbed:KusudaAchenbach, !- Type of Undisturbed Ground Temperature Object
-      KATemps;                            !- Name of Undisturbed Ground Temperature Object
+  Pipe Heat Transfer Towers,  !- Name of Pipe
+  Insulated Buried Pipe,      !- Construction Name
+  Condenser Tower Outlet Node,!- Inlet Node Name
+  HTPipe Outlet Node,         !- Outlet Node Name
+  Water,                      !- Fluid Name
+  SunExposed,                 !- Sun Exposure
+  0.05,                       !- Pipe Inside Diameter
+  20.0,                       !- Pipe Length
+  Buried Pipe Soil,           !- Soil Material
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Type of Undisturbed Ground Temperature Object
+  KATemps;                    !- Name of Undisturbed Ground Temperature Object
 
-    Construction,
-      Insulated Buried Pipe,              !- Name
-      Buried Pipe Insulation,             !- Layer #1
-      Buried Pipe Steel;                  !- Layer #2
+Construction,
+  Insulated Buried Pipe,      !- Name
+  Buried Pipe Insulation,     !- Layer #1
+  Buried Pipe Steel;          !- Layer #2
 
-    Material,
-      Buried Pipe Soil,                   !- Name
-      Smooth,                             !- Roughness
-      1.5,                                !- Thickness {m}
-      0.36,                               !- Conductivity {W/m-K}
-      2000.0,                             !- Density {kg/m3}
-      1200.0,                             !- Specific Heat {J/kg-K}
-      0.9,                                !- Thermal Absorptance
-      0.5,                                !- Solar Absorptance
-      0.5;                                !- Visible Absorptance
+Material,
+  Buried Pipe Soil,           !- Name
+  Smooth,                     !- Roughness
+  1.5,                        !- Thickness {m}
+  0.36,                       !- Conductivity {W/m-K}
+  2000.0,                     !- Density {kg/m3}
+  1200.0,                     !- Specific Heat {J/kg-K}
+  0.9,                        !- Thermal Absorptance
+  0.5,                        !- Solar Absorptance
+  0.5;                        !- Visible Absorptance
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-004}
@@ -1120,97 +1111,96 @@ This alpha field is used to define the flow direction within this pipe segment.~
 An example of this object in an IDF is offered here for a foundation heat exchanger
 
 \begin{lstlisting}
+PipingSystem:Underground:Domain,
+  My Piping System,           !- Name
+  12,                         !- Xmax
+  4.5,                        !- Ymax
+  36.84,                      !- Zmax
+  2,                          !- XMeshCount
+  Uniform,                    !- XMeshType
+  ,                           !- XGeometricCoeff
+  2,                          !- YMeshCount
+  Uniform,                    !- YMeshType
+  ,                           !- YGeometricCoeff
+  6,                          !- ZMeshCount
+  Uniform,                    !- ZMeshType
+  ,                           !- ZGeometricCoeff
+  1.08,                       !- GroundThermalConductivity
+  962,                        !- GroundDensity
+  2576,                       !- GroundSpecificHeat
+  30,                         !- MoistureContent
+  50,                         !- MoistureContentAtSaturation
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Type of Undisturbed Ground Temperature Object
+  KATemps,                    !- Name of Undisturbed Ground Temperature Object
+  Yes,                        !- DomainHasBasement
+  6,                          !- BasementWidthInDomain
+  2.5,                        !- BasementDepthInDomain
+  Yes,                        !- ShiftPipeXValuesByBasementWidth
+  BasementWallOSCM,           !- BasementWallBoundaryConditionModel
+  BasementFloorOSCM,          !- BasementFloorBoundaryConditionModel
+  0.005,                      !- CartesianIterationConvergenceCriterion
+  100,                        !- CartesianMaxIterations
+  0.408,                      !- EvapotranspirationGroundCoverParameter
+  1,                          !- NumPipeCircuits
+  My Pipe Circuit;            !- PipeCircuit
 
-  PipingSystem:Underground:Domain,
-      My Piping System,        !- Name
-      12,                      !- Xmax
-      4.5,                     !- Ymax
-      36.84,                   !- Zmax
-      2,                       !- XMeshCount
-      Uniform,                 !- XMeshType
-      ,                        !- XGeometricCoeff
-      2,                       !- YMeshCount
-      Uniform,                 !- YMeshType
-      ,                        !- YGeometricCoeff
-      6,                       !- ZMeshCount
-      Uniform,                 !- ZMeshType
-      ,                        !- ZGeometricCoeff
-      1.08,                    !- GroundThermalConductivity
-      962,                     !- GroundDensity
-      2576,                    !- GroundSpecificHeat
-      30,                      !- MoistureContent
-      50,                      !- MoistureContentAtSaturation
-      Site:GroundTemperature:Undisturbed:KusudaAchenbach, !- Type of Undisturbed Ground Temperature Object
-      KATemps,                 !- Name of Undisturbed Ground Temperature Object
-      Yes,                     !- DomainHasBasement
-      6,                       !- BasementWidthInDomain
-      2.5,                     !- BasementDepthInDomain
-      Yes,                     !- ShiftPipeXValuesByBasementWidth
-      BasementWallOSCM,        !- BasementWallBoundaryConditionModel
-      BasementFloorOSCM,       !- BasementFloorBoundaryConditionModel
-      0.005,                   !- CartesianIterationConvergenceCriterion
-      100,                     !- CartesianMaxIterations
-      0.408,                   !- EvapotranspirationGroundCoverParameter
-      1,                       !- NumPipeCircuits
-      My Pipe Circuit;         !- PipeCircuit
+PipingSystem:Underground:PipeCircuit,
+  My Pipe Circuit,            !- Name
+  0.3895,                     !- PipeThermalConductivity
+  641,                        !- PipeDensity
+  2405,                       !- PipeSpecificHeat
+  0.016,                      !- PipeInnerDiameter
+  0.02667,                    !- PipeOuterDiameter
+  0.004,                      !- DesignFlowRate
+  Piping System Inlet Node,   !- InletNode
+  Piping System Outlet Node,  !- OutletNode
+  0.001,                      !- RadialIterationConvergenceCriterion
+  100,                        !- RadialMaxIterations
+  2,                          !- RadialMeshCount
+  0.03,                       !- RadialMeshThickness
+  6,                          !- NumSegments
+  Segment 1,                  !- Segment1
+  Segment 2,                  !- Segment2
+  Segment 3,                  !- Segment3
+  Segment 4,                  !- Segment4
+  Segment 5,                  !- Segment5
+  Segment 6;                  !- Segment6
 
-    PipingSystem:Underground:PipeCircuit,
-      My Pipe Circuit,         !- Name
-      0.3895,                  !- PipeThermalConductivity
-      641,                     !- PipeDensity
-      2405,                    !- PipeSpecificHeat
-      0.016,                   !- PipeInnerDiameter
-      0.02667,                 !- PipeOuterDiameter
-      0.004,                   !- DesignFlowRate
-      Piping System Inlet Node, !- InletNode
-      Piping System Outlet Node, !- OutletNode
-      0.001,                   !- RadialIterationConvergenceCriterion
-      100,                     !- RadialMaxIterations
-      2,                       !- RadialMeshCount
-      0.03,                    !- RadialMeshThickness
-      6,                       !- NumSegments
-      Segment 1,               !- Segment1
-      Segment 2,               !- Segment2
-      Segment 3,               !- Segment3
-      Segment 4,               !- Segment4
-      Segment 5,               !- Segment5
-      Segment 6;               !- Segment6
+PipingSystem:Underground:PipeSegment,
+  Segment 1,                  !- Name
+  0.67,                       !- X
+  2.20,                       !- Burial Depth
+  IncreasingZ;                !- Flow Direction
 
-    PipingSystem:Underground:PipeSegment,
-      Segment 1,               !- Name
-      0.67,                    !- X
-      2.20,                    !- Burial Depth
-      IncreasingZ;             !- Flow Direction
+PipingSystem:Underground:PipeSegment,
+  Segment 2,                  !- Name
+  0.95,                       !- X
+  2.20,                       !- Burial Depth
+  IncreasingZ;                !- Flow Direction
 
-    PipingSystem:Underground:PipeSegment,
-      Segment 2,               !- Name
-      0.95,                    !- X
-      2.20,                    !- Burial Depth
-      IncreasingZ;             !- Flow Direction
+PipingSystem:Underground:PipeSegment,
+  Segment 3,                  !- Name
+  1.23,                       !- X
+  2.20,                       !- Burial Depth
+  IncreasingZ;                !- Flow Direction
 
-    PipingSystem:Underground:PipeSegment,
-      Segment 3,               !- Name
-      1.23,                    !- X
-      2.20,                    !- Burial Depth
-      IncreasingZ;             !- Flow Direction
+PipingSystem:Underground:PipeSegment,
+  Segment 4,                  !- Name
+  1.40,                       !- X
+  1.94,                       !- Burial Depth
+  DecreasingZ;                !- Flow Direction
 
-    PipingSystem:Underground:PipeSegment,
-      Segment 4,               !- Name
-      1.40,                    !- X
-      1.94,                    !- Burial Depth
-      DecreasingZ;             !- Flow Direction
+PipingSystem:Underground:PipeSegment,
+  Segment 5,                  !- Name
+  1.40,                       !- X
+  1.66,                       !- Burial Depth
+  DecreasingZ;                !- Flow Direction
 
-    PipingSystem:Underground:PipeSegment,
-      Segment 5,               !- Name
-      1.40,                    !- X
-      1.66,                    !- Burial Depth
-      DecreasingZ;             !- Flow Direction
-
-    PipingSystem:Underground:PipeSegment,
-      Segment 6,               !- Name
-      1.40,                    !- X
-      1.39,                    !- Burial Depth
-      DecreasingZ;             !- Flow Direction
+PipingSystem:Underground:PipeSegment,
+  Segment 6,                  !- Name
+  1.40,                       !- X
+  1.39,                       !- Burial Depth
+  DecreasingZ;                !- Flow Direction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-004}
@@ -1277,11 +1267,10 @@ The name of the component's air outlet node.
 Below is an example input for Duct.
 
 \begin{lstlisting}
-
 DUCT,
-      VAV Sys 1 Bypass Duct,            !- Name
-      VAV Sys 1 Bypass Duct Inlet Node, !- Inlet Node Name
-      VAV Sys 1 Bypass Duct Outlet Node;!- Outlet Node Name
+  VAV Sys 1 Bypass Duct,      !- Name
+  VAV Sys 1 Bypass Duct Inlet Node,   !- Inlet Node Name
+  VAV Sys 1 Bypass Duct Outlet Node;  !- Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-004}

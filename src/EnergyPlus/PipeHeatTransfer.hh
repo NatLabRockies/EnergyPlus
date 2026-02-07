@@ -128,7 +128,7 @@ namespace PipeHeatTransfer {
         Real64 SectionArea;            // cross sectional area [m^2]
         Real64 PipeHeatCapacity;       // heat capacity of pipe section [J/m.K]
         Real64 PipeOD;                 // pipe outside diameter [m]
-        Real64 PipeCp;                 // pipe materail Cp [J/kg.K]
+        Real64 PipeCp;                 // pipe material Cp [J/kg.K]
         Real64 PipeDensity;            // pipe material density [kg/m3]
         Real64 PipeConductivity;       // pipe material thermal conductivity [W/m.K]
         Real64 InsulationOD;           // insulation outside diameter [m]

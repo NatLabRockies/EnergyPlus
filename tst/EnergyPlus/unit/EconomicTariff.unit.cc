@@ -625,7 +625,7 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
 
     state->dataGlobal->KindOfSim = Constant::KindOfSim::RunPeriodWeather; // fake a weather run
 
-    // Unitialized: default initialized to 0
+    // Uninitialized: default initialized to 0
     EXPECT_ENUM_EQ(Season::Invalid, state->dataEconTariff->tariff(1).seasonForMonth(5));
     EXPECT_ENUM_EQ(Season::Invalid, state->dataEconTariff->tariff(1).seasonForMonth(6));
 
@@ -969,7 +969,7 @@ TEST_F(EnergyPlusFixture, EconomicTariff_evaluateChargeBlock)
 TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test0)
 {
     // Tests for PR #8456 and Issue #8455 ... Case 0 of Cases 0-3
-    // to ensure UtilityCost:Variable inputs being procesed properly
+    // to ensure UtilityCost:Variable inputs being processed properly
 
     std::string const idf_objects = delimited_string({
 
@@ -1051,7 +1051,7 @@ TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test0)
 TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test1)
 {
     // Tests for PR #8456 and Issue #8455 ... Case 1 of Cases 0-3
-    // to ensure UtilityCost:Variable inputs being procesed properly
+    // to ensure UtilityCost:Variable inputs being processed properly
 
     std::string const idf_objects1 = delimited_string({
 
@@ -1131,7 +1131,7 @@ TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test1)
 TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test2)
 {
     // Tests for PR #8456 and Issue #8455 ... Case 2 of Cases 0-3
-    // to ensure UtilityCost:Variable inputs being procesed properly
+    // to ensure UtilityCost:Variable inputs being processed properly
 
     std::string const idf_objects2 = delimited_string({
 
@@ -1210,7 +1210,7 @@ TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test2)
 TEST_F(EnergyPlusFixture, InputEconomics_UtilityCost_Variable_Test3)
 {
     // Tests for PR #8456 and Issue #8455 ... Case 3 of Cases 0-3
-    // to ensure UtilityCost:Variable inputs being procesed properly
+    // to ensure UtilityCost:Variable inputs being processed properly
 
     std::string const idf_objects3 = delimited_string({
 

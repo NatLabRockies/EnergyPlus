@@ -568,7 +568,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     23190.00,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -582,7 +582,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     11600.00,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -616,7 +616,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -630,7 +630,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -664,7 +664,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -678,7 +678,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -712,7 +712,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -726,7 +726,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3870.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -760,7 +760,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -774,7 +774,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2261,14 +2261,14 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall001,    !- Name
     Zn005:Wall001,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     OutdoorAirNode:0001;     !- Outdoor Air Node Name
 
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall002,    !- Name
     Zn005:Wall002,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     OutdoorAirNode:0002;     !- Outdoor Air Node Name
 
@@ -2283,8 +2283,8 @@
     Infiltration Sch,        !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     2.831685,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.6060000,               !- Constant Term Coefficient
     3.6359996E-02,           !- Temperature Term Coefficient

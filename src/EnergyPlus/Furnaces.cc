@@ -8078,6 +8078,7 @@ namespace Furnaces {
         } else {
             state.dataFurnaces->FanSpeedRatio = state.dataFurnaces->CompOnFlowRatio;
         }
+
         // IF the furnace is scheduled on or nightime cycle overrides fan schedule. Uses same logic as fan.
         if (furnace.availSched->getCurrentVal() > 0.0 &&
             ((furnace.fanAvailSched->getCurrentVal() > 0.0 || state.dataHVACGlobal->TurnFansOn) &&

@@ -430,7 +430,7 @@ TEST_F(LowTempRadiantSystemTest, SizeLowTempRadiantConstantFlow)
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).ColdWaterInNode = 3;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).ColdWaterOutNode = 4;
 
-    // Hydronic - embeded tube length autosize
+    // Hydronic - embedded tube length autosize
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).NumCircCalcMethod = CircuitCalc::Invalid;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).NumOfSurfaces = 1;
     state->dataLowTempRadSys->CFloRadSys(RadSysNum).TubeLength = AutoSize;
@@ -3104,7 +3104,7 @@ TEST_F(LowTempRadiantSystemTest, calculateOperationalFractionTest)
     functionResult = thisRadSys.calculateOperationalFraction(offTemperature, controlTemperature, throttlingRange);
     EXPECT_NEAR(expectedResult, functionResult, 0.001);
 
-    // Test 2b: Temperature Difference is not zero and negtive, throttling range is zero-->answer should be 1.0
+    // Test 2b: Temperature Difference is not zero and negative, throttling range is zero-->answer should be 1.0
     offTemperature = 14.0;
     controlTemperature = 15.0;
     throttlingRange = 0.0;

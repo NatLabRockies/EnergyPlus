@@ -94,8 +94,8 @@
     No,                      !- Do Zone Sizing Calculation
     No,                      !- Do System Sizing Calculation
     No,                      !- Do Plant Sizing Calculation
-    No,                     !- Run Simulation for Sizing Periods
-    Yes,                      !- Run Simulation for Weather File Run Periods
+    No,                      !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
     No,                      !- Do HVAC Sizing Simulation for Sizing Periods
     1;                       !- Maximum Number of HVAC Sizing Simulation Passes
 
@@ -124,8 +124,8 @@
     Discrete;                !- Numeric Type
 
   ScheduleTypeLimits,
-    FlowDir,                  !- Name
-    -1,                       !- Lower Limit Value
+    FlowDir,                 !- Name
+    -1,                      !- Lower Limit Value
     1,                       !- Upper Limit Value
     Discrete;                !- Numeric Type
 
@@ -140,10 +140,10 @@
     Any Number,              !- Schedule Type Limits Name
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    UNTIL:  4:00,186000,      !- Field 3
+    UNTIL:  4:00,186000,     !- Field 3
     UNTIL:  8:00,50000,      !- Field 5
     UNTIL:  9:00,30000,      !- Field 7
-    UNTIL: 17:00,18000,       !- Field 9
+    UNTIL: 17:00,18000,      !- Field 9
     UNTIL: 24:00,72000;      !- Field 11
 
   Schedule:Compact,
@@ -154,7 +154,6 @@
     UNTIL: 24:00,1.0;        !- Field 3
 
   ! Simulate a summer time, daytime hours load, but the pump is always running in that season
-
 ! *** Heating Coil Loop
 
   PlantLoop,
@@ -162,13 +161,13 @@
     WATER,                   !- Fluid Type
     ,                        !- User Defined Fluid Type
     Heating Coil Load Loop Operation,  !- Plant Equipment Operation Scheme Name
-    Tank Use Outlet Node,  !- Loop Temperature Setpoint Node Name
+    Tank Use Outlet Node,    !- Loop Temperature Setpoint Node Name
     100,                     !- Maximum Loop Temperature {C}
     3,                       !- Minimum Loop Temperature {C}
     0.005,                   !- Maximum Loop Flow Rate {m3/s}
     0,                       !- Minimum Loop Flow Rate {m3/s}
     1,                       !- Plant Loop Volume {m3}
-    Heating Coil Load Loop Supply Inlet Node,     !- Plant Side Inlet Node Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Plant Side Inlet Node Name
     Tank Use Outlet Node,    !- Plant Side Outlet Node Name
     Heating Coil Load Loop Supply Branches,  !- Plant Side Branch List Name
     ,                        !- Plant Side Connector List Name
@@ -179,10 +178,10 @@
     Optimal;                 !- Load Distribution Scheme
 
   PlantLoop,
-    Hot Water Loop,  !- Name
+    Hot Water Loop,          !- Name
     WATER,                   !- Fluid Type
     ,                        !- User Defined Fluid Type
-    Hot Water Loop Operation,  !- Plant Equipment Operation Scheme Name
+    Hot Water Loop Operation,!- Plant Equipment Operation Scheme Name
     Hot Water Loop Supply Outlet Node,  !- Loop Temperature Setpoint Node Name
     100,                     !- Maximum Loop Temperature {C}
     3,                       !- Minimum Loop Temperature {C}
@@ -215,7 +214,7 @@
     Heating Coil Load Loop Setpoint Manager,  !- Name
     Temperature,             !- Control Variable
     Heating Coil Load Loop Setpoint Temperature Schedule,  !- Schedule Name
-    Tank Use Outlet Node;  !- Setpoint Node or NodeList Name
+    Tank Use Outlet Node;    !- Setpoint Node or NodeList Name
 
   PlantEquipmentOperationSchemes,
     Heating Coil Load Loop Operation,  !- Name
@@ -232,10 +231,10 @@
   PlantEquipmentList,
     Heating Coil Load Loop Heating Equipment,  !- Name
     ThermalStorage:HotWater:Stratified,  !- Equipment 1 Object Type
-    Hot Water Storage Tank;              !- Equipment 1 Name
+    Hot Water Storage Tank;  !- Equipment 1 Name
 
   PlantEquipmentOperationSchemes,
-    Hot Water Loop Operation,  !- Name
+    Hot Water Loop Operation,!- Name
     PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
     Hot Water Loop Heating Operation,  !- Control Scheme 1 Name
     AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
@@ -261,16 +260,16 @@
     Pump:VariableSpeed,      !- Component 1 Object Type
     Heating Coil Load Loop Pump,  !- Component 1 Name
     Heating Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
-    Tank Use Inlet Node,  !- Component 1 Outlet Node Name
-    ThermalStorage:HotWater:Stratified,       !- Component 2 Object Type
-    Hot Water Storage Tank,                   !- Component 2 Name
-    Tank Use Inlet Node,                      !- Component 2 Inlet Node Name
-    Tank Use Outlet Node;                     !- Component 2 Outlet Node Name
+    Tank Use Inlet Node,     !- Component 1 Outlet Node Name
+    ThermalStorage:HotWater:Stratified,  !- Component 2 Object Type
+    Hot Water Storage Tank,  !- Component 2 Name
+    Tank Use Inlet Node,     !- Component 2 Inlet Node Name
+    Tank Use Outlet Node;    !- Component 2 Outlet Node Name
 
   Pump:VariableSpeed,
     Heating Coil Load Loop Pump,  !- Name
     Heating Coil Load Loop Supply Inlet Node,  !- Inlet Node Name
-    Tank Use Inlet Node,  !- Outlet Node Name
+    Tank Use Inlet Node,     !- Outlet Node Name
     0.005,                   !- Design Maximum Flow Rate {m3/s}
     3000,                    !- Design Pump Head {Pa}
     22,                      !- Design Power Consumption {W}
@@ -288,10 +287,10 @@
     Hot Water Loop Supply Branch;  !- Branch 1 Name
 
   Branch,
-    Hot Water Loop Supply Branch,    !- Name
+    Hot Water Loop Supply Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
     Pump:VariableSpeed,      !- Component 1 Object Type
-    Hot Water Loop Pump,  !- Component 1 Name
+    Hot Water Loop Pump,     !- Component 1 Name
     Hot Water Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
     Hot Water Loop Intermediate Node,  !- Component 1 Outlet Node Name
     HeatPump:PlantLoop:EIR:Heating,  !- Component 2 Object Type
@@ -300,7 +299,7 @@
     Hot Water Loop Supply Outlet Node;  !- Component 2 Outlet Node Name
 
   Pump:VariableSpeed,
-    Hot Water Loop Pump,  !- Name
+    Hot Water Loop Pump,     !- Name
     Hot Water Loop Supply Inlet Node,  !- Inlet Node Name
     Hot Water Loop Intermediate Node,  !- Outlet Node Name
     0.005,                   !- Design Maximum Flow Rate {m3/s}
@@ -318,7 +317,7 @@
   HeatPump:PlantLoop:EIR:Heating,
     Heating Coil,            !- Name
     Hot Water Loop Intermediate Node,  !- Load Side Inlet Node Name
-    Hot Water Loop Supply Outlet Node, !- Load Side Outlet Node Name
+    Hot Water Loop Supply Outlet Node,  !- Load Side Outlet Node Name
     AirSource,               !- Condenser Type
     Outdoor Air Inlet Node,  !- Source Side Inlet Node Name
     Outdoor Air Outlet Node, !- Source Side Outlet Node Name
@@ -386,10 +385,10 @@
   Branch,
     Hot Water Loop Demand Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    ThermalStorage:HotWater:Stratified,       !- Component 1 Object Type
+    ThermalStorage:HotWater:Stratified,  !- Component 1 Object Type
     Hot Water Storage Tank,  !- Component 1 Name
     Tank Source Inlet Node,  !- Component 1 Inlet Node Name
-    Tank Source Outlet Node;  !- Component 1 Outlet Node Name
+    Tank Source Outlet Node; !- Component 1 Outlet Node Name
 
   BranchList,
     Heating Coil Load Loop Demand Branches,  !- Name
@@ -409,12 +408,12 @@
     8.0,                     !- Tank Height {m}
     VerticalCylinder,        !- Tank Shape
     ,                        !- Tank Perimeter {m}
-    CW Tank Temp Top Schedule,   !- Top Setpoint Temperature Schedule Name
-    CW Tank Temp Bottom Schedule,   !- Bottom Setpoint Temperature Schedule Name
+    CW Tank Temp Top Schedule,  !- Top Setpoint Temperature Schedule Name
+    CW Tank Temp Bottom Schedule,  !- Bottom Setpoint Temperature Schedule Name
     2.5,                     !- Deadband Temperature Difference {deltaC}
     8.0,                     !- Top Temperature Sensor Height {m}
     1.0,                     !- Bottom Temperature Sensor Height {m}
-    82.0,                     !- Maximum Temperature Limit {C}
+    82.0,                    !- Maximum Temperature Limit {C}
     0.0,                     !- Nominal Heating Capacity {W}
     Outdoors,                !- Ambient Temperature Indicator
     ,                        !- Ambient Temperature Schedule Name
@@ -431,7 +430,7 @@
     autosize,                !- Use Side Design Flow Rate {m3/s}
     Tank Source Inlet Node,  !- Source Side Inlet Node Name
     Tank Source Outlet Node, !- Source Side Outlet Node Name
-    ,                        !- Use Side Flow Direction Schedule
+    ,                        !- Source Side Flow Direction Schedule
     0.9,                     !- Source Side Heat Transfer Effectiveness
     TES Charge Schedule,     !- Source Side Availability Schedule Name
     7.85,                    !- Source Side Inlet Height {m}
@@ -443,7 +442,7 @@
     0.0;                     !- Additional Destratification Conductivity {W/m-K}
 
   OutdoorAir:Node,
-    Dummy Tank OA Node;  !- Name
+    Dummy Tank OA Node;      !- Name
 
   Schedule:Compact,
     ALWAYS_ON,               !- Name
@@ -453,24 +452,24 @@
     Until: 24:00,1.0;        !- Field 3
 
   Schedule:Compact,
-    CW Tank Temp Top Schedule,   !- Name
+    CW Tank Temp Top Schedule,  !- Name
     Temperature,             !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00,21;        !- Field 3
+    Until: 24:00,21;         !- Field 3
 
   Schedule:Compact,
-    CW Tank Temp Bottom Schedule,   !- Name
+    CW Tank Temp Bottom Schedule,  !- Name
     Temperature,             !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00,15;        !- Field 3
+    Until: 24:00,15;         !- Field 3
 
   SetpointManager:Scheduled,
     Hot Water Loop Setpoint Manager,  !- Name
     Temperature,             !- Control Variable
     HW Loop Temp Schedule,   !- Schedule Name
-    HOT WATER LOOP SUPPLY OUTLET NODE;   !- Setpoint Node or NodeList Name
+    HOT WATER LOOP SUPPLY OUTLET NODE;  !- Setpoint Node or NodeList Name
 
   Schedule:Compact,
     HW Loop Temp Schedule,   !- Name
@@ -484,61 +483,94 @@
     on/off,                  !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    Until: 24:00,1.0;        !- Field 7
+    Until: 24:00,1.0;        !- Field 3
 
   Schedule:Compact,
     Tank Use Flow Dir Sched, !- Name
     FlowDir,                 !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    Until: 24:00,-1.0;        !- Field 7
+    Until: 24:00,-1.0;       !- Field 3
 
   LoadProfile:Plant,
     Heating Coil Load Profile,  !- Name
-    Heating Coil Load Loop Demand Inlet Node,   !- Inlet Node Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Inlet Node Name
     Heating Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
-    Heating Coil Load Profile Load Schedule,    !- Load Schedule Name
+    Heating Coil Load Profile Load Schedule,  !- Load Schedule Name
     0.005,                   !- Peak Flow Rate {m3/s}
-    Heating Coil Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Heating Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
   OutdoorAir:Node,
     Outdoor Air Inlet Node;  !- Name
 
   Output:VariableDictionary,IDF;
 
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Tank Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Energy,hourly; !- HVAC Sum [J]
-  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Energy,hourly; !- HVAC Sum [J]
-  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Inlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Outlet Temperature,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Energy,hourly; !- HVAC Sum [J]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 1,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 2,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 3,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 4,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 5,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 6,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 1,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 2,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 3,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 4,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 5,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 6,hourly; !- HVAC Average [C]
-  Output:Variable,*,Plant Supply Side Heating Demand Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,hourly; !- HVAC Average [W]
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature,hourly;
 
-  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly; !- HVAC Average [W]
-  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Setpoint,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Sensor Value,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Setpoint,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Sensor Value,hourly; !- HVAC Average [C]
-  Output:Variable,*,Hot Water Thermal Storage Needs Charge,hourly; !- HVAC Average [C]
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Tank Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Use Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Mass Flow Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Inlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Outlet Temperature,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Source Side Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 1,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 2,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 3,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 4,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 5,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Temperature Node 6,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 1,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 2,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 3,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 4,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 5,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Final Temperature Node 6,hourly;
+
+  Output:Variable,*,Plant Supply Side Heating Demand Rate,hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Heat Gain Rate,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Setpoint,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Top Temperature Sensor Value,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Setpoint,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Tank Bottom Temperature Sensor Value,hourly;
+
+  Output:Variable,*,Hot Water Thermal Storage Needs Charge,hourly;
 

@@ -229,105 +229,103 @@ This optional field allows you to specify a user-defined end-use subcategory, e.
 Three examples of an IDF specification for this object are shown below:
 
 \begin{lstlisting}
+CoolingTower:SingleSpeed,
+  My Tower,                   !- Name
+  Condenser Tower Inlet Node, !- Water Inlet Node Name
+  Condenser Tower Outlet Node,!- Water Outlet Node Name
+  .0011,                      !- Design Water Flow Rate {m3/s}
+  16.0,                       !- Design Air Flow Rate {m3/s}
+  10000.,                     !- Design Fan Power {W}
+  3500.,                      !- Design U-Factor Times Area Value {W/K}
+  0.0,                        !- Free Convection Air Flow Rate {m3/s}
+  ,                           !- Free Convection Air Flow Rate Sizing Factor
+  0.0,                        !- Free Convection U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- Nominal Capacity {W}
+  ,                           !- Free Convection Capacity {W}
+  ,                           !- Free Convection Nominal Capacity Sizing Factor
+  ,                           !- Design Inlet Air Dry-Bulb Temperature {C}
+  ,                           !- Design Inlet Air Wet-Bulb Temperature {C}
+  ,                           !- Design Approach Temperature {deltaC}
+  ,                           !- Design Range Temperature {deltaC}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Setpoint Temperature {C}
+  ,                           !- Basin Heater Operating Schedule Name
+  ,                           !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor {percent/K}
+  ,                           !- Drift Loss Percent {percent}
+  ,                           !- Blowdown Calculation Mode
+  ,                           !- Blowdown Concentration Ratio
+  ,                           !- Blowdown Makeup Water Usage Schedule Name
+  ,                           !- Supply Water Storage Tank Name
+  ,                           !- Outdoor Air Inlet Node Name
+  FluidBypass,                !- Capacity Control
+  4,                          !- Number of Cells
+  MinimalCell,                !- Cell Control
+  ,                           !- Cell Minimum  Water Flow Rate Fraction
+  ,                           !- Cell Maximum Water Flow Rate Fraction
+  1.0000;                     !- Sizing Factor
 
-  CoolingTower:SingleSpeed,
-    My Tower,                     !- Name
-    Condenser Tower Inlet Node,   !- Water Inlet Node Name
-    Condenser Tower Outlet Node,  !- Water Outlet Node Name
-    .0011,                        !- Design Water Flow Rate {m3/s}
-    16.0,                         !- Design Air Flow Rate {m3/s}
-    10000.,                       !- Design Fan Power {W}
-    3500.,                        !- Design U-Factor Times Area Value {W/K}
-    0.0,                          !- Free Convection Air Flow Rate {m3/s}
-    ,                             !- Free Convection Air Flow Rate Sizing Factor
-    0.0,                          !- Free Convection U-Factor Times Area Value {W/K}
-    ,                             !- Free Convection U-Factor Times Area Value Sizing Factor
-    UFactorTimesAreaAndDesignWaterFlowRate,   !- Performance Input Method
-    ,                             !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                             !- Nominal Capacity {W}
-    ,                             !- Free Convection Capacity {W}
-    ,                             !- Free Convection Nominal Capacity Sizing Factor
-    ,                             !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                             !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                             !- Design Approach Temperature {deltaC}
-    ,                             !- Design Range Temperature {deltaC}
-    ,                             !- Basin Heater Capacity {W/K}
-    ,                             !- Basin Heater Setpoint Temperature {C}
-    ,                             !- Basin Heater Operating Schedule Name
-    ,                             !- Evaporation Loss Mode
-    ,                             !- Evaporation Loss Factor {percent/K}
-    ,                             !- Drift Loss Percent {percent}
-    ,                             !- Blowdown Calculation Mode
-    ,                             !- Blowdown Concentration Ratio
-    ,                             !- Blowdown Makeup Water Usage Schedule Name
-    ,                             !- Supply Water Storage Tank Name
-    ,                             !- Outdoor Air Inlet Node Name
-    FluidBypass,                  !- Capacity Control
-    4,                            !- Number of Cells
-    MinimalCell,                  !- Cell Control
-    ,                             !- Cell Minimum  Water Flow Rate Fraction
-    ,                             !- Cell Maximum Water Flow Rate Fraction
-    1.0000;                       !- Sizing Factor
+CoolingTower:SingleSpeed,
+  My Tower,                   !- Name
+  Condenser Tower Inlet Node, !- Water Inlet Node Name
+  Condenser Tower Outlet Node,!- Water Outlet Node Name
+  ,                           !- Design Water Flow Rate {m3/s}
+  Autosize,                   !- Design Air Flow Rate {m3/s}
+  1000.,                      !- Design Fan Power {W}
+  ,                           !- Design U-Factor Times Area Value {W/K}
+  autocalculate,              !- Free Convection Air Flow Rate {m3/s}
+  ,                           !- Free Convection Air Flow Rate Sizing Factor
+  autocalculate,              !- Free Convection U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  95250.,                     !- Nominal Capacity {W}
+  9525.;                      !- Free Convection Capacity {W}
 
-  CoolingTower:SingleSpeed,
-    My Tower,                   !- Name
-    Condenser Tower Inlet Node, !- Water Inlet Node Name
-    Condenser Tower Outlet Node,!- Water Outlet Node Name
-    ,                           !- Design Water Flow Rate {m3/s}
-    Autosize,                   !- Design Air Flow Rate {m3/s}
-    1000.,                      !- Design Fan Power {W}
-    ,                           !- Design U-Factor Times Area Value {W/K}
-    autocalculate,              !- Free Convection Air Flow Rate {m3/s}
-    ,                           !- Free Convection Air Flow Rate Sizing Factor
-    autocalculate,              !- Free Convection U-Factor Times Area Value {W/K}
-    ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
-    NominalCapacity,            !- Performance Input Method
-    ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    95250.,                     !- Nominal Capacity {W}
-    9525.;                      !- Free Convection Capacity {W}
+CoolingTower:SingleSpeed,
+  TowerWaterSys CoolTower,    !- Name
+  TowerWaterSys Pump-TowerWaterSys CoolTowerNode,  !- Water Inlet Node Name
+  TowerWaterSys Supply Equipment Outlet Node,  !- Water Outlet Node Name
+  AUTOSIZE,                   !- Design Water Flow Rate {m3/s}
+  AUTOSIZE,                   !- Design Air Flow Rate {m3/s}
+  AUTOSIZE,                   !- Design Fan Power {W}
+  AUTOSIZE,                   !- Design U-Factor Times Area Value {W/K}
+  autocalculate,              !- Free Convection Air Flow Rate {m3/s}
+  ,                           !- Free Convection Air Flow Rate Sizing Factor
+  autocalculate,              !- Free Convection U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- Nominal Capacity {W}
+  ,                           !- Free Convection Capacity {W}
+  ,                           !- Free Convection Nominal Capacity Sizing Factor
+  ,                           !- Design Inlet Air Dry-Bulb Temperature {C}
+  ,                           !- Design Inlet Air Wet-Bulb Temperature {C}
+  ,                           !- Design Approach Temperature {deltaC}
+  ,                           !- Design Range Temperature {deltaC}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Setpoint Temperature {C}
+  ,                           !- Basin Heater Operating Schedule Name
+  SaturatedExit,              !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor {percent/K}
+  0.0080,                     !- Drift Loss Percent {percent}
+  ConcentrationRatio,         !- Blowdown Calculation Mode
+  3.0000,                     !- Blowdown Concentration Ratio
+  ,                           !- Blowdown Makeup Water Usage Schedule Name
+  ,                           !- Supply Water Storage Tank Name
+  TowerWaterSys CoolTower OA ref Node,  !- Outdoor Air Inlet Node Name
+  FanCycling,                 !- Capacity Control
+  4,                          !- Number of Cells
+  MinimalCell,                !- Cell Control
+  ,                           !- Cell Minimum  Water Flow Rate Fraction
+  ,                           !- Cell Maximum Water Flow Rate Fraction
+  1.0000;                     !- Sizing Factor
 
-  CoolingTower:SingleSpeed,
-    TowerWaterSys CoolTower, !- Name
-    TowerWaterSys Pump-TowerWaterSys CoolTowerNode,  !- Water Inlet Node Name
-    TowerWaterSys Supply Equipment Outlet Node,  !- Water Outlet Node Name
-    AUTOSIZE,                !- Design Water Flow Rate {m3/s}
-    AUTOSIZE,                !- Design Air Flow Rate {m3/s}
-    AUTOSIZE,                !- Design Fan Power {W}
-    AUTOSIZE,                !- Design U-Factor Times Area Value {W/K}
-    autocalculate,           !- Free Convection Air Flow Rate {m3/s}
-    ,                        !- Free Convection Air Flow Rate Sizing Factor
-    autocalculate,           !- Free Convection U-Factor Times Area Value {W/K}
-    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
-    UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                        !- Nominal Capacity {W}
-    ,                        !- Free Convection Capacity {W}
-    ,                        !- Free Convection Nominal Capacity Sizing Factor
-    ,                        !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                        !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                        !- Design Approach Temperature {deltaC}
-    ,                        !- Design Range Temperature {deltaC}
-    ,                        !- Basin Heater Capacity {W/K}
-    ,                        !- Basin Heater Setpoint Temperature {C}
-    ,                        !- Basin Heater Operating Schedule Name
-    SaturatedExit,           !- Evaporation Loss Mode
-    ,                        !- Evaporation Loss Factor {percent/K}
-    0.0080,                  !- Drift Loss Percent {percent}
-    ConcentrationRatio,      !- Blowdown Calculation Mode
-    3.0000,                  !- Blowdown Concentration Ratio
-    ,                        !- Blowdown Makeup Water Usage Schedule Name
-    ,                        !- Supply Water Storage Tank Name
-    TowerWaterSys CoolTower OA ref Node,  !- Outdoor Air Inlet Node Name
-    FanCycling,              !- Capacity Control
-    4,                       !- Number of Cells
-    MinimalCell,             !- Cell Control
-    ,                        !- Cell Minimum  Water Flow Rate Fraction
-    ,                        !- Cell Maximum Water Flow Rate Fraction
-    1.0000;                  !- Sizing Factor
-
-  OutdoorAir:Node,
-    TowerWaterSys CoolTower OA ref Node;  !- Name
-
+OutdoorAir:Node,
+  TowerWaterSys CoolTower OA ref Node;  !- Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-004}
@@ -740,142 +738,137 @@ This optional field allows you to specify a user-defined end-use subcategory, e.
 Four examples of an IDF specification for this object are shown below:
 
 \begin{lstlisting}
+CoolingTower:TwoSpeed,
+  My Tower,                   !- Name
+  Condenser Tower Inlet Node, !- Water Inlet Node Name
+  Condenser Tower Outlet Node,!- Water Outlet Node Name
+  .0011,                      !- Design Water Flow Rate {m3/s}
+  16.0,                       !- High Fan Speed Air Flow Rate {m3/s}
+  10000.,                     !- High Fan Speed Fan Power {W}
+  3500.,                      !- High Fan Speed U-Factor Times Area Value {W/K}
+  8.0,                        !- Low Fan Speed Air Flow Rate {m3/s}
+  ,                           !- Low Fan Speed Air Flow Rate Sizing Factor
+  1600.,                      !- Low Fan Speed Fan Power {W}
+  ,                           !- Low Fan Speed Fan Power Sizing Factor
+  2100.,                      !- Low Fan Speed U-Factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  1.6,                        !- Free Convection Regime Air Flow Rate {m3/s}
+  ,                           !- Free Convection Regime Air Flow Rate Sizing Factor
+  350.,                       !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  UFactorTimesAreaAndDesignWaterFlowRate;  !- Performance Input Method
 
-  CoolingTower:TwoSpeed,
-    My Tower,                     !- Name
-    Condenser Tower Inlet Node,   !- Water Inlet Node Name
-    Condenser Tower Outlet Node,  !- Water Outlet Node Name
-    .0011,                        !- Design Water Flow Rate {m3/s}
-    16.0,                         !- High Fan Speed Air Flow Rate {m3/s}
-    10000.,                       !- High Fan Speed Fan Power {W}
-    3500.,                        !- High Fan Speed U-Factor Times Area Value {W/K}
-    8.0,                          !- Low Fan Speed Air Flow Rate {m3/s}
-    ,                             !- Low Fan Speed Air Flow Rate Sizing Factor
-    1600.,                        !- Low Fan Speed Fan Power {W}
-    ,                             !- Low Fan Speed Fan Power Sizing Factor
-    2100.,                        !- Low Fan Speed U-Factor Times Area Value {W/K}
-    ,                             !- Low Fan Speed U-Factor Times Area Sizing Factor
-    1.6,                          !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                             !- Free Convection Regime Air Flow Rate Sizing Factor
-    350.,                         !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                             !- Free Convection U-Factor Times Area Value Sizing Factor
-    UFactorTimesAreaAndDesignWaterFlowRate; !- Performance Input Method
+CoolingTower:TwoSpeed,
+  My Tower,                   !- Name
+  Condenser Tower Inlet Node, !- Water Inlet Node Name
+  Condenser Tower Outlet Node,!- Water Outlet Node Name
+  ,                           !- Design Water Flow Rate {m3/s}
+  8.0,                        !- High Fan Speed Air Flow Rate {m3/s}
+  500,                        !- High Fan Speed Fan Power {W}
+  ,                           !- High Fan Speed U-Factor Times Area Value {W/K}
+  4.0,                        !- Low Fan Speed Air Flow Rate {m3/s}
+  ,                           !- Low Fan Speed Air Flow Rate Sizing Factor
+  125,                        !- Low Fan Speed Fan Power {W}
+  ,                           !- Low Fan Speed Fan Power Sizing Factor
+  ,                           !- Low Fan Speed U-Factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  0.8,                        !- Free Convection Regime Air Flow Rate {m3/s}
+  ,                           !- Free Convection Regime Air Flow Rate Sizing Factor
+  ,                           !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  20000.0,                    !- High Speed Nominal Capacity {W}
+  10000.0,                    !- Low Speed Nominal Capacity {W}
+  ,                           !- Low Speed Nominal Capacity Sizing Factor
+  2000.0,                     !- Free Convection Nominal Capacity {W}
+  ;                           !- Free Convection Nominal Capacity Sizing Factor
 
+CoolingTower:TwoSpeed,
+  Big Tower1,                 !- Name
+  Condenser Tower Inlet Node, !- Water Inlet Node Name
+  Condenser Tower Outlet Node,!- Water Outlet Node Name
+  ,                           !- Design Water Flow Rate {m3/s}
+  8.0,                        !- High Fan Speed Air Flow Rate {m3/s}
+  500,                        !- High Fan Speed Fan Power {W}
+  ,                           !- High Fan Speed U-Factor Times Area Value {W/K}
+  4.0,                        !- Low Fan Speed Air Flow Rate {m3/s}
+  ,                           !- Low Fan Speed Air Flow Rate Sizing Factor
+  125,                        !- Low Fan Speed Fan Power {W}
+  ,                           !- Low Fan Speed Fan Power Sizing Factor
+  ,                           !- Low Fan Speed U-Factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  0.8,                        !- Free Convection Regime Air Flow Rate {m3/s}
+  ,                           !- Free Convection Regime Air Flow Rate Sizing Factor
+  ,                           !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  20000.0,                    !- High Speed Nominal Capacity {W}
+  10000.0,                    !- Low Speed Nominal Capacity {W}
+  ,                           !- Low Speed Nominal Capacity Sizing Factor
+  2000.0,                     !- Free Convection Nominal Capacity {W}
+  ,                           !- Free Convection Nominal Capacity Sizing Factor
+  ,                           !- Design Inlet Air Dry-Bulb Temperature {C}
+  ,                           !- Design Inlet Air Wet-Bulb Temperature {C}
+  ,                           !- Design Approach Temperature {deltaC}
+  ,                           !- Design Range Temperature {deltaC}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Setpoint Temperature {C}
+  ,                           !- Basin Heater Operating Schedule Name
+  SaturatedExit,              !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor {percent/K}
+  0.0080,                     !- Drift Loss Percent {percent}
+  ConcentrationRatio,         !- Blowdown Calculation Mode
+  3.0000,                     !- Blowdown Concentration Ratio
+  ,                           !- Blowdown Makeup Water Usage Schedule Name
+  Recovery Tank;              !- Supply Water Storage Tank Name
 
-  CoolingTower:TwoSpeed,
-    My Tower,                    !- Name
-    Condenser Tower Inlet Node,  !- Water Inlet Node Name
-    Condenser Tower Outlet Node, !- Water Outlet Node Name
-    ,                            !- Design Water Flow Rate {m3/s}
-    8.0,                         !- High Fan Speed Air Flow Rate {m3/s}
-    500,                         !- High Fan Speed Fan Power {W}
-    ,                            !- High Fan Speed U-Factor Times Area Value {W/K}
-    4.0,                         !- Low Fan Speed Air Flow Rate {m3/s}
-    ,                            !- Low Fan Speed Air Flow Rate Sizing Factor
-    125,                         !- Low Fan Speed Fan Power {W}
-    ,                            !- Low Fan Speed Fan Power Sizing Factor
-    ,                            !- Low Fan Speed U-Factor Times Area Value {W/K}
-    ,                            !- Low Fan Speed U-Factor Times Area Sizing Factor
-    0.8,                         !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                            !- Free Convection Regime Air Flow Rate Sizing Factor
-    ,                            !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                            !- Free Convection U-Factor Times Area Value Sizing Factor
-    NominalCapacity,             !- Performance Input Method
-    ,                            !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    20000.0,                     !- High Speed Nominal Capacity {W}
-    10000.0,                     !- Low Speed Nominal Capacity {W}
-    ,                            !- Low Speed Nominal Capacity Sizing Factor
-    2000.0,                      !- Free Convection Nominal Capacity {W}
-    ;                            !- Free Convection Nominal Capacity Sizing Factor
-
-
-  CoolingTower:TwoSpeed,
-    Big Tower1,                  !- Name
-    Condenser Tower Inlet Node,  !- Water Inlet Node Name
-    Condenser Tower Outlet Node, !- Water Outlet Node Name
-    ,                            !- Design Water Flow Rate {m3/s}
-    8.0,                         !- High Fan Speed Air Flow Rate {m3/s}
-    500,                         !- High Fan Speed Fan Power {W}
-    ,                            !- High Fan Speed U-Factor Times Area Value {W/K}
-    4.0,                         !- Low Fan Speed Air Flow Rate {m3/s}
-    ,                            !- Low Fan Speed Air Flow Rate Sizing Factor
-    125,                         !- Low Fan Speed Fan Power {W}
-    ,                            !- Low Fan Speed Fan Power Sizing Factor
-    ,                            !- Low Fan Speed U-Factor Times Area Value {W/K}
-    ,                            !- Low Fan Speed U-Factor Times Area Sizing Factor
-    0.8,                         !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                            !- Free Convection Regime Air Flow Rate Sizing Factor
-    ,                            !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                            !- Free Convection U-Factor Times Area Value Sizing Factor
-    NominalCapacity,             !- Performance Input Method
-    ,                            !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    20000.0,                     !- High Speed Nominal Capacity {W}
-    10000.0,                     !- Low Speed Nominal Capacity {W}
-    ,                            !- Low Speed Nominal Capacity Sizing Factor
-    2000.0,                      !- Free Convection Nominal Capacity {W}
-    ;                            !- Free Convection Nominal Capacity Sizing Factor
-    ,                            !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                            !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                            !- Design Approach Temperature {deltaC}
-    ,                            !- Design Range Temperature {deltaC}
-    ,                            !- Basin Heater Capacity {W/K}
-    ,                            !- Basin Heater Setpoint Temperature {C}
-    ,                            !- Basin Heater Operating Schedule Name
-    SaturatedExit,               !- Evaporation Loss Mode
-    ,                            !- Evaporation Loss Factor {percent/K}
-    0.0080,                      !- Drift Loss Percent {percent}
-    ConcentrationRatio,          !- Blowdown Calculation Mode
-    3.0000,                      !- Blowdown Concentration Ratio
-    ,                            !- Blowdown Makeup Water Usage Schedule Name
-    Recovery Tank;               !- Supply Water Storage Tank Name
-
-
-  CoolingTower:TwoSpeed,
-    TowerWaterSys CoolTower, !- Name
-    TowerWaterSys Pump-TowerWaterSys CoolTowerNode,  !- Water Inlet Node Name
-    TowerWaterSys Supply Equipment Outlet Node,  !- Water Outlet Node Name
-    AUTOSIZE,                !- Design Water Flow Rate {m3/s}
-    AUTOSIZE,                !- High Fan Speed Air Flow Rate {m3/s}
-    AUTOSIZE,                !- High Fan Speed Fan Power {W}
-    AUTOSIZE,                !- High Fan Speed U-Factor Times Area Value {W/K}
-    autocalculate,           !- Low Fan Speed Air Flow Rate {m3/s}
-    ,                        !- Low Fan Speed Air Flow Rate Sizing Factor
-    autocalculate,           !- Low Fan Speed Fan Power {W}
-    ,                        !- Low Fan Speed Fan Power Sizing Factor
-    autocalculate,           !- Low Fan Speed U-Factor Times Area Value {W/K}
-    ,                        !- Low Fan Speed U-Factor Times Area Sizing Factor
-    autocalculate,           !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                        !- Free Convection Regime Air Flow Rate Sizing Factor
-    autocalculate,           !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
-    UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                        !- High Speed Nominal Capacity {W}
-    ,                        !- Low Speed Nominal Capacity {W}
-    ,                        !- Low Speed Nominal Capacity Sizing Factor
-    ,                        !- Free Convection Nominal Capacity {W}
-    ,                        !- Free Convection Nominal Capacity Sizing Factor
-    ,                        !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                        !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                        !- Design Approach Temperature {deltaC}
-    ,                        !- Design Range Temperature {deltaC}
-    ,                        !- Basin Heater Capacity {W/K}
-    ,                        !- Basin Heater Setpoint Temperature {C}
-    ,                        !- Basin Heater Operating Schedule Name
-    SaturatedExit,           !- Evaporation Loss Mode
-    ,                        !- Evaporation Loss Factor {percent/K}
-    0.0080,                  !- Drift Loss Percent {percent}
-    ConcentrationRatio,      !- Blowdown Calculation Mode
-    3.0000,                  !- Blowdown Concentration Ratio
-    ,                        !- Blowdown Makeup Water Usage Schedule Name
-    ,                        !- Supply Water Storage Tank Name
-    TowerWaterSys CoolTower OA ref Node,  !- Outdoor Air Inlet Node Name
-    4,                       !- Number of Cells
-    MinimalCell,             !- Cell Control
-    ,                        !- Cell Minimum  Water Flow Rate Fraction
-    ,                        !- Cell Maximum Water Flow Rate Fraction
-    1.0000;                  !- Sizing Factor
-
+CoolingTower:TwoSpeed,
+  TowerWaterSys CoolTower,    !- Name
+  TowerWaterSys Pump-TowerWaterSys CoolTowerNode,  !- Water Inlet Node Name
+  TowerWaterSys Supply Equipment Outlet Node,  !- Water Outlet Node Name
+  AUTOSIZE,                   !- Design Water Flow Rate {m3/s}
+  AUTOSIZE,                   !- High Fan Speed Air Flow Rate {m3/s}
+  AUTOSIZE,                   !- High Fan Speed Fan Power {W}
+  AUTOSIZE,                   !- High Fan Speed U-Factor Times Area Value {W/K}
+  autocalculate,              !- Low Fan Speed Air Flow Rate {m3/s}
+  ,                           !- Low Fan Speed Air Flow Rate Sizing Factor
+  autocalculate,              !- Low Fan Speed Fan Power {W}
+  ,                           !- Low Fan Speed Fan Power Sizing Factor
+  autocalculate,              !- Low Fan Speed U-Factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  autocalculate,              !- Free Convection Regime Air Flow Rate {m3/s}
+  ,                           !- Free Convection Regime Air Flow Rate Sizing Factor
+  autocalculate,              !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  ,                           !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- High Speed Nominal Capacity {W}
+  ,                           !- Low Speed Nominal Capacity {W}
+  ,                           !- Low Speed Nominal Capacity Sizing Factor
+  ,                           !- Free Convection Nominal Capacity {W}
+  ,                           !- Free Convection Nominal Capacity Sizing Factor
+  ,                           !- Design Inlet Air Dry-Bulb Temperature {C}
+  ,                           !- Design Inlet Air Wet-Bulb Temperature {C}
+  ,                           !- Design Approach Temperature {deltaC}
+  ,                           !- Design Range Temperature {deltaC}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Setpoint Temperature {C}
+  ,                           !- Basin Heater Operating Schedule Name
+  SaturatedExit,              !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor {percent/K}
+  0.0080,                     !- Drift Loss Percent {percent}
+  ConcentrationRatio,         !- Blowdown Calculation Mode
+  3.0000,                     !- Blowdown Concentration Ratio
+  ,                           !- Blowdown Makeup Water Usage Schedule Name
+  ,                           !- Supply Water Storage Tank Name
+  TowerWaterSys CoolTower OA ref Node,  !- Outdoor Air Inlet Node Name
+  4,                          !- Number of Cells
+  MinimalCell,                !- Cell Control
+  ,                           !- Cell Minimum  Water Flow Rate Fraction
+  ,                           !- Cell Maximum Water Flow Rate Fraction
+  1.0000;                     !- Sizing Factor
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-003}
@@ -1234,104 +1227,99 @@ This optional field allows you to specify a user-defined end-use subcategory, e.
 An example IDF specification follows.
 
 \begin{lstlisting}
+CoolingTower:VariableSpeed:Merkel,
+  Big Tower1,                 !- Name
+  Condenser Tower 1 Inlet Node,  !- Water Inlet Node Name
+  Condenser Tower 1 Outlet Node,  !- Water Outlet Node Name
+  NominalCapacity,            !- Performance Input Method
+  1.25,                       !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  20000.0,                    !- Nominal Capacity {W}
+  autocalculate,              !- Free Convection Nominal Capacity {W}
+  0.1,                        !- Free Convection Nominal Capacity Sizing Factor
+  autocalculate,              !- Design Water Flow Rate {m3/s}
+  5.382E-8,                   !- Design Water Flow Rate per Unit of Nominal Capacity {m3/s-W}
+  autocalculate,              !- Design Air Flow Rate {m3/s}
+  2.76316E-5,                 !- Design Air Flow Rate Per Unit of Nominal Capacity {m3/s-W}
+  0.2,                        !- Minimum Air Flow Rate Ratio
+  autocalculate,              !- Design Fan Power {W}
+  0.0105,                     !- Design Fan Power Per Unit of Nominal Capacity {dimensionless}
+  VS tower fan power mod func air flow ratio,  !- Fan Power Modifier Function of Air Flow Rate Ratio Curve Name
+  autocalculate,              !- Free Convection Regime Air Flow Rate {m3/s}
+  0.1,                        !- Free Convection Regime Air Flow Rate Sizing Factor
+  ,                           !- Design Air Flow Rate U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection Regime U-Factor Times Area Value {W/K}
+  ,                           !- Free Convection U-Factor Times Area Value Sizing Factor
+  VS tower UA mod func air flow ratio,  !- U-Factor Times Area Modifier Function of Air Flow Ratio Curve Name
+  VS tower UA mod func wetbulb difference,  !- U-Factor Times Area Modifier Function of Wetbulb Temperature Difference Curve Name
+  VS tower UA mod func water flow ratio,  !- U-Factor Times Area Modifier Function of Water Flow Ratio Curve Name
+  ,                           !- Design Inlet Air Dry-Bulb Temperature {C}
+  ,                           !- Design Inlet Air Wet-Bulb Temperature {C}
+  ,                           !- Design Approach Temperature {deltaC}
+  ,                           !- Design Range Temperature {deltaC}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Setpoint Temperature {C}
+  ,                           !- Basin Heater Operating Schedule Name
+  ,                           !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor {percent/K}
+  ,                           !- Drift Loss Percent {percent}
+  ,                           !- Blowdown Calculation Mode
+  ,                           !- Blowdown Concentration Ratio
+  ,                           !- Blowdown Makeup Water Usage Schedule Name
+  ,                           !- Supply Water Storage Tank Name
+  ,                           !- Outdoor Air Inlet Node Name
+  ,                           !- Number of Cells
+  ,                           !- Cell Control
+  ,                           !- Cell Minimum  Water Flow Rate Fraction
+  ,                           !- Cell Maximum Water Flow Rate Fraction
+  1.0;                        !- Sizing Factor
 
-  CoolingTower:VariableSpeed:Merkel,
-    Big Tower1,                    !- Name
-    Condenser Tower 1 Inlet Node,  !- Water Inlet Node Name
-    Condenser Tower 1 Outlet Node, !- Water Outlet Node Name
-    NominalCapacity,               !- Performance Input Method
-    1.25,                          !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    20000.0,                       !- Nominal Capacity {W}
-    autocalculate,                 !- Free Convection Nominal Capacity {W}
-    0.1,                           !- Free Convection Nominal Capacity Sizing Factor
-    autocalculate,                 !- Design Water Flow Rate {m3/s}
-    5.382E-8,                      !- Design Water Flow Rate per Unit of Nominal Capacity {m3/s-W}
-    autocalculate,                 !- Design Air Flow Rate {m3/s}
-    2.76316E-5,                    !- Design Air Flow Rate Per Unit of Nominal Capacity {m3/s-W}
-    0.2,                           !- Minimum Air Flow Rate Ratio
-    autocalculate,                 !- Design Fan Power {W}
-    0.0105,                        !- Design Fan Power Per Unit of Nominal Capacity {dimensionless}
-    VS tower fan power mod func air flow ratio,  !- Fan Power Modifier Function of Air Flow Rate Ratio Curve Name
-    autocalculate,                 !- Free Convection Regime Air Flow Rate {m3/s}
-    0.1,                           !- Free Convection Regime Air Flow Rate Sizing Factor
-    ,                              !- Design Air Flow Rate U-Factor Times Area Value {W/K}
-    ,                              !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                              !- Free Convection U-Factor Times Area Value Sizing Factor
-    VS tower UA mod func air flow ratio,  !- U-Factor Times Area Modifier Function of Air Flow Ratio Curve Name
-    VS tower UA mod func wetbulb difference,  !- U-Factor Times Area Modifier Function of Wetbulb Temperature Difference Curve Name
-    VS tower UA mod func water flow ratio,  !- U-Factor Times Area Modifier Function of Water Flow Ratio Curve Name
-    ,                              !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                              !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                              !- Design Approach Temperature {deltaC}
-    ,                              !- Design Range Temperature {deltaC}
-    ,                              !- Basin Heater Capacity {W/K}
-    ,                              !- Basin Heater Setpoint Temperature {C}
-    ,                              !- Basin Heater Operating Schedule Name
-    ,                              !- Evaporation Loss Mode
-    ,                              !- Evaporation Loss Factor {percent/K}
-    ,                              !- Drift Loss Percent {percent}
-    ,                              !- Blowdown Calculation Mode
-    ,                              !- Blowdown Concentration Ratio
-    ,                              !- Blowdown Makeup Water Usage Schedule Name
-    ,                              !- Supply Water Storage Tank Name
-    ,                              !- Outdoor Air Inlet Node Name
-    ,                              !- Number of Cells
-    ,                              !- Cell Control
-    ,                              !- Cell Minimum  Water Flow Rate Fraction
-    ,                              !- Cell Maximum Water Flow Rate Fraction
-    1.0;                           !- Sizing Factor
+Curve:Cubic,
+  VS tower fan power mod func air flow ratio,  !- Name
+  0.02,                       !- Coefficient1 Constant
+  0.0,                        !- Coefficient2 x
+  0.0,                        !- Coefficient3 x**2
+  0.98,                       !- Coefficient4 x**3
+  0.2,                        !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  0.0,                        !- Minimum Curve Output
+  1.0,                        !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless;              !- Output Unit Type
 
-  Curve:Cubic,
-    VS tower fan power mod func air flow ratio, !- Name
-    0.02 , !- Coefficient1 Constant
-    0.0 ,  !- Coefficient2 x
-    0.0 ,  !- Coefficient3 x**2
-    0.98 , !- Coefficient4 x**3
-    0.2,   !- Minimum Value of x
-    1.0 ,  !- Maximum Value of x
-    0.0 ,  !- Minimum Curve Output
-    1.0 ,  !- Maximum Curve Output
-    Dimensionless,  !- Input Unit Type for X
-    Dimensionless;  !- Output Unit Type
+Curve:Quadratic,
+  VS tower UA mod func air flow ratio,  !- Name
+  0.0,                        !- Coefficient1 Constant
+  1.3,                        !- Coefficient2 x
+  -0.3,                       !- Coefficient3 x**2
+  0.2,                        !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  0.0,                        !- Minimum Curve Output
+  1.0,                        !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless;              !- Output Unit Type
 
+Curve:Linear,
+  VS tower UA mod func wetbulb difference,  !- Name
+  1.0,                        !- Coefficient1 Constant
+  0.0081,                     !- Coefficient2 x
+  -10,                        !- Minimum Value of x
+  25.0,                       !- Maximum Value of x
+  0.85,                       !- Minimum Curve Output
+  1.3,                        !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless;              !- Output Unit Type
 
-  Curve:Quadratic,
-    VS tower UA mod func air flow ratio, !- Name
-    0.0 , !- Coefficient1 Constant
-    1.3 , !- Coefficient2 x
-    -0.3 , !- Coefficient3 x**2
-    0.2 , !- Minimum Value of x
-    1.0 , !- Maximum Value of x
-    0.0 , !- Minimum Curve Output
-    1.0 , !- Maximum Curve Output
-    Dimensionless,  !- Input Unit Type for X
-    Dimensionless;  !- Output Unit Type
-
-
-  Curve:Linear,
-    VS tower UA mod func wetbulb difference , !- Name
-    1.0 , !- Coefficient1 Constant
-    0.0081 , !- Coefficient2 x
-    -10 , !- Minimum Value of x
-    25.0 , !- Maximum Value of x
-    0.85 , !- Minimum Curve Output
-    1.3 , !- Maximum Curve Output
-    Dimensionless,  !- Input Unit Type for X
-    Dimensionless; !- Output Unit Type
-
-
-  Curve:Quadratic,
-    VS tower UA mod func water flow ratio, !- Name
-    0.1082 , !- Coefficient1 Constant
-    1.667 , !- Coefficient2 x
-    -0.7713 , !- Coefficient3 x**2
-    0.3 , !- Minimum Value of x
-    1.0 , !- Maximum Value of x
-    0.5 , !- Minimum Curve Output
-    1.1 , !- Maximum Curve Output
-    Dimensionless,  !- Input Unit Type for X
-    Dimensionless;  !- Output Unit Type
-
+Curve:Quadratic,
+  VS tower UA mod func water flow ratio,  !- Name
+  0.1082,                     !- Coefficient1 Constant
+  1.667,                      !- Coefficient2 x
+  -0.7713,                    !- Coefficient3 x**2
+  0.3,                        !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  0.5,                        !- Minimum Curve Output
+  1.1,                        !- Maximum Curve Output
+  Dimensionless,              !- Input Unit Type for X
+  Dimensionless;              !- Output Unit Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-003}
@@ -1648,37 +1636,36 @@ This optional field allows you to specify a user-defined end-use subcategory, e.
 An example IDF specification for this object is shown below:
 
 \begin{lstlisting}
-
 CoolingTower:VariableSpeed,
-    Big Tower1,  !- Tower Name
-    Condenser 1 Inlet Node,  !- Water Inlet Node Name
-    Condenser 1 Outlet Node,  !- Water Outlet Node Name
-    YorkCalc,  !- Tower Model Type
-    ,  !- Tower Model Coefficient Name
-    25.5556,  !- Design Inlet Air Wet-Bulb Temperature {C}
-    3.8889,  !- Design Approach Temperature {C}
-    5.5556,  !- Design Range Temperature {C}
-    0.0015,  !- Design Water Flow Rate {m3/s}
-    1.6435,  !- Design Air Flow Rate {m3/s}
-    275,  !- Design Fan Power {W}
-    FanRatioCurve,  !- Fan Power Ratio - function of Air Flow Rate Curve Name
-    0.2,  !- Minimum Air Flow Rate Ratio
-    0.125,  !- Fraction of Tower Capacity in Free Convection Regime
-    450.0,  !- Basin Heater Capacity {W/K}
-    4.5,  !- Basin Heater Set Point Temperature {C}
-    BasinSchedule,  !- Basin Heater Operating Schedule Name
-    SaturatedExit,  !- Evaporation Loss Mode
-    ,  !- Evaporation Loss Factor
-    0.05,  !- Makeup Water Usage due to Drift {percent}
-    ScheduledRate,  !- Blowdown Calculation Mode
-    BlowDownSchedule,  !- Schedule Name for Makeup Water Usage due to Blowdown
-    ,  !- Name of Water Storage Tank for Supply
-    ,  !- Outdoor Air Inlet Node Name
-    4, !- Number of Cells
-    MinimalCell, !- Cell Control
-    ,  !- Cell Minimum Water Flow Rate Fraction
-    ,  !- Cell Maximum Water Flow Rate Fraction
-    1.000 ;  !- Sizing Factor
+  Big Tower1,                 !- Tower Name
+  Condenser 1 Inlet Node,     !- Water Inlet Node Name
+  Condenser 1 Outlet Node,    !- Water Outlet Node Name
+  YorkCalc,                   !- Tower Model Type
+  ,                           !- Tower Model Coefficient Name
+  25.5556,                    !- Design Inlet Air Wet-Bulb Temperature {C}
+  3.8889,                     !- Design Approach Temperature {C}
+  5.5556,                     !- Design Range Temperature {C}
+  0.0015,                     !- Design Water Flow Rate {m3/s}
+  1.6435,                     !- Design Air Flow Rate {m3/s}
+  275,                        !- Design Fan Power {W}
+  FanRatioCurve,              !- Fan Power Ratio - function of Air Flow Rate Curve Name
+  0.2,                        !- Minimum Air Flow Rate Ratio
+  0.125,                      !- Fraction of Tower Capacity in Free Convection Regime
+  450.0,                      !- Basin Heater Capacity {W/K}
+  4.5,                        !- Basin Heater Set Point Temperature {C}
+  BasinSchedule,              !- Basin Heater Operating Schedule Name
+  SaturatedExit,              !- Evaporation Loss Mode
+  ,                           !- Evaporation Loss Factor
+  0.05,                       !- Makeup Water Usage due to Drift {percent}
+  ScheduledRate,              !- Blowdown Calculation Mode
+  BlowDownSchedule,           !- Schedule Name for Makeup Water Usage due to Blowdown
+  ,                           !- Name of Water Storage Tank for Supply
+  ,                           !- Outdoor Air Inlet Node Name
+  4,                          !- Number of Cells
+  MinimalCell,                !- Cell Control
+  ,                           !- Cell Minimum Water Flow Rate Fraction
+  ,                           !- Cell Maximum Water Flow Rate Fraction
+  1.000;                      !- Sizing Factor
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-001}
@@ -1914,52 +1901,51 @@ These numeric fields contain the coefficients to be used by the CoolTools approa
 An example IDF specification for this object is shown below:
 
 \begin{lstlisting}
-
 CoolingTowerPerformance:CoolTools,
-   CoolTools CrossFlow Default Model, !- Tower Model Coefficient Name
-       -1.0,               !- Minimum Inlet Air Wet-Bulb Temperature {C}
-       26.6667,            !- Maximum Inlet Air Wet-Bulb Temperature {C}
-       1.1111,             !- Minimum Range Temperature {C}
-       11.1111,            !- Maximum Range Temperature {C}
-       1.1111,             !- Minimum Approach Temperature {C}
-       11.1111,            !- Maximum Approach Temperature {C}
-       0.75,               !- Minimum Water Flow Rate Ratio
-       1.25,               !- Maximum Water Flow Rate Ratio
-       0.52049709836241,                !- Coefficient 1
-     -10.617046395344,                  !- Coefficient 2
-      10.7292974722538,                 !- Coefficient 3
-      -2.74988377158227,                !- Coefficient 4
-       4.73629943913743,                !- Coefficient 5
-      -8.25759700874711,                !- Coefficient 6
-       1.57640938114136,                !- Coefficient 7
-       6.51119643791324,                !- Coefficient 8
-       1.50433525206692,                !- Coefficient 9
-      -3.2888529287801,                 !- Coefficient 10
-       0.0257786145353773,              !- Coefficient 11
-       0.182464289315254,               !- Coefficient 12
-      -0.0818947291400898,              !- Coefficient 13
-      -0.215010003996285,               !- Coefficient 14
-       0.0186741309635284,              !- Coefficient 15
-       0.0536824177590012,              !- Coefficient 16
-      -0.00270968955115031,             !- Coefficient 17
-       0.00112277498589279,             !- Coefficient 18
-      -0.00127758497497718,             !- Coefficient 19
-       0.0000760420796601607,           !- Coefficient 20
-       1.43600088336017,                !- Coefficient 21
-      -0.5198695909109,                 !- Coefficient 22
-       0.117339576910507,               !- Coefficient 23
-       1.50492810819924,                !- Coefficient 24
-      -0.135898905926974,               !- Coefficient 25
-      -0.152577581866506,               !- Coefficient 26
-      -0.0533843828114562,              !- Coefficient 27
-       0.00493294869565511,             !- Coefficient 28
-      -0.00796260394174197,             !- Coefficient 29
-       0.000222619828621544,            !- Coefficient 30
-      -0.0543952001568055,              !- Coefficient 31
-       0.00474266879161693,             !- Coefficient 32
-      -0.0185854671815598,              !- Coefficient 33
-       0.00115667701293848,             !- Coefficient 34
-       0.000807370664460284;            !- Coefficient 35
+  CoolTools CrossFlow Default Model,  !- Tower Model Coefficient Name
+  -1.0,                       !- Minimum Inlet Air Wet-Bulb Temperature {C}
+  26.6667,                    !- Maximum Inlet Air Wet-Bulb Temperature {C}
+  1.1111,                     !- Minimum Range Temperature {C}
+  11.1111,                    !- Maximum Range Temperature {C}
+  1.1111,                     !- Minimum Approach Temperature {C}
+  11.1111,                    !- Maximum Approach Temperature {C}
+  0.75,                       !- Minimum Water Flow Rate Ratio
+  1.25,                       !- Maximum Water Flow Rate Ratio
+  0.52049709836241,           !- Coefficient 1
+  -10.617046395344,           !- Coefficient 2
+  10.7292974722538,           !- Coefficient 3
+  -2.74988377158227,          !- Coefficient 4
+  4.73629943913743,           !- Coefficient 5
+  -8.25759700874711,          !- Coefficient 6
+  1.57640938114136,           !- Coefficient 7
+  6.51119643791324,           !- Coefficient 8
+  1.50433525206692,           !- Coefficient 9
+  -3.2888529287801,           !- Coefficient 10
+  0.0257786145353773,         !- Coefficient 11
+  0.182464289315254,          !- Coefficient 12
+  -0.0818947291400898,        !- Coefficient 13
+  -0.215010003996285,         !- Coefficient 14
+  0.0186741309635284,         !- Coefficient 15
+  0.0536824177590012,         !- Coefficient 16
+  -0.00270968955115031,       !- Coefficient 17
+  0.00112277498589279,        !- Coefficient 18
+  -0.00127758497497718,       !- Coefficient 19
+  0.0000760420796601607,      !- Coefficient 20
+  1.43600088336017,           !- Coefficient 21
+  -0.5198695909109,           !- Coefficient 22
+  0.117339576910507,          !- Coefficient 23
+  1.50492810819924,           !- Coefficient 24
+  -0.135898905926974,         !- Coefficient 25
+  -0.152577581866506,         !- Coefficient 26
+  -0.0533843828114562,        !- Coefficient 27
+  0.00493294869565511,        !- Coefficient 28
+  -0.00796260394174197,       !- Coefficient 29
+  0.000222619828621544,       !- Coefficient 30
+  -0.0543952001568055,        !- Coefficient 31
+  0.00474266879161693,        !- Coefficient 32
+  -0.0185854671815598,        !- Coefficient 33
+  0.00115667701293848,        !- Coefficient 34
+  0.000807370664460284;       !- Coefficient 35
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-001}
@@ -2049,45 +2035,44 @@ These numeric fields contain the coefficients to be used by the YorkCalc approac
 An example IDF specification for this object is shown below:
 
 \begin{lstlisting}
-
 CoolingTowerPerformance:YorkCalc
-   YorkCalc Default Tower Model, !- Tower Model Coefficient Name
-       -34.4,              !- Minimum Inlet Air Wet-Bulb Temperature {C}
-       26.6667,            !- Maximum Inlet Air Wet-Bulb Temperature {C}
-       1.1111,             !- Minimum Range Temperature {C}
-       22.2222,            !- Maximum Range Temperature {C}
-       1.1111,             !- Minimum Approach Temperature {C}
-       40.0,               !- Maximum Approach Temperature {C}
-       0.75,               !- Minimum Water Flow Rate Ratio
-       1.25,               !- Maximum Water Flow Rate Ratio
-       8.0,                !- Maximum Liquid to Gas Ratio
-      -0.359741205,                     !- Coefficient 1
-      -0.055053608,                     !- Coefficient 2
-       0.0023850432,                    !- Coefficient 3
-       0.173926877,                     !- Coefficient 4
-      -0.0248473764,                    !- Coefficient 5
-       0.00048430224,                   !- Coefficient 6
-      -0.005589849456,                  !- Coefficient 7
-       0.0005770079712,                 !- Coefficient 8
-      -0.00001342427256,                !- Coefficient 9
-       2.84765801111111,                !- Coefficient 10
-      -0.121765149,                     !- Coefficient 11
-       0.0014599242,                    !- Coefficient 12
-       1.680428651,                     !- Coefficient 13
-      -0.0166920786,                    !- Coefficient 14
-      -0.0007190532,                    !- Coefficient 15
-      -0.025485194448,                  !- Coefficient 16
-       0.0000487491696,                 !- Coefficient 17
-       0.00002719234152,                !- Coefficient 18
-      -0.0653766255555556,              !- Coefficient 19
-      -0.002278167,                     !- Coefficient 20
-       0.0002500254,                    !- Coefficient 21
-      -0.0910565458,                    !- Coefficient 22
-       0.00318176316,                   !- Coefficient 23
-       0.000038621772,                  !- Coefficient 24
-      -0.0034285382352,                 !- Coefficient 25
-       0.00000856589904,                !- Coefficient 26
-      -0.000001516821552;               !- Coefficient 27
+  YorkCalc Default Tower Model,  !- Tower Model Coefficient Name
+  -34.4,                      !- Minimum Inlet Air Wet-Bulb Temperature {C}
+  26.6667,                    !- Maximum Inlet Air Wet-Bulb Temperature {C}
+  1.1111,                     !- Minimum Range Temperature {C}
+  22.2222,                    !- Maximum Range Temperature {C}
+  1.1111,                     !- Minimum Approach Temperature {C}
+  40.0,                       !- Maximum Approach Temperature {C}
+  0.75,                       !- Minimum Water Flow Rate Ratio
+  1.25,                       !- Maximum Water Flow Rate Ratio
+  8.0,                        !- Maximum Liquid to Gas Ratio
+  -0.359741205,               !- Coefficient 1
+  -0.055053608,               !- Coefficient 2
+  0.0023850432,               !- Coefficient 3
+  0.173926877,                !- Coefficient 4
+  -0.0248473764,              !- Coefficient 5
+  0.00048430224,              !- Coefficient 6
+  -0.005589849456,            !- Coefficient 7
+  0.0005770079712,            !- Coefficient 8
+  -0.00001342427256,          !- Coefficient 9
+  2.84765801111111,           !- Coefficient 10
+  -0.121765149,               !- Coefficient 11
+  0.0014599242,               !- Coefficient 12
+  1.680428651,                !- Coefficient 13
+  -0.0166920786,              !- Coefficient 14
+  -0.0007190532,              !- Coefficient 15
+  -0.025485194448,            !- Coefficient 16
+  0.0000487491696,            !- Coefficient 17
+  0.00002719234152,           !- Coefficient 18
+  -0.0653766255555556,        !- Coefficient 19
+  -0.002278167,               !- Coefficient 20
+  0.0002500254,               !- Coefficient 21
+  -0.0910565458,              !- Coefficient 22
+  0.00318176316,              !- Coefficient 23
+  0.000038621772,             !- Coefficient 24
+  -0.0034285382352,           !- Coefficient 25
+  0.00000856589904,           !- Coefficient 26
+  -0.000001516821552;         !- Coefficient 27
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-001}
@@ -2244,24 +2229,23 @@ This field is optional. It is used to describe where the evaporative fluid coole
 An IDF specification for this object is shown below:
 
 \begin{lstlisting}
-
 EvaporativeFluidCooler:SingleSpeed,
-      Big EvaporativeFluidCooler,         !- Name
-      Condenser EvaporativeFluidcooler Inlet Node,  !- Water Inlet Node Name
-      Condenser EvaporativeFluidcooler Outlet Node,  !- Water Outlet Node Name
-      3.02,                    !- Design Air Flow Rate {m3/s}
-      2250,                    !- Design Air Flow Rate Fan Power {W}
-      0.002208,                !- Design Spray Water Flow Rate {m3/s}
-      UserSpecifiedDesignCapacity,                        !- Performance Input Method
-      ,                        !- Outdoor Air Inlet Node Name
-      1.25,                    !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-      ,                        !- Standard Design Capacity {W}
-      ,                        !- Design Air Flow Rate U-factor Times Area Value {W/K}
-      0.001703,                !- Design Water Flow Rate {m3/s}
-      87921,                   !- User Specified Design Capacity {W}
-      46.11,                   !- Design Entering Water Temperature {C}
-      35,                      !- Design Entering Air Temperature {C}
-      25.6;                    !- Design Entering Air Wet-bulb Temperature {C}
+  Big EvaporativeFluidCooler, !- Name
+  Condenser EvaporativeFluidcooler Inlet Node,  !- Water Inlet Node Name
+  Condenser EvaporativeFluidcooler Outlet Node,  !- Water Outlet Node Name
+  3.02,                       !- Design Air Flow Rate {m3/s}
+  2250,                       !- Design Air Flow Rate Fan Power {W}
+  0.002208,                   !- Design Spray Water Flow Rate {m3/s}
+  UserSpecifiedDesignCapacity,!- Performance Input Method
+  ,                           !- Outdoor Air Inlet Node Name
+  1.25,                       !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- Standard Design Capacity {W}
+  ,                           !- Design Air Flow Rate U-factor Times Area Value {W/K}
+  0.001703,                   !- Design Water Flow Rate {m3/s}
+  87921,                      !- User Specified Design Capacity {W}
+  46.11,                      !- Design Entering Water Temperature {C}
+  35,                         !- Design Entering Air Temperature {C}
+  25.6;                       !- Design Entering Air Wet-bulb Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-001}
@@ -2545,34 +2529,33 @@ This field is optional. It is used to describe where the evaporative fluid coole
 Examples of an IDF specification for this object are shown below:
 
 \begin{lstlisting}
-
 EvaporativeFluidCooler:TwoSpeed,
-      Big EvaporativeFluidCooler,         !- Name
-      Condenser EvaporativeFluidcooler Inlet Node,  !- Water Inlet Node Name
-      Condenser EvaporativeFluidcooler Outlet Node,  !- Water Outlet Node Name
-      9.911,                   !- High Fan Speed Air Flow Rate {m3/s}
-      autosize,                !- High Fan Speed Fan Power {W}
-      4.911,                   !- Low Fan Speed Air Flow Rate {m3/s}
-      0.5,                     !- Low Fan Speed Air Flow Rate Sizing Factor
-      autosize,                !- Low Fan Speed Fan Power {W}
-      0.16,                    !- Low Fan Speed Fan Power Sizing Factor
-      0.002208,                !- Design Spray Water Flow Rate {m3/s}
-      UserSpecifiedDesignCapacity,    !- Performance Input Method
-      ,                        !- Outdoor Air Inlet Node Name
-      1.25,                    !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-      ,                        !- High Speed Standard Design Capacity {W}
-      ,                        !- Low Speed Standard Design Capacity {W}
-      0.5,                     !- Low Speed Standard Capacity Sizing Factor
-      ,                        !- High Fan Speed U-factor Times Area Value  {W/K}
-      ,                        !- Low Fan Speed U-factor Times Area Value  {W/K}
-      0.6,                     !- Low Fan Speed U-Factor Times Area Sizing Factor
-      0.001703,                !- Design Water Flow Rate {m3/s}
-      87921,                   !- High Speed User Specified Design Capacity {W}
-      47921,                   !- Low Speed User Specified Design Capacity {W}
-      0.5,                     !- Low Speed User Specified Design Capacity Sizing Factor
-      46.11,                   !- Design Entering Water Temperature {C}
-      35,                      !- Design Entering Air Temperature {C}
-      25.6;                    !- Design Entering Air Wet-bulb Temperature {C}
+  Big EvaporativeFluidCooler, !- Name
+  Condenser EvaporativeFluidcooler Inlet Node,  !- Water Inlet Node Name
+  Condenser EvaporativeFluidcooler Outlet Node,  !- Water Outlet Node Name
+  9.911,                      !- High Fan Speed Air Flow Rate {m3/s}
+  autosize,                   !- High Fan Speed Fan Power {W}
+  4.911,                      !- Low Fan Speed Air Flow Rate {m3/s}
+  0.5,                        !- Low Fan Speed Air Flow Rate Sizing Factor
+  autosize,                   !- Low Fan Speed Fan Power {W}
+  0.16,                       !- Low Fan Speed Fan Power Sizing Factor
+  0.002208,                   !- Design Spray Water Flow Rate {m3/s}
+  UserSpecifiedDesignCapacity,!- Performance Input Method
+  ,                           !- Outdoor Air Inlet Node Name
+  1.25,                       !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+  ,                           !- High Speed Standard Design Capacity {W}
+  ,                           !- Low Speed Standard Design Capacity {W}
+  0.5,                        !- Low Speed Standard Capacity Sizing Factor
+  ,                           !- High Fan Speed U-factor Times Area Value  {W/K}
+  ,                           !- Low Fan Speed U-factor Times Area Value  {W/K}
+  0.6,                        !- Low Fan Speed U-Factor Times Area Sizing Factor
+  0.001703,                   !- Design Water Flow Rate {m3/s}
+  87921,                      !- High Speed User Specified Design Capacity {W}
+  47921,                      !- Low Speed User Specified Design Capacity {W}
+  0.5,                        !- Low Speed User Specified Design Capacity Sizing Factor
+  46.11,                      !- Design Entering Water Temperature {C}
+  35,                         !- Design Entering Air Temperature {C}
+  25.6;                       !- Design Entering Air Wet-bulb Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-001}
@@ -2746,20 +2729,19 @@ This optional alpha field specifies the outdoor air node name used to define the
 An IDF specification for this object is shown below:
 
 \begin{lstlisting}
-
 FluidCooler:SingleSpeed,
-      Big FLUIDCOOLER1,              !- Name
-      Condenser FLUIDCOOLER 1 Inlet Node,  !- Water Inlet Node Name
-      Condenser FLUIDCOOLER 1 Outlet Node, !- Water Outlet Node Name
-      NominalCapacity,        !- Performance Input Method
-      ,                       !- Design Air Flow Rate U-factor Times Area Value {W/K}
-      58601.,                 !- Nominal Capacity {W}
-      51.67,                  !- Design Entering Water Temperature {C}
-      35,                     !- Design Entering Air Temperature {C}
-      25.6,                   !- Design Entering Air Wetbulb Temperature {C}
-      0.001388,               !- Design Water Flow Rate{m3/s}
-      9.911,                  !- Design Air Flow Rate {m3/s}
-      Autosize;               !- Design Air Flow Rate Fan Power {W}
+  Big FLUIDCOOLER1,           !- Name
+  Condenser FLUIDCOOLER 1 Inlet Node,  !- Water Inlet Node Name
+  Condenser FLUIDCOOLER 1 Outlet Node,  !- Water Outlet Node Name
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- Design Air Flow Rate U-factor Times Area Value {W/K}
+  58601.,                     !- Nominal Capacity {W}
+  51.67,                      !- Design Entering Water Temperature {C}
+  35,                         !- Design Entering Air Temperature {C}
+  25.6,                       !- Design Entering Air Wetbulb Temperature {C}
+  0.001388,                   !- Design Water Flow Rate{m3/s}
+  9.911,                      !- Design Air Flow Rate {m3/s}
+  Autosize;                   !- Design Air Flow Rate Fan Power {W}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-000}
@@ -2900,28 +2882,27 @@ This optional alpha field specifies the outdoor air node name used to define the
 Examples of an IDF specification for this object are shown below:
 
 \begin{lstlisting}
-
 FluidCooler:TwoSpeed,
-      Big FLUIDCOOLER1,              !- Name
-      Condenser FLUIDCOOLER 1 inlet Node,  !- Water Inlet Node Name
-      Condenser FLUIDCOOLER 1 Outlet Node,  !- Water Outlet Node Name
-      NominalCapacity,         !- Performance Input Method
-      ,                        !- High Fan Speed U-factor Times Area Value {W/K}
-      ,                        !- Low Fan Speed U-factor Times Area Value {W/K}
-      ,                        !- Low Fan Speed U-Factor Times Area Sizing Factor
-      58601.,                  !- High Speed Nominal Capacity {W}
-      28601.,                  !- Low Speed Nominal Capacity {W}
-  .   0.6,                     !- Low Speed Nominal Capacity Sizing Factor
-      51.67,                   !- Design Entering Water temperature {C}
-      35,                      !- Design Entering Air temperature {C}
-      25.6,                    !- Design Entering Air Wet-bulb temperature {C}
-      0.001388,                !- Design Water Flow Rate {m3/s}
-      9.911,                   !- High Fan Speed Air Flow Rate {m3/s}
-      autosize,                !- High Fan Speed Fan Power {W}
-      autosize,                !- Low Fan Speed Air Flow Rate {m3/s}
-      0.5,                     !- Low Fan Speed Air Flow Rate Sizing Factor
-      autosize,                !- Low Fan Speed Fan Power {W}
-      0.16;                    !- Low Fan Speed Fan Power Sizing Factor
+  Big FLUIDCOOLER1,           !- Name
+  Condenser FLUIDCOOLER 1 inlet Node,  !- Water Inlet Node Name
+  Condenser FLUIDCOOLER 1 Outlet Node,  !- Water Outlet Node Name
+  NominalCapacity,            !- Performance Input Method
+  ,                           !- High Fan Speed U-factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-factor Times Area Value {W/K}
+  ,                           !- Low Fan Speed U-Factor Times Area Sizing Factor
+  58601.,                     !- High Speed Nominal Capacity {W}
+  28601.,                     !- Low Speed Nominal Capacity {W}
+  .   0.6,                    !- Low Speed Nominal Capacity Sizing Factor
+  51.67,                      !- Design Entering Water temperature {C}
+  35,                         !- Design Entering Air temperature {C}
+  25.6,                       !- Design Entering Air Wet-bulb temperature {C}
+  0.001388,                   !- Design Water Flow Rate {m3/s}
+  9.911,                      !- High Fan Speed Air Flow Rate {m3/s}
+  autosize,                   !- High Fan Speed Fan Power {W}
+  autosize,                   !- Low Fan Speed Air Flow Rate {m3/s}
+  0.5,                        !- Low Fan Speed Air Flow Rate Sizing Factor
+  autosize,                   !- Low Fan Speed Fan Power {W}
+  0.16;                       !- Low Fan Speed Fan Power Sizing Factor
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-000}
@@ -2978,12 +2959,13 @@ The heat exchanger response is defined by a g-function which is a non-dimensiona
   GFNC\emph{i} is the g-function value
 \end{itemize}
 
-The g-function is different for each borehole field configuration (i.e.~a 4 $\times$ 4 field has a different response than a 80 $\times$ 80 field). It is also dependent on the ratio of borehole spacing to depth. g-function values, for accurate simulation, have to be computed for each specific heat exchanger design. The GroundHeatExchanger:System object will accept three different types of input in order to define the g-functions necessary for the ground heat exchanger calculations.
+The g-function is different for each borehole field configuration (i.e.~a 4 $\times$ 4 field has a different response than a 80 $\times$ 80 field). It is also dependent on the ratio of borehole spacing to depth. g-function values, for accurate simulation, have to be computed for each specific heat exchanger design. The GroundHeatExchanger:System object will accept four different types of input in order to define the g-functions necessary for the ground heat exchanger calculations.
 
 \begin{enumerate}
     \item Use the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object to define a rectangular borehole field.
     \item Use one or more \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} objects to define a vertical borehole field with the boreholes located arbitrarily.
-    \item Use a third-party tool, such as GLHEPro, to compute the g-functions and pass them to EnergyPlus using the \hyperref[groundheatexchangerresponsefactors]{GroundHeatExchanger:ResponseFactors} object.
+    \item Use a third-party tool such as GLHEPro to compute the g-functions, or download them from a \href{https://gdr.openei.org/submissions/1325}{precomputed library} and pass them to EnergyPlus using the \hyperref[groundheatexchangerresponsefactors]{GroundHeatExchanger:ResponseFactors} object.
+    \item Request borehole field design and sizing by providing a single \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} object and also a \hyperref[groundheatexchangerverticalsizingrect]{GroundHeatExchanger:Vertical:Sizing:Rectangle} object.
 \end{enumerate}
 
 A small number of reference datasets containing example input data for 1 $\times$ 2, 4 $\times$ 4 and 8 $\times$ 8 configurations and for both standard and thermally enhanced grout are provided as well.
@@ -3036,7 +3018,30 @@ The unique name of the \hyperref[groundheatexchangerresponsefactors]{GroundHeatE
 
 \paragraph{Field: g-Function Calculation Method}
 
-If the GHE:ResponseFactors object is not provided, this input will be relevant to the calculation method used to generate the g-function values. There are two options for this input: ``UHFcalc" or ``UBHWTcalc". The default is UHFcalc, where a g-function is computed with the uniform heat flux boundary condition. The UBHWTcalc option computes the g-function with a uniform borehole wall temperature boundary condition. The g-function computed with a uniform borehole wall temperature boundary condition is expected to be a better approximation of the borehole physics and is also expected to be faster to compute.
+If the GHE:ResponseFactors object is not provided, this input will be relevant to the calculation method used to generate the g-function values.
+There are three options for this input:
+
+\begin{itemize}
+  \item ``UHFcalc''
+  \item ``UBHWTcalc''
+  \item ``FullDesign''
+\end{itemize}
+
+The default is UHFcalc, where a g-function is computed with the uniform heat flux boundary condition.
+The UBHWTcalc option computes the g-function with a uniform borehole wall temperature boundary condition.
+The g-function computed with a uniform borehole wall temperature boundary condition is expected to be a better approximation of the borehole physics and is also expected to be faster to compute.
+The final option of FullDesign allows a borehole field to be designed and sized based on loads and design parameters.
+For a designed borehole field, the input file should include a GHE:Vertical:Sizing object matching the next field in this object, a full annual weather file sizing period to allow a year of loads to be generated, and finally hvac sizing enabled in the simulation control object.
+
+\paragraph{Field: GHEVertical:Sizing object type}
+
+For borehole field design and sizing calculations, this should be the type of an object specifying the borehole field design parameters.
+Currently only GroundHeatExchanger:Vertical:Sizing:Rectangle is supported.
+
+\paragraph{Field: GHE:Vertical:Sizing object name}
+
+For borehole field design and sizing calculations, this should be the name of an object specifying the borehole field design parameters.
+See the full documentation for \hyperref[groundheatexchangerverticalsizingrect]{GroundHeatExchanger:Vertical:Sizing:Rectangle}.
 
 \paragraph{Field: GHE:Vertical:Array object name}
 
@@ -3044,150 +3049,158 @@ The unique name of the \hyperref[groundheatexchangerverticalarray]{GroundHeatExc
 
 \paragraph{Field: GHE:Vertical:Single names}
 
-The unique names of all single, vertical GLHE objects which are used to define and arbitrarily shaped GHE array. This field is extensible.
+The unique names of all single, vertical GLHE objects which are used to define and arbitrarily shaped GHE array.
+This field is extensible.
 
-The following is are example inputs corresponding to the input variations allowed which were described previously. The first example uses the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object. The g-functions will be generated automatically by EnergyPlus.
+The following are example inputs corresponding to the input variations allowed which were described previously.
+The first example uses the \hyperref[groundheatexchangerverticalarray]{GroundHeatExchanger:Vertical:Array} object.
+The g-functions will be generated automatically by EnergyPlus.
 
 \begin{lstlisting}
-  GroundHeatExchanger:System,
-    Vertical GHE 1x4 Std,  !- Name
-    GLHE Inlet,         !- Inlet Node Name
-    GLHE Outlet,        !- Outlet Node Name
-    0.00100944,         !- Design Flow Rate {m3/s}
-    Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
-    KATemps,            !- Undisturbed Ground Temperature Model Name
-    2.5,                !- Ground Thermal Conductivity {W/m-K}
-    2.5E+06,            !- Ground Thermal Heat Capacity {J/m3-K}
-    ,                   !- Response Factors Object Name
-    UBHWTcalc,          !- g-Function Calculation Method
-    GHE-Array;          !- GHE:Vertical:Array Object Name
+GroundHeatExchanger:System,
+  Vertical GHE 1x4 Std,       !- Name
+  GLHE Inlet,                 !- Inlet Node Name
+  GLHE Outlet,                !- Outlet Node Name
+  0.00100944,                 !- Design Flow Rate {m3/s}
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
+  KATemps,                    !- Undisturbed Ground Temperature Model Name
+  2.5,                        !- Ground Thermal Conductivity {W/m-K}
+  2.5E+06,                    !- Ground Thermal Heat Capacity {J/m3-K}
+  ,                           !- Response Factors Object Name
+  UBHWTcalc,                  !- g-Function Calculation Method
+  ,                           !- GHE:Vertical:Sizing Object Type
+  ,                           !- GHE:Vertical:Sizing Object Name
+  GHE-Array;                  !- GHE:Vertical:Array Object Name
 
-  GroundHeatExchanger:Vertical:Properties,
-    GHE-1 Props,        !- Name
-    1,                  !- Depth of Top of Borehole {m}
-    100,                !- Borehole Length {m}
-    0.114,              !- Borehole Diameter {m}
-    0.7443,             !- Grout Thermal Conductivity {W/m-K}
-    3.90E+06,           !- Grout Thermal Heat Capacity {J/m3-K}
-    0.3895,             !- Pipe Thermal Conductivity {W/m-K}
-    1.77E+06,           !- Pipe Thermal Heat Capacity {J/m3-K}
-    0.03341,            !- Pipe Outer Diameter {m}
-    0.002984,           !- Pipe Thickness {m}
-    0.04913;            !- U-Tube Distance {m}
+GroundHeatExchanger:Vertical:Properties,
+  GHE-1 Props,                !- Name
+  1,                          !- Depth of Top of Borehole {m}
+  100,                        !- Borehole Length {m}
+  0.114,                      !- Borehole Diameter {m}
+  0.7443,                     !- Grout Thermal Conductivity {W/m-K}
+  3.90E+06,                   !- Grout Thermal Heat Capacity {J/m3-K}
+  0.3895,                     !- Pipe Thermal Conductivity {W/m-K}
+  1.77E+06,                   !- Pipe Thermal Heat Capacity {J/m3-K}
+  0.03341,                    !- Pipe Outer Diameter {m}
+  0.002984,                   !- Pipe Thickness {m}
+  0.04913;                    !- U-Tube Distance {m}
 
-  GroundHeatExchanger:Vertical:Array,
-    GHE-Array,          !- Name
-    GHE-1 Props,        !- GHE Properties
-    2,                  !- Number of Boreholes in X Direction
-    2,                  !- Number of Boreholes in Y Direction
-    5;                  !- Borehole Spacing {m}
+GroundHeatExchanger:Vertical:Array,
+  GHE-Array,                  !- Name
+  GHE-1 Props,                !- GHE Properties
+  2,                          !- Number of Boreholes in X Direction
+  2,                          !- Number of Boreholes in Y Direction
+  5;                          !- Borehole Spacing {m}
 \end{lstlisting}
 
-The second example uses the \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} object. The g-functions will be generated automatically by EnergyPlus.
+The second example uses the \hyperref[groundheatexchangerverticalsingle]{GroundHeatExchanger:Vertical:Single} object.
+The g-functions will be generated automatically by EnergyPlus.
 
 \begin{lstlisting}
-  GroundHeatExchanger:System,
-    Vertical GHE 1x4 Std,  !- Name
-    GLHE Inlet,         !- Inlet Node Name
-    GLHE Outlet,        !- Outlet Node Name
-    0.00100944,         !- Design Flow Rate {m3/s}
-    Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
-    KATemps,            !- Undisturbed Ground Temperature Model Name
-    2.5,                !- Ground Thermal Conductivity {W/m-K}
-    2.5E+06,            !- Ground Thermal Heat Capacity {J/m3-K}
-    ,                   !- Response Factors Object Name
-    UBHWTcalc,          !- g-Function Calculation Method
-    ,                   !- GHE Array Object Name
-    GHE-1,              !- GHE Borehole Definition 1
-    GHE-2,              !- GHE Borehole Definition 2
-    GHE-3,              !- GHE Borehole Definition 3
-    GHE-4;              !- GHE Borehole Definition 4
+GroundHeatExchanger:System,
+  Vertical GHE 1x4 Std,       !- Name
+  GLHE Inlet,                 !- Inlet Node Name
+  GLHE Outlet,                !- Outlet Node Name
+  0.00100944,                 !- Design Flow Rate {m3/s}
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
+  KATemps,                    !- Undisturbed Ground Temperature Model Name
+  2.5,                        !- Ground Thermal Conductivity {W/m-K}
+  2.5E+06,                    !- Ground Thermal Heat Capacity {J/m3-K}
+  ,                           !- Response Factors Object Name
+  UBHWTcalc,                  !- g-Function Calculation Method
+  ,                           !- GHE:Vertical:Sizing Object Type
+  ,                           !- GHE:Vertical:Sizing Object Name
+  ,                           !- GHE Array Object Name
+  GHE-1,                      !- GHE Borehole Definition 1
+  GHE-2,                      !- GHE Borehole Definition 2
+  GHE-3,                      !- GHE Borehole Definition 3
+  GHE-4;                      !- GHE Borehole Definition 4
 
-  GroundHeatExchanger:Vertical:Properties,
-    GHE-1 Props,        !- Name
-    1,                  !- Depth of Top of Borehole {m}
-    100,                !- Borehole Length {m}
-    0.114,              !- Borehole Diameter {m}
-    0.7443,             !- Grout Thermal Conductivity {W/m-K}
-    3.90E+06,           !- Grout Thermal Heat Capacity {J/m3-K}
-    0.3895,             !- Pipe Thermal Conductivity {W/m-K}
-    1.77E+06,           !- Pipe Thermal Heat Capacity {J/m3-K}
-    0.03341,            !- Pipe Outer Diameter {m}
-    0.002984,           !- Pipe Thickness {m}
-    0.04913;            !- U-Tube Distance {m}
+GroundHeatExchanger:Vertical:Properties,
+  GHE-1 Props,                !- Name
+  1,                          !- Depth of Top of Borehole {m}
+  100,                        !- Borehole Length {m}
+  0.114,                      !- Borehole Diameter {m}
+  0.7443,                     !- Grout Thermal Conductivity {W/m-K}
+  3.90E+06,                   !- Grout Thermal Heat Capacity {J/m3-K}
+  0.3895,                     !- Pipe Thermal Conductivity {W/m-K}
+  1.77E+06,                   !- Pipe Thermal Heat Capacity {J/m3-K}
+  0.03341,                    !- Pipe Outer Diameter {m}
+  0.002984,                   !- Pipe Thickness {m}
+  0.04913;                    !- U-Tube Distance {m}
 
-  GroundHeatExchanger:Vertical:Single,
-    GHE-1,              !- Name
-    GHE-1 Props,        !- GHE Properties
-    0,                  !- X Location {m}
-    0;                  !- Y Location {m}
+GroundHeatExchanger:Vertical:Single,
+  GHE-1,                      !- Name
+  GHE-1 Props,                !- GHE Properties
+  0,                          !- X Location {m}
+  0;                          !- Y Location {m}
 
-  GroundHeatExchanger:Vertical:Single,
-    GHE-2,              !- Name
-    GHE-1 Props,        !- GHE Properties
-    5,                  !- X Location {m}
-    0;                  !- Y Location {m}
+GroundHeatExchanger:Vertical:Single,
+  GHE-2,                      !- Name
+  GHE-1 Props,                !- GHE Properties
+  5,                          !- X Location {m}
+  0;                          !- Y Location {m}
 
-  GroundHeatExchanger:Vertical:Single,
-    GHE-3,              !- Name
-    GHE-1 Props,        !- GHE Properties
-    0,                  !- X Location {m}
-    5;                  !- Y Location {m}
+GroundHeatExchanger:Vertical:Single,
+  GHE-3,                      !- Name
+  GHE-1 Props,                !- GHE Properties
+  0,                          !- X Location {m}
+  5;                          !- Y Location {m}
 
-  GroundHeatExchanger:Vertical:Single,
-    GHE-4,              !- Name
-    GHE-1 Props,        !- GHE Properties
-    5,                  !- X Location {m}
-    5;                  !- Y Location {m}
+GroundHeatExchanger:Vertical:Single,
+  GHE-4,                      !- Name
+  GHE-1 Props,                !- GHE Properties
+  5,                          !- X Location {m}
+  5;                          !- Y Location {m}
 \end{lstlisting}
 
 The final example uses the ResponseFactors object to provide third-party g-functions.
 
 \begin{lstlisting}
-  GroundHeatExchanger:System,
-    Vertical GHE 1x4 Std,  !- Name
-    GLHE Inlet,         !- Inlet Node Name
-    GLHE Outlet,        !- Outlet Node Name
-    0.00100944,         !- Design Flow Rate {m3/s}
-    Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
-    KATemps,            !- Undisturbed Ground Temperature Model Name
-    2.5,                !- Ground Thermal Conductivity {W/m-K}
-    2.5E+06,            !- Ground Thermal Heat Capacity {J/m3-K}
-    GHE-1 g-functions;  !- Response Factors Object Name
+GroundHeatExchanger:System,
+  Vertical GHE 1x4 Std,       !- Name
+  GLHE Inlet,                 !- Inlet Node Name
+  GLHE Outlet,                !- Outlet Node Name
+  0.00100944,                 !- Design Flow Rate {m3/s}
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type
+  KATemps,                    !- Undisturbed Ground Temperature Model Name
+  2.5,                        !- Ground Thermal Conductivity {W/m-K}
+  2.5E+06,                    !- Ground Thermal Heat Capacity {J/m3-K}
+  GHE-1 g-functions;          !- Response Factors Object Name
 
-  GroundHeatExchanger:Vertical:Properties,
-    GHE-1 Props,        !- Name
-    1,                  !- Depth of Top of Borehole {m}
-    100,                !- Borehole Length {m}
-    0.114,              !- Borehole Diameter {m}
-    0.7443,             !- Grout Thermal Conductivity {W/m-K}
-    3.90E+06,           !- Grout Thermal Heat Capacity {J/m3-K}
-    0.3895,             !- Pipe Thermal Conductivity {W/m-K}
-    1.77E+06,           !- Pipe Thermal Heat Capacity {J/m3-K}
-    0.03341,            !- Pipe Outer Diameter {m}
-    0.002984,           !- Pipe Thickness {m}
-    0.04913;            !- U-Tube Distance {m}
+GroundHeatExchanger:Vertical:Properties,
+  GHE-1 Props,                !- Name
+  1,                          !- Depth of Top of Borehole {m}
+  100,                        !- Borehole Length {m}
+  0.114,                      !- Borehole Diameter {m}
+  0.7443,                     !- Grout Thermal Conductivity {W/m-K}
+  3.90E+06,                   !- Grout Thermal Heat Capacity {J/m3-K}
+  0.3895,                     !- Pipe Thermal Conductivity {W/m-K}
+  1.77E+06,                   !- Pipe Thermal Heat Capacity {J/m3-K}
+  0.03341,                    !- Pipe Outer Diameter {m}
+  0.002984,                   !- Pipe Thickness {m}
+  0.04913;                    !- U-Tube Distance {m}
 
-  GroundHeatExchanger:ResponseFactors,
-    GHE-1 g-functions,       !- Name
-    GHE-1 Props,             !- GHE Properties
-    4,                       !- Number of Boreholes
-    0.00043,                 !- G-Function Reference Ratio {dimensionless}
-    -15.585075,              !- G-Function Ln(T/Ts) Value 1
-    -2.672011,               !- G-Function G Value 1
-    -15.440481,              !- G-Function Ln(T/Ts) Value 2
-    -2.575897,               !- G-Function G Value 2
-    -15.295888,              !- G-Function Ln(T/Ts) Value 3
-    -2.476279,               !- G-Function G Value 3
-    -15.151295,              !- G-Function Ln(T/Ts) Value 4
-    -2.372609,               !- G-Function G Value 4
-    ...,
-    12.365217,               !- G-Function G Value 70
-    1.112000,                !- G-Function Ln(T/Ts) Value 71
-    12.469007,               !- G-Function G Value 71
-    1.335000,                !- G-Function Ln(T/Ts) Value 72
-    12.547123,               !- G-Function G Value 72
-    1.679000;                !- G-Function Ln(T/Ts) Value 73
+GroundHeatExchanger:ResponseFactors,
+  GHE-1 g-functions,          !- Name
+  GHE-1 Props,                !- GHE Properties
+  4,                          !- Number of Boreholes
+  0.00043,                    !- G-Function Reference Ratio {dimensionless}
+  -15.585075,                 !- G-Function Ln(T/Ts) Value 1
+  -2.672011,                  !- G-Function G Value 1
+  -15.440481,                 !- G-Function Ln(T/Ts) Value 2
+  -2.575897,                  !- G-Function G Value 2
+  -15.295888,                 !- G-Function Ln(T/Ts) Value 3
+  -2.476279,                  !- G-Function G Value 3
+  -15.151295,                 !- G-Function Ln(T/Ts) Value 4
+  -2.372609,                  !- G-Function G Value 4
+  ...,
+  12.365217,                  !- G-Function G Value 70
+  1.112000,                   !- G-Function Ln(T/Ts) Value 71
+  12.469007,                  !- G-Function G Value 71
+  1.335000,                   !- G-Function Ln(T/Ts) Value 72
+  12.547123,                  !- G-Function G Value 72
+  1.679000;                   !- G-Function Ln(T/Ts) Value 73
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-000}
@@ -3236,6 +3249,91 @@ This is the average temperature of the working fluid inside the heat exchanger.
 \paragraph{Ground Heat Exchanger Farfield Ground Temperature}
 
 This is the farfield temperature used by the object which is provided by the undisturbed ground temperature object. The temperature is the average of the 5 evenly spaced points between the top of the borehole and the bottom of the borehole.
+
+\subsection{GroundHeatExchanger:Vertical:Sizing:Rectangle}\label{groundheatexchangerverticalsizingrect}
+
+The ground loop heat exchanger can be designed and sized using the packaged GHEDesigner library.
+Currently the design is limited to rectangular borehole fields, with future enhancements expected to allow more flexible field design.
+To achieve the design, several design parameters are required, and are supplied in this object.
+HVAC sizing must also be enabled.
+
+\subsubsection{Inputs}
+
+\paragraph{Field: Name}
+
+This alpha field contains the identifying name for the rectangle ground heat exchanger sizing object.
+This name will be referenced in a GroundHeatExchanger:System object.
+
+\paragraph{Field: SizingPeriod:WeatherFileDays Name}
+
+The name of the SizingPeriod:WeatherFileDays object, used to define the design period.
+This object is required and must specify a period of 356 days.
+
+\paragraph{Field: Design Flow Rate Per Borehole}
+
+This is the design flow rate per borehole in m3/s.
+Used only for sizing the ground heat exchanger.
+
+\paragraph{Field: Available Borehole Field Length}
+
+This is the available borehole field length, in meters, as looking down from above.
+
+\paragraph{Field: Available Borehole Field Width}
+
+This is the available borehole field width, in meters, as looking down from above.
+
+\paragraph{Field: Maximum Number of Boreholes}
+
+This is the maximum number of boreholes available for the design.
+
+\paragraph{Field: Minimum Borehole Spacing}
+
+This is the minimum borehole-to-borehole spacing, in meters.
+
+\paragraph{Field: Maximum Borehole Spacing}
+
+This is the maximum borehole-to-borehole spacing, in meters.
+
+\paragraph{Field: Minimum Borehole Vertical Length}
+
+This is the minimum vertical height, or total borehole ``length'', to be used when designing the borehole field.
+
+\paragraph{Field: Maximum Borehole Vertical Length}
+
+This is the maximum vertical height, or total borehole ``length'', to be used when designing the borehole field.
+
+\paragraph{Field: Minimum Exiting Fluid Temperature for Sizing}
+
+This is the minimum allowable exiting fluid temperature for the borehole heat exchanger when designing the borehole field.
+
+\paragraph{Field: Maximum Exiting Fluid Temperature for Sizing}
+
+This is the maximum allowable exiting fluid temperature for the borehole heat exchanger when designing the borehole field.
+
+\subsubsection{Example Inputs}
+
+This is an example input object for the sizing parameters:
+
+\begin{lstlisting}
+GroundHeatExchanger:Vertical:Sizing:Rectangle,
+  GHE-1-Sizing,               !- Name
+  GHE Sizing Period,          !- SizingPeriod:WeatherFileDays Name
+  0.0005,                     !- Design Flow Rate Per Borehole
+  100.0,                      !- Available Borehole Field Length
+  100.0,                      !- Available Borehole Field Width
+  200.0,                      !- Maximum Number of Boreholes
+  3.0,                        !- Minimum Borehole Spacing
+  10.0,                       !- Maximum Borehole Spacing
+  60.0,                       !- Minimum Borehole Vertical Length
+  135.0,                      !- Maximum Borehole Vertical Length
+  5.0,                        !- Minimum Exiting Fluid Temperature for Sizing
+  35.0;                       !- Maximum Exiting Fluid Temperature for Sizing
+\end{lstlisting}
+
+\subsubsection{Outputs}
+
+This object does not have any specific output variables.
+However, by using the full design approach, there may be additional output files or sizing outputs available in the EIO.
 
 \subsection{GroundHeatExchanger:Vertical:Properties}\label{groundheatexchangerverticalproperties}
 
@@ -3290,18 +3388,18 @@ This numeric field contains the distance between the two legs of the U-tube in m
 An example object is shown below.
 
 \begin{lstlisting}
-  GroundHeatExchanger:Vertical:Properties,
-    GHE-1 Props,        !- Name
-    1,                  !- Depth of Top of Borehole {m}
-    100,                !- Borehole Length {m}
-    0.114,              !- Borehole Diameter {m}
-    0.7443,             !- Grout Thermal Conductivity {W/m-K}
-    3.90E+06,           !- Grout Thermal Heat Capacity {J/m3-K}
-    0.3895,             !- Pipe Thermal Conductivity {W/m-K}
-    1.77E+06,           !- Pipe Thermal Heat Capacity {J/m3-K}
-    0.03341,            !- Pipe Outer Diameter {m}
-    0.002984,           !- Pipe Thickness {m}
-    0.04913;            !- U-Tube Distance {m}
+GroundHeatExchanger:Vertical:Properties,
+  GHE-1 Props,                !- Name
+  1,                          !- Depth of Top of Borehole {m}
+  100,                        !- Borehole Length {m}
+  0.114,                      !- Borehole Diameter {m}
+  0.7443,                     !- Grout Thermal Conductivity {W/m-K}
+  3.90E+06,                   !- Grout Thermal Heat Capacity {J/m3-K}
+  0.3895,                     !- Pipe Thermal Conductivity {W/m-K}
+  1.77E+06,                   !- Pipe Thermal Heat Capacity {J/m3-K}
+  0.03341,                    !- Pipe Outer Diameter {m}
+  0.002984,                   !- Pipe Thickness {m}
+  0.04913;                    !- U-Tube Distance {m}
 \end{lstlisting}
 
 \subsection{GroundHeatExchanger:Vertical:Array}\label{groundheatexchangerverticalarray}
@@ -3331,12 +3429,12 @@ This numeric field indicates the center-to-center borehole spacing, in meters, w
 An example object is shown below.
 
 \begin{lstlisting}
-  GroundHeatExchanger:Vertical:Array,
-    GHE-Array,          !- Name
-    GHE-1 Props,        !- GHE Properties
-    2,                  !- Number of Boreholes in X Direction
-    2,                  !- Number of Boreholes in Y Direction
-    5;                  !- Borehole Spacing {m}
+GroundHeatExchanger:Vertical:Array,
+  GHE-Array,                  !- Name
+  GHE-1 Props,                !- GHE Properties
+  2,                          !- Number of Boreholes in X Direction
+  2,                          !- Number of Boreholes in Y Direction
+  5;                          !- Borehole Spacing {m}
 \end{lstlisting}
 
 \subsection{GroundHeatExchanger:Vertical:Single}\label{groundheatexchangerverticalsingle}
@@ -3362,11 +3460,11 @@ This numeric field indicates the x-location of this borehole.
 This numeric field indicates the y-location of this borehole.
 
 \begin{lstlisting}
-  GroundHeatExchanger:Vertical:Single,
-    GHE-1,              !- Name
-    GHE-1 Props,        !- GHE Properties
-    0,                  !- X Location {m}
-    0;                  !- Y Location {m}
+GroundHeatExchanger:Vertical:Single,
+  GHE-1,                      !- Name
+  GHE-1 Props,                !- GHE Properties
+  0,                          !- X Location {m}
+  0;                          !- Y Location {m}
 \end{lstlisting}
 
 \subsection{GroundHeatExchanger:ResponseFactors}\label{groundheatexchangerresponsefactors}
@@ -3409,26 +3507,26 @@ This object is extensible, so additional pairs of these last two fields can be a
 An example object is shown below.
 
 \begin{lstlisting}
-  GroundHeatExchanger:ResponseFactors,
-    GHE-1 g-functions,       !- Name
-    GHE-1 Props,             !- GHE Properties
-    4,                       !- Number of Boreholes
-    0.0005,                  !- G-Function Reference Ratio {dimensionless}
-    -15.585075,              !- G-Function Ln(T/Ts) Value 1
-    -2.672011,               !- G-Function G Value 1
-    -15.440481,              !- G-Function Ln(T/Ts) Value 2
-    -2.575897,               !- G-Function G Value 2
-    -15.295888,              !- G-Function Ln(T/Ts) Value 3
-    -2.476279,               !- G-Function G Value 3
-    -15.151295,              !- G-Function Ln(T/Ts) Value 4
-    -2.372609,               !- G-Function G Value 4
-    ...,
-    12.365217,               !- G-Function G Value 70
-    1.112000,                !- G-Function Ln(T/Ts) Value 71
-    12.469007,               !- G-Function G Value 71
-    1.335000,                !- G-Function Ln(T/Ts) Value 72
-    12.547123,               !- G-Function G Value 72
-    1.679000;                !- G-Function Ln(T/Ts) Value 73
+GroundHeatExchanger:ResponseFactors,
+  GHE-1 g-functions,          !- Name
+  GHE-1 Props,                !- GHE Properties
+  4,                          !- Number of Boreholes
+  0.0005,                     !- G-Function Reference Ratio {dimensionless}
+  -15.585075,                 !- G-Function Ln(T/Ts) Value 1
+  -2.672011,                  !- G-Function G Value 1
+  -15.440481,                 !- G-Function Ln(T/Ts) Value 2
+  -2.575897,                  !- G-Function G Value 2
+  -15.295888,                 !- G-Function Ln(T/Ts) Value 3
+  -2.476279,                  !- G-Function G Value 3
+  -15.151295,                 !- G-Function Ln(T/Ts) Value 4
+  -2.372609,                  !- G-Function G Value 4
+  ...,
+  12.365217,                  !- G-Function G Value 70
+  1.112000,                   !- G-Function Ln(T/Ts) Value 71
+  12.469007,                  !- G-Function G Value 71
+  1.335000,                   !- G-Function Ln(T/Ts) Value 72
+  12.547123,                  !- G-Function G Value 72
+  1.679000;                   !- G-Function Ln(T/Ts) Value 73
 \end{lstlisting}
 
 \subsection{GroundHeatExchanger:Slinky}\label{groundheatexchangerslinky}
@@ -3456,30 +3554,29 @@ Figure: Schematic of Slinky HX.
 An example GroundHeatExchanger:Slinky object is shown below.
 
 \begin{lstlisting}
-
 GroundHeatExchanger:Slinky,
-  Slinky GHX,       !- Name
-  GHE Inlet Node,   !- Inlet Node
-  GHE Outlet Node,  !- Outlet Node
-  0.0033,           !- Design Flow Rate [m3/s]
-  1.2,              !- Soil Thermal Conductivity [W/m-K]
-  3200,             !- Soil Density [kg/m3]
-  850,              !- Soil Specific Heat [J/kg-K]
-  1.8,              !- Pipe Thermal Conductivity [W/m-K]
-  920,              !- Pipe Density [kg/m3]
-  2200,             !- Pipe Specific Heat [J/kg-K]
-  0.02667,          !- Pipe Outside Diameter [m]
-  0.002413,         !- Pipe Wall Thickness [m]
-  Vertical,         !- Heat Exchanger Configuration (Vertical, Horizontal)
-  1,                !- Coil Diameter [m]
-  0.2,              !- Coil Pitch [m]
-  2.5,              !- Trench Depth [m]
-  40,               !- Trench Length [m]
-  15,               !- Number of Parallel Trenches
-  2,                !- Trench Spacing [m]
-  Site:GroundTemperature:Undisturbed:KusudaAchenbach, !- Type of Undisturbed Ground Temperature Object
-  KATemps,          !- Name of Undisturbed Ground Temperature Object
-  10;               !- Maximum length of simulation [years]
+  Slinky GHX,                 !- Name
+  GHE Inlet Node,             !- Inlet Node
+  GHE Outlet Node,            !- Outlet Node
+  0.0033,                     !- Design Flow Rate [m3/s]
+  1.2,                        !- Soil Thermal Conductivity [W/m-K]
+  3200,                       !- Soil Density [kg/m3]
+  850,                        !- Soil Specific Heat [J/kg-K]
+  1.8,                        !- Pipe Thermal Conductivity [W/m-K]
+  920,                        !- Pipe Density [kg/m3]
+  2200,                       !- Pipe Specific Heat [J/kg-K]
+  0.02667,                    !- Pipe Outside Diameter [m]
+  0.002413,                   !- Pipe Wall Thickness [m]
+  Vertical,                   !- Heat Exchanger Configuration (Vertical, Horizontal)
+  1,                          !- Coil Diameter [m]
+  0.2,                        !- Coil Pitch [m]
+  2.5,                        !- Trench Depth [m]
+  40,                         !- Trench Length [m]
+  15,                         !- Number of Parallel Trenches
+  2,                          !- Trench Spacing [m]
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Type of Undisturbed Ground Temperature Object
+  KATemps,                    !- Name of Undisturbed Ground Temperature Object
+  10;                         !- Maximum length of simulation [years]
 \end{lstlisting}
 
 \subsubsection{Inputs}\label{inputs-11-002}
@@ -3682,19 +3779,18 @@ This numeric field contains length \{m\} of each hydronic tubing circuit.
 An example of the IDF is shown below.
 
 \begin{lstlisting}
-
-  GroundHeatExchanger:Pond,
-      Pond 1,                  !- Name
-      Condenser Tower 1 Inlet Node,  !- Fluid Inlet Node Name
-      Condenser Tower 1 Outlet Node,  !- Fluid Outlet Node Name
-      2.0,                     !- Pond Depth {m}
-      1000.0,                  !- Pond Area {m2}
-      0.02,                    !- Hydronic Tubing Inside Diameter {m}
-      0.025,                   !- Hydronic Tubing Outside Diameter {m}
-      0.4,                     !- Hydronic Tubing Thermal Conductivity {W/m-K}
-      1.0,                     !- Ground Thermal Conductivity {W/m2-K}
-      10,                      !- Number of Tubing Circuits
-      50.0;                    !- Length of Each Tubing Circuit {m}
+GroundHeatExchanger:Pond,
+  Pond 1,                     !- Name
+  Condenser Tower 1 Inlet Node,  !- Fluid Inlet Node Name
+  Condenser Tower 1 Outlet Node,  !- Fluid Outlet Node Name
+  2.0,                        !- Pond Depth {m}
+  1000.0,                     !- Pond Area {m2}
+  0.02,                       !- Hydronic Tubing Inside Diameter {m}
+  0.025,                      !- Hydronic Tubing Outside Diameter {m}
+  0.4,                        !- Hydronic Tubing Thermal Conductivity {W/m-K}
+  1.0,                        !- Ground Thermal Conductivity {W/m2-K}
+  10,                         !- Number of Tubing Circuits
+  50.0;                       !- Length of Each Tubing Circuit {m}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12-000}
@@ -3795,18 +3891,17 @@ This alpha field expresses the lower surface exposure: Exposed or Ground.
 An example of this statement in an IDF is shown below:
 
 \begin{lstlisting}
-
-  GroundHeatExchanger:Surface,
-      SURFACE 1,               !- Name
-      Outside Surface Construction,  !- Construction Name
-      Condenser Tower 1 Inlet Node,  !- Fluid Inlet Node Name
-      Condenser Tower 1 Outlet Node,  !- Fluid Outlet Node Name
-      0.02,                    !- Hydronic Tubing Inside Diameter {m}
-      10.0,                    !- Number of Tubing Circuits
-      0.3,                     !- Hydronic Tube Spacing {m}
-      100.0,                   !- Surface Length {m}
-      100.0,                   !- Surface Width {m}
-      GROUND;                  !- Lower Surface Environment
+GroundHeatExchanger:Surface,
+  SURFACE 1,                  !- Name
+  Outside Surface Construction,  !- Construction Name
+  Condenser Tower 1 Inlet Node,  !- Fluid Inlet Node Name
+  Condenser Tower 1 Outlet Node,  !- Fluid Outlet Node Name
+  0.02,                       !- Hydronic Tubing Inside Diameter {m}
+  10.0,                       !- Number of Tubing Circuits
+  0.3,                        !- Hydronic Tube Spacing {m}
+  100.0,                      !- Surface Length {m}
+  100.0,                      !- Surface Width {m}
+  GROUND;                     !- Lower Surface Environment
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-13-000}
@@ -3967,29 +4062,28 @@ This numeric field specifies the ground cover effects used in the evapotranspira
 An example of this statement in an IDF is shown below:
 
 \begin{lstlisting}
-
 GroundHeatExchanger:HorizontalTrench,
-     My Pipe Circuit, !- Name
-     Plant Supply Intermediate Node, !- Inlet Node Name
-     Plant Supply Outlet Node, !- Outlet Node Name
-     0.004,       !- Design Flow Rate
-     75,          !- Trench Length in Pipe Axial Direction
-     2,           !- Number of Trenches
-     2.0,         !- Horizontal Spacing Between Pipes
-     0.016,       !- Pipe Inner Diameter
-     0.02667,     !- Pipe Outer Diameter
-     1.25,        !- Burial Depth
-     1.08,        !- Soil Thermal Conductivity
-     962,         !- Soil Density
-     2576,        !- Soil Specific Heat
-     0.3895,      !- Pipe Thermal Conductivity {W/m-K}
-     641,         !- Pipe Density {kg/m3}
-     2405,        !- Pipe Specific Heat {J/kg-K}
-     30,          !- Soil Moisture Content Volume Fraction {percent}
-     50,          !- Soil Moisture Content Volume Fraction at Saturation {percent}
-     Site:GroundTemperature:Undisturbed:KusudaAchenbach, !- Type of Undisturbed Ground Temperature Object
-     KATemps,     !- Name of Undisturbed Ground Temperature Object
-     0.408;       !- Evapotranspiration Ground Cover Parameter
+  My Pipe Circuit,            !- Name
+  Plant Supply Intermediate Node,  !- Inlet Node Name
+  Plant Supply Outlet Node,   !- Outlet Node Name
+  0.004,                      !- Design Flow Rate
+  75,                         !- Trench Length in Pipe Axial Direction
+  2,                          !- Number of Trenches
+  2.0,                        !- Horizontal Spacing Between Pipes
+  0.016,                      !- Pipe Inner Diameter
+  0.02667,                    !- Pipe Outer Diameter
+  1.25,                       !- Burial Depth
+  1.08,                       !- Soil Thermal Conductivity
+  962,                        !- Soil Density
+  2576,                       !- Soil Specific Heat
+  0.3895,                     !- Pipe Thermal Conductivity {W/m-K}
+  641,                        !- Pipe Density {kg/m3}
+  2405,                       !- Pipe Specific Heat {J/kg-K}
+  30,                         !- Soil Moisture Content Volume Fraction {percent}
+  50,                         !- Soil Moisture Content Volume Fraction at Saturation {percent}
+  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Type of Undisturbed Ground Temperature Object
+  KATemps,                    !- Name of Undisturbed Ground Temperature Object
+  0.408;                      !- Evapotranspiration Ground Cover Parameter
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-14-000}
@@ -4203,39 +4297,37 @@ This optional field can be used to provide supervisory control of the heat excha
 Some example IDF input objects follow.
 
 \begin{lstlisting}
+HeatExchanger:FluidToFluid,
+  CondenserLoop HX,           !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  CondenserLoop HX HX Inlet Node,  !- Loop Demand Side Inlet Node Name
+  CondenserLoop HX HX Outlet Node,  !- Loop Demand Side Outlet Node Name
+  autosize,                   !- Loop Demand Side Design Flow Rate
+  CondenserLoop Pump- HXNode, !- Loop Supply Side Inlet Node Name
+  CondenserLoop HX- ChillerNode,  !- Loop Supply Side Outlet Node Name
+  autosize,                   !- Loop Supply Side Design Flow Rate
+  CounterFlow,                !- Heat Exchange Model Type
+  autosize,                   !- Heat Exchanger U-Factor Times Area Value
+  CoolingDifferentialOnOff,   !- Control Type
+  ,                           !- Heat Exchanger Setpoint Node Name
+  2.0,                        !- Minimum Temperature Difference to Activate Heat Exchanger
+  FreeCooling;                !- Heat Transfer Metering End Use Type
 
-  HeatExchanger:FluidToFluid,
-      CondenserLoop HX,!- Name
-      ALWAYS_ON,     !- Availability Schedule Name
-      CondenserLoop HX HX Inlet Node, !- Loop Demand Side Inlet Node Name
-      CondenserLoop HX HX Outlet Node, !- Loop Demand Side Outlet Node Name
-      autosize,                     !- Loop Demand Side Design Flow Rate
-      CondenserLoop Pump- HXNode,   !- Loop Supply Side Inlet Node Name
-      CondenserLoop HX- ChillerNode,!- Loop Supply Side Outlet Node Name
-      autosize,                !- Loop Supply Side Design Flow Rate
-      CounterFlow,             !- Heat Exchange Model Type
-      autosize,                !- Heat Exchanger U-Factor Times Area Value
-      CoolingDifferentialOnOff,    !- Control Type
-      ,   !- Heat Exchanger Setpoint Node Name
-      2.0,         !- Minimum Temperature Difference to Activate Heat Exchanger
-      FreeCooling;             !- Heat Transfer Metering End Use Type
-
-
-  HeatExchanger:FluidToFluid,
-      SOURCE to TRANSFER HX , !- Name
-      AlwaysOnSchedule, !- Availability Schedule Name
-      SOURCE Demand HX Inlet Node , !- Loop Demand Side Inlet Node Name
-      SOURCE Demand HX Outlet Node , !- Loop Demand Side Outlet Node Name
-      0.003 , !- Loop Demand Side Design Flow Rate
-      TRANSFER HX Supply Inlet Node, !- Loop Supply Side Inlet Node Name
-      TRANSFER HX Supply Outlet Node, !- Loop Supply Side Outlet Node Name
-      0.003 , !- Loop Supply Side Design Flow Rate
-      CrossFlow, !- Heat Exchange Model Type
-      15000 , !- Heat Exchanger U-Factor Times Area Value
-      DualDeadbandSetpointModulated , !- Control Type
-      TRANSFER Supply Outlet Node, !- Heat Exchanger Setpoint Node Name
-      0.2 , !- Minimum Temperature Difference to Activate Heat Exchanger
-      LoopToLoop; !- Heat Transfer Metering End Use Type
+HeatExchanger:FluidToFluid,
+  SOURCE to TRANSFER HX,      !- Name
+  AlwaysOnSchedule,           !- Availability Schedule Name
+  SOURCE Demand HX Inlet Node,!- Loop Demand Side Inlet Node Name
+  SOURCE Demand HX Outlet Node,  !- Loop Demand Side Outlet Node Name
+  0.003,                      !- Loop Demand Side Design Flow Rate
+  TRANSFER HX Supply Inlet Node,  !- Loop Supply Side Inlet Node Name
+  TRANSFER HX Supply Outlet Node,  !- Loop Supply Side Outlet Node Name
+  0.003,                      !- Loop Supply Side Design Flow Rate
+  CrossFlow,                  !- Heat Exchange Model Type
+  15000,                      !- Heat Exchanger U-Factor Times Area Value
+  DualDeadbandSetpointModulated,  !- Control Type
+  TRANSFER Supply Outlet Node,!- Heat Exchanger Setpoint Node Name
+  0.2,                        !- Minimum Temperature Difference to Activate Heat Exchanger
+  LoopToLoop;                 !- Heat Transfer Metering End Use Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-15}

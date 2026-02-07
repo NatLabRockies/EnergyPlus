@@ -64,6 +64,16 @@ bool CsvParser::hasErrors()
     return !errors_.empty();
 }
 
+std::vector<std::pair<std::string, bool>> const &CsvParser::warnings()
+{
+    return warnings_;
+}
+
+bool CsvParser::hasWarnings()
+{
+    return !warnings_.empty();
+}
+
 json CsvParser::decode(std::string_view csv, char t_delimiter, int t_rows_to_skip)
 {
     if (csv.empty()) {
@@ -212,13 +222,32 @@ void CsvParser::parse_line(std::string_view csv, size_t &index, json &columns)
     size_t parsed_values = 0;
     const size_t num_columns = columns.size(); // Csv isn't empty, so we know it's at least 1
 
+    bool has_extra_columns = false;
+
     size_t this_cur_line_num = cur_line_num;
     size_t this_beginning_of_line_index = beginning_of_line_index;
+
+    auto getCurrentLine = [&]() {
+        size_t found_index = csv.find_first_of("\r\n", this_beginning_of_line_index);
+        std::string_view line;
+        if (found_index != std::string::npos) {
+            line = csv.substr(this_beginning_of_line_index, found_index - this_beginning_of_line_index);
+        }
+        return line;
+    };
 
     while (true) {
         token = look_ahead(csv, index);
         if (token == Token::LINE_END || token == Token::FILE_END) {
-            if (parsed_values != num_columns) {
+            if (has_extra_columns) {
+                warnings_.emplace_back(
+                    fmt::format("CsvParser - Line {} - Expected {} columns, got {}. Ignored extra columns. Error in following line.",
+                                this_cur_line_num,
+                                num_columns,
+                                parsed_values),
+                    false);
+                warnings_.emplace_back(getCurrentLine(), true);
+            } else if (parsed_values != num_columns) {
 
                 size_t found_index = csv.find_first_of("\r\n", this_beginning_of_line_index);
                 std::string line;
@@ -250,9 +279,33 @@ void CsvParser::parse_line(std::string_view csv, size_t &index, json &columns)
             return;
         } else if (token == Token::DELIMITER) {
             next_token(csv, index);
+            token = look_ahead(csv, index);
+            if (token == Token::DELIMITER) {
+                // Two delimiters in a row means a blank value
+                // This is not yet an error, in case the user is not using this column... It will crash later if they do try to cast it to a number
+                size_t const next_col = column_num + 1;
+                if (next_col < num_columns) {
+                    // Push a nan for blank value
+                    columns.at(next_col).push_back(json::value_t::null);
+                    warnings_.emplace_back(fmt::format("CsvParser - Line {} Column {} - Blank value found, setting to null. Error in following line.",
+                                                       this_cur_line_num,
+                                                       next_col + 1),
+                                           false);
+                    warnings_.emplace_back(getCurrentLine(), true);
+                } else {
+                    has_extra_columns = true;
+                }
+                ++parsed_values;
+            }
             ++column_num;
         } else {
-            columns.at(column_num).push_back(parse_value(csv, index));
+            if (column_num < num_columns) {
+                columns.at(column_num).push_back(parse_value(csv, index));
+            } else {
+                // Just parse and ignore the value
+                parse_value(csv, index);
+                has_extra_columns = true;
+            }
             ++parsed_values;
         }
     }

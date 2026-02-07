@@ -2719,7 +2719,7 @@
     InteriorLightingHE,      !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    1.05216214401829,        !- Watts per Zone Floor Area {W/m2}
+    1.05216214401829,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.6,                     !- Fraction Radiant
@@ -2732,7 +2732,7 @@
     InteriorLightingHE,      !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    0.478467682251396,       !- Watts per Zone Floor Area {W/m2}
+    0.478467682251396,       !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.6,                     !- Fraction Radiant
@@ -2747,7 +2747,7 @@
     DishWasher,              !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     65.698787492023,         !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.15,                    !- Fraction Latent
     0.6,                     !- Fraction Radiant
@@ -2760,7 +2760,7 @@
     Refrigerator,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     91.0575745202123,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     1,                       !- Fraction Radiant
@@ -2773,7 +2773,7 @@
     ClothesWasher,           !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     28.4784377542718,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.8,                     !- Fraction Radiant
@@ -2786,7 +2786,7 @@
     ClothesDryer,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     213.064557285022,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.05,                    !- Fraction Latent
     0.15,                    !- Fraction Radiant
@@ -2799,7 +2799,7 @@
     CookingRange,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     248.154224774405,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.3,                     !- Fraction Latent
     0.4,                     !- Fraction Radiant
@@ -2812,7 +2812,7 @@
     InteriorLighting,        !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     1,                       !- Fraction Radiant
@@ -2825,7 +2825,7 @@
     MiscPlugLoad,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     567.464237516869,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.06,                    !- Fraction Latent
     0.69,                    !- Fraction Radiant
@@ -2838,7 +2838,7 @@
     MiscPlugLoad,            !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    1.54356736989469,        !- Watts per Zone Floor Area {W/m2}
+    1.54356736989469,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0624390461422629,      !- Fraction Latent
     0.41190936353998,        !- Fraction Radiant
@@ -2853,7 +2853,7 @@
     always_avail,            !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type
@@ -3472,7 +3472,14 @@
     ,                        !- Account for Dedicated Outdoor Air System
     ,                        !- Dedicated Outdoor Air System Control Strategy
     ,                        !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    ;                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:SYSTEM ===========
 
@@ -3686,15 +3693,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     4.06853019625951,        !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Cooling Coil Air Inlet Node_unit1,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node_unit1,  !- Air Outlet Node Name
     HPACCoolCapFT,           !- Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Total Cooling Capacity Function of Flow Fraction Curve Name
     HPACCOOLEIRFT,           !- Energy Input Ratio Function of Temperature Curve Name
     HPACCOOLEIRFFF,          !- Energy Input Ratio Function of Flow Fraction Curve Name
-    HPACCOOLPLFFPLR;         !- Part Load Fraction Correlation Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 !-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:ELECTRIC ===========
 
@@ -3714,8 +3724,8 @@
     autosize,                !- Gross Rated Heating Capacity {W}
     3.69308080013886,        !- Gross Rated Heating COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Heating Coil Air Inlet Node_unit1,  !- Air Inlet Node Name
     Supp Heating Coil Air Inlet Node_unit1,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -3731,7 +3741,14 @@
     ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ReverseCycle,            !- Defrost Strategy
-    OnDemand;                !- Defrost Control
+    OnDemand,                !- Defrost Control
+    ,                        !- Defrost Time Period Fraction
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 !-   ===========  ALL OBJECTS IN CLASS: COIL:WATERHEATING:AIRTOWATERHEATPUMP:WRAPPED ===========
 

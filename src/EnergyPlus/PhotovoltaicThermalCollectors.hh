@@ -107,7 +107,7 @@ namespace PhotovoltaicThermalCollectors {
         std::string Name;
         std::string OSCMName;                  // OtherSideConditionsModel
         int OSCMPtr = 0;                       // OtherSideConditionsModel index
-        Sched::Schedule *availSched = nullptr; // Availablity schedule
+        Sched::Schedule *availSched = nullptr; // Availability schedule
         Real64 PVEffGapWidth = 0.0;            // Effective Gap Plenum Behind PV modules (m)
         Real64 PVCellTransAbsProduct = 0.0;    // PV cell Transmittance-Absorptance prodiuct
         Real64 BackMatTranAbsProduct = 0.0;    // Backing Material Normal Transmittance-Absorptance Product

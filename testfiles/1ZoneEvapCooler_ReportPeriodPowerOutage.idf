@@ -342,12 +342,12 @@
 
   People,
     Main Zone People 1,      !- Name
-    Main Zone,               !- Zone or ZoneList Name
+    Main Zone,               !- Zone or ZoneList or Space or SpaceList Name
     BLDG_OCC_SCH,            !- Number of People Schedule Name
     People,                  !- Number of People Calculation Method
     1,                       !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000,                  !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -368,17 +368,17 @@
     ,                        !- Thermal Comfort Model 6 Type
     ,                        !- Thermal Comfort Model 7 Type
     ,                        !- Ankle Level Air Velocity Schedule Name
-    10.5,                    !- Cold Stress Temperature Threshold [C]
-    30;                      !- Heat Stress Temperature Threshold [C]
+    10.5,                    !- Cold Stress Temperature Threshold {C}
+    30;                      !- Heat Stress Temperature Threshold {C}
 
   ZoneInfiltration:DesignFlowRate,
     Main Zone Infiltration,  !- Name
-    Main Zone,               !- Zone or ZoneList Name
+    Main Zone,               !- Zone or ZoneList or Space or SpaceList Name
     System Availability Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.02,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -480,11 +480,11 @@
   AvailabilityManagerAssignmentList,
     Evap Cooler Availability List,  !- Name
     AvailabilityManager:Scheduled,  !- Availability Manager 1 Object Type
-    availabilityReportPeriodOff;   !- Availability Manager 1 Name
+    availabilityReportPeriodOff;  !- Availability Manager 1 Name
 
   AvailabilityManager:Scheduled,
     availabilityReportPeriodOff,  !- Name
-    ReportPeriodOff;              !- Schedule Name
+    ReportPeriodOff;         !- Schedule Name
 
   AvailabilityManager:LowTemperatureTurnOff,
     Low Temperature Turn Off Availability Manager,  !- Name
@@ -561,7 +561,7 @@
 
   Fan:ConstantVolume,
     Supply Fan,              !- Name
-    ReportPeriodOff,  !- Availability Schedule Name
+    ReportPeriodOff,         !- Availability Schedule Name
     0.7,                     !- Fan Total Efficiency
     600.0,                   !- Pressure Rise {Pa}
     2.0,                     !- Maximum Flow Rate {m3/s}
@@ -572,7 +572,7 @@
 
   EvaporativeCooler:Direct:CelDekPad,
     Evaporative Cooler,      !- Name
-    ReportPeriodOff,  !- Availability Schedule Name
+    ReportPeriodOff,         !- Availability Schedule Name
     0.6,                     !- Direct Pad Area {m2}
     0.2,                     !- Direct Pad Depth {m}
     225,                     !- Recirculating Water Pump Power Consumption {W}
@@ -628,7 +628,7 @@
 
   AirTerminal:SingleDuct:ConstantVolume:NoReheat,
     Main Zone Direct Air,    !- Name
-    ReportPeriodOff,  !- Availability Schedule Name
+    ReportPeriodOff,         !- Availability Schedule Name
     Main Zone Inlet Node ATInlet,  !- Air Inlet Node Name
     Main Zone Inlet Node,    !- Air Outlet Node Name
     1.5,                     !- Maximum Air Flow Rate {m3/s}
@@ -646,7 +646,7 @@
 
   ZoneHVAC:Baseboard:Convective:Electric,
     Main Zone Baseboard,     !- Name
-    ReportPeriodOff,  !- Availability Schedule Name
+    ReportPeriodOff,         !- Availability Schedule Name
     HeatingDesignCapacity,   !- Heating Design Capacity Method
     8000,                    !- Heating Design Capacity {W}
     ,                        !- Heating Design Capacity Per Floor Area {W/m2}
@@ -665,21 +665,21 @@
     Fraction,                !- Schedule Type Limits Name
     Through: 7/24,           !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00,1.0,        !- Field 6
-    Through: 7/25,           !- Field 1
-    For: AllDays,            !- Field 2
-    Until: 6:00,1.0,         !- Field 3
-    Until: 24:00,0.0,        !- Field 3
-    Through: 7/26,           !- Field 4
-    For: AllDays,            !- Field 2
-    Until: 24:00,0.0,        !- Field 3
-    Through: 7/27,           !- Field 4
-    For: AllDays,            !- Field 5
-    Until: 18:00,0.0,        !- Field 6
-    Until: 24:00,1.0,        !- Field 6
-    Through: 12/31,          !- Field 7
-    For: AllDays,            !- Field 8
-    Until: 24:00,0.0;        !- Field 9
+    Until: 24:00,1.0,        !- Field 3
+    Through: 7/25,           !- Field 5
+    For: AllDays,            !- Field 6
+    Until: 6:00,1.0,         !- Field 7
+    Until: 24:00,0.0,        !- Field 9
+    Through: 7/26,           !- Field 11
+    For: AllDays,            !- Field 12
+    Until: 24:00,0.0,        !- Field 13
+    Through: 7/27,           !- Field 15
+    For: AllDays,            !- Field 16
+    Until: 18:00,0.0,        !- Field 17
+    Until: 24:00,1.0,        !- Field 19
+    Through: 12/31,          !- Field 21
+    For: AllDays,            !- Field 22
+    Until: 24:00,0.0;        !- Field 23
 
   Schedule:Compact,
     Zone Control Type Sched, !- Name
@@ -736,13 +736,14 @@
     AllSummary;              !- Report 1 Name
 
   Output:Table:ReportPeriod,
-   ThermalResilienceReportTimeSummer,  !- field Name,
-   ThermalResilienceSummary,     !- field Report Name,
-   ,                             !- Begin Year
-   7,                            !- Begin Month
-   25,                           !- Begin Day of Month
-   8,                            !- Begin Hour of Day
-   ,                             !- End Year
-   7,                            !- End Month
-   27,                           !- End Day of Month
-   18;                           !- End Hour of Day
+    ThermalResilienceReportTimeSummer,  !- Name
+    ThermalResilienceSummary,!- Report Name
+    ,                        !- Begin Year
+    7,                       !- Begin Month
+    25,                      !- Begin Day of Month
+    8,                       !- Begin Hour of Day
+    ,                        !- End Year
+    7,                       !- End Month
+    27,                      !- End Day of Month
+    18;                      !- End Hour of Day
+

@@ -141,7 +141,7 @@ namespace DataAirLoop {
         bool HeatRecoveryResimFlag = true;            // Used to trigger new air loop sim when HX is used in OA system
         bool HeatRecoveryResimFlag2 = false;          // Used to trigger new air loop sim when HX is used in OA system
         bool CheckHeatRecoveryBypassStatus = false;   // determines when heat recovery bypass is set
-        bool EconomizerFlowLocked = false;            // locks economizer flow for custon ERV operation
+        bool EconomizerFlowLocked = false;            // locks economizer flow for custom ERV operation
         bool HighHumCtrlActive = false;               // if true high humidity control is active
         bool EconoLockout = false;                    // if true the economizer will be locked out (OA flow set to minimum)
         bool LoopFlowRateSet = false;                 // if true then the air loop flow rate should be set using ReqSupplyFrac

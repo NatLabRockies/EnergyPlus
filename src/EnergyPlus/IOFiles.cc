@@ -456,6 +456,9 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             { // "sqlite"
                 sqlite = boolean_choice(find_input(fields, "output_sqlite"));
             }
+            { // "psz"
+                psz = boolean_choice(find_input(fields, "output_plant_component_sizing"));
+            }
         }
     }
 

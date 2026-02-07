@@ -507,7 +507,7 @@
     TU1 VRF Fan Outlet Node, !- Air Outlet Node Name
     0.595,                   !- Design Maximum Air Flow Rate {m3/s}
     Continuous,              !- Speed Control Method
-            0.69748,         !- Electric Power Minimum Flow Rate Fraction
+    0.69748,                 !- Electric Power Minimum Flow Rate Fraction
     400,                     !- Design Pressure Rise {Pa}
     0.9,                     !- Motor Efficiency
     1,                       !- Motor In Air Stream Fraction
@@ -6175,7 +6175,6 @@
 !   3,                       !- Zone Equipment 2 Heating or No-Load Sequence
 !   ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
 !   ,                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
-
 !- DHW pipe network...
 
   Material,

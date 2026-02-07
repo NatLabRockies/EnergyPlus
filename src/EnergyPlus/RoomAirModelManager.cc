@@ -813,7 +813,7 @@ namespace RoomAir {
         //     Get Mundt model controls for all zones at once
 
         // METHODOLOGY EMPLOYED:
-        //     Use input processer to get input from idf file
+        //     Use input processor to get input from idf file
 
         // Using/Aliasing
         constexpr std::string_view routineName = "GetMundtData";
@@ -1519,7 +1519,7 @@ namespace RoomAir {
             if (mod((NumAlphas + NumNumbers - 1), 3) != 0) {
                 ShowSevereError(state, format("GetRoomAirflowNetworkData: For {}: {}", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
-                    state, format("Extensible field set are not evenly divisable by 3. Number of data entries = {}", NumAlphas + NumNumbers - 1));
+                    state, format("Extensible field set are not evenly divisible by 3. Number of data entries = {}", NumAlphas + NumNumbers - 1));
                 ErrorsFound = true;
                 break;
             }
@@ -1618,7 +1618,7 @@ namespace RoomAir {
             if (mod((NumAlphas + NumNumbers - 1), 4) != 0) {
                 ShowSevereError(state, format("GetRoomAirflowNetworkData: For {}: {}", cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  format("Extensible field set are not evenly divisable by 4. Number of data entries = {}",
+                                  format("Extensible field set are not evenly divisible by 4. Number of data entries = {}",
                                          fmt::to_string(NumAlphas + NumNumbers - 1)));
                 ErrorsFound = true;
                 break;
@@ -2909,82 +2909,82 @@ namespace RoomAir {
             // For AirTerminals, find matching return node later
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalDualDuctConstantVolume: { // AirTerminal : DualDuct : ConstantVolume
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalDualDuctVAV: { // AirTerminal : DualDuct : VAV
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctConstantVolumeReheat: { // AirTerminal : SingleDuct : ConstantVolume : Reheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctConstantVolumeNoReheat: { // AirTerminal : SingleDuct :
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(4);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctVAVReheat: { // AirTerminal : SingleDuct : VAV : Reheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctVAVNoReheat: { // AirTerminal : SingleDuct : VAV : NoReheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctSeriesPIUReheat: { // AirTerminal : SingleDuct : SeriesPIU : Reheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctParallelPIUReheat: { // AirTerminal : SingleDuct : ParallelPIU : Reheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctCAVFourPipeInduction: { // AirTerminal : SingleDuct :
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // ConstantVolume : FourPipeInduction
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctVAVReheatVariableSpeedFan: { // AirTerminal : SingleDuct : VAV
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // : Reheat : VariableSpeedFan
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctVAVHeatAndCoolReheat: { // AirTerminal : SingleDuct : VAV :
                                                                                             // HeatAndCool : Reheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctVAVHeatAndCoolNoReheat: { // AirTerminal : SingleDuct : VAV :
                                                                                               // HeatAndCool : NoReheat
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(1);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalSingleDuctConstantVolumeCooledBeam: { // AirTerminal : SingleDuct :
                                                                                                 // ConstantVolume : CooledBeam
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(5);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirTerminalDualDuctVAVOutdoorAir: { // AirTerminal : DualDuct : VAV : OutdoorAir
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(3);
             // ReturnNodeName = "";
         } break;
         case DataZoneEquipment::ZoneEquipType::AirLoopHVACReturnAir: { // AirLoopHVACReturnAir
-            // Air teminal components are handled later
+            // Air terminal components are handled later
             // SupplyNodeName = Alphas(4);                                //
             // ReturnNodeName = "";                                       //
         } break;

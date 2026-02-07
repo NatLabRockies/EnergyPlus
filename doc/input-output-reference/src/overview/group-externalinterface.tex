@@ -15,9 +15,8 @@ The name of the external interface. The only valid entries are \textbf{PtolemySe
 An example IDF object is:
 
 \begin{lstlisting}
-
-ExternalInterface,                     !- Object to activate the external interface
-  PtolemyServer;                           !- Name of external interface
+ExternalInterface,            !- Object to activate the external interface
+  PtolemyServer;              !- Name of external interface
 \end{lstlisting}
 
 \subsection{Building Controls Virtual Test Bed (BCVTB)}\label{building-controls-virtual-test-bed-bcvtb}
@@ -47,11 +46,10 @@ This field contains the schedule value that is used during the warm-up period an
 ! During warm-up and system-sizing, it is fixed at 24 degC.
 
 \begin{lstlisting}
-
 ExternalInterface:Schedule,
-  TSetCoo,                                 !- Name
-  Temperature,                         !- ScheduleType
-  24;                                           !- Initial value, used during warm-up
+  TSetCoo,                    !- Name
+  Temperature,                !- ScheduleType
+  24;                         !- Initial value, used during warm-up
 \end{lstlisting}
 
 ! Heating schedule. This schedule is set directly by the external interface.
@@ -59,11 +57,10 @@ ExternalInterface:Schedule,
 ! During warm-up and system-sizing, it is fixed at 20 degC.
 
 \begin{lstlisting}
-
 ExternalInterface:Schedule,
-  TSetHea,                                 !- Name
-  Temperature,                         !- ScheduleType
-  20;                                           !- Initial value, used during warm-up
+  TSetHea,                    !- Name
+  Temperature,                !- ScheduleType
+  20;                         !- Initial value, used during warm-up
 \end{lstlisting}
 
 \subsection{ExternalInterface:Actuator}\label{externalinterfaceactuator}
@@ -93,13 +90,12 @@ This field defines the type of control to be done on the specific entity being c
 This field contains the initial value. If a value is specified, then this value is used during the warm-up period and the system sizing. If no value is specified, then the actuated component will only be updated once the time stepping starts, i.e., after the warm-up and the system-sizing. This allows, for example, to schedule a setpoint with a \hyperref[schedulecompact]{Schedule:Compact} during warm-up and system-sizing, and then overwrite the value of this schedule during each zone time step based on a feedback control loop that is implemented in the BCVTB.
 
 \begin{lstlisting}
-
 ExternalInterface:Actuator,
-  Zn001_Wall001_Win001_Shading_Deploy_Status,   !- Name
+  Zn001_Wall001_Win001_Shading_Deploy_Status,  !- Name
   Zn001:Wall001:Win001,       !- Actuated Component Unique Name
-  Window Shading Control,   !- Actuated Component Type
-  Control Status,                   !- Actuated Component Control Type
-  ;                                             ! initial value
+  Window Shading Control,     !- Actuated Component Type
+  Control Status,             !- Actuated Component Control Type
+  ;                           !- initial value
 \end{lstlisting}
 
 \subsection{ExternalInterface:Variable}\label{externalinterfacevariable}
@@ -117,10 +113,9 @@ This field becomes the global Erl variable name that can be referenced in the En
 This field contains the initial value that is used during the warm-up period and during the system sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:Variable,
-  yShade,                                   !- Name of Erl variable
-  1;                                             !- Initial value
+  yShade,                     !- Name of Erl variable
+  1;                          !- Initial value
 \end{lstlisting}
 
 \subsection{Functional Mock-up Unit (FMU) Import}\label{functional-mock-up-unit-fmu-import}
@@ -146,11 +141,10 @@ This field contains the communication timeout value in milli-seconds to allow in
 This field contains the loggingOn value to enable or disable debug in FMU. If loggingOn = 1, debug logging is enabled. If loggingOn = 0, debug logging is disabled.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitImport,
-  MoistAir.fmu,                       !- FMU File Name
-  15,                                           !- FMU Timeout
-  0;                                             !- FMU LoggingOn
+  MoistAir.fmu,               !- FMU File Name
+  15,                         !- FMU Timeout
+  0;                          !- FMU LoggingOn
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitImport:From:Variable}\label{externalinterfacefunctionalmockupunitimportfromvariable}
@@ -180,37 +174,33 @@ This field contains the EnergyPlus instance name of the FMU. See External Interf
 This field contains the name of the variable in the FMU that will be mapped to the corresponding variable in EnergyPlus.
 
 \begin{lstlisting}
+ExternalInterface:FunctionalMockupUnitImport:From:Variable,
+  Environment,                !- EnergyPlus Key Value
+  Site Outdoor Air Drybulb Temperature,  !- EnergyPlus Variable Name
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  TDryBul;                    !- FMU Variable Name
 
 ExternalInterface:FunctionalMockupUnitImport:From:Variable,
-  Environment,                         !- EnergyPlus Key Value
-  Site Outdoor Air Drybulb Temperature,       !- EnergyPlus Variable Name
-  MoistAir.fmu,                       !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  TDryBul;                                 !- FMU Variable Name
+  ZONE ONE,                   !- EnergyPlus Key Value
+  Zone Mean Air Temperature,  !- EnergyPlus Variable Name
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  TRooMea;                    !- FMU Variable Name
 
+ExternalInterface:FunctionalMockupUnitImport:From:Variable,
+  Environment,                !- EnergyPlus Key Value
+  Site Outdoor Air Relative Humidity,  !- EnergyPlus Variable Name
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  outRelHum;                  !- FMU Variable Name
 
-  ExternalInterface:FunctionalMockupUnitImport:From:Variable,
-  ZONE ONE,                               !- EnergyPlus Key Value
-  Zone Mean Air Temperature, !- EnergyPlus Variable Name
-  MoistAir.fmu,                       !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  TRooMea;                                 !- FMU Variable Name
-
-
-  ExternalInterface:FunctionalMockupUnitImport:From:Variable,
-  Environment,                         !- EnergyPlus Key Value
-  Site Outdoor Air Relative Humidity,   !- EnergyPlus Variable Name
-  MoistAir.fmu,                       !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  outRelHum;                             !- FMU Variable Name
-
-
-  ExternalInterface:FunctionalMockupUnitImport:From:Variable,
-  ZONE ONE,                               !- EnergyPlus Key Value
-  Zone Air Relative Humidity,   !- EnergyPlus Variable Name
-  MoistAir.fmu,                       !-FMU File Name
-  Model1,                                   !- FMU Instance Name
-  rooRelHum;                             !- FMU Variable Name
+ExternalInterface:FunctionalMockupUnitImport:From:Variable,
+  ZONE ONE,                   !- EnergyPlus Key Value
+  Zone Air Relative Humidity, !- EnergyPlus Variable Name
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  rooRelHum;                  !- FMU Variable Name
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitImport:To:Schedule}\label{externalinterfacefunctionalmockupunitimporttoschedule}
@@ -244,23 +234,21 @@ This field contains the name of the variable in the FMU that will be mapped to t
 This field contains the schedule value that is used during the system sizing.
 
 \begin{lstlisting}
+ExternalInterface:FunctionalMockupUnitImport:To:Schedule,
+  FMU_OthEquSen_ZoneOne,      !- EnergyPlus Variable Name
+  Any Number,                 !- Schedule Type Limits Names
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  QSensible,                  !- FMU Variable Name
+  0;                          !- Initial Value
 
 ExternalInterface:FunctionalMockupUnitImport:To:Schedule,
-  FMU_OthEquSen_ZoneOne,     !- EnergyPlus Variable Name
-  Any Number,                           !- Schedule Type Limits Names
-  MoistAir.fmu,                       !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  QSensible,                             !- FMU Variable Name
-  0;                                             !- Initial Value
-
-
-  ExternalInterface:FunctionalMockupUnitImport:To:Schedule,
-  FMU_OthEquLat_ZoneOne,     !- EnergyPlus Variable Name
-  Any Number,                           !- Schedule Type Limits Names
-  MoistAir.fmu,                       !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  QLatent,                                 !- FMU Variable Name
-  0;                                             !- Initial Value
+  FMU_OthEquLat_ZoneOne,      !- EnergyPlus Variable Name
+  Any Number,                 !- Schedule Type Limits Names
+  MoistAir.fmu,               !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  QLatent,                    !- FMU Variable Name
+  0;                          !- Initial Value
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitImport:To:Actuator}\label{externalinterfacefunctionalmockupunitimporttoactuator}
@@ -302,16 +290,15 @@ This field contains the name of the variable in the FMU that will be mapped to t
 This field contains the value that is used during the system sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitImport:To:Actuator,
-  Zn001_Wall001_Win001_Shading_Deploy_Status,   !- EnergyPlus Variable Name
-  Zn001:Wall001:Win001,                                 !- Actuated Component Unique Name
-  Window Shading Control,                                   !- Actuated Component Type
-  Control Status,                                             !- Actuated Component Control Type
-  ShadingController.fmu,                                     !- FMU File Name
-  Model1,                                                                   !- FMU Instance Name
-  yShade,                                                                   !- FMU Variable Name
-  6;                                                                             !- Initial Value
+  Zn001_Wall001_Win001_Shading_Deploy_Status,  !- EnergyPlus Variable Name
+  Zn001:Wall001:Win001,       !- Actuated Component Unique Name
+  Window Shading Control,     !- Actuated Component Type
+  Control Status,             !- Actuated Component Control Type
+  ShadingController.fmu,      !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  yShade,                     !- FMU Variable Name
+  6;                          !- Initial Value
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitImport:To:Variable}\label{externalinterfacefunctionalmockupunitimporttovariable}
@@ -341,13 +328,12 @@ This field contains the name of the variable in the FMU that will be mapped to t
 This field contains the initial value that is used during the system sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitImport:To:Variable,
-  Shade_Signal,                       !- EnergyPlus Variable Name
-  ShadingController.fmu,     !- FMU File Name
-  Model1,                                   !- FMU Instance Name
-  yShade,                                   !- FMU Variable Name
-  1;                                             !- Initial Value
+  Shade_Signal,               !- EnergyPlus Variable Name
+  ShadingController.fmu,      !- FMU File Name
+  Model1,                     !- FMU Instance Name
+  yShade,                     !- FMU Variable Name
+  1;                          !- Initial Value
 \end{lstlisting}
 
 \subsection{Functional Mock-up Unit (FMU) Export}\label{functional-mock-up-unit-fmu-export}
@@ -373,26 +359,25 @@ This field contains the Variable Name as defined in the InputOutput Reference. F
 This field contains the name of the variable in the model description file of the FMU that will be mapped to the corresponding variable in EnergyPlus.
 
 \begin{lstlisting}
+ExternalInterface:FunctionalMockupUnitExport:From:Variable,
+  Environment,                !- EnergyPlus Key Value
+  Site Outdoor Air Drybulb Temperature,  !- EnergyPlus Variable Name
+  TDryBul;                    !- FMU Variable Name
+
+ExternalInterface: FunctionalMockupUnitExport:From:Variable,
+  ZONE ONE,                   !- EnergyPlus Key Value
+  Zone Mean Air Temperature,  !- EnergyPlus Variable Name
+  TRooMea;                    !- FMU Variable Name
+
+ExternalInterface: FunctionalMockupUnitExport:From:Variable,
+  Environment,                !- EnergyPlus Key Value
+  Site Outdoor Air Relative Humidity,  !- EnergyPlus Variable Name
+  outRelHum;                  !- FMU Variable Name
 
 ExternalInterface:FunctionalMockupUnitExport:From:Variable,
-  Environment,                         !- EnergyPlus Key Value
-  Site Outdoor Air Drybulb Temperature,   !- EnergyPlus Variable Name
-  TDryBul;                                 !- FMU Variable Name
-
-  ExternalInterface: FunctionalMockupUnitExport:From:Variable,
-  ZONE ONE,                                   !- EnergyPlus Key Value
-  Zone Mean Air Temperature, !- EnergyPlus Variable Name
-  TRooMea;                                     !- FMU Variable Name
-
-  ExternalInterface: FunctionalMockupUnitExport:From:Variable,
-  Environment,                               !- EnergyPlus Key Value
-  Site Outdoor Air Relative Humidity,   !- EnergyPlus Variable Name
-  outRelHum;                                   !- FMU Variable Name
-
-  ExternalInterface:FunctionalMockupUnitExport:From:Variable,
-  ZONE ONE,                                       !- EnergyPlus Key Value
-  Zone Air Relative Humidity,   !- EnergyPlus Variable Name
-  rooRelHum;                                     !- FMU Variable Name
+  ZONE ONE,                   !- EnergyPlus Key Value
+  Zone Air Relative Humidity, !- EnergyPlus Variable Name
+  rooRelHum;                  !- FMU Variable Name
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitExport:To:Schedule}\label{externalinterfacefunctionalmockupunitexporttoschedule}
@@ -418,12 +403,11 @@ This field contains the name of the variable in the model description file of th
 This field contains the schedule value that is used during the warm-up period and during the system sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
-  FMU_OthEquSen_ZoneOne,     !- EnergyPlus Variable Name
-  Any Number,                           !- Schedule Type Limits Names
-  QSensible,                             !- FMU Variable Name
-  0;                                             !- Initial Value
+  FMU_OthEquSen_ZoneOne,      !- EnergyPlus Variable Name
+  Any Number,                 !- Schedule Type Limits Names
+  QSensible,                  !- FMU Variable Name
+  0;                          !- Initial Value
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitExport:To:Actuator}\label{externalinterfacefunctionalmockupunitexporttoactuator}
@@ -457,14 +441,13 @@ This field contains the name of the variable in the model description file of th
 This field contains the initial value. If a value is specified, then this value is used during the warm-up period and the system sizing. If no value is specified, then the actuated component will only be updated once the time stepping starts, i.e., after the warm-up and the system-sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
-  Zn001_Wall001_Win001_Shading_Deploy_Status,   !- EnergyPlus Variable Name
-  Zn001:Wall001:Win001,                                   !- Actuated Component Unique Name
-  Window Shading Control,                               !- Actuated Component Type
-  Control Status,                                               !- Actuated Component Control Type
-  yShade,                                                               !- FMU Variable Name
-  6;                                                                         !- Initial Value
+  Zn001_Wall001_Win001_Shading_Deploy_Status,  !- EnergyPlus Variable Name
+  Zn001:Wall001:Win001,       !- Actuated Component Unique Name
+  Window Shading Control,     !- Actuated Component Type
+  Control Status,             !- Actuated Component Control Type
+  yShade,                     !- FMU Variable Name
+  6;                          !- Initial Value
 \end{lstlisting}
 
 \subsection{ExternalInterface:FunctionalMockupUnitExport:To:Variable}\label{externalinterfacefunctionalmockupunitexporttovariable}
@@ -486,9 +469,8 @@ This field contains the name of the variable in the model description file of th
 This field contains the initial value that is used during the warm-up period and during the system sizing.
 
 \begin{lstlisting}
-
 ExternalInterface:FunctionalMockupUnitExport:To:Variable,
-  Shade_Signal,                       !- EnergyPlus Variable Name
-  yShade,                                   !- FMU Variable Name
-  1;                                             !- Initial Value
+  Shade_Signal,               !- EnergyPlus Variable Name
+  yShade,                     !- FMU Variable Name
+  1;                          !- Initial Value
 \end{lstlisting}

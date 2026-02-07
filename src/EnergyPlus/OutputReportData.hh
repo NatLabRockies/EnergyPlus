@@ -130,7 +130,7 @@ public:
     std::string m_colHead;                     // the column header to use instead of the variable name (only for predefined)
     AggregationKind m_aggregate;               // the type of aggregation for the variable (see aggType parameters)
     int m_showDigits;                          // the number of digits to be shown
-    Constant::Units m_varUnits;                // Units sting, may be blank
+    Constant::Units m_varUnits;                // Units string, may be blank
     OutputProcessor::VariableType m_typeOfVar; // 0=not found, 1=integer, 2=real, 3=meter
     int m_keyCount;
     OutputProcessor::StoreType m_varAvgSum;      // Variable  is Averaged=1 or Summed=2

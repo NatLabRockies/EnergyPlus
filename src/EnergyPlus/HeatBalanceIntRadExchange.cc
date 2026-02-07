@@ -312,16 +312,20 @@ namespace HeatBalanceIntRadExchange {
                     SurfaceTempRad[ZoneSurfNum] = SurfaceTemp(SurfNum);
                     SurfaceEmiss[ZoneSurfNum] = construct.InsideAbsorpThermal;
                 }
+                SurfaceTempInKto4th[ZoneSurfNum] = pow_4(SurfaceTempRad[ZoneSurfNum] + Constant::Kelvin);
                 if (state.dataHeatBalIntRadExchg->CarrollMethod) {
-                    CarrollMRTNumerator += SurfaceTempRad[ZoneSurfNum] * zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
+                    // The original approach from Carroll's paper didn't balance because the mean radiant temperature was essentially the mean
+                    // of SurfaceTempRad. This has been updated to use SurfaceTempInKto4th so that the sum of the net long-wave radiation for each
+                    // surface equals 0.
+                    CarrollMRTNumerator += SurfaceTempInKto4th[ZoneSurfNum] * zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
                     CarrollMRTDenominator += zone_info.Fp[ZoneSurfNum] * zone_info.Area[ZoneSurfNum];
                 }
-                SurfaceTempInKto4th[ZoneSurfNum] = pow_4(SurfaceTempRad[ZoneSurfNum] + Constant::Kelvin);
             }
 
             if (state.dataHeatBalIntRadExchg->CarrollMethod) {
                 if (CarrollMRTDenominator > 0.0) {
-                    CarrollMRTInKTo4th = pow_4(CarrollMRTNumerator / CarrollMRTDenominator + Constant::Kelvin);
+                    // pow_4 and root_4 cancel out, so we can avoid calling root_4 here
+                    CarrollMRTInKTo4th = CarrollMRTNumerator / CarrollMRTDenominator;
                 } else {
                     // Likely only one surface in this enclosure
                     CarrollMRTInKTo4th = 293.15; // arbitrary value, IR will be zero
@@ -339,13 +343,13 @@ namespace HeatBalanceIntRadExchange {
                         Real64 CarrollMRTDenominatorWin(0.0);
                         for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
                             if (SendZoneSurfNum != RecZoneSurfNum) {
-                                CarrollMRTNumeratorWin +=
-                                    SurfaceTempRad[SendZoneSurfNum] * zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
+                                CarrollMRTNumeratorWin += pow_4(SurfaceTempRad[SendZoneSurfNum] + Constant::Kelvin) * zone_info.Fp[SendZoneSurfNum] *
+                                                          zone_info.Area[SendZoneSurfNum];
                                 CarrollMRTDenominatorWin += zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
                             }
                         }
                         if (CarrollMRTDenominatorWin > 0.0) {
-                            CarrollMRTInKTo4thWin = pow_4(CarrollMRTNumeratorWin / CarrollMRTDenominatorWin + Constant::Kelvin);
+                            CarrollMRTInKTo4thWin = CarrollMRTNumeratorWin / CarrollMRTDenominatorWin;
                         }
                         state.dataSurface->SurfWinIRfromParentZone(RecSurfNum) +=
                             (zone_info.Fp[RecZoneSurfNum] * CarrollMRTInKTo4thWin) / SurfaceEmiss[RecZoneSurfNum];
@@ -1522,7 +1526,7 @@ namespace HeatBalanceIntRadExchange {
         // A(i)*F(i,j)=A(j)*F(j,i); F(i,i)=0.; SUM(F(i,j)=1.0, j=1,N)
         // Subroutine takes approximate view factors and enforces reciprocity by
         // averaging AiFij and AjFji.  Then it determines a set of row coefficients
-        // which can be multipled by each AF product to force the sum of AiFij for
+        // which can be multiplied by each AF product to force the sum of AiFij for
         // each row to equal Ai, and applies them. Completeness is checked, and if
         // not satisfied, the AF averaging and row modifications are repeated until
         // completeness is within a preselected small deviation from 1.0
@@ -1842,7 +1846,7 @@ namespace HeatBalanceIntRadExchange {
         CalcMatrixInverse(Cmatrix, Cinverse); // SOLVE THE LINEAR SYSTEM
         Cmatrix.clear();                      // Release memory ASAP
 
-        // Scale Cinverse colums by excitation to get partial radiosity matrix
+        // Scale Cinverse columns by excitation to get partial radiosity matrix
         l = 0u;
         for (int j = 1; j <= N; ++j) {
             Real64 const e_j(Excite(j));

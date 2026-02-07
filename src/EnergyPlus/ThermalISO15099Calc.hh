@@ -350,7 +350,7 @@ namespace ThermalISO15099Calc {
                             Array2A<Real64> gvis,                      // Gas specific viscosity
                             Array2A<Real64> gcp,                       // Gas specific heat
                             const Array1D<Real64> &EffectiveOpenness,  // Layer effective openneess [m2]
-                            Array1D<Real64> const &theta,              // Layer surface tempeartures [K]
+                            Array1D<Real64> const &theta,              // Layer surface temperatures [K]
                             Array1D<Real64> &sconScaled,               // Layer conductivity divided by thickness
                             int &nperr,                                // Error message flag
                             std::string &ErrorMessage                  // Error message

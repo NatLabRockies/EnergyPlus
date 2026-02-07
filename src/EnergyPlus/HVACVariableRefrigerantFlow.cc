@@ -10445,7 +10445,7 @@ void VRFCondenserEquipment::CalcVRFIUTeTc_FluidTCtrl(EnergyPlusData &state)
     //       and then decide and Te/Tc that can satisfy all the zones (2) TeTcConstant method uses fixed values provided
     //       by the user.
 
-    // Followings for FluidTCtrl Only
+    // Following for FluidTCtrl Only
     Array1D<Real64> EvapTemp;
     Array1D<Real64> CondTemp;
     Real64 IUMinEvapTemp;
@@ -10686,7 +10686,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
     bool HRHeatRequestFlag;           // flag indicating VRF TU could operate in heating mode
     bool HRCoolRequestFlag;           // flag indicating VRF TU could operate in cooling mode
 
-    // Followings for VRF FluidTCtrl Only
+    // Following for VRF FluidTCtrl Only
     int Counter;                     // index for iterations [-]
     int NumIteHIUIn;                 // index for HIU calculation iterations [-]
     int NumOfCompSpdInput;           // Number of compressor speed input by the user [-]

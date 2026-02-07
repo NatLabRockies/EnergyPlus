@@ -326,7 +326,7 @@ namespace SingleDuct {
                     std::string const &ZoneEquipName, // zone unit name name
                     std::string &ATMixerName,         // air terminal mixer name
                     int &ATMixerNum,                  // air terminal mixer index
-                    HVAC::MixerType &ATMixerType,     // air teminal mixer type
+                    HVAC::MixerType &ATMixerType,     // air terminal mixer type
                     int &ATMixerPriNode,              // air terminal mixer primary air node number
                     int &ATMixerSecNode,              // air terminal mixer secondary air node number
                     int &ATMixerOutNode,              // air terminal mixer outlet air node number

@@ -5061,7 +5061,7 @@ namespace PlantPipingSystemsManager {
             int PipeX = segment->PipeCellCoordinates.X;
             int PipeY = segment->PipeCellCoordinates.Y;
 
-            //'loop across all z-direction indeces
+            //'loop across all z-direction indices
             int const Zindex_stop(floop_end(StartingZ, EndingZ, Increment));
             for (int Zindex = StartingZ; Zindex != Zindex_stop; Zindex += Increment) {
 

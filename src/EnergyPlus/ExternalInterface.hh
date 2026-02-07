@@ -215,7 +215,7 @@ namespace ExternalInterface {
         std::string Name;               // FMU Filename
         std::string modelID;            // FMU modelID
         std::string modelGUID;          // FMU modelGUID
-        fs::path WorkingFolder;         // Path to the FMU wokring folder
+        fs::path WorkingFolder;         // Path to the FMU working folder
         fs::path WorkingFolder_wLib;    // Path to the binaries
         std::string fmiVersionNumber;   // Version number of FMI used
         int NumInputVariablesInFMU;     // Number of input variables in fmu
@@ -451,7 +451,7 @@ struct ExternalInterfaceData : BaseGlobalStruct
         this->fmiEndSimulation = 0;         // Flag to indicate end of simulation
         this->UniqueFMUInputVarNames.clear();
 
-        // these were statics without an initial value
+        // these were statistics without an initial value
         //        int nOutVal;       // Number of output values (E+ -> ExternalInterface)
         //        int nInpVar;       // Number of input values (ExternalInterface -> E+)
     }

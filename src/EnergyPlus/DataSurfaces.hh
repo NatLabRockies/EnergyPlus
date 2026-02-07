@@ -1174,7 +1174,7 @@ namespace DataSurfaces {
         SlatAngleControl slatAngleControl{
             SlatAngleControl::Invalid}; // Takes one of the following values that specifies
                                         //  CHARACTER(len=32) :: slatAngleControlForBlinds = ' ' ! Takes one of the following values that specifies
-                                        //  how slat angle is controled in a blind when ShadingType =
+                                        //  how slat angle is controlled in a blind when ShadingType =
                                         //  InteriorBlind, ExteriorBlind or BetweenGlassBlind.
                                         //  FixedSlatAngle: the slat angle is fixed at the constant value given in the
                                         //    associated Material:WindowBlind
@@ -1208,7 +1208,7 @@ namespace DataSurfaces {
         bool SinusoidalConstTempCoef;              // If true then ConstTempCoef varies by sine wave
         Real64 SinusoidPeriod;                     // period of sine wave variation  (hr)
         Real64 TPreviousCoef;                      // Coefficient modifying the OSC temp from the previous timestep (dimensionless)
-        Real64 TOutsideSurfPast;                   // Ouside surface temperature from previous timestep {C}
+        Real64 TOutsideSurfPast;                   // Outside surface temperature from previous timestep {C}
         Real64 MinTempLimit;                       // Minimum limit on OSC temp {deg C}
         Real64 MaxTempLimit;                       // Maximum limit on OSC temp {deg C}
         bool MinLimitPresent;                      // If TRUE then apply minimum limit on calculated OSC temp
@@ -1373,7 +1373,7 @@ namespace DataSurfaces {
         std::string ZoneOrZoneListName;   // zone or zone list name
         int ZoneOrZoneListPtr;            // pointer to a zone list
         int NumOfZones;                   // number of zones in a zone list
-        int Construction;                 // pointer to contruction object
+        int Construction;                 // pointer to construction object
         Real64 GrossArea;                 // internal surface area, [m2]
         bool ZoneListActive;              // flag to a list
         std::string spaceOrSpaceListName; // Space or Space list name

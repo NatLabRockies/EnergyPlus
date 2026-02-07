@@ -3849,62 +3849,63 @@ bool getWaterTankStratifiedInput(EnergyPlusData &state, std::string_view const o
         Tank.flowRateSched = nullptr;
         Tank.useInletTempSched = nullptr;
         Tank.UseEffectiveness = s_ip->getRealFieldValue(fields, schemaProps, "use_side_heat_transfer_effectiveness");
-        Tank.UseInletHeight = s_ip->getRealFieldValue(fields, schemaProps, "use_side_inlet_height");
 
-        // default to always on
-        Tank.sourceSideAvailSched = Sched::GetScheduleAlwaysOn(state);
-        Tank.useSideAvailSched = Sched::GetScheduleAlwaysOn(state);
-
-        auto const UseOutletHeight = fields.at("use_side_outlet_height");
-        if (UseOutletHeight == "AutoCalculate") {
-            Tank.UseOutletHeight = Tank.Height;
-        } else {
-            Tank.UseOutletHeight = UseOutletHeight.get<Real64>();
-        }
-        if (Tank.UseInletHeight > Tank.Height) {
-            ShowSevereError(state, format("{} = {}: Use inlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
-            ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
-            ShowContinueError(state, format("{} = {:.4R}", "use_side_inlet_height", Tank.UseInletHeight));
-            ErrorsFound = true;
-        }
-
-        Tank.UseOutletHeight = s_ip->getRealFieldValue(fields, schemaProps, "use_side_outlet_height");
-        if (Tank.UseOutletHeight > Tank.Height) {
-            ShowSevereError(state, format("{} = {}: Use outlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
-            ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
-            ShowContinueError(state, format("{} = {:.4R}", "use_side_outlet_height", Tank.UseOutletHeight));
-            ErrorsFound = true;
-        }
-
-        Tank.SourceEffectiveness =
-            s_ip->getRealFieldValue(fields, schemaProps, "source_side_heat_transfer_effectiveness");
+        Tank.SourceEffectiveness = s_ip->getRealFieldValue(fields, schemaProps, "source_side_heat_transfer_effectiveness");
         if ((Tank.SourceEffectiveness > 1) || (Tank.SourceEffectiveness <= 0)) {
             ShowSevereError(state, format("{} = {}:  Source Side Effectiveness is out of bounds (>0 to 1)", cCurrentModuleObject, thisObjectName));
             ErrorsFound = true;
         }
 
-        Tank.SourceInletHeight = s_ip->getRealFieldValue(fields, schemaProps, "source_side_inlet_height");
-        if (Tank.SourceInletHeight > Tank.Height) {
-            ShowSevereError(state, format("{} = {}: Source inlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
-            ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
-            ShowContinueError(state, format("{} = {:.4R}", "source_side_inlet_height", Tank.SourceInletHeight));
-            ErrorsFound = true;
-        }
+        // default to always on
+        Tank.sourceSideAvailSched = Sched::GetScheduleAlwaysOn(state);
+        Tank.useSideAvailSched = Sched::GetScheduleAlwaysOn(state);
 
-        Tank.SourceOutletHeight = s_ip->getRealFieldValue(fields, schemaProps, "source_side_outlet_height");
+        // Inlet and Outlet Height
+        // Is there a reason why this is a scope?
+        {
+            // Use Side Inlet Height: AutoCalculatable and defaults to top of tank
+            Tank.UseInletHeight = s_ip->getRealFieldValue(fields, schemaProps, "use_side_inlet_height");
+            if (Tank.UseInletHeight == Constant::AutoCalculate) {
+                Tank.UseInletHeight = Tank.Height;
+            } else if (Tank.UseInletHeight > Tank.Height) {
+                ShowSevereError(state,
+                                format("{} = {}: Use inlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
+                ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
+                ShowContinueError(state, format("{} = {:.4R}", "use_side_inlet_height", Tank.UseInletHeight));
+                ErrorsFound = true;
+            }
 
-        auto const SourceOutletHeight = fields.at("source_side_outlet_height");
-        if (SourceOutletHeight == "AutoCalculate") {
-            Tank.SourceOutletHeight = Tank.Height;
-        } else {
-            Tank.SourceOutletHeight = SourceOutletHeight.get<Real64>();
-        }
-        if (Tank.SourceOutletHeight > Tank.Height) {
-            ShowSevereError(state,
-                            format("{} = {}: Source outlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
-            ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
-            ShowContinueError(state, format("{} = {:.4R}", "source_side_outlet_height", Tank.SourceOutletHeight));
-            ErrorsFound = true;
+            // Defaults to 0.0
+            Tank.UseOutletHeight = s_ip->getRealFieldValue(fields, schemaProps, "use_side_outlet_height");
+            if (Tank.UseOutletHeight > Tank.Height) {
+                ShowSevereError(state,
+                                format("{} = {}: Use outlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
+                ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
+                ShowContinueError(state, format("{} = {:.4R}", "use_side_outlet_height", Tank.UseOutletHeight));
+                ErrorsFound = true;
+            }
+
+            // Defaults to 0.0
+            Tank.SourceInletHeight = s_ip->getRealFieldValue(fields, schemaProps, "source_side_inlet_height");
+            if (Tank.SourceInletHeight > Tank.Height) {
+                ShowSevereError(state,
+                                format("{} = {}: Source inlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
+                ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
+                ShowContinueError(state, format("{} = {:.4R}", "source_side_inlet_height", Tank.SourceInletHeight));
+                ErrorsFound = true;
+            }
+
+            // Source Side Outlet Height: AutoCalculatable and defaults to top of tank
+            Tank.SourceOutletHeight = s_ip->getRealFieldValue(fields, schemaProps, "source_side_outlet_height");
+            if (Tank.SourceOutletHeight == Constant::AutoCalculate) {
+                Tank.SourceOutletHeight = Tank.Height;
+            } else if (Tank.SourceOutletHeight > Tank.Height) {
+                ShowSevereError(state,
+                                format("{} = {}: Source outlet is located higher than overall tank height.", cCurrentModuleObject, thisObjectName));
+                ShowContinueError(state, format("{} = {:.4R}", "tank_height", Tank.Height));
+                ShowContinueError(state, format("{} = {:.4R}", "source_side_outlet_height", Tank.SourceOutletHeight));
+                ErrorsFound = true;
+            }
         }
 
         Tank.StandAlone = false;
@@ -4157,7 +4158,7 @@ void GetWaterThermalTankInput(EnergyPlusData &state)
             ErrorsFound |= getWaterTankStratifiedInput(state, cStratifiedCWTankModuleObj);
         }
 
-        //  =======   Get 'ThermalStorage:ChilledWater:Stratified' =======================================================
+        //  =======   Get 'ThermalStorage:HotWater:Stratified' =======================================================
         if (state.dataWaterThermalTanks->numHotWaterStratified > 0) {
             ErrorsFound |= getWaterTankStratifiedInput(state, cStratifiedHWTankModuleObj);
         }
@@ -4844,29 +4845,30 @@ void GetWaterThermalTankInput(EnergyPlusData &state)
         if (state.dataWaterThermalTanks->numWaterThermalTank > 0) {
             for (int WaterThermalTankNum = 1; WaterThermalTankNum <= state.dataWaterThermalTanks->numWaterThermalTank; ++WaterThermalTankNum) {
 
-                if ((state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).VolumeWasAutoSized) &&
-                    (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Sizing.DesignMode == SizingMode::Invalid)) {
-                    ShowWarningError(
-                        state,
-                        format("Water heater named {}has tank volume set to AUTOSIZE but it is missing associated WaterHeater:Sizing object",
-                               state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Name));
-                    ErrorsFound = true;
-                }
-                if ((state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).MaxCapacityWasAutoSized) &&
-                    (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Sizing.DesignMode == SizingMode::Invalid)) {
-                    ShowWarningError(
-                        state,
-                        format("Water heater named {}has heater capacity set to AUTOSIZE but it is missing associated WaterHeater:Sizing object",
-                               state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Name));
-                    ErrorsFound = true;
-                }
-                if ((state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).HeightWasAutoSized) &&
-                    (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Sizing.DesignMode == SizingMode::Invalid)) {
-                    ShowWarningError(
-                        state,
-                        format("Water heater named {}has tank height set to AUTOSIZE but it is missing associated WaterHeater:Sizing object",
-                               state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Name));
-                    ErrorsFound = true;
+                auto const &Tank = state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum);
+
+                if (Tank.Sizing.DesignMode == SizingMode::Invalid) {
+                    if (Tank.VolumeWasAutoSized) {
+                        ShowSevereError(state,
+                                        format("{}='{}' has tank volume set to Autosize but it is missing associated WaterHeater:Sizing object",
+                                               DataPlant::PlantEquipTypeNames[static_cast<int>(Tank.WaterThermalTankType)],
+                                               Tank.Name));
+                        ErrorsFound = true;
+                    }
+                    if (Tank.MaxCapacityWasAutoSized) {
+                        ShowSevereError(state,
+                                        format("{}='{}' has heater capacity set to Autosize but it is missing associated WaterHeater:Sizing object",
+                                               DataPlant::PlantEquipTypeNames[static_cast<int>(Tank.WaterThermalTankType)],
+                                               Tank.Name));
+                        ErrorsFound = true;
+                    }
+                    if (Tank.HeightWasAutoSized) {
+                        ShowSevereError(state,
+                                        format("{}='{}' has tank height set to Autosize but it is missing associated WaterHeater:Sizing object",
+                                               DataPlant::PlantEquipTypeNames[static_cast<int>(Tank.WaterThermalTankType)],
+                                               Tank.Name));
+                        ErrorsFound = true;
+                    }
                 }
             }
         }
@@ -4874,28 +4876,21 @@ void GetWaterThermalTankInput(EnergyPlusData &state)
         //    now do calls to TestCompSet for tanks, depending on nodes and heat pump water heater
         if (state.dataWaterThermalTanks->numWaterThermalTank > 0) {
             for (int WaterThermalTankNum = 1; WaterThermalTankNum <= state.dataWaterThermalTanks->numWaterThermalTank; ++WaterThermalTankNum) {
-                if (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).UseInletNode > 0 &&
-                    state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).UseOutletNode > 0) {
-                    if (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).HeatPumpNum > 0) {
+
+                auto const &Tank = state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum);
+
+                if (Tank.UseInletNode > 0 && Tank.UseOutletNode > 0) {
+                    if (Tank.HeatPumpNum > 0) {
                         // do nothing, Use nodes are tested for HeatPump:WaterHeater not tank
                     } else {
-                        BranchNodeConnections::TestCompSet(state,
-                                                           state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Type,
-                                                           state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Name,
-                                                           state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).InletNodeName1,
-                                                           state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).OutletNodeName1,
-                                                           "Use Side Water Nodes");
+                        BranchNodeConnections::TestCompSet(
+                            state, Tank.Type, Tank.Name, Tank.InletNodeName1, Tank.OutletNodeName1, "Use Side Water Nodes");
                     }
                 }
-                if (state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).SourceInletNode > 0 &&
-                    state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).SourceOutletNode > 0) {
+                if (Tank.SourceInletNode > 0 && Tank.SourceOutletNode > 0) {
 
-                    BranchNodeConnections::TestCompSet(state,
-                                                       state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Type,
-                                                       state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).Name,
-                                                       state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).InletNodeName2,
-                                                       state.dataWaterThermalTanks->WaterThermalTank(WaterThermalTankNum).OutletNodeName2,
-                                                       "Source Side Water Nodes");
+                    BranchNodeConnections::TestCompSet(
+                        state, Tank.Type, Tank.Name, Tank.InletNodeName2, Tank.OutletNodeName2, "Source Side Water Nodes");
                 }
             }
         }
@@ -11816,8 +11811,8 @@ void WaterThermalTankData::SizeDemandSidePlantConnections(EnergyPlusData &state)
             int PltSizNum = this->UseSidePlantSizNum;
             if (PltSizNum > 0) { // we have a Plant Sizing Object
                 if (this->UseSidePlantLoc.loopSideNum == DataPlant::LoopSideLocation::Demand) {
-                    // probably shouldn't come here as Use side is unlikley to be on demand side (?)
-                    // but going to treat component with symetry so if connections are reversed it'll still work
+                    // probably shouldn't come here as Use side is unlikely to be on demand side (?)
+                    // but going to treat component with symmetry so if connections are reversed it'll still work
                     // choose a flow rate that will allow the entire volume of the tank to go from 14.44 to 57.22 C
                     // in user specified hours.
                     //  using the plant inlet design temp for sizing.
@@ -12545,7 +12540,7 @@ void WaterThermalTankData::CalcStandardRatings(EnergyPlusData &state)
                 Real64 MdotWater = hpwh.OperatingWaterFlowRate * Psychrometrics::RhoH2O(this->TankTemp);
                 Real64 mdotAir = hpwh.OperatingAirMassFlowRate;
 
-                // ?? why is HPWH condenser inlet node temp reset inside the for loop? shouldn't it chnage with the tank temp throughout these
+                // ?? why is HPWH condenser inlet node temp reset inside the for loop? shouldn't it change with the tank temp throughout these
                 // iterations?
                 if (hpwh.HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterPumped) {
                     // set the condenser inlet node mass flow rate and temperature
@@ -12978,7 +12973,7 @@ void WaterThermalTankData::setBackupElementCapacity(EnergyPlusData &state)
 {
     // Fix for #9001: The BackupElementCapacity was not being reset from the autosize value (-99999) which resulted in
     // negative electric consumption.  Using a test for any negative numbers here instead of just -99999 for safety.
-    // Only reset the backup element capacity if a problem has been occured.
+    // Only reset the backup element capacity if a problem has been occurred.
     if (this->HeatPumpNum > 0) {
         if (state.dataWaterThermalTanks->HPWaterHeater(this->HeatPumpNum).HPWHType == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterWrapped) {
             return;

@@ -272,7 +272,7 @@ TEST(FileSystem, Elaborate)
     fs::remove_all("sandboxB");
 }
 
-// Windows support for symlink isn't great, you'd need admin priviledges
+// Windows support for symlink isn't great, you'd need admin privileges
 #ifndef _WIN32
 TEST(FileSystem, getAbsolutePath_WithSymlink)
 {

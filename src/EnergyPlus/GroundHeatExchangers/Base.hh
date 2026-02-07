@@ -98,7 +98,7 @@ namespace GroundHeatExchangers {
         std::shared_ptr<GLHEResponseFactors> myRespFactors;
         GroundTemp::BaseGroundTempsModel *groundTempModel = nullptr; // non-owning pointer
 
-        // some statics pulled out into member variables
+        // some statistics pulled out into member variables
         bool firstTime = true;
         int numErrorCalls = 0;
         Real64 ToutNew = 19.375;

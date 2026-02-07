@@ -251,7 +251,7 @@ namespace HXAssistCoil {
         //       DATE WRITTEN   Sept 2003
 
         // PURPOSE OF THIS SUBROUTINE:
-        //  Obtains input data for this compount object and stores it in data structure
+        //  Obtains input data for this compound object and stores it in data structure
 
         // METHODOLOGY EMPLOYED:
         //  Uses "Get" routines to read in data.

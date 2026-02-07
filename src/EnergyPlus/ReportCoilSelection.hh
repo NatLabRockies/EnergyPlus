@@ -213,7 +213,7 @@ public:                                  // data
     Real64 plantDesMaxMassFlowRate; // this coil's plant loop overall design flow rate [kg/s]
     Real64 plantDesRetTemp;         // this coil's plant loop design return temperature
     Real64 plantDesSupTemp;         // this coil's plant loop design supply temperature
-    Real64 plantDesDeltaTemp;       // this coil's plant loop design temperature diference (delta C)
+    Real64 plantDesDeltaTemp;       // this coil's plant loop design temperature difference (delta C)
     Real64 plantDesCapacity;        // this coil's plant loop capacity [W]
     Real64 coilCapPrcntPlantCap;    // this coil's capacity as a percentage of the overall loop's capacity
     Real64 coilFlowPrcntPlantFlow;  // this coil's design flow rate as a percentage the overall loop's design flow rate

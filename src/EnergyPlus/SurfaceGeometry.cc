@@ -3204,7 +3204,7 @@ namespace SurfaceGeometry {
                                                                          s_ipsc->cAlphaFieldNames,
                                                                          s_ipsc->cNumericFieldNames);
 
-                // Even though these will be validated, set defaults in case error here -- wont
+                // Even though these will be validated, set defaults in case error here -- won't
                 // cause aborts in later surface gets (hopefully)
                 state.dataSurface->Corner = DataSurfaces::UpperLeftCorner;
                 state.dataSurface->WorldCoordSystem = true;
@@ -4323,7 +4323,7 @@ namespace SurfaceGeometry {
                 // Not sure if it's better to add this or guard in SolarShading.cc
                 // surfTemp.shadowSurfSched = nullptr
             }
-        } // Item Looop
+        } // Item Loop
         // Check number of Vertex between base surface and Outside Boundary surface
         int ExtSurfNum;
         for (int i = 1; i <= SurfNum; i++) {
@@ -5791,7 +5791,7 @@ namespace SurfaceGeometry {
                     }
                     if (state.dataConstruction->Construct(ConstrNum).LayerPoint(TotLayers) !=
                         state.dataConstruction->Construct(ConstrNumSh).LayerPoint(TotShLayers)) {
-                        ShowSevereError(state, format("{}: Mis-match in unshaded/shaded inside layer materials.  These should match.", cRoutineName));
+                        ShowSevereError(state, format("{}: Mismatch in unshaded/shaded inside layer materials.  These should match.", cRoutineName));
                         ShowContinueError(state,
                                           format("Unshaded construction={}, Material={}",
                                                  state.dataConstruction->Construct(ConstrNum).Name,
@@ -5803,7 +5803,7 @@ namespace SurfaceGeometry {
                         ErrorsFound = true;
                     }
                     if (state.dataConstruction->Construct(ConstrNum).LayerPoint(1) != state.dataConstruction->Construct(ConstrNumSh).LayerPoint(1)) {
-                        ShowSevereError(state, format("{}: Mis-match in unshaded/shaded inside layer materials.  These should match.", cRoutineName));
+                        ShowSevereError(state, format("{}: Mismatch in unshaded/shaded inside layer materials.  These should match.", cRoutineName));
                         ShowContinueError(state,
                                           format("Unshaded construction={}, Material={}",
                                                  state.dataConstruction->Construct(ConstrNum).Name,
@@ -10094,7 +10094,7 @@ namespace SurfaceGeometry {
                     surfTemp.shadedConstructionList.push_back(curShadedConstruction);
                     surfTemp.activeShadedConstruction = curShadedConstruction;
 
-                    // check to make the window refenced is an exterior window
+                    // check to make the window referenced is an exterior window
                     if (surfTemp.ExtBoundCond != DataSurfaces::ExternalEnvironment) {
                         ErrorsFound = true;
                         ShowSevereError(

@@ -226,7 +226,7 @@ void GasAbsorberSpecs::getDesignCapacities(
 
     if (!matchfound) {
         // Error, nodes do not match
-        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorbtion Chiller-Heater {}", this->Name));
+        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorption Chiller-Heater {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     } // Operate as Chiller or Heater
@@ -251,7 +251,7 @@ void GasAbsorberSpecs::onInitLoopEquip(EnergyPlusData &state, const PlantLocatio
     } else if (BranchInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
                                                                 // don't do anything here
     } else {                                                    // Error, nodes do not match
-        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorbtion Chiller-Heater {}", this->Name));
+        ShowSevereError(state, format("SimGasAbsorber: Invalid call to Gas Absorption Chiller-Heater {}", this->Name));
         ShowContinueError(state, "Node connections in branch are not consistent with object nodes.");
         ShowFatalError(state, "Preceding conditions cause termination.");
     } // Operate as Chiller or Heater
@@ -1939,7 +1939,7 @@ void GasAbsorberSpecs::calculateHeater(EnergyPlusData &state, Real64 &MyLoad, bo
         // Calculate electric parasitics used
         // for heating based on nominal capacity not available capacity
         lHeatElectricPower = lNomCoolingCap * lNomHeatCoolRatio * lElecHeatRatio * lFractionOfPeriodRunning;
-        // Coodinate electric parasitics for heating and cooling to avoid double counting
+        // Coordinate electric parasitics for heating and cooling to avoid double counting
         // Total electric is the max of heating electric or cooling electric
         // If heating electric is greater, leave cooling electric and subtract if off of heating elec
         // If cooling electric is greater, set heating electric to zero

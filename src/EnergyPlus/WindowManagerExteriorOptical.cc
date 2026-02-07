@@ -550,7 +550,7 @@ namespace Window {
     std::shared_ptr<ICellDescription> CWCEScreenCellFactory::getCellDescription([[maybe_unused]] EnergyPlusData &state)
     {
         Real64 diameter = m_Material->Thickness; // Thickness in this case is diameter
-        // ratio is not saved withing material but rather calculated from transmittance
+        // ratio is not saved within material but rather calculated from transmittance
         const Real64 ratio = 1.0 - sqrt(dynamic_cast<Material::MaterialScreen const *>(m_Material)->Trans);
         Real64 spacing = diameter / ratio;
         return std::make_shared<CWovenCellDescription>(diameter, spacing);

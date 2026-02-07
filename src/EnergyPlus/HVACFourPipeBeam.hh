@@ -208,7 +208,7 @@ namespace FourPipeBeam {
         Real64 cpSystemAir;         // current specific heat of primary supply air
         Real64 qDotSystemAir;       // current heat transfer rate of primary supply air wrt zone, W
         Real64 qDotBeamCoolingMax;  // current beam cooling rate at maximum chilled water flow rate, W
-        Real64 qDotBeamHeatingMax;  // curent beam heating rate at maximum hot water flow rate, W
+        Real64 qDotBeamHeatingMax;  // current beam heating rate at maximum hot water flow rate, W
         Real64 qDotTotalDelivered;  // current combined heat transfer rate of primary supply air and beam, W
         Real64 qDotBeamCooling;     // current beam cooling rate, W
         Real64 qDotBeamHeating;     // current beam heating rate, W

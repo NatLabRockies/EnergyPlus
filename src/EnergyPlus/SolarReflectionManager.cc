@@ -724,7 +724,7 @@ namespace SolarReflectionManager {
                         continue;
                     }
 
-                    // CR 7872 - TH 4/6/2010. The shading surfaces should point to the receiveing heat transfer surface
+                    // CR 7872 - TH 4/6/2010. The shading surfaces should point to the receiving heat transfer surface
                     //  according to the the right hand rule. If user inputs do not follow the rule, use the following
                     //  code to check the mirrored shading surface
                     if (state.dataSolarReflectionManager->HitPtSurfNum > 0) {

@@ -10583,15 +10583,14 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
        WRITE (InputEcho,600)
      END IF
 500  FORMAT (/5X,'EXTERIOR INSULATION IS FULL LENGTH')
-600  FORMAT (/5X,'IF INSULATED ON EXTERIOR, '                                &
-            & 'INSULATION IS PARTIAL LENGTH')
+600  FORMAT (/5X,'IF INSULATED ON EXTERIOR, ','INSULATION IS PARTIAL LENGTH')
 
      WRITE (InputEcho,700) ALBEDO(1), ALBEDO(2), EPSLN(1), EPSLN(2),         &
            & VEGHT(1), VEGHT(2), RHO(4), CP(4), TCON(4)
 700  FORMAT (/'SOIL AND SURFACE PROPERTIES:'//                               &
      & 5X,'ALBEDO:'/5X,'NO SNOW:',2X,F5.2,5X,'SNOW:',2X,F5.2//               &
      & 5X,'LONG-WAVE EMISSIVITY:'/5X,'NO SNOW:',2X,F5.2,5X,                  &
-     & 'SNOW:',2X,F5.2//5X'VEGETATION HEIGHT (CM):'/                         &
+     & 'SNOW:',2X,F5.2//5X,'VEGETATION HEIGHT (CM):'/                         &
      & 5X,'NO SNOW:',2X,F5.2,5X,'SNOW:',2X,F5.2//                            &
      & 5X,'DENSITY (KG/M**3):',2X,F7.2,                                      &
      & 5X,'SPECIFIC HEAT (J/KG/K):',2X,F6.2/                                 &
@@ -10609,7 +10608,7 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
      & ARIM, ASILL, AWALL, XFACE(0), XFACE(IBASE+3), YFACE(0),               &
      & YFACE(JBASE+3), ZFACE(KBASE)
 
-1000 FORMAT (/'FOUNDATION WALL MATERIAL PROPERTIES AND '                     &
+1000 FORMAT (/'FOUNDATION WALL MATERIAL PROPERTIES AND ',                    &
      & 'BASEMENT DIMENSIONS:'//5X,'DENSITY (KG/M**3):',2X,                   &
      & F7.2,                                                                 &
      & 5X,'SPECIFIC HEAT (J/KG/K):',2X,F6.2/                                 &
@@ -10640,7 +10639,7 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
 
      WRITE (InputEcho,1300) HIN(4), HIN(5), HIN(6)
 
-1300 FORMAT (/'BOUNDARY CONDITIONS:'//5X,'INSIDE HEAT TRANSFER'              &
+1300 FORMAT (/'BOUNDARY CONDITIONS:'//5X,'INSIDE HEAT TRANSFER',             &
      & ' COEFFICIENTS, CONVECTION AND RADIATION (W/M**2/K):'/                &
      & 5X,'Q DOWNWARD:',2X,F6.2,5X,'Q UPWARD:',2X,F6.2,5X,                   &
      &'Q HORIZONTAL:',2X,F6.2)
@@ -11389,7 +11388,7 @@ IMPLICIT NONE
 5200  FORMAT('YEARLY NET SURFACE HEAT LOSSES [W-H]'/                 &
       &  'CEILING:  ',8X,F15.1/,'FLOOR:  ',10X,F15.1/,               &
       &  'RIM JOIST:  ',6X,F15.1/,'SILL PLATE:  ',5X,F15.1/,         &
-      &  'FOUNDATION WALL:  ',F15.1/,'BASEMENT:  '7X,F15.1)
+      &  'FOUNDATION WALL:  ',F15.1/,'BASEMENT:  ',7X,F15.1)
      RETURN
 END SUBROUTINE YearlyOutput
 
@@ -12887,7 +12886,7 @@ IMPLICIT NONE
      WRITE  (XZWallTs,4300)
 4300 FORMAT (7X,'YZ Wall TS',9X,'Inside',6X,'YZ Heat flux',5X,'Base T')
      WRITE  (YZWallTs,4301)
-4301 FORMAT (7X,'XZ Wall TS',9X,'Inside'6X,'XZ Heat flux',5X,'Base T')
+4301 FORMAT (7X,'XZ Wall TS',9X,'Inside',6X,'XZ Heat flux',5X,'Base T')
      WRITE  (FloorTs,4302)
 4302 FORMAT (7X,'Floor TS',7X,'Inside',6X,'Floor heat flux',5X,'Base T')
      WRITE  (Centerline,4303)

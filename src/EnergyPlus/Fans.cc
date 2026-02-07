@@ -106,7 +106,7 @@ void FanBase::simulate(EnergyPlusData &state,
                        ObjexxFCL::Optional<Real64 const> _massFlowRate1,    // Mass flow rate in operating mode 1 [kg/s]
                        ObjexxFCL::Optional<Real64 const> _runTimeFraction1, // Run time fraction in operating mode 1
                        ObjexxFCL::Optional<Real64 const> _massFlowRate2,    // Mass flow rate in operating mode 2 [kg/s]
-                       ObjexxFCL::Optional<Real64 const> _runTimeFraction2, // Run time fraction in opearating mode 2
+                       ObjexxFCL::Optional<Real64 const> _runTimeFraction2, // Run time fraction in operating mode 2
                        ObjexxFCL::Optional<Real64 const> _pressureRise2     // Pressure difference for operating mode 2
 )
 {

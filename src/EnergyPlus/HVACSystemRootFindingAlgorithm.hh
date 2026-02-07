@@ -69,7 +69,7 @@ static constexpr std::array<std::string_view, static_cast<int>(HVACSystemRootSol
 struct HVACSystemRootFindingAlgorithm
 {
     std::string Algorithm = {}; // Choice of algorithm
-    int NumOfIter = 5;          // Number of Iteration Before Algorith Switch
+    int NumOfIter = 5;          // Number of Iteration Before Algorithm Switch
     HVACSystemRootSolverAlgorithm HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::RegulaFalsi;
 };
 struct RootFindingData : BaseGlobalStruct

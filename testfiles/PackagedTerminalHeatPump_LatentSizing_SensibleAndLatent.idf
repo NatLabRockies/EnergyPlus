@@ -1072,12 +1072,12 @@
 
   People,
     WEST ZONE,               !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     3.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -1094,12 +1094,12 @@
 
   People,
     EAST ZONE,               !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     5.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -1116,12 +1116,12 @@
 
   People,
     NORTH ZONE,              !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE OCCUPANCY,        !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
     4.000000,                !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000000,               !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     Activity Sch,            !- Activity Level Schedule Name
@@ -1140,11 +1140,11 @@
 
   Lights,
     WEST ZONE Lights 1,      !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     550.0,                   !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1154,11 +1154,11 @@
 
   Lights,
     EAST ZONE Lights 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     550.0,                   !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1168,11 +1168,11 @@
 
   Lights,
     NORTH ZONE Lights 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     550.0,                   !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1184,11 +1184,11 @@
 
   ElectricEquipment,
     WEST ZONE ElecEq 1,      !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE EQUIP,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     300.0,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1196,11 +1196,11 @@
 
   ElectricEquipment,
     EAST ZONE ElecEq 1,      !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     OFFICE EQUIP,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     300.0,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1208,11 +1208,11 @@
 
   ElectricEquipment,
     NORTH ZONE ElecEq 1,     !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     OFFICE EQUIP,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     300.0,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1222,12 +1222,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     WEST ZONE Infil 1,       !- Name
-    WEST ZONE,               !- Zone or ZoneList Name
+    WEST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2,                     !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1236,12 +1236,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     EAST ZONE Infil 1,       !- Name
-    EAST ZONE,               !- Zone or ZoneList Name
+    EAST ZONE,               !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.04,                    !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1250,12 +1250,12 @@
 
   ZoneInfiltration:DesignFlowRate,
     NORTH ZONE Infil 1,      !- Name
-    NORTH ZONE,              !- Zone or ZoneList Name
+    NORTH ZONE,              !- Zone or ZoneList or Space or SpaceList Name
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.2,                     !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1299,29 +1299,29 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.004,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.004,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
-    Zone Dehumidification Setpoint, !- Zone Humidistat Dehumidification Set Point Schedule Name
-    Zone Humidification Setpoint;   !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    Zone Dehumidification Setpoint,  !- Zone Humidistat Dehumidification Set Point Schedule Name
+    Zone Humidification Setpoint;  !- Zone Humidistat Humidification Set Point Schedule Name
 
   Schedule:Compact,
-    Zone Dehumidification Setpoint, !- Name
-    Any Number,                     !- Schedule Type Limits Name
-    Through: 12/31,                 !- Field 1
-    For: AllDays,                   !- Field 2
-    Until: 24:00,45.0;              !- Field 3
+    Zone Dehumidification Setpoint,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,45.0;       !- Field 3
 
   Schedule:Compact,
-    Zone Humidification Setpoint,   !- Name
-    Any Number,                     !- Schedule Type Limits Name
-    Through: 12/31,                 !- Field 1
-    For: AllDays,                   !- Field 2
-    Until: 24:00,40.0;              !- Field 3
+    Zone Humidification Setpoint,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,40.0;       !- Field 3
 
   DesignSpecification:OutdoorAir,
     SZ DSOA WEST ZONE,       !- Name
@@ -1358,15 +1358,15 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.004,                    !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.004,                    !- Zone Heating Design Supply Air Humidity Ratio Difference
-    Zone Dehumidification Setpoint, !- Zone Humidistat Dehumidification Set Point Schedule Name
-    Zone Humidification Setpoint;   !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    Zone Dehumidification Setpoint,  !- Zone Humidistat Dehumidification Set Point Schedule Name
+    Zone Humidification Setpoint;  !- Zone Humidistat Humidification Set Point Schedule Name
 
   DesignSpecification:OutdoorAir,
     SZ DSOA EAST ZONE,       !- Name
@@ -1403,15 +1403,15 @@
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
     autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
-    Sensible And Latent Load, !- Zone Load Sizing Method
+    Sensible And Latent Load,!- Zone Load Sizing Method
     HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-    0.004,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
     HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-    ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-    0.004,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
-    Zone Dehumidification Setpoint, !- Zone Humidistat Dehumidification Set Point Schedule Name
-    Zone Humidification Setpoint;   !- Zone Humidistat Humidification Set Point Schedule Name
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    Zone Dehumidification Setpoint,  !- Zone Humidistat Dehumidification Set Point Schedule Name
+    Zone Humidification Setpoint;  !- Zone Humidistat Humidification Set Point Schedule Name
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NORTH ZONE,      !- Name
@@ -1438,16 +1438,16 @@
     DualSetPoint;            !- Control 1 Name
 
   ZoneControl:Thermostat,
-    Zone 2 Thermostat,             !- Thermostat Name
-    EAST ZONE,                     !- Zone Name
-    West Zone Control Type Sched,  !- Control Type SCHEDULE Name
+    Zone 2 Thermostat,       !- Name
+    EAST ZONE,               !- Zone or ZoneList Name
+    West Zone Control Type Sched,  !- Control Type Schedule Name
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
   ZoneControl:Thermostat,
-    Zone 3 Thermostat,             !- Thermostat Name
-    NORTH ZONE,                    !- Zone Name
-    West Zone Control Type Sched,  !- Control Type SCHEDULE Name
+    Zone 3 Thermostat,       !- Name
+    NORTH ZONE,              !- Zone or ZoneList Name
+    West Zone Control Type Sched,  !- Control Type Schedule Name
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -1681,15 +1681,18 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     0.4,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone1PTHPFanOutletNode,  !- Air Inlet Node Name
     Zone1PTHPDXCoolCoilOutletNode,  !- Air Outlet Node Name
     HPACCoolCapFT,           !- Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Total Cooling Capacity Function of Flow Fraction Curve Name
     HPACEIRFT,               !- Energy Input Ratio Function of Temperature Curve Name
     HPACEIRFFF,              !- Energy Input Ratio Function of Flow Fraction Curve Name
-    HPACPLFFPLR;             !- Part Load Fraction Correlation Curve Name
+    HPACPLFFPLR,             !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     Zone2PTHPDXCoolCoil,     !- Name
@@ -1698,15 +1701,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone2PTHPFanOutletNode,  !- Air Inlet Node Name
     Zone2PTHPCoolCoilOutletNode,  !- Air Outlet Node Name
     HPACCoolCapFT,           !- Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Total Cooling Capacity Function of Flow Fraction Curve Name
     HPACEIRFT,               !- Energy Input Ratio Function of Temperature Curve Name
     HPACEIRFFF,              !- Energy Input Ratio Function of Flow Fraction Curve Name
-    HPACPLFFPLR;             !- Part Load Fraction Correlation Curve Name
+    HPACPLFFPLR,             !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     Zone3PTHPDXCoolCoil,     !- Name
@@ -1715,15 +1721,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone3PTHPOAMixerOutletNode,  !- Air Inlet Node Name
     Zone3PTHPCoolCoilOutletNode,  !- Air Outlet Node Name
     HPACCoolCapFT,           !- Total Cooling Capacity Function of Temperature Curve Name
     HPACCoolCapFFF,          !- Total Cooling Capacity Function of Flow Fraction Curve Name
     HPACEIRFT,               !- Energy Input Ratio Function of Temperature Curve Name
     HPACEIRFFF,              !- Energy Input Ratio Function of Flow Fraction Curve Name
-    HPACPLFFPLR;             !- Part Load Fraction Correlation Curve Name
+    HPACPLFFPLR,             !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 !-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:ELECTRIC ===========
 
@@ -1759,8 +1768,8 @@
     6600.0,                  !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     0.398,                   !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone1PTHPDXCoolCoilOutletNode,  !- Air Inlet Node Name
     Zone1PTHPDXHeatCoilOutletNode,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1778,7 +1787,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    7200;                    !- Resistive Defrost Heater Capacity {W}
+    7200,                    !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
   Coil:Heating:DX:SingleSpeed,
     Zone2PTHPDXHeatCoil,     !- Name
@@ -1786,8 +1800,8 @@
     autosize,                !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone2PTHPCoolCoilOutletNode,  !- Air Inlet Node Name
     Zone2PTHPDXHeatCoilOutletNode,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1805,7 +1819,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    5000;                    !- Resistive Defrost Heater Capacity {W}
+    5000,                    !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
   Coil:Heating:DX:SingleSpeed,
     Zone3PTHPDXHeatCoil,     !- Name
@@ -1813,8 +1832,8 @@
     autosize,                !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone3PTHPCoolCoilOutletNode,  !- Air Inlet Node Name
     Zone3PTHPDXHeatCoilOutletNode,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1832,7 +1851,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    7800;                    !- Resistive Defrost Heater Capacity {W}
+    7800,                    !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:MIXER ===========
 

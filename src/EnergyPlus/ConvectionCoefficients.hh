@@ -779,7 +779,7 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     int CalcClearRoofErrorIDX = 0;
     int CalcMitchellErrorIDX = 0;
 
-    // move random statics so they can be reset for unit tests
+    // move random statistics so they can be reset for unit tests
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;

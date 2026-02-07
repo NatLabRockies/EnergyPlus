@@ -446,7 +446,7 @@ TEST_F(EnergyPlusFixture, Psychrometrics_Interpolation_Sample_Test)
     Real64 error = 0.0;
     int i;
     for (i = 1; i < 1651; ++i) {
-        int tsat_fn_pb_pressure = i * 64; // sample bin size =64 Pa; sample size =1651 (continous)
+        int tsat_fn_pb_pressure = i * 64; // sample bin size =64 Pa; sample size =1651 (continuous)
         tsat_psy = PsyTsatFnPb(*state, tsat_fn_pb_pressure);
         error = max(abs(tsat_psy - tsat_fn_pb_y[i]), error);
     }

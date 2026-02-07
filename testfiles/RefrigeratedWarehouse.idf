@@ -4471,8 +4471,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .25,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4485,8 +4485,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.1,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4499,8 +4499,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .05,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4513,8 +4513,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .1,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4527,8 +4527,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .05,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4541,8 +4541,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .25,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4555,8 +4555,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .25,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4569,8 +4569,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .1,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4583,8 +4583,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     .05,                     !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4597,8 +4597,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     2.,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4611,8 +4611,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4625,8 +4625,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4639,8 +4639,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4653,8 +4653,8 @@
     InfiltrationSchedule,    !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     1.,                      !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -4665,8 +4665,8 @@
 
   ZoneRefrigerationDoorMixing,
     Freezer5_Cooler2,        !- Name
-    Freezer_5,               !- Zone 1 Name
-    Cooler_2,                !- Zone 2 Name
+    Freezer_5,               !- Zone or Space Name 1
+    Cooler_2,                !- Zone or Space Name 2
     Freezer5DoorSchedA,      !- Schedule Name
     1.8,                     !- Door Height {m}
     2.3,                     !- Door Area {m2}
@@ -4674,8 +4674,8 @@
 
   ZoneRefrigerationDoorMixing,
     Freezer5_Cooler3,        !- Name
-    Freezer_5,               !- Zone 1 Name
-    Cooler_3,                !- Zone 2 Name
+    Freezer_5,               !- Zone or Space Name 1
+    Cooler_3,                !- Zone or Space Name 2
     Freezer5DoorSchedB,      !- Schedule Name
     1.8,                     !- Door Height {m}
     2.3,                     !- Door Area {m2}
@@ -4683,8 +4683,8 @@
 
   ZoneRefrigerationDoorMixing,
     Freezer1_SubFreezer1,    !- Name
-    Freezer_1,               !- Zone 1 Name
-    Subfreezer,              !- Zone 2 Name
+    Freezer_1,               !- Zone or Space Name 1
+    Subfreezer,              !- Zone or Space Name 2
     Freezer1DoorSchedA,      !- Schedule Name
     1.8,                     !- Door Height {m}
     2.3,                     !- Door Area {m2}
@@ -5008,7 +5008,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5022,7 +5022,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5036,7 +5036,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5050,7 +5050,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5064,7 +5064,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5078,7 +5078,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5092,7 +5092,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5106,7 +5106,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5120,7 +5120,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5134,7 +5134,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.5,                     !- Watts per Zone Floor Area {W/m2}
+    6.5,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5148,7 +5148,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5162,7 +5162,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5176,7 +5176,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5190,7 +5190,7 @@
     T24 Light,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Return Air Fraction
     0.67,                    !- Fraction Radiant
@@ -5206,7 +5206,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5219,7 +5219,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5232,7 +5232,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5245,7 +5245,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5258,7 +5258,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5271,7 +5271,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5284,7 +5284,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5297,7 +5297,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5310,7 +5310,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5323,7 +5323,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.6,                     !- Watts per Zone Floor Area {W/m2}
+    4.6,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5336,7 +5336,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    14.42,                   !- Watts per Zone Floor Area {W/m2}
+    14.42,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5349,7 +5349,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    14.42,                   !- Watts per Zone Floor Area {W/m2}
+    14.42,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5362,7 +5362,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    14.42,                   !- Watts per Zone Floor Area {W/m2}
+    14.42,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -5375,7 +5375,7 @@
     T24 Equip,               !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    14.42,                   !- Watts per Zone Floor Area {W/m2}
+    14.42,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.,                      !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -6379,9 +6379,9 @@
     -1.111,                  !- <none>
     -1.110,                  !- <none>
     1.666,                   !- <none>
-    4.44,                    !- Extended Field
-    7.222,                   !- Extended Field
-    10.;                     !- Extended Field
+    4.44,                    !- <none>
+    7.222,                   !- <none>
+    10.;                     !- <none>
 
   Table:IndependentVariable,
     ColmacCoilInc_IndependentVariable2,  !- Name
@@ -13584,7 +13584,7 @@
 
   Output:Table:TimeBins,
     *,                       !- Key Value
-    DistrictHeatingWater:Facility,!- Variable Name
+    DistrictHeatingWater:Facility,  !- Variable Name
     15000000,                !- Interval Start
     1000000,                 !- Interval Size
     10;                      !- Interval Count
@@ -13741,9 +13741,9 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     DistrictCooling:Facility,!- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    DistrictHeatingWater:Facility,!- Variable or Meter 3 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    DistrictHeatingWater:Facility,!- Variable or Meter 4 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 4 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 4
 
   Output:Table:Monthly,

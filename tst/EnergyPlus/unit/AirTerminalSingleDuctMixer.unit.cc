@@ -2556,7 +2556,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMInletSide)
 
     HVACInletMassFlowRate = 0.50;
     PrimaryAirMassFlowRate = 0.1;
-    SecondaryAirMassFlowRate = HVACInletMassFlowRate - PrimaryAirMassFlowRate; // seconday air flow is VRFTU flow less primary air flow
+    SecondaryAirMassFlowRate = HVACInletMassFlowRate - PrimaryAirMassFlowRate; // secondary air flow is VRFTU flow less primary air flow
 
     // set zoneNode air condition
     state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp = 24.0;
@@ -3239,7 +3239,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMSupplySide)
 
     HVACInletMassFlowRate = 0.50;
     PrimaryAirMassFlowRate = 0.1;
-    SecondaryAirMassFlowRate = HVACInletMassFlowRate; // seconday air mass flow rate is the same as that of the VRF terminal unit
+    SecondaryAirMassFlowRate = HVACInletMassFlowRate; // secondary air mass flow rate is the same as that of the VRF terminal unit
 
     // set zoneNode air condition
     state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp = 24.0;
@@ -5012,7 +5012,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRFfluidCntrl_ATMInletSi
     state->dataEnvrn->StdRhoAir = 1.20;
     HVACInletMassFlowRate = 0.50;
     PrimaryAirMassFlowRate = 0.1;
-    SecondaryAirMassFlowRate = HVACInletMassFlowRate - PrimaryAirMassFlowRate; // seconday air flow is VRFTU flow less primary air flow
+    SecondaryAirMassFlowRate = HVACInletMassFlowRate - PrimaryAirMassFlowRate; // secondary air flow is VRFTU flow less primary air flow
 
     // set zoneNode air condition
     state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp = 24.0;

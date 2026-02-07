@@ -2120,7 +2120,7 @@ void GetChillerHeaterChangeoverOpSchemeInput(EnergyPlusData &state,
                 }
             }
 
-            // process simulataneous heating and cooling mode cooling equipment lists and ranges
+            // process simultaneous heating and cooling mode cooling equipment lists and ranges
 
             for (auto instance = coolLoadInstancesValue.begin(); instance != coolLoadInstancesValue.end(); ++instance) {
                 auto const &fields = instance.value();
@@ -2801,7 +2801,7 @@ void InitLoadDistribution(EnergyPlusData &state, bool const FirstHVACIteration)
                     auto &this_branch = this_loop_side.Branch(BranchNum);
                     for (int CompNum = 1, CompNum_end = this_branch.TotalComponents; CompNum <= CompNum_end; ++CompNum) {
                         auto &this_component = this_branch.Comp(CompNum);
-                        // initalize components 'ON-AVAILABLE-NO LOAD-NO EMS CTRL'
+                        // initialize components 'ON-AVAILABLE-NO LOAD-NO EMS CTRL'
                         this_component.ON = true;
                         this_component.Available = true;
                         this_component.MyLoad = 0.0;

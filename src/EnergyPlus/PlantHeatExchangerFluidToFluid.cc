@@ -1467,7 +1467,7 @@ void HeatExchangerStruct::calculate(EnergyPlusData &state, Real64 const SupSideM
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
-    // Evalutate heat exchanger model and calculate leaving temperatures
+    // Evaluate heat exchanger model and calculate leaving temperatures
 
     // METHODOLOGY EMPLOYED:
     // apply heat transfer model depending on type of HX used

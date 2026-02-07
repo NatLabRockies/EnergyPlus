@@ -179,7 +179,7 @@ namespace PoweredInductionUnits {
             HeatCntrlBehaviorType::Invalid; // heating control scheme, staged or modulated (physical devices) have different control behavior
         Real64 designHeatingDAT = 0.0;      // C, target heating discharge air temperature during second stage modulated heating behavior
         Real64 highLimitDAT = 0.0;          // C, maximum limit on heating discharge air temperature, end of third stage modulated heating behavior
-        Real64 TotMassFlowRate = 0.0;       // currrent operating total air mass flow, for reporting
+        Real64 TotMassFlowRate = 0.0;       // current operating total air mass flow, for reporting
         Real64 SecMassFlowRate = 0.0;       // current operating secondary air mass flow rate, for reporting
         Real64 PriMassFlowRate = 0.0;       // current operating primary air mass flow rate, for reporting
         Real64 DischargeAirTemp = 0.0;      // current operating discharge air temperature at outlet, for reporting

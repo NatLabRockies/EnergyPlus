@@ -677,7 +677,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPEC,            !- Name
@@ -713,7 +720,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     NORTH ZONE,              !- Zone or ZoneList Name
@@ -742,7 +756,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   People,
     WEST ZONE,               !- Name
@@ -772,7 +793,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     27000.0,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -806,7 +827,7 @@
     Office Lighting,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     9000.0,                  !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -820,7 +841,7 @@
     Intermittent,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     27000.0,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -854,7 +875,7 @@
     BLDG Sch 24x7,           !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     9000.0,                  !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -868,7 +889,7 @@
     BLDG Sch 24x7,           !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     81000.0,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1282,7 +1303,7 @@
     45.00000,60.00000,4.000000;  !- X,Y,Z ==> Vertex 4 {m}
 
   AirLoopHVAC,
-    Typical Terminal Reheat,  !- Name
+    Typical Terminal Reheat, !- Name
     Reheat System 1 Controllers,  !- Controller List Name
     Reheat System 1 Avail List,  !- Availability Manager List Name
     25.0,                    !- Design Supply Air Flow Rate {m3/s}
@@ -1409,8 +1430,8 @@
     Cooling Supply Side Branches,  !- Name
     CW Pump Branch,          !- Branch 1 Name
     Main Chiller Branch,     !- Branch 2 Name
-    Supply Bypass Branch,    !- Branch 4 Name
-    Cooling Supply Outlet;   !- Branch 5 Name
+    Supply Bypass Branch,    !- Branch 3 Name
+    Cooling Supply Outlet;   !- Branch 4 Name
 
   BranchList,
     Cooling Demand Side Branches,  !- Name
@@ -1500,10 +1521,10 @@
     Circ Pump,               !- Component 1 Name
     CW Supply Inlet Node,    !- Component 1 Inlet Node Name
     CW Pump Outlet Node,     !- Component 1 Outlet Node Name
-    HeatExchanger:FluidToFluid,  !- Component 1 Object Type
-    Water Side Economizer,   !- Component 1 Name
-    CW Pump Outlet Node,     !- Component 1 Inlet Node Name
-    WaterSide Economizer Outlet Node; !- Component 1 Outlet Node Name
+    HeatExchanger:FluidToFluid,  !- Component 2 Object Type
+    Water Side Economizer,   !- Component 2 Name
+    CW Pump Outlet Node,     !- Component 2 Inlet Node Name
+    WaterSide Economizer Outlet Node;  !- Component 2 Outlet Node Name
 
   Branch,
     Main Chiller Branch,     !- Name
@@ -1530,13 +1551,13 @@
     CW Loop Splitter,        !- Name
     CW Pump Branch,          !- Inlet Branch Name
     Main Chiller Branch,     !- Outlet Branch 1 Name
-    Supply Bypass Branch;    !- Outlet Branch 3 Name
+    Supply Bypass Branch;    !- Outlet Branch 2 Name
 
   Connector:Mixer,
     CW Loop Mixer,           !- Name
     Cooling Supply Outlet,   !- Outlet Branch Name
     Main Chiller Branch,     !- Inlet Branch 1 Name
-    Supply Bypass Branch;    !- Inlet Branch 3 Name
+    Supply Bypass Branch;    !- Inlet Branch 2 Name
 
   Connector:Splitter,
     CW Demand Splitter,      !- Name
@@ -1599,8 +1620,8 @@
     WaterCooled,             !- Condenser Type
     LeavingSetpointModulated,!- Chiller Flow Mode
     ,                        !- Sizing Factor
-    ,                        !- Basin Heater Capacity
-    ,                        !- Basin Heater Setpoint Temperature
+    ,                        !- Basin Heater Capacity {W/K}
+    ,                        !- Basin Heater Setpoint Temperature {C}
     ,                        !- Basin Heater Operating Schedule Name
     ThermoCapFracCurve,      !- Thermosiphon Capacity Fraction Curve Name
     2.5;                     !- Thermosiphon Minimum Temperature Difference
@@ -1623,26 +1644,26 @@
     Main Chiller Outlet Node;!- Setpoint Node or NodeList Name
 
   HeatExchanger:FluidToFluid,
-    Water Side Economizer,                       !- Name
-    ,                                            !- Availability Schedule Name
-    WaterSide Economizer Condenser Inlet Node,   !- Loop Demand Side Inlet Node Name
+    Water Side Economizer,   !- Name
+    ,                        !- Availability Schedule Name
+    WaterSide Economizer Condenser Inlet Node,  !- Loop Demand Side Inlet Node Name
     WaterSide Economizer Condenser Outlet Node,  !- Loop Demand Side Outlet Node Name
-    autosize,                                    !- Loop Demand Side Design Flow Rate {m3/s}
-    CW Pump Outlet Node,                         !- Loop Supply Side Inlet Node Name
-    WaterSide Economizer Outlet Node,            !- Loop Supply Side Outlet Node Name
-    autosize,                                    !- Loop Supply Side Design Flow Rate {m3/s}
-    ParallelFlow,                                !- Heat Exchange Model Type
-    autosize,                                    !- Heat Exchanger U-Factor Times Area Value {W/K}
-    CoolingSetpointModulated,                    !- Control Type
-    WaterSide Economizer Outlet Node,            !- Heat Exchanger Setpoint Node Name
-    1.0,                                         !- Minimum Temperature Difference to Activate Heat Exchanger {deltaC}
-    FreeCooling;                                 !- Heat Transfer Metering End Use Type
+    autosize,                !- Loop Demand Side Design Flow Rate {m3/s}
+    CW Pump Outlet Node,     !- Loop Supply Side Inlet Node Name
+    WaterSide Economizer Outlet Node,  !- Loop Supply Side Outlet Node Name
+    autosize,                !- Loop Supply Side Design Flow Rate {m3/s}
+    ParallelFlow,            !- Heat Exchange Model Type
+    autosize,                !- Heat Exchanger U-Factor Times Area Value {W/K}
+    CoolingSetpointModulated,!- Control Type
+    WaterSide Economizer Outlet Node,  !- Heat Exchanger Setpoint Node Name
+    1.0,                     !- Minimum Temperature Difference to Activate Heat Exchanger {deltaC}
+    FreeCooling;             !- Heat Transfer Metering End Use Type
 
   SetpointManager:Scheduled,
-    WaterEconomizerSP,                !- Name
-    Temperature,                      !- Control Variable
-    CW Loop Temp Schedule,            !- Schedule Name
-    WaterSide Economizer Outlet Node; !- Setpoint Node or NodeList Name
+    WaterEconomizerSP,       !- Name
+    Temperature,             !- Control Variable
+    CW Loop Temp Schedule,   !- Schedule Name
+    WaterSide Economizer Outlet Node;  !- Setpoint Node or NodeList Name
 
   Pump:VariableSpeed,
     Circ Pump,               !- Name
@@ -1661,31 +1682,31 @@
     INTERMITTENT;            !- Pump Control Type
 
   Sizing:Plant,
-    Chilled Water Condenser Loop, !- Plant or Condenser Loop Name
-    Condenser,                    !- Loop Type
-    29.0,                         !- Design Loop Exit Temperature {C}
-    6.0;                          !- Loop Design Temperature Difference {deltaC}
+    Chilled Water Condenser Loop,  !- Plant or Condenser Loop Name
+    Condenser,               !- Loop Type
+    29.0,                    !- Design Loop Exit Temperature {C}
+    6.0;                     !- Loop Design Temperature Difference {deltaC}
 
   CondenserLoop,
-    Chilled Water Condenser Loop,      !- Name
-    Water,                             !- Fluid Type
-    ,                                  !- User Defined Fluid Type
-    Tower Loop Operation,              !- Condenser Equipment Operation Scheme Name
-    Condenser Supply Outlet Node,      !- Condenser Loop Temperature Setpoint Node Name
-    80,                                !- Maximum Loop Temperature {C}
-    3,                                 !- Minimum Loop Temperature {C}
-    autosize,                          !- Maximum Loop Flow Rate {m3/s}
-    0,                                 !- Minimum Loop Flow Rate {m3/s}
-    autocalculate,                     !- Condenser Loop Volume {m3}
-    Condenser Supply Inlet Node,       !- Condenser Side Inlet Node Name
-    Condenser Supply Outlet Node,      !- Condenser Side Outlet Node Name
-    Condenser Supply Side Branches,    !- Condenser Side Branch List Name
+    Chilled Water Condenser Loop,  !- Name
+    Water,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Tower Loop Operation,    !- Condenser Equipment Operation Scheme Name
+    Condenser Supply Outlet Node,  !- Condenser Loop Temperature Setpoint Node Name
+    80,                      !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    autosize,                !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    autocalculate,           !- Condenser Loop Volume {m3}
+    Condenser Supply Inlet Node,  !- Condenser Side Inlet Node Name
+    Condenser Supply Outlet Node,  !- Condenser Side Outlet Node Name
+    Condenser Supply Side Branches,  !- Condenser Side Branch List Name
     Condenser Supply Side Connectors,  !- Condenser Side Connector List Name
-    Condenser Demand Inlet Node,       !- Demand Side Inlet Node Name
-    Condenser Demand Outlet Node,      !- Demand Side Outlet Node Name
-    Condenser Demand Side Branches,    !- Condenser Demand Side Branch List Name
+    Condenser Demand Inlet Node,  !- Demand Side Inlet Node Name
+    Condenser Demand Outlet Node,  !- Demand Side Outlet Node Name
+    Condenser Demand Side Branches,  !- Condenser Demand Side Branch List Name
     Condenser Demand Side Connectors,  !- Condenser Demand Side Connector List Name
-    SequentialLoad;                    !- Load Distribution Scheme
+    SequentialLoad;          !- Load Distribution Scheme
 
   SetpointManager:FollowOutdoorAirTemperature,
     MyCondenserControl,      !- Name
@@ -1796,7 +1817,7 @@
     WaterSide Economizer Condenser Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
     HeatExchanger:FluidToFluid,  !- Component 1 Object Type
-    Water Side Economizer,             !- Component 1 Name
+    Water Side Economizer,   !- Component 1 Name
     WaterSide Economizer Condenser Inlet Node,  !- Component 1 Inlet Node Name
     WaterSide Economizer Condenser Outlet Node;  !- Component 1 Outlet Node Name
 
@@ -1872,77 +1893,77 @@
     Big Tower2;              !- Equipment 2 Name
 
   CoolingTower:SingleSpeed,
-    Big Tower1,                     !- Name
-    Condenser Tower 1 Inlet Node,   !- Water Inlet Node Name
+    Big Tower1,              !- Name
+    Condenser Tower 1 Inlet Node,  !- Water Inlet Node Name
     Condenser Tower 1 Outlet Node,  !- Water Outlet Node Name
-    autosize,                       !- Design Water Flow Rate {m3/s}
-    autosize,                       !- Design Air Flow Rate {m3/s}
-    autosize,                       !- Design Fan Power {W}
-    autosize,                       !- Design U-Factor Times Area Value {W/K}
-    autocalculate,                  !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                               !- Free Convection Regime Air Flow Rate Sizing Factor
-    autocalculate,                  !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                               !- Free Convection U-Factor Times Area Value Sizing Factor
-    ,                               !- Performance Input Method
-    ,                               !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                               !- Nominal Capacity {W}
-    autocalculate,                  !- Free Convection Capacity {W}
-    ,                               !- Free Convection Nominal Capacity Sizing Factor
-    ,                               !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                               !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                               !- Design Approach Temperature {deltaC}
-    ,                               !- Design Range Temperature {deltaC}
-    ,                               !- Basin Heater Capacity {W/K}
-    ,                               !- Basin Heater Setpoint Temperature {C}
-    ,                               !- Basin Heater Operating Schedule Name
-    ,                               !- Evaporation Loss Mode
-    ,                               !- Evaporation Loss Factor {percent/K}
-    ,                               !- Drift Loss Percent {percent}
-    ,                               !- Blowdown Calculation Mode
-    ,                               !- Blowdown Concentration Ratio
-    ,                               !- Blowdown Makeup Water Usage Schedule Name
-    ,                               !- Supply Water Storage Tank Name
-    ,                               !- Outdoor Air Inlet Node Name
-    FluidBypass;                    !- Capacity Control
+    autosize,                !- Design Water Flow Rate {m3/s}
+    autosize,                !- Design Air Flow Rate {m3/s}
+    autosize,                !- Design Fan Power {W}
+    autosize,                !- Design U-Factor Times Area Value {W/K}
+    autocalculate,           !- Free Convection Regime Air Flow Rate {m3/s}
+    ,                        !- Free Convection Regime Air Flow Rate Sizing Factor
+    autocalculate,           !- Free Convection Regime U-Factor Times Area Value {W/K}
+    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
+    ,                        !- Performance Input Method
+    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+    ,                        !- Nominal Capacity {W}
+    autocalculate,           !- Free Convection Capacity {W}
+    ,                        !- Free Convection Nominal Capacity Sizing Factor
+    ,                        !- Design Inlet Air Dry-Bulb Temperature {C}
+    ,                        !- Design Inlet Air Wet-Bulb Temperature {C}
+    ,                        !- Design Approach Temperature {deltaC}
+    ,                        !- Design Range Temperature {deltaC}
+    ,                        !- Basin Heater Capacity {W/K}
+    ,                        !- Basin Heater Setpoint Temperature {C}
+    ,                        !- Basin Heater Operating Schedule Name
+    ,                        !- Evaporation Loss Mode
+    ,                        !- Evaporation Loss Factor {percent/K}
+    ,                        !- Drift Loss Percent {percent}
+    ,                        !- Blowdown Calculation Mode
+    ,                        !- Blowdown Concentration Ratio
+    ,                        !- Blowdown Makeup Water Usage Schedule Name
+    ,                        !- Supply Water Storage Tank Name
+    ,                        !- Outdoor Air Inlet Node Name
+    FluidBypass;             !- Capacity Control
 
   CoolingTower:SingleSpeed,
     Big Tower2,              !- Name
     Condenser Tower 1 Outlet Node,  !- Water Inlet Node Name
     Condenser Tower 2 Outlet Node,  !- Water Outlet Node Name
-    autosize,                       !- Design Water Flow Rate {m3/s}
-    autosize,                       !- Design Air Flow Rate {m3/s}
-    autosize,                       !- Design Fan Power {W}
-    autosize,                       !- Design U-Factor Times Area Value {W/K}
-    autocalculate,                  !- Free Convection Regime Air Flow Rate {m3/s}
-    ,                               !- Free Convection Regime Air Flow Rate Sizing Factor
-    autocalculate,                  !- Free Convection Regime U-Factor Times Area Value {W/K}
-    ,                               !- Free Convection U-Factor Times Area Value Sizing Factor
-    ,                               !- Performance Input Method
-    ,                               !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-    ,                               !- Nominal Capacity {W}
-    autocalculate,                  !- Free Convection Capacity {W}
-    ,                               !- Free Convection Nominal Capacity Sizing Factor
-    ,                               !- Design Inlet Air Dry-Bulb Temperature {C}
-    ,                               !- Design Inlet Air Wet-Bulb Temperature {C}
-    ,                               !- Design Approach Temperature {deltaC}
-    ,                               !- Design Range Temperature {deltaC}
-    ,                               !- Basin Heater Capacity {W/K}
-    ,                               !- Basin Heater Setpoint Temperature {C}
-    ,                               !- Basin Heater Operating Schedule Name
-    ,                               !- Evaporation Loss Mode
-    ,                               !- Evaporation Loss Factor {percent/K}
-    ,                               !- Drift Loss Percent {percent}
-    ,                               !- Blowdown Calculation Mode
-    ,                               !- Blowdown Concentration Ratio
-    ,                               !- Blowdown Makeup Water Usage Schedule Name
-    ,                               !- Supply Water Storage Tank Name
-    ,                               !- Outdoor Air Inlet Node Name
-    FluidBypass;                    !- Capacity Control
+    autosize,                !- Design Water Flow Rate {m3/s}
+    autosize,                !- Design Air Flow Rate {m3/s}
+    autosize,                !- Design Fan Power {W}
+    autosize,                !- Design U-Factor Times Area Value {W/K}
+    autocalculate,           !- Free Convection Regime Air Flow Rate {m3/s}
+    ,                        !- Free Convection Regime Air Flow Rate Sizing Factor
+    autocalculate,           !- Free Convection Regime U-Factor Times Area Value {W/K}
+    ,                        !- Free Convection U-Factor Times Area Value Sizing Factor
+    ,                        !- Performance Input Method
+    ,                        !- Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+    ,                        !- Nominal Capacity {W}
+    autocalculate,           !- Free Convection Capacity {W}
+    ,                        !- Free Convection Nominal Capacity Sizing Factor
+    ,                        !- Design Inlet Air Dry-Bulb Temperature {C}
+    ,                        !- Design Inlet Air Wet-Bulb Temperature {C}
+    ,                        !- Design Approach Temperature {deltaC}
+    ,                        !- Design Range Temperature {deltaC}
+    ,                        !- Basin Heater Capacity {W/K}
+    ,                        !- Basin Heater Setpoint Temperature {C}
+    ,                        !- Basin Heater Operating Schedule Name
+    ,                        !- Evaporation Loss Mode
+    ,                        !- Evaporation Loss Factor {percent/K}
+    ,                        !- Drift Loss Percent {percent}
+    ,                        !- Blowdown Calculation Mode
+    ,                        !- Blowdown Concentration Ratio
+    ,                        !- Blowdown Makeup Water Usage Schedule Name
+    ,                        !- Supply Water Storage Tank Name
+    ,                        !- Outdoor Air Inlet Node Name
+    FluidBypass;             !- Capacity Control
 
   Pump:VariableSpeed,
-    Cond Circ Pump,               !- Name
+    Cond Circ Pump,          !- Name
     Condenser Supply Inlet Node,  !- Inlet Node Name
-    Condenser Pump Outlet Node,   !- Outlet Node Name
+    Condenser Pump Outlet Node,  !- Outlet Node Name
     autosize,                !- Design Maximum Flow Rate {m3/s}
     30000,                   !- Design Pump Head {Pa}
     autosize,                !- Design Power Consumption {W}
@@ -1956,215 +1977,215 @@
     INTERMITTENT;            !- Pump Control Type
 
   PlantLoop,
-    Hot Water Loop,                  !- Name
-    Water,                           !- Fluid Type
-    ,                                !- User Defined Fluid Type
-    Hot Loop Operation,              !- Plant Equipment Operation Scheme Name
-    HW Supply Outlet Node,           !- Loop Temperature Setpoint Node Name
-    100,                             !- Maximum Loop Temperature {C}
-    10,                              !- Minimum Loop Temperature {C}
-    autosize,                        !- Maximum Loop Flow Rate {m3/s}
-    0,                               !- Minimum Loop Flow Rate {m3/s}
-    autocalculate,                   !- Plant Loop Volume {m3}
-    HW Supply Inlet Node,            !- Plant Side Inlet Node Name
-    HW Supply Outlet Node,           !- Plant Side Outlet Node Name
-    Heating Supply Side Branches,    !- Plant Side Branch List Name
+    Hot Water Loop,          !- Name
+    Water,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Hot Loop Operation,      !- Plant Equipment Operation Scheme Name
+    HW Supply Outlet Node,   !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    10,                      !- Minimum Loop Temperature {C}
+    autosize,                !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    autocalculate,           !- Plant Loop Volume {m3}
+    HW Supply Inlet Node,    !- Plant Side Inlet Node Name
+    HW Supply Outlet Node,   !- Plant Side Outlet Node Name
+    Heating Supply Side Branches,  !- Plant Side Branch List Name
     Heating Supply Side Connectors,  !- Plant Side Connector List Name
-    HW Demand Inlet Node,            !- Demand Side Inlet Node Name
-    HW Demand Outlet Node,           !- Demand Side Outlet Node Name
-    Heating Demand Side Branches,    !- Demand Side Branch List Name
+    HW Demand Inlet Node,    !- Demand Side Inlet Node Name
+    HW Demand Outlet Node,   !- Demand Side Outlet Node Name
+    Heating Demand Side Branches,  !- Demand Side Branch List Name
     Heating Demand Side Connectors,  !- Demand Side Connector List Name
-    Optimal;                         !- Load Distribution Scheme
+    Optimal;                 !- Load Distribution Scheme
 
   SetpointManager:Scheduled,
-    Hot Water Loop Setpoint Manager,    !- Name
-    Temperature,                        !- Control Variable
-    HW Loop Temp Schedule,              !- Schedule Name
+    Hot Water Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    HW Loop Temp Schedule,   !- Schedule Name
     Hot Water Loop Setpoint Node List;  !- Setpoint Node or NodeList Name
 
   NodeList,
     Hot Water Loop Setpoint Node List,  !- Name
-    HW Supply Outlet Node;              !- Node 1 Name
+    HW Supply Outlet Node;   !- Node 1 Name
 
   BranchList,
-    Heating Supply Side Branches,       !- Name
-    Heating Supply Inlet Branch,        !- Branch 1 Name
-    Heating Purchased Hot Water Branch, !- Branch 2 Name
-    Heating Supply Bypass Branch,       !- Branch 3 Name
-    Heating Supply Outlet Branch;       !- Branch 4 Name
+    Heating Supply Side Branches,  !- Name
+    Heating Supply Inlet Branch,  !- Branch 1 Name
+    Heating Purchased Hot Water Branch,  !- Branch 2 Name
+    Heating Supply Bypass Branch,  !- Branch 3 Name
+    Heating Supply Outlet Branch;  !- Branch 4 Name
 
   ConnectorList,
-    Heating Supply Side Connectors,    !- Name
-    Connector:Splitter,                !- Connector 1 Object Type
-    Heating Supply Splitter,           !- Connector 1 Name
-    Connector:Mixer,                   !- Connector 2 Object Type
-    Heating Supply Mixer;              !- Connector 2 Name
+    Heating Supply Side Connectors,  !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Heating Supply Splitter, !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Heating Supply Mixer;    !- Connector 2 Name
 
   Branch,
-    Heating Supply Inlet Branch,       !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pump:VariableSpeed,                !- Component 1 Object Type
-    HW Circ Pump,                      !- Component 1 Name
-    HW Supply Inlet Node,              !- Component 1 Inlet Node Name
-    HW Pump Outlet Node;               !- Component 1 Outlet Node Name
+    Heating Supply Inlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    HW Circ Pump,            !- Component 1 Name
+    HW Supply Inlet Node,    !- Component 1 Inlet Node Name
+    HW Pump Outlet Node;     !- Component 1 Outlet Node Name
 
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
-    ,                                  !- Pressure Drop Curve Name
-    DistrictHeating:Water,             !- Component 1 Object Type
-    Purchased Heating,                 !- Component 1 Name
-    Purchased Heat Inlet Node,         !- Component 1 Inlet Node Name
-    Purchased Heat Outlet Node;        !- Component 1 Outlet Node Name
+    ,                        !- Pressure Drop Curve Name
+    DistrictHeating:Water,   !- Component 1 Object Type
+    Purchased Heating,       !- Component 1 Name
+    Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
+    Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    Heating Supply Bypass Branch,      !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pipe:Adiabatic,                    !- Component 1 Object Type
-    Heating Supply Side Bypass,        !- Component 1 Name
+    Heating Supply Bypass Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Heating Supply Side Bypass,  !- Component 1 Name
     Heating Supply Bypass Inlet Node,  !- Component 1 Inlet Node Name
-    Heating Supply Bypass Outlet Node; !- Component 1 Outlet Node Name
+    Heating Supply Bypass Outlet Node;  !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic,
-    Heating Supply Side Bypass,        !- Name
+    Heating Supply Side Bypass,  !- Name
     Heating Supply Bypass Inlet Node,  !- Inlet Node Name
-    Heating Supply Bypass Outlet Node; !- Outlet Node Name
+    Heating Supply Bypass Outlet Node;  !- Outlet Node Name
 
   Branch,
-    Heating Supply Outlet Branch,      !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pipe:Adiabatic,                    !- Component 1 Object Type
-    Heating Supply Outlet,             !- Component 1 Name
+    Heating Supply Outlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Heating Supply Outlet,   !- Component 1 Name
     Heating Supply Exit Pipe Inlet Node,  !- Component 1 Inlet Node Name
-    HW Supply Outlet Node;             !- Component 1 Outlet Node Name
+    HW Supply Outlet Node;   !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic,
-    Heating Supply Outlet,             !- Name
+    Heating Supply Outlet,   !- Name
     Heating Supply Exit Pipe Inlet Node,  !- Inlet Node Name
-    HW Supply Outlet Node;             !- Outlet Node Name
+    HW Supply Outlet Node;   !- Outlet Node Name
 
   BranchList,
-    Heating Demand Side Branches,      !- Name
-    Reheat Inlet Branch,               !- Branch 1 Name
-    West Zone Reheat Branch,           !- Branch 2 Name
-    East Zone Reheat Branch,           !- Branch 3 Name
-    North Zone Reheat Branch,          !- Branch 4 Name
-    Reheat Bypass Branch,              !- Branch 5 Name
-    Reheat Outlet Branch;              !- Branch 6 Name
+    Heating Demand Side Branches,  !- Name
+    Reheat Inlet Branch,     !- Branch 1 Name
+    West Zone Reheat Branch, !- Branch 2 Name
+    East Zone Reheat Branch, !- Branch 3 Name
+    North Zone Reheat Branch,!- Branch 4 Name
+    Reheat Bypass Branch,    !- Branch 5 Name
+    Reheat Outlet Branch;    !- Branch 6 Name
 
   ConnectorList,
-    Heating Demand Side Connectors,    !- Name
-    Connector:Splitter,                !- Connector 1 Object Type
-    Reheat Splitter,                   !- Connector 1 Name
-    Connector:Mixer,                   !- Connector 2 Object Type
-    Reheat Mixer;                      !- Connector 2 Name
+    Heating Demand Side Connectors,  !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Reheat Splitter,         !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Reheat Mixer;            !- Connector 2 Name
 
   Branch,
-    Reheat Inlet Branch,               !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pipe:Adiabatic,                    !- Component 1 Object Type
-    Reheat Inlet Pipe,                 !- Component 1 Name
-    HW Demand Inlet Node,              !- Component 1 Inlet Node Name
+    Reheat Inlet Branch,     !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Reheat Inlet Pipe,       !- Component 1 Name
+    HW Demand Inlet Node,    !- Component 1 Inlet Node Name
     HW Demand Entrance Pipe Outlet Node;  !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic,
-    Reheat Inlet Pipe,                 !- Name
-    HW Demand Inlet Node,              !- Inlet Node Name
+    Reheat Inlet Pipe,       !- Name
+    HW Demand Inlet Node,    !- Inlet Node Name
     HW Demand Entrance Pipe Outlet Node;  !- Outlet Node Name
 
   Branch,
-    Reheat Outlet Branch,              !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pipe:Adiabatic,                    !- Component 1 Object Type
-    Reheat Outlet Pipe,                !- Component 1 Name
-    HW Demand Exit Pipe Inlet Node,    !- Component 1 Inlet Node Name
-    HW Demand Outlet Node;             !- Component 1 Outlet Node Name
+    Reheat Outlet Branch,    !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Reheat Outlet Pipe,      !- Component 1 Name
+    HW Demand Exit Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    HW Demand Outlet Node;   !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic,
-    Reheat Outlet Pipe,                !- Name
-    HW Demand Exit Pipe Inlet Node,    !- Inlet Node Name
-    HW Demand Outlet Node;             !- Outlet Node Name
+    Reheat Outlet Pipe,      !- Name
+    HW Demand Exit Pipe Inlet Node,  !- Inlet Node Name
+    HW Demand Outlet Node;   !- Outlet Node Name
 
   Branch,
-    West Zone Reheat Branch,           !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Coil:Heating:Water,                !- Component 1 Object Type
-    Reheat Coil West Zone,             !- Component 1 Name
+    West Zone Reheat Branch, !- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Heating:Water,      !- Component 1 Object Type
+    Reheat Coil West Zone,   !- Component 1 Name
     West Zone Reheat Water Inlet Node,  !- Component 1 Inlet Node Name
-    West Zone Reheat Water Outlet Node; !- Component 1 Outlet Node Name
+    West Zone Reheat Water Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    East Zone Reheat Branch,           !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Coil:Heating:Water,                !- Component 1 Object Type
-    Reheat Coil East Zone,             !- Component 1 Name
+    East Zone Reheat Branch, !- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Heating:Water,      !- Component 1 Object Type
+    Reheat Coil East Zone,   !- Component 1 Name
     East Zone Reheat Water Inlet Node,  !- Component 1 Inlet Node Name
-    East Zone Reheat Water Outlet Node; !- Component 1 Outlet Node Name
+    East Zone Reheat Water Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    North Zone Reheat Branch,          !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Coil:Heating:Water,                !- Component 1 Object Type
-    Reheat Coil North Zone,            !- Component 1 Name
+    North Zone Reheat Branch,!- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Heating:Water,      !- Component 1 Object Type
+    Reheat Coil North Zone,  !- Component 1 Name
     North Zone Reheat Water Inlet Node,  !- Component 1 Inlet Node Name
-    North Zone Reheat Water Outlet Node; !- Component 1 Outlet Node Name
+    North Zone Reheat Water Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    Reheat Bypass Branch,              !- Name
-    ,                                  !- Pressure Drop Curve Name
-    Pipe:Adiabatic,                    !- Component 1 Object Type
-    Reheat Bypass,                     !- Component 1 Name
-    Reheat Bypass Inlet Node,          !- Component 1 Inlet Node Name
-    Reheat Bypass Outlet Node;         !- Component 1 Outlet Node Name
+    Reheat Bypass Branch,    !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Reheat Bypass,           !- Component 1 Name
+    Reheat Bypass Inlet Node,!- Component 1 Inlet Node Name
+    Reheat Bypass Outlet Node;  !- Component 1 Outlet Node Name
 
   Pipe:Adiabatic,
-    Reheat Bypass,                     !- Name
-    Reheat Bypass Inlet Node,          !- Inlet Node Name
-    Reheat Bypass Outlet Node;         !- Outlet Node Name
+    Reheat Bypass,           !- Name
+    Reheat Bypass Inlet Node,!- Inlet Node Name
+    Reheat Bypass Outlet Node;  !- Outlet Node Name
 
   Connector:Splitter,
-    Reheat Splitter,                   !- Name
-    Reheat Inlet Branch,               !- Inlet Branch Name
-    West Zone Reheat Branch,           !- Outlet Branch 1 Name
-    East Zone Reheat Branch,           !- Outlet Branch 2 Name
-    North Zone Reheat Branch,          !- Outlet Branch 3 Name
-    Reheat Bypass Branch;              !- Outlet Branch 4 Name
+    Reheat Splitter,         !- Name
+    Reheat Inlet Branch,     !- Inlet Branch Name
+    West Zone Reheat Branch, !- Outlet Branch 1 Name
+    East Zone Reheat Branch, !- Outlet Branch 2 Name
+    North Zone Reheat Branch,!- Outlet Branch 3 Name
+    Reheat Bypass Branch;    !- Outlet Branch 4 Name
 
   Connector:Mixer,
-    Reheat Mixer,                      !- Name
-    Reheat Outlet Branch,              !- Outlet Branch Name
-    West Zone Reheat Branch,           !- Inlet Branch 1 Name
-    East Zone Reheat Branch,           !- Inlet Branch 2 Name
-    North Zone Reheat Branch,          !- Inlet Branch 3 Name
-    Reheat Bypass Branch;              !- Inlet Branch 4 Name
+    Reheat Mixer,            !- Name
+    Reheat Outlet Branch,    !- Outlet Branch Name
+    West Zone Reheat Branch, !- Inlet Branch 1 Name
+    East Zone Reheat Branch, !- Inlet Branch 2 Name
+    North Zone Reheat Branch,!- Inlet Branch 3 Name
+    Reheat Bypass Branch;    !- Inlet Branch 4 Name
 
   Connector:Splitter,
-    Heating Supply Splitter,           !- Name
-    Heating Supply Inlet Branch,       !- Inlet Branch Name
+    Heating Supply Splitter, !- Name
+    Heating Supply Inlet Branch,  !- Inlet Branch Name
     Heating Purchased Hot Water Branch,  !- Outlet Branch 1 Name
-    Heating Supply Bypass Branch;      !- Outlet Branch 2 Name
+    Heating Supply Bypass Branch;  !- Outlet Branch 2 Name
 
   Connector:Mixer,
-    Heating Supply Mixer,              !- Name
-    Heating Supply Outlet Branch,      !- Outlet Branch Name
+    Heating Supply Mixer,    !- Name
+    Heating Supply Outlet Branch,  !- Outlet Branch Name
     Heating Purchased Hot Water Branch,  !- Inlet Branch 1 Name
-    Heating Supply Bypass Branch;      !- Inlet Branch 2 Name
+    Heating Supply Bypass Branch;  !- Inlet Branch 2 Name
 
   PlantEquipmentOperationSchemes,
-    Hot Loop Operation,                !- Name
+    Hot Loop Operation,      !- Name
     PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
-    Purchased Only,                    !- Control Scheme 1 Name
-    ON;                                !- Control Scheme 1 Schedule Name
+    Purchased Only,          !- Control Scheme 1 Name
+    ON;                      !- Control Scheme 1 Schedule Name
 
   PlantEquipmentOperation:HeatingLoad,
-    Purchased Only,                    !- Name
-    0,                                 !- Load Range 1 Lower Limit {W}
-    1000000,                           !- Load Range 1 Upper Limit {W}
-    heating plant;                     !- Range 1 Equipment List Name
+    Purchased Only,          !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    1000000,                 !- Load Range 1 Upper Limit {W}
+    heating plant;           !- Range 1 Equipment List Name
 
   PlantEquipmentList,
-    heating plant,                     !- Name
-    DistrictHeating:Water,             !- Equipment 1 Object Type
-    Purchased Heating;                 !- Equipment 1 Name
+    heating plant,           !- Name
+    DistrictHeating:Water,   !- Equipment 1 Object Type
+    Purchased Heating;       !- Equipment 1 Name
 
   Pump:VariableSpeed,
     HW Circ Pump,            !- Name
@@ -2183,141 +2204,141 @@
     INTERMITTENT;            !- Pump Control Type
 
   DistrictHeating:Water,
-    Purchased Heating,          !- Name
+    Purchased Heating,       !- Name
     Purchased Heat Inlet Node,  !- Hot Water Inlet Node Name
-    Purchased Heat Outlet Node, !- Hot Water Outlet Node Name
-    autosize;                   !- Nominal Capacity {W}
+    Purchased Heat Outlet Node,  !- Hot Water Outlet Node Name
+    autosize;                !- Nominal Capacity {W}
 
   ZoneControl:Thermostat,
-    West Zone Thermostat,              !- Name
-    WEST ZONE,                         !- Zone or ZoneList Name
-    Zone Control Type Sched,           !- Control Type Schedule Name
+    West Zone Thermostat,    !- Name
+    WEST ZONE,               !- Zone or ZoneList Name
+    Zone Control Type Sched, !- Control Type Schedule Name
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
-    Heating Setpoint with SB,          !- Control 1 Name
+    Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
-    Cooling Setpoint with SB;          !- Control 2 Name
+    Cooling Setpoint with SB;!- Control 2 Name
 
   ZoneControl:Thermostat,
-    East Zone Thermostat,              !- Name
-    EAST ZONE,                         !- Zone or ZoneList Name
-    Zone Control Type Sched,           !- Control Type Schedule Name
+    East Zone Thermostat,    !- Name
+    EAST ZONE,               !- Zone or ZoneList Name
+    Zone Control Type Sched, !- Control Type Schedule Name
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
-    Heating Setpoint with SB,          !- Control 1 Name
+    Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
-    Cooling Setpoint with SB;          !- Control 2 Name
+    Cooling Setpoint with SB;!- Control 2 Name
 
   ZoneControl:Thermostat,
-    North Zone Thermostat,             !- Name
-    NORTH ZONE,                        !- Zone or ZoneList Name
-    Zone Control Type Sched,           !- Control Type Schedule Name
+    North Zone Thermostat,   !- Name
+    NORTH ZONE,              !- Zone or ZoneList Name
+    Zone Control Type Sched, !- Control Type Schedule Name
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
-    Heating Setpoint with SB,          !- Control 1 Name
+    Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
-    Cooling Setpoint with SB;          !- Control 2 Name
+    Cooling Setpoint with SB;!- Control 2 Name
 
   ThermostatSetpoint:SingleHeating,
-    Heating Setpoint with SB,          !- Name
-    Heating Setpoints;                 !- Setpoint Temperature Schedule Name
+    Heating Setpoint with SB,!- Name
+    Heating Setpoints;       !- Setpoint Temperature Schedule Name
 
   ThermostatSetpoint:SingleCooling,
-    Cooling Setpoint with SB,          !- Name
-    Cooling Setpoints;                 !- Setpoint Temperature Schedule Name
+    Cooling Setpoint with SB,!- Name
+    Cooling Setpoints;       !- Setpoint Temperature Schedule Name
 
   AirLoopHVAC:SupplyPath,
-    TermReheatSupplyPath,              !- Name
-    Zone Equipment Inlet Node,         !- Supply Air Path Inlet Node Name
-    AirLoopHVAC:ZoneSplitter,          !- Component 1 Object Type
-    Zone Supply Air Splitter;          !- Component 1 Name
+    TermReheatSupplyPath,    !- Name
+    Zone Equipment Inlet Node,  !- Supply Air Path Inlet Node Name
+    AirLoopHVAC:ZoneSplitter,!- Component 1 Object Type
+    Zone Supply Air Splitter;!- Component 1 Name
 
   AirLoopHVAC:ReturnPath,
-    TermReheatReturnPath,              !- Name
-    Return Air Mixer Outlet,           !- Return Air Path Outlet Node Name
-    AirLoopHVAC:ZoneMixer,             !- Component 1 Object Type
-    Zone Return Air Mixer;             !- Component 1 Name
+    TermReheatReturnPath,    !- Name
+    Return Air Mixer Outlet, !- Return Air Path Outlet Node Name
+    AirLoopHVAC:ZoneMixer,   !- Component 1 Object Type
+    Zone Return Air Mixer;   !- Component 1 Name
 
   ZoneHVAC:EquipmentConnections,
-    WEST ZONE,                         !- Zone Name
-    WestZoneEquipment,                 !- Zone Conditioning Equipment List Name
-    WestZoneInlets,                    !- Zone Air Inlet Node or NodeList Name
-    ,                                  !- Zone Air Exhaust Node or NodeList Name
-    West Zone Node,                    !- Zone Air Node Name
-    West Zone Outlet Node;             !- Zone Return Air Node or NodeList Name
+    WEST ZONE,               !- Zone Name
+    WestZoneEquipment,       !- Zone Conditioning Equipment List Name
+    WestZoneInlets,          !- Zone Air Inlet Node or NodeList Name
+    ,                        !- Zone Air Exhaust Node or NodeList Name
+    West Zone Node,          !- Zone Air Node Name
+    West Zone Outlet Node;   !- Zone Return Air Node or NodeList Name
 
   ZoneHVAC:EquipmentConnections,
-    EAST ZONE,                         !- Zone Name
-    EastZoneEquipment,                 !- Zone Conditioning Equipment List Name
-    EastZoneInlets,                    !- Zone Air Inlet Node or NodeList Name
-    ,                                  !- Zone Air Exhaust Node or NodeList Name
-    East Zone Node,                    !- Zone Air Node Name
-    East Zone Outlet Node;             !- Zone Return Air Node or NodeList Name
+    EAST ZONE,               !- Zone Name
+    EastZoneEquipment,       !- Zone Conditioning Equipment List Name
+    EastZoneInlets,          !- Zone Air Inlet Node or NodeList Name
+    ,                        !- Zone Air Exhaust Node or NodeList Name
+    East Zone Node,          !- Zone Air Node Name
+    East Zone Outlet Node;   !- Zone Return Air Node or NodeList Name
 
   ZoneHVAC:EquipmentConnections,
-    NORTH ZONE,                        !- Zone Name
-    NorthZoneEquipment,                !- Zone Conditioning Equipment List Name
-    NorthZoneInlets,                   !- Zone Air Inlet Node or NodeList Name
-    ,                                  !- Zone Air Exhaust Node or NodeList Name
-    North Zone Node,                   !- Zone Air Node Name
-    North Zone Outlet Node;            !- Zone Return Air Node or NodeList Name
+    NORTH ZONE,              !- Zone Name
+    NorthZoneEquipment,      !- Zone Conditioning Equipment List Name
+    NorthZoneInlets,         !- Zone Air Inlet Node or NodeList Name
+    ,                        !- Zone Air Exhaust Node or NodeList Name
+    North Zone Node,         !- Zone Air Node Name
+    North Zone Outlet Node;  !- Zone Return Air Node or NodeList Name
 
   ZoneHVAC:EquipmentList,
-    WestZoneEquipment,                 !- Name
-    SequentialLoad,                    !- Load Distribution Scheme
-    ZoneHVAC:AirDistributionUnit,      !- Zone Equipment 1 Object Type
-    WestZoneTermReheat,                !- Zone Equipment 1 Name
-    1,                                 !- Zone Equipment 1 Cooling Sequence
-    1,                                 !- Zone Equipment 1 Heating or No-Load Sequence
-    ,                                  !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
-    ;                                  !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+    WestZoneEquipment,       !- Name
+    SequentialLoad,          !- Load Distribution Scheme
+    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+    WestZoneTermReheat,      !- Zone Equipment 1 Name
+    1,                       !- Zone Equipment 1 Cooling Sequence
+    1,                       !- Zone Equipment 1 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+    ;                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
 
   ZoneHVAC:EquipmentList,
-    EastZoneEquipment,                 !- Name
-    SequentialLoad,                    !- Load Distribution Scheme
-    ZoneHVAC:AirDistributionUnit,      !- Zone Equipment 1 Object Type
-    EastZoneTermReheat,                !- Zone Equipment 1 Name
-    1,                                 !- Zone Equipment 1 Cooling Sequence
-    1,                                 !- Zone Equipment 1 Heating or No-Load Sequence
-    ,                                  !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
-    ;                                  !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+    EastZoneEquipment,       !- Name
+    SequentialLoad,          !- Load Distribution Scheme
+    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+    EastZoneTermReheat,      !- Zone Equipment 1 Name
+    1,                       !- Zone Equipment 1 Cooling Sequence
+    1,                       !- Zone Equipment 1 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+    ;                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
 
   ZoneHVAC:EquipmentList,
-    NorthZoneEquipment,                !- Name
-    SequentialLoad,                    !- Load Distribution Scheme
-    ZoneHVAC:AirDistributionUnit,      !- Zone Equipment 1 Object Type
-    NorthZoneTermReheat,               !- Zone Equipment 1 Name
-    1,                                 !- Zone Equipment 1 Cooling Sequence
-    1,                                 !- Zone Equipment 1 Heating or No-Load Sequence
-    ,                                  !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
-    ;                                  !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+    NorthZoneEquipment,      !- Name
+    SequentialLoad,          !- Load Distribution Scheme
+    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+    NorthZoneTermReheat,     !- Zone Equipment 1 Name
+    1,                       !- Zone Equipment 1 Cooling Sequence
+    1,                       !- Zone Equipment 1 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+    ;                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
 
   ZoneHVAC:AirDistributionUnit,
-    WestZoneTermReheat,                !- Name
+    WestZoneTermReheat,      !- Name
     West Zone Reheat Air Outlet Node,  !- Air Distribution Unit Outlet Node Name
     AirTerminal:SingleDuct:ConstantVolume:Reheat,  !- Air Terminal Object Type
-    Reheat West Zone;                  !- Air Terminal Name
+    Reheat West Zone;        !- Air Terminal Name
 
   ZoneHVAC:AirDistributionUnit,
-    EastZoneTermReheat,                !- Name
+    EastZoneTermReheat,      !- Name
     East Zone Reheat Air Outlet Node,  !- Air Distribution Unit Outlet Node Name
     AirTerminal:SingleDuct:ConstantVolume:Reheat,  !- Air Terminal Object Type
-    Reheat East Zone;                  !- Air Terminal Name
+    Reheat East Zone;        !- Air Terminal Name
 
   ZoneHVAC:AirDistributionUnit,
-    NorthZoneTermReheat,               !- Name
+    NorthZoneTermReheat,     !- Name
     North Zone Reheat Air Outlet Node,  !- Air Distribution Unit Outlet Node Name
     AirTerminal:SingleDuct:ConstantVolume:Reheat,  !- Air Terminal Object Type
-    Reheat North Zone;                 !- Air Terminal Name
+    Reheat North Zone;       !- Air Terminal Name
 
   NodeList,
-    WestZoneInlets,                    !- Name
+    WestZoneInlets,          !- Name
     West Zone Reheat Air Outlet Node;  !- Node 1 Name
 
   NodeList,
-    EastZoneInlets,                    !- Name
+    EastZoneInlets,          !- Name
     East Zone Reheat Air Outlet Node;  !- Node 1 Name
 
   NodeList,
-    NorthZoneInlets,                   !- Name
-    North Zone Reheat Air Outlet Node; !- Node 1 Name
+    NorthZoneInlets,         !- Name
+    North Zone Reheat Air Outlet Node;  !- Node 1 Name
 
   Fan:ConstantVolume,
     Supply Fan 1,            !- Name
@@ -2348,95 +2369,95 @@
     ,                        !- Fin Spacing {m}
     ,                        !- Tube Depth Spacing {m}
     ,                        !- Number of Tube Rows
-    autosize,                       !- Number of Tubes per Row
+    autosize,                !- Number of Tubes per Row
     Cooling Coil Water Inlet Node,  !- Water Inlet Node Name
-    Cooling Coil Water Outlet Node, !- Water Outlet Node Name
-    Cooling Coil Air Inlet Node,    !- Air Inlet Node Name
-    Air Loop Outlet Node;           !- Air Outlet Node Name
+    Cooling Coil Water Outlet Node,  !- Water Outlet Node Name
+    Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
+    Air Loop Outlet Node;    !- Air Outlet Node Name
 
   AirTerminal:SingleDuct:ConstantVolume:Reheat,
-    Reheat West Zone,                  !- Name
-    FanAndCoilAvailSched,              !- Availability Schedule Name
+    Reheat West Zone,        !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
     West Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
-    West Zone Reheat Air Inlet Node,   !- Air Inlet Node Name
-    autosize,                          !- Maximum Air Flow Rate {m3/s}
-    Coil:Heating:Water,                !- Reheat Coil Object Type
-    Reheat Coil West Zone,             !- Reheat Coil Name
-    autosize,                          !- Maximum Hot Water or Steam Flow Rate {m3/s}
-    0.0;                               !- Minimum Hot Water or Steam Flow Rate {m3/s}
+    West Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
+    autosize,                !- Maximum Air Flow Rate {m3/s}
+    Coil:Heating:Water,      !- Reheat Coil Object Type
+    Reheat Coil West Zone,   !- Reheat Coil Name
+    autosize,                !- Maximum Hot Water or Steam Flow Rate {m3/s}
+    0.0;                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
 
   AirTerminal:SingleDuct:ConstantVolume:Reheat,
-    Reheat East Zone,                  !- Name
-    FanAndCoilAvailSched,              !- Availability Schedule Name
+    Reheat East Zone,        !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
     East Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
-    East Zone Reheat Air Inlet Node,   !- Air Inlet Node Name
-    autosize,                          !- Maximum Air Flow Rate {m3/s}
-    Coil:Heating:Water,                !- Reheat Coil Object Type
-    Reheat Coil East Zone,             !- Reheat Coil Name
-    autosize,                          !- Maximum Hot Water or Steam Flow Rate {m3/s}
-    0.0;                               !- Minimum Hot Water or Steam Flow Rate {m3/s}
+    East Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
+    autosize,                !- Maximum Air Flow Rate {m3/s}
+    Coil:Heating:Water,      !- Reheat Coil Object Type
+    Reheat Coil East Zone,   !- Reheat Coil Name
+    autosize,                !- Maximum Hot Water or Steam Flow Rate {m3/s}
+    0.0;                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
 
   AirTerminal:SingleDuct:ConstantVolume:Reheat,
-    Reheat North Zone,                 !- Name
-    FanAndCoilAvailSched,              !- Availability Schedule Name
-    North Zone Reheat Air Outlet Node, !- Air Outlet Node Name
+    Reheat North Zone,       !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
+    North Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
     North Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
-    autosize,                          !- Maximum Air Flow Rate {m3/s}
-    Coil:Heating:Water,                !- Reheat Coil Object Type
-    Reheat Coil North Zone,            !- Reheat Coil Name
-    autosize,                          !- Maximum Hot Water or Steam Flow Rate {m3/s}
-    0.0;                               !- Minimum Hot Water or Steam Flow Rate {m3/s}
+    autosize,                !- Maximum Air Flow Rate {m3/s}
+    Coil:Heating:Water,      !- Reheat Coil Object Type
+    Reheat Coil North Zone,  !- Reheat Coil Name
+    autosize,                !- Maximum Hot Water or Steam Flow Rate {m3/s}
+    0.0;                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
 
   Coil:Heating:Water,
-    Reheat Coil West Zone,                   !- Name
-    FanAndCoilAvailSched,                    !- Availability Schedule Name
-    autosize,                                !- U-Factor Times Area Value {W/K}
-    autosize,                                !- Maximum Water Flow Rate {m3/s}
-    West Zone Reheat Water Inlet Node,       !- Water Inlet Node Name
-    West Zone Reheat Water Outlet Node,      !- Water Outlet Node Name
-    West Zone Reheat Air Inlet Node,         !- Air Inlet Node Name
-    West Zone Reheat Air Outlet Node,        !- Air Outlet Node Name
+    Reheat Coil West Zone,   !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
+    autosize,                !- U-Factor Times Area Value {W/K}
+    autosize,                !- Maximum Water Flow Rate {m3/s}
+    West Zone Reheat Water Inlet Node,  !- Water Inlet Node Name
+    West Zone Reheat Water Outlet Node,  !- Water Outlet Node Name
+    West Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
+    West Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
     UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    autosize,                                !- Rated Capacity {W}
-    82.2,                                    !- Rated Inlet Water Temperature {C}
-    16.6,                                    !- Rated Inlet Air Temperature {C}
-    71.1,                                    !- Rated Outlet Water Temperature {C}
-    32.2,                                    !- Rated Outlet Air Temperature {C}
-    ;                                        !- Rated Ratio for Air and Water Convection
+    autosize,                !- Rated Capacity {W}
+    82.2,                    !- Rated Inlet Water Temperature {C}
+    16.6,                    !- Rated Inlet Air Temperature {C}
+    71.1,                    !- Rated Outlet Water Temperature {C}
+    32.2,                    !- Rated Outlet Air Temperature {C}
+    ;                        !- Rated Ratio for Air and Water Convection
 
   Coil:Heating:Water,
-    Reheat Coil East Zone,                   !- Name
-    FanAndCoilAvailSched,                    !- Availability Schedule Name
-    autosize,                                !- U-Factor Times Area Value {W/K}
-    autosize,                                !- Maximum Water Flow Rate {m3/s}
-    East Zone Reheat Water Inlet Node,       !- Water Inlet Node Name
-    East Zone Reheat Water Outlet Node,      !- Water Outlet Node Name
-    East Zone Reheat Air Inlet Node,         !- Air Inlet Node Name
-    East Zone Reheat Air Outlet Node,        !- Air Outlet Node Name
+    Reheat Coil East Zone,   !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
+    autosize,                !- U-Factor Times Area Value {W/K}
+    autosize,                !- Maximum Water Flow Rate {m3/s}
+    East Zone Reheat Water Inlet Node,  !- Water Inlet Node Name
+    East Zone Reheat Water Outlet Node,  !- Water Outlet Node Name
+    East Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
+    East Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
     UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    autosize,                                !- Rated Capacity {W}
-    82.2,                                    !- Rated Inlet Water Temperature {C}
-    16.6,                                    !- Rated Inlet Air Temperature {C}
-    71.1,                                    !- Rated Outlet Water Temperature {C}
-    32.2,                                    !- Rated Outlet Air Temperature {C}
-    ;                                        !- Rated Ratio for Air and Water Convection
+    autosize,                !- Rated Capacity {W}
+    82.2,                    !- Rated Inlet Water Temperature {C}
+    16.6,                    !- Rated Inlet Air Temperature {C}
+    71.1,                    !- Rated Outlet Water Temperature {C}
+    32.2,                    !- Rated Outlet Air Temperature {C}
+    ;                        !- Rated Ratio for Air and Water Convection
 
   Coil:Heating:Water,
-    Reheat Coil North Zone,                  !- Name
-    FanAndCoilAvailSched,                    !- Availability Schedule Name
-    autosize,                                !- U-Factor Times Area Value {W/K}
-    autosize,                                !- Maximum Water Flow Rate {m3/s}
-    North Zone Reheat Water Inlet Node,      !- Water Inlet Node Name
-    North Zone Reheat Water Outlet Node,     !- Water Outlet Node Name
-    North Zone Reheat Air Inlet Node,        !- Air Inlet Node Name
-    North Zone Reheat Air Outlet Node,       !- Air Outlet Node Name
+    Reheat Coil North Zone,  !- Name
+    FanAndCoilAvailSched,    !- Availability Schedule Name
+    autosize,                !- U-Factor Times Area Value {W/K}
+    autosize,                !- Maximum Water Flow Rate {m3/s}
+    North Zone Reheat Water Inlet Node,  !- Water Inlet Node Name
+    North Zone Reheat Water Outlet Node,  !- Water Outlet Node Name
+    North Zone Reheat Air Inlet Node,  !- Air Inlet Node Name
+    North Zone Reheat Air Outlet Node,  !- Air Outlet Node Name
     UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-    autosize,                                !- Rated Capacity {W}
-    82.2,                                    !- Rated Inlet Water Temperature {C}
-    16.6,                                    !- Rated Inlet Air Temperature {C}
-    71.1,                                    !- Rated Outlet Water Temperature {C}
-    32.2,                                    !- Rated Outlet Air Temperature {C}
-    ;                                        !- Rated Ratio for Air and Water Convection
+    autosize,                !- Rated Capacity {W}
+    82.2,                    !- Rated Inlet Water Temperature {C}
+    16.6,                    !- Rated Inlet Air Temperature {C}
+    71.1,                    !- Rated Outlet Water Temperature {C}
+    32.2,                    !- Rated Outlet Air Temperature {C}
+    ;                        !- Rated Ratio for Air and Water Convection
 
   AirLoopHVAC:ZoneSplitter,
     Zone Supply Air Splitter,!- Name

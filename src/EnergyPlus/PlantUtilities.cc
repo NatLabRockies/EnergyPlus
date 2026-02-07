@@ -888,7 +888,7 @@ void PullCompInterconnectTrigger(EnergyPlusData &state,
     //  of the simulation when components are first calling their sim flag requests.  After that
     //  the INOUT index variable will be used to avoid reallocation and string compares.
     // Error handling will be put in to ensure unique identifiers are used for debugging purposes.
-    // A single component may have multiple check indeces, but a single index will only have one
+    // A single component may have multiple check indices, but a single index will only have one
     //  associated component.  Therefore whenever we come in with a non-zero index, we will just
     //  verify that the stored loop/side/branch/comp matches
 
@@ -1360,7 +1360,7 @@ void RegisterPlantCompDesignFlow(EnergyPlusData &state,
     //       RE-ENGINEERED  B. Griffith April 2011, allow to enter repeatedly
 
     // PURPOSE OF THIS SUBROUTINE:
-    // Regester the design fluid flow rates of plant components for sizing purposes
+    // Register the design fluid flow rates of plant components for sizing purposes
     // in an array that can be accessed by the plant manager routines
     // allows sizing routines to iterate by safely processing repeated calls from the same component
 

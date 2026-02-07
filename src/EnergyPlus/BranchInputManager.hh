@@ -134,6 +134,7 @@ namespace BranchInputManager {
 
     // Functions
     void ManageBranchInput(EnergyPlusData &state);
+    void ManageConnectorInput(EnergyPlusData &state);
 
     //==================================================================================
     //   Routines that "get" data from internal branch management structure

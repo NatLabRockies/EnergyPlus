@@ -213,7 +213,7 @@ void InitializeRuntimeLanguage(EnergyPlusData &state)
     state.dataRuntimeLang->ErlVariable(state.dataRuntimeLangProcessor->CurrentTimeVariableNum).Value = SetErlValueNumber(tmpCurrentTime);
     tmpMinutes = ((tmpCurrentTime - double(state.dataGlobal->HourOfDay - 1)) * 60.0); // -1.0 // off by 1
     state.dataRuntimeLang->ErlVariable(state.dataRuntimeLangProcessor->MinuteVariableNum).Value = SetErlValueNumber(tmpMinutes);
-    // Subtract 7 from HolidayIndex to maintain compatability for EMS where 1=Holiday,2=SummerDesignDay, 3=WinterDesignDay, 4=CustomDay1,
+    // Subtract 7 from HolidayIndex to maintain compatibility for EMS where 1=Holiday,2=SummerDesignDay, 3=WinterDesignDay, 4=CustomDay1,
     // 5=CustomDay2, but not <0
     if (state.dataEnvrn->HolidayIndex == 0) {
         state.dataRuntimeLang->ErlVariable(state.dataRuntimeLangProcessor->HolidayVariableNum).Value = SetErlValueNumber(0.0);
@@ -370,7 +370,7 @@ void BeginEnvrnInitializeRuntimeLanguage(EnergyPlusData &state)
         state.dataRuntimeLang->TrendVariable(TrendVarNum).TrendValARR({1, TrendDepth}) = 0.0;
     }
 
-    // reinitilize sensors
+    // reinitialize sensors
     for (SensorNum = 1; SensorNum <= state.dataRuntimeLang->NumSensors; ++SensorNum) {
         SetInternalVariableValue(
             state, state.dataRuntimeLang->Sensor(SensorNum).VariableType, state.dataRuntimeLang->Sensor(SensorNum).Index, 0.0, 0);
@@ -980,7 +980,7 @@ void WriteTrace(EnergyPlusData &state, int const StackNum, int const Instruction
     //       AUTHOR         Peter Graham Ellis
     //       DATE WRITTEN   June 2006
     //       MODIFIED       Brent Griffith, May 2009
-    //                      Brent Griffith, May 2016, added bool and fatal error messages for runtime problems with math and unitialized vars
+    //                      Brent Griffith, May 2016, added bool and fatal error messages for runtime problems with math and uninitialized vars
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
@@ -1335,7 +1335,7 @@ void ParseExpression(EnergyPlusData &state,
             std::string const cc(String.substr(Pos, 2));
             if (parse("==", ErlFunc::Equal, false) || parse("<>", ErlFunc::NotEqual, false) || parse("<=", ErlFunc::LessOrEqual, false) ||
                 parse(">=", ErlFunc::GreaterOrEqual, false) || parse("||", ErlFunc::LogicalOR, false) || parse("&&", ErlFunc::LogicalAND, false)) {
-                // One of the comparision / logical operators
+                // One of the comparison / logical operators
                 OperatorProcessing = true;
 
             } else if (String[Pos] == '@') { // next check for builtin functions signaled by "@"
@@ -1679,7 +1679,7 @@ int ProcessTokens(
                 state.dataRuntimeLang->ErlExpression(ExpressionNum).NumOperands = NumOperands;
                 state.dataRuntimeLang->ErlExpression(ExpressionNum).Operand.allocate(NumOperands);
 
-                // PE commment: Need a right-hand and left-hand check for these, not just number of operators
+                // PE comment: Need a right-hand and left-hand check for these, not just number of operators
                 // Unification of TYPEs would turn these into one-liners
 
                 state.dataRuntimeLang->ErlExpression(ExpressionNum).Operand(1).Type = static_cast<Value>(static_cast<int>(Token(Pos - 1).Type));
@@ -3817,7 +3817,7 @@ ErlValueType StringValue(std::string const &String)
 {
     // FUNCTION INFORMATION:
     //       AUTHOR         P. Ellis
-    //       DATE WRITTEN   unkown
+    //       DATE WRITTEN   unknown
     //       MODIFIED       na
     //       RE-ENGINEERED  na
 
@@ -4006,7 +4006,7 @@ int NewEMSVariable(EnergyPlusData &state, std::string const &VariableName, int c
 
 void ExternalInterfaceSetErlVariable(EnergyPlusData &state,
                                      int const varNum,  // The variable index to be written during run time
-                                     Real64 const value // The real time value of the vairable to be set
+                                     Real64 const value // The real time value of the variable to be set
 )
 {
 

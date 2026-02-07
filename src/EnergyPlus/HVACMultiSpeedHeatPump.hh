@@ -107,6 +107,7 @@ namespace HVACMultiSpeedHeatPump {
         Real64 FanVolFlow;                        // Supply fan volumetric flow rate
 
         Sched::Schedule *fanOpModeSched = nullptr; // Supply air fan operating mode schedule
+
         HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // mode of operation; 1=cycling fan, cycling compressor; 2=continuous fan, cycling compresor
 
         std::string HeatCoilName;               // COIL:DX:MultiSpeed:Heating name
@@ -244,7 +245,7 @@ namespace HVACMultiSpeedHeatPump {
     struct MSHeatPumpReportData
     {
         // Members
-        Real64 ElecPowerConsumption;   // Electricity Rate comsumption: CondenserFan+CrankcaseHeater+Defroster+aux
+        Real64 ElecPowerConsumption;   // Electricity Rate consumption: CondenserFan+CrankcaseHeater+Defroster+aux
         Real64 HeatRecoveryEnergy;     // Heat recovery rate [J]
         Real64 CycRatio;               // Cycle ratio
         Real64 SpeedRatio;             // Speed ratio between two stages

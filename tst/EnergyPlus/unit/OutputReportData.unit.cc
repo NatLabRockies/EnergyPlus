@@ -204,7 +204,7 @@ TEST_F(EnergyPlusFixture, OutputReportData_Regex)
     ASSERT_TRUE(process_idf(idf_objects));
 
     EXPECT_EQ(state->dataOutput->NumConsideredOutputVariables, 10);
-    // FindItemInVariableList is case-insentive, so we also test that
+    // FindItemInVariableList is case-insensitive, so we also test that
     EXPECT_TRUE(FindItemInVariableList(*state, "Outside Air Inlet Node", "System Node Mass Flow Rate"));
     EXPECT_TRUE(FindItemInVariableList(*state, "OUTSIDE AIR INLET NODE", "System Node Mass Flow Rate"));
     EXPECT_TRUE(FindItemInVariableList(*state, "OutsIDE AiR InLEt NoDE", "System NoDE MaSS FLOw Rate"));

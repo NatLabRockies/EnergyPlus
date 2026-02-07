@@ -3842,7 +3842,7 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
 
     } else { // DO NOT CORRECT FOR SLAT CURVATURE
 
-        //  CHECK TO SEE IF BEAM IS ALLIGNED WITH SLATS
+        //  CHECK TO SEE IF BEAM IS ALIGNED WITH SLATS
         if (std::abs(PHI + OMEGA) < state.dataWindowEquivalentLayer->SMALL_ERROR) { // YES!
             RHO_BD = 0.0;
             TAU_BB = 1.0;
@@ -3864,7 +3864,7 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
                 TAU_BB = 0.0;
                 VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
             } //  END CHECK FOR DIRECT BEAM TRANSMISSION
-        } // END CHECK TO SEE IF BEAM ALLIGNED WITH SLATS
+        } // END CHECK TO SEE IF BEAM ALIGNED WITH SLATS
     }
 }
 

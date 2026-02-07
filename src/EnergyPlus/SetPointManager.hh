@@ -464,7 +464,7 @@ namespace SetPointManager {
 
     void ManageSetPoints(EnergyPlusData &state);
 
-    void GetSetPointManagerInputs(EnergyPlusData &state); // wrapper for GetInput to accomodate unit testing
+    void GetSetPointManagerInputs(EnergyPlusData &state); // wrapper for GetInput to accommodate unit testing
 
     void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound);
 

@@ -96,7 +96,7 @@ namespace WindowAC {
         int CoilNumOfSpeeds;                    // number of speed levels for variable speed DX coil
         int CoilAirOutletNode = 0;                    // Outlet node number of DX cooling coil
         HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // mode of operation; 1=cycling fan, cycling compressor,
-        // 2=continuous fan, cycling compresor
+        // 2=continuous fan, cycling compressor
         HVAC::FanPlace fanPlace; // fan placement; 1=blow through, 2=draw through
         int MaxIterIndex1;
         int MaxIterIndex2;

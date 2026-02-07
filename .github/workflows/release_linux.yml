@@ -96,7 +96,7 @@ jobs:
       run: cmake --build . --target package -j 4
 
     - name: Upload Tarball as artifact for testing
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: energyplus-${{ matrix.os }}
         path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
@@ -164,7 +164,7 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Gather Test Package from Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: energyplus-${{ matrix.os }}
           path: package

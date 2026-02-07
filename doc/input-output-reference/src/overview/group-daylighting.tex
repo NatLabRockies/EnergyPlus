@@ -186,32 +186,30 @@ These three fields are the X, Y and Z values of the reference point in the coord
 An IDF example:
 
 \begin{lstlisting}
+Daylighting:Controls,
+  West Zone_DaylCtrl,         !- Name
+  West Zone,                  !- Zone or Space Name
+  SplitFlux,                  !- Daylighting Method
+  ,                           !- Availability Schedule Name
+  Continuous,                 !- Lighting Control Type
+  0.3,                        !- Minimum Input Power Fraction for Continuous or ContinuousOff Dimming Control
+  0.2,                        !- Minimum Light Output Fraction for Continuous or ContinuousOff Dimming Control
+  ,                           !- Number of Stepped Control Steps
+  1.0,                        !- Probability Lighting will be Reset When Needed in Manual Stepped Control
+  West Zone_DaylRefPt1,       !- Glare Calculation Daylighting Reference Point Name
+  180.0,                      !- Glare Calculation Azimuth Angle of View Direction Clockwise from Zone y-Axis {deg}
+  20.0,                       !- Maximum Allowable Discomfort Glare Index
+  ,                           !- DElight Gridding Resolution {m2}
+  West Zone_DaylRefPt1,       !- Daylighting Reference Point 1 Name
+  1.0,                        !- Fraction of Lights Controlled by Reference Point 1
+  500.;                       !- Illuminance Setpoint at Reference Point 1 {lux}
 
-  Daylighting:Controls,
-    West Zone_DaylCtrl,      !- Name
-    West Zone,               !- Zone or Space Name
-    SplitFlux,               !- Daylighting Method
-    ,                        !- Availability Schedule Name
-    Continuous,              !- Lighting Control Type
-    0.3,                     !- Minimum Input Power Fraction for Continuous or ContinuousOff Dimming Control
-    0.2,                     !- Minimum Light Output Fraction for Continuous or ContinuousOff Dimming Control
-    ,                        !- Number of Stepped Control Steps
-    1.0,                     !- Probability Lighting will be Reset When Needed in Manual Stepped Control
-    West Zone_DaylRefPt1,    !- Glare Calculation Daylighting Reference Point Name
-    180.0,                   !- Glare Calculation Azimuth Angle of View Direction Clockwise from Zone y-Axis {deg}
-    20.0,                    !- Maximum Allowable Discomfort Glare Index
-    ,                        !- DElight Gridding Resolution {m2}
-    West Zone_DaylRefPt1,    !- Daylighting Reference Point 1 Name
-    1.0,                     !- Fraction of Lights Controlled by Reference Point 1
-    500.;                    !- Illuminance Setpoint at Reference Point 1 {lux}
-
-  Daylighting:ReferencePoint,
-    West Zone_DaylRefPt1,    !- Name
-    West Zone,               !- Zone or Space Name
-    3.048,                   !- X-Coordinate of Reference Point {m}
-    3.048,                   !- Y-Coordinate of Reference Point {m}
-    0.9;                     !- Z-Coordinate of Reference Point {m}
-
+Daylighting:ReferencePoint,
+  West Zone_DaylRefPt1,       !- Name
+  West Zone,                  !- Zone or Space Name
+  3.048,                      !- X-Coordinate of Reference Point {m}
+  3.048,                      !- Y-Coordinate of Reference Point {m}
+  0.9;                        !- Z-Coordinate of Reference Point {m}
 \end{lstlisting}
 
 \subsection{Guidelines for Daylighting Modeling Using the SplitFlux Method)}\label{guidelines-for-daylighting-modeling-splitflux-method}
@@ -377,7 +375,6 @@ Type name of the DElight daylighting Complex Fenestration system to be analyzed.
 
 
 \begin{lstlisting}
-
 BTDF^GEN^Analytical Type^Normal Visible Transmittance^Dispersion Angle
 
 BTDF^FILE^Filename
@@ -405,13 +402,12 @@ The in-plane counter-clockwise rotation angle between the Complex Fenestration o
 An IDF example for an analytical WINDOW type CFS:
 
 \begin{lstlisting}
-
 Daylighting:DELight:ComplexFenestration,
-      Window CFS,       !- DElight Complex Fenestration User Name
-      BTDF^GEN^WINDOW^1.0^20.0,     !- Complex Fenestration Type
-      ZN003:WALL001,  !- Complex Fenestration Host Surface
-      Zn003:Wall001:Doppel001, !- Doppelganger Surface Name
-      0.0;            !- Fenestration Rotation {deg}
+  Window CFS,                 !- DElight Complex Fenestration User Name
+  BTDF^GEN^WINDOW^1.0^20.0,   !- Complex Fenestration Type
+  ZN003:WALL001,              !- Complex Fenestration Host Surface
+  Zn003:Wall001:Doppel001,    !- Doppelganger Surface Name
+  0.0;                        !- Fenestration Rotation {deg}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-004}
@@ -555,17 +551,16 @@ The maximum Y coordinate boundary for the map.
 The number of daylighting reference points in the Y direction from the minimum to the maximum boundaries. The maximum number of points that can be generated is 2500 (Number of X Grid Points X Number of Y Grid Points).
 
 \begin{lstlisting}
-
 Output:IlluminanceMap,
-    Daylit Map,      ! Map Name
-    Daylit Zone,     ! Zone or Space Name
-    0,               ! Z Height [m]
-    0.1,             ! X Minimum Coordinate [m]
-    4.9,             ! X Maximum Coordinate [m]
-    10,              ! Number of X Grid Points
-    0.1,             ! Y Minimum Coordinate [m]
-    9.9,             ! Y Maximum Coordinate [m]
-    10;              ! Number of Y grid Points
+  Daylit Map,                 !- Map Name
+  Daylit Zone,                !- Zone or Space Name
+  0,                          !- Z Height [m]
+  0.1,                        !- X Minimum Coordinate [m]
+  4.9,                        !- X Maximum Coordinate [m]
+  10,                         !- Number of X Grid Points
+  0.1,                        !- Y Minimum Coordinate [m]
+  9.9,                        !- Y Maximum Coordinate [m]
+  10;                         !- Number of Y grid Points
 \end{lstlisting}
 
 \subsection{OutputControl:IlluminanceMap:Style}\label{outputcontrolilluminancemapstyle}
@@ -681,43 +676,43 @@ The \emph{Transition Zone Name} and \emph{Transition Zone Length} fields can be 
 
 \begin{lstlisting}
 DaylightingDevice:Tubular,
-  Pipe1,                    !- Object Name
-  Dome1,                    !- Dome Name
-  Diffuser1,                !- Diffuser Name
-  Reflective Aluminum,      !- Construction Name
-  0.3556,                   !- Diameter [m] (approximately 14", a standard size)
-  1.4,                      !- Total Length [m] (subtract zone lengths to get outdoor exposed length)
-  0.28,                     !- Effective Thermal Resistance [m2-K/W] between TubularDaylightDome and TubularDaylightDiffuser
-  Attic Zone,               !- Transition Zone 1 Name
-  1.1;                      !- Transition Zone 1 Length [m]
+  Pipe1,                      !- Object Name
+  Dome1,                      !- Dome Name
+  Diffuser1,                  !- Diffuser Name
+  Reflective Aluminum,        !- Construction Name
+  0.3556,                     !- Diameter [m] (approximately 14", a standard size)
+  1.4,                        !- Total Length [m] (subtract zone lengths to get outdoor exposed length)
+  0.28,                       !- Effective Thermal Resistance [m2-K/W] between TubularDaylightDome and TubularDaylightDiffuser
+  Attic Zone,                 !- Transition Zone 1 Name
+  1.1;                        !- Transition Zone 1 Length [m]
 
 FenestrationSurface:Detailed,
-  Dome1,  !- Subsurface Name
-  TubularDaylightDome,  !- Surface Type
-  Clear Acrylic Dome,  !- Construction Name (only 1 layer allowed in construction)
-  Attic Roof,  !- Base Surface Name
-  ,  !- Outside Face Environment (not allowed for TubularDaylightDome)
-  0.0,  !- VF to Ground
-  ,  !- Window Shading Control (not allowed for TubularDaylightDome)
-  ,  !- Frame/Divider Name (not allowed for TubularDaylightDome)
-  1.0,  !- Multiplier (must be 1.0 for TubularDaylightDome)
-  4,  !- Number of Vertices
+  Dome1,                      !- Subsurface Name
+  TubularDaylightDome,        !- Surface Type
+  Clear Acrylic Dome,         !- Construction Name (only 1 layer allowed in construction)
+  Attic Roof,                 !- Base Surface Name
+  ,                           !- Outside Face Environment (not allowed for TubularDaylightDome)
+  0.0,                        !- VF to Ground
+  ,                           !- Window Shading Control (not allowed for TubularDaylightDome)
+  ,                           !- Frame/Divider Name (not allowed for TubularDaylightDome)
+  1.0,                        !- Multiplier (must be 1.0 for TubularDaylightDome)
+  4,                          !- Number of Vertices
   2.3425,  3.1575,  3.9,
   2.3425,  2.8425,  3.9,
   2.6575,  2.8425,  3.9,
   2.6575,  3.1575,  3.9;
 
 FenestrationSurface:Detailed,
-  Diffuser1,  !- Subsurface Name
-  TubularDaylightDiffuser,  !- Surface Type
-  Frosted Acrylic Diffuser,  !- Construction Name (only 1 layer allowed in construction)
-  Daylit Zone Ceiling,  !- Base Surface Name
-  ,  !- Outside Face Environment (not allowed for TubularDaylightDiffuser)
-  0.0,  !- VF to Ground
-  ,  !- Window Shading Control (not allowed for TubularDaylightDiffuser)
-  ,  !- Frame/Divider Name (not allowed for TubularDaylightDiffuser)
-  1.0,  !- Multiplier (must be 1.0 for TubularDaylightDiffuser)
-  4,  !- Number of Vertices
+  Diffuser1,                  !- Subsurface Name
+  TubularDaylightDiffuser,    !- Surface Type
+  Frosted Acrylic Diffuser,   !- Construction Name (only 1 layer allowed in construction)
+  Daylit Zone Ceiling,        !- Base Surface Name
+  ,                           !- Outside Face Environment (not allowed for TubularDaylightDiffuser)
+  0.0,                        !- VF to Ground
+  ,                           !- Window Shading Control (not allowed for TubularDaylightDiffuser)
+  ,                           !- Frame/Divider Name (not allowed for TubularDaylightDiffuser)
+  1.0,                        !- Multiplier (must be 1.0 for TubularDaylightDiffuser)
+  4,                          !- Number of Vertices
   2.3425,  3.1575,  2.5,
   2.3425,  2.8425,  2.5,
   2.6575,  2.8425,  2.5,
@@ -877,54 +872,54 @@ User defined value for the view factor from the window to the outside shelf. Thi
 
 \begin{lstlisting}
 DaylightingDevice:Shelf,
-    Shelf,  !- Name
-    Daylit Upper Window,  !- Window Name
-    Inside Shelf,  !- Inside Shelf Name
-    Outside Shelf,  !- Outside Shelf Name
-    Shelf Construction;  !- Outside Shelf Construction Name (required if outside shelf specified)
-    ! 0.29;  !- View Factor To Outside Shelf (optional)
+  Shelf,                      !- Name
+  Daylit Upper Window,        !- Window Name
+  Inside Shelf,               !- Inside Shelf Name
+  Outside Shelf,              !- Outside Shelf Name
+  Shelf Construction;         !- Outside Shelf Construction Name (required if outside shelf specified)
 
-FenestrationSurface:Detailed,
-    Daylit Upper Window,  !- Subsurface Name
-    Window,  !- Surface Type
-    Standard Window,  !- Construction Name
-    Daylit South Wall,  !- Base Surface Name
-    ,  !- Outside Face Environment
-    0.211,  !- VF to Ground (user must adjust to account for view factor to outside shelf)
-    ,  !- Window Shading Control (not allowed)
-    ,  !- Frame/Divider Name (not allowed)
-    1.0,  !- Multiplier (must be 1.0)
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.8,
-    1.0,  0.0,  2.0,
-    4.0,  0.0,  2.0,
-    4.0,  0.0,  2.8;
+! 0.29;  !- View Factor To Outside Shelf (optional)
+  FenestrationSurface:Detailed,
+  Daylit Upper Window,        !- Subsurface Name
+  Window,                     !- Surface Type
+  Standard Window,            !- Construction Name
+  Daylit South Wall,          !- Base Surface Name
+  ,                           !- Outside Face Environment
+  0.211,                      !- VF to Ground (user must adjust to account for view factor to outside shelf)
+  ,                           !- Window Shading Control (not allowed)
+  ,                           !- Frame/Divider Name (not allowed)
+  1.0,                        !- Multiplier (must be 1.0)
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.8,
+  1.0,  0.0,  2.0,
+  4.0,  0.0,  2.0,
+  4.0,  0.0,  2.8;
 
 BuildingSurface:Detailed,
-    Inside Shelf,  !- Surface Name
-    Wall,  !- Surface Type
-    Shelf Construction,  !- Construction Name
-    Daylit Zone,  !- Zone Name
-    OtherZoneSurface,  !- Exterior Conditions (must be OtherZoneSurface)
-    Inside Shelf,  !- Target (must be itself)
-    NoSun,  !- Solar Exposure
-    NoWind,  !- Wind Exposure
-    0.0,  !- VF to Ground
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.0,
-    4.0,  0.0,  2.0,
-    4.0,  1.0,  2.0,
-    1.0,  1.0,  2.0;
+  Inside Shelf,               !- Surface Name
+  Wall,                       !- Surface Type
+  Shelf Construction,         !- Construction Name
+  Daylit Zone,                !- Zone Name
+  OtherZoneSurface,           !- Exterior Conditions (must be OtherZoneSurface)
+  Inside Shelf,               !- Target (must be itself)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- VF to Ground
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.0,
+  4.0,  0.0,  2.0,
+  4.0,  1.0,  2.0,
+  1.0,  1.0,  2.0;
 
 Shading:Zone:Detailed,
-    Outside Shelf,  !- Surface Name
-    Daylit South Wall,  !- Base Surface Name
-    ,  !- Shading Transmittance Schedule (default is always opaque)
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.0,  !- Outward normal vector must point up toward the upper window
-    1.0, -1.0,  2.0,
-    4.0, -1.0,  2.0,
-    4.0,  0.0,  2.0;
+  Outside Shelf,              !- Surface Name
+  Daylit South Wall,          !- Base Surface Name
+  ,                           !- Shading Transmittance Schedule (default is always opaque)
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.0,            !- Outward normal vector must point up toward the upper window
+  1.0, -1.0,  2.0,
+  4.0, -1.0,  2.0,
+  4.0,  0.0,  2.0;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-002}
@@ -1020,12 +1015,12 @@ The visible reflectance of the side walls of the well. If the walls do not all h
 An IDF example:
 
 \begin{lstlisting}
-DaylightingDevice:LightWell,  ! The well is 60% reflecting, is 1.2m high and has a 2.5m x 5.5m bottom opening.
-   Skylight-1, !- Name of Exterior Window that this Light Well Applies To
-   1.2,        !- Height of Well(m)
-   16.0,       !- Perimeter of Bottom of Well (m)
-   13.75,      !- Area of Bottom of Well (m2)
-   0.60;       !- Visible Reflectance of Well Walls
+DaylightingDevice:LightWell,  !- The well is 60% reflecting, is 1.2m high and has a 2.5m x 5.5m bottom opening.
+  Skylight-1,                 !- Name of Exterior Window that this Light Well Applies To
+  1.2,                        !- Height of Well(m)
+  16.0,                       !- Perimeter of Bottom of Well (m)
+  13.75,                      !- Area of Bottom of Well (m2)
+  0.60;                       !- Visible Reflectance of Well Walls
 \end{lstlisting}
 
 \subsection{Daylighting Modeling Options}\label{daylighting-modeling-options}

@@ -28,33 +28,31 @@ When the \hyperref[utilitycostcomputation]{UtilityCost:Computation} object is us
 A typical rate will have a simple series of steps. For example F the following steps would be created automatically by the software:
 
 \begin{lstlisting}
-
 UtilityCost:Computation,
-    SpecialStepsForF,             !- Name
-    ExampleF,                     !- Tariff Name
-    EnergyCharges SUM SummerOnPeak SummerOffPeak WinterOnPeak WinterOffPeak, Compute Step 1
-    Basis SUM EnergyCharges DemandCharges ServiceCharges, Compute Step 2
-    SubTotal SUM Basis Adjustments Surcharges, Compute Step 3
-    Total SUM SubTotal Taxes, Compute Step 4
-    MinDemand; Compute Step 5
+  SpecialStepsForF,           !- Name
+  ExampleF,                   !- Tariff Name
+  EnergyCharges SUM SummerOnPeak SummerOffPeak WinterOnPeak WinterOffPeak, Compute Step 1
+  Basis SUM EnergyCharges DemandCharges ServiceCharges, Compute Step 2
+  SubTotal SUM Basis Adjustments Surcharges, Compute Step 3
+  Total SUM SubTotal Taxes, Compute Step 4
+  MinDemand; Compute Step 5
 \end{lstlisting}
 
 This example does not have any dependency of different charges that are summed on the same line but if it did the charges could appear by themselves on lines and this would indicate the order that they should be computed. Here is the same example again showing that form.
 
 \begin{lstlisting}
-
 UtilityCost:Computation,
-    SpecialStepsForF,            !- Name
-    ExampleF,                    !- Tariff Name
-    SummerOnPeak,                !- Compute Step 1
-    SummerOffPeak,               !- Compute Step 2
-    WinterOnPeak,                !- Compute Step 3
-    WinterOffPeak,               !- Compute Step 4
-    EnergyCharges SUM SummerOnPeak SummerOffPeak WinterOnPeak WinterOffPeak,  !- Compute Step 5
-    Basis SUM EnergyCharges DemandCharges ServiceCharges,                     !- Compute Step 6
-    SubTotal SUM Basis Adjustments Surcharges,   !- Compute Step 7
-    Total SUM SubTotal Taxes,                    !- Compute Step 8
-    MinDemand;                   !- Compute Step 9
+  SpecialStepsForF,           !- Name
+  ExampleF,                   !- Tariff Name
+  SummerOnPeak,               !- Compute Step 1
+  SummerOffPeak,              !- Compute Step 2
+  WinterOnPeak,               !- Compute Step 3
+  WinterOffPeak,              !- Compute Step 4
+  EnergyCharges SUM SummerOnPeak SummerOffPeak WinterOnPeak WinterOffPeak,  !- Compute Step 5
+  Basis SUM EnergyCharges DemandCharges ServiceCharges,  !- Compute Step 6
+  SubTotal SUM Basis Adjustments Surcharges,  !- Compute Step 7
+  Total SUM SubTotal Taxes,   !- Compute Step 8
+  MinDemand;                  !- Compute Step 9
 \end{lstlisting}
 
 This second expanded format is generated automatically when no \hyperref[utilitycostcomputation]{UtilityCost:Computation} object is provided.

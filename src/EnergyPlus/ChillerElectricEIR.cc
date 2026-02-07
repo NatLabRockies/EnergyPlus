@@ -685,20 +685,49 @@ void GetElectricEIRChillerInput(EnergyPlusData &state)
 
         if (thisChiller.ChillerEIRFPLRIndex > 0) {
             bool FoundNegValue = false;
+            int DecimalPrecision = 2;
             Array1D<Real64> CurveValArray(11); // Used to evaluate PLFFPLR curve objects
             for (int CurveCheck = 0; CurveCheck <= 10; ++CurveCheck) {
                 Real64 CurveValTmp = Curve::CurveValue(state, thisChiller.ChillerEIRFPLRIndex, double(CurveCheck / 10.0));
+                CurveValArray(CurveCheck + 1) = CurveValTmp;
+
                 if (CurveValTmp < 0.0) {
                     FoundNegValue = true;
+                    // Negative value has been found, so don't round it. Rounding will occasionally lead to
+                    // small negative numbers displaying as 0, making it difficult to see the cause of the error
+
+                    // Adding additional precision so you can at least see one digit for small numbers, stopping a 8
+                    if (DecimalPrecision < 8) {
+                        for (int i = DecimalPrecision; i < 9; ++i) {
+                            // Multiply it by a power of 10 to see if you have a value
+                            int MultipliedValue = abs(int(CurveValTmp * (10 ^ i)));
+                            if (MultipliedValue > 0) {
+                                // There's a value, so set the percision needed
+                                DecimalPrecision = i;
+                                break;
+                            }
+                        }
+                    }
                 }
-                CurveValArray(CurveCheck + 1) = int(CurveValTmp * 100.0) / 100.0;
             }
             if (FoundNegValue) {
+                Array1D<Real64> PLRArray(11);
+                PLRArray[0] = 0;
+                PLRArray[1] = 0.1;
+                PLRArray[2] = 0.2;
+                PLRArray[3] = 0.3;
+                PLRArray[4] = 0.4;
+                PLRArray[5] = 0.5;
+                PLRArray[6] = 0.6;
+                PLRArray[7] = 0.7;
+                PLRArray[8] = 0.8;
+                PLRArray[9] = 0.9;
+                PLRArray[10] = 1;
                 ShowSevereError(state, format("{}{}=\"{}\"", RoutineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Energy input ratio as a function of part-load ratio curve shows negative values.");
                 ShowContinueError(state, "EIR as a function of PLR curve output at various part-load ratios shown below:");
-                ShowContinueError(state, "PLR          =    0.00   0.10   0.20   0.30   0.40   0.50   0.60   0.70   0.80   0.90   1.00");
-                ShowContinueError(state, fmt::format("Curve Output = {:7.2F}", fmt::join(CurveValArray, ",")));
+                ShowContinueError(state, fmt::format("PLR          = {:7." + std::to_string(DecimalPrecision) + "F}", fmt::join(PLRArray, ",")));
+                ShowContinueError(state, fmt::format("Curve Output = {:7." + std::to_string(DecimalPrecision) + "F}", fmt::join(CurveValArray, ",")));
                 ErrorsFound = true;
             }
         }
@@ -1575,8 +1604,11 @@ void ElectricEIRChillerSpecs::size(EnergyPlusData &state)
                         state, "Chiller:Electric:EIR", this->Name, "Design Size Heat Recovery Water Flow Rate [m3/s]", tempHeatRecVolFlowRate);
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(
-                        state, "Chiller:Electric:EIR", this->Name, "Intial Design Size Heat Recovery Water Flow Rate [m3/s]", tempHeatRecVolFlowRate);
+                    BaseSizer::reportSizerOutput(state,
+                                                 "Chiller:Electric:EIR",
+                                                 this->Name,
+                                                 "Initial Design Size Heat Recovery Water Flow Rate [m3/s]",
+                                                 tempHeatRecVolFlowRate);
                 }
             }
         } else {

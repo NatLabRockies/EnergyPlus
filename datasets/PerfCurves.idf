@@ -7,9 +7,6 @@
 ! See the example input file 5ZoneAutoDXVAV for an example of their use.
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Curve:Biquadratic,
     VarSpeedCoolCapFT,       !- Name
     0.476428E+00,            !- Coefficient1 Constant
@@ -202,7 +199,7 @@
     HXDesPerf1,              !- Name
     1.32,                    !- Nominal Air Flow Rate {m3/s}
     2.54,                    !- Nominal Air Face Velocity {m/s}
-    50.0,                    !- Nominal Electricity Rate {W}
+    50.0,                    !- Nominal Electric Power {W}
     -7.18302E+00,            !- Temperature Equation Coefficient 1
     -1.84967E+02,            !- Temperature Equation Coefficient 2
     1.00051E+00,             !- Temperature Equation Coefficient 3
@@ -274,7 +271,7 @@
     HXDesPerf2,              !- Name
     1.32,                    !- Nominal Air Flow Rate {m3/s}
     4.064,                   !- Nominal Air Face Velocity {m/s}
-    50.0,                    !- Nominal Electricity Rate {W}
+    50.0,                    !- Nominal Electric Power {W}
     -2.53636E+00,            !- Temperature Equation Coefficient 1
     2.13247E+01,             !- Temperature Equation Coefficient 2
     9.23308E-01,             !- Temperature Equation Coefficient 3

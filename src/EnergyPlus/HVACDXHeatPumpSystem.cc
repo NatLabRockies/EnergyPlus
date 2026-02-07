@@ -206,7 +206,7 @@ namespace HVACDXHeatPumpSystem {
         }
         // set econo lockout flag
         // set econo lockout flag
-        if (AirLoopNum != -1) { // IF the sysem is not an equipment of outdoor air unit
+        if (AirLoopNum != -1) { // IF the system is not an equipment of outdoor air unit
 
             if ((dxhp.PartLoadFrac > 0.0) &&
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithCompressor) {

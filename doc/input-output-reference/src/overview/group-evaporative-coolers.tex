@@ -67,15 +67,14 @@ This field is optional. It is used to describe where the cooler obtains water us
 An IDF example showing how this object is:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Direct:CelDekPad,
-  Evaporative Cooler,           !- Name
-  System Availability Schedule,   !- Availability Schedule Name
-  0.6,                                         !- Direct Pad Area {m2}
-  0.2,                                         !- Direct Pad Depth {m}
-  225,                                         !- Recirculating Water Pump Power Consumption {W}
-  Evap Cooler Inlet Node,   !- Air Inlet Node Name
-  Supply Outlet Node;           !- Air Outlet Node Name
+  Evaporative Cooler,         !- Name
+  System Availability Schedule,  !- Availability Schedule Name
+  0.6,                        !- Direct Pad Area {m2}
+  0.2,                        !- Direct Pad Depth {m}
+  225,                        !- Recirculating Water Pump Power Consumption {W}
+  Evap Cooler Inlet Node,     !- Air Inlet Node Name
+  Supply Outlet Node;         !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}
@@ -217,22 +216,21 @@ This numeric field defines the evaporative cooler air inlet node drybulb tempera
 An example IDF entry is
 
 \begin{lstlisting}
-
 EvaporativeCooler:Direct:ResearchSpecial,
-  Direct Evap Cooler, !- Name
-  ALWAYS_ON,          !- Availability Schedule Name
-  0.7 ,               !- Cooler Design Effectiveness
-  ,                   !- Effectiveness Flow Ratio Modifier Curve Name
-  autosize,           !- Primary Air Design Flow Rate {m3/s}
-  30.0 ,              !- Recirculating Water Pump Design Power
-  ,                   !- Water Pump Power Sizing Factor
-  ,                   !- Water Pump Power Modifier Curve Name
-  OAIndRDD Evap Cooler-OADirect Evap CoolerNode , !- Air Inlet Node Name
-  OADirect Evap Cooler-OAMixing BoxNode, !- Air Outlet Node Name
-  OADirect Evap Cooler-OAMixing BoxNode, !- Sensor Node Name
-  ,                   !- Water Supply Storage Tank Name
-  0.0,                !- Drift Loss Fraction
-  3;                  !- Blowdown Concentration Ratio
+  Direct Evap Cooler,         !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  0.7,                        !- Cooler Design Effectiveness
+  ,                           !- Effectiveness Flow Ratio Modifier Curve Name
+  autosize,                   !- Primary Air Design Flow Rate {m3/s}
+  30.0,                       !- Recirculating Water Pump Design Power
+  ,                           !- Water Pump Power Sizing Factor
+  ,                           !- Water Pump Power Modifier Curve Name
+  OAIndRDD Evap Cooler-OADirect Evap CoolerNode,  !- Air Inlet Node Name
+  OADirect Evap Cooler-OAMixing BoxNode,  !- Air Outlet Node Name
+  OADirect Evap Cooler-OAMixing BoxNode,  !- Sensor Node Name
+  ,                           !- Water Supply Storage Tank Name
+  0.0,                        !- Drift Loss Fraction
+  3;                          !- Blowdown Concentration Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-009}
@@ -369,22 +367,21 @@ This field is optional. It is used to explicitly define an outdoor air node for 
 And an IDF example showing how this object is specified:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:CelDekPad,
-  IndirectEvapCooler1,         !- Name
+  IndirectEvapCooler1,        !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  0.6,                                         !- Direct Pad Area {m2}
-  0.2,                                         !- Direct Pad Depth {m}
-  225.,                                       !- Recirculating Water Pump Power Consumption {W}
-  1.0,                                         !- Secondary Air Fan Flow Rate {m3/s}
-  0.7,                                         !- Secondary Fan Total Efficiency
-  200.0,                                     !- Secondary Fan Delta Pressure {Pa}
-  0.67,                                       !- Indirect Heat Exchanger Effectiveness
-  EvapCoolerIndirectInletAirNode,   !- Primary Air Inlet Node Name
-  EvapCoolerDirectInletAirNode,   !- Primary Air Outlet Node Name
-  ,                                           !- Control Type
-  ,                                               !- Water Supply Storage Tank Name
-  Secondary side OA inlet node;   !- Secondary Air Inlet Node Name
+  0.6,                        !- Direct Pad Area {m2}
+  0.2,                        !- Direct Pad Depth {m}
+  225.,                       !- Recirculating Water Pump Power Consumption {W}
+  1.0,                        !- Secondary Air Fan Flow Rate {m3/s}
+  0.7,                        !- Secondary Fan Total Efficiency
+  200.0,                      !- Secondary Fan Delta Pressure {Pa}
+  0.67,                       !- Indirect Heat Exchanger Effectiveness
+  EvapCoolerIndirectInletAirNode,  !- Primary Air Inlet Node Name
+  EvapCoolerDirectInletAirNode,  !- Primary Air Outlet Node Name
+  ,                           !- Control Type
+  ,                           !- Water Supply Storage Tank Name
+  Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-008}
@@ -523,21 +520,20 @@ This field is optional. It is used to explicitly define an outdoor air node for 
 And an IDF example showing how this object is specified:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:WetCoil,
-  IndirectEvapCooler1,         !- Name
+  IndirectEvapCooler1,        !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  0.8,                                         !- Coil Maximum Efficiency
-  0.16,                                       !- Coil Flow Ratio
-  225.,                                       !- Recirculating Water Pump Power Consumption {W}
-  1.0,                                         !- Secondary Air Fan Flow Rate {m3/s}
-  0.7,                                         !- Secondary Air Fan Total Efficiency
-  200.0,                                     !- Secondary Air Fan Delta Pressure {Pa}
-  EvapCoolerIndirectInletAirNode,   !- Primary Air Inlet Node Name
-  EvapCoolerDirectInletAirNode,   !- Primary Air Outlet Node Name
-  ,                                               !- Control Type
-  ,                                               !- Water Supply Storage Tank Name
-  Secondary side OA inlet node;   !- Secondary Air Inlet Node Name
+  0.8,                        !- Coil Maximum Efficiency
+  0.16,                       !- Coil Flow Ratio
+  225.,                       !- Recirculating Water Pump Power Consumption {W}
+  1.0,                        !- Secondary Air Fan Flow Rate {m3/s}
+  0.7,                        !- Secondary Air Fan Total Efficiency
+  200.0,                      !- Secondary Air Fan Delta Pressure {Pa}
+  EvapCoolerIndirectInletAirNode,  !- Primary Air Inlet Node Name
+  EvapCoolerDirectInletAirNode,  !- Primary Air Outlet Node Name
+  ,                           !- Control Type
+  ,                           !- Water Supply Storage Tank Name
+  Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-006}
@@ -716,32 +712,30 @@ This numeric field defines the secondary air inlet node drybulb temperature limi
 An IDF example is shown below:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:ResearchSpecial,
-  DataC_IndirectEvapCooler,     !- Name
-  ALWAYS_ON,                    !- Availability Schedule Name
-  0.75,                         !- Cooler Wetbulb Design Effectiveness
-  ,              !- Wetbulb Effectiveness Flow Ratio Modifier Curve Name
-  ,                          !- Cooler Drybulb Design Effectiveness
-  ,              !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
-  autosize,                     !- Recirculating Water Pump Power
-  autosize,                     !- Secondary Air Design Flow Rate
-  1.0,                          !- Secondary Air Flow Scaling Factor
-
-  autosize,                     !- Secondary Air Fan Design Power
-  800.0,                        !- Secondary Air Fan Sizing Specific Power W
-  ,               !- Secondary Air Fan Power Modifier Curve Name
-  Return Air Node,              !- Primary Air Inlet Node Name
-  IndEC Outlet Node,            !- Primary Air Outlet Node Name
-  autosize,                     !- Primary Design Air Flow Rate
-  0.9 ,                         !- Dewpoint Effectiveness Factor
-  IndEC OA Air Inlet Node,      !- Secondary Air Inlet Node Name
-  IndEC OA Air Outlet Node,     !- Secondary Air Outlet Node Name
-  IndEC Outlet Node,            !- Sensor Node Name
-  ,                             !- Relief Air Inlet Node Name
-  ,                             !- Water Supply Storage Tank Name
-  0.0,                          !- Drift Loss Fraction
-  ;                             !- Blowdown Concentration Ratio
+  DataC_IndirectEvapCooler,   !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  0.75,                       !- Cooler Wetbulb Design Effectiveness
+  ,                           !- Wetbulb Effectiveness Flow Ratio Modifier Curve Name
+  ,                           !- Cooler Drybulb Design Effectiveness
+  ,                           !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
+  autosize,                   !- Recirculating Water Pump Power
+  autosize,                   !- Secondary Air Design Flow Rate
+  1.0,                        !- Secondary Air Flow Scaling Factor
+  autosize,                   !- Secondary Air Fan Design Power
+  800.0,                      !- Secondary Air Fan Sizing Specific Power W
+  ,                           !- Secondary Air Fan Power Modifier Curve Name
+  Return Air Node,            !- Primary Air Inlet Node Name
+  IndEC Outlet Node,          !- Primary Air Outlet Node Name
+  autosize,                   !- Primary Design Air Flow Rate
+  0.9,                        !- Dewpoint Effectiveness Factor
+  IndEC OA Air Inlet Node,    !- Secondary Air Inlet Node Name
+  IndEC OA Air Outlet Node,   !- Secondary Air Outlet Node Name
+  IndEC Outlet Node,          !- Sensor Node Name
+  ,                           !- Relief Air Inlet Node Name
+  ,                           !- Water Supply Storage Tank Name
+  0.0,                        !- Drift Loss Fraction
+  ;                           !- Blowdown Concentration Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-004}

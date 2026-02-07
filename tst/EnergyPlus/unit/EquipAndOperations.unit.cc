@@ -373,7 +373,7 @@ TEST_F(DistributeEquipOpTest, EvaluateChillerHeaterChangeoverOpSchemeTest)
 
     // check to see if correct plant equipment are active
     auto &eqcool = chillerHeaterSupervisor.CoolingOnlyEquipList(1).Comp(1);
-    // set cooling demand node temp above cooling set point so equipment is actived if needed
+    // set cooling demand node temp above cooling set point so equipment is activated if needed
     // heating demand temp = 0 (not initialized) so heating will be active if needed (i.e., temp < heating set point)
     state->dataLoopNodes->Node(eqcool.DemandNodeNum).Temp = 10.0;
     auto &eqheat = chillerHeaterSupervisor.HeatingOnlyEquipList(1).Comp(1);
@@ -572,7 +572,7 @@ TEST_F(DistributeEquipOpTest, SupervisoryControlLogicForAirSourcePlantsTest)
     auto &eqcool = chillerHeaterSupervisor.CoolingOnlyEquipList(1).Comp(1);
     auto &CoolEq1_status = state->dataPlnt->PlantLoop(1).LoopSide(eqcool.LoopSideNumPtr).Branch(eqcool.BranchNumPtr).Comp(eqcool.CompNumPtr).ON;
     auto &HeatEq1_status = state->dataPlnt->PlantLoop(2).LoopSide(eqheat.LoopSideNumPtr).Branch(eqheat.BranchNumPtr).Comp(eqheat.CompNumPtr).ON;
-    // set cooling demand node temp above cooling set point so equipment is actived if needed
+    // set cooling demand node temp above cooling set point so equipment is activated if needed
     state->dataLoopNodes->Node(eqcool.DemandNodeNum).Temp = 10.0;
     auto &zone1SysEnergyDemand = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(chillerHeaterSupervisor.ZonePtrs(1));
     auto &zone2SysEnergyDemand = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(chillerHeaterSupervisor.ZonePtrs(2));

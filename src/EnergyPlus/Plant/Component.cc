@@ -72,7 +72,7 @@ namespace DataPlant {
         //       MODIFIED       June 2000  -Brandon Anderson
         //                             Changed to Group Similar Components.  Components will
         //                         be defined by ComponentType:SpecificComponent.
-        //                         The colon will act as the type delimeter, So all
+        //                         The colon will act as the type delimiter, So all
         //                         components of one type will be grouped. ex.(Boilers,Chillers)
         //                       May 2003 - Simon Rees
         //                         Added initial loop to force free cooling chiller etc to be

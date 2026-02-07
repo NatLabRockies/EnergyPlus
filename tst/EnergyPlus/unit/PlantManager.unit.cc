@@ -282,7 +282,7 @@ namespace PlantManager {
         // Check first equipment type
         DataPlant::CtrlType ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::Boiler_Simple)];
         EXPECT_EQ(ctrlType, DataPlant::CtrlType::HeatingOp);
-        // Check last dew equipment types
+        // Check last few equipment types
         ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::CoolingPanel_Simple)];
         EXPECT_EQ(ctrlType, DataPlant::CtrlType::Invalid);
         ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::HeatPumpEIRCooling)];
@@ -291,6 +291,10 @@ namespace PlantManager {
         EXPECT_EQ(ctrlType, DataPlant::CtrlType::HeatingOp);
         ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::PurchSteam)];
         EXPECT_EQ(ctrlType, DataPlant::CtrlType::HeatingOp);
+        // Check that last slot is initialized
+        ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::Num) - 1];
+        EXPECT_EQ(ctrlType, DataPlant::CtrlType::HeatingOp);
+
         // Check random other types
         ctrlType = DataPlant::PlantEquipmentCtrlType[static_cast<int>(DataPlant::PlantEquipmentType::FluidCooler_SingleSpd)];
         EXPECT_EQ(ctrlType, DataPlant::CtrlType::CoolingOp);

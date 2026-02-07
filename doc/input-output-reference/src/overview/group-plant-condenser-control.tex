@@ -62,21 +62,20 @@ This alpha field contains the schedule name for the control scheme. This schedul
 Examples of this statement in two different IDFs:
 
 \begin{lstlisting}
+PlantEquipmentOperationSchemes,
+  CW Loop Operation,          !- Name
+  PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+  Peak Operation,             !- Control Scheme 1 Name
+  On Peak,                    !- Control Scheme 1 Schedule
+  PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 2 Object Type
+  Off Peak Operation,         !- Control Scheme 2 Name
+  Off Peak;                   !- Control Scheme 2 Schedule
 
 PlantEquipmentOperationSchemes,
-      CW Loop Operation,       !- Name
-      PlantEquipmentOperation:CoolingLoad,  ! Control Scheme 1 Object Type
-      Peak Operation,          !- Control Scheme 1 Name
-      On Peak,                 !- Control Scheme 1 Schedule
-      PlantEquipmentOperation:CoolingLoad,  ! Control Scheme 2 Object Type
-      Off Peak Operation,      !- Control Scheme 2 Name
-      Off Peak;                !- Control Scheme 2 Schedule
-
-  PlantEquipmentOperationSchemes,
-      CW Loop Operation,       !- Name
-      PlantEquipmentOperation:CoolingLoad,  ! Control Scheme 1 Object Type
-      Central Chiller Only,    !- Control Scheme 1 Name
-      PlantOnSched;            !- Control Scheme 1 Schedule
+  CW Loop Operation,          !- Name
+  PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+  Central Chiller Only,       !- Control Scheme 1 Name
+  PlantOnSched;               !- Control Scheme 1 Schedule
 \end{lstlisting}
 
 In the first IDF example, ``\hyperref[plantequipmentoperationcoolingload]{PlantEquipmentOperation:CoolingLoad}'' is the type of control scheme. ``Peak Operation'' and ``Off Peak Operation'' are the names of two different load range based controls defined separately (see below -- ). ``On Peak'' and ``Off Peak'' are schedules defined elsewhere in the input file.
@@ -141,17 +140,16 @@ Scheduling conflicts are handled by selecting the first available scheme in orde
 Examples of this statement in two IDFs:
 
 \begin{lstlisting}
-
 CondenserEquipmentOperationSchemes,
-      Tower Loop Operation,    !- CondenserOperationSchemeName
-      PlantEquipmentOperation:CoolingLoad,  Control Scheme 1 Object Type
-      Year Round Tower Operation,  !- Control Scheme 1 Name
-      PlantOnSched;            !- Control Scheme 1 Schedule
+  Tower Loop Operation,       !- CondenserOperationSchemeName
+  PlantEquipmentOperation:CoolingLoad,  Control Scheme 1 Object Type
+  Year Round Tower Operation, !- Control Scheme 1 Name
+  PlantOnSched;               !- Control Scheme 1 Schedule
 
-  CondenserEquipmentOperationSchemes,Tower Loop Operation,
-      PlantEquipmentOperation:CoolingLoad, Peak Load Operation, AFTERNOONSCHEDULE,
-      PlantEquipmentOperation:CoolingLoad, OffPeak Load Operation, MORNINGSCHEDULE,
-      PlantEquipmentOperation:OutdoorWetBulb, NightOperation, NIGHTSCHEDULE;
+CondenserEquipmentOperationSchemes,Tower Loop Operation,
+  PlantEquipmentOperation:CoolingLoad, Peak Load Operation, AFTERNOONSCHEDULE,
+  PlantEquipmentOperation:CoolingLoad, OffPeak Load Operation, MORNINGSCHEDULE,
+  PlantEquipmentOperation:OutdoorWetBulb, NightOperation, NIGHTSCHEDULE;
 \end{lstlisting}
 
 Each schedule (AFTERNOONSCHEDULE, MORNINGSCHEDULE, NIGHTSCHEDULE) invokes its associated operation scheme (Peak Load Operation, OffPeak Load Operation, NightOperation). The type of operation scheme and its name references the input syntax associated with the range specification and the associated equipment.
@@ -205,42 +203,40 @@ This alpha field contains the identifying name for the Equipment List (i.e., the
 An example of these statements in an IDF is:
 
 \begin{lstlisting}
-
 PlantEquipmentOperation:CoolingLoad, Peak Operation,
-          0,7000,   Chiller Plant,
-          7000,24500,   Chiller Plant and Purchased,
-          24500,500000, Purchased Only;
+  0,7000,   Chiller Plant,
+  7000,24500,   Chiller Plant and Purchased,
+  24500,500000, Purchased Only;
 \end{lstlisting}
 
 This particular load based operation scheme (above) has three different ranges. ``Chiller Plant'', ``Chiller Plant and Purchased'', and ``Purchased Only'' are names which link to various \hyperref[plantequipmentlist]{PlantEquipmentList} or \hyperref[condenserequipmentlist]{CondenserEquipmentList} objects as described below. Gaps may be left in the load ranges specified, but to operate equipment over the entire range the upper limit of a given range must equal the lower limit of the next range as shown in the example. If gaps are left in the load ranges specified, a warning message will be issued when the load to be met falls within a load range ``gap''. If the user wishes to leave a load range ``gap'' for a specific reason (no equipment to operate on this plant {[}or condenser{]} loop within this load range) and does not want the warning messages to be generated, then specify a lower limit, upper limit and equipment list name for the gap and do not specify any equipment in the associated equipment list, as shown below.
 
 \begin{lstlisting}
-
 PlantEquipmentOperation:CoolingLoad, Peak Operation,
-      0,7000,   Chiller Plant,
-      7000,7100, NoEquipmentOperationOnThisPlantLoop,
-      7100,24500,   Chiller Plant and Purchased,
-      24500,500000, Purchased Only;
+  0,7000,   Chiller Plant,
+  7000,7100, NoEquipmentOperationOnThisPlantLoop,
+  7100,24500,   Chiller Plant and Purchased,
+  24500,500000, Purchased Only;
 
-  PlantEquipmentList,
-      Chiller Plant,           !- Name
-      Chiller:Electric,        !- Equipment 1 Object Type
-      Big Chiller;             !- Equipment 1 Name
+PlantEquipmentList,
+  Chiller Plant,              !- Name
+  Chiller:Electric,           !- Equipment 1 Object Type
+  Big Chiller;                !- Equipment 1 Name
 
-  PlantEquipmentList,
-      NoEquipmentOperationOnThisPlantLoop;    !- Name
+PlantEquipmentList,
+  NoEquipmentOperationOnThisPlantLoop;  !- Name
 
-  PlantEquipmentList,
-      Chiller Plant and Purchased,  !- Name
-      Chiller:Electric,        !- Equipment 1 Object Type
-      Big Chiller,             !- Equipment 1 Name
-      DistrictCooling,         !- Equipment 2 Object Type
-      Purchased Cooling;       !- Equipment 2 Name
+PlantEquipmentList,
+  Chiller Plant and Purchased,!- Name
+  Chiller:Electric,           !- Equipment 1 Object Type
+  Big Chiller,                !- Equipment 1 Name
+  DistrictCooling,            !- Equipment 2 Object Type
+  Purchased Cooling;          !- Equipment 2 Name
 
-  PlantEquipmentList,
-      Purchased Only,          !- Name
-      DistrictCooling,         !- Equipment 1 Object Type
-      Purchased Cooling;       !- Equipment 1 Name
+PlantEquipmentList,
+  Purchased Only,             !- Name
+  DistrictCooling,            !- Equipment 1 Object Type
+  Purchased Cooling;          !- Equipment 1 Name
 \end{lstlisting}
 
 \subsection{PlantEquipmentOperation:OutdoorDryBulb}\label{plantequipmentoperationoutdoordrybulb}
@@ -354,27 +350,26 @@ This alpha field specifies the operation mode for the equipment. The equipment c
 And, as an example in an IDF:
 
 \begin{lstlisting}
-
 PlantEquipmentOperationSchemes,
-      CW Loop Operation,       !- PlantOperationSchemeName
-      PlantEquipmentOperation:ComponentSetpoint, ! Control Scheme 1 Object Type
-      Test Scheme,                         !- Control Scheme 1 Name
-      On;                                  !- Control Scheme 1 Schedule
+  CW Loop Operation,          !- PlantOperationSchemeName
+  PlantEquipmentOperation:ComponentSetpoint,  !- Control Scheme 1 Object Type
+  Test Scheme,                !- Control Scheme 1 Name
+  On;                         !- Control Scheme 1 Schedule
 
-  PlantEquipmentOperation:ComponentSetpoint,
-      Test Scheme,
-      CHILLER:ELECTRIC,        !- Equipment 1 Object Type
-      Little Chiller,          !- Equipment 1 Name
-      Little Chiller Inlet Node, !- Demand Calculation 1 Node Name
-      Little Chiller Outlet Node, !- Setpoint 1 Node Name
-      0.0011,                     !- Component 1 Flow Rate
-      COOLING,                    !- Operation 1 Type
-      CHILLER:ELECTRIC,        !- Equipment 2 Object Type
-      Big Chiller,             !- Equipment 2 Name
-      Big Chiller Inlet Node,  !- Demand Calculation 2 Node Name
-      Big Chiller Outlet Node, !- Setpoint 2 Node Name
-      0.0011,                  !- Component 2 Flow Rate
-      COOLING;                 !- Operation 2 Type
+PlantEquipmentOperation:ComponentSetpoint,
+  Test Scheme,
+  CHILLER:ELECTRIC,           !- Equipment 1 Object Type
+  Little Chiller,             !- Equipment 1 Name
+  Little Chiller Inlet Node,  !- Demand Calculation 1 Node Name
+  Little Chiller Outlet Node, !- Setpoint 1 Node Name
+  0.0011,                     !- Component 1 Flow Rate
+  COOLING,                    !- Operation 1 Type
+  CHILLER:ELECTRIC,           !- Equipment 2 Object Type
+  Big Chiller,                !- Equipment 2 Name
+  Big Chiller Inlet Node,     !- Demand Calculation 2 Node Name
+  Big Chiller Outlet Node,    !- Setpoint 2 Node Name
+  0.0011,                     !- Component 2 Flow Rate
+  COOLING;                    !- Operation 2 Type
 \end{lstlisting}
 
 \subsection{PlantEquipmentOperation:ThermalEnergyStorage}\label{plantequipmentoperationthermalenergystorage}
@@ -432,31 +427,30 @@ This alpha field specifies the operation mode for the equipment. The equipment c
 An example IDF is shown below:
 
 \begin{lstlisting}
-
 PlantEquipmentOperationSchemes,
-  CW Loop Operation,       !- Name
+  CW Loop Operation,          !- Name
   PlantEquipmentOperation:ThermalEnergyStorage,  !- Control Scheme 1 Object Type
   Chiller and Partial Ice Storage,  !- Control Scheme 1 Name
-  PlantOnSched;            !- Control Scheme 1 Schedule Name
+  PlantOnSched;               !- Control Scheme 1 Schedule Name
 
-  PlantEquipmentOperation:ThermalEnergyStorage,
+PlantEquipmentOperation:ThermalEnergyStorage,
   Chiller and Partial Ice Storage,  !- Name
-  OnPeakEnergy,            !- On-Peak Schedule Name
-  ChargingAvail,           !- Charging Availability Schedule Name
-  7.22,                    !- Non-charging Chilled Water Temperature
-  -5.0,                    !- Charging Chilled Water Temperature
-  Chiller:Electric,        !- Component 1 Object Type
-  Central Chiller,         !- Component 1 Name
-  Central Chiller Inlet Node,  !- Component 1 Demand Calculation Node Name
-  Central Chiller Outlet Node,  !- Component 1 Setpoint Node Name
-  autosize,                !- Component 1 Flow Rate {m3/s}
-  COOLING,                 !- Component 1 Operation Type
-  ThermalStorage:Ice:Detailed,  !- Component 2 Object Type
-  Ice Tank,                !- Component 2 Name
-  Ice Tank Inlet Node,     !- Component 2 Demand Calculation Node Name
-  Ice Tank Outlet Node,    !- Component 2 Setpoint Node Name
-  0.13506E-02,             !- Component 2 Flow Rate {m3/s}
-  DUAL;                    !- Component 2 Operation Type
+  OnPeakEnergy,               !- On-Peak Schedule Name
+  ChargingAvail,              !- Charging Availability Schedule Name
+  7.22,                       !- Non-charging Chilled Water Temperature
+  -5.0,                       !- Charging Chilled Water Temperature
+  Chiller:Electric,           !- Component 1 Object Type
+  Central Chiller,            !- Component 1 Name
+  Central Chiller Inlet Node, !- Component 1 Demand Calculation Node Name
+  Central Chiller Outlet Node,!- Component 1 Setpoint Node Name
+  autosize,                   !- Component 1 Flow Rate {m3/s}
+  COOLING,                    !- Component 1 Operation Type
+  ThermalStorage:Ice:Detailed,!- Component 2 Object Type
+  Ice Tank,                   !- Component 2 Name
+  Ice Tank Inlet Node,        !- Component 2 Demand Calculation Node Name
+  Ice Tank Outlet Node,       !- Component 2 Setpoint Node Name
+  0.13506E-02,                !- Component 2 Flow Rate {m3/s}
+  DUAL;                       !- Component 2 Operation Type
 \end{lstlisting}
 
 \subsection{PlantEquipmentOperation:ChillerHeaterChangeover}\label{plantequipmentoperationchillerheaterchangeover}
@@ -554,46 +548,45 @@ This alpha field specifies the name of a water-to-water heat pump (HeatPump:Plan
 Examples of this object:
 
 \begin{lstlisting}
+PlantEquipmentOperation:ChillerHeaterChangeover,
+  Two AWHP Operation Scheme,  !- Name
+  6.6,                        !- Primary Cooling Plant Setpoint Temperature
+  10.0,                       !- Secondary Distribution Cooling Plant Setpoint Temperature
+  59.8,                       !- Primary Heating Plant Setpoint at Outdoor High Temperature
+  10.0,                       !- Outdoor High Temperature
+  37.6,                       !- Primary Heating Plant Setpoint at Outdoor Low Temperature
+  0.0,                        !- Outdoor Low Temperature
+  45.0,                       !- Secondary Distribution Heating Plant Setpoint Temperature
+  All Conditioned Zones,      !- Zone Load Polling ZoneList Name
+  Two AWHP Cooling Operation Scheme,  !- Cooling Only Load Plant Equipment Operation Cooling Load Name
+  Two AWHP Heating Operation Scheme,  !- Heating Only Load Plant Equipment Operation Heating Load Name
+  One AWHP Cooling Operation Scheme,  !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name
+  One AWHP Heating Operation Scheme,  !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
+  Dedicated HR Cooling Side WSHP,  !- Dedicated Chilled Water Return Recovery HeatPump Name
+  Dedicated HR Heating Side WSHP;  !- Dedicated Hot Water Return Recovery HeatPump Name
 
-  PlantEquipmentOperation:ChillerHeaterChangeover,
-    Two AWHP Operation Scheme , !- Name
-    6.6 ,                                           !- Primary Cooling Plant Setpoint Temperature
-    10.0,                                           !- Secondary Distribution Cooling Plant Setpoint Temperature
-    59.8 ,                                          !- Primary Heating Plant Setpoint at Outdoor High Temperature
-    10.0,                                           !- Outdoor High Temperature
-    37.6 ,                                          !- Primary Heating Plant Setpoint at Outdoor Low Temperature
-    0.0 ,                                           !- Outdoor Low Temperature
-    45.0 ,                                          !- Secondary Distribution Heating Plant Setpoint Temperature
-    All Conditioned Zones,                          !- Zone Load Polling ZoneList Name
-    Two AWHP Cooling Operation Scheme,              !- Cooling Only Load Plant Equipment Operation Cooling Load Name
-    Two AWHP Heating Operation Scheme,              !- Heating Only Load Plant Equipment Operation Heating Load Name
-    One AWHP Cooling Operation Scheme,              !- Simultaneous Cooling And Heating Plant Equipment Operation Cooling Load Name
-    One AWHP Heating Operation Scheme,              !- Simultaneous Cooling And Heating Plant Equipment Operation Heating Load Name
-    Dedicated HR Cooling Side WSHP,                 !- Dedicated Chilled Water Return Recovery HeatPump Name
-    Dedicated HR Heating Side WSHP;                 !- Dedicated Hot Water Return Recovery HeatPump Name
+ZoneList,
+  All Conditioned Zones,      !- Name
+  Basement,                   !- Zone name 1
+  Core_bottom,                !- Zone name 2
+  Core_mid,                   !- Zone name 3
+  continue with all zone names attached to these plant loops;
 
-  ZoneList,
-    All Conditioned Zones,         !- Name
-    Basement,                         !- Zone name 1
-    Core_bottom,                     !- Zone name 2
-    Core_mid,                          !- Zone name 3
-    continue with all zone names attached to these plant loops;
+PlantEquipmentOperation:CoolingLoad,
+  Two AWHP Cooling Operation Scheme,  !- Name
+  0.0,                        !- Load Range 1 Lower Limit {W}
+  50000,                      !- Load Range 1 Upper Limit {W}
+  One AWHP Cooling Equipment List,  !- Range 1 Equipment List Name
+  50000,                      !- Load Range 2 Lower Limit {W}
+  10000000000000,             !- Load Range 2 Upper Limit {W}
+  Two AWHP Cooling Equipment List;  !- Range 2 Equipment List Name
 
-  PlantEquipmentOperation:CoolingLoad,
-    Two AWHP Cooling Operation Scheme,  !- Name
-    0.0,                                                   !- Load Range 1 Lower Limit {W}
-    50000,                                               !- Load Range 1 Upper Limit {W}
-    One AWHP Cooling Equipment List,        !- Range 1 Equipment List Name
-    50000,                                               !- Load Range 2 Lower Limit {W}
-    10000000000000,                                !- Load Range 2 Upper Limit {W}
-    Two AWHP Cooling Equipment List;        !- Range 2 Equipment List Name
-
-  PlantEquipmentList,
-    Two AWHP Cooling Equipment List,  !- Name
-    HeatPump:PlantLoop:EIR:Cooling,   !- Equipment 1 Object Type
-    AWHP_1 Cooling Side,                   !- Equipment 1 Name
-    HeatPump:PlantLoop:EIR:Cooling,   !- Equipment 2 Object Type
-    AWHP_2 Cooling Side;                   !- Equipment 2 Name  
+PlantEquipmentList,
+  Two AWHP Cooling Equipment List,  !- Name
+  HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
+  AWHP_1 Cooling Side,        !- Equipment 1 Name
+  HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 2 Object Type
+  AWHP_2 Cooling Side;        !- Equipment 2 Name
 \end{lstlisting}
 
 \paragraph{Output reporting available with the supervisory controller:}\label{operation-scheme-heating-outputs-description}
@@ -688,10 +681,9 @@ This alpha field contains the identifying name for the equipment in operation. T
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 PlantEquipmentList, Chiller Plant and Purchased,
-          Chiller:Electric, Big Chiller,
-          DistrictCooling, Purchased Cooling;
+  Chiller:Electric, Big Chiller,
+  DistrictCooling, Purchased Cooling;
 \end{lstlisting}
 
 Note that this list is the middle range defined in the \hyperref[plantequipmentoperationcoolingload]{PlantEquipmentOperation:CoolingLoad} statement named ``Peak Operation'' above. This defines the equipment available when the load encountered by the plant (chiller water demand, for example) is between 7000 W and 24500 W. EnergyPlus will run the ``Big Chiller'' first up to its capacity and then attempt to meet the remaining load (while in that range) with the next piece of equipment (in this case, ``Purchased:Cooling'') in the list.

@@ -443,6 +443,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
                                                       "Load , !- Operating Mode Control Method",
                                                       "SingleMode, !- Operating Mode Control Option for Multiple Unit",
                                                       ", !- Operating Mode Control Schedule Name",
+                                                      ",    !- Minimum Part Load Ratio",
                                                       "20 , !-  Rated Inlet Air Temperature in Heating Mode",
                                                       "1.0, !-  Rated Air Flow Rate in Heating Mode",
                                                       "50 , !-  Rated Leaving Water Temperature in Heating Mode",
@@ -451,7 +452,6 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
                                                       ", !-  Maximum Outdoor Air Temperature in Heating Mode",
                                                       ",    !- Minimum Leaving Water Temperature Curve Name in Heating Mode",
                                                       ",    !- Maximum Leaving Water Temperature Curve Name in Heating Mode",
-                                                      ",    !- Minimum Part Load Ratio",
                                                       "1.0, !-  Sizing Factor for Heating",
                                                       "25, !-  Rated Inlet Air Temperature in Cooling Mode",
                                                       "0.002, !-  Rated Air Flow Rate in Cooling Mode",
@@ -694,6 +694,7 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
         "Load , !- Operating Mode Control Method",
         "SingleMode, !- Operating Mode Control Option for Multiple Unit",
         ", !- Operating Mode Control Schedule Name",
+        ",    !- Minimum Part Load Ratio",
         "20 , !-  Rated Inlet Air Temperature in Heating Mode",
         "0.1 , !-  Rated Air Flow Rate in Heating Mode",
         "50 , !-  Rated Leaving Water Temperature in Heating Mode",
@@ -702,7 +703,6 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
         "25, !-  Maximum Outdoor Air Temperature in Heating Mode",
         "MinLWTvsOAT,    !- Minimum Leaving Water Temperature Curve Name in Heating Mode",
         "MaxLWTvsOAT,    !- Maximum Leaving Water Temperature Curve Name in Heating Mode",
-        ",    !- Minimum Part Load Ratio",
         "1.0, !-  Sizing Factor for Heating",
         "25, !-  Rated Inlet Air Temperature in Cooling Mode",
         "0.1 , !-  Rated Air Flow Rate in Cooling Mode",
@@ -801,6 +801,7 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
         ", !- Operating Mode Control Method",
         ", !- Operating Mode Control Option for Multiple Unit",
         ", !- Operating Mode Control Schedule Name",
+        ",    !- Minimum Part Load Ratio",
         ", !-  Rated Inlet Air Temperature in Heating Mode",
         ", !-  Rated Air Flow Rate in Heating Mode",
         ", !-  Rated Leaving Water Temperature in Heating Mode",
@@ -809,7 +810,6 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
         ", !-  Maximum Outdoor Air Temperature in Heating Mode",
         ",    !- Minimum Leaving Water Temperature Curve Name in Heating Mode",
         ",    !- Maximum Leaving Water Temperature Curve Name in Heating Mode",
-        ",    !- Minimum Part Load Ratio",
         ", !-  Sizing Factor for Heating",
         ", !-  Rated Inlet Air Temperature in Cooling Mode",
         ", !-  Rated Air Flow Rate in Cooling Mode",
@@ -4481,6 +4481,7 @@ TEST_F(EnergyPlusFixture, Test_DoPhysics_AWHP)
                           "Load , !- Operating Mode Control Method",
                           "SingleMode, !- Operating Mode Control Option for Multiple Unit",
                           ", !- Operating Mode Control Schedule Name",
+                          ",    !- Minimum Part Load Ratio",
                           "20 , !-  Rated Inlet Air Temperature in Heating Mode",
                           "0.002, !-  Rated Air Flow Rate in Heating Mode",
                           "50 , !-  Rated Leaving Water Temperature in Heating Mode",
@@ -4489,7 +4490,6 @@ TEST_F(EnergyPlusFixture, Test_DoPhysics_AWHP)
                           "25, !-  Maximum Outdoor Air Temperature in Heating Mode",
                           ",    !- Minimum Leaving Water Temperature Curve Name in Heating Mode",
                           ",    !- Maximum Leaving Water Temperature Curve Name in Heating Mode",
-                          ",    !- Minimum Part Load Ratio",
                           "1.0, !-  Sizing Factor for Heating",
                           "25, !-  Rated Inlet Air Temperature in Cooling Mode",
                           "0.002, !-  Rated Air Flow Rate in Cooling Mode",
@@ -7287,7 +7287,7 @@ TEST_F(EnergyPlusFixture, GAHP_AirSource_CurveEval)
 
     // I am picking a temperature that is:
     // * Below the 'Maximum Outdoor Dry-bulb Temperature for Defrost Operation' I entered (5.0C)
-    // * Between the harcoded min/max defrost temperatures of 16F/-8.88C | 38F/3.33C
+    // * Between the hardcoded min/max defrost temperatures of 16F/-8.88C | 38F/3.33C
     double constexpr oaTemp = 3.0;
     state->dataEnvrn->OutDryBulbTemp = oaTemp;
 

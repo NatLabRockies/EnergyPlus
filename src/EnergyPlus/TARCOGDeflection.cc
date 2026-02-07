@@ -104,7 +104,7 @@ void PanesDeflection(DeflectionCalculation const DeflectionStandard,
     EP_SIZE_CHECK(PoissonsRat, maxlay);
     EP_SIZE_CHECK(LayerDeflection, maxlay);
 
-    // Localy used
+    // Locally used
     Array1D<Real64> DCoeff(maxlay);
 
     // first calculate D coefficients since that will be necessary for any of selected standards
@@ -164,7 +164,7 @@ void DeflectionTemperatures(int const nlayer,
     // Static constants
     static Real64 const Pi_6(pow_6(Constant::Pi));
 
-    // localy used
+    // locally used
     Array1D<Real64> DPressure(maxlay); // delta pressure at each glazing layer
     Array1D<Real64> Vini(MaxGap);
     Array1D<Real64> Vgap(MaxGap);

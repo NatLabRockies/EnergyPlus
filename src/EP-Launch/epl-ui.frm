@@ -1197,6 +1197,9 @@ Begin VB.Form eplUI
          Begin VB.Menu mnuViewSpSZ 
             Caption         =   "SpSZ File"
          End
+         Begin VB.Menu mnuViewPSZ 
+            Caption         =   "PSZ File"
+         End
          Begin VB.Menu mnuViewAUDIT 
             Caption         =   "AUDIT File"
             Shortcut        =   ^{F8}
@@ -2124,6 +2127,7 @@ End Sub
 
 
 
+
 Private Sub queueTimer_Timer()
 Call manageSimulationQueue
 End Sub
@@ -2209,6 +2213,9 @@ Call viewZSZFile
 End Sub
 Private Sub mnuViewSpSZ_Click()
 Call viewSpSZFile
+End Sub
+Private Sub mnuViewPSZ_Click()
+Call viewPSZFile
 End Sub
 Private Sub mnuViewTABLE_Click()
 Call viewTABLEfile
@@ -5702,6 +5709,39 @@ If Err.Number = 0 Then
   Exit Sub
 End If
 End Sub
+
+
+'=======================================================
+' View PSZ file
+'=======================================================
+Sub viewPSZFile()
+Dim filelength As Long
+' check first for text file
+On Error Resume Next
+Err.Clear
+filelength = FileLen(outputFileName & "Psz.txt")
+If Err.Number = 0 Then
+  Call RunOutputEditorSingleFile("Psz.txt")
+  Exit Sub
+End If
+Err.Clear
+filelength = FileLen(outputFileName & "Psz.csv")
+If Err.Number = 0 Then
+  Call runOutputSpreadsheetSingleFile("Psz.csv")
+  Exit Sub
+End If
+Err.Clear
+filelength = FileLen(outputFileName & "Psz.tab")
+If Err.Number = 0 Then
+  If tabWithSpreadsheet Then
+    Call runOutputSpreadsheetSingleFile("Psz.tab")
+  Else
+    Call RunOutputEditorSingleFile("Psz.tab")
+  End If
+  Exit Sub
+End If
+End Sub
+
 
 '=======================================================
 ' View TABLE file

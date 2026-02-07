@@ -168,7 +168,7 @@ TEST_F(EnergyPlusFixture, DemandManagerAssignmentListGetInputTest)
     dMgrIndex = Util::FindItemInList("EXT LIGHTS MANAGER", DemandMgr);
     auto &lightsDmndMgr = state->dataDemandManager->DemandMgr(dMgrIndex);
     EXPECT_EQ("EXT LIGHTS MANAGER", lightsDmndMgr.Name);
-    // test expected fatal error due to wrong demand manager objet name
+    // test expected fatal error due to wrong demand manager object name
     // object name in the list and in the object are different
     std::string expected_error = delimited_string({
         "   ** Severe  ** DemandManagerAssignmentList = \"DEMAND MANAGER\" invalid DemandManager Name = \"EXT LIGHTS MANAGER 1\" not found.",

@@ -839,7 +839,7 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     EXPECT_EQ("POWER MODULE EFFICIENCY CURVE", fCPM.EffCurve->Name);
     EXPECT_EQ(1.0, fCPM.NomEff);
     EXPECT_EQ(3400.0, fCPM.NomPel);
-    // At beggining of simulation, 10. Then it's ALWAYS ON (baseload), so it doesn't cycle, so still should be 10
+    // At beginning of simulation, 10. Then it's ALWAYS ON (baseload), so it doesn't cycle, so still should be 10
     EXPECT_EQ(10, fCPM.NumCycles);
     EXPECT_EQ(0.0, fCPM.CyclingDegradRat);
     EXPECT_EQ(1.0, fCPM.NomEff);
@@ -888,7 +888,7 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     EXPECT_EQ(1.0, airSup.BlowerHeatLossFactor);
     EXPECT_ENUM_EQ(DataGenerators::AirSupRateMode::ConstantStoicsAirRat, airSup.AirSupRateMode);
 
-    // Note: as mentionned in the IO/ref, Stoics ratio is the input + 1.0
+    // Note: as mentioned in the IO/ref, Stoics ratio is the input + 1.0
     EXPECT_EQ(2.0, airSup.Stoics);
 
     ASSERT_GT(airSup.AirFuncPelCurve->Num, 0);
@@ -1790,7 +1790,7 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
 //     EXPECT_EQ("POWER MODULE EFFICIENCY CURVE", state->dataCurveManager->PerfCurve(fCPM.EffCurveID)->Name);
 //     EXPECT_EQ(1.0, fCPM.NomEff);
 //     EXPECT_EQ(3400.0, fCPM.NomPel);
-//     // At beggining of simulation, 10. Then it's ALWAYS ON (baseload), so it doesn't cycle, so still should be 10
+//     // At beginning of simulation, 10. Then it's ALWAYS ON (baseload), so it doesn't cycle, so still should be 10
 //     EXPECT_EQ(10, fCPM.NumCycles);
 //     EXPECT_EQ(0.0, fCPM.CyclingDegradRat);
 //     EXPECT_EQ(1.0, fCPM.NomEff);
@@ -1839,7 +1839,7 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
 //     EXPECT_EQ(1.0, airSup.BlowerHeatLossFactor);
 //     EXPECT_ENUM_EQ(DataGenerators::AirSupRateMode::QuadraticFuncofPel, airSup.AirSupRateMode);
 //
-//     // Note: as mentionned in the IO/ref, Stoics ratio is the input + 1.0
+//     // Note: as mentioned in the IO/ref, Stoics ratio is the input + 1.0
 //     EXPECT_EQ(2.0, airSup.Stoics);
 //
 //     ASSERT_GT(airSup.AirFuncPelCurveID, 0);

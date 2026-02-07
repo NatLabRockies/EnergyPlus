@@ -8893,6 +8893,9 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    No,                      !- Do HVAC Sizing Simulation for Sizing Periods",
         "    1;                       !- Maximum Number of HVAC Sizing Simulation Passes",
 
+        "  Output:Diagnostics,",
+        "    ReportDuringWarmup;",
+
         "  Building,",
         "    Ref Bldg Small Office New2004_v1.3_5.0,  !- Name",
         "    0.0000,                  !- North Axis {deg}",
@@ -9122,6 +9125,22 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    1,                       !- Multiplier",
         "    autocalculate,           !- Ceiling Height {m}",
         "    autocalculate;           !- Volume {m3}",
+
+        "  Schedule:Compact,",
+        "    always_on_lights,  !- Name",
+        "    ,             !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: SummerDesignDay WinterDesignDay, !- Field 2"
+        "    Until: 24:00,0,          !- Field 3"
+        "    For: AllOtherDays,            !- Field 2",
+        "    Until: 24:00,1;       !- Field 3",
+
+        "  Lights,",
+        "    lights_obj,",
+        "    core_zn,",
+        "    always_on_lights,",
+        "    lightinglevel,",
+        "    1;",
 
         "  GlobalGeometryRules,",
         "    UpperLeftCorner,         !- Starting Vertex Position",
@@ -10079,7 +10098,11 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // OA flow rate
     EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_MaxCoolAirVolFlow, 0.65598, 0.001);
     // Cooling capacity
-    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24885.6323, 0.05);
+    EXPECT_NEAR(state->dataUnitarySystems->unitarySys[0].m_DesignCoolingCapacity, 24883.6371, 0.05);
+
+    // Check meter accumulation
+    // Lights are 1W so the meter should be 3600 [J] * 24 hours
+    EXPECT_TRUE(state->dataOutputProcessor->meters[4]->periodFinYrSM.Value == 3600 * 24);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)

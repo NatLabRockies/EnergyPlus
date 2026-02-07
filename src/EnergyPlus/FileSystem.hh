@@ -172,7 +172,7 @@ namespace FileSystem {
 
     bool fileExists(fs::path const &filePath);
 
-    // Checks that fileExists(filePath), if so tries to rename to destination, falling back on copy+remove if failed (if trying to do move accross
+    // Checks that fileExists(filePath), if so tries to rename to destination, falling back on copy+remove if failed (if trying to do move across
     // devices for eg)
     void moveFile(fs::path const &filePath, fs::path const &destinationPath);
 

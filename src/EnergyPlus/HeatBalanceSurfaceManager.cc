@@ -8333,8 +8333,8 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
                 if (state.dataHeatBal->InsideSurfIterations == 0) { // Do windows only once
                     // Get outside convection coeff for exterior window here to avoid calling
                     // InitExteriorConvectionCoeff from CalcWindowHeatBalance, which avoids circular reference
-                    // (HeatBalanceSurfaceManager USEing and WindowManager and
-                    // WindowManager USEing HeatBalanceSurfaceManager)
+                    // (HeatBalanceSurfaceManager using and WindowManager and
+                    // WindowManager using HeatBalanceSurfaceManager)
                     if (surface.ExtBoundCond == DataSurfaces::ExternalEnvironment) {
                         auto const *thisMaterial = s_mat->materials(construct.LayerPoint(1));
                         Material::SurfaceRoughness RoughSurf = thisMaterial->Roughness; // Outside surface roughness
@@ -9041,8 +9041,8 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
                         if (state.dataHeatBal->InsideSurfIterations == 0) { // Do windows only once
                             // Get outside convection coeff for exterior window here to avoid calling
                             // InitExteriorConvectionCoeff from CalcWindowHeatBalance, which avoids circular reference
-                            // (HeatBalanceSurfaceManager USEing and WindowManager and
-                            // WindowManager USEing HeatBalanceSurfaceManager)
+                            // (HeatBalanceSurfaceManager using and WindowManager and
+                            // WindowManager using HeatBalanceSurfaceManager)
                             if (surface.ExtBoundCond == DataSurfaces::ExternalEnvironment) {
                                 auto const *thisMaterial = s_mat->materials(construct.LayerPoint(1));
                                 assert(thisMaterial != nullptr);

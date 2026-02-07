@@ -275,7 +275,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
     bool SimZoneEquipment(false);
     SimAirServingZones::SimAirLoops(*state, true, SimZoneEquipment);
 
-    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num contollers on air loop)
+    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num controllers on air loop)
     ASSERT_EQ(1, airSys.NumControllers);
     ASSERT_EQ(1, airSys.ControllerIndex(1));
     ASSERT_EQ(1, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
@@ -309,7 +309,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_SchSetPointMgrsOrderTest)
         "	Until: 24:00, 1.0;        !- Field 3",
 
         "  Controller:WaterCoil,",
-        "    Cooling Coil Contoller,  !- Name",
+        "    Cooling Coil Controller,  !- Name",
         "    HumidityRatio,           !- Control Variable",
         "    Reverse,                 !- Action",
         "    FLOW,                    !- Actuator Variable",
@@ -348,7 +348,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_SchSetPointMgrsOrderTest)
         "  AirLoopHVAC:ControllerList,",
         "	CW Coil Controller,       !- Name",
         "	Controller:WaterCoil,     !- Controller 1 Object Type",
-        "	Cooling Coil Contoller;   !- Controller 1 Name",
+        "	Cooling Coil Controller;   !- Controller 1 Name",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1018,7 +1018,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     // and issue a warning
     SimAirServingZones::SimAirLoops(*state, true, SimZoneEquipment);
 
-    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num contollers on air loop)
+    // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num controllers on air loop)
     ASSERT_EQ(1, airSys.NumControllers);
     ASSERT_EQ(1, airSys.ControllerIndex(1));
     ASSERT_EQ(1, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);

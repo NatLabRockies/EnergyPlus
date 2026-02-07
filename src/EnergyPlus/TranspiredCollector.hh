@@ -74,7 +74,7 @@ namespace TranspiredCollector {
         std::string Name;
         std::string OSCMName;                             // OtherSideConditionsModel
         int OSCMPtr;                                      // OtherSideConditionsModel index
-        Sched::Schedule *availSched = nullptr;            // Availablity schedule
+        Sched::Schedule *availSched = nullptr;            // Availability schedule
         Array1D_int InletNode;                            // Air system node "pointer", should be set to outdoor air
         Array1D_int OutletNode;                           // Air system node "pointer", outlet from UTSC
         Array1D_int ControlNode;                          // Air system node "pointer", should have mixed air setpoint
@@ -96,9 +96,9 @@ namespace TranspiredCollector {
         Real64 Cv;                                        // volume-based effectiveness of openings for wind-driven vent when Passive
         Real64 Cd;                                        // discharge coefficient of openings for buoyancy-driven vent when Passive
         int NumOASysAttached;                             // =1 if no splitter, other wise set by Splitter object
-        Sched::Schedule *freeHeatSetPointSched = nullptr; // used for controlling seperately from usual setpoint managers.
+        Sched::Schedule *freeHeatSetPointSched = nullptr; // used for controlling separately from usual setpoint managers.
         int VsucErrIndex;
-        // data from elswhere and calculated
+        // data from elsewhere and calculated
         Real64 ActualArea; // Overall Area of Collect with surface corrugations.
         Real64 ProjArea;   // Overall Area of Collector projected, as if flat [m2]
         Vector Centroid;   // computed centroid
@@ -111,7 +111,7 @@ namespace TranspiredCollector {
         Real64 HrPlen;     // Modeled radiation coef for OSCM [W/m2-C]
         Real64 HcPlen;     // Modeled Convection coef for OSCM [W/m2-C]
         Real64 MdotVent;   // air mass flow exchanging with ambient when passive.
-        Real64 HdeltaNPL;  // lenth scale for buoyancy-driven vent when Passive [m]
+        Real64 HdeltaNPL;  // length scale for buoyancy-driven vent when Passive [m]
         Real64 TairHX;     // air drybulb of air leaving collector when Active [C]
         Real64 InletMDot;  // flow rate from outdoor mixer controller
         Real64 InletTempDB;

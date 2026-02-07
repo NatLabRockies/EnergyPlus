@@ -552,7 +552,7 @@ namespace RoomAir {
         Real64 TThisNode;       // dummy variable for air node temp
         int NodeNum;            // index for air nodes
         int SurfNum;            // index for surfaces
-        int SurfCounted;        // number of surfaces assciated with an air node
+        int SurfCounted;        // number of surfaces associated with an air node
 
         //   apply floor splits
         QequipConvFloor = state.dataRoomAir->ConvectiveFloorSplit(ZoneNum) * state.dataMundtSimMgr->ConvIntGain;

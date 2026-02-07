@@ -322,7 +322,7 @@ void InitializeRootFinder(EnergyPlusData &state,
         }
     }
 
-    // First save current candidate value before it is overriden in ResetRootFinder()
+    // First save current candidate value before it is overridden in ResetRootFinder()
     SavedXCandidate = RootFinderData.XCandidate;
 
     // Reset internal data for root finder with actual min and max values
@@ -1518,7 +1518,7 @@ bool BracketRoot(RootFinderDataType const &RootFinderData, // Data used by root 
     // using the secant formula to take advantage of the slope between the last 2
     // iterates.
     // Returns TRUE if successfully computed a new bracket in XNext.
-    // Else returns FASLE and does not update the XNext argument.
+    // Else returns FALSE and does not update the XNext argument.
     // Should only be used while in braketing mode (iMethodBracket).
     // When the lower and upper brackets are detected then the FUNCTION SecantMethod
     // should be used instead.

@@ -448,7 +448,7 @@ void ConstructionProps::calculateTransferFunction(EnergyPlusData &state, bool &E
                     RevConst = false;
                 }
 
-                if (RevConst) { // Curent construction is a reverse of
+                if (RevConst) { // Current construction is a reverse of
                     // construction Constr.  Thus, CTFs do not need to be re-
                     // calculated.  Copy CTF info for construction Constr to
                     // construction ConstrNum.
@@ -1122,7 +1122,7 @@ void ConstructionProps::calculateExponentialMatrix()
     // precision variables has been added.  The main loop for higher powers
     // of AMat is now stopped whenever these powers of AMat will no longer
     // add to the summation (AExp) instead ofstopping potentially at the
-    // artifical limit of AMat**100.
+    // artificial limit of AMat**100.
 
     // REFERENCES:
     // Seem, J.E.  "Modeling of Heat Transfer in Buildings",
@@ -1351,7 +1351,7 @@ void ConstructionProps::calculateExponentialMatrix()
                 }
             }
         }
-        // Backup is true when every item of AExp didnt pass the TinyLimit test
+        // Backup is true when every item of AExp didn't pass the TinyLimit test
         if (Backup) {
             this->AExp = AMato;
             break;
@@ -1814,7 +1814,7 @@ void ConstructionProps::calculateFinalCoefficients()
             if (rat < ConvrgLim) {
 
                 // If the ratio is less than the convergence limit, then any other
-                // terms would have a neglible impact on the CTF-based energy balances.
+                // terms would have a negligible impact on the CTF-based energy balances.
                 this->NumCTFTerms = inum;
                 CTFConvrg = true; // CTF calculations have converged--set logical.
             }

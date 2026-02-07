@@ -1697,7 +1697,7 @@ void CalcDirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 const P
 
         PadDepth = thisEvapCond.PadDepth;
         //******************************************************************************
-        //   THIS SUBROUTINE WILL CACULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
+        //   THIS SUBROUTINE WILL CALCULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
         //   FOR A DIRECT EVAPORATIVE AIR COOLER SUPPLIED WITH CFMAir,DIRPAD,TEWB,TEDB,
         //   AND PB (ATM. PRESS.) FOR AIR DENSITY CALCULATIONS.
         //******************************************************************************
@@ -1807,7 +1807,7 @@ void CalcDryIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
 
         PadDepth = thisEvapCond.IndirectPadDepth;
         //******************************************************************************
-        //   THIS SUBROUTINE WILL CACULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
+        //   THIS SUBROUTINE WILL CALCULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
         //   FOR A DIRECT EVAPORATIVE AIR COOLER SUPPLIED WITH CFMAir,DIRPAD,TEWB,TEDB,
         //   AND PB (ATM. PRESS.) FOR AIR DENSITY CALCULATIONS.
         //******************************************************************************
@@ -1946,7 +1946,7 @@ void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
     if ((thisEvapCond.InletMassFlowRate > 0.0) && (thisEvapCond.availSched->getCurrentVal() > 0.0)) {
 
         //******************************************************************************
-        //   THIS SUBROUTINE WILL CACULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
+        //   THIS SUBROUTINE WILL CALCULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
         //   FOR A WET COIL EVAPORATIVE COOLER
         //******************************************************************************
         //  INDIRECT STAGE EFFICIENCY FOR WET COIL INDIRECT EVAP COOLERS
@@ -2189,7 +2189,7 @@ void CalcIndirectResearchSpecialEvapCooler(EnergyPlusData &state, int const Evap
     if ((thisEvapCond.InletMassFlowRate > 0.0) && (thisEvapCond.availSched->getCurrentVal() > 0.0)) {
 
         //******************************************************************************
-        //   THIS SUBROUTINE WILL CACULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
+        //   THIS SUBROUTINE WILL CALCULATE THE TEMPERATURE OF THE LEAVING AIR DRY BULB
         //   FOR A WET COIL EVAPORATIVE COOLER
         //******************************************************************************
         //  INDIRECT STAGE EFFICIENCY FOR WET COIL INDIRECT EVAP COOLERS
@@ -3171,7 +3171,7 @@ void CalcDirectResearchSpecialEvapCooler(EnergyPlusData &state, int const EvapCo
 
         //***************************************************************************
         //                  ENERGY CONSUMED BY THE RECIRCULATING PUMP
-        // Add the pump energy to the total Evap Cooler energy comsumption
+        // Add the pump energy to the total Evap Cooler energy consumption
         if (thisEvapCond.PumpPowerModifierCurve != nullptr) {
             PumpPowerModCurveValue = thisEvapCond.PumpPowerModifierCurve->value(state, FlowRatio);
         } else {
@@ -3302,7 +3302,7 @@ void ReportEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     thisEvapCond.EvapCoolerPower = thisEvapCond.EvapCoolerPower;
     thisEvapCond.EvapCoolerEnergy = thisEvapCond.EvapCoolerPower * TimeStepSysSec;
 
-    // Report Water comsumption in cubic meters per timestep
+    // Report Water consumption in cubic meters per timestep
     thisEvapCond.EvapWaterConsump = thisEvapCond.EvapWaterConsumpRate * TimeStepSysSec;
     thisEvapCond.EvapWaterStarvMakup = thisEvapCond.EvapWaterStarvMakupRate * TimeStepSysSec;
 }
@@ -3514,7 +3514,7 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
             thisZoneEvapUnit.fanPlace = static_cast<HVAC::FanPlace>(getEnumValue(HVAC::fanPlaceNamesUC, Alphas(9)));
             assert(thisZoneEvapUnit.fanPlace != HVAC::FanPlace::Invalid);
 
-            // get the zone numer served by the zoneHVAC evaporative cooler
+            // get the zone number served by the zoneHVAC evaporative cooler
             for (int CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                 if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
                     continue;
@@ -4139,7 +4139,7 @@ void CalcZoneEvapUnitOutput(EnergyPlusData &state,
                             Real64 &LatentOutputProvided    // target cooling load
 )
 {
-    // caculates zone evaporative cooler sensible and latent outputs
+    // calculates zone evaporative cooler sensible and latent outputs
 
     Real64 MinHumRat; // minimum humidity ratio
 

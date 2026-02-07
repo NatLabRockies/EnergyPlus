@@ -357,7 +357,7 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_GetInputs)
     // dual duct  VAV air terminal get input test
     EXPECT_ENUM_EQ(state->dataDualDuct->dd_airterminal(1).DamperType, DualDuctDamper::VariableVolume); // dual duct VAV Type
     EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).Name, "VAV DUAL DUCT AT");                        // dual duct VAV Name
-    EXPECT_TRUE(state->dataDualDuct->dd_airterminal(1).zoneTurndownMinAirFracSched != nullptr);        // turndown schdule exists
+    EXPECT_TRUE(state->dataDualDuct->dd_airterminal(1).zoneTurndownMinAirFracSched != nullptr);        // turndown schedule exists
     EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneTurndownMinAirFrac, 1.0);                     // turndown fraction initialized to 1.0
     EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneMinAirFracDes, 0.3);                          // design minimum flow fraction
 }
@@ -459,7 +459,7 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
     // dual duct  VAV air terminal get input test
     EXPECT_ENUM_EQ(thisDDAirTerminal.DamperType, DualDuctDamper::VariableVolume); // dual duct VAV Type
     EXPECT_EQ(thisDDAirTerminal.Name, "VAV DUAL DUCT AT");                        // dual duct VAV Name
-    EXPECT_TRUE(thisDDAirTerminal.zoneTurndownMinAirFracSched != nullptr);        // turndown schdule exists
+    EXPECT_TRUE(thisDDAirTerminal.zoneTurndownMinAirFracSched != nullptr);        // turndown schedule exists
     EXPECT_EQ(thisDDAirTerminal.ZoneTurndownMinAirFrac, 1.0);                     // turndown fraction initialized to 1.0
     EXPECT_EQ(thisDDAirTerminal.ZoneMinAirFracDes, 0.3);                          // design minimum flow fraction
 

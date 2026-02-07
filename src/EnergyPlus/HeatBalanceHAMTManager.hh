@@ -98,7 +98,7 @@ namespace HeatBalanceHAMTManager {
         ~MaterialHAMT() = default;
     };
 
-    constexpr int ittermax(150); // Maximum Number of itterations
+    constexpr int ittermax(150); // Maximum Number of iterations
     constexpr int adjmax(6);     // Maximum Number of Adjacent Cells
 
     constexpr Real64 wdensity(1000.0); // Density of water kg.m-3
@@ -116,7 +116,7 @@ namespace HeatBalanceHAMTManager {
         int sid;          // Surface Id Number
         Real64 Qadds;     // Additional sources of heat
         Real64 density;   // Density
-        Real64 wthermalc; // Moisture Dependant Thermal Conductivity
+        Real64 wthermalc; // Moisture Dependent Thermal Conductivity
         Real64 spech;     // Specific Heat capacity
         Real64 htc;       // Heat Transfer Coefficient
         Real64 vtc;       // Vapor Transfer Coefficient

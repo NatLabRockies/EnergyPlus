@@ -151,18 +151,26 @@ if __name__ == "__main__":
         # along with the /usr/share/tcltk/tclX.Y and /usr/share/tcltk/tkX.Y folders.
         # while I think X.Y will be 8.6, I'll try my best to be flexible for version and architecture
         arch = platform.machine()  # x86_64, arm64, aarch64
-        base_lib_dir = Path('/usr/lib')
-        arch_lib_dir = base_lib_dir / f"{arch}-linux-gnu"
+        if platform.freedesktop_os_release()['ID'] in ['centos', 'almalinux']:
+            arch_lib_dir = Path('/usr/lib64')
+            tcl_tk_root_dir = Path('/usr/share')
+        else:
+            arch_lib_dir = Path('/usr/lib') / f"{arch}-linux-gnu"
+            tcl_tk_root_dir = Path('/usr/share/tcltk')
+
         lib_tk_search_path = arch_lib_dir / "libtk[0-9]*.[0-9]*.so"
         tk_candidates = glob.glob(str(lib_tk_search_path))
         if not tk_candidates:
             print(f"Could not find the libtk .so file, expected it inside {arch_lib_dir}")
             sys.exit(1)
         found_tk_so = Path(tk_candidates[0])
+        print(f"Found libtk at: {found_tk_so}")
         target_tk_so = lib_dynload_dir / found_tk_so.name
+        print(f"Copying libtk to: {target_tk_so}")
         shutil.copy(found_tk_so, target_tk_so)
         # we also need to find the _tkinter....so file in the python_lib/lib-dynload folder, and fixup the rpath
         matches = list(lib_dynload_dir.glob("_tkinter*.so"))
+        print("DEBUG Matches:", matches)
         if len(matches) == 1:
             file_path = matches[0]
             print("DEBUG Found:", file_path)
@@ -176,7 +184,6 @@ if __name__ == "__main__":
         else:
             subprocess.check_output(["patchelf", "--set-rpath", '$ORIGIN', file_path])
         # and then grab the tcl and tk config/data folders as well
-        tcl_tk_root_dir = Path('/usr/share/tcltk')
         if not tcl_tk_root_dir.exists():
             print(f"TclTk directory not found at expected location: {tcl_tk_root_dir}, make sure it is installed")
         tcl_search_path = tcl_tk_root_dir / "tcl[0-9]*.[0-9]*"

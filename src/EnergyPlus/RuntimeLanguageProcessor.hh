@@ -91,9 +91,9 @@ namespace RuntimeLanguageProcessor {
         Token Type;         // token type, eg. TokenNumber
         Real64 Number;      // May want to store all literals as a variable?
         std::string String; // Serves double duty, also saves string version of token for easy debugging
-        ErlFunc Operator;   // indentifies operator or function 1..64
+        ErlFunc Operator;   // identifies operator or function 1..64
         int Variable;       // points to a variable in ErlVariable structure
-        Token Parenthesis;  // identifes if token is left or right parenthesis
+        Token Parenthesis;  // identifies if token is left or right parenthesis
         int Expression;     // points to an expression in ErlExpression structure
         std::string Error;  // holds token processing error message content
 
@@ -170,7 +170,7 @@ namespace RuntimeLanguageProcessor {
 
     void ExternalInterfaceSetErlVariable(EnergyPlusData &state,
                                          int varNum,  // The variable index to be written during run time
-                                         Real64 value // The real time value of the vairable to be set
+                                         Real64 value // The real time value of the variable to be set
     );
 
     void ExternalInterfaceInitializeErlVariable(EnergyPlusData &state,

@@ -1,12 +1,12 @@
-! PlantLoopHeatPump_EIR_AirSource.idf
+! PlantLoopHeatPump_EIR_AirSource_and_AWHP.idf
 !
 ! Basic file description:
-! The EIR formulated air-to-water heat pump is demonstrated using a simple collection of plant loops.  Building loads
+! The air-to-water heat pump HeatPump:AirToWater is demonstrated using a simple collection of plant loops.  Building loads
 ! are represented using Plant Load Profile objects
 ! Run:      1 design day.
 ! Building: None.
 ! System:   None.
-! Plant:    PLANT LOAD PROFILE with District Heating and Cooling as necessary.
+! Plant:    Both the heating loop and the cooling loop served by air-to-water heat pump.
 
   Version,25.2;
 
@@ -16,7 +16,7 @@
     Suburbs,                 !- Terrain
     0.04,                    !- Loads Convergence Tolerance Value {W}
     0.04,                    !- Temperature Convergence Tolerance Value {deltaC}
-    FullInteriorAndExterior,  !- Solar Distribution
+    FullInteriorAndExterior, !- Solar Distribution
     25,                      !- Maximum Number of Warmup Days
     6;                       !- Minimum Number of Warmup Days
 
@@ -214,12 +214,12 @@
     Heating Coil Load Loop Demand Branches,  !- Demand Side Branch List Name
     ,                        !- Demand Side Connector List Name
     Optimal,                 !- Load Distribution Scheme
-    ,
-    ,
-    ,
-    ,
-    ,
-    HotWater;
+    ,                        !- Availability Manager List Name
+    ,                        !- Plant Loop Demand Calculation Scheme
+    ,                        !- Common Pipe Simulation
+    ,                        !- Pressure Simulation Type
+    ,                        !- Loop Circulation Time {minutes}
+    HotWater;                !- Water Loop Type
 
   SetpointManager:Scheduled,
     Heating Coil Load Loop Setpoint Manager,  !- Name
@@ -255,7 +255,7 @@
     Heating Coil Load Loop Pump,  !- Component 1 Name
     Heating Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
     Heating Coil Load Loop Intermediate Node,  !- Component 1 Outlet Node Name
-    HeatPump:AirToWater:Heating,  !- Component 2 Object Type
+    HeatPump:AirToWater,     !- Component 2 Object Type
     test_AWHP,               !- Component 2 Name
     Heating Coil Load Loop Intermediate Node,  !- Component 2 Inlet Node Name
     Heating Coil Load Loop Supply Outlet Node;  !- Component 2 Outlet Node Name
@@ -280,105 +280,105 @@
     test_AWHP,               !- Name
     ,                        !- Availability Schedule Name Heating
     ,                        !- Availability Schedule Name Cooling
-    Load ,                   !- Operating Mode Control Method
+    Load,                    !- Operating Mode Control Method
     SingleMode,              !- Operating Mode Control Option for Multiple Unit
     ,                        !- Operating Mode Control Schedule Name
-    20 ,                     !- Rated Inlet Air Temperature in Heating Mode
-    autosize,                !- Rated Air Flow Rate in Heating Mode
-    50 ,                     !- Rated Leaving Water Temperature in Heating Mode
-    autosize,                !- Rated Water Flow Rate in Heating Mode
-    -20,                     !- Minimum Outdoor Air Temperature in Heating Mode
-    25,                      !- Maximum Outdoor Air Temperature in Heating Mode
+    ,                        !- Minimum Part Load Ratio
+    20,                      !- Rated Inlet Air Temperature in Heating Mode {C}
+    autosize,                !- Rated Air Flow Rate in Heating Mode {m3/s}
+    50,                      !- Rated Leaving Water Temperature in Heating Mode {C}
+    autosize,                !- Rated Water Flow Rate in Heating Mode {m3/s}
+    -20,                     !- Minimum Outdoor Air Temperature in Heating Mode {C}
+    25,                      !- Maximum Outdoor Air Temperature in Heating Mode {C}
     MinHeatingSWTvsOAT,      !- Minimum Leaving Water Temperature Curve Name in Heating Mode
     MaxHeatingSWTvsOAT,      !- Maximum Leaving Water Temperature Curve Name in Heating Mode
-    ,                        !- Minimum Part Load Ratio
     1.0,                     !- Sizing Factor for Heating
-    25,                      !- Rated Inlet Air Temperature in Cooling Mode
-    20 ,                     !- Rated Air Flow Rate in Cooling Mode
-    22 ,                     !- Rated Leaving Water Temperature in Cooling Mode
-    autosize ,               !- Rated Water Flow Rate in Cooling Mode
-    18 ,                     !- Minimum Outdoor Air Temperature in Cooling Mode
-    40,                      !- Maximum Outdoor Air Temperature in Cooling Mode
+    25,                      !- Rated Inlet Air Temperature in Cooling Mode {C}
+    20,                      !- Rated Air Flow Rate in Cooling Mode {m3/s}
+    22,                      !- Rated Leaving Water Temperature in Cooling Mode {C}
+    autosize,                !- Rated Water Flow Rate in Cooling Mode {m3/s}
+    18,                      !- Minimum Outdoor Air Temperature in Cooling Mode {C}
+    40,                      !- Maximum Outdoor Air Temperature in Cooling Mode {C}
     MinCoolingSWTvsOAT,      !- Minimum Leaving Water Temperature Curve Name in Cooling Mode
     MaxCoolingSWTvsOAT,      !- Maximum Leaving Water Temperature Curve Name in Cooling Mode
     0.9,                     !- Sizing Factor for Cooling
-    Outdoor Air Inlet Node ,  !- Air Inlet Node Name
-    Outdoor Air Outlet Node,  !- Air Outlet Node Name
+    Outdoor Air Inlet Node,  !- Air Inlet Node Name
+    Outdoor Air Outlet Node, !- Air Outlet Node Name
     Heating Coil Load Loop Intermediate Node,  !- Hot Water Inlet Node Name
     Heating Coil Load Loop Supply Outlet Node,  !- Hot Water Outlet Node Name
-    Cooling Coil Load Loop Intermediate Node ,  !- Chilled Water Inlet Node Name
-    Cooling Coil Load Loop Supply Outlet Node ,  !- Chilled Water Outlet Node Name
+    Cooling Coil Load Loop Intermediate Node,  !- Chilled Water Inlet Node Name
+    Cooling Coil Load Loop Supply Outlet Node,  !- Chilled Water Outlet Node Name
     ,                        !- Maximum Outdoor Dry Bulb Temperature For Defrost Operation
     Timed,                   !- Heat Pump Defrost Control
     0.2,                     !- Heat Pump Defrost Time Period Fraction
-    150,                     !- Resistive Defrost Heater Capacity
+    150,                     !- Resistive Defrost Heater Capacity {W}
     ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name
-    2 ,                      !- Heat Pump Multiplier
-    FixedSpeed ,             !- Control Type
-    100 ,                    !- Crankcase Heater Capacity
+    2,                       !- Heat Pump Multiplier
+    FixedSpeed,              !- Control Type
+    100,                     !- Crankcase Heater Capacity {W}
     CrankCaseHeaterPowerCurve,  !- Crankcase Heater Capacity Function of Temperature Curve Name
-    5 ,                      !- Maximum Ambient Temperature for Crankcase Heater Operation
-    2 ,                      !- Number of Speeds for Heating
-    20000,                   !- Rated Heating Capacity at Speed 1
-    3.49,                    !- Rated COP for Heating at Speed 1
-    CapCurveFuncTemp,        !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 1
-    EIRCurveFuncTemp,        !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 1
+    5,                       !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
+    2,                       !- Number of Speeds for Heating
+    20000,                   !- Rated Heating Capacity at Speed 1 {W}
+    3.49,                    !- Rated COP for Heating at Speed 1 {W/W}
+    CapCurveFuncTempHT,      !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 1
+    EIRCurveFuncTempHT,      !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 1
     EIRCurveFuncPLR,         !- Heating Energy Input Ratio Function of PLR Curve Name at Speed 1
-    40000,                   !- Rated Heating Capacity at Speed 2
-    3.51,                    !- Rated COP for Heating at Speed 2
-    CapCurveFuncTemp2,       !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 2
-    EIRCurveFuncTemp2,       !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 2
+    40000,                   !- Rated Heating Capacity at Speed 2 {W}
+    3.51,                    !- Rated COP for Heating at Speed 2 {W/W}
+    CapCurveFuncTempHT2,     !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 2
+    EIRCurveFuncTempHT2,     !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 2
     EIRCurveFuncPLR2,        !- Heating Energy Input Ratio Function of PLR Curve Name at Speed 2
-    ,                        !- Rated Heating Capacity at Speed 3
-    ,                        !- Rated COP for Heating at Speed 3
+    ,                        !- Rated Heating Capacity at Speed 3 {W}
+    ,                        !- Rated COP for Heating at Speed 3 {W/W}
     ,                        !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 3
     ,                        !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 3
     ,                        !- Heating Energy Input Ratio Function of PLR Curve Name at Speed 3
-    ,                        !- Rated Heating Capacity at Speed 4
-    ,                        !- Rated COP for Heating at Speed 4
+    ,                        !- Rated Heating Capacity at Speed 4 {W}
+    ,                        !- Rated COP for Heating at Speed 4 {W/W}
     ,                        !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 4
     ,                        !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 4
     ,                        !- Heating Energy Input Ratio Function of PLR Curve Name at Speed 4
-    ,                        !- Rated Heating Capacity at Speed 5
-    ,                        !- Rated COP for Heating at Speed 5
+    ,                        !- Rated Heating Capacity at Speed 5 {W}
+    ,                        !- Rated COP for Heating at Speed 5 {W/W}
     ,                        !- Normalized Heating Capacity Function of Temperature Curve Name at Speed 5
     ,                        !- Heating Energy Input Ratio Function of Temperature Curve Name at Speed 5
     ,                        !- Heating Energy Input Ratio Function of PLR Curve Name at Speed 5
     ,                        !- Booster Mode On Heating
-    ,                        !- Rated Heating Capacity in Booster Mode
-    ,                        !- Rated Heating COP in Booster Mode
+    ,                        !- Rated Heating Capacity in Booster Mode {W}
+    ,                        !- Rated Heating COP in Booster Mode {W/W}
     ,                        !- Normalized Heating Capacity Function of Temperature Curve Name in Booster Mode
     ,                        !- Heating Energy Input Ratio Function of Temperature Curve Name in Booster Mode
     ,                        !- Heating Energy Input Ratio Function of PLR Curve Name in Booster Mode
     2,                       !- Number of Speeds for Cooling
-    200000,                  !- Rated Cooling Capacity at Speed 1
-    3.5,                     !- Rated COP for Cooling at Speed 1
-    CapCurveFuncTemp,        !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 1
-    EIRCurveFuncTemp,        !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 1
+    200000,                  !- Rated Cooling Capacity at Speed 1 {W}
+    3.5,                     !- Rated COP for Cooling at Speed 1 {W/W}
+    CapCurveFuncTempCL,      !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 1
+    EIRCurveFuncTempCL,      !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 1
     EIRCurveFuncPLR,         !- Cooling Energy Input Ratio Function of PLR Curve Name at Speed 1
-    400000,                  !- Rated Cooling Capacity at Speed 2
-    3.5,                     !- Rated COP for Cooling at Speed 2
-    CapCurveFuncTemp2,       !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 2
-    EIRCurveFuncTemp2,       !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 2
+    400000,                  !- Rated Cooling Capacity at Speed 2 {W}
+    3.5,                     !- Rated COP for Cooling at Speed 2 {W/W}
+    CapCurveFuncTempCL2,     !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 2
+    EIRCurveFuncTempCL2,     !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 2
     EIRCurveFuncPLR2,        !- Cooling Energy Input Ratio Function of PLR Curve Name at Speed 2
-    ,                        !- Rated Cooling Capacity at Speed 3
-    ,                        !- Rated COP for Cooling at Speed 3
+    ,                        !- Rated Cooling Capacity at Speed 3 {W}
+    ,                        !- Rated COP for Cooling at Speed 3 {W/W}
     ,                        !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 3
     ,                        !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 3
     ,                        !- Cooling Energy Input Ratio Function of PLR Curve Name at Speed 3
-    ,                        !- Rated Cooling Capacity at Speed 4
-    ,                        !- Rated COP for Cooling at Speed 4
+    ,                        !- Rated Cooling Capacity at Speed 4 {W}
+    ,                        !- Rated COP for Cooling at Speed 4 {W/W}
     ,                        !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 4
     ,                        !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 4
     ,                        !- Cooling Energy Input Ratio Function of PLR Curve Name at Speed 4
-    ,                        !- Rated Cooling Capacity at Speed 5
-    ,                        !- Rated COP for Cooling at Speed 5
+    ,                        !- Rated Cooling Capacity at Speed 5 {W}
+    ,                        !- Rated COP for Cooling at Speed 5 {W/W}
     ,                        !- Normalized Cooling Capacity Function of Temperature Curve Name at Speed 5
     ,                        !- Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 5
     ,                        !- Cooling Energy Input Ratio Function of PLR Curve Name at Speed 5
     ,                        !- Booster Mode On Cooling
-    ,                        !- Rated Cooling Capacity in Booster Mode
-    ,                        !- Rated Cooling COP in Booster Mode
+    ,                        !- Rated Cooling Capacity in Booster Mode {W}
+    ,                        !- Rated Cooling COP in Booster Mode {W/W}
     ,                        !- Normalized Cooling Capacity Function of Temperature Curve Name in Booster Mode
     ,                        !- Cooling Energy Input Ratio Function of Temperature Curve Name in Booster Mode
     ;                        !- Cooling Energy Input Ratio Function of PLR Curve Name in Booster Mode
@@ -388,8 +388,8 @@
     0.0,                     !- Coefficient1 Constant
     1.0,                     !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.77778,               !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.77778,               !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     20.0,                    !- Minimum Curve Output
     35.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
@@ -400,8 +400,8 @@
     100.0,                   !- Coefficient1 Constant
     0.85,                    !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.777778,              !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.777778,              !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     20.0,                    !- Minimum Curve Output
     150.0,                   !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
@@ -412,8 +412,8 @@
     -100.0,                  !- Coefficient1 Constant
     0.0,                     !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.77778,               !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.77778,               !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     -100.0,                  !- Minimum Curve Output
     35.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
@@ -424,45 +424,45 @@
     53.1666666666667,        !- Coefficient1 Constant
     0.85,                    !- Coefficient2 x
     0.0,                     !- Coefficient3 x**2
-    -17.777778,              !- Minimum Value of x !- 0 F
-    35.0,                    !- Maximum Value of x !- 95 F
+    -17.777778,              !- Minimum Value of x
+    35.0,                    !- Maximum Value of x
     20.0,                    !- Minimum Curve Output
     60.0,                    !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature;             !- Output Unit Type
 
   Curve:Biquadratic,
-    CapCurveFuncTemp,        !- Name
-    0.5,                     !- Coefficient1 Constant
-    0.0,                     !- Coefficient2 x
-    0.0,                     !- Coefficient3 x**2
-    0.0,                     !- Coefficient4 y
-    0.0,                     !- Coefficient5 y**2
-    0.0,                     !- Coefficient6 x*y
-    5.0,                     !- Minimum Value of x
-    10.0,                    !- Maximum Value of x
-    24.0,                    !- Minimum Value of y
-    35.0,                    !- Maximum Value of y
-    ,                        !- Minimum Curve Output
-    ,                        !- Maximum Curve Output
+    CapCurveFuncTempHT,      !- Name
+    0.899,                   !- Coefficient1 Constant
+    -0.00045,                !- Coefficient2 x
+    0.00021,                 !- Coefficient3 x**2
+    0.0185,                  !- Coefficient4 y
+    -0.0108,                 !- Coefficient5 y**2
+    0.000617,                !- Coefficient6 x*y
+    30,                      !- Minimum Value of x
+    50,                      !- Maximum Value of x
+    -7,                      !- Minimum Value of y
+    20,                      !- Maximum Value of y
+    0.5,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
 
   Curve:Biquadratic,
-    EIRCurveFuncTemp,        !- Name
-    1.0,                     !- Coefficient1 Constant
-    0.0,                     !- Coefficient2 x
-    0.0,                     !- Coefficient3 x**2
-    0.0,                     !- Coefficient4 y
-    0.0,                     !- Coefficient5 y**2
-    0.0,                     !- Coefficient6 x*y
-    5.0,                     !- Minimum Value of x
-    10.0,                    !- Maximum Value of x
-    24.0,                    !- Minimum Value of y
-    35.0,                    !- Maximum Value of y
-    ,                        !- Minimum Curve Output
-    ,                        !- Maximum Curve Output
+    EIRCurveFuncTempHT,      !- Name
+    1.055,                   !- Coefficient1 Constant
+    0.00035,                 !- Coefficient2 x
+    -0.00027,                !- Coefficient3 x**2
+    -0.0108,                 !- Coefficient4 y
+    0.0145,                  !- Coefficient5 y**2
+    -0.000230,               !- Coefficient6 x*y
+    30,                      !- Minimum Value of x
+    50,                      !- Maximum Value of x
+    -7,                      !- Minimum Value of y
+    20,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.5,                     !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
@@ -474,6 +474,42 @@
     0.0,                     !- Coefficient3 x**2
     0.0,                     !- Minimum Value of x
     1.0;                     !- Maximum Value of x
+
+  Curve:Biquadratic,
+    CapCurveFuncTempCL,      !- Name
+    0.900,                   !- Coefficient1 Constant
+    -0.00038,                !- Coefficient2 x
+    -0.00042,                !- Coefficient3 x**2
+    -0.0102,                 !- Coefficient4 y
+    0.0225,                  !- Coefficient5 y**2
+    -0.000210,               !- Coefficient6 x*y
+    5,                       !- Minimum Value of x
+    15,                      !- Maximum Value of x
+    15,                      !- Minimum Value of y
+    45,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    EIRCurveFuncTempCL,      !- Name
+    0.980,                   !- Coefficient1 Constant
+    0.00021,                 !- Coefficient2 x
+    0.00019,                 !- Coefficient3 x**2
+    0.0068,                  !- Coefficient4 y
+    -0.0085,                 !- Coefficient5 y**2
+    0.000158,                !- Coefficient6 x*y
+    5,                       !- Minimum Value of x
+    15,                      !- Maximum Value of x
+    15,                      !- Minimum Value of y
+    45,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
 
   Curve:Quadratic,
     CrankCaseHeaterPowerCurve,  !- Name
@@ -501,7 +537,8 @@
     Heating Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
     Heating Coil Load Profile Load Schedule,  !- Load Schedule Name
     0.005,                   !- Peak Flow Rate {m3/s}
-    Heating Coil Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Heating Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
 ! *** Cooling coil loop
 
@@ -525,12 +562,12 @@
     Cooling Coil Load Loop Demand Branches,  !- Demand Side Branch List Name
     ,                        !- Demand Side Connector List Name
     Optimal,                 !- Load Distribution Scheme
-    ,
-    ,
-    ,
-    ,
-    ,
-    ChilledWater;
+    ,                        !- Availability Manager List Name
+    ,                        !- Plant Loop Demand Calculation Scheme
+    ,                        !- Common Pipe Simulation
+    ,                        !- Pressure Simulation Type
+    ,                        !- Loop Circulation Time {minutes}
+    ChilledWater;            !- Water Loop Type
 
   SetpointManager:Scheduled,
     Cooling Coil Load Loop Setpoint Manager,  !- Name
@@ -566,7 +603,7 @@
     Cooling Coil Load Loop Pump,  !- Component 1 Name
     Cooling Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
     Cooling Coil Load Loop Intermediate Node,  !- Component 1 Outlet Node Name
-    HeatPump:AirToWater:Cooling,  !- Component 2 Object Type
+    HeatPump:AirToWater,     !- Component 2 Object Type
     test_AWHP,               !- Component 2 Name
     Cooling Coil Load Loop Intermediate Node,  !- Component 2 Inlet Node Name
     Cooling Coil Load Loop Supply Outlet Node;  !- Component 2 Outlet Node Name
@@ -588,37 +625,73 @@
     INTERMITTENT;            !- Pump Control Type
 
   Curve:Biquadratic,
-    CapCurveFuncTemp2,       !- Name
-    0.8,                     !- Coefficient1 Constant
-    0.02,                    !- Coefficient2 x
-    0.0,                     !- Coefficient3 x**2
-    0.0,                     !- Coefficient4 y
-    0.0,                     !- Coefficient5 y**2
-    0.0,                     !- Coefficient6 x*y
-    5.0,                     !- Minimum Value of x
-    10.0,                    !- Maximum Value of x
-    24.0,                    !- Minimum Value of y
-    35.0,                    !- Maximum Value of y
-    ,                        !- Minimum Curve Output
-    ,                        !- Maximum Curve Output
+    CapCurveFuncTempHT2,     !- Name
+    0.885,                   !- Coefficient1 Constant
+    -0.00040,                !- Coefficient2 x
+    0.00019,                 !- Coefficient3 x**2
+    0.0202,                  !- Coefficient4 y
+    -0.0096,                 !- Coefficient5 y**2
+    0.000580,                !- Coefficient6 x*y
+    30,                      !- Minimum Value of x
+    50,                      !- Maximum Value of x
+    -7,                      !- Minimum Value of y
+    20,                      !- Maximum Value of y
+    0.5,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
 
   Curve:Biquadratic,
-    EIRCurveFuncTemp2,       !- Name
-    1.0,                     !- Coefficient1 Constant
-    0.0,                     !- Coefficient2 x
-    0.0,                     !- Coefficient3 x**2
-    0.0,                     !- Coefficient4 y
-    0.0,                     !- Coefficient5 y**2
-    0.0,                     !- Coefficient6 x*y
-    5.0,                     !- Minimum Value of x
-    10.0,                    !- Maximum Value of x
-    24.0,                    !- Minimum Value of y
-    35.0,                    !- Maximum Value of y
-    ,                        !- Minimum Curve Output
-    ,                        !- Maximum Curve Output
+    EIRCurveFuncTempHT2,     !- Name
+    1.055,                   !- Coefficient1 Constant
+    0.00035,                 !- Coefficient2 x
+    -0.00027,                !- Coefficient3 x**2
+    -0.0108,                 !- Coefficient4 y
+    0.0145,                  !- Coefficient5 y**2
+    -0.000230,               !- Coefficient6 x*y
+    30,                      !- Minimum Value of x
+    50,                      !- Maximum Value of x
+    -7,                      !- Minimum Value of y
+    20,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.5,                     !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    CapCurveFuncTempCL2,     !- Name
+    0.910,                   !- Coefficient1 Constant
+    -0.00034,                !- Coefficient2 x
+    -0.00040,                !- Coefficient3 x**2
+    -0.0096,                 !- Coefficient4 y
+    0.0208,                  !- Coefficient5 y**2
+    -0.000205,               !- Coefficient6 x*y
+    5,                       !- Minimum Value of x
+    15,                      !- Maximum Value of x
+    15,                      !- Minimum Value of y
+    45,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    EIRCurveFuncTempCL2,     !- Name
+    0.990,                   !- Coefficient1 Constant
+    0.00019,                 !- Coefficient2 x
+    0.00017,                 !- Coefficient3 x**2
+    0.0075,                  !- Coefficient4 y
+    -0.0078,                 !- Coefficient5 y**2
+    0.000165,                !- Coefficient6 x*y
+    5,                       !- Minimum Value of x
+    15,                      !- Maximum Value of x
+    15,                      !- Minimum Value of y
+    45,                      !- Maximum Value of y
+    0.7,                     !- Minimum Curve Output
+    1.3,                     !- Maximum Curve Output
     Temperature,             !- Input Unit Type for X
     Temperature,             !- Input Unit Type for Y
     Dimensionless;           !- Output Unit Type
@@ -649,7 +722,8 @@
     Cooling Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
     Cooling Coil Load Profile Load Schedule,  !- Load Schedule Name
     0.020,                   !- Peak Flow Rate {m3/s}
-    Cooling Coil Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Cooling Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
   OutdoorAir:Node,
     Outdoor Air Inlet Node;  !- Name
@@ -657,47 +731,88 @@
   Output:VariableDictionary,IDF;
 
   Output:Variable,*,Heat Pump Load Side Heat Transfer Rate in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Heat Transfer Energy in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Heat Transfer Rate in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Heat Transfer Energy in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Inlet Temperature in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Outlet Temperature in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Inlet Temperature in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Outlet Temperature in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Electricity Rate in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Electricity Energy in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Mass Flow Rate in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Mass Flow Rate in Heating Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Heat Transfer Rate in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Heat Transfer Energy in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Heat Transfer Rate in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Heat Transfer Energy in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Inlet Temperature in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Outlet Temperature in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Inlet Temperature in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Outlet Temperature in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Electricity Rate in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Electricity Energy in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Load Side Mass Flow Rate in Cooling Mode,detailed;
+
   Output:Variable,*,Heat Pump Source Side Mass Flow Rate in Cooling Mode,detailed;
-  Output:Variable,*,Heat Pump Number Of Heating Unit On,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Number Of Cooling Unit On,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Crankcase Heater Electricity Rate,detailed;  !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Crankcase Heater Electricity Energy,detailed;  !- HVAC Sum [W]
-  Output:Variable,*,Heat Pump Heating COP,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Total Heating Rate,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Cooling COP,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Total Cooling Rate,detailed;  !- HVAC Average []
-  Output:Variable,*,Site Outdoor Air Drybulb Temperature,detailed;  !- Zone Average [C]
-  Output:Variable,*,Heat Pump Defrost Electricity Rate,detailed;  !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Defrost Electricity Energy,detailed;  !- HVAC Sum [J]
-  Output:Variable,Cooling Coil Load Loop,Plant Supply Side Cooling Demand Rate,detailed;  !- HVAC Average [W]
-  Output:Variable,Heating Coil Load Loop,Plant Supply Side Heating Demand Rate,detailed;  !- HVAC Average [W]
-  Output:Variable,*,Plant Load Profile Heat Transfer Rate,detailed;  !- HVAC Average [W]
-  Output:Variable,*,Heat Pump Speed Level in Heating Mode,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Speed Ratio in Heating Mode,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Speed Level in Cooling Mode,detailed;  !- HVAC Average []
-  Output:Variable,*,Heat Pump Speed Ratio in Cooling Mode,detailed;  !- HVAC Average []
+
+  Output:Variable,*,Heat Pump Number Of Heating Unit On,detailed;
+
+  Output:Variable,*,Heat Pump Number Of Cooling Unit On,detailed;
+
+  Output:Variable,*,Heat Pump Crankcase Heater Electricity Rate,detailed;
+
+  Output:Variable,*,Heat Pump Crankcase Heater Electricity Energy,detailed;
+
+  Output:Variable,*,Heat Pump Heating COP,detailed;
+
+  Output:Variable,*,Heat Pump Total Heating Rate,detailed;
+
+  Output:Variable,*,Heat Pump Cooling COP,detailed;
+
+  Output:Variable,*,Heat Pump Total Cooling Rate,detailed;
+
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,detailed;
+
+  Output:Variable,*,Heat Pump Defrost Electricity Rate,detailed;
+
+  Output:Variable,*,Heat Pump Defrost Electricity Energy,detailed;
+
+  Output:Variable,Cooling Coil Load Loop,Plant Supply Side Cooling Demand Rate,detailed;
+
+  Output:Variable,Heating Coil Load Loop,Plant Supply Side Heating Demand Rate,detailed;
+
+  Output:Variable,*,Plant Load Profile Heat Transfer Rate,detailed;
+
+  Output:Variable,*,Heat Pump Speed Level in Heating Mode,detailed;
+
+  Output:Variable,*,Heat Pump Speed Ratio in Heating Mode,detailed;
+
+  Output:Variable,*,Heat Pump Speed Level in Cooling Mode,detailed;
+
+  Output:Variable,*,Heat Pump Speed Ratio in Cooling Mode,detailed;
 
   OutputControl:Table:Style,
     HTML;                    !- Column Separator
@@ -709,3 +824,4 @@
     Verbose,                 !- Actuator Availability Dictionary Reporting
     Verbose,                 !- Internal Variable Availability Dictionary Reporting
     Verbose;                 !- EMS Runtime Language Debug Output Level
+

@@ -705,26 +705,26 @@
     CFS_Glz_62_Tfvis,        !- Visible Optical Complex Front Transmittance Matrix Name
     CFS_Glz_62_Rbvis,        !- Visible Optical Complex Back Transmittance Matrix Name
     Glass_21013_Layer,       !- Outside Layer Name
-    CFS_Glz_62_Layer_1_fAbs, !- Outside Layer Directional Front Absoptance Matrix Name
-    CFS_Glz_62_Layer_1_bAbs, !- Outside Layer Directional Back Absoptance Matrix Name
+    CFS_Glz_62_Layer_1_fAbs, !- Outside Layer Directional Front Absorptance Matrix Name
+    CFS_Glz_62_Layer_1_bAbs, !- Outside Layer Directional Back Absorptance Matrix Name
     Gap_9_Glz_62_Layer_1,    !- Gap 1 Name
-    ,                        !- CFS Gap 1 Directional Front Absoptance Matrix Name
-    ,                        !- CFS Gap 1 Directional Back Absoptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Front Absorptance Matrix Name
+    ,                        !- CFS Gap 1 Directional Back Absorptance Matrix Name
     Shade_27003_Layer,       !- Layer 2 Name
-    CFS_Glz_62_Layer_2_fAbs, !- Layer 2 Directional Front Absoptance Matrix Name
-    CFS_Glz_62_Layer_2_bAbs, !- Layer 2 Directional Back Absoptance Matrix Name
+    CFS_Glz_62_Layer_2_fAbs, !- Layer 2 Directional Front Absorptance Matrix Name
+    CFS_Glz_62_Layer_2_bAbs, !- Layer 2 Directional Back Absorptance Matrix Name
     Gap_9_Glz_62_Layer_2,    !- Gap 2 Name
-    ,                        !- Gap 2 Directional Front Absoptance Matrix Name
-    ,                        !- Gap 2 Directional Back Absoptance Matrix Name
+    ,                        !- Gap 2 Directional Front Absorptance Matrix Name
+    ,                        !- Gap 2 Directional Back Absorptance Matrix Name
     Glass_21436_Layer,       !- Layer 3 Name
-    CFS_Glz_62_Layer_3_fAbs, !- Layer 3 Directional Front Absoptance Matrix Name
-    CFS_Glz_62_Layer_3_bAbs, !- Layer 3 Directional Back Absoptance Matrix Name
+    CFS_Glz_62_Layer_3_fAbs, !- Layer 3 Directional Front Absorptance Matrix Name
+    CFS_Glz_62_Layer_3_bAbs, !- Layer 3 Directional Back Absorptance Matrix Name
     Gap_9_Glz_62_Layer_3,    !- Gap 3 Name
-    ,                        !- Gap 3 Directional Front Absoptance Matrix Name
-    ,                        !- Gap 3 Directional Back Absoptance Matrix Name
+    ,                        !- Gap 3 Directional Front Absorptance Matrix Name
+    ,                        !- Gap 3 Directional Back Absorptance Matrix Name
     Glass_21436_Layer,       !- Layer 4 Name
-    CFS_Glz_62_Layer_4_fAbs, !- Layer 4 Directional Front Absoptance Matrix Name
-    CFS_Glz_62_Layer_4_bAbs; !- Layer 4 Directional Back Absoptance Matrix Name
+    CFS_Glz_62_Layer_4_fAbs, !- Layer 4 Directional Front Absorptance Matrix Name
+    CFS_Glz_62_Layer_4_bAbs; !- Layer 4 Directional Back Absorptance Matrix Name
 
 !----------------------------------------------------------------------
 !         Basis Matrix

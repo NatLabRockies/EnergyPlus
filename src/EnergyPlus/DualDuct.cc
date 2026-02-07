@@ -1353,7 +1353,7 @@ namespace DualDuct {
             if (this->dd_airterminalColdAirInlet.AirMassFlowRate > this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail) {
                 this->dd_airterminalColdAirInlet.AirMassFlowRate = this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail;
 
-                // These are shutoff boxes for either the hot or the cold, therfore one side or other can = 0.0
+                // These are shutoff boxes for either the hot or the cold, therefore one side or other can = 0.0
             } else if (this->dd_airterminalColdAirInlet.AirMassFlowRate < 0.0) {
                 this->dd_airterminalColdAirInlet.AirMassFlowRate = 0.0;
             } else if (this->dd_airterminalColdAirInlet.AirMassFlowRate > MassFlow) {
@@ -1530,7 +1530,7 @@ namespace DualDuct {
             // Need to make sure that the RA flows are within limits
             if (this->dd_airterminalRecircAirInlet.AirMassFlowRate > this->dd_airterminalRecircAirInlet.AirMassFlowRateMaxAvail) {
                 this->dd_airterminalRecircAirInlet.AirMassFlowRate = this->dd_airterminalRecircAirInlet.AirMassFlowRateMaxAvail;
-                // These are shutoff boxes for either the hot or the cold, therfore one side or other can = 0.0
+                // These are shutoff boxes for either the hot or the cold, therefore one side or other can = 0.0
             } else if (this->dd_airterminalRecircAirInlet.AirMassFlowRate < 0.0) {
                 this->dd_airterminalRecircAirInlet.AirMassFlowRate = 0.0;
             }

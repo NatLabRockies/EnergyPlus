@@ -7777,7 +7777,7 @@ TEST_F(EnergyPlusFixture, InteriorSurfaceEnvelopeSummaryReport)
             EXPECT_EQ(OutputReportPredefined::RetrievePreDefTableEntry(
                           *state, state->dataOutRptPredefined->pdchIntDrCons, state->dataSurface->Surface(i).Name),
                       "A Construction");
-            // Check the door parant surface name
+            // Check the door parent surface name
             EXPECT_EQ(OutputReportPredefined::RetrievePreDefTableEntry(
                           *state, state->dataOutRptPredefined->pdchIntDrParent, state->dataSurface->Surface(i).Name),
                       state->dataSurface->Surface(i - 1).Name);
@@ -8674,7 +8674,7 @@ TEST_F(SQLiteFixture, ORT_DualUnits_Process_Missing_Case_1)
 TEST_F(SQLiteFixture, ORT_DualUnits_Process_Missing_Case_2)
 {
     // Test the missing scenario (has missing or default fields) Case 2: Missing A2 field at all
-    // This will allow a backward compatiability: even an earlier version format can be correctly handeled.
+    // This will allow a backward compatibility: even an earlier version format can be correctly handeled.
     std::string const idf_objects = delimited_string({"Output:SQLite,", "SimpleAndTabular; !-Option Type"});
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -8817,7 +8817,7 @@ TEST_F(SQLiteFixture, ORT_DualUnits_Heat_Emission)
     setTabularReportStyles(*state);
 
     // Test 2.5:
-    // Actually here is an additonal test unit for the getSpecificUnitDivider:
+    // Actually here is an additional test unit for the getSpecificUnitDivider:
     SetupUnitConversions(*state);
     Real64 rconv = getSpecificUnitDivider(*state, "GJ", "kBtu");
     energyconversion = 1.0 / rconv; // 948.45
@@ -13049,7 +13049,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_WarnMonthly)
         "  2, !-  Digits After Decimal",
         "  Exterior Lights Electricity Energy, !- Variable or Meter 1 Name",
         "  SumOrAverage, !- Aggregation Type for Variable or Meter 1",
-        "  NON EXISTANT VARIABLE, !- Variable or Meter 2 Name", // That's not how you spell EXISTENT
+        "  NON EXISTENT VARIABLE, !- Variable or Meter 2 Name", // That's not how you spell EXISTENT
         "  Maximum; !- Aggregation Type for Variable or Meter 2",
 
         "Output:Table:SummaryReports,",
@@ -13110,7 +13110,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_WarnMonthly_AlwaysIfWeather
         "  2,                                  !-  Digits After Decimal",
         "  Exterior Lights Electricity Energy, !- Variable or Meter 1 Name",
         "  SumOrAverage,                       !- Aggregation Type for Variable or Meter 1",
-        "  NON EXISTANT VARIABLE,              !- Variable or Meter 2 Name",
+        "  NON EXISTENT VARIABLE,              !- Variable or Meter 2 Name",
         "  Maximum;                            !- Aggregation Type for Variable or Meter 2",
 
         "Output:Table:SummaryReports,",
@@ -13164,9 +13164,9 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_WarnMonthlyDisplayExtraWarn
         "Output:Table:Monthly,",
         "  Space Gains Annual Report, !- Name",
         "  2, !-  Digits After Decimal",
-        "  NON EXISTANT VARIABLE, !- Variable or Meter 1 Name",
+        "  NON EXISTENT VARIABLE, !- Variable or Meter 1 Name",
         "  SumOrAverage, !- Aggregation Type for Variable or Meter 1",
-        "  NON EXISTANT VARIABLE BIS, !- Variable or Meter 2 Name",
+        "  NON EXISTENT VARIABLE BIS, !- Variable or Meter 2 Name",
         "  Maximum; !- Aggregation Type for Variable or Meter 2",
 
         "Output:Table:SummaryReports,",
@@ -13217,8 +13217,8 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_WarnMonthlyDisplayExtraWarn
     std::string const expected_error = delimited_string({
         "   ** Warning ** Processing Monthly Tabular Reports: Variable names not valid for this simulation",
         "   **   ~~~   ** ..Variables not valid for this simulation will have \"[Invalid/Undefined]\" in the Units Column of the Table Report.",
-        "   ** Warning ** In Output:Table:Monthly 'SPACE GAINS ANNUAL REPORT' invalid Variable or Meter Name 'NON EXISTANT VARIABLE'",
-        "   ** Warning ** In Output:Table:Monthly 'SPACE GAINS ANNUAL REPORT' invalid Variable or Meter Name 'NON EXISTANT VARIABLE BIS'",
+        "   ** Warning ** In Output:Table:Monthly 'SPACE GAINS ANNUAL REPORT' invalid Variable or Meter Name 'NON EXISTENT VARIABLE'",
+        "   ** Warning ** In Output:Table:Monthly 'SPACE GAINS ANNUAL REPORT' invalid Variable or Meter Name 'NON EXISTENT VARIABLE BIS'",
     });
     compare_err_stream(expected_error);
 }
@@ -13290,9 +13290,9 @@ TEST_F(EnergyPlusFixture, OutputReportTabularMonthly_NoWarnMonthlIfNoWeatherFile
         "Output:Table:Monthly,",
         "  Space Gains Annual Report, !- Name",
         "  2, !-  Digits After Decimal",
-        "  NON EXISTANT VARIABLE, !- Variable or Meter 1 Name",
+        "  NON EXISTENT VARIABLE, !- Variable or Meter 1 Name",
         "  SumOrAverage, !- Aggregation Type for Variable or Meter 1",
-        "  NON EXISTANT VARIABLE BIS, !- Variable or Meter 2 Name",
+        "  NON EXISTENT VARIABLE BIS, !- Variable or Meter 2 Name",
         "  Maximum; !- Aggregation Type for Variable or Meter 2",
 
         "Output:Table:SummaryReports,",

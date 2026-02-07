@@ -319,7 +319,7 @@ TEST_F(EnergyPlusFixture, SurfaceControlMovableInsulation_InvalidWindowSimpleGla
     Array1D_string const BaseSurfCls(1, {"WALL"});
     Array1D<DataSurfaces::SurfaceClass> const BaseSurfIDs(1, {DataSurfaces::SurfaceClass::Wall});
     int NeedToAddSurfaces;
-    // get heat tranfer surface data
+    // get heat transfer surface data
     SurfaceGeometry::GetHTSurfaceData(*state, ErrorsFound, SurfNum, TotHTSurfs, 0, 0, 0, BaseSurfCls, BaseSurfIDs, NeedToAddSurfaces);
     // get movable insulation object data
     state->dataSurface->Surface(1) = state->dataSurfaceGeometry->SurfaceTmp(1);

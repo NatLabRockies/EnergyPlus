@@ -1276,6 +1276,7 @@ SizingPeriod:WeatherFileDays,
        \memo Use a weather file period for design sizing calculations.
   A1 , \field Name
        \reference RunPeriodsAndDesignDays
+       \reference SizingPeriodWeatherFileDays
        \required-field
        \note user supplied name for reporting
   N1 , \field Begin Month
@@ -1537,7 +1538,7 @@ RunPeriodControl:DaylightSavingTime,
      \note  <number>/<number>  (month/day)
      \note  <number> <Month>
      \note  <Month> <number>
-     \note <Nth> <Weekday> in <Month)
+     \note <Nth> <Weekday> in <Month>
      \note Last <WeekDay> in <Month>
      \note <Month> can be January, February, March, April, May, June, July, August, September, October, November, December
      \note Months can be the first 3 letters of the month
@@ -21649,6 +21650,7 @@ ComfortViewFactorAngles,
   A2 , \field Surface 1 Name
        \type object-list
        \object-list AllHeatTranSurfNames
+       \begin-extensible
   N1 , \field Angle Factor 1
        \type real
        \minimum 0.0
@@ -27128,7 +27130,7 @@ AirflowNetwork:Distribution:DuctSizing,
  N2 , \field Maximum Airflow Velocity
       \type real
       \units m/s
-      \minimum >0.0
+      \minimum> 0.0
       \maximum 25.0
       \default 5.0
       \note Used only if Duct Sizing Type = MaximumVelocity or PressureLossWithMaximumVelocity.
@@ -27141,7 +27143,7 @@ AirflowNetwork:Distribution:DuctSizing,
  N3 , \field Total Pressure Loss Across Supply Trunk
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Used only if Duct Sizing Type = PressureLoss or PressureLossWithMaximumVelocity.
       \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation
       \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
@@ -27151,19 +27153,19 @@ AirflowNetwork:Distribution:DuctSizing,
  N4 , \field Total Pressure Loss Across Supply Branch
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
  N5 , \field Total Pressure Loss Across Return Trunk
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
  N6 ; \field Total Pressure Loss Across Return Branch
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
 
@@ -34626,8 +34628,8 @@ Sizing:Zone,
       \note Only No Latent Load or a zone humidistat is present.
       \note A default of 50.0 will be used if no schedule is provided and
       \note no humidistat is associated with this zone.
-      \type alpha
-      \units percent
+      \type object-list
+      \object-list ScheduleNames
   A14,\field Zone Humidistat Humidification Set Point Schedule Name
       \note Enter the zone relative humidity schedule used for zone latent
       \note heating calculations.
@@ -34636,8 +34638,8 @@ Sizing:Zone,
       \note Only No Latent Load or a zone humidistat is present.
       \note A default of 50.0 will be used if no schedule is provided and
       \note no humidistat is associated with this zone.
-      \type alpha
-      \units percent
+      \type object-list
+      \object-list ScheduleNames
   A15,\field Type of Space Sum to Use
       \note NonCoincident is available only if Do Space Heat Balance for Sizing=Yes in ZoneAirHeatBalanceAlgorithm.
       \type choice
@@ -36012,7 +36014,7 @@ ZoneHVAC:IdealLoadsAirSystem,
        \key DistrictCooling
        \key DistrictHeatingWater
        \key DistrictHeatingSteam
-       \Default DistrictHeatingWater
+       \default DistrictHeatingWater
   A20, \field Cooling Fuel Efficiency Schedule Name
        \type object-list
        \object-list ScheduleNames
@@ -36036,7 +36038,7 @@ ZoneHVAC:IdealLoadsAirSystem,
        \key DistrictCooling
        \key DistrictHeatingWater
        \key DistrictHeatingSteam
-       \Default DistrictCooling
+       \default DistrictCooling
 
 ZoneHVAC:FourPipeFanCoil,
         \memo Four pipe fan coil system. Forced-convection hydronic heating-cooling unit with
@@ -45219,7 +45221,7 @@ ZoneHVAC:CoolingPanel:RadiantConvective:Water,
        \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
        \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
        \note from user specified cooling capacity per floor area and total floor area of cooled zone
-       \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+       \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
        \note design cooling capacity is determined from a user specified fraction and the auto-sized
        \note design cooling capacity of the system.
   N4 , \field Cooling Design Capacity
@@ -46271,7 +46273,7 @@ ZoneHVAC:LowTemperatureRadiant:VariableFlow:Design,
         \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
         \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
         \note from user specified cooling capacity per floor area and total floor area of cooled zone
-        \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+        \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
         \note design cooling capacity is determined from a user specified fraction and the auto-sized
         \note design cooling capacity of the system.
   N7, \field Cooling Design Capacity Per Floor Area
@@ -57657,7 +57659,7 @@ Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
         \note Availability schedule name for this system. Schedule value > 0 means the system is available.
         \note If this field is blank, the system is always available.
         \type object-list
-        \object-list ScheduleNames      
+        \object-list ScheduleNames
    A3 , \field Compressor Type
         \required-field
         \type choice
@@ -60105,7 +60107,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
        \type object-list
-       \object-list ScheduleNames 
+       \object-list ScheduleNames
   N1,  \field Number of Speeds
        \units dimensionless
        \type integer
@@ -67861,49 +67863,49 @@ AirLoopHVAC:ControllerList,
        \required-field
        \type object-list
        \object-list AirLoopControllers
-  A4 , \field  Controller 2 Object Type
+  A4 , \field Controller 2 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A5 , \field Controller 2 Name
        \type object-list
        \object-list AirLoopControllers
-  A6 , \field  Controller 3 Object Type
+  A6 , \field Controller 3 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A7 , \field Controller 3 Name
        \type object-list
        \object-list AirLoopControllers
-  A8 , \field  Controller 4 Object Type
+  A8 , \field Controller 4 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A9 , \field Controller 4 Name
        \type object-list
        \object-list AirLoopControllers
-  A10, \field  Controller 5 Object Type
+  A10, \field Controller 5 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A11, \field Controller 5 Name
        \type object-list
        \object-list AirLoopControllers
-  A12, \field  Controller 6 Object Type
+  A12, \field Controller 6 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A13, \field Controller 6 Name
        \type object-list
        \object-list AirLoopControllers
-  A14, \field  Controller 7 Object Type
+  A14, \field Controller 7 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
   A15, \field Controller 7 Name
        \type object-list
        \object-list AirLoopControllers
-  A16, \field  Controller 8 Object Type
+  A16, \field Controller 8 Object Type
        \type choice
        \key Controller:WaterCoil
        \key Controller:OutdoorAir
@@ -73976,7 +73978,7 @@ Chiller:Electric:EIR,
        \default 0.2
   A20, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -74228,7 +74230,7 @@ Chiller:Electric:ReformulatedEIR,
        \default 0.2
   A19, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -74389,7 +74391,7 @@ Chiller:Electric,
        \default General
   A14, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -74779,7 +74781,7 @@ Chiller:ConstantCOP,
        \note throughout the entire simulation.
   A9 , \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -75673,7 +75675,7 @@ HeatPump:PlantLoop:EIR:Cooling,
         \note EIR = 1/COP
         \required-field
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*PLR + c*PLR**2 is typical, other univariate curves may be used
         \note PLR = part load ratio (cooling load/steady state capacity)
    A13, \field Control Type
@@ -75712,12 +75714,12 @@ HeatPump:PlantLoop:EIR:Cooling,
         \note The unit is disabled above this temperature.
    A15, \field Minimum Supply Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A16, \field Maximum Supply Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N10, \field Maximum Heat Recovery Outlet Temperature
@@ -75746,7 +75748,7 @@ HeatPump:PlantLoop:EIR:Cooling,
         \note If this field is blank, the AWHP curve without heat recovery will be used
    A19, \field Thermosiphon Capacity Fraction Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
         \note Tevap, out = evaporator outlet temperature
         \note Tcond, in = condenser inlet temperature
@@ -75853,7 +75855,7 @@ HeatPump:PlantLoop:EIR:Heating,
         \note EIR = 1/COP
         \required-field
         \type object-list
-        \object-list BiVariateFunctions
+        \object-list BivariateFunctions
         \note curve = a + b*CWS + c*CWS**2 + d*ECT + e*ECT**2 + f*CWS*ECT
         \note CWS = supply (leaving) hot water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
@@ -75913,17 +75915,17 @@ HeatPump:PlantLoop:EIR:Heating,
         \note The unit is disabled above this temperature.
    A16, \field Minimum Supply Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A17, \field Maximum Supply Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A18, \field Dry Outdoor Correction Factor Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
    N11, \field Maximum Outdoor Dry Bulb Temperature For Defrost Operation
         \type real
         \default 10.0
@@ -75951,14 +75953,14 @@ HeatPump:PlantLoop:EIR:Heating,
         \note only required if Timed or OnDemand defrost strategy is specified
    A21, \field Timed Empirical Defrost Frequency Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note univariate curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = outdoor air dry-bulb temperature (C)
         \note Timed Empirical Defrost Frequency fraction in hours = curve output
         \note only applicable if TimedEmpirical defrost control is specified
    A22, \field Timed Empirical Defrost Heat Load Penalty Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \object-list BivariateFunctions
         \note univariate curve = a + b*OAT is typical, other univariate curves may be used
         \note bivariate curve = a + b*WB + c*WB**2 + d*OAT + e*OAT**2 + f*WB*OAT
@@ -75968,7 +75970,7 @@ HeatPump:PlantLoop:EIR:Heating,
         \note only applicable if TimedEmpirical defrost control is specified
    A23, \field Timed Empirical Defrost Heat Input Energy Fraction Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \object-list BivariateFunctions
         \note univariate curve = a + b*OAT is typical, other univariate curves may be used
         \note bivariate curve = a + b*WB + c*WB**2 + d*OAT + e*OAT**2 + f*WB*OAT
@@ -75994,7 +75996,7 @@ HeatPump:PlantLoop:EIR:Heating,
         \note Electric Input Ratio (EIR) modifier as a function of temperature
         \note EIR = 1/COP
         \type object-list
-        \object-list BiVariateFunctions
+        \object-list BivariateFunctions
         \note curve = a + b*HWS + c*HWS**2 + d*ECT + e*ECT**2 + f*HWS*ECT
         \note HWS = supply (leaving) hot water temperature(C)
         \note ECT = entering condenser fluid temperature(C)
@@ -76103,7 +76105,7 @@ HeatPump:AirToWater:FuelFired:Heating,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
   A12, \field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -76290,7 +76292,7 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
   A12, \field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -76348,15 +76350,18 @@ HeatPump:AirToWater:FuelFired:Cooling,
 
 HeatPump:AirToWater,
         \memo air-to-water heat pump system which provides either chilled or hot water with single- or variable speed compressors.
-        \min-fields 56
+        \min-fields 77
    A1 , \field Name
         \required-field
         \type alpha
-        \note Enter a unique name for this air-to-water heat pump
+        \reference-class-name validPlantEquipmentTypes
+        \reference validPlantEquipmentNames
+        \reference-class-name validBranchEquipmentTypes
+        \reference validBranchEquipmentNames
    A2 , \field Availability Schedule Name Heating
         \type object-list
         \object-list ScheduleNames
-        \note Enter the name of a schedule that defines the availability of the unit in cooling mode
+        \note Enter the name of a schedule that defines the availability of the unit in heating mode
         \note Schedule values of 0 denote the unit is off. All other values denote the unit is available
         \note If this field is left blank, the unit is available the entire simulation
    A3 , \field Availability Schedule Name Cooling
@@ -76374,6 +76379,7 @@ HeatPump:AirToWater,
    A5,  \field Operating Mode Control Option for Multiple Unit
         \note this determines how the operation mode is assigned when the load
         \note is too large to be met by multiple heat pump units
+        \type choice
         \key SingleMode
         \key CoolingPriority
         \key HeatingPriority
@@ -76394,13 +76400,18 @@ HeatPump:AirToWater,
         \note Schedule values control operating mode: 0=off, 1=cooling, 2=heating
         \type object-list
         \object-list ScheduleNames
-   N1 , \field Rated Inlet Air Temperature in Heating Mode
+   N1,  \field Minimum Part Load Ratio
+        \note Below this operating limit compressor cycling will occur
+        \type real
+        \minimum 0.0
+        \default 0.0
+   N2 , \field Rated Inlet Air Temperature in Heating Mode
         \type real
         \units C
         \default 8
         \note inlet air dry-bulb temperature corresponding to rated heat pump performance
         \note (capacity, COP).
-   N2 , \field Rated Air Flow Rate in Heating Mode
+   N3 , \field Rated Air Flow Rate in Heating Mode
         \type real
         \units m3/s
         \minimum> 0.0
@@ -76408,13 +76419,13 @@ HeatPump:AirToWater,
         \default autosize
         \note air flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N3 , \field Rated Leaving Water Temperature in Heating Mode
+   N4 , \field Rated Leaving Water Temperature in Heating Mode
         \type real
         \units C
         \default 40
         \note outlet water temperature corresponding to rated heat pump performance
         \note (heating capacity, COP).
-   N4 , \field Rated Water Flow Rate in Heating Mode
+   N5 , \field Rated Water Flow Rate in Heating Mode
         \type real
         \units m3/s
         \ip-units gal/min
@@ -76423,13 +76434,13 @@ HeatPump:AirToWater,
         \default autosize
         \note Condenser water flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N5,  \field Minimum Outdoor Air Temperature in Heating Mode
+   N6,  \field Minimum Outdoor Air Temperature in Heating Mode
         \type real
         \units C
         \default -30.0
         \note Enter the minimum outdoor temperature allowed for heating operation
         \note Heating is disabled below this temperature
-   N6,  \field Maximum Outdoor Air Temperature in Heating Mode
+   N7,  \field Maximum Outdoor Air Temperature in Heating Mode
         \type real
         \units C
         \default 100
@@ -76437,19 +76448,14 @@ HeatPump:AirToWater,
         \note Heating is disabled above this temperature
    A7,  \field Minimum Leaving Water Temperature Curve Name in Heating Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A8,  \field Maximum Leaving Water Temperature Curve Name in Heating Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
-   N7,  \field Minimum Part Load Ratio
-        \note Below this operating limit compressor cycling will occur
-        \type real
-        \minimum 0.0
-        \default 0.0
    N8, \field Sizing Factor for Heating
         \note Multiplies the autosized capacity and flow rates
         \type real
@@ -76498,12 +76504,12 @@ HeatPump:AirToWater,
         \note Cooling is disabled above this temperature
    A9,  \field Minimum Leaving Water Temperature Curve Name in Cooling Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A10, \field Maximum Leaving Water Temperature Curve Name in Cooling Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N15, \field Sizing Factor for Cooling
@@ -76541,7 +76547,7 @@ HeatPump:AirToWater,
         \key Timed
         \key OnDemand
         \key TimedEmpirical
-        \note A blank field is the same as None.
+        \default None
    N17, \field Heat Pump Defrost Time Period Fraction
         \type real
         \minimum 0.0
@@ -76552,10 +76558,8 @@ HeatPump:AirToWater,
         \type real
         \minimum 0.0
         \default 0.0
-        \autosizable
         \units W
         \note only applicable if resistive defrost strategy is specified
-        \ip-units W
    A18, \field Defrost Energy Input Ratio Function of Temperature Curve Name
         \type object-list
         \object-list BivariateFunctions
@@ -76598,6 +76602,7 @@ HeatPump:AirToWater,
    N24, \field Number of Speeds for Heating
         \type integer
         \note the number of speed levels in heating mode
+        \minimum 0
         \maximum 5
         \default 1
         \note if there's only cooling component, set this field to 0
@@ -76615,7 +76620,7 @@ HeatPump:AirToWater,
    A22, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 1
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A23, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 1
         \type object-list
@@ -76631,6 +76636,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N28, \field Rated COP for Heating at Speed 2
         \type real
         \minimum> 0.0
@@ -76638,7 +76645,7 @@ HeatPump:AirToWater,
    A25, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 2
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A26, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 2
         \type object-list
@@ -76654,6 +76661,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N30, \field Rated COP for Heating at Speed 3
         \type real
         \minimum> 0.0
@@ -76661,7 +76670,7 @@ HeatPump:AirToWater,
    A28, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 3
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A29, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 3
         \type object-list
@@ -76677,6 +76686,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N32,\field Rated COP for Heating at Speed 4
         \type real
         \minimum> 0.0
@@ -76684,7 +76695,7 @@ HeatPump:AirToWater,
    A31, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 4
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A32, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 4
         \type object-list
@@ -76700,6 +76711,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N34, \field Rated COP for Heating at Speed 5
         \type real
         \minimum> 0.0
@@ -76707,7 +76720,7 @@ HeatPump:AirToWater,
    A34, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 5
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A35, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 5
         \type object-list
@@ -76736,7 +76749,7 @@ HeatPump:AirToWater,
    A38, \field Normalized Heating Capacity Function of Temperature Curve Name in Booster Mode
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A39, \field Heating Energy Input Ratio Function of Temperature Curve Name in Booster Mode
         \type object-list
@@ -76750,6 +76763,7 @@ HeatPump:AirToWater,
         \note which is a cubic curve or a lookup table.
    N37, \field Number of Speeds for Cooling
         \type integer
+        \minimum 0
         \maximum 5
         \default 1
         \note the number of speed levels in cooling mode
@@ -76768,7 +76782,7 @@ HeatPump:AirToWater,
    A41, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 1
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A42, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 1
         \type object-list
@@ -76784,6 +76798,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N41, \field Rated COP for Cooling at Speed 2
         \type real
         \minimum> 0.0
@@ -76791,7 +76807,7 @@ HeatPump:AirToWater,
    A44, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 2
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A45, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 2
         \type object-list
@@ -76807,6 +76823,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N43, \field Rated COP for Cooling at Speed 3
         \type real
         \minimum> 0.0
@@ -76814,7 +76832,7 @@ HeatPump:AirToWater,
    A47, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 3
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A48, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 3
         \type object-list
@@ -76830,6 +76848,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N45, \field Rated COP for Cooling at Speed 4
         \type real
         \minimum> 0.0
@@ -76837,7 +76857,7 @@ HeatPump:AirToWater,
    A50, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 4
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A51, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 4
         \type object-list
@@ -76853,6 +76873,8 @@ HeatPump:AirToWater,
         \type real
         \units W
         \minimum> 0.0
+        \autosizable
+        \default autosize
    N47, \field Rated COP for Cooling at Speed 5
         \type real
         \minimum> 0.0
@@ -76860,7 +76882,7 @@ HeatPump:AirToWater,
    A53, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 5
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A54, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 5
         \type object-list
@@ -76889,7 +76911,7 @@ HeatPump:AirToWater,
    A57, \field Normalized Cooling Capacity Function of Temperature Curve Name in Booster Mode
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A58, \field Cooling Energy Input Ratio Function of Temperature Curve Name in Booster Mode
         \type object-list
@@ -79951,311 +79973,395 @@ GroundHeatExchanger:System,
         \type choice
         \key UHFcalc
         \key UBHWTcalc
+        \key FullDesign
         \default UHFcalc
-  A8,   \field GHE:Vertical:Array Object Name
+  A8,   \field GHE:Vertical:Sizing Object Type
+        \type choice
+        \key GroundHeatExchanger:Vertical:Sizing:Rectangle
+  A9,   \field GHE:Vertical:Sizing Object Name
+        \type object-list
+        \object-list GroundHeatExchangerVerticalSizingNames
+        \note Only needed when g-function calculation method is FullDesign
+  A10,  \field GHE:Vertical:Array Object Name
         \type object-list
         \object-list GroundHeatExchangerVerticalArrayNames
-  A9,   \field GHE:Vertical:Single Object Name 1
+  A11,  \field GHE:Vertical:Single Object Name 1
         \begin-extensible
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A10,  \field GHE:Vertical:Single Object Name 2
+  A12,  \field GHE:Vertical:Single Object Name 2
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A11,  \field GHE:Vertical:Single Object Name 3
+  A13,  \field GHE:Vertical:Single Object Name 3
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A12,  \field GHE:Vertical:Single Object Name 4
+  A14,  \field GHE:Vertical:Single Object Name 4
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A13,  \field GHE:Vertical:Single Object Name 5
+  A15,  \field GHE:Vertical:Single Object Name 5
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A14,  \field GHE:Vertical:Single Object Name 6
+  A16,  \field GHE:Vertical:Single Object Name 6
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A15,  \field GHE:Vertical:Single Object Name 7
+  A17,  \field GHE:Vertical:Single Object Name 7
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A16,  \field GHE:Vertical:Single Object Name 8
+  A18,  \field GHE:Vertical:Single Object Name 8
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A17,  \field GHE:Vertical:Single Object Name 9
+  A19,  \field GHE:Vertical:Single Object Name 9
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A18,  \field GHE:Vertical:Single Object Name 10
+  A20,  \field GHE:Vertical:Single Object Name 10
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A19,  \field GHE:Vertical:Single Object Name 11
+  A21,  \field GHE:Vertical:Single Object Name 11
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A20,  \field GHE:Vertical:Single Object Name 12
+  A22,  \field GHE:Vertical:Single Object Name 12
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A21,  \field GHE:Vertical:Single Object Name 13
+  A23,  \field GHE:Vertical:Single Object Name 13
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A22,  \field GHE:Vertical:Single Object Name 14
+  A24,  \field GHE:Vertical:Single Object Name 14
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A23,  \field GHE:Vertical:Single Object Name 15
+  A25,  \field GHE:Vertical:Single Object Name 15
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A24,  \field GHE:Vertical:Single Object Name 16
+  A26,  \field GHE:Vertical:Single Object Name 16
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A25,  \field GHE:Vertical:Single Object Name 17
+  A27,  \field GHE:Vertical:Single Object Name 17
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A26,  \field GHE:Vertical:Single Object Name 18
+  A28,  \field GHE:Vertical:Single Object Name 18
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A27,  \field GHE:Vertical:Single Object Name 19
+  A29,  \field GHE:Vertical:Single Object Name 19
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A28,  \field GHE:Vertical:Single Object Name 20
+  A30,  \field GHE:Vertical:Single Object Name 20
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A29,  \field GHE:Vertical:Single Object Name 21
+  A31,  \field GHE:Vertical:Single Object Name 21
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A30,  \field GHE:Vertical:Single Object Name 22
+  A32,  \field GHE:Vertical:Single Object Name 22
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A31,  \field GHE:Vertical:Single Object Name 23
+  A33,  \field GHE:Vertical:Single Object Name 23
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A32,  \field GHE:Vertical:Single Object Name 24
+  A34,  \field GHE:Vertical:Single Object Name 24
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A33,  \field GHE:Vertical:Single Object Name 25
+  A35,  \field GHE:Vertical:Single Object Name 25
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A34,  \field GHE:Vertical:Single Object Name 26
+  A36,  \field GHE:Vertical:Single Object Name 26
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A35,  \field GHE:Vertical:Single Object Name 27
+  A37,  \field GHE:Vertical:Single Object Name 27
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A36,  \field GHE:Vertical:Single Object Name 28
+  A38,  \field GHE:Vertical:Single Object Name 28
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A37,  \field GHE:Vertical:Single Object Name 29
+  A39,  \field GHE:Vertical:Single Object Name 29
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A38,  \field GHE:Vertical:Single Object Name 30
+  A40,  \field GHE:Vertical:Single Object Name 30
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A39,  \field GHE:Vertical:Single Object Name 31
+  A41,  \field GHE:Vertical:Single Object Name 31
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A40,  \field GHE:Vertical:Single Object Name 32
+  A42,  \field GHE:Vertical:Single Object Name 32
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A41,  \field GHE:Vertical:Single Object Name 33
+  A43,  \field GHE:Vertical:Single Object Name 33
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A42,  \field GHE:Vertical:Single Object Name 34
+  A44,  \field GHE:Vertical:Single Object Name 34
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A43,  \field GHE:Vertical:Single Object Name 35
+  A45,  \field GHE:Vertical:Single Object Name 35
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A44,  \field GHE:Vertical:Single Object Name 36
+  A46,  \field GHE:Vertical:Single Object Name 36
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A45,  \field GHE:Vertical:Single Object Name 37
+  A47,  \field GHE:Vertical:Single Object Name 37
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A46,  \field GHE:Vertical:Single Object Name 38
+  A48,  \field GHE:Vertical:Single Object Name 38
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A47,  \field GHE:Vertical:Single Object Name 39
+  A49,  \field GHE:Vertical:Single Object Name 39
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A48,  \field GHE:Vertical:Single Object Name 40
+  A50,  \field GHE:Vertical:Single Object Name 40
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A49,  \field GHE:Vertical:Single Object Name 41
+  A51,  \field GHE:Vertical:Single Object Name 41
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A50,  \field GHE:Vertical:Single Object Name 42
+  A52,  \field GHE:Vertical:Single Object Name 42
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A51,  \field GHE:Vertical:Single Object Name 43
+  A53,  \field GHE:Vertical:Single Object Name 43
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A52,  \field GHE:Vertical:Single Object Name 44
+  A54,  \field GHE:Vertical:Single Object Name 44
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A53,  \field GHE:Vertical:Single Object Name 45
+  A55,  \field GHE:Vertical:Single Object Name 45
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A54,  \field GHE:Vertical:Single Object Name 46
+  A56,  \field GHE:Vertical:Single Object Name 46
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A55,  \field GHE:Vertical:Single Object Name 47
+  A57,  \field GHE:Vertical:Single Object Name 47
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A56,  \field GHE:Vertical:Single Object Name 48
+  A58,  \field GHE:Vertical:Single Object Name 48
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A57,  \field GHE:Vertical:Single Object Name 49
+  A59,  \field GHE:Vertical:Single Object Name 49
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A58,  \field GHE:Vertical:Single Object Name 50
+  A60,  \field GHE:Vertical:Single Object Name 50
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A59,  \field GHE:Vertical:Single Object Name 51
+  A61,  \field GHE:Vertical:Single Object Name 51
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A60,  \field GHE:Vertical:Single Object Name 52
+  A62,  \field GHE:Vertical:Single Object Name 52
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A61,  \field GHE:Vertical:Single Object Name 53
+  A63,  \field GHE:Vertical:Single Object Name 53
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A62,  \field GHE:Vertical:Single Object Name 54
+  A64,  \field GHE:Vertical:Single Object Name 54
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A63,  \field GHE:Vertical:Single Object Name 55
+  A65,  \field GHE:Vertical:Single Object Name 55
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A64,  \field GHE:Vertical:Single Object Name 56
+  A66,  \field GHE:Vertical:Single Object Name 56
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A65,  \field GHE:Vertical:Single Object Name 57
+  A67,  \field GHE:Vertical:Single Object Name 57
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A66,  \field GHE:Vertical:Single Object Name 58
+  A68,  \field GHE:Vertical:Single Object Name 58
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A67,  \field GHE:Vertical:Single Object Name 59
+  A69,  \field GHE:Vertical:Single Object Name 59
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A68,  \field GHE:Vertical:Single Object Name 60
+  A70,  \field GHE:Vertical:Single Object Name 60
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A69,  \field GHE:Vertical:Single Object Name 61
+  A71,  \field GHE:Vertical:Single Object Name 61
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A70,  \field GHE:Vertical:Single Object Name 62
+  A72,  \field GHE:Vertical:Single Object Name 62
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A71,  \field GHE:Vertical:Single Object Name 63
+  A73,  \field GHE:Vertical:Single Object Name 63
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A72,  \field GHE:Vertical:Single Object Name 64
+  A74,  \field GHE:Vertical:Single Object Name 64
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A73,  \field GHE:Vertical:Single Object Name 65
+  A75,  \field GHE:Vertical:Single Object Name 65
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A74,  \field GHE:Vertical:Single Object Name 66
+  A76,  \field GHE:Vertical:Single Object Name 66
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A75,  \field GHE:Vertical:Single Object Name 67
+  A77,  \field GHE:Vertical:Single Object Name 67
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A76,  \field GHE:Vertical:Single Object Name 68
+  A78,  \field GHE:Vertical:Single Object Name 68
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A77,  \field GHE:Vertical:Single Object Name 69
+  A79,  \field GHE:Vertical:Single Object Name 69
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A78,  \field GHE:Vertical:Single Object Name 70
+  A80,  \field GHE:Vertical:Single Object Name 70
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A79,  \field GHE:Vertical:Single Object Name 71
+  A81,  \field GHE:Vertical:Single Object Name 71
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A80,  \field GHE:Vertical:Single Object Name 72
+  A82,  \field GHE:Vertical:Single Object Name 72
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A81,  \field GHE:Vertical:Single Object Name 73
+  A83,  \field GHE:Vertical:Single Object Name 73
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A82,  \field GHE:Vertical:Single Object Name 74
+  A84,  \field GHE:Vertical:Single Object Name 74
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A83,  \field GHE:Vertical:Single Object Name 75
+  A85,  \field GHE:Vertical:Single Object Name 75
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A84,  \field GHE:Vertical:Single Object Name 76
+  A86,  \field GHE:Vertical:Single Object Name 76
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A85,  \field GHE:Vertical:Single Object Name 77
+  A87,  \field GHE:Vertical:Single Object Name 77
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A86,  \field GHE:Vertical:Single Object Name 78
+  A88,  \field GHE:Vertical:Single Object Name 78
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A87,  \field GHE:Vertical:Single Object Name 79
+  A89,  \field GHE:Vertical:Single Object Name 79
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A88,  \field GHE:Vertical:Single Object Name 80
+  A90,  \field GHE:Vertical:Single Object Name 80
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A89,  \field GHE:Vertical:Single Object Name 81
+  A91,  \field GHE:Vertical:Single Object Name 81
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A90,  \field GHE:Vertical:Single Object Name 82
+  A92,  \field GHE:Vertical:Single Object Name 82
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A91,  \field GHE:Vertical:Single Object Name 83
+  A93,  \field GHE:Vertical:Single Object Name 83
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A92,  \field GHE:Vertical:Single Object Name 84
+  A94,  \field GHE:Vertical:Single Object Name 84
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A93,  \field GHE:Vertical:Single Object Name 85
+  A95,  \field GHE:Vertical:Single Object Name 85
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A94,  \field GHE:Vertical:Single Object Name 86
+  A96,  \field GHE:Vertical:Single Object Name 86
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A95,  \field GHE:Vertical:Single Object Name 87
+  A97,  \field GHE:Vertical:Single Object Name 87
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A96,  \field GHE:Vertical:Single Object Name 88
+  A98,  \field GHE:Vertical:Single Object Name 88
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A97,  \field GHE:Vertical:Single Object Name 89
+  A99,  \field GHE:Vertical:Single Object Name 89
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A98,  \field GHE:Vertical:Single Object Name 90
+  A100, \field GHE:Vertical:Single Object Name 90
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A99,  \field GHE:Vertical:Single Object Name 91
+  A101, \field GHE:Vertical:Single Object Name 91
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A100,  \field GHE:Vertical:Single Object Name 92
+  A102, \field GHE:Vertical:Single Object Name 92
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A101, \field GHE:Vertical:Single Object Name 93
+  A103, \field GHE:Vertical:Single Object Name 93
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A102, \field GHE:Vertical:Single Object Name 94
+  A104, \field GHE:Vertical:Single Object Name 94
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A103, \field GHE:Vertical:Single Object Name 95
+  A105, \field GHE:Vertical:Single Object Name 95
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A104, \field GHE:Vertical:Single Object Name 96
+  A106, \field GHE:Vertical:Single Object Name 96
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A105, \field GHE:Vertical:Single Object Name 97
+  A107, \field GHE:Vertical:Single Object Name 97
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A106, \field GHE:Vertical:Single Object Name 98
+  A108, \field GHE:Vertical:Single Object Name 98
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A107, \field GHE:Vertical:Single Object Name 99
+  A109, \field GHE:Vertical:Single Object Name 99
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
-  A108; \field GHE:Vertical:Single Object Name 100
+  A110; \field GHE:Vertical:Single Object Name 100
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
+
+GroundHeatExchanger:Vertical:Sizing:Rectangle,
+        \memo Specifies parameters to be used for Ground Heat Exchanger borehole
+        \memo field design and sizing.
+        \min-fields 6
+  A1,   \field Name
+        \required-field
+        \type alpha
+        \reference GroundHeatExchangerVerticalSizingNames
+  A2,   \field SizingPeriod:WeatherFileDays Name
+        \required-field
+        \type object-list
+        \object-list SizingPeriodWeatherFileDays
+        \note Specifies the SizingPeriod:WeatherFileDays required to perform GHE sizing
+  N1,   \field Design Flow Rate Per Borehole
+        \type real
+        \minimum> 0.0
+        \default 0.0005
+        \units m3/s
+        \required-field
+        \note Design flow rate per borehole used to size borehole field
+  N2,   \field Available Borehole Field Length
+        \type real
+        \minimum> 0.0
+        \units m
+        \required-field
+        \note Available length of the area available for designing the borehole field
+  N3,   \field Available Borehole Field Width
+        \type real
+        \minimum> 0.0
+        \units m
+        \required-field
+        \note Available width of the area available for designing the borehole field
+  N4,   \field Maximum Number of Boreholes
+        \type real
+        \minimum> 0.0
+        \required-field
+        \note User specified maximum number of boreholes
+  N5,   \field Minimum Borehole Spacing
+        \type real
+        \minimum> 0.0
+        \default 4.0
+        \units m
+        \note Minimum borehole-to-borehole spacing
+  N6,   \field Maximum Borehole Spacing
+        \type real
+        \minimum> 0.0
+        \default 6.0
+        \units m
+        \note Maximum borehole-to-borehole spacing
+  N7,   \field Minimum Borehole Vertical Length
+        \type real
+        \minimum> 0.0
+        \default 60.0
+        \units m
+        \note Minimum drilled depth of the vertical borehole
+  N8,   \field Maximum Borehole Vertical Length
+        \type real
+        \minimum> 0.0
+        \default 135.0
+        \units m
+        \note Maximum drilled depth of the vertical borehole
+  N9,   \field Minimum Exiting Fluid Temperature for Sizing
+        \type real
+        \minimum> 0.0
+        \default 5.0
+        \units C
+        \note Minimum ground heat exchanger exiting fluid temperature used
+        \note when designing the borehole field
+  N10;  \field Maximum Exiting Fluid Temperature for Sizing
+        \type real
+        \minimum> 0.0
+        \default 35.0
+        \units C
+        \note Maximum ground heat exchanger exiting fluid temperature used
+        \note when designing the borehole field
 
 GroundHeatExchanger:Vertical:Properties,
         \memo Properties for vertical ground heat exchanger systems
@@ -81897,6 +82003,7 @@ WaterHeater:Sizing,
        \required-field
        \type object-list
        \object-list WaterHeaterNames
+       \object-list ThermalStorageWaterNames
   A2 , \field Design Mode
        \type choice
        \key PeakDraw
@@ -82619,6 +82726,7 @@ ThermalStorage:ChilledWater:Mixed,
   A1 , \field Name
        \required-field
        \type alpha
+       \reference ThermalStorageWaterNames
        \reference-class-name validPlantEquipmentTypes
        \reference validPlantEquipmentNames
        \reference-class-name validCondenserEquipmentTypes
@@ -82721,6 +82829,7 @@ ThermalStorage:ChilledWater:Stratified,
   A1 , \field Name
        \required-field
        \type alpha
+       \reference ThermalStorageWaterNames
        \reference-class-name validPlantEquipmentTypes
        \reference validPlantEquipmentNames
        \reference-class-name validCondenserEquipmentTypes
@@ -82933,6 +83042,7 @@ ThermalStorage:HotWater:Stratified,
   A1 , \field Name
        \required-field
        \type alpha
+       \reference ThermalStorageWaterNames
        \reference-class-name validPlantEquipmentTypes
        \reference validPlantEquipmentNames
        \reference-class-name validCondenserEquipmentTypes
@@ -83194,7 +83304,7 @@ ThermalStorage:PCM,
   N1 , \field Tank Capacity
        \type real
        \units kg
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
   N2 , \field Heat Loss Rate
@@ -83204,13 +83314,13 @@ ThermalStorage:PCM,
   N3 , \field Use Side Design Flow Rate
        \type real
        \units m3/s
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
   N4 ; \field Plant Side Design Flow Rate
        \type real
        \units m3/s
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
 
@@ -85874,7 +85984,7 @@ EnergyManagementSystem:Actuator,
        \required-field
        \type alpha
        \note This name becomes a variable for use in Erl programs
-       \note no spaces or other special characters (-,+,/,\) allowed in name
+       \note no spaces or other special characters (minus, plus, slashes, etc) allowed in name
   A2 , \field Actuated Component Unique Name
        \required-field
        \type alpha
@@ -94455,13 +94565,13 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \minimum 1
         \required-field
         \note Battery voltage is calculated by multiplying this field
-        \note by the nominal cell voltage (N13, default 3.342V)
+        \note by the nominal cell voltage (Numeric Field 13, default 3.342V)
    N3,  \field Number of Strings in Parallel
         \type integer
         \minimum 1
         \required-field
         \note Capacity (Ah) is determined by multiplying this field
-        \note by the cell capacity (N14, default 3.2 Ah)
+        \note by the cell capacity (Numeric Field 14, default 3.2 Ah)
    N4,  \field Initial Fractional State of Charge
         \type real
         \minimum 0
@@ -98472,7 +98582,12 @@ Table:IndependentVariable,
        \begin-extensible
   N7,  \field Value 2
        \type real
-  N8,N9,N10,N11,N12,N13,N14,N15,N16,N17,N18,N19,N20;
+  N8,N9,N10,N11,N12,N13,N14,N15,N16,N17,N18,N19,N20,N21,N22,N23,N24,N25,N26,N27,N28,N29,N30,  \note fields as indicated
+  N31,N32,N33,N34,N35,N36,N37,N38,N39,N40,N41,N42,N43,N44,N45,N46,N47,N48,N49,N50,  \note fields as indicated
+  N51,N52,N53,N54,N55,N56,N57,N58,N59,N60,N61,N62,N63,N64,N65,N66,N67,N68,N69,N70,  \note fields as indicated
+  N71,N72,N73,N74,N75,N76,N77,N78,N79,N80,N81,N82,N83,N84,N85,N86,N87,N88,N89,N90,  \note fields as indicated
+  N91,N92,N93,N94,N95,N96,N97,N98,N99,N100;  \note fields as indicated
+
 Table:IndependentVariableList,
        \memo A sorted list of independent variables used by one or more Table:Lookup
        \memo objects.
@@ -108111,11 +108226,12 @@ Output:Table:ReportPeriod,
        \memo This object allows the user to generate the resilience tabular reports over a subset of a run period.
        \memo When it is defined, a series of reporting-period-specific resilience summary tables will be generated
        \memo at the end of all tabular reports. Multiple reporting periods may be input.
-   A1, \field Name,
+   A1, \field Name
        \required-field
        \note descriptive name
        \note cannot be blank and must be unique
-   A2, \field Report Name,
+   A2, \field Report Name
+       \type choice
        \key ThermalResilienceSummary
        \key CO2ResilienceSummary
        \key VisualResilienceSummary
@@ -108188,8 +108304,8 @@ OutputControl:Table:Style,
        \key InchPoundExceptElectricity
        \default None
    A3; \field Format Numeric Values
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
@@ -108735,12 +108851,19 @@ OutputControl:Files,
        \key Yes
        \key No
        \default Yes
-  A32; \field Output Tarcog
+  A32, \field Output Tarcog
        \note Not Implemented Yet
        \type choice
        \key Yes
        \key No
        \default Yes
+  A33; \field Output Plant Component Sizing
+       \note epluspsz.csv
+       \type choice
+       \key Yes
+       \key No
+       \default Yes
+
 
 OutputControl:Timestamp,
        \memo Control timestamp format, currently applies only to JSON and native CSV (not CSV via ReadVars)
@@ -108794,8 +108917,8 @@ Output:JSON,
        \key InchPoundExceptElectricity
        \default UseOutputControlTableStyle
   A6 ; \field Format Numeric Values for Tabular Data
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
@@ -108821,8 +108944,8 @@ Output:SQLite,
        \key InchPoundExceptElectricity
        \default UseOutputControlTableStyle
    A3; \field Format Numeric Values for Tabular Data
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No

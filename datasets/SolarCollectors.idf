@@ -20,9 +20,6 @@
 ! All collectors are glazed flat-plate collectors, unless otherwise indicated
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   SolarCollectorPerformance:FlatPlate,
     ACR Solar International 10-01,  !- Name
     0.9325,                  !- Gross Area {m2}

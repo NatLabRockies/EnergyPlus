@@ -134,11 +134,11 @@ TEST_F(EnergyPlusFixture, SkyTempTest)
     state->init_state(*state);
 
     auto *tSkySched = Sched::GetSchedule(*state, "TSKYSCHEDULE");
-    // Febuary 27
+    // February 27
 
     EXPECT_NEAR(2.27, tSkySched->getDayVals(*state, 58, 3)[0 * state->dataGlobal->TimeStepsInHour + 0], .001);
 
-    // Febuary 28
+    // February 28
     EXPECT_NEAR(2.28, tSkySched->getDayVals(*state, 59, 4)[0 * state->dataGlobal->TimeStepsInHour + 0], .001);
 
     // March 1
@@ -1772,7 +1772,7 @@ TEST_F(EnergyPlusFixture, WeatherManager_GroupReportPeriodByType)
                                                       "18;                           !- End Hour of Day",
 
                                                       "Output:Table:ReportPeriod,",
-                                                      "ThermalResilienceReportTimeWinter,  !- field Name,",
+                                                      "ThermalResilienceReportTimeSummer,  !- field Name,",
                                                       "ThermalResilienceSummary,     !- field Report Name,",
                                                       ",                             !- Begin Year",
                                                       "7,                            !- Begin Month",

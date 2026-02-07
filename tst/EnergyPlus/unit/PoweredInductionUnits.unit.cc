@@ -2341,7 +2341,7 @@ TEST_F(EnergyPlusFixture, VSParallelPIUModulatedHeat)
     // - reheat: yes
     // - discharge air temperature: DAT below design heating DAT
     // - primary air flow rate: minimum value
-    // - secondary air flow rate: minmum value
+    // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
@@ -2793,7 +2793,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUModulatedHeat)
     // - reheat: yes
     // - discharge air temperature: DAT below design heating DAT
     // - primary air flow rate: minimum value
-    // - secondary air flow rate: minmum value
+    // - secondary air flow rate: minimum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = 500.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToHeatSP = 500.0;
@@ -3031,7 +3031,7 @@ TEST_F(EnergyPlusFixture, VSSeriesPIUCool)
     Real64 PriMinMassFlow = thisPIU.MinPriAirMassFlow;
 
     // first stage cooling, expects:
-    // - total flow rate: modulating between minimum and maxium value
+    // - total flow rate: modulating between minimum and maximum value
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = PriMinMassFlow;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputRequired = -400.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNodeNum).RemainingOutputReqToCoolSP = -400.0;

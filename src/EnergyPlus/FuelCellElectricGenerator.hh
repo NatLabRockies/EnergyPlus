@@ -86,7 +86,7 @@ namespace FuelCellElectricGenerator {
         Curve::Curve *EffCurve = nullptr;      // pointer to curve for efficiency
         Real64 NomEff;                         // nominal efficiency
         Real64 NomPel;                         // nominal power rate at rating point
-        int NumCyclesAtStart = 0.0;            // number of start stop cycles at beggining of simulation (user input)
+        int NumCyclesAtStart = 0.0;            // number of start stop cycles at beginning of simulation (user input)
         int NumCycles;                         // number of start stop cycles
         Real64 CyclingDegradRat;               // rate of degradation from cycles
         Real64 NumRunHours;                    // number of hours of operation
@@ -101,8 +101,8 @@ namespace FuelCellElectricGenerator {
         Real64 ShutDownTime;                   // time to shut down [hours]
         Real64 ShutDownFuel;                   // fuel consumed during shut down
         Real64 ShutDownElectConsum;            // Elect consumed during shut down
-        Real64 ANC0;                           // Ancilliary Loads constant term
-        Real64 ANC1;                           // Ancilliary Loads linear term
+        Real64 ANC0;                           // Ancillary Loads constant term
+        Real64 ANC1;                           // Ancillary Loads linear term
         DataGenerators::SkinLoss SkinLossMode; // how are skin losses determined
         std::string ZoneName;
         int ZoneID; // "pointer" to zone with component in it

@@ -91,29 +91,28 @@ FractionIndicentOnPeople + \sum {FractionToSurfaces = 1}
 An example IDF for the water baseboard is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:RadiantConvective:Water,
-      SPACE4-1 Baseboard,           !- Name
-      SPACE4-1 Baseboard Design,    !- Design Object Name
-      ReheatCoilAvailSched,         !- Availability Schedule Name
-      SPACE4-1 Zone Coil Water In Node,     !- Inlet Node Name
-      SPACE4-1 Zone Coil Water Out Node,    !- Outlet Node Name
-      82.22,                        !- Rated Average Water Temperature
-      0.063,                        !- Rated Water Mass Flow Rate
-      autosize,                     !- Heating Design Capacity
-      autosize,                     !- Maximum Water Flow Rate
-      LEFT-1,                       !- Surface 1 Name
-      0.4,                          !- fraction of radiant energy from heater distributed to surface 1
-      C4-1,                         !- Surface 2 Name
-      0.2,                          !- fraction of radiant energy from heater distributed to surface 2
-      SB45,                         !- Surface 3 Name
-      0.1;                          !- fraction of radiant energy from heater distributed to surface 3
-      SB23,                         !- Surface 4 Name
-      0.1,                          !- fraction of radiant energy from heater distributed to surface 4
-      SB25,                         !- Surface 5 Name
-      0.1,                          !- fraction of radiant energy from heater distributed to surface 5
-      WR-1,                         !- Surface 6 Name
-      0.1;                          !- fraction of radiant energy from heater distributed to surface 6
+  SPACE4-1 Baseboard,         !- Name
+  SPACE4-1 Baseboard Design,  !- Design Object Name
+  ReheatCoilAvailSched,       !- Availability Schedule Name
+  SPACE4-1 Zone Coil Water In Node,  !- Inlet Node Name
+  SPACE4-1 Zone Coil Water Out Node,  !- Outlet Node Name
+  82.22,                      !- Rated Average Water Temperature
+  0.063,                      !- Rated Water Mass Flow Rate
+  autosize,                   !- Heating Design Capacity
+  autosize,                   !- Maximum Water Flow Rate
+  LEFT-1,                     !- Surface 1 Name
+  0.4,                        !- fraction of radiant energy from heater distributed to surface 1
+  C4-1,                       !- Surface 2 Name
+  0.2,                        !- fraction of radiant energy from heater distributed to surface 2
+  SB45,                       !- Surface 3 Name
+  0.1,                        !- fraction of radiant energy from heater distributed to surface 3
+  SB23,                       !- Surface 4 Name
+  0.1,                        !- fraction of radiant energy from heater distributed to surface 4
+  SB25,                       !- Surface 5 Name
+  0.1,                        !- fraction of radiant energy from heater distributed to surface 5
+  WR-1,                       !- Surface 6 Name
+  0.1;                        !- fraction of radiant energy from heater distributed to surface 6
 \end{lstlisting}
 
 
@@ -227,16 +226,14 @@ This field specifies the fraction of radiant portion of heat transfer to the zon
 An example IDF for the water baseboard design object is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:RadiantConvective:Water:Design,
-      SPACE2-1 Baseboard Design,    !- Design Object Name
-      HeatingDesignCapacity,        !- Heating Design Capacity Method
-      ,                             !- Heating Design Capacity Per Floor Area
-      ,                             !- Fraction of Autosized Heating Design Capacity
-      0.001,                        !- Convergence Tolerance
-      0.3,                          !- Fraction Radiant
-      0.3;                          !- Fraction of Radiant Energy Incident on People
-
+  SPACE2-1 Baseboard Design,  !- Design Object Name
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  ,                           !- Heating Design Capacity Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Capacity
+  0.001,                      !- Convergence Tolerance
+  0.3,                        !- Fraction Radiant
+  0.3;                        !- Fraction of Radiant Energy Incident on People
 \end{lstlisting}
 
 \subsection{ZoneHVAC:Baseboard:RadiantConvective:Steam}\label{zonehvacbaseboardradiantconvectivesteam}
@@ -300,24 +297,23 @@ FractionIndicentOnPeople + \sum {FractionToSurfaces = 1}
 An example IDF for the steam baseboard is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:RadiantConvective:Steam,
-  SPACE1-1 Baseboard,                   !- Name
-  SPACE1-1 Baseboard Design,            !- Design Object Name
-  REHEATCOILAVAILSCHED,                 !- Availability Schedule Name
-  SPACE1-1 Reheat Coil Steam Inlet,     !- Inlet Node Name
-  SPACE1-1 Reheat Coil Steam Outlet,    !- Outlet Node Name
-  Autosize,                             !- Heating Design Capacity
-  5,                                    !- Degree of SubCooling
-  autosize,                             !- Maximum Steam Flow Rate
-  FRONT-1,                              !- Surface 1 Name
-  0.4,                                  !- Fraction of radiant energy from heater distributed to surface 1
-  C1-1,                                 !- Surface 2 Name
-  0.2,                                  !- Fraction of radiant energy from heater distributed to surface 2
-  SB15,                                 !- Surface 3 Name
-  0.1;                                  !- Fraction of radiant energy from heater distributed to surface 3
-  Floor,                                !- Surface 4 Name
-  0.1;                                  !- Fraction of radiant energy from heater distributed to surface 4
+  SPACE1-1 Baseboard,         !- Name
+  SPACE1-1 Baseboard Design,  !- Design Object Name
+  REHEATCOILAVAILSCHED,       !- Availability Schedule Name
+  SPACE1-1 Reheat Coil Steam Inlet,  !- Inlet Node Name
+  SPACE1-1 Reheat Coil Steam Outlet,  !- Outlet Node Name
+  Autosize,                   !- Heating Design Capacity
+  5,                          !- Degree of SubCooling
+  autosize,                   !- Maximum Steam Flow Rate
+  FRONT-1,                    !- Surface 1 Name
+  0.4,                        !- Fraction of radiant energy from heater distributed to surface 1
+  C1-1,                       !- Surface 2 Name
+  0.2,                        !- Fraction of radiant energy from heater distributed to surface 2
+  SB15,                       !- Surface 3 Name
+  0.1,                        !- Fraction of radiant energy from heater distributed to surface 3
+  Floor,                      !- Surface 4 Name
+  0.1;                        !- Fraction of radiant energy from heater distributed to surface 4
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-021}
@@ -428,15 +424,14 @@ This field specifies the fraction of radiant portion of heat transfer to the zon
 An example IDF for the steam baseboard design object is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:RadiantConvective:Steam:Design,
-  SPACE1-1 Baseboard Design,    !- Design Object Name
-  HeatingDesignCapacity,        !- Heating Design Capacity Method
-  ,                             !- Heating Design Capacity Per Floor Area
-  ,                             !- Fraction of Autosized Heating Design Capacity
-  0.001,                        !- Convergence Tolerance
-  0.3,                          !- Fraction Radiant
-  0.3;                          !- Fraction of Radiant Energy Incident on People
+  SPACE1-1 Baseboard Design,  !- Design Object Name
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  ,                           !- Heating Design Capacity Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Capacity
+  0.001,                      !- Convergence Tolerance
+  0.3,                        !- Fraction Radiant
+  0.3;                        !- Fraction of Radiant Energy Incident on People
 \end{lstlisting}
 
 \subsection{ZoneHVAC:Baseboard:RadiantConvective:Electric}\label{zonehvacbaseboardradiantconvectiveelectric}
@@ -504,27 +499,26 @@ FractionIndicentOnPeople + \sum {FractionToSurfaces = 1}
 Below is an example input for an Electric Baseboard Heater.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:RadiantConvective:Electric,
-  Baseboard 1,   !- Name
-  BB Schedule,   !- Availability Schedule Name
-  HeatingDesignCapacity,   !- Heating Design Capacity Method
-  5000,          !- Heating Design Capacity{ W }
-  ,              !- Heating Design Capacity Per Floor Area{ W / m2 }
-  ,              !- Fraction of Autosized Heating Design Capacity{ -}
-  0.97,          !- Efficiency of the baseboard
-  0.3,           !- Fraction radiant
-  0.3,           !- Fraction of radiant energy that is incident directly on people
-  EastWall,      !- Surface 1 name
-  0.3,           !- Fraction of radiant energy from heater distributed to surface 1
-  WestWall,      !- Surface 2 name
-  0.1,           !- Fraction of radiant energy from heater distributed to surface 2
-  NorthWall,     !- Surface 3 name
-  0.1,           !- Fraction of radiant energy from heater distributed to surface 3
-  SouthWall,     !- Surface 4 name
-  0.1,           !- Fraction of radiant energy from heater distributed to surface 4
-  Ceiling,       !- Surface 5 name
-  0.1;           !- Fraction of radiant energy from heater distributed to surface 5
+  Baseboard 1,                !- Name
+  BB Schedule,                !- Availability Schedule Name
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  5000,                       !- Heating Design Capacity{ W }
+  ,                           !- Heating Design Capacity Per Floor Area{ W / m2 }
+  ,                           !- Fraction of Autosized Heating Design Capacity{ -}
+  0.97,                       !- Efficiency of the baseboard
+  0.3,                        !- Fraction radiant
+  0.3,                        !- Fraction of radiant energy that is incident directly on people
+  EastWall,                   !- Surface 1 name
+  0.3,                        !- Fraction of radiant energy from heater distributed to surface 1
+  WestWall,                   !- Surface 2 name
+  0.1,                        !- Fraction of radiant energy from heater distributed to surface 2
+  NorthWall,                  !- Surface 3 name
+  0.1,                        !- Fraction of radiant energy from heater distributed to surface 3
+  SouthWall,                  !- Surface 4 name
+  0.1,                        !- Fraction of radiant energy from heater distributed to surface 4
+  Ceiling,                    !- Surface 5 name
+  0.1;                        !- Fraction of radiant energy from heater distributed to surface 5
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-017}
@@ -716,30 +710,29 @@ In combination with the previous field, this defines what fraction of the radian
 An example input for the radiant cooling panel is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:CoolingPanel:RadiantConvective:Water,
-  Radiant Cooling Panel 1,   !- Name
-  RCP Schedule 1,            !- Availability schedule
-  RCP Water Inlet Node,      !- Water Inlet node name
-  RCP Water Outlet Node,     !- Water Outlet node name
-  5.0,                       !- Rated Water Inlet Temperature {C}
-  24.0,                      !- Rated Space Temperature {C}
-  0.063,                     !- Rated Water Mass Flow Rate {kg/s}
-  5000.0,                    !- Rated cooling capacity {W}
-  0.1,                       !- Maximum water flow rate {m3/s}
-  MeanAirTemperature,        !- Temperature Control Type
-  1.0,                       !- Cooling Control Throttling Range
-  RCP Temp Schedule,         !- Cooling Control Temperature Schedule Name
-  SimpleOff,                 !- Condensation Control Type
-  1.0,                       !- Condensation Control Dewpoint Offset
-  0.65,                      !- Fraction Radiant
-  0.2,                       !- Fraction of Radiant Energy Incident on People
-  Zone 1 Floor,              !- Surface 1 Name
-  0.5,                       !- Fraction of Radiant Energy to Surface 1
-  Zone 1 West Wall,          !- Surface 2 Name
-  0.25,                      !- Fraction of Radiant Energy to Surface 2
-  Zone 1 South Wall,         !- Surface 3 Name
-  0.25;                      !- Fraction of Radiant Energy to Surface 3
+  Radiant Cooling Panel 1,    !- Name
+  RCP Schedule 1,             !- Availability schedule
+  RCP Water Inlet Node,       !- Water Inlet node name
+  RCP Water Outlet Node,      !- Water Outlet node name
+  5.0,                        !- Rated Water Inlet Temperature {C}
+  24.0,                       !- Rated Space Temperature {C}
+  0.063,                      !- Rated Water Mass Flow Rate {kg/s}
+  5000.0,                     !- Rated cooling capacity {W}
+  0.1,                        !- Maximum water flow rate {m3/s}
+  MeanAirTemperature,         !- Temperature Control Type
+  1.0,                        !- Cooling Control Throttling Range
+  RCP Temp Schedule,          !- Cooling Control Temperature Schedule Name
+  SimpleOff,                  !- Condensation Control Type
+  1.0,                        !- Condensation Control Dewpoint Offset
+  0.65,                       !- Fraction Radiant
+  0.2,                        !- Fraction of Radiant Energy Incident on People
+  Zone 1 Floor,               !- Surface 1 Name
+  0.5,                        !- Fraction of Radiant Energy to Surface 1
+  Zone 1 West Wall,           !- Surface 2 Name
+  0.25,                       !- Fraction of Radiant Energy to Surface 2
+  Zone 1 South Wall,          !- Surface 3 Name
+  0.25;                       !- Fraction of Radiant Energy to Surface 3
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-radiant-convective-cooling-panel}
@@ -884,19 +877,18 @@ The default is 0.001.
 An example IDF for the hot water convective baseboard is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:Convective:Water,
-          Zone3Baseboard,                  !- name
-          FanAndCoilAvailSched,            !- on/off schedule
-          Zone 3 Reheat Water Inlet Node,  !- water inlet node
-          Zone 3 Reheat Water Outlet Node, !- water outlet node
-          HeatingDesignCapacity,           !- Heating Design Capacity Method
-          autosize,                        !- Heating Design Capacity{ W }
-          ,                                !- Heating Design Capacity Per Floor Area{ W / m2 }
-          ,                                !- Fraction of Autosized Heating Design Capacity{ -}
-          500.,                            !- UA
-          0.0013,                          !- maximum water flow rate m3/s
-          0.001;                           !- tolerance
+  Zone3Baseboard,             !- name
+  FanAndCoilAvailSched,       !- on/off schedule
+  Zone 3 Reheat Water Inlet Node,  !- water inlet node
+  Zone 3 Reheat Water Outlet Node,  !- water outlet node
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity{ W }
+  ,                           !- Heating Design Capacity Per Floor Area{ W / m2 }
+  ,                           !- Fraction of Autosized Heating Design Capacity{ -}
+  500.,                       !- UA
+  0.0013,                     !- maximum water flow rate m3/s
+  0.001;                      !- tolerance
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-015}
@@ -995,15 +987,14 @@ This is the overall electrical efficiency of the electric baseboard. The zone lo
 An example IDF for the electric convective baseboard is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:Baseboard:Convective:Electric,
-      Zone1Baseboard,          !- Baseboard Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      5000,                    !- Heating Design Capacity{ W }
-      ,                        !- Heating Design Capacity Per Floor Area{ W / m2 }
-      ,                        !- Fraction of Autosized Heating Design Capacity{ -}
-      0.97;                    !- Efficiency of the BaseBoard
+  Zone1Baseboard,             !- Baseboard Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  5000,                       !- Heating Design Capacity{ W }
+  ,                           !- Heating Design Capacity Per Floor Area{ W / m2 }
+  ,                           !- Fraction of Autosized Heating Design Capacity{ -}
+  0.97;                       !- Efficiency of the BaseBoard
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-012}
@@ -1114,24 +1105,23 @@ The length in meters of each parallel hydronic circuit in a surface. Used when t
 An example IDF with a hydronic low temperature radiant system is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:LowTemperatureRadiant:VariableFlow,
-      West Zone Radiant Floor,          !- Name
-      West Zone Radiant Floor Design,   !- Design_Object_Name
-      RadiantSysAvailSched,             !- Availability_Schedule_Name
-      West Zone,                        !- Zone_Name
-      Zn001:Flr001,                     !- Surface_Name_or_Radiant_Surface_Group_Name
-      Autosize,                         !- Hydronic_Tubing_Length
-      Autosize,                         !- Heating_Design_Capacity
-      Autosize,                         !- Maximum_Hot_Water_Flow
-      West Zone Radiant Water Inlet Node,   !- Heating_Water_Inlet_Node_Name
-      West Zone Radiant Water Outlet Node,  !- Heating_Water_Outlet_Node_Name
-      Autosize,                         !- Cooling_Design_Capacity
-      Autosize,                         !- Maximum_Cold_Water_Flow
-      Zone 1 Cooling Water Inlet Node,  !- Cooling_Water_Inlet_Node_Name
-      Zone 1 Cooling Water Outlet Node,     !- Cooling_Water_Outlet_Node_Name
-      ,                                 !- Number_of_Circuits
-      ;                                 !- Circuit_Length
+  West Zone Radiant Floor,    !- Name
+  West Zone Radiant Floor Design,  !- Design_Object_Name
+  RadiantSysAvailSched,       !- Availability_Schedule_Name
+  West Zone,                  !- Zone_Name
+  Zn001:Flr001,               !- Surface_Name_or_Radiant_Surface_Group_Name
+  Autosize,                   !- Hydronic_Tubing_Length
+  Autosize,                   !- Heating_Design_Capacity
+  Autosize,                   !- Maximum_Hot_Water_Flow
+  West Zone Radiant Water Inlet Node,  !- Heating_Water_Inlet_Node_Name
+  West Zone Radiant Water Outlet Node,  !- Heating_Water_Outlet_Node_Name
+  Autosize,                   !- Cooling_Design_Capacity
+  Autosize,                   !- Maximum_Cold_Water_Flow
+  Zone 1 Cooling Water Inlet Node,  !- Cooling_Water_Inlet_Node_Name
+  Zone 1 Cooling Water Outlet Node,  !- Cooling_Water_Outlet_Node_Name
+  ,                           !- Number_of_Circuits
+  ;                           !- Circuit_Length
 \end{lstlisting}
 
 
@@ -1344,24 +1334,23 @@ This field defines a schedule which should be populated with values for the amou
 An example IDF with a design object for a hydronic low temperature radiant system is shown below.
 
 \begin{lstlisting}
-	
-	ZoneHVAC:LowTemperatureRadiant:VariableFlow:Design,
-	West Zone Radiant Floor Design,       !- Design Object Name
-	ConvectionOnly,                       !- Fluid to Radiant Surface Heat Transfer Model
-	0.013,                                !- Hydronic Tubing Inside Diameter
-	0.016,                                !- Hydronic Tubing Outside Diameter
-	0.35,                                 !- Hydronic Tubing Conductivity
-	MeanAirTemperature,                   !- Temperature Control Type
-	HalfFlowPower,                        !- Setpoint Control Type
-	HeatingDesignCapacity,                !- Heating Design Capacity Method
-	,                                     !- Heating Design Capacity Per Floor Area Control Temperature Schedule Name
-	CoolingDesignCapacity,                !- Cooling Design Capacity Method
-	,                                     !- Cooling Design Capacity Per Floor Area
-	,                                     !- Fraction of Autosized Cooling Design Capacity
-	2.0,                                  !- Cooling Control Throttling Range
-	Radiant Cooling Setpoints,            !- Cooling Control Temperature Schedule Name
-	Off,                                  !- Condensation Control Type
-	;                                     !- Condensation Control Dewpoint Offset
+ZoneHVAC:LowTemperatureRadiant:VariableFlow:Design,
+  West Zone Radiant Floor Design,  !- Design Object Name
+  ConvectionOnly,             !- Fluid to Radiant Surface Heat Transfer Model
+  0.013,                      !- Hydronic Tubing Inside Diameter
+  0.016,                      !- Hydronic Tubing Outside Diameter
+  0.35,                       !- Hydronic Tubing Conductivity
+  MeanAirTemperature,         !- Temperature Control Type
+  HalfFlowPower,              !- Setpoint Control Type
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  ,                           !- Heating Design Capacity Per Floor Area Control Temperature Schedule Name
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  ,                           !- Cooling Design Capacity Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Capacity
+  2.0,                        !- Cooling Control Throttling Range
+  Radiant Cooling Setpoints,  !- Cooling Control Temperature Schedule Name
+  Off,                        !- Condensation Control Type
+  ;                           !- Condensation Control Dewpoint Offset
 \end{lstlisting}
 
 
@@ -1478,32 +1467,31 @@ The length in meters of each parallel hydronic circuit in a surface. Used when t
 An example IDF with a constant flow low temperature radiant system is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:LowTemperatureRadiant:ConstantFlow,
-      West Zone Radiant Floor,              !- Name
-      West Zone Radiant Floor Design,       !- Design Object Name
-      RadiantSysAvailSched,                 !- Availability Schedule Name
-      West Zone,                            !- Zone Name
-      Zn001:Flr001,                         !- Surface Name or Radiant Surface Group Name
-      400.0,                                !- Hydronic Tubing Length
-      0.0004,                               !- Rated Flow Rate
-      ,                                     !- Pump Flow Rate Schedule Name
-      75000,                                !- Rated Pump Head
-      50,                                   !- Rated Power Consumption
-      West Zone Radiant Water Inlet Node,   !- Heating Water Inlet Node Name
-      West Zone Radiant Water Outlet Node,  !- Heating Water Outlet Node Name
-      RadHeatHighWaterTemp,                 !- Heating High Water Temperature Schedule Name
-      RadHeatLowWaterTemp,                  !- Heating Low Water Temperature Schedule Name
-      RadHeatHighControlTemp,               !- Heating High Control Temperature Schedule Name
-      RadHeatLowControlTemp,                !- Heating Low Control Temperature Schedule Name
-      Zone 1 Cooling Water Inlet Node,      !- Cooling Water Inlet Node Name
-      Zone 1 Cooling Water Outlet Node,     !- Cooling Water Outlet Node Name
-      RadCoolHighWaterTemp,                 !- Cooling High Water Temperature Schedule Name
-      RadCoolLowWaterTemp,                  !- Cooling Low Water Temperature Schedule Name
-      RadCoolHighControlTemp,               !- Cooling High Control Temperature Schedule Name
-      RadCoolLowControlTemp,                !- Cooling Low Control Temperature Schedule Name
-      ,                                     !- Number_of_Circuits
-      ;                                     !- Circuit Length {m}
+  West Zone Radiant Floor,    !- Name
+  West Zone Radiant Floor Design,  !- Design Object Name
+  RadiantSysAvailSched,       !- Availability Schedule Name
+  West Zone,                  !- Zone Name
+  Zn001:Flr001,               !- Surface Name or Radiant Surface Group Name
+  400.0,                      !- Hydronic Tubing Length
+  0.0004,                     !- Rated Flow Rate
+  ,                           !- Pump Flow Rate Schedule Name
+  75000,                      !- Rated Pump Head
+  50,                         !- Rated Power Consumption
+  West Zone Radiant Water Inlet Node,  !- Heating Water Inlet Node Name
+  West Zone Radiant Water Outlet Node,  !- Heating Water Outlet Node Name
+  RadHeatHighWaterTemp,       !- Heating High Water Temperature Schedule Name
+  RadHeatLowWaterTemp,        !- Heating Low Water Temperature Schedule Name
+  RadHeatHighControlTemp,     !- Heating High Control Temperature Schedule Name
+  RadHeatLowControlTemp,      !- Heating Low Control Temperature Schedule Name
+  Zone 1 Cooling Water Inlet Node,  !- Cooling Water Inlet Node Name
+  Zone 1 Cooling Water Outlet Node,  !- Cooling Water Outlet Node Name
+  RadCoolHighWaterTemp,       !- Cooling High Water Temperature Schedule Name
+  RadCoolLowWaterTemp,        !- Cooling Low Water Temperature Schedule Name
+  RadCoolHighControlTemp,     !- Cooling High Control Temperature Schedule Name
+  RadCoolLowControlTemp,      !- Cooling Low Control Temperature Schedule Name
+  ,                           !- Number_of_Circuits
+  ;                           !- Circuit Length {m}
 \end{lstlisting}
 
 
@@ -1748,20 +1736,19 @@ This field defines a schedule which should be populated with values for the amou
 An example IDF with a design object for constant flow low temperature radiant system is shown below.
 
 \begin{lstlisting}
-	
-	ZoneHVAC:LowTemperatureRadiant:ConstantFlow:Design,
-	West Zone Radiant Floor Design,       !- Design_Object_Name
-	ConvectionOnly,                       !- Fluid_to_Radiant_Surface_Heat_Transfer_Model
-	MeanAirTemperature,                   !- Temperature_Control_Type
-	0.8,                                  !- Running_Mean_Outdoor_DryBulb_Temperature_Weighting_Factor
-	0.012,                                !- Hydronic_Tubing_Inside_Diameter
-	0.016,                                !- Hydronic_Tubing_Outside_Diameter
-	0.35,                                 !- Hydronic_Tubing_Conductivity
-	0.87,                                 !- Motor_Efficiency
-	0.1,                                  !- Fraction_of_Motor_Inefficiencies_to_Fluid_Stream
-	Off,                                  !- Condensation_Control_Type
-	1.0,                                  !- Condensation_Control_Dewpoint_Offset
-	ChangeoverSchedW;                     !- Changeover delay schedule
+ZoneHVAC:LowTemperatureRadiant:ConstantFlow:Design,
+  West Zone Radiant Floor Design,  !- Design_Object_Name
+  ConvectionOnly,             !- Fluid_to_Radiant_Surface_Heat_Transfer_Model
+  MeanAirTemperature,         !- Temperature_Control_Type
+  0.8,                        !- Running_Mean_Outdoor_DryBulb_Temperature_Weighting_Factor
+  0.012,                      !- Hydronic_Tubing_Inside_Diameter
+  0.016,                      !- Hydronic_Tubing_Outside_Diameter
+  0.35,                       !- Hydronic_Tubing_Conductivity
+  0.87,                       !- Motor_Efficiency
+  0.1,                        !- Fraction_of_Motor_Inefficiencies_to_Fluid_Stream
+  Off,                        !- Condensation_Control_Type
+  1.0,                        !- Condensation_Control_Dewpoint_Offset
+  ChangeoverSchedW;           !- Changeover delay schedule
 \end{lstlisting}
 
 
@@ -1857,20 +1844,19 @@ This field specifies the heating setpoint or control temperature for the radiant
 An example IDF with an electric low temperature radiant system is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:LowTemperatureRadiant:Electric,
-           Zone 2 Radiant Floor,       !- Name
-           RadiantPanelAvailSched ,    !- Availability Schedule Name
-           EAST ZONE ,                 !- Zone name (name of zone system is serving)
-           Zn002:Flr001 ,              !- Surface Name or Radiant Surface Group Name
-           HeatingDesignCapacity,      !- Heating Design Capacity Method
-           10000,                      !- Heating Design Capacity{ W }
-           ,                           !- Heating Design Capacity Per Floor Area{ W/m2 }
-           ,                           !- Fraction of Autosized Heating Design Capacity{ - }
-           MeanAirTemperature,         !- Temperature Control Type (control on mean air temperature)
-           HalfFlowPower,              !- Setpoint Control Type
-           2.0 ,                       !- Heating Throttling Range { deltaC }
-           Radiant Heating Setpoints ; !- Heating Setpoint Temperature Schedule Name
+  Zone 2 Radiant Floor,       !- Name
+  RadiantPanelAvailSched,     !- Availability Schedule Name
+  EAST ZONE,                  !- Zone name (name of zone system is serving)
+  Zn002:Flr001,               !- Surface Name or Radiant Surface Group Name
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  10000,                      !- Heating Design Capacity{ W }
+  ,                           !- Heating Design Capacity Per Floor Area{ W/m2 }
+  ,                           !- Fraction of Autosized Heating Design Capacity{ - }
+  MeanAirTemperature,         !- Temperature Control Type (control on mean air temperature)
+  HalfFlowPower,              !- Setpoint Control Type
+  2.0,                        !- Heating Throttling Range { deltaC }
+  Radiant Heating Setpoints;  !- Heating Setpoint Temperature Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-007}
@@ -1925,13 +1911,12 @@ This field is the fraction of the total radiant system flow rate that is being s
 An example IDF with an electric low temperature radiant system is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:LowTemperatureRadiant:SurfaceGroup,
-      Zone 1 Radiant Surfaces, !- name of surface list
-      Zn001:Flr001,            !- Surface name 1
-      0.75,                    !- Flow fraction for surface 1
-      Zn002:Flr002,            !- Surface name 2
-      0.25;                    !- Flow fraction for surface 2
+  Zone 1 Radiant Surfaces,    !- name of surface list
+  Zn001:Flr001,               !- Surface name 1
+  0.75,                       !- Flow fraction for surface 1
+  Zn002:Flr002,               !- Surface name 2
+  0.25;                       !- Flow fraction for surface 2
 \end{lstlisting}
 
 \subsection{ZoneHVAC:HighTemperatureRadiant}\label{zonehvachightemperatureradiant}
@@ -2038,27 +2023,26 @@ This field is paired with the preceding surface name (previous field) to define 
 An example IDF with a high temperature radiant system is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:HighTemperatureRadiant, Zone 2 Radiant Heater,
-           RadiantPanelAvailSched ,   !- Availability schedule
-           EAST ZONE ,                !- Zone name (name of zone system is serving)
-           10000,                     !- Heating Design Capacity{ W }
-           ,                          !- Heating Design Capacity Per Floor Area{ W / m2 }
-           ,                          !- Fraction of Autosized Heating Design Capacity{ -}
-           Gas,                       !- type of heater (either gas or electric)
-           0.8,                       !- combustion efficiency (ignored for electric radiant heaters)
-           0.80,                      !- fraction radiant
-           0.00,                      !- fraction latent
-           0.00,                      !- fraction lost
-           OperativeTemperature,      !- temperature control type (controls on operative temperature)
-           2.0 ,                      !- heating throttling range (in C)
-           Radiant Heating Setpoints, !- heating setpoint temperatures
-           0.04,                      !- fraction of radiant energy that is incident directly on people
-           Zn002:Flr001, 0.80,        !- fraction of radiant energy that is incident on the surface indicated
-           Zn002:Wall001, 0.04,       !- fraction of radiant energy that is incident on the surface indicated
-           Zn002:Wall002, 0.04,       !- fraction of radiant energy that is incident on the surface indicated
-           Zn002:Wall003, 0.04,       !- fraction of radiant energy that is incident on the surface indicated
-           Zn002:Wall004, 0.04;       !- fraction of radiant energy that is incident on the surface indicated
+  RadiantPanelAvailSched,     !- Availability schedule
+  EAST ZONE,                  !- Zone name (name of zone system is serving)
+  10000,                      !- Heating Design Capacity{ W }
+  ,                           !- Heating Design Capacity Per Floor Area{ W / m2 }
+  ,                           !- Fraction of Autosized Heating Design Capacity{ -}
+  Gas,                        !- type of heater (either gas or electric)
+  0.8,                        !- combustion efficiency (ignored for electric radiant heaters)
+  0.80,                       !- fraction radiant
+  0.00,                       !- fraction latent
+  0.00,                       !- fraction lost
+  OperativeTemperature,       !- temperature control type (controls on operative temperature)
+  2.0,                        !- heating throttling range (in C)
+  Radiant Heating Setpoints,  !- heating setpoint temperatures
+  0.04,                       !- fraction of radiant energy that is incident directly on people
+  Zn002:Flr001, 0.80,         !- fraction of radiant energy that is incident on the surface indicated
+  Zn002:Wall001, 0.04,        !- fraction of radiant energy that is incident on the surface indicated
+  Zn002:Wall002, 0.04,        !- fraction of radiant energy that is incident on the surface indicated
+  Zn002:Wall003, 0.04,        !- fraction of radiant energy that is incident on the surface indicated
+  Zn002:Wall004, 0.04;        !- fraction of radiant energy that is incident on the surface indicated
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-006}
@@ -2326,46 +2310,45 @@ This optional input field is the name of a \hyperref[designspecificationzonehvac
 An example IDF with a ventilated slab is shown below.
 
 \begin{lstlisting}
-
-  ZoneHVAC:VentilatedSlab,
-      Zone4VentSlab,           !- Name
-      VentSlabAvailability,    !- Availability Schedule Name
-      SPACE4-1,                !- Zone Name
-      F4-1,                    !- Surface Name or Radiant Surface Group Name
-      0.84,                    !- Maximum Air Flow Rate {m3/s}
-      VariablePercent,         !- Outdoor Air Control Type
-      0.168,                   !- Minimum Outdoor Air Flow Rate {m3/s}
-      U2MinOASched,            !- Minimum Outdoor Air Schedule Name
-      0.84,                    !- Maximum Outdoor Air Flow Rate {m3/s}
-      VentSlabMaxOA,           !- Maximum Outdoor Air Fraction or Temperature Schedule Name
-      SlabAndZone,             !- System Configuration Type
-      0.050,                   !- Hollow Core Inside Diameter {m}
-      15.0,                    !- Hollow Core Length {m}
-      50.0,                    !- Number of Cores
-      MeanRadiantTemperature,  !- Temperature Control Type
-      VentSlabHotHighAir,      !- Heating High Air Temperature Schedule Name
-      VentSlabHotLowAir,       !- Heating Low Air Temperature Schedule Name
-      VentSlabHotHighControl,  !- Heating High Control Temperature Schedule Name
-      VentSlabHotLowControl,   !- Heating Low Control Temperature Schedule Name
-      VentSlabCoolHighAir,     !- Cooling High Air Temperature Schedule Name
-      VentSlabCoolLowAir,      !- Cooling Low Air Temperature Schedule Name
-      VentSlabCoolHighControl, !- Cooling High Control Temperature Schedule Name
-      VentSlabCoolLowControl,  !- Cooling Low Control Temperature Schedule Name
-      Zone4VentSlabReturnAirNode,  !- Return Air Node Name
-      Zone4VentslabSlabInNode, !- Slab In Node Name
-      Zone4Inlets,             !-Zone Supply Air Node Name
-      Zone4VentSlabOAInNode,   !- Outdoor Air Node Name
-      Zone4VentSlabExhNode,    !- Relief Air Node Name
-      Zone4VentSlabOAMixerOutletNode,  !-Outdoor Air Mixer Outlet Node Name
-      Zone4VentSlabFanOutletNode,  !- Fan Outlet Node Name
-      Zone4VentSlabFan,        !- Fan Name
-      HeatingAndCooling,       !- Coil Option Type
-      Coil:Heating:Electric,   !- Heating Coil Object Type
-      Zone4VentSlabHeatingCoil,!- Heating Coil Name
-      ,                        !- Hot Water or Steam Inlet Node Name
-      Coil:Cooling:Water,      !- Cooling Coil Object Type
-      Zone4VentSlabCoolingCoil,!- Cooling Coil Name
-      Zone4VentSlabChWInletNode;  !- Cold Water Inlet Node Name
+ZoneHVAC:VentilatedSlab,
+  Zone4VentSlab,              !- Name
+  VentSlabAvailability,       !- Availability Schedule Name
+  SPACE4-1,                   !- Zone Name
+  F4-1,                       !- Surface Name or Radiant Surface Group Name
+  0.84,                       !- Maximum Air Flow Rate {m3/s}
+  VariablePercent,            !- Outdoor Air Control Type
+  0.168,                      !- Minimum Outdoor Air Flow Rate {m3/s}
+  U2MinOASched,               !- Minimum Outdoor Air Schedule Name
+  0.84,                       !- Maximum Outdoor Air Flow Rate {m3/s}
+  VentSlabMaxOA,              !- Maximum Outdoor Air Fraction or Temperature Schedule Name
+  SlabAndZone,                !- System Configuration Type
+  0.050,                      !- Hollow Core Inside Diameter {m}
+  15.0,                       !- Hollow Core Length {m}
+  50.0,                       !- Number of Cores
+  MeanRadiantTemperature,     !- Temperature Control Type
+  VentSlabHotHighAir,         !- Heating High Air Temperature Schedule Name
+  VentSlabHotLowAir,          !- Heating Low Air Temperature Schedule Name
+  VentSlabHotHighControl,     !- Heating High Control Temperature Schedule Name
+  VentSlabHotLowControl,      !- Heating Low Control Temperature Schedule Name
+  VentSlabCoolHighAir,        !- Cooling High Air Temperature Schedule Name
+  VentSlabCoolLowAir,         !- Cooling Low Air Temperature Schedule Name
+  VentSlabCoolHighControl,    !- Cooling High Control Temperature Schedule Name
+  VentSlabCoolLowControl,     !- Cooling Low Control Temperature Schedule Name
+  Zone4VentSlabReturnAirNode, !- Return Air Node Name
+  Zone4VentslabSlabInNode,    !- Slab In Node Name
+  Zone4Inlets,                !- Zone Supply Air Node Name
+  Zone4VentSlabOAInNode,      !- Outdoor Air Node Name
+  Zone4VentSlabExhNode,       !- Relief Air Node Name
+  Zone4VentSlabOAMixerOutletNode,  !- Outdoor Air Mixer Outlet Node Name
+  Zone4VentSlabFanOutletNode, !- Fan Outlet Node Name
+  Zone4VentSlabFan,           !- Fan Name
+  HeatingAndCooling,          !- Coil Option Type
+  Coil:Heating:Electric,      !- Heating Coil Object Type
+  Zone4VentSlabHeatingCoil,   !- Heating Coil Name
+  ,                           !- Hot Water or Steam Inlet Node Name
+  Coil:Cooling:Water,         !- Cooling Coil Object Type
+  Zone4VentSlabCoolingCoil,   !- Cooling Coil Name
+  Zone4VentSlabChWInletNode;  !- Cold Water Inlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-006}
@@ -2540,28 +2523,27 @@ This field is a node name (character string) used to identify the node that serv
 An Example IDF with a ventilated slab system is shown below
 
 \begin{lstlisting}
-
 ZoneHVAC:VentilatedSlab:SlabGroup,
-      Z125,                    !- Name
-      SPACE1-1,                !- Zone 1 Name
-      C1-1,                    !- Surface 1 Name
-      0.05,                    !- Core Diameter for Surface 1
-      30,                      !- Core Length for Surface 1
-      20,                      !- Core Numbers for Surface 1
-      Z1VentslabIn,            !- Slab In Node Name for Surface 1
-      Z1VentSlabout,           !- Slab Outlet Node Name for Surface 1
-      SPACE2-1,                !- Zone 2 Name
-      C2-1,                    !- Surface 2 Name
-      0.05,                    !- Core Diameter for Surface 2
-      15,                      !- Core Length for Surface 2
-      20,                      !- Core Numbers for Surface 2
-      Z2VentSlabIn,            !- Slab In Node Name for Surface 2
-      Z2VentSlabOut,           !- Slab Outlet Node Name for Surface 2
-      SPACE5-1,                !- Zone 3 Name
-      C5-1,                    !- Surface 3 Name
-      0.05,                    !- Core Diameter for Surface 3
-      30,                      !- Core Length for Surface 3
-      20,                      !- Core Numbers for Surface 3
-      Z5VentSlabIn,            !- Slab In Node Name for Surface 3
-      Z5VentSlabOut;           !- Slab Outlet Node Name for Surface 3
+  Z125,                       !- Name
+  SPACE1-1,                   !- Zone 1 Name
+  C1-1,                       !- Surface 1 Name
+  0.05,                       !- Core Diameter for Surface 1
+  30,                         !- Core Length for Surface 1
+  20,                         !- Core Numbers for Surface 1
+  Z1VentslabIn,               !- Slab In Node Name for Surface 1
+  Z1VentSlabout,              !- Slab Outlet Node Name for Surface 1
+  SPACE2-1,                   !- Zone 2 Name
+  C2-1,                       !- Surface 2 Name
+  0.05,                       !- Core Diameter for Surface 2
+  15,                         !- Core Length for Surface 2
+  20,                         !- Core Numbers for Surface 2
+  Z2VentSlabIn,               !- Slab In Node Name for Surface 2
+  Z2VentSlabOut,              !- Slab Outlet Node Name for Surface 2
+  SPACE5-1,                   !- Zone 3 Name
+  C5-1,                       !- Surface 3 Name
+  0.05,                       !- Core Diameter for Surface 3
+  30,                         !- Core Length for Surface 3
+  20,                         !- Core Numbers for Surface 3
+  Z5VentSlabIn,               !- Slab In Node Name for Surface 3
+  Z5VentSlabOut;              !- Slab Outlet Node Name for Surface 3
 \end{lstlisting}

@@ -1609,7 +1609,7 @@ namespace OutputReportPredefined {
         s->pdchLeedEtsDemUnt = newPreDefColumn(state, s->pdstLeedEneTypSum, "Units of Demand");
 
         s->pdstLeedPerf = newPreDefSubTable(state, s->pdrLeed, "EAp2-4/5. Performance Rating Method Compliance");
-        // Multiple colums with rows of:
+        // Multiple columns with rows of:
         //     Interior Lighting
         //     Exterior Lighting
         //     Space Heating
@@ -1686,7 +1686,7 @@ namespace OutputReportPredefined {
         //    Receptacle equipment
         //    Miscellaneous
         //    Subtotal
-        s->pdchLeedEuiElec = newPreDefColumn(state, s->pdstLeedEneUseIntEl, "Electricty [MJ/m2]");
+        s->pdchLeedEuiElec = newPreDefColumn(state, s->pdstLeedEneUseIntEl, "Electricity [MJ/m2]");
 
         s->pdstLeedEneUseIntNatG = newPreDefSubTable(state, s->pdrLeed, "EAp2-17b. Energy Use Intensity - Natural Gas");
         // Single column with rows of:

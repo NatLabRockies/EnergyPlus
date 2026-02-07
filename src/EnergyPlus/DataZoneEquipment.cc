@@ -198,7 +198,7 @@ void GetZoneEquipmentData(EnergyPlusData &state)
     int MaxNums;
     int NumParams;
     Array1D_int NodeNums;
-    bool IsNotOK;                    // Flag to verify nam
+    bool IsNotOK;                    // Flag to verify name
     std::string CurrentModuleObject; // Object type for getting and error messages
     Array1D_string cAlphaFields;     // Alpha field names
     Array1D_string cNumericFields;   // Numeric field names
@@ -956,7 +956,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                         ShowSevereError(state, format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
                             state, format("invalid zone_equipment_cooling_sequence=[{}].", thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum)));
-                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipments in the list.");
+                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.CoolingPriority(ZoneEquipTypeNum) > 0) {
                             ShowContinueError(state, format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
@@ -970,7 +970,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                         ShowSevereError(state, format("{}{} = \"{}\".", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                         ShowContinueError(
                             state, format("invalid zone_equipment_heating_sequence=[{}].", thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum)));
-                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipments in the list.");
+                        ShowContinueError(state, "equipment sequence must be > 0 and <= number of equipment in the list.");
                         if (thisZoneEquipList.HeatingPriority(ZoneEquipTypeNum) > 0) {
                             ShowContinueError(state, format("only {} in the list.", thisZoneEquipList.NumOfEquipTypes));
                         }
@@ -1039,7 +1039,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                     ShowSevereError(state, format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       format("...multiple assignments for Zone Equipment Cooling Sequence={}, must be 1-1 correspondence between "
-                                             "sequence assignments and number of equipments.",
+                                             "sequence assignments and number of equipment.",
                                              ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) == 0) {
@@ -1053,7 +1053,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                     ShowSevereError(state, format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       format("...multiple assignments for Zone Equipment Heating or No-Load Sequence={}, must be 1-1 "
-                                             "correspondence between sequence assignments and number of equipments.",
+                                             "correspondence between sequence assignments and number of equipment.",
                                              ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
                 } else if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) == 0) {

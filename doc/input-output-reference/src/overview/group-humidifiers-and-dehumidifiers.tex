@@ -47,16 +47,15 @@ This field is optional. If left blank or omitted, then the humidifier obtains it
 An IDF example:
 
 \begin{lstlisting}
-
 Humidifier:Steam:Electric,
-  Humidifier 1,                   !- Name
-  FanAndCoilAvailSched,   !- Availability Schedule Name
-  0.00000379,                       !- Rated Capacity {m3/s}
-  10200.,                               !- Rated Power {W}
-  27.,                                     !- Rated Fan Power {W}
-  2.,                                       !- Standby Power {W}
-  Cooling Coil Air Outlet Node, !- Air Inlet Node Name
-  Air Loop Outlet Node;   !- Air Outlet Node Name
+  Humidifier 1,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.00000379,                 !- Rated Capacity {m3/s}
+  10200.,                     !- Rated Power {W}
+  27.,                        !- Rated Fan Power {W}
+  2.,                         !- Standby Power {W}
+  Cooling Coil Air Outlet Node,  !- Air Inlet Node Name
+  Air Loop Outlet Node;       !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-016}
@@ -185,19 +184,18 @@ This field is a key/choice field that tells which humidifier water inlet tempera
 An IDF example:
 
 \begin{lstlisting}
-
 Humidifier:Steam:Gas,
-  Main Gas Humidifier,!- Name
-  ALWAYS_ON,          !- Availability Schedule Name
-  4.00E-5,            !- Rated Capacity {m3/s}
-  104000,             !- Rated Gas Use Rate {W}
-  1.0,                !- Thermal Efficiency {-}
-  ,                   !- Thermal Efficiency Modifier Curve Name
-  0,                  !- Rated Fan Power {W}
-  0,                  !- Auxiliary Electric Power {W}
-  Mixed Air Node 1,   !- Air Inlet Node Name
-  Main Humidifier Outlet Node,  !- Air Outlet Node Name
-  ;                   !- Water Storage Tank Name
+  Main Gas Humidifier,        !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  4.00E-5,                    !- Rated Capacity {m3/s}
+  104000,                     !- Rated Gas Use Rate {W}
+  1.0,                        !- Thermal Efficiency {-}
+  ,                           !- Thermal Efficiency Modifier Curve Name
+  0,                          !- Rated Fan Power {W}
+  0,                          !- Auxiliary Electric Power {W}
+  Mixed Air Node 1,           !- Air Inlet Node Name
+  Main Humidifier Outlet Node,!- Air Outlet Node Name
+  ;                           !- Water Storage Tank Name
 \end{lstlisting}
 
 Steam Gas Humidifier Outputs
@@ -516,35 +514,33 @@ This field is nominal power consumption per unit air flow rate. It is used to ca
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Dehumidifier:Desiccant:NoFans,
-  Desiccant 1,                         !- Name
+  Desiccant 1,                !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  Outside Air Inlet Node,   !- Process Air Inlet Node Name
-  Desiccant Process Outlet Node,   !- Process Air Outlet Node Name
-  Regen Coil Out Node,         !- Regeneration Air Inlet Node Name
-  Outside Air Inlet Node 2,!- Regeneration Fan Inlet Node Name
-  SystemNodeMaximumHumidityRatioSetpoint,   !- Control Type
-  0.007,                                     !- Leaving Maximum Humidity Ratio Setpoint {kgWater/kgDryAir}
-  1,                                             !- Nominal Process Air Flow Rate {m3/s}
-  2.5,                                         !- Nominal Process Air Velocity {m/s}
-  10,                                           !- Rotor Power {W}
-  Coil:Heating:Fuel,               !- Regeneration Coil Object Type
+  Outside Air Inlet Node,     !- Process Air Inlet Node Name
+  Desiccant Process Outlet Node,  !- Process Air Outlet Node Name
+  Regen Coil Out Node,        !- Regeneration Air Inlet Node Name
+  Outside Air Inlet Node 2,   !- Regeneration Fan Inlet Node Name
+  SystemNodeMaximumHumidityRatioSetpoint,  !- Control Type
+  0.007,                      !- Leaving Maximum Humidity Ratio Setpoint {kgWater/kgDryAir}
+  1,                          !- Nominal Process Air Flow Rate {m3/s}
+  2.5,                        !- Nominal Process Air Velocity {m/s}
+  10,                         !- Rotor Power {W}
+  Coil:Heating:Fuel,          !- Regeneration Coil Object Type
   Desiccant Regen Coil,       !- Regeneration Coil Name
-  Fan:SystemModel,           !- Regeneration Fan Object Type
-  Desiccant Regen Fan,         !- Regeneration Fan Name
-  UserCurves,                           !- Performance Model Type
-  Desiccant DryBulb fTW Curve, !- Leaving Dry-Bulb Function of Entering Dry-Bulb and Humidity Ratio
-  !                                                 Curve Name
-  Desiccant DryBulb fV Curve,   !- Leaving Dry-Bulb Function of Air Velocity Curve Name
-  Desiccant HumRat fTW Curve,   !- Leaving Humidity Ratio Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant HumRat fV Curve,     !- Leaving Humidity Ratio Function of Air Velocity Curve Name
-  Desiccant RegenEnergy fTW Curve, !- Regeneration Energy Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant RegenEnergy fV Curve,   !- Regeneration Energy Function of Air Velocity Curve Name
-  Desiccant RegenVel fTW Curve,       !- Regeneration Velocity Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant RegenVel fV Curve,         !- Regeneration Velocity Function of Air Velocity Curve Name
-  121,                                         !- Nominal Regeneration Temperature {C}
-  ;                                  !- Nominal Power Per Unit Air Flow Rate {W/m3/s}
+  Fan:SystemModel,            !- Regeneration Fan Object Type
+  Desiccant Regen Fan,        !- Regeneration Fan Name
+  UserCurves,                 !- Performance Model Type
+  Desiccant DryBulb fTW Curve,!- Leaving Dry-Bulb Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant DryBulb fV Curve, !- Leaving Dry-Bulb Function of Air Velocity Curve Name
+  Desiccant HumRat fTW Curve, !- Leaving Humidity Ratio Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant HumRat fV Curve,  !- Leaving Humidity Ratio Function of Air Velocity Curve Name
+  Desiccant RegenEnergy fTW Curve,  !- Regeneration Energy Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant RegenEnergy fV Curve,  !- Regeneration Energy Function of Air Velocity Curve Name
+  Desiccant RegenVel fTW Curve,  !- Regeneration Velocity Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant RegenVel fV Curve,!- Regeneration Velocity Function of Air Velocity Curve Name
+  121,                        !- Nominal Regeneration Temperature {C}
+  ;                           !- Nominal Power Per Unit Air Flow Rate {W/m3/s}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-008}
@@ -761,26 +757,25 @@ This optional alpha field contains the name of the exhaust fan power modifier cu
 Following is an example input for this object:
 
 \begin{lstlisting}
-
 Dehumidifier:Desiccant:System,
-  Desiccant 1,                         !- Name
-  FanAvailSched,                     !- Availability Schedule Name
-  HeatExchanger:Desiccant:BalancedFlow,   !- Desiccant Heat Exchanger Object Type
-  Desiccant Heat Exchanger 1,   !- Desiccant Heat Exchanger Name
-  HX Process Outlet Node,   !- Sensor Node Name
-  Fan:SystemModel,           !- Regeneration Air Fan Object Type
-  Desiccant Regen Fan,         !- Regeneration Air Fan Name
-  DrawThrough,                         !- Regeneration Air Fan Placement
-  Coil:Heating:Fuel,               !- Regeneration Air Heater Object Type
+  Desiccant 1,                !- Name
+  FanAvailSched,              !- Availability Schedule Name
+  HeatExchanger:Desiccant:BalancedFlow,  !- Desiccant Heat Exchanger Object Type
+  Desiccant Heat Exchanger 1, !- Desiccant Heat Exchanger Name
+  HX Process Outlet Node,     !- Sensor Node Name
+  Fan:SystemModel,            !- Regeneration Air Fan Object Type
+  Desiccant Regen Fan,        !- Regeneration Air Fan Name
+  DrawThrough,                !- Regeneration Air Fan Placement
+  Coil:Heating:Fuel,          !- Regeneration Air Heater Object Type
   Desiccant Regen Coil,       !- Regeneration Air Heater Name
-  46.111111,                             !- Regeneration Inlet Air Setpoint Temperature {C}
-  Coil:Cooling:DX:SingleSpeed,   !- Companion Cooling Coil Object Type
-  Desiccant DXSystem Cooling Coil,   !- Companion Cooling Coil Name
-  Yes,                           !- Companion Cooling Coil Upstream of Dehumidifier Process Inlet
-  Yes,                                         !- Companion Coil Regeneration Air Heating
-  1.05,                                       !- Exhaust Fan Maximum Flow Rate {m3/s}
-  50,                                           !- Exhaust Fan Maximum Power {W}
-  EXHAUSTFANPLF;                     !- Exhaust Fan Power Curve Name
+  46.111111,                  !- Regeneration Inlet Air Setpoint Temperature {C}
+  Coil:Cooling:DX:SingleSpeed,!- Companion Cooling Coil Object Type
+  Desiccant DXSystem Cooling Coil,  !- Companion Cooling Coil Name
+  Yes,                        !- Companion Cooling Coil Upstream of Dehumidifier Process Inlet
+  Yes,                        !- Companion Coil Regeneration Air Heating
+  1.05,                       !- Exhaust Fan Maximum Flow Rate {m3/s}
+  50,                         !- Exhaust Fan Maximum Power {W}
+  EXHAUSTFANPLF;              !- Exhaust Fan Power Curve Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-006}

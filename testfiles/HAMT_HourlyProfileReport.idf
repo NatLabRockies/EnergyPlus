@@ -1103,7 +1103,7 @@
     Moisture on,             !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352.6,                   !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1116,7 +1116,7 @@
     On,                      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     800,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1130,8 +1130,8 @@
     On,                      !- Schedule Name
     AirChanges/Hour,         !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    0,                       !- Flow per Zone Floor Area {m3/s-m2}
-    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow Rate per Floor Area {m3/s-m2}
+    0,                       !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0.5,                     !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient

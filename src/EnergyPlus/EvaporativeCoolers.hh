@@ -182,7 +182,7 @@ namespace EvaporativeCoolers {
         Real64 EvapWaterStarvMakup;                     // Evap water consumed but not really available from tank m3
         Real64 SatEff;                                  // Reporting for Direct Stage and Ind Dry Saturation Efficiency
         Real64 StageEff;                                // Reporting for Indirect Total Stage Efficiency
-        Real64 DPBoundFactor;                           // in RDDSpecial efficency w.r.t. dewpoint
+        Real64 DPBoundFactor;                           // in RDDSpecial efficiency w.r.t. dewpoint
         int EvapControlNodeNum;                         // need to control to avoid over cooling
         Real64 DesiredOutletTemp;                       // setpoint manager should set this
         Real64 PartLoadFract;                           // reduces cooling performance and associated fan power
@@ -261,7 +261,7 @@ namespace EvaporativeCoolers {
         HVAC::FanPlace fanPlace;
         ControlType ControlSchemeType;
         Real64 TimeElapsed;
-        Real64 ThrottlingRange; // temperature range for hystersis type tstat contorl [Delta C]
+        Real64 ThrottlingRange; // temperature range for hystersis type tstat control [Delta C]
         bool IsOnThisTimestep;
         bool WasOnLastTimestep;
         Real64 ThresholdCoolingLoad;

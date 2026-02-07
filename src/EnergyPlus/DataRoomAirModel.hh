@@ -593,7 +593,7 @@ struct RoomAirModelData : BaseGlobalStruct
     Array1D<Real64> Urec;           // Recirculation region average velocity
     Array1D<Real64> Ujet;           // Jet region average velocity
     Array1D<Real64> Qrec;           // Recirculation zone total flow rate
-    Array1D<Real64> Qtot;           // Total volumetric inflow rate through all active aperatures [m3/s]
+    Array1D<Real64> Qtot;           // Total volumetric inflow rate through all active apertures [m3/s]
     Array1D<Real64> RecInflowRatio; // Ratio of the recirculation volumetric flow rate to the total inflow flow rate []
     Array1D<Real64> Uhc;
     Array1D<Real64> Ain;             // Inflow aperture area
@@ -674,7 +674,7 @@ struct RoomAirModelData : BaseGlobalStruct
         PosZ_Window.clear();
         PosZ_Door.clear();
         PosZ_Internal.clear();
-        // Convection coeficients for the various surfaces
+        // Convection coefficients for the various surfaces
         HCeiling.clear();
         HWall.clear();
         HFloor.clear();
@@ -738,7 +738,7 @@ struct RoomAirModelData : BaseGlobalStruct
         Urec.clear();           // Recirculation region average velocity
         Ujet.clear();           // Jet region average velocity
         Qrec.clear();           // Recirculation zone total flow rate
-        Qtot.clear();           // Total volumetric inflow rate through all active aperatures [m3/s]
+        Qtot.clear();           // Total volumetric inflow rate through all active apertures [m3/s]
         RecInflowRatio.clear(); // Ratio of the recirculation volumetric flow rate to the total inflow flow rate []
         Uhc.clear();
         Ain.clear();                 // Inflow aperture area

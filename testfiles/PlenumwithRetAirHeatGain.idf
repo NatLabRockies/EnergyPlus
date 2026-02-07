@@ -405,7 +405,7 @@
     BLDG Sch   2,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     4310.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.3000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -419,7 +419,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     4310.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant

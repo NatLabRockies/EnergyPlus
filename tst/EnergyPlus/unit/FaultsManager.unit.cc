@@ -774,7 +774,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_FoulingCoil_AssignmentAndCalc)
         "  0.000010,                !- Maximum Water Flow Rate {m3/s}",
         "  AHU HW Heating Coil Water Inlet Node,  !- Water Inlet Node Name",
         "  AHU HW Heating Coil Water Outlet Node,  !- Water Outlet Node Name",
-        "  Air Loop Referenz AHU Cooling Coil Air Outlet Node,  !- Air Inlet Node Name",
+        "  Air Loop Reference AHU Cooling Coil Air Outlet Node,  !- Air Inlet Node Name",
         "  AHU HW Heating Coil Air Outlet Node,  !- Air Outlet Node Name",
         "  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method",
         "  438.32,                  !- Rated Capacity {W}",

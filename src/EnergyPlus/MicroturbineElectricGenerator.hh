@@ -88,7 +88,7 @@ namespace MicroturbineElectricGenerator {
         Real64 FuelLowerHeatingValue;      // Lower Heating Value for Fuel (kJ/kg)
         Real64 StandbyPower;               // Standby Power entered by user (W)
         Real64 AncillaryPower;             // Ancillary Power entered by user (W)
-        int AncillaryPowerFuelCurveNum;    // Index to ancillary power modifer curve (function of fuel input)
+        int AncillaryPowerFuelCurveNum;    // Index to ancillary power modifier curve (function of fuel input)
         int HeatRecInletNodeNum;           // Heat Recovery Water Inlet Node number
         int HeatRecOutletNodeNum;          // Heat Recovery Water Outlet Node number
         Real64 RefThermalEffLHV;           // Reference Thermal Efficiency (LHV Basis)

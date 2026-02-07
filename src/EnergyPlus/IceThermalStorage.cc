@@ -201,7 +201,7 @@ namespace IceThermalStorage {
         // FIRST PROCESS (MyLoad = 0.0 as IN)
         // At this moment as first calling of ITS, ITS provide ONLY MaxCap/OptCap/MinCap.
         //------------------------------------------------------------------------
-        // First process is in subroutine CalcIceStorageCapacity(MaxCap,MinCap,OptCap) shown bellow.
+        // First process is in subroutine CalcIceStorageCapacity(MaxCap,MinCap,OptCap) shown below.
 
         //------------------------------------------------------------------------
         // SECOND PROCESS (MyLoad is provided by E+ based on MaxCap/OptCap/MinCap)

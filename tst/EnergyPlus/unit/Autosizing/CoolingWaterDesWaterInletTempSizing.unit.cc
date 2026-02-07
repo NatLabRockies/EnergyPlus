@@ -70,7 +70,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesWaterInletTempSizingGauntlet)
     Real64 sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_TRUE(errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType2, sizer.errorType);
-    EXPECT_NEAR(0.0, sizedValue, 0.01); // unitialized sizing types always return 0
+    EXPECT_NEAR(0.0, sizedValue, 0.01); // uninitialized sizing types always return 0
     errorsFound = false;
 
     // ZONE EQUIPMENT TESTING

@@ -210,7 +210,7 @@ Real64 OutBaroPressAt(EnergyPlusData &state, Real64 const Z) // Height above gro
     // Return value
     Real64 LocalAirPressure; // Return result for function (Pa)
 
-    // FNCTION PARAMETER DEFINITIONS:
+    // FUNCTION PARAMETER DEFINITIONS:
     Real64 constexpr StdGravity(9.80665);    // The acceleration of gravity at the sea level (m/s2)
     Real64 constexpr AirMolarMass(0.028964); // Molar mass of Earth's air (kg/mol)
     Real64 constexpr GasConstant(8.31432);   // Molar gas constant (J/Mol-K)

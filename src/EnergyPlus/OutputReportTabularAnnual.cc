@@ -600,7 +600,7 @@ void AnnualTable::resetGathering()
             }
             fldStIt->m_cell[row].duration = 0.0;
             fldStIt->m_cell[row].timeStamp = 0;
-            // if any defered results
+            // if any deferred results
             fldStIt->m_cell[row].deferredResults.clear();
             fldStIt->m_cell[row].deferredElapsed.clear();
         }

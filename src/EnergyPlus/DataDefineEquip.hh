@@ -102,7 +102,7 @@ namespace DataDefineEquip {
         std::shared_ptr<AirTerminalUnit> airTerminalPtr = nullptr;
         Array1D_string EquipName; // name of subcomponent
         Array1D_int EquipIndex;
-        int AirTerminalSizingSpecIndex = 0; // index to DesignSpecification:AirTerminal:Sizing obect
+        int AirTerminalSizingSpecIndex = 0; // index to DesignSpecification:AirTerminal:Sizing object
         int TermUnitSizingNum = 0;          // index to TermUnitSizing and TermUnitFinalZoneSizing for this air distribution unit
         Real64 UpStreamLeakFrac = 0.0;      // upstream nominal leakage fraction
         Real64 DownStreamLeakFrac = 0.0;    // downstream constant leakage fraction

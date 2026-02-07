@@ -357,7 +357,7 @@ namespace ThermalEN673Calc {
             Rg += rs(2 * i);                // cumulative thermal resistance of glazing layers
         }
 
-        if (nlayer == 1) { // Calc U-Factor and glazing temperature for simgle glazing and return
+        if (nlayer == 1) { // Calc U-Factor and glazing temperature for single glazing and return
             ufactor = 1.0 / (1.0 / hin + 1.0 / hout + Rg);
             theta(1) = ufactor * (tind - tout) / hout + tout;
             theta(2) = tind - ufactor * (tind - tout) / hin;
@@ -449,7 +449,7 @@ namespace ThermalEN673Calc {
                 sumRs = 0.0;
 
                 if ((standard == TARCOGGassesParams::Stdrd::EN673) && (nlayer == 2)) {
-                    return; // If EN673 declared values path and glazing has 2 layers, end claculations and return
+                    return; // If EN673 declared values path and glazing has 2 layers, end calculations and return
                 } else {
                     if (tind > tout) {
                         for (i = 1; i <= nlayer - 1; ++i) {

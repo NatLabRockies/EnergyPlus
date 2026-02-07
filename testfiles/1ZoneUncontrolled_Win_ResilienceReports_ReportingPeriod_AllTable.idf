@@ -444,12 +444,12 @@
 
   People,
     ZONE ONE People 1,       !- Name
-    ZONE ONE,                !- Zone or ZoneList Name
+    ZONE ONE,                !- Zone or ZoneList or Space or SpaceList Name
     BLDG_OCC_SCH,            !- Number of People Schedule Name
     People,                  !- Number of People Calculation Method
     10,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000,                  !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -470,17 +470,17 @@
     ,                        !- Thermal Comfort Model 6 Type
     ,                        !- Thermal Comfort Model 7 Type
     ,                        !- Ankle Level Air Velocity Schedule Name
-    10.5,                    !- Cold Stress Temperature Threshold [C]
-    32.5;                    !- Heat Stress Temperature Threshold [C]
+    10.5,                    !- Cold Stress Temperature Threshold {C}
+    32.5;                    !- Heat Stress Temperature Threshold {C}
 
   People,
     ZONE ONE People 2,       !- Name
-    ZONE ONE,                !- Zone or ZoneList Name
+    ZONE ONE,                !- Zone or ZoneList or Space or SpaceList Name
     BLDG_OCC_SCH,            !- Number of People Schedule Name
     People,                  !- Number of People Calculation Method
     10,                      !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    ,                        !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
     0.3000,                  !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -501,8 +501,8 @@
     ,                        !- Thermal Comfort Model 6 Type
     ,                        !- Thermal Comfort Model 7 Type
     ,                        !- Ankle Level Air Velocity Schedule Name
-    10.5,                    !- Cold Stress Temperature Threshold [C]
-    32.5;                    !- Heat Stress Temperature Threshold [C]
+    10.5,                    !- Cold Stress Temperature Threshold {C}
+    32.5;                    !- Heat Stress Temperature Threshold {C}
 
   ScheduleTypeLimits,
     Any Number;              !- Name
@@ -585,11 +585,11 @@
   OtherEquipment,
     Test 352a,               !- Name
     None,                    !- Fuel Type
-    ZONE ONE,                !- Zone or ZoneList Name
+    ZONE ONE,                !- Zone or ZoneList or Space or SpaceList Name
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -598,11 +598,11 @@
   OtherEquipment,
     Test 352 minus,          !- Name
     None,                    !- Fuel Type
-    ZONE ONE,                !- Zone or ZoneList Name
+    ZONE ONE,                !- Zone or ZoneList or Space or SpaceList Name
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -623,11 +623,11 @@
 
   Lights,
     SPACE1-1 Lights 1,       !- Name
-    ZONE ONE,                !- Zone or ZoneList Name
+    ZONE ONE,                !- Zone or ZoneList or Space or SpaceList Name
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -656,7 +656,7 @@
 
   Daylighting:Controls,
     SPACE1-1 Daylighting Control,  !- Name
-    ZONE ONE,                !- Zone Name
+    ZONE ONE,                !- Zone or Space Name
     SplitFlux,               !- Daylighting Method
     ,                        !- Availability Schedule Name
     Stepped,                 !- Lighting Control Type
@@ -669,12 +669,12 @@
     20,                      !- Maximum Allowable Discomfort Glare Index
     ,                        !- DElight Gridding Resolution {m2}
     SPACE1-1 Reference Point1,  !- Daylighting Reference Point 1 Name
-    1.0000,                  !- Fraction of Zone Controlled by Reference Point 1
+    1.0000,                  !- Fraction of Lights Controlled by Reference Point 1
     400.0000;                !- Illuminance Setpoint at Reference Point 1 {lux}
 
   Daylighting:ReferencePoint,
     SPACE1-1 Reference Point1,  !- Name
-    ZONE ONE,                !- Zone Name
+    ZONE ONE,                !- Zone or Space Name
     7.5,                     !- X-Coordinate of Reference Point {m}
     7.5,                     !- Y-Coordinate of Reference Point {m}
     0.7;                     !- Z-Coordinate of Reference Point {m}
@@ -716,13 +716,14 @@
     VisualResilienceSummary; !- Report 5 Name
 
   Output:Table:ReportPeriod,
-   AllResilienceReportTimeWinter,  !- field Name,
-   AllResilienceSummaries,         !- field Report Name,
-   ,                               !- Begin Year
-   2,                              !- Begin Month
-   1,                              !- Begin Day of Month
-   8,                              !- Begin Hour of Day
-   ,                               !- End Year
-   1,                              !- End Month
-   3,                              !- End Day of Month
-   18;                             !- End Hour of Day
+    AllResilienceReportTimeWinter,  !- Name
+    AllResilienceSummaries,  !- Report Name
+    ,                        !- Begin Year
+    2,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    8,                       !- Begin Hour of Day
+    ,                        !- End Year
+    1,                       !- End Month
+    3,                       !- End Day of Month
+    18;                      !- End Hour of Day
+

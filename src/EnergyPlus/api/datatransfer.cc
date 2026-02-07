@@ -438,7 +438,7 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                             *thisState, fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                         ShowContinueError(*thisState,
                                           fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller "
-                                                      "should take note that there is a risk of overwritting.",
+                                                      "should take note that there is a risk of overwriting.",
                                                       handle));
                         foundActuator = true;
                         break;
@@ -450,7 +450,7 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                                       fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                     ShowContinueError(*thisState,
                                       fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller should "
-                                                  "take note that there is a risk of overwritting.",
+                                                  "take note that there is a risk of overwriting.",
                                                   handle));
                 }
             }

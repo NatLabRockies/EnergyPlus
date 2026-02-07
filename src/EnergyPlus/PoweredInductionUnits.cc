@@ -1606,7 +1606,7 @@ void CalcSeriesPIU(EnergyPlusData &state,
         Real64 mixAirEnthalpy =
             Psychrometrics::PsyHFnTdbW(state.dataLoopNodes->Node(thisPIU.HCoilInAirNode).Temp, state.dataLoopNodes->Node(ZoneNode).HumRat);
         Real64 QcoilLimit = state.dataLoopNodes->Node(thisPIU.HCoilInAirNode).MassFlowRate * (HiLimitDATEnthalpy - mixAirEnthalpy);
-        if (QcoilLimit < QActualHeating) { // if requried power is too high use limit of coil discharge
+        if (QcoilLimit < QActualHeating) { // if required power is too high use limit of coil discharge
             QCoilReq = QcoilLimit;
         } else {
             QCoilReq = QActualHeating;
@@ -1950,7 +1950,7 @@ void CalcParallelPIU(EnergyPlusData &state,
         Real64 mixAirEnthalpy =
             Psychrometrics::PsyHFnTdbW(state.dataLoopNodes->Node(thisPIU.HCoilInAirNode).Temp, state.dataLoopNodes->Node(ZoneNode).HumRat);
         Real64 QcoilLimit = state.dataLoopNodes->Node(thisPIU.HCoilInAirNode).MassFlowRate * (HiLimitDATEnthalpy - mixAirEnthalpy);
-        if (QcoilLimit < QActualHeating) { // if requried power is too high use limit of coil discharge
+        if (QcoilLimit < QActualHeating) { // if required power is too high use limit of coil discharge
             QCoilReq = QcoilLimit;
         } else {
             QCoilReq = QActualHeating;

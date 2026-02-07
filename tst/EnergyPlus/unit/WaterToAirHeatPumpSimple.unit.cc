@@ -221,6 +221,9 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
                            wahp.RatedCapCoolSens /
                                wahp.RatedCapCoolTotal));
     }
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Air Flow Rate", false));
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Total Cooling Capacity", false));
+    EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Sensible Cooling Capacity", true));
 }
 
 TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)

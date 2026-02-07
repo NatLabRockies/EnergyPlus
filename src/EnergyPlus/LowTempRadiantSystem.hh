@@ -162,7 +162,7 @@ namespace LowTempRadiantSystem {
         CtrlType controlType = CtrlType::MAT;                    // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
                                                                  // Surface Face Temp, Surface Interior Temp, Running Mean
                                                                  // Temp for Constant Flow systems only)
-        SetpointType setpointType = SetpointType::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
+        SetpointType setpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
         OpMode opMode = OpMode::None;                            // Operating mode currently being used (NotOperating, Heating, Cooling)
         Real64 HeatPower;                                        // heating sent to panel in Watts
         Real64 HeatEnergy;                                       // heating sent to panel in Joules
@@ -311,7 +311,7 @@ namespace LowTempRadiantSystem {
         CtrlType VarFlowControlType = CtrlType::MAT;     // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
         // Surface Face Temp, Surface Interior Temp, Running Mean Temp
         // for Constant Flow systems only)
-        SetpointType VarFlowSetpointType = SetpointType::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
+        SetpointType VarFlowSetpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
         std::string DesignHeatingCapMethodInput;
         int DesignHeatingCapMethod = 0; // - Method for Low Temp Radiant system heating capacity scaledsizing calculation (HeatingDesignCapacity,
         // CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)

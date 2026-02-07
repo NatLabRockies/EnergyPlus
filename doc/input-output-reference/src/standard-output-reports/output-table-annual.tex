@@ -69,24 +69,23 @@ The Digits After Decimal field is a numeric value that indicates how many digits
 The VariableOrMeterName, AggregationType, and DigitsAfterDecimal fields may be repeated for each column desired in the annual report. These three fields define each column of the report.  These fields are extensible, so additional groups of these fields can be added to the end of this object.  An example of this object follows.
 
 \begin{lstlisting}
-
 Output:Table:Annual,
-  Custom Annual Window Report,  !- Name
-  , !- Filter
-  , !- Schedule Name
+  Custom Annual Window Report,!- Name
+  ,                           !- Filter
+  ,                           !- Schedule Name
   SURFACE WINDOW TRANSMITTED SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 1
-  SumOrAverage,  !- Aggregation Type for 1
-  2,  !- Digits After Decimal for 1
+  SumOrAverage,               !- Aggregation Type for 1
+  2,                          !- Digits After Decimal for 1
   SURFACE WINDOW TRANSMITTED BEAM SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 2
-  SumOrAverage,  !- Aggregation Type for 2
-  2,  !- Digits After Decimal for 2
+  SumOrAverage,               !- Aggregation Type for 2
+  2,                          !- Digits After Decimal for 2
   SURFACE WINDOW TRANSMITTED DIFFUSE SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 3
-  SumOrAverage,  !- Aggregation Type for 3
-  2,  !- Digits After Decimal for 3
+  SumOrAverage,               !- Aggregation Type for 3
+  2,                          !- Digits After Decimal for 3
   SURFACE WINDOW HEAT GAIN RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 4
-  SumOrAverage,  !- Aggregation Type for 4
-  2,  !- Digits After Decimal for 4
+  SumOrAverage,               !- Aggregation Type for 4
+  2,                          !- Digits After Decimal for 4
   ACE WINDOW HEAT LOSS RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 5
-  SumOrAverage,  !- Aggregation Type for 5
-  2;  !- Digits After Decimal for 5
+  SumOrAverage,               !- Aggregation Type for 5
+  2;                          !- Digits After Decimal for 5
 \end{lstlisting}

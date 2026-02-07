@@ -83,28 +83,27 @@ DemandManagers are listed by pairs of data items: \emph{Demand Manager Type} and
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManagerAssignmentList,
-  Demand Manager,                   !- Name
+  Demand Manager,             !- Name
   Electricity:Facility,       !- Meter Name
-  Limit Schedule,                   !- Demand Limit Schedule Name
-  1.0,                                         !- Demand Limit Safety Fraction
-  ,                                               !- Billing Period Schedule Name
-  ,                                               !- Peak Period Schedule Name
-  15,                                           !- Demand Window Length {minutes}
-  Sequential,                           !- Demand Manager Priority
-  DemandManager:ExteriorLights,   !- DemandManager 1 Object Type
-  Ext Lights Manager,           !- DemandManager 1 Name
-  DemandManager:ElectricEquipment,   !- DemandManager 2 Object Type
-  Eq Mgr Stage 1,                   !- DemandManager 2 Name
-  DemandManager:ElectricEquipment,   !- DemandManager 3 Object Type
-  Eq Mgr Stage 2,                   !- DemandManager 3 Name
-  DemandManager:ElectricEquipment,   !- DemandManager 4 Object Type
-  Eq Mgr Stage 3,                   !- DemandManager 4 Name
+  Limit Schedule,             !- Demand Limit Schedule Name
+  1.0,                        !- Demand Limit Safety Fraction
+  ,                           !- Billing Period Schedule Name
+  ,                           !- Peak Period Schedule Name
+  15,                         !- Demand Window Length {minutes}
+  Sequential,                 !- Demand Manager Priority
+  DemandManager:ExteriorLights,  !- DemandManager 1 Object Type
+  Ext Lights Manager,         !- DemandManager 1 Name
+  DemandManager:ElectricEquipment,  !- DemandManager 2 Object Type
+  Eq Mgr Stage 1,             !- DemandManager 2 Name
+  DemandManager:ElectricEquipment,  !- DemandManager 3 Object Type
+  Eq Mgr Stage 2,             !- DemandManager 3 Name
+  DemandManager:ElectricEquipment,  !- DemandManager 4 Object Type
+  Eq Mgr Stage 3,             !- DemandManager 4 Name
   DemandManager:Lights,       !- DemandManager 5 Object Type
-  Lights Manager,                   !- DemandManager 5 Name
-  DemandManager:Thermostats,   !- DemandManager 6 Object Type
-  Thermostats Manager;         !- DemandManager 6 Name
+  Lights Manager,             !- DemandManager 5 Name
+  DemandManager:Thermostats,  !- DemandManager 6 Object Type
+  Thermostats Manager;        !- DemandManager 6 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-007}
@@ -225,17 +224,16 @@ The names of \hyperref[exteriorlights]{Exterior:Lights} objects defined elsewher
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManager:ExteriorLights,
-  Ext Lights Manager,           !- Name
-  ,                                               !- Availability Schedule Name
-  Fixed,                                     !- Limit Control
-  60,                                           !- Minimum Limit Duration {minutes}
-  0.0,                                         !- Maximum Limit Fraction
-  ,                                               !- Limit Step Change
-  All,                                         !- Selection Control
-  ,                                               !- Rotation Duration {minutes}
-  Exterior Lights;                 !- Exterior Lights 1 Name
+  Ext Lights Manager,         !- Name
+  ,                           !- Availability Schedule Name
+  Fixed,                      !- Limit Control
+  60,                         !- Minimum Limit Duration {minutes}
+  0.0,                        !- Maximum Limit Fraction
+  ,                           !- Limit Step Change
+  All,                        !- Selection Control
+  ,                           !- Rotation Duration {minutes}
+  Exterior Lights;            !- Exterior Lights 1 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-005}
@@ -289,21 +287,20 @@ If a global lights statement is used (Ref: \hyperref[lights-000]{Lights}), then 
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManager:Lights,
-  Lights Manager,                   !- Name
-  ,                                               !- Availability Schedule Name
-  Fixed,                                     !- Limit Control
-  60,                                           !- Minimum Limit Duration {minutes}
-  0.5,                                         !- Maximum Limit Fraction
-  ,                                               !- Limit Step Change
-  All,                                         !- Selection Control
-  ,                                               !- Rotation Duration {minutes}
-  Space1-1 Lights 1,             !- Lights 1 Name
-  Space2-1 Lights 1,             !- Lights 2 Name
-  Space3-1 Lights 1,             !- Lights 3 Name
-  Space4-1 Lights 1,             !- Lights 4 Name
-  Space5-1 Lights 1;             !- Lights 5 Name
+  Lights Manager,             !- Name
+  ,                           !- Availability Schedule Name
+  Fixed,                      !- Limit Control
+  60,                         !- Minimum Limit Duration {minutes}
+  0.5,                        !- Maximum Limit Fraction
+  ,                           !- Limit Step Change
+  All,                        !- Selection Control
+  ,                           !- Rotation Duration {minutes}
+  Space1-1 Lights 1,          !- Lights 1 Name
+  Space2-1 Lights 1,          !- Lights 2 Name
+  Space3-1 Lights 1,          !- Lights 3 Name
+  Space4-1 Lights 1,          !- Lights 4 Name
+  Space5-1 Lights 1;          !- Lights 5 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-005}
@@ -357,17 +354,16 @@ If a global Electric Equipment statement is used (Ref: \hyperref[electricequipme
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManager:ElectricEquipment,
-  Eq Mgr Stage 3,                   !- Name
-  ,                                               !- Availability Schedule Name
-  Fixed,                                     !- Limit Control
-  60,                                           !- Minimum Limit Duration {minutes}
-  0.0,                                         !- Maximum Limit Fraction
-  ,                                               !- Limit Step Change
-  All,                                         !- Selection Control
-  ,                                               !- Rotation Duration {minutes}
-  Space5-1 ElecEq 1;             !- Electric Equipment 1 Name
+  Eq Mgr Stage 3,             !- Name
+  ,                           !- Availability Schedule Name
+  Fixed,                      !- Limit Control
+  60,                         !- Minimum Limit Duration {minutes}
+  0.0,                        !- Maximum Limit Fraction
+  ,                           !- Limit Step Change
+  All,                        !- Selection Control
+  ,                           !- Rotation Duration {minutes}
+  Space5-1 ElecEq 1;          !- Electric Equipment 1 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-003}
@@ -425,22 +421,21 @@ If a global thermostat statement is used (Ref: \hyperref[zonecontrolthermostat]{
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManager:Thermostats,
-  Thermostats Manager,         !- Name
-  ,                                               !- Availability Schedule Name
-  Fixed,                                     !- Reset Control
-  60,                                           !- Minimum Reset Duration {minutes}
-  19,                                           !- Maximum Heating Setpoint Reset {C}
-  26,                                           !- Maximum Cooling Setpoint Reset {C}
-  ,                                               !- Reset Step Change
-  All,                                         !- Selection Control
-  ,                                               !- Rotation Duration {minutes}
-  SPACE1-1 Control,               !- Thermostat 1 Name
-  SPACE2-1 Control,               !- Thermostat 2 Name
-  SPACE3-1 Control,               !- Thermostat 3 Name
-  SPACE4-1 Control,               !- Thermostat 4 Name
-  SPACE5-1 Control;               !- Thermostat 5 Name
+  Thermostats Manager,        !- Name
+  ,                           !- Availability Schedule Name
+  Fixed,                      !- Reset Control
+  60,                         !- Minimum Reset Duration {minutes}
+  19,                         !- Maximum Heating Setpoint Reset {C}
+  26,                         !- Maximum Cooling Setpoint Reset {C}
+  ,                           !- Reset Step Change
+  All,                        !- Selection Control
+  ,                           !- Rotation Duration {minutes}
+  SPACE1-1 Control,           !- Thermostat 1 Name
+  SPACE2-1 Control,           !- Thermostat 2 Name
+  SPACE3-1 Control,           !- Thermostat 3 Name
+  SPACE4-1 Control,           !- Thermostat 4 Name
+  SPACE5-1 Control;           !- Thermostat 5 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-002}
@@ -494,18 +489,17 @@ The names of \hyperref[controlleroutdoorair]{Controller:OutdoorAir} objects defi
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 DemandManager:Ventilation,
-  Ventilation Manager,         !- Name
-  ,                            !- Availability Schedule Name
-  ReductionRatio,              !- Reset Control
-  60,                          !- Minimum Limit Duration {minutes}
-  ,                            !- Fixed Rate {m3/s}
-  0.5,                         !- Reduction Ratio
-  ,                            !- Limit Step Change
-  All,                         !- Selection Control
-  ,                            !- Rotation Duration {minutes}
-  OA Controller 1;             !- Controller:OutdoorAir Name
+  Ventilation Manager,        !- Name
+  ,                           !- Availability Schedule Name
+  ReductionRatio,             !- Reset Control
+  60,                         !- Minimum Limit Duration {minutes}
+  ,                           !- Fixed Rate {m3/s}
+  0.5,                        !- Reduction Ratio
+  ,                           !- Limit Step Change
+  All,                        !- Selection Control
+  ,                           !- Rotation Duration {minutes}
+  OA Controller 1;            !- Controller:OutdoorAir Name
 \end{lstlisting}
 
 \subsection{DemandManager:Ventilation Outputs}\label{demandmanagerventilation-outputs}

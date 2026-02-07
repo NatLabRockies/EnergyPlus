@@ -695,7 +695,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing4)
 {
 
     // Test all blank inputs for min cool flow and max heat and reheat flow and there have been no sizing calculations.
-    // What will happen? It is suposed to autocalculate inputs anyway!
+    // What will happen? It is supposed to autocalculate inputs anyway!
 
     bool ErrorsFound(false);
 

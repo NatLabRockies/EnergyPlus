@@ -119,7 +119,7 @@ namespace Window {
         //          April 2021: returning CSeries instead of pointer to CSeries
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Handles solar radiation spetrum from defalut location or IDF
+        // Handles solar radiation spetrum from default location or IDF
         CSeries solarRadiation;
 
         for (int i = 1; i <= nume; ++i) {
@@ -140,7 +140,7 @@ namespace Window {
         //          April 2021: Function now returns CSeries instead of pointer to CSeries
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Handles solar radiation spetrum from defalut location or IDF
+        // Handles solar radiation spetrum from default location or IDF
         CSeries visibleResponse;
 
         for (int i = 1; i <= numt3; ++i) {

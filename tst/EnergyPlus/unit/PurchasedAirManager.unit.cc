@@ -303,7 +303,7 @@ TEST_F(EnergyPlusFixture, IdealLoadsAirSystem_GetInput)
     EXPECT_ENUM_EQ(PurchAir(1).CoolingLimit, LimitType::None);
     EXPECT_ENUM_EQ(PurchAir(1).DehumidCtrlType, HumControl::ConstantSupplyHumidityRatio);
     EXPECT_ENUM_EQ(PurchAir(1).HumidCtrlType, HumControl::ConstantSupplyHumidityRatio);
-    // confirm a constant fuel efficiency defalt value of 1.0
+    // confirm a constant fuel efficiency default value of 1.0
     EXPECT_EQ(PurchAir(1).heatFuelEffSched, Sched::GetScheduleAlwaysOn(*state));
     EXPECT_EQ(PurchAir(1).coolFuelEffSched, Sched::GetScheduleAlwaysOn(*state));
     EXPECT_EQ(PurchAir(1).heatFuelEffSched->getCurrentVal(), 1.0);

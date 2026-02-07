@@ -1230,7 +1230,7 @@ namespace Weather {
                 envNew.Title = format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
                 envNew.HVACSizingIterationNum = HVACSizingIterCount;
             }
-        } // for each loop over Environment data strucure
+        } // for each loop over Environment data structure
     }
 
     void SetupWeekDaysByMonth(EnergyPlusData &state, int const StMon, int const StDay, int const StWeekDay, Array1D_int &WeekDays)
@@ -1282,7 +1282,7 @@ namespace Weather {
 
         if (any_eq(WeekDays, 0)) {
             // need to start at StMon and go backwards.
-            // EndDayOfMonth is also "days" in month.  (without leapyear day in February)
+            // EndDayOfMonth is also "days" in month.  (without leap year day in February)
             CurWeekDay = StWeekDay;
             for (int i = 1; i <= StDay - 1; ++i) {
                 --CurWeekDay;
@@ -1382,7 +1382,7 @@ namespace Weather {
 
             if (any_eq(WeekDays, 0)) {
                 // need to start at StMon and go backwards.
-                // EndDayOfMonth is also "days" in month.  (without leapyear day in February)
+                // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                 CurWeekDay = WeekDays(StartMonth);
                 for (int i = 1; i <= StartMonthDay - 1; ++i) {
                     --CurWeekDay;
@@ -1479,7 +1479,7 @@ namespace Weather {
 
                 if (any_eq(WeekDays, 0)) {
                     // need to start at StMon and go backwards.
-                    // EndDayOfMonth is also "days" in month.  (without leapyear day in February)
+                    // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                     CurWeekDay = WeekDays(StartMonth);
                     for (int i = 1; i <= StartMonthDay - 1; ++i) {
                         --CurWeekDay;
@@ -3801,7 +3801,7 @@ namespace Weather {
                         Psychrometrics::PsyRhFnTdbWPb(state, tomorrowTs.OutDryBulbTemp, OutHumRat, desDayInput.PressBarom, WeatherManager) * 100.0;
                 } else if (ConstantHumidityRatio) {
                     //  Need Dew Point Temperature.  Use Relative Humidity to get Humidity Ratio, unless Humidity Ratio is constant
-                    // BG 9-26-07  moved following inside this IF statment; when HumIndType is 'Schedule' HumidityRatio wasn't being initialized
+                    // BG 9-26-07  moved following inside this IF statement; when HumIndType is 'Schedule' HumidityRatio wasn't being initialized
                     Real64 WetBulb =
                         Psychrometrics::PsyTwbFnTdbWPb(state, tomorrowTs.OutDryBulbTemp, HumidityRatio, desDayInput.PressBarom, RoutineNameLong);
 
@@ -3873,7 +3873,7 @@ namespace Weather {
                             } else {
                                 TotHoriz = desDayInput.SkyClear * A * (C + CosZenith) * std::exp(-B / CosZenith);
                             }
-                            // Radiation on an extraterrestial horizontal surface
+                            // Radiation on an extraterrestrial horizontal surface
                             Real64 HO = GlobalSolarConstant * AVSC * CosZenith;
                             Real64 KT = TotHoriz / HO; // Radiation ratio
                             KT = min(KT, 0.75);
@@ -4728,7 +4728,7 @@ namespace Weather {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool ErrorsFound(false);
 
-        // Get the number of design days and annual runs from user inpout
+        // Get the number of design days and annual runs from user input
         state.dataEnvrn->TotDesDays = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:DesignDay");
         int RPD1 = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:WeatherFileDays");
         int RPD2 = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:WeatherFileConditionType");
@@ -5114,7 +5114,7 @@ namespace Weather {
                     runPeriodInput.startWeekDay = static_cast<Sched::DayType>(dayType);
                     inputWeekday = true;
                 }
-            } else { // No input, set the default as Sunday. This may get overriden below
+            } else { // No input, set the default as Sunday. This may get overridden below
                 runPeriodInput.startWeekDay = Sched::DayType::Sunday;
             }
 
@@ -7829,7 +7829,7 @@ namespace Weather {
             }
         } break;
         case Weather::EpwHeaderType::HolidaysDST: {
-            // A1, \field LeapYear Observed
+            // A1, \field leap year Observed
             // \type choice
             // \key Yes
             // \key No
@@ -8603,7 +8603,7 @@ namespace Weather {
         //       DATE WRITTEN   October 31, 2017
 
         // PURPOSE OF THIS FUNCTION:
-        // Determine if a month/day+leapyear combination is valid.
+        // Determine if a month/day+leap year combination is valid.
 
         switch (month) {
         case 1:

@@ -81,6 +81,7 @@ set(test_src
     ConvectionCoefficients.unit.cc
     CoolTower.unit.cc
     CrossVentMgr.unit.cc
+    CsvParser.unit.cc
     CurveManager.unit.cc
     CustomMatchers.unit.cc
     DElightManager.unit.cc

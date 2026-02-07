@@ -326,7 +326,7 @@ struct ThermalComfortsData : BaseGlobalStruct
     Real64 VapPress = 0.0;                  // Vapor pressure; Torr  ?? BG Oct 2005 humm, this should be kPa
     Real64 VasoconstrictFac = 0.0;          // Constriction factor of blood vessel
     Real64 VasodilationFac = 0.0;           // Dilation factor of blood vessel
-    Real64 WorkEff = 0.0;                   // Energy cosumption by external work; w/m2
+    Real64 WorkEff = 0.0;                   // Energy consumption by external work; w/m2
     int ZoneNum = 0;                        // Zone number
     Real64 TemporarySixAMTemperature = 0.0; // Temperature at 6am
 

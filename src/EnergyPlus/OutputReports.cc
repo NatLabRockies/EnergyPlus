@@ -1214,7 +1214,7 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                 AlgoName = DataSurfaces::HeatTransAlgoStrs[(int)thisSurface.HeatTransferAlgorithm];
 
                 // Default Convection Coefficient Calculation Algorithms
-                // This doulbe lookup is a screwed up way to do this, but ...
+                // This double lookup is a screwed up way to do this, but ...
                 IntConvCoeffCalc = ConvCoeffCalcs[Convect::HcIntReportVals[static_cast<int>(state.dataHeatBal->Zone(ZoneNum).IntConvAlgo)] - 1];
                 ExtConvCoeffCalc = ConvCoeffCalcs[Convect::HcExtReportVals[static_cast<int>(state.dataHeatBal->Zone(ZoneNum).ExtConvAlgo)] - 1];
 

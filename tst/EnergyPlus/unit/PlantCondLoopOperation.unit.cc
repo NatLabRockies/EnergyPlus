@@ -1005,7 +1005,7 @@ TEST_F(EnergyPlusFixture, ThermalEnergyStorageWithIceForceDualOp)
         EXPECT_EQ(ctrlType, "DualOp") << compName << " has a wrong control type = '" << ctrlType << "'.";
     }
 
-    // We should now alos have two TES SPMs created, and that's all of them
+    // We should now also have two TES SPMs created, and that's all of them
     EXPECT_EQ(state->dataSetPointManager->spms.size(), 2);
 }
 

@@ -750,7 +750,7 @@ namespace RoomAir {
             auto &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneNum);
             for (int iNode = 1; iNode <= zoneEquipConfig.NumInletNodes; ++iNode) {
                 // Get node conditions
-                // this next block is of interest to irratic system loads... maybe nodes are not accurate at time of call ?
+                // this next block is of interest to erratic system loads... maybe nodes are not accurate at time of call ?
                 // how can we tell ? predict step must be lagged ? correct step, systems have run.
                 auto const &inletNode = state.dataLoopNodes->Node(zoneEquipConfig.InletNode(iNode));
                 for (auto const &afnHVAC : afnNode.HVAC) {

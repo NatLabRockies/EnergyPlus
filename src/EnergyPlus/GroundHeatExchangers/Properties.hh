@@ -59,15 +59,17 @@ namespace GroundHeatExchangers {
 
     static constexpr Real64 hrsPerMonth = 730.0; // Number of hours in month
     static constexpr Real64 maxTSinHr = 60.0;    // Max number of time step in an hour
-    static constexpr std::array<std::string_view, 2> GFuncCalcMethodsStrs = {"UHFCALC", "UBHWTCALC"};
 
     enum class GFuncCalcMethod
     {
         Invalid = -1,
         UniformHeatFlux,
         UniformBoreholeWallTemp,
+        FullDesign,
         Num
     };
+    static constexpr std::array<std::string_view, static_cast<int>(GFuncCalcMethod::Num)> GFuncCalcMethodsStrs = {
+        "UHFCALC", "UBHWTCALC", "FULLDESIGN"};
 
     struct ThermophysicalProps // LCOV_EXCL_LINE
     {

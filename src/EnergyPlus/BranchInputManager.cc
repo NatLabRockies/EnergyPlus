@@ -117,6 +117,22 @@ namespace BranchInputManager {
         }
     }
 
+    void ManageConnectorInput(EnergyPlusData &state)
+    {
+        bool hasSplitterOrMixer(false);
+        if (state.dataBranchInputManager->GetSplitterInputFlag) {
+            hasSplitterOrMixer = true;
+            GetSplitterInput(state);
+        }
+        if (state.dataBranchInputManager->GetMixerInputFlag) {
+            hasSplitterOrMixer = true;
+            GetMixerInput(state);
+        }
+        if (hasSplitterOrMixer && state.dataBranchInputManager->GetConnectorListInputFlag) {
+            GetConnectorListInput(state);
+        }
+    }
+
     //==================================================================================
     //   Routines that "get" data from internal branch management structure
     //==================================================================================

@@ -137,39 +137,37 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Pumps'', 
 Examples of this object in the IDF follow.
 
 \begin{lstlisting}
+Pump:VariableSpeed,
+  HW Circ Pump,               !- Name
+  HW Supply Inlet Node,       !- Inlet Node Name
+  HW Pump Outlet Node,        !- Outlet Node Name
+  autosize,                   !- Design Maximum Flow Rate {m3/s}
+  179352,                     !- Design Pump Head {Pa}
+  autosize,                   !- Design Power Consumption {W}
+  0.9,                        !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  0,                          !- Coefficient 1 of the Part Load Performance Curve
+  1,                          !- Coefficient 2 of the Part Load Performance Curve
+  0,                          !- Coefficient 3 of the Part Load Performance Curve
+  0,                          !- Coefficient 4 of the Part Load Performance Curve
+  0,                          !- Minimum Flow Rate {m3/s}
+  Intermittent;               !- Pump Control Type
 
 Pump:VariableSpeed,
-  HW Circ Pump,                          !- Name
-  HW Supply Inlet Node,                  !- Inlet Node Name
-  HW Pump Outlet Node,                   !- Outlet Node Name
-  autosize,                              !- Design Maximum Flow Rate {m3/s}
-  179352,                                !- Design Pump Head {Pa}
-  autosize,                              !- Design Power Consumption {W}
-  0.9,                                   !- Motor Efficiency
-  0.0,                                   !- Fraction of Motor Inefficiencies to Fluid Stream
-  0,                                     !- Coefficient 1 of the Part Load Performance Curve
-  1,                                     !- Coefficient 2 of the Part Load Performance Curve
-  0,                                     !- Coefficient 3 of the Part Load Performance Curve
-  0,                                     !- Coefficient 4 of the Part Load Performance Curve
-  0,                                     !- Minimum Flow Rate {m3/s}
-  Intermittent;                          !- Pump Control Type
-
-
-  Pump:VariableSpeed,
-  Circ Pump,                             !- Name
-  CW Supply Inlet Node,                  !- Inlet Node Name
-  CW Pump Outlet Node,                   !- Outlet Node Name
-  .0011,                                 !- Design Maximum Flow Rate {m3/s}
-  300000,                                !- Design Pump Head {Pa}
-  500,                                   !- Design Power Consumption {W}
-  .87,                                   !- Motor Efficiency
-  0.0,                                   !- Fraction of Motor Inefficiencies to Fluid Stream
-  0,                                     !- Coefficient 1 of the Part Load Performance Curve
-  1,                                     !- Coefficient 2 of the Part Load Performance Curve
-  0,                                     !- Coefficient 3 of the Part Load Performance Curve
-  0,                                     !- Coefficient 4 of the Part Load Performance Curve
-  0,                                     !- Minimum Flow Rate {m3/s}
-  Intermittent;                          !- Pump Control Type
+  Circ Pump,                  !- Name
+  CW Supply Inlet Node,       !- Inlet Node Name
+  CW Pump Outlet Node,        !- Outlet Node Name
+  .0011,                      !- Design Maximum Flow Rate {m3/s}
+  300000,                     !- Design Pump Head {Pa}
+  500,                        !- Design Power Consumption {W}
+  .87,                        !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  0,                          !- Coefficient 1 of the Part Load Performance Curve
+  1,                          !- Coefficient 2 of the Part Load Performance Curve
+  0,                          !- Coefficient 3 of the Part Load Performance Curve
+  0,                          !- Coefficient 4 of the Part Load Performance Curve
+  0,                          !- Minimum Flow Rate {m3/s}
+  Intermittent;               !- Pump Control Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-026}
@@ -350,17 +348,16 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Pumps'', 
 An example of this object follows.
 
 \begin{lstlisting}
-
 Pump:ConstantSpeed,
-  Circ Pump,                         !- Name
-  CW Supply Inlet Node,              !- Inlet Node Name
-  PumpChiller Node,                  !- Outlet Node Name
-  0.0011,                            !- Design Flow Rate
-  300000,                            !- Design Pump Head
-  700,                               !- Design Power Consumption
-  0.87,                              !- Motor Efficiency
-  0.0,                               !- Fraction of Motor Inefficiencies to Fluid Stream
-  Intermittent;                      !- Pump Control Type
+  Circ Pump,                  !- Name
+  CW Supply Inlet Node,       !- Inlet Node Name
+  PumpChiller Node,           !- Outlet Node Name
+  0.0011,                     !- Design Flow Rate
+  300000,                     !- Design Pump Head
+  700,                        !- Design Power Consumption
+  0.87,                       !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  Intermittent;               !- Pump Control Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-020}
@@ -517,35 +514,33 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Pumps'', 
 Examples of this object in the IDF follow.
 
 \begin{lstlisting}
+Pump:VariableSpeed:Condensate,
+  Steam Boiler Plant Steam Circ Pump,  !- Name
+  Steam Boiler Plant Steam Supply Inlet Node,  !- Inlet Node Name
+  Steam Boiler Plant Steam Pump Outlet Node,  !- Outlet Node Name
+  0.36,                       !- Design Steam Volume Flow Rate {m3/s}
+  179352,                     !- Design Pump Head {Pa}
+  400,                        !- Design Power Consumption {W}
+  0.9,                        !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  0,                          !- Coefficient 1 of the Part Load Performance Curve
+  1,                          !- Coefficient 2 of the Part Load Performance Curve
+  0,                          !- Coefficient 3 of the Part Load Performance Curve
+  0;                          !- Coefficient 4 of the Part Load Performance Curve
 
 Pump:VariableSpeed:Condensate,
-  Steam Boiler Plant Steam Circ Pump,         !- Name
-  Steam Boiler Plant Steam Supply Inlet Node, !- Inlet Node Name
+  Steam Boiler Plant Steam Circ Pump,  !- Name
+  Steam Boiler Plant Steam Supply Inlet Node,  !- Inlet Node Name
   Steam Boiler Plant Steam Pump Outlet Node,  !- Outlet Node Name
-  0.36,                                  !- Design Steam Volume Flow Rate {m3/s}
-  179352,                                !- Design Pump Head {Pa}
-  400,                                   !- Design Power Consumption {W}
-  0.9,                                   !- Motor Efficiency
-  0.0,                                   !- Fraction of Motor Inefficiencies to Fluid Stream
-  0,                                     !- Coefficient 1 of the Part Load Performance Curve
-  1,                                     !- Coefficient 2 of the Part Load Performance Curve
-  0,                                     !- Coefficient 3 of the Part Load Performance Curve
-  0;                                     !- Coefficient 4 of the Part Load Performance Curve
-
-
-  Pump:VariableSpeed:Condensate,
-  Steam Boiler Plant Steam Circ Pump,         !- Name
-  Steam Boiler Plant Steam Supply Inlet Node, !- Inlet Node Name
-  Steam Boiler Plant Steam Pump Outlet Node,  !- Outlet Node Name
-  0.36,                                  !- Design Steam Volume Flow Rate {m3/s}
-  179352,                                !- Design Pump Head {Pa}
-  autosize,                              !- Design Power Consumption {W}
-  0.9,                                   !- Motor Efficiency
-  0.0,                                   !- Fraction of Motor Inefficiencies to Fluid Stream
-  0,                                     !- Coefficient 1 of the Part Load Performance Curve
-  1,                                     !- Coefficient 2 of the Part Load Performance Curve
-  0,                                     !- Coefficient 3 of the Part Load Performance Curve
-  0;                                     !- Coefficient 4 of the Part Load Performance Curve
+  0.36,                       !- Design Steam Volume Flow Rate {m3/s}
+  179352,                     !- Design Pump Head {Pa}
+  autosize,                   !- Design Power Consumption {W}
+  0.9,                        !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  0,                          !- Coefficient 1 of the Part Load Performance Curve
+  1,                          !- Coefficient 2 of the Part Load Performance Curve
+  0,                          !- Coefficient 3 of the Part Load Performance Curve
+  0;                          !- Coefficient 4 of the Part Load Performance Curve
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-016}
@@ -692,20 +687,19 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Pumps'', 
 An example for constant speed pump bank follows.
 
 \begin{lstlisting}
-
 HeaderedPumps:ConstantSpeed,
-  Chilled Water Headered Pumps,           !- Name
-  CW Supply Inlet Node,                   !- Inlet Node Name
-  CW Pumps Outlet Node,                   !- Outlet Node Name
-  autosize,                               !- Total Design Flow Rate
-  2,                                      !- Number of Pumps in Bank
-  SEQUENTIAL,                             !- Flow Sequencing Control Scheme
-  179352,                                 !- Design Pump Head
-  autosize,                               !- Design Power Consumption
-  0.9,                                    !- Motor Efficiency
-  0.0,                                    !- Fraction of Motor Inefficiencies to Fluid Stream
-  INTERMITTENT,                           !- Pump Control Type
-  CoolingPumpAvailSched;                  !- Pump Flow Rate Schedule Name
+  Chilled Water Headered Pumps,  !- Name
+  CW Supply Inlet Node,       !- Inlet Node Name
+  CW Pumps Outlet Node,       !- Outlet Node Name
+  autosize,                   !- Total Design Flow Rate
+  2,                          !- Number of Pumps in Bank
+  SEQUENTIAL,                 !- Flow Sequencing Control Scheme
+  179352,                     !- Design Pump Head
+  autosize,                   !- Design Power Consumption
+  0.9,                        !- Motor Efficiency
+  0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream
+  INTERMITTENT,               !- Pump Control Type
+  CoolingPumpAvailSched;      !- Pump Flow Rate Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-014}
@@ -884,9 +878,8 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Main Pumps'', 
 An example of this object follows.
 
 \begin{lstlisting}
-
 HeaderedPumps:VariableSpeed,
-  Chilled Water Headered Pumps, !- Name
+  Chilled Water Headered Pumps,  !- Name
   CW Supply Inlet Node,       !- Inlet Node Name
   CW Pumps Outlet Node,       !- Outlet Node Name
   autosize,                   !- Total Design Flow Rate {m3/s}

@@ -301,7 +301,7 @@ namespace EconomicTariff {
         int lastOperand;           // last item in the operand array
         bool activeNow;            // flag if the econVar is used in the current tariff
         bool isEvaluated;          // flag if the economics object that results in this variable
-        // has already been evaulated
+        // has already been evaluated
         bool isReported;                                // flag if the econVar has been reported in the output file
         VarUnitType varUnitType = VarUnitType::Invalid; // variable unit type: energy, demand, dimensionless, currency
 
@@ -355,7 +355,7 @@ namespace EconomicTariff {
         Array1D<std::array<Real64, (int)Period::Num>> gatherDemand;
         Real64 collectTime;
         Real64 collectEnergy;
-        // arryas for holding real time pricing gathered values
+        // arrays for holding real time pricing gathered values
         Array1D<Real64> RTPcost;
         Array1D<Real64> RTPaboveBaseCost;
         Array1D<Real64> RTPbelowBaseCost;

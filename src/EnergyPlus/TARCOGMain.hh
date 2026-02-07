@@ -78,7 +78,7 @@ namespace TARCOGMain {
                   Real64 &VacuumMaxGapThickness,                      // maximum allowed thickness without producing warning message
                   TARCOGParams::DeflectionCalculation CalcDeflection, // Deflection calculation flag:
                   Real64 Pa,                                          // Atmospheric (outside/inside) pressure (used onlu if CalcDeflection = 1)
-                  Real64 Pini,                                        // Initial presssure at time of fabrication (used only if CalcDeflection = 1)
+                  Real64 Pini,                                        // Initial pressure at time of fabrication (used only if CalcDeflection = 1)
                   Real64 Tini,                                        // Initial temperature at time of fabrication (used only if CalcDeflection = 1)
                   Array1D<Real64> &gap,                               // Vector of gap widths [m]
                   Array1D<Real64> &GapDefMax,                         // Vector of gap widths in deflected state. It will be used as input
@@ -101,7 +101,7 @@ namespace TARCOGMain {
                   Array2A<Real64> xgvis,                              // Matrix of constants for gas dynamic viscosity calc
                   Array2A<Real64> xgcp,                               // Matrix of constants for gas specific heat calc at constant pressure
                   const Array1D<Real64> &xwght,                       // Vector of Molecular weights for gasses
-                  const Array1D<Real64> &gama,                        // Vector of spefic heat ration for low pressure calc
+                  const Array1D<Real64> &gama,                        // Vector of specific heat ration for low pressure calc
                   const Array1D_int &nmix,                            // Vector of number of gasses in gas mixture of each gap
                   const Array1D_int &SupportPillar,                   // Shows whether or not gap have support pillar
                   const Array1D<Real64> &PillarSpacing,               // Pillar spacing for each gap (used in case there is support pillar)
@@ -170,7 +170,7 @@ namespace TARCOGMain {
                   Array1D<Real64> &ShadeGapKeffConv,           // Vector of convective keff values for areas above/below
                   Real64 SDScalar,                             // Factor of Venetian SD layer contribution to convection
                   int SHGCCalc,                                // SHGC calculation switch:
-                  int &NumOfIterations,                        // Number of iterations for reacing solution
+                  int &NumOfIterations,                        // Number of iterations for reaching solution
                   Real64 edgeGlCorrFac                         // Edge of glass correction factor
     );
 }
@@ -180,7 +180,7 @@ struct TARCOGMainData : BaseGlobalStruct
     Array1D<Real64> sconTemp = Array1D<Real64>(TARCOGParams::maxlay);
     Array1D<Real64> thickTemp = Array1D<Real64>(TARCOGParams::maxlay);
 
-    // Internaly used
+    // Internally used
     bool converged = false; // used for convergence check in case of deflection calculations
     Array1D<Real64> told = Array1D<Real64>(TARCOGParams::maxlay2);
     Array1D<Real64> CurGap = Array1D<Real64>(TARCOGParams::MaxGap);

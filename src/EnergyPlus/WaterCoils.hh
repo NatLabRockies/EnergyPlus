@@ -319,7 +319,7 @@ namespace WaterCoils {
                            int const CoilNum,            // Number of Coil
                            Real64 const WaterTempIn,     // Water temperature IN to this function (C)
                            Real64 const AirTempIn,       // Air dry bulb temperature IN to this function(C)
-                           Real64 const AirHumRat,       // Air Humidity Ratio IN to this funcation (C)
+                           Real64 const AirHumRat,       // Air Humidity Ratio IN to this function (C)
                            Real64 const UAInternalTotal, // Internal overall heat transfer coefficient(W/m2 C)
                            Real64 const UAExternalTotal, // External overall heat transfer coefficient(W/m2 C)
                            Real64 &OutletWaterTemp,      // Leaving water temperature (C)
@@ -375,7 +375,7 @@ namespace WaterCoils {
                                    Real64 &EnergyOutStreamTwo      // Outlet state of stream2 (C)
     );
 
-    // Subroutine for caculating outlet condition if coil is wet , for Cooling Coil
+    // Subroutine for calculating outlet condition if coil is wet , for Cooling Coil
 
     void WetCoilOutletCondition(EnergyPlusData &state,
                                 int const CoilNum,

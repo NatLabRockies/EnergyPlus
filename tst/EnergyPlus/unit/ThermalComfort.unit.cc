@@ -1868,9 +1868,7 @@ TEST_F(EnergyPlusFixture, ThermalComfort_GetAngleFactorListTest)
         "  InTheZone:Wall99,   !- Surface 99 Name ",
         "  0.01,               !- Angle Factor 99 ",
         "  InTheZone:Wall100,  !- Surface 100 Name ",
-        "  0.01,               !- Angle Factor 100 ",
-        " ",
-
+        "  0.01;               !- Angle Factor 100 ",
     });
 
     state->dataSurface->Surface.allocate(100);

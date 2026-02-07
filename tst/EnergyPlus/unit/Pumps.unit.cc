@@ -670,7 +670,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPump_MinFlowGreaterThanMax)
     std::string const error_string = delimited_string({
         "   ** Warning ** GetPumpInput: Pump:VariableSpeed=\"SUPPLY INLET PUMP\", Invalid 'Design Minimum Flow Rate'",
         "   **   ~~~   ** Entered Value=[2.00000E-003] is above or too close (equal) to the Design Maximum Flow Rate=[1.00000E-003].",
-        "   **   ~~~   ** Reseting value of 'Design Minimum Flow Rate' to the value of 99% of 'Design Maximum Flow Rate'.",
+        "   **   ~~~   ** Resetting value of 'Design Minimum Flow Rate' to the value of 99% of 'Design Maximum Flow Rate'.",
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
@@ -722,7 +722,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPump_MinFlowEqualToMax)
     std::string const error_string = delimited_string({
         "   ** Warning ** GetPumpInput: Pump:VariableSpeed=\"SUPPLY INLET PUMP\", Invalid 'Design Minimum Flow Rate'",
         "   **   ~~~   ** Entered Value=[9.95000E-004] is above or too close (equal) to the Design Maximum Flow Rate=[1.00000E-003].",
-        "   **   ~~~   ** Reseting value of 'Design Minimum Flow Rate' to the value of 99% of 'Design Maximum Flow Rate'.",
+        "   **   ~~~   ** Resetting value of 'Design Minimum Flow Rate' to the value of 99% of 'Design Maximum Flow Rate'.",
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));

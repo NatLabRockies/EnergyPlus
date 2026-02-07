@@ -89,16 +89,15 @@ This field is used to connect ancillary losses from the zone unit to a thermal z
 An example of this input object follows.
 
 \begin{lstlisting}
-
 ZoneHVAC:ForcedAir:UserDefined,
-  Zone1WindAC,   !- Name
-  Zone 1 Window AC Model Program Manager , !- Overall Model Simulation Program Calling Manager Name
-  Zone 1 Window AC Init Program Manager , !- Model Setup and Sizing Program Calling Manager Name
-  Zone1WindACAirInletNode , !- Primary Air Inlet Node Name
-  Zone1WindACAirOutletNode, !- Primary Air Outlet Node Name
-  Zone1WindACOAInNode,   !- Secondary Air Inlet Node Name
-  Zone1WindACExhNode,   !- Secondary Air Outlet Node Name
-  0 ; !- Number of Plant Loop Connections
+  Zone1WindAC,                !- Name
+  Zone 1 Window AC Model Program Manager,  !- Overall Model Simulation Program Calling Manager Name
+  Zone 1 Window AC Init Program Manager,  !- Model Setup and Sizing Program Calling Manager Name
+  Zone1WindACAirInletNode,    !- Primary Air Inlet Node Name
+  Zone1WindACAirOutletNode,   !- Primary Air Outlet Node Name
+  Zone1WindACOAInNode,        !- Secondary Air Inlet Node Name
+  Zone1WindACExhNode,         !- Secondary Air Outlet Node Name
+  0;                          !- Number of Plant Loop Connections
 \end{lstlisting}
 
 \subsection{AirTerminal:SingleDuct:UserDefined}\label{airterminalsingleductuserdefined}
@@ -168,18 +167,17 @@ This field is used to connect ancillary losses from the air terminal unit to a t
 An example of this input object follows.
 
 \begin{lstlisting}
-
 AirTerminal:SingleDuct:UserDefined,
-  SPACE1-1 VAV Reheat,   !- Name
-  Space1 ATU Sim Programs , !- Overall Model Simulation Program Calling Manager Name
-  Space1 ATU Init Programs , !- Model Setup and Sizing Program Calling Manager Name
-  SPACE1-1 ATU In Node , !- Primary Air Inlet Node Name
-  SPACE1-1 In Node , !- Primary Air Outlet Node Name
-  ,   !- Secondary Air Inlet Node Name
-  ,   !- Secondary Air Outlet Node Name
-  1,   !- Number of Plant Loop Connections
-  SPACE1-1 Zone Coil Water In Node , !- Plant Connection 1 Inlet Node Name
-  SPACE1-1 Zone Coil Water Out Node; !- Plant Connection 1 Outlet Node Name
+  SPACE1-1 VAV Reheat,        !- Name
+  Space1 ATU Sim Programs,    !- Overall Model Simulation Program Calling Manager Name
+  Space1 ATU Init Programs,   !- Model Setup and Sizing Program Calling Manager Name
+  SPACE1-1 ATU In Node,       !- Primary Air Inlet Node Name
+  SPACE1-1 In Node,           !- Primary Air Outlet Node Name
+  ,                           !- Secondary Air Inlet Node Name
+  ,                           !- Secondary Air Outlet Node Name
+  1,                          !- Number of Plant Loop Connections
+  SPACE1-1 Zone Coil Water In Node,  !- Plant Connection 1 Inlet Node Name
+  SPACE1-1 Zone Coil Water Out Node;  !- Plant Connection 1 Outlet Node Name
 \end{lstlisting}
 
 \subsection{Coil:UserDefined}\label{coiluserdefined}
@@ -245,19 +243,18 @@ This field is used to connect ancillary losses from the coil to a thermal zone. 
 An example of this input object follows.
 
 \begin{lstlisting}
-
 Coil:UserDefined,
-  Main Cooling Coil 1, !- Name
-  Main Cooling Coil Model Program Manager , !- Overall Model Simulation Program Calling Manager Name
-  Main Cooling Coil Init Program Manager , !- Model Setup and Sizing Program Calling Manager Name
-  1 , !- Number of Air Connections
-  Mixed Air Node 1 , !- Air Connection 1 Inlet Node Name
-  Main Cooling Coil 1 Outlet Node , !- Air Connection 1 Outlet Node Name
-  , !- Air Connection 2 Inlet Node Name
-  , !- Air Connection 2 Outlet Node Name
-  Yes , !- Plant Connection is Used
-  Main Cooling Coil 1 Water Inlet Node, !- Plant Connection Inlet Node Name
-  Main Cooling Coil 1 Water Outlet Node; !- Plant Connection Outlet Node Name
+  Main Cooling Coil 1,        !- Name
+  Main Cooling Coil Model Program Manager,  !- Overall Model Simulation Program Calling Manager Name
+  Main Cooling Coil Init Program Manager,  !- Model Setup and Sizing Program Calling Manager Name
+  1,                          !- Number of Air Connections
+  Mixed Air Node 1,           !- Air Connection 1 Inlet Node Name
+  Main Cooling Coil 1 Outlet Node,  !- Air Connection 1 Outlet Node Name
+  ,                           !- Air Connection 2 Inlet Node Name
+  ,                           !- Air Connection 2 Outlet Node Name
+  Yes,                        !- Plant Connection is Used
+  Main Cooling Coil 1 Water Inlet Node,  !- Plant Connection Inlet Node Name
+  Main Cooling Coil 1 Water Outlet Node;  !- Plant Connection Outlet Node Name
 \end{lstlisting}
 
 Note that the Coil:UserDefined needs to be specifically configured in \hyperref[energymanagementsystemmeteredoutputvariable]{EnergyManagementSystem:MeteredOutputVariable}, in order to be included in the meters such as HeatingCoils:EnergyTransfer.
@@ -265,27 +262,26 @@ Note that the Coil:UserDefined needs to be specifically configured in \hyperref[
 An example of this input object follows.
 
 \begin{lstlisting}
-
 EnergyManagementSystem:Program,
-  MainHWCoil1_Modeloutput,  !- Name
+  MainHWCoil1_Modeloutput,    !- Name
   Set HWcoil1_Water_MdotRequest = Water_MdotRequest,  !- Program Line 1
   Set HWcoil1_Air_Tout          = Air_Tout,  !- Program Line 2
   Set HWcoil1_Air_Wout          = Air_Wout,  !- <none>
   Set HWcoil1_tot_heat_Power    = Tot_heat_Power,  !- <none>
   Set HWcoil1_tot_heat_Energy   = Tot_heat_Power * SystemTimestep * 3600,  !- <none>
   Set HWcoil1_Air_MdotOut       = Air_Mdot,  !- <none>
-  Set HWcoil1_Water_Tout        = Water_Tout;!- <none>
+  Set HWcoil1_Water_Tout        = Water_Tout;  !- <none>
 
-  EnergyManagementSystem:MeteredOutputVariable,
-  HWcoil1 tot heat Energy, !- Name
-  HWcoil1_tot_heat_Energy, !- EMS Variable Name
-  SystemTimestep,          !- Update Frequency
-  MainHWCoil1_Modeloutput,  !- EMS Program or Subroutine Name
-  ENERGYTRANSFER,          !- Resource Type
-  System,                  !- Group Type
-  HEATINGCOILS,            !- End-Use Category
-  ,                        !- End-Use Subcategory
-  J;                       !- Units
+EnergyManagementSystem:MeteredOutputVariable,
+  HWcoil1 tot heat Energy,    !- Name
+  HWcoil1_tot_heat_Energy,    !- EMS Variable Name
+  SystemTimestep,             !- Update Frequency
+  MainHWCoil1_Modeloutput,    !- EMS Program or Subroutine Name
+  ENERGYTRANSFER,             !- Resource Type
+  System,                     !- Group Type
+  HEATINGCOILS,               !- End-Use Category
+  ,                           !- End-Use Subcategory
+  J;                          !- Units
 \end{lstlisting}
 
 \subsection{PlantComponent:UserDefined}\label{plantcomponentuserdefined}
@@ -383,40 +379,39 @@ This field is used to connect ancillary losses from the plant component to a the
 An example of this input object follows:
 
 \begin{lstlisting}
-
 PlantComponent:UserDefined,
-  Central Chiller,   !- Name
-  , !- Main Model Program Calling Manager Name
-  1 ,   !- Number of Plant Loop Connections
-  Central Chiller Inlet Node,     !- Plant Connection 1 Inlet Node Name
-  Central Chiller Outlet Node , !- Plant Connection 1 Outlet Node Name
-  MeetsLoadWithNominalCapacityLowOutLimit, !- Plant Connection 1 Loading Mode
-  NeedsFlowIfLoopOn , !- Plant Connection 1 Loop Flow Request Mode
-  Chiller model init programs, !- Plant Connection 1 Initialization Program Calling Manager Name
-  Chiller model simulation programs ,!- Plant Connection 1 Simulation Program Calling Manager Name
-  , !- Plant Connection 2 Inlet Node Name
-  , !- Plant Connection 2 Outlet Node Name
-  , !- Plant Connection 2 Loading Mode
-  , !- Plant Connection 2 Loop Flow Request Mode
-  , !- Plant Connection 2 Initialization Program Calling Manager Names
-  , !- Plant Connection 2 Simulation Program Calling Manager Name
-  , !- Plant Connection 3 Inlet Node Name
-  , !- Plant Connection 3 Outlet Node Name
-  , !- Plant Connection 3 Loading Mode
-  , !- Plant Connection 3 Loop Flow Request Mode
-  , !- Plant Connection 3 Initialization Program Calling Manager Name
-  , !- Plant Connection 3 Simulation Program Calling Manager Name
-  , !- Plant Connection 4 Inlet Node Name
-  , !- Plant Connection 4 Outlet Node Name
-  , !- Plant Connection 4 Loading Mode
-  , !- Plant Connection 4 Loop Flow Request Mode
-  , !- Plant Connection 4 Initialization Program Calling Manager Name
-  , !- Plant Connection 4 Simulation Program Calling Manager Name
-  Central Chiller Condenser Inlet Node, !- Air Connection Inlet Node Name
-  Central Chiller Condenser Outlet Node, !- Air Connection Outlet Node Name
-  , !- Supply Inlet Water Storage Tank Name
-  , !- Collection Outlet Water Storage Tank Name
-  ; !- Ambient Zone Name
+  Central Chiller,            !- Name
+  ,                           !- Main Model Program Calling Manager Name
+  1,                          !- Number of Plant Loop Connections
+  Central Chiller Inlet Node, !- Plant Connection 1 Inlet Node Name
+  Central Chiller Outlet Node,!- Plant Connection 1 Outlet Node Name
+  MeetsLoadWithNominalCapacityLowOutLimit,  !- Plant Connection 1 Loading Mode
+  NeedsFlowIfLoopOn,          !- Plant Connection 1 Loop Flow Request Mode
+  Chiller model init programs,!- Plant Connection 1 Initialization Program Calling Manager Name
+  Chiller model simulation programs,  !- Plant Connection 1 Simulation Program Calling Manager Name
+  ,                           !- Plant Connection 2 Inlet Node Name
+  ,                           !- Plant Connection 2 Outlet Node Name
+  ,                           !- Plant Connection 2 Loading Mode
+  ,                           !- Plant Connection 2 Loop Flow Request Mode
+  ,                           !- Plant Connection 2 Initialization Program Calling Manager Names
+  ,                           !- Plant Connection 2 Simulation Program Calling Manager Name
+  ,                           !- Plant Connection 3 Inlet Node Name
+  ,                           !- Plant Connection 3 Outlet Node Name
+  ,                           !- Plant Connection 3 Loading Mode
+  ,                           !- Plant Connection 3 Loop Flow Request Mode
+  ,                           !- Plant Connection 3 Initialization Program Calling Manager Name
+  ,                           !- Plant Connection 3 Simulation Program Calling Manager Name
+  ,                           !- Plant Connection 4 Inlet Node Name
+  ,                           !- Plant Connection 4 Outlet Node Name
+  ,                           !- Plant Connection 4 Loading Mode
+  ,                           !- Plant Connection 4 Loop Flow Request Mode
+  ,                           !- Plant Connection 4 Initialization Program Calling Manager Name
+  ,                           !- Plant Connection 4 Simulation Program Calling Manager Name
+  Central Chiller Condenser Inlet Node,  !- Air Connection Inlet Node Name
+  Central Chiller Condenser Outlet Node,  !- Air Connection Outlet Node Name
+  ,                           !- Supply Inlet Water Storage Tank Name
+  ,                           !- Collection Outlet Water Storage Tank Name
+  ;                           !- Ambient Zone Name
 \end{lstlisting}
 
 \subsection{PlantEquipmentOperation:UserDefined}\label{plantequipmentoperationuserdefined}
@@ -452,34 +447,33 @@ This field specifies the user selected name of the equipment to be controlled by
 The following example shows control of a chilled water plant with two chillers that have different sizes and load dispatch is scaled so that each chiller runs at the same part load ratio.
 
 \begin{lstlisting}
-
 PlantEquipmentOperation:UserDefined,
   CoolSys1 Operation Scheme,  !- Name
-  Cooling_dispatch , !- Main Model Program Calling Manager Name
-  Init_Chiller_Capacity, !- Initialization Program Calling Manager Name
-  Chiller:Electric:ReformulatedEIR, !- Equipment 1 Object Type
-  CoolSys1 Chiller 1,    !- Equipment 1 Name
-  Chiller:Electric:ReformulatedEIR,* !- Equipment 2 Object Type
-  CoolSys1 Chiller 2;    !- Equipment 2 Name
+  Cooling_dispatch,           !- Main Model Program Calling Manager Name
+  Init_Chiller_Capacity,      !- Initialization Program Calling Manager Name
+  Chiller:Electric:ReformulatedEIR,  !- Equipment 1 Object Type
+  CoolSys1 Chiller 1,         !- Equipment 1 Name
+  Chiller:Electric:ReformulatedEIR,  *!- Equipment 2 Object Type
+  CoolSys1 Chiller 2;         !- Equipment 2 Name
 
-  EnergyManagementSystem:ProgramCallingManager,
+EnergyManagementSystem:ProgramCallingManager,
   Init_Chiller_Capacity,
   UserDefinedComponentModel,
   Init_Chiller_Capacity_Values;
 
-  EnergyManagementSystem:Program,
+EnergyManagementSystem:Program,
   Init_Chiller_Capacity_Values,
   Set totChilCap = Chil1_Cap + Chil2_Cap;
 
-  EnergyManagementSystem:GlobalVariable,
+EnergyManagementSystem:GlobalVariable,
   totChilCap;
 
-  EnergyManagementSystem:ProgramCallingManager,
+EnergyManagementSystem:ProgramCallingManager,
   Cooling_dispatch,
   UserDefinedComponentModel,
   Cooling_dispatch_Values;
 
-  EnergyManagementSystem:Program,
+EnergyManagementSystem:Program,
   Cooling_dispatch_Values,
   IF CoolSys1_LoopDmnd < 0.0,
   Set UniformPLR* = CoolSys1_LoopDmnd / totChilCap,
@@ -487,17 +481,13 @@ PlantEquipmentOperation:UserDefined,
   SET Chil1_Disptch = UniformPLR\*Chil1_Cap,
   SET Chil2_Disptch = UniformPLR\*Chil2_Cap,
   ELSE,
-  SET Chil1_Disptch = 0.0 ,
-  SET Chil2_Disptch = 0.0 ,
+  SET Chil1_Disptch = 0.0,
+  SET Chil2_Disptch = 0.0,
   ENDIF;
 
-  EnergyManagementSystem:InternalVariable, CoolSys1_LoopDmnd,CoolSys1 Operation Scheme,Supply Side Current Demand Rate; !,[W]
-
-  EnergyManagementSystem:InternalVariable, Chil1_Cap, CoolSys1 Chiller 1, Chiller Nominal Capacity;
-
-  EnergyManagementSystem:InternalVariable, Chil2_Cap, CoolSys1 Chiller 2, Chiller Nominal Capacity;
-
-  EnergyManagementSystem:Actuator, Chil1_Disptch,CoolSys1 Operation Scheme:CoolSys1 Chiller 1,Plant Equipment Operation,Distributed Load Rate; ! [W]
-
-  EnergyManagementSystem:Actuator, Chil2_Disptch,CoolSys1 Operation Scheme:CoolSys1 Chiller 2,Plant Equipment Operation,Distributed Load Rate; ! [W]
+EnergyManagementSystem:InternalVariable, CoolSys1_LoopDmnd,CoolSys1 Operation Scheme,Supply Side Current Demand Rate;  !- ,[W]
+EnergyManagementSystem:InternalVariable, Chil1_Cap, CoolSys1 Chiller 1, Chiller Nominal Capacity;
+EnergyManagementSystem:InternalVariable, Chil2_Cap, CoolSys1 Chiller 2, Chiller Nominal Capacity;
+EnergyManagementSystem:Actuator, Chil1_Disptch,CoolSys1 Operation Scheme:CoolSys1 Chiller 1,Plant Equipment Operation,Distributed Load Rate;  !- [W]
+EnergyManagementSystem:Actuator, Chil2_Disptch,CoolSys1 Operation Scheme:CoolSys1 Chiller 2,Plant Equipment Operation,Distributed Load Rate;  !- [W]
 \end{lstlisting}

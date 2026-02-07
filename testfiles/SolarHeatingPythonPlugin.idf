@@ -1,0 +1,433 @@
+!-Generator IDFEditor 1.53
+!-Option SortedOrder
+!-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
+!-      Use '!' comments if they need to be retained when using the IDFEditor.
+!-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
+
+  Version,25.1;
+
+!-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
+
+  SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    No,                      !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    ,                        !- Do HVAC Sizing Simulation for Sizing Periods
+    ;                        !- Maximum Number of HVAC Sizing Simulation Passes
+
+!-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
+
+  Building,
+    ThermosolarFacility,     !- Name
+    ,                        !- North Axis {deg}
+    ,                        !- Terrain
+    ,                        !- Loads Convergence Tolerance Value {W}
+    ,                        !- Temperature Convergence Tolerance Value {deltaC}
+    ,                        !- Solar Distribution
+    ,                        !- Maximum Number of Warmup Days
+    ;                        !- Minimum Number of Warmup Days
+
+!-   ===========  ALL OBJECTS IN CLASS: SHADOWCALCULATION ===========
+
+  ShadowCalculation,
+    PolygonClipping,         !- Shading Calculation Method
+    Periodic,                !- Shading Calculation Update Frequency Method
+    20,                      !- Shading Calculation Update Frequency
+    15000,                   !- Maximum Figures in Shadow Overlap Calculations
+    SutherlandHodgman,       !- Polygon Clipping Algorithm
+    512,                     !- Pixel Counting Resolution
+    SimpleSkyDiffuseModeling,!- Sky Diffuse Modeling Algorithm
+    No,                      !- Output External Shading Calculation Results
+    No,                      !- Disable Self-Shading Within Shading Zone Groups
+    No;                      !- Disable Self-Shading From Shading Zone Groups to Other Zones
+
+!-   ===========  ALL OBJECTS IN CLASS: HEATBALANCEALGORITHM ===========
+
+  HeatBalanceAlgorithm,ConductionTransferFunction,200;
+
+!-   ===========  ALL OBJECTS IN CLASS: TIMESTEP ===========
+
+  Timestep,6;
+
+!-   ===========  ALL OBJECTS IN CLASS: SITE:LOCATION ===========
+
+  Site:Location,
+    Zacatecas,               !- Name
+    22.75,                   !- Latitude {deg}
+    -102.5,                  !- Longitude {deg}
+    -6,                      !- Time Zone {hr}
+    2440;                    !- Elevation {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: RUNPERIOD ===========
+
+  RunPeriod,
+    Run Period 1,            !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    2024,                    !- Begin Year
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    2024,                    !- End Year
+    Monday,                  !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+!-   ===========  ALL OBJECTS IN CLASS: SCHEDULETYPELIMITS ===========
+
+  ScheduleTypeLimits,
+    ActivityLevel,           !- Name
+    0,                       !- Lower Limit Value
+    ,                        !- Upper Limit Value
+    Continuous,              !- Numeric Type
+    activitylevel;           !- Unit Type
+
+  ScheduleTypeLimits,
+    Fraction,                !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    CONTINUOUS;              !- Numeric Type
+
+!-   ===========  ALL OBJECTS IN CLASS: MATERIAL ===========
+
+  Material,
+    F16 Acoustic tile,       !- Name
+    MediumSmooth,            !- Roughness
+    0.0191,                  !- Thickness {m}
+    0.06,                    !- Conductivity {W/m-K}
+    368,                     !- Density {kg/m3}
+    590.000000000002,        !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.3,                     !- Solar Absorptance
+    0.3;                     !- Visible Absorptance
+
+  Material,
+    G01a 19mm gypsum board,  !- Name
+    MediumSmooth,            !- Roughness
+    0.019,                   !- Thickness {m}
+    0.16,                    !- Conductivity {W/m-K}
+    800,                     !- Density {kg/m3}
+    1090,                    !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.4,                     !- Solar Absorptance
+    0.4;                     !- Visible Absorptance
+
+  Material,
+    M11 100mm lightweight concrete,  !- Name
+    MediumRough,             !- Roughness
+    0.1016,                  !- Thickness {m}
+    0.53,                    !- Conductivity {W/m-K}
+    1280,                    !- Density {kg/m3}
+    840.000000000002,        !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.5,                     !- Solar Absorptance
+    0.5;                     !- Visible Absorptance
+
+!-   ===========  ALL OBJECTS IN CLASS: MATERIAL:AIRGAP ===========
+
+  Material:AirGap,
+    F04 Wall air space resistance,  !- Name
+    0.15;                    !- Thermal Resistance {m2-K/W}
+
+  Material:AirGap,
+    F05 Ceiling air space resistance,  !- Name
+    0.18;                    !- Thermal Resistance {m2-K/W}
+
+!-   ===========  ALL OBJECTS IN CLASS: CONSTRUCTION ===========
+
+  Construction,
+    Interior Ceiling,        !- Name
+    M11 100mm lightweight concrete,  !- Outside Layer
+    F05 Ceiling air space resistance,  !- Layer 2
+    F16 Acoustic tile;       !- Layer 3
+
+  Construction,
+    Interior Floor,          !- Name
+    F16 Acoustic tile,       !- Outside Layer
+    F05 Ceiling air space resistance,  !- Layer 2
+    M11 100mm lightweight concrete;  !- Layer 3
+
+  Construction,
+    Interior Wall,           !- Name
+    G01a 19mm gypsum board,  !- Outside Layer
+    F04 Wall air space resistance,  !- Layer 2
+    G01a 19mm gypsum board;  !- Layer 3
+
+!-   ===========  ALL OBJECTS IN CLASS: GLOBALGEOMETRYRULES ===========
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    Counterclockwise,        !- Vertex Entry Direction
+    Relative,                !- Coordinate System
+    Relative,                !- Daylighting Reference Point Coordinate System
+    Relative;                !- Rectangular Surface Coordinate System
+
+!-   ===========  ALL OBJECTS IN CLASS: SPACE ===========
+
+  Space,
+    space,                   !- Name
+    ThermalZone,             !- Zone Name
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ;                        !- Space Type
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONE ===========
+
+  Zone,
+    ThermalZone,             !- Name
+    ,                        !- Direction of Relative North {deg}
+    0,                       !- X Origin {m}
+    0,                       !- Y Origin {m}
+    0,                       !- Z Origin {m}
+    ,                        !- Type
+    1,                       !- Multiplier
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ,                        !- Zone Inside Convection Algorithm
+    ,                        !- Zone Outside Convection Algorithm
+    Yes;                     !- Part of Total Floor Area
+
+!-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
+
+  BuildingSurface:Detailed,
+    space_floor,             !- Name
+    Floor,                   !- Surface Type
+    Interior Floor,          !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0,0,0,  !- X,Y,Z ==> Vertex 1 {m}
+    0,1,0,  !- X,Y,Z ==> Vertex 2 {m}
+    1,1,0,  !- X,Y,Z ==> Vertex 3 {m}
+    1,0,0;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    space_roofceiling,       !- Name
+    Ceiling,                 !- Surface Type
+    Interior Ceiling,        !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    1,0,1,  !- X,Y,Z ==> Vertex 1 {m}
+    1,1,1,  !- X,Y,Z ==> Vertex 2 {m}
+    0,1,1,  !- X,Y,Z ==> Vertex 3 {m}
+    0,0,1;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    space_wall0,             !- Name
+    Wall,                    !- Surface Type
+    Interior Wall,           !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0,0,1,  !- X,Y,Z ==> Vertex 1 {m}
+    0,1,1,  !- X,Y,Z ==> Vertex 2 {m}
+    0,1,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,0,0;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    space_wall1,             !- Name
+    Wall,                    !- Surface Type
+    Interior Wall,           !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0,1,1,  !- X,Y,Z ==> Vertex 1 {m}
+    1,1,1,  !- X,Y,Z ==> Vertex 2 {m}
+    1,1,0,  !- X,Y,Z ==> Vertex 3 {m}
+    0,1,0;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    space_wall2,             !- Name
+    Wall,                    !- Surface Type
+    Interior Wall,           !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    1,0,1,  !- X,Y,Z ==> Vertex 1 {m}
+    0,0,1,  !- X,Y,Z ==> Vertex 2 {m}
+    0,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    1,0,0;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    space_wall3,             !- Name
+    Wall,                    !- Surface Type
+    Interior Wall,           !- Construction Name
+    ThermalZone,             !- Zone Name
+    space,                   !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    1,1,1,  !- X,Y,Z ==> Vertex 1 {m}
+    1,0,1,  !- X,Y,Z ==> Vertex 2 {m}
+    1,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    1,1,0;  !- X,Y,Z ==> Vertex 4 {m}
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:AIRDISTRIBUTIONUNIT ===========
+
+  ZoneHVAC:AirDistributionUnit,
+    TunnelTerminal,          !- Name
+    TunnelInlet,             !- Air Distribution Unit Outlet Node Name
+    AirTerminal:SingleDuct:UserDefined,  !- Air Terminal Object Type
+    AirMixer;                !- Air Terminal Name
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTLIST ===========
+
+  ZoneHVAC:EquipmentList,
+    SolarHeatingSystem,      !- Name
+    SequentialLoad,          !- Load Distribution Scheme
+    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+    TunnelTerminal,          !- Zone Equipment 1 Name
+    3,                       !- Zone Equipment 1 Cooling Sequence
+    3,                       !- Zone Equipment 1 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+    ,                        !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+    ZoneHVAC:ForcedAir:UserDefined,  !- Zone Equipment 2 Object Type
+    IndirectSolarAirHeater,  !- Zone Equipment 2 Name
+    2,                       !- Zone Equipment 2 Cooling Sequence
+    2,                       !- Zone Equipment 2 Heating or No-Load Sequence
+    ,                        !- Zone Equipment 2 Sequential Cooling Fraction Schedule Name
+    ,                        !- Zone Equipment 2 Sequential Heating Fraction Schedule Name
+    ZoneHVAC:ForcedAir:UserDefined,  !- Zone Equipment 3 Object Type
+    DirectSolarAirHeater,    !- Zone Equipment 3 Name
+    1,                       !- Zone Equipment 3 Cooling Sequence
+    1;                       !- Zone Equipment 3 Heating or No-Load Sequence
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTCONNECTIONS ===========
+
+  ZoneHVAC:EquipmentConnections,
+    ThermalZone,             !- Zone Name
+    SolarHeatingSystem,      !- Zone Conditioning Equipment List Name
+    TunnelInlet,             !- Zone Air Inlet Node or NodeList Name
+    ,                        !- Zone Air Exhaust Node or NodeList Name
+    TunnelZoneNode;          !- Zone Air Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:NODE ===========
+
+  OutdoorAir:Node,
+    OA_DSAH_Node;            !- Name
+
+  OutdoorAir:Node,
+    OA_ISAH_Node;            !- Name
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:FORCEDAIR:USERDEFINED ===========
+
+  ZoneHVAC:ForcedAir:UserDefined,
+    DirectSolarAirHeater,    !- Name
+    DirectSolarHeatingEMS,   !- Overall Model Simulation Program Calling Manager Name
+    ,                        !- Model Setup and Sizing Program Calling Manager Name
+    OA_DSAH_Node,            !- Primary Air Inlet Node Name
+    DSAHOutletNode,          !- Primary Air Outlet Node Name
+    ,                        !- Secondary Air Inlet Node Name
+    ,                        !- Secondary Air Outlet Node Name
+    0;                       !- Number of Plant Loop Connections
+
+  ZoneHVAC:ForcedAir:UserDefined,
+    IndirectSolarAirHeater,  !- Name
+    IndirectSolarHeatingEMS, !- Overall Model Simulation Program Calling Manager Name
+    ,                        !- Model Setup and Sizing Program Calling Manager Name
+    OA_ISAH_Node,            !- Primary Air Inlet Node Name
+    ISAHOutletNode,          !- Primary Air Outlet Node Name
+    ,                        !- Secondary Air Inlet Node Name
+    ,                        !- Secondary Air Outlet Node Name
+    0;                       !- Number of Plant Loop Connections
+
+!-   ===========  ALL OBJECTS IN CLASS: AIRTERMINAL:SINGLEDUCT:USERDEFINED ===========
+
+  AirTerminal:SingleDuct:UserDefined,
+    AirMixer,                !- Name
+    AirMixingEMS,            !- Overall Model Simulation Program Calling Manager Name
+    ,                        !- Model Setup and Sizing Program Calling Manager Name
+    DSAHOutletNode,          !- Primary Air Inlet Node Name
+    TunnelInlet,             !- Primary Air Outlet Node Name
+    ISAHOutletNode,          !- Secondary Air Inlet Node Name
+    ,                        !- Secondary Air Outlet Node Name
+    0,                       !- Number of Plant Loop Connections
+    AMXRPlantInletNode,      !- Plant Connection 1 Inlet Node Name
+    AMXRPlantOutletNode;     !- Plant Connection 1 Outlet Node Name
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLEDICTIONARY ===========
+
+  Output:VariableDictionary,IDF,Unsorted;
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:TABLE:SUMMARYREPORTS ===========
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUTCONTROL:TABLE:STYLE ===========
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
+
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,Timestep;
+
+  Output:Variable,*,Site Outdoor Air Humidity Ratio,Timestep;
+
+  Output:Variable,*,System Node Temperature,Timestep;
+
+  Output:Variable,*,System Node Humidity Ratio,Timestep;
+
+  Output:Variable,*,System Node Mass Flow Rate,Timestep;
+
+!-   ===========  ALL OBJECTS IN CLASS: OUTPUT:SQLITE ===========
+
+  Output:SQLite,
+    SimpleAndTabular;        !- Option Type
+
+!-   ===========  ALL OBJECTS IN CLASS: PYTHONPLUGIN:INSTANCE ===========
+
+  PythonPlugin:Instance,
+    DirectSolarHeatingEMS,   !- Name
+    No,                      !- Run During Warmup Days
+    SolarHeatingPythonPlugin,!- Python Module Name
+    DirectSolarHeating;      !- Plugin Class Name
+
+  PythonPlugin:Instance,
+    IndirectSolarHeatingEMS, !- Name
+    No,                      !- Run During Warmup Days
+    SolarHeatingPythonPlugin,!- Python Module Name
+    IndirectSolarHeating;    !- Plugin Class Name
+
+  PythonPlugin:Instance,
+    AirMixingEMS,            !- Name
+    No,                      !- Run During Warmup Days
+    SolarHeatingPythonPlugin,!- Python Module Name
+    AirMixing;               !- Plugin Class Name
+

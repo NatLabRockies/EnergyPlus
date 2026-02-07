@@ -566,7 +566,7 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
         Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
 
-        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0); // Orignal code without PR 9907 fix would fail this one by getting an s.Azimuth of 0.0
+        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0); // Original code without PR 9907 fix would fail this one by getting an s.Azimuth of 0.0
         EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
 
         s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
@@ -588,7 +588,7 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
         Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
 
-        // Orignal code should get the same result in this case
+        // Original code should get the same result in this case
         EXPECT_DOUBLE_EQ(s.Azimuth, 180.0);
         EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
 

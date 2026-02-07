@@ -702,7 +702,7 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_Python_EMS_Override)
         "'TEMPSETPOINTLO'.",
         "   **   ~~~   ** Occurred for componentType='SYSTEM NODE SETPOINT', controlType='TEMPERATURE MINIMUM SETPOINT', uniqueKey='TEST NODE'.",
         "   **   ~~~   ** The getActuatorHandle function will still return the handle (= 2) but caller should take note that there is a risk of "
-        "overwritting.",
+        "overwriting.",
     });
 
     EXPECT_TRUE(compare_err_stream(expectedError, true));
@@ -754,7 +754,7 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_Python_Python_Override)
         "   ** Warning ** Data Exchange API: You seem to already have tried to get an Actuator Handle on this one.",
         "   **   ~~~   ** Occurred for componentType='SYSTEM NODE SETPOINT', controlType='TEMPERATURE MINIMUM SETPOINT', uniqueKey='TEST NODE'.",
         "   **   ~~~   ** The getActuatorHandle function will still return the handle (= 2) but caller should take note that there is a risk of "
-        "overwritting.",
+        "overwriting.",
     });
 
     EXPECT_TRUE(compare_err_stream(expectedError, true));

@@ -4923,10 +4923,8 @@ namespace HeatBalanceManager {
                     if (auto found = fields.find("simple_mixing_air_changes_per_hour"); found != fields.end()) {
                         thisConstruct.AirBoundaryACH = found.value().get<Real64>();
                     } else {
-                        if (!state.dataInputProcessing->inputProcessor->getDefaultValue(
-                                state, cCurrentModuleObject, "simple_mixing_air_changes_per_hour", thisConstruct.AirBoundaryACH)) {
-                            errorsFound = true;
-                        }
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, cCurrentModuleObject, "simple_mixing_air_changes_per_hour", thisConstruct.AirBoundaryACH);
                     }
 
                     if (auto found = fields.find("simple_mixing_schedule_name"); found != fields.end()) {
@@ -5664,7 +5662,7 @@ namespace HeatBalanceManager {
                 if (thisConstruct.BSDFInput.VisBkReflIndex == 0) {
                     ErrorsFound = true;
                     ShowSevereCustom(
-                        state, eoh, format("Visble back reflectance Matrix:TwoDimension = \"{}\" is missing from the input file.", locAlphaArgs(9)));
+                        state, eoh, format("Visible back reflectance Matrix:TwoDimension = \"{}\" is missing from the input file.", locAlphaArgs(9)));
                 } else {
                     MatrixDataManager::Get2DMatrix(state, thisConstruct.BSDFInput.VisBkReflIndex, thisConstruct.BSDFInput.VisBkRefl);
                 }
@@ -6058,7 +6056,7 @@ namespace HeatBalanceManager {
             thisConstruct.WindowTypeBSDF = true;
         }
 
-        // Do not forget to deallocate localy allocated variables
+        // Do not forget to deallocate locally allocated variables
         if (allocated(locAlphaFieldNames)) {
             locAlphaFieldNames.deallocate();
         }

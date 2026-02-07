@@ -1927,7 +1927,7 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
     //  |                                               |
     //  o                                               o
     //
-    //  The Demand side has only one ATU:VAV:NoReheat with a Minimum flow Fraction of 0 so that it doesn't drive the airlfow either
+    //  The Demand side has only one ATU:VAV:NoReheat with a Minimum flow Fraction of 0 so that it doesn't drive the airflow either
 
     std::string const idf_objects = delimited_string({
 

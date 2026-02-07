@@ -326,7 +326,7 @@ namespace Sched {
         std::array<bool, (int)DayType::Num> MaxMinByDayTypeSet = {false}; // minimum and maximum values by daytype have been stored
         std::array<Real64, (int)DayType::Num> MinByDayType = {0.0};       // minimum values by daytype for this schedule
         std::array<Real64, (int)DayType::Num> MaxByDayType = {0.0};       // maximum values by daytype for this schedule
-        bool UseDaylightSaving = true; // Toggles between daylight saving option to be inclused as "No" or "Yes" (default)
+        bool UseDaylightSaving = true; // Toggles between daylight saving option to be included as "No" or "Yes" (default)
 
         ScheduleDetailed()
         {

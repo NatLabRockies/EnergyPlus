@@ -477,7 +477,7 @@ struct SolarShadingData : BaseGlobalStruct
     Array1D<Real64> ZVert;
     Array1D<Real64> SurfWinAbsBeam;                                                               // Glass layer beam solar absorptance of a window
     Array1D<Real64> SurfWinAbsBeamEQL = Array1D<Real64>(DataWindowEquivalentLayer::CFSMAXNL + 1); // layers beam solar absorptance of a window
-    Array1D<Real64> SurfWinExtBeamAbsByShadFac; // Factor for exterior beam radiation absorbed by shade (1/m2) (absorbed radation = beam incident *
+    Array1D<Real64> SurfWinExtBeamAbsByShadFac; // Factor for exterior beam radiation absorbed by shade (1/m2) (absorbed radiation = beam incident *
                                                 // ExtBeamAbsByShad
     Array1D<Real64> SurfWinIntBeamAbsByShadFac; // Like SurfWinExtBeamAbsByShadFac, but for interior beam radiation.
     Array1D<Real64>

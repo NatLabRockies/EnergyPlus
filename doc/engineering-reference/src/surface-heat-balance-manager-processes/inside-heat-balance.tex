@@ -116,8 +116,10 @@ Because of the circular reference in this equation, the collection of all ``view
 \item Finally, the mean radiant temperature, $Tr$, is:
 
 \begin{equation}
-    T_r=\frac{\sum_1^nA_i F'_i T_i}{\sum_1^nA_i F'_i}
+    T_r=\sqrt[4]{\frac{\sum_1^n{A_iF_i'T_i^4}}{\sum_1^n{A_iF_i'}}}
 \end{equation}
+
+The original approach from Carroll's paper didn't balance because the mean radiant temperature, $Tr$, was essentially the mean of the surface temperatures, $Ti$. This has been updated to use $Ti^4$ so that the sum of the net long-wave radiation for each surface equals 0.
 
 \end{enumerate}
 
@@ -128,8 +130,6 @@ Once the mean radiant temperature is known, the net radiation heat transfer for 
 \end{equation}
 
 Carroll, J. A., 1980, ``An `MRT Method' of Computing Radiant Energy Exchange in Rooms,'' Proceedings of the Second Systems Simulation and Economic Analysis Conference, San Diego, CA.
-
-Carroll, J. A., 1980a, ``An MRT method of computing radiant energy exchange in rooms,'' Proceedings of the 2nd Systems Simulation and Economic Analysis Conference, San Diego, CA.
 
 Carroll, J. A., 1981, ``A Comparison of Radiant Interchange Algorithms,'' Proceedings of the 3rd Annual Systems Simulation and Economics Analysis/Solar Heating and Cooling Operational Results Conference, Reno. Solar Engineering, Proceedings of the ASME Solar division.
 

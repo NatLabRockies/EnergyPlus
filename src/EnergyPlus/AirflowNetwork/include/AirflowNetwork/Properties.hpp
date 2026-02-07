@@ -121,7 +121,7 @@ namespace AirflowNetwork {
     struct AirState
     {
         Real64 temperature;
-        // Real64 pressure;      //{0.0}; // gage pressure
+        // Real64 pressure;      //{0.0}; // gauge pressure
         Real64 humidity_ratio;
         Real64 density;
         Real64 sqrt_density;

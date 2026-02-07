@@ -63,7 +63,7 @@ namespace EnergyPlus::TARCOGGasses90 {
 // MODULE INFORMATION:
 //       AUTHOR         D. Charlie Curcija
 //       DATE WRITTEN   June/2000
-//       MODIFIED       (see revision history bellow)
+//       MODIFIED       (see revision history below)
 //       RE-ENGINEERED  na
 //  Revision: 7.0.02  (November/8/2011), Simon Vidanovic
 //   - feature: Error message (string) return from gasses

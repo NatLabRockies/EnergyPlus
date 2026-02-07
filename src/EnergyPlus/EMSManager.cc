@@ -771,7 +771,7 @@ namespace EMSManager {
                                                              thisEMSactuator.ComponentTypeName,
                                                              thisEMSactuator.ControlTypeName,
                                                              thisEMSactuator.UniqueIDName));
-                        EnergyPlus::ShowContinueError(state, "You should take note that there is a risk of overwritting.");
+                        EnergyPlus::ShowContinueError(state, "You should take note that there is a risk of overwriting.");
                     }
                     ++state.dataRuntimeLang->EMSActuatorAvailable(found->second).handleCount;
                 }
@@ -1070,7 +1070,7 @@ namespace EMSManager {
                                                          actuatorUsed.ComponentTypeName,
                                                          actuatorUsed.ControlTypeName,
                                                          actuatorUsed.UniqueIDName));
-                    EnergyPlus::ShowContinueError(state, "You should take note that there is a risk of overwritting.");
+                    EnergyPlus::ShowContinueError(state, "You should take note that there is a risk of overwriting.");
                 }
                 ++s_lang->EMSActuatorAvailable(found->second).handleCount;
 
@@ -2042,8 +2042,8 @@ void SetupEMSActuator(EnergyPlusData &state,
     actuator.UniqueIDName = objName;
     actuator.ControlTypeName = controlTypeName;
     actuator.Units = cUnits;
-    actuator.Actuated = &lEMSActuated; // Pointer assigment
-    actuator.RealValue = &rValue;      // Pointer assigment
+    actuator.Actuated = &lEMSActuated; // Pointer assignment
+    actuator.RealValue = &rValue;      // Pointer assignment
     actuator.PntrVarTypeUsed = DataRuntimeLanguage::PtrDataType::Real;
     s_lang->EMSActuatorAvailableMap.insert_or_assign(std::move(tup), s_lang->numEMSActuatorsAvailable);
 }
@@ -2094,8 +2094,8 @@ void SetupEMSActuator(EnergyPlusData &state,
         actuator.UniqueIDName = cUniqueIDName;
         actuator.ControlTypeName = cControlTypeName;
         actuator.Units = cUnits;
-        actuator.Actuated = &lEMSActuated; // Pointer assigment
-        actuator.IntValue = &iValue;       // Pointer assigment
+        actuator.Actuated = &lEMSActuated; // Pointer assignment
+        actuator.IntValue = &iValue;       // Pointer assignment
         actuator.PntrVarTypeUsed = DataRuntimeLanguage::PtrDataType::Integer;
         s_lang->EMSActuatorAvailableMap.insert_or_assign(std::make_tuple(objType, objName, actuatorName), s_lang->numEMSActuatorsAvailable);
     }
@@ -2147,8 +2147,8 @@ void SetupEMSActuator(EnergyPlusData &state,
         actuator.UniqueIDName = cUniqueIDName;
         actuator.ControlTypeName = cControlTypeName;
         actuator.Units = cUnits;
-        actuator.Actuated = &lEMSActuated; // Pointer assigment
-        actuator.LogValue = &lValue;       // Pointer assigment
+        actuator.Actuated = &lEMSActuated; // Pointer assignment
+        actuator.LogValue = &lValue;       // Pointer assignment
         actuator.PntrVarTypeUsed = DataRuntimeLanguage::PtrDataType::Logical;
         s_lang->EMSActuatorAvailableMap.insert_or_assign(std::make_tuple(objType, objName, actuatorName), s_lang->numEMSActuatorsAvailable);
     }

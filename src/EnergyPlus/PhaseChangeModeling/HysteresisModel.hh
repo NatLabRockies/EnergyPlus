@@ -92,7 +92,7 @@ namespace Material {
         Real64 peakTempFreezing = 0.0;
         Real64 deltaTempFreezingLow = 0.0;
 
-        // additional thermal propreties
+        // additional thermal properties
         Real64 fullySolidThermalConductivity = 0.0;
         Real64 fullyLiquidThermalConductivity = 0.0;
         Real64 fullySolidDensity = 0.0;

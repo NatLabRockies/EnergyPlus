@@ -1336,28 +1336,28 @@ TEST_F(EnergyPlusFixture, DuctLoss_test)
     Supply trunck,      !- Name
     Typical Residential System,  !- AirLoopHVAC name
     Main Link,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
+    Zone,                   !- Environment type
     Attic Zone;                     !- Ambient temperature zone
 
   Duct:Loss:Conduction,
     Supply branch,      !- Name
     Typical Residential System,  !- AirLoopHVAC name
     ZoneSupplyLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
+    Zone,                   !- Environment type
     Attic Zone;                     !- Ambient temperature zone
 
   Duct:Loss:Conduction,
     Return Branch,      !- Name
     Typical Residential System,  !- AirLoopHVAC name
     ZoneReturnLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
+    Zone,                   !- Environment type
     Attic Zone;                     !- Ambient temperature zone
 
   Duct:Loss:Conduction,
     Return trunck,      !- Name
     Typical Residential System,  !- AirLoopHVAC name
     ReturnMixerLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
+    Zone,                   !- Environment type
     Attic Zone;                     !- Ambient temperature zone
 
   Duct:Loss:Leakage,

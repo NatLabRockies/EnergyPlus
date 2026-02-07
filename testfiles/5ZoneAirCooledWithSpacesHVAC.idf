@@ -123,10 +123,10 @@
 
   HeatBalanceAlgorithm,ConductionTransferFunction;
 
-ZoneAirHeatBalanceAlgorithm,
+  ZoneAirHeatBalanceAlgorithm,
     ThirdOrderBackwardDifference,  !- Algorithm
-    Yes,                      !- Do Space Heat Balance for Sizing
-    Yes;                      !- Do Space Heat Balance for Simulation
+    Yes,                     !- Do Space Heat Balance for Sizing
+    Yes;                     !- Do Space Heat Balance for Simulation
 
   GlobalGeometryRules,
     UpperLeftCorner,         !- Starting Vertex Position
@@ -898,8 +898,8 @@ ZoneAirHeatBalanceAlgorithm,
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.032,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -924,7 +924,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -938,7 +938,7 @@ ZoneAirHeatBalanceAlgorithm,
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.0,                    !- Watts per Zone Floor Area {W/m2}
+    10.0,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1113,8 +1113,8 @@ ZoneAirHeatBalanceAlgorithm,
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.014,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1139,7 +1139,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1281,8 +1281,8 @@ ZoneAirHeatBalanceAlgorithm,
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.032,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1307,7 +1307,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1321,7 +1321,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1335,7 +1335,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.0,                     !- Watts per Zone Floor Area {W/m2}
+    5.0,                     !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1683,8 +1683,8 @@ ZoneAirHeatBalanceAlgorithm,
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.014,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1709,7 +1709,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1851,8 +1851,8 @@ ZoneAirHeatBalanceAlgorithm,
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.062,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1895,7 +1895,7 @@ ZoneAirHeatBalanceAlgorithm,
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2070,7 +2070,14 @@ ZoneAirHeatBalanceAlgorithm,
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Zone 1,          !- Name
@@ -2106,7 +2113,14 @@ ZoneAirHeatBalanceAlgorithm,
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Zone 2,          !- Name
@@ -2142,7 +2156,14 @@ ZoneAirHeatBalanceAlgorithm,
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Zone 3,          !- Name
@@ -2178,7 +2199,14 @@ ZoneAirHeatBalanceAlgorithm,
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Zone 4,          !- Name
@@ -2214,7 +2242,14 @@ ZoneAirHeatBalanceAlgorithm,
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA Zone 5 Office,   !- Name
@@ -2517,18 +2552,18 @@ ZoneAirHeatBalanceAlgorithm,
     ZoneHVAC:AirDistributionUnit,  !- Zone Equipment Object Type
     Zone 5 ATU,              !- Zone Equipment Name
     Zone 5 In Node,          !- Zone Equipment Outlet Node Name
-    SingleSpace,                   !- Thermostat Control Method
-    Space 5 Office,                        !- Control Space Name
-    DesignCoolingLoad,                        !- Space Fraction Method
+    SingleSpace,             !- Thermostat Control Method
+    Space 5 Office,          !- Control Space Name
+    DesignCoolingLoad,       !- Space Fraction Method
     Space 5 Office,          !- Space 1 Name
-    autosize,                     !- Space 1 Fraction {dimensionless}
+    autosize,                !- Space 1 Fraction {dimensionless}
     Space 5 Office In Node,  !- Space 1 Supply Node Name
     Space 5 Conference,      !- Space 2 Name
-    autosize,                     !- Space 2 Fraction {dimensionless}
+    autosize,                !- Space 2 Fraction {dimensionless}
     Space 5 Conference In Node,  !- Space 2 Supply Node Name
     Zone 5-Remainder,        !- Space 3 Name
-    autosize,                     !- Space 3 Fraction {dimensionless}
-    Zone 5-Remainder In Node;  !- Space 3 Supply Node Name
+    autosize,                !- Space 3 Fraction {dimensionless}
+    Zone 5-Remainder In Node;!- Space 3 Supply Node Name
 
   SpaceHVAC:ZoneEquipmentMixer,
     Zone 5 Exhaust Fan Mixer,!- Name
@@ -2566,7 +2601,7 @@ ZoneAirHeatBalanceAlgorithm,
 
   SpaceHVAC:EquipmentConnections,
     Zone 5-Remainder,        !- Space Name
-    Zone 5-Remainder In Node,  !- Space Air Inlet Node or NodeList Name
+    Zone 5-Remainder In Node,!- Space Air Inlet Node or NodeList Name
     ,                        !- Space Air Exhaust Node or NodeList Name
     Zone 5-Remainder Node,   !- Space Air Node Name
     Zone 5-Remainder Return Node;  !- Space Return Air Node or NodeList Name
@@ -3825,60 +3860,86 @@ ZoneAirHeatBalanceAlgorithm,
     CoolingPumpAvailSched;   !- Pump Flow Rate Schedule Name
 
   EnergyManagementSystem:ProgramCallingManager,
-    test calling point,  !- Name
+    test calling point,      !- Name
     EndOfZoneTimestepBeforeZoneReporting,  !- EnergyPlus Model Calling Point
-    testProgram;     !- Program Name 1
+    testProgram;             !- Program Name 1
 
   EnergyManagementSystem:Program,
-    testProgram,     !- Name
+    testProgram,             !- Name
     Set dummy = 1;           !- Program Line 1
 
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;
 
   Output:Variable,*,Zone Air Temperature,hourly;
+
   Output:Variable,*,Space Air Temperature,hourly;
+
   Output:Variable,Space 5 Office,Space Wetbulb Globe Temperature,hourly;
+
   Output:Variable,*,Zone Wetbulb Globe Temperature,hourly;
 
-  Output:Variable,*,Zone Air Humidity Ratio,hourly; !- HVAC Average []
-  Output:Variable,*,Zone Air Relative Humidity,hourly; !- HVAC Average [%]
-  
-  Output:Variable,*,Space Air Humidity Ratio,hourly; !- HVAC Average []
-  Output:Variable,*,Space Air Relative Humidity,hourly; !- HVAC Average [%]
+  Output:Variable,*,Zone Air Humidity Ratio,hourly;
+
+  Output:Variable,*,Zone Air Relative Humidity,hourly;
+
+  Output:Variable,*,Space Air Humidity Ratio,hourly;
+
+  Output:Variable,*,Space Air Relative Humidity,hourly;
 
   Output:Variable,*,Zone Air System Sensible Heating Rate,hourly;
+
   Output:Variable,*,Zone Air System Sensible Cooling Rate,hourly;
-Output:Variable,*,Zone Predicted Sensible Load to Setpoint Heat Transfer Rate,hourly; !- HVAC Average [W]
+
+  Output:Variable,*,Zone Predicted Sensible Load to Setpoint Heat Transfer Rate,hourly;
 
   Output:Variable,*,Space Air System Sensible Heating Rate,hourly;
+
   Output:Variable,*,Space Air System Sensible Cooling Rate,hourly;
-Output:Variable,*,Space Predicted Sensible Load to Setpoint Heat Transfer Rate,hourly; !- HVAC Average [W]
 
-  Output:Variable,Zone 5 In Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Office In Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference In Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5-Remainder In Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
+  Output:Variable,*,Space Predicted Sensible Load to Setpoint Heat Transfer Rate,hourly;
 
-  Output:Variable,Zone 5 In Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Office In Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference In Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5-Remainder In Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
+  Output:Variable,Zone 5 In Node,System Node Mass Flow Rate,hourly;
 
-  Output:Variable,Zone 5 Out Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5 Exhaust Fan Inlet,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Office Return Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference Return Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference Exhaust Fan Inlet,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5-Remainder Return Node,System Node Mass Flow Rate,hourly; !- HVAC Average [kg/s]
+  Output:Variable,Space 5 Office In Node,System Node Mass Flow Rate,hourly;
 
-  Output:Variable,Zone 5 Out Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5 Exhaust Fan Inlet,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Office Return Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference Return Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Space 5 Conference Exhaust Fan Inlet,System Node Temperature,hourly; !- HVAC Average [kg/s]
-  Output:Variable,Zone 5-Remainder Return Node,System Node Temperature,hourly; !- HVAC Average [kg/s]
+  Output:Variable,Space 5 Conference In Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Zone 5-Remainder In Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Zone 5 In Node,System Node Temperature,hourly;
+
+  Output:Variable,Space 5 Office In Node,System Node Temperature,hourly;
+
+  Output:Variable,Space 5 Conference In Node,System Node Temperature,hourly;
+
+  Output:Variable,Zone 5-Remainder In Node,System Node Temperature,hourly;
+
+  Output:Variable,Zone 5 Out Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Zone 5 Exhaust Fan Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Space 5 Office Return Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Space 5 Conference Return Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Space 5 Conference Exhaust Fan Inlet,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Zone 5-Remainder Return Node,System Node Mass Flow Rate,hourly;
+
+  Output:Variable,Zone 5 Out Node,System Node Temperature,hourly;
+
+  Output:Variable,Zone 5 Exhaust Fan Inlet,System Node Temperature,hourly;
+
+  Output:Variable,Space 5 Office Return Node,System Node Temperature,hourly;
+
+  Output:Variable,Space 5 Conference Return Node,System Node Temperature,hourly;
+
+  Output:Variable,Space 5 Conference Exhaust Fan Inlet,System Node Temperature,hourly;
+
+  Output:Variable,Zone 5-Remainder Return Node,System Node Temperature,hourly;
 
   Output:Variable,*,EMS Zone Wetbulb Globe Temperature,hourly;
+
   Output:Variable,*,EMS Space Wetbulb Globe Temperature,hourly;
 
   Output:VariableDictionary,idf;
@@ -3925,32 +3986,33 @@ Output:Variable,*,Space Predicted Sensible Load to Setpoint Heat Transfer Rate,h
   Output:Surfaces:Drawing,dxf;
 
   EnergyManagementSystem:Sensor,
-    test_WBGT,                   !- Name
-    ZONE 5,                        !- Output:Variable or Output:Meter Index Key Name
+    test_WBGT,               !- Name
+    ZONE 5,                  !- Output:Variable or Output:Meter Index Key Name
     Zone Wetbulb Globe Temperature;  !- Output:Variable or Output:Meter Name
 
   EnergyManagementSystem:Sensor,
-    test_space_WBGT,                   !- Name
-    Space 5 Office,                        !- Output:Variable or Output:Meter Index Key Name
+    test_space_WBGT,         !- Name
+    Space 5 Office,          !- Output:Variable or Output:Meter Index Key Name
     Space Wetbulb Globe Temperature;  !- Output:Variable or Output:Meter Name
 
   EnergyManagementSystem:OutputVariable,
-    EMS Zone Wetbulb Globe Temperature, !- Name
+    EMS Zone Wetbulb Globe Temperature,  !- Name
     test_WBGT,               !- EMS Variable Name
     Averaged,                !- Type of Data in Variable
-    ZoneTimeStep,          !- Update Frequency
+    ZoneTimeStep,            !- Update Frequency
     ,                        !- EMS Program or Subroutine Name
-    deg;                       !- Units
+    deg;                     !- Units
 
   EnergyManagementSystem:OutputVariable,
-    EMS Space Wetbulb Globe Temperature, !- Name
-    test_space_WBGT,               !- EMS Variable Name
+    EMS Space Wetbulb Globe Temperature,  !- Name
+    test_space_WBGT,         !- EMS Variable Name
     Averaged,                !- Type of Data in Variable
-    ZoneTimeStep,          !- Update Frequency
+    ZoneTimeStep,            !- Update Frequency
     ,                        !- EMS Program or Subroutine Name
-    deg;                       !- Units
+    deg;                     !- Units
 
-Output:EnergyManagementSystem,
-    Verbose,    ! Actuator Availability Dictionary Reporting
-    Verbose,    ! Internal Variable Availability Dictionary Reporting
-    ErrorsOnly; ! EnergyPlus Runtime Language Debug Output Level
+  Output:EnergyManagementSystem,
+    Verbose,                 !- Actuator Availability Dictionary Reporting
+    Verbose,                 !- Internal Variable Availability Dictionary Reporting
+    ErrorsOnly;              !- EMS Runtime Language Debug Output Level
+

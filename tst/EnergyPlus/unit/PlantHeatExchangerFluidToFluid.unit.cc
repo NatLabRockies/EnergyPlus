@@ -927,7 +927,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
         "    SOURCE Demand Mixer;     !- Connector 2 Name",
 
         "  Connector:Splitter,",
-        "    SOURCE Demand Splitter,  !- Nam",
+        "    SOURCE Demand Splitter,  !- Name",
         "    SOURCE Demand Inlet Branch,  !- Inlet Branch Name",
         "    SOURCE Demand HX Branch; !- Outlet Branch 1 Name",
 
@@ -2024,7 +2024,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
         "    SOURCE Demand Mixer;     !- Connector 2 Name",
 
         "  Connector:Splitter,",
-        "    SOURCE Demand Splitter,  !- Nam",
+        "    SOURCE Demand Splitter,  !- Name",
         "    SOURCE Demand Inlet Branch,  !- Inlet Branch Name",
         "    SOURCE Demand HX Branch; !- Outlet Branch 1 Name",
 

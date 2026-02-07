@@ -393,7 +393,7 @@ namespace PlantChillers {
         Real64 UAtoCapRat;                         // (UACGC) Heat Exchanger UA to Capacity
         Array1D<Real64> UAtoCapCoef;               // Heat Exchanger UA to Capacity Coeffs Poly Fit
         Real64 GTEngineCapacity;                   // Capacity of GT Unit attached to Chiller
-        bool GTEngineCapacityWasAutoSized;         // true if previous field was autosize on inpt
+        bool GTEngineCapacityWasAutoSized;         // true if previous field was autosize on input
         Real64 MaxExhaustperGTPower;               // Max Exhaust Flow per KW Power Out
         Real64 DesignSteamSatTemp;                 // Steam Saturation Temperature
         Real64 ExhaustStackTemp;                   // Temperature of Exhaust Gases

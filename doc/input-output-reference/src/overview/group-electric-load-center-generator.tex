@@ -109,36 +109,34 @@ A transformer may serve different loads such as plug loads, some lighting loads,
 An example input of the ElectricLoadCenter:Transformer input is:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Transformer,
-  Transformer 1,                       !-Name
-  Always On,                           !- Availability Schedule Name
-  PowerInFromGrid,                     !- Transformer Usage
-  ,                                    !- Zone Name
-  ,                                    !-Radiative Fraction
-  15000,                               !- Nameplate Rating {VA}
-  3,                                   !- Phase
-  Aluminum,                            !- Conductor Material
-  150,                                 !- Full Load Temperature Rise { &deg;C}
-  0.1,                                 !- Fraction of Eddy Current Losses
-  NominalEfficiency,                   !- Performance Input Method
-  ,                                    !- Rated No Load Loss {W}
-  ,                                    !- Rated Load Loss {W}
-  0.985,                               !- Nameplate Efficiency
-  0.35,                                !- Per Unit Load for Nameplate Efficiency
-  75,                                  !- Reference Temperature for Nameplate Efficiency { &deg;C}
-  ,                                    !- Per Unit Load for Maximum Efficiency
-  Yes,                                 !- Consider Transformer Loss for Utility Cost
-  Electricity:Building;                !- Meter 1 Name
+  Transformer 1,              !- Name
+  Always On,                  !- Availability Schedule Name
+  PowerInFromGrid,            !- Transformer Usage
+  ,                           !- Zone Name
+  ,                           !- Radiative Fraction
+  15000,                      !- Nameplate Rating {VA}
+  3,                          !- Phase
+  Aluminum,                   !- Conductor Material
+  150,                        !- Full Load Temperature Rise { &deg;C}
+  0.1,                        !- Fraction of Eddy Current Losses
+  NominalEfficiency,          !- Performance Input Method
+  ,                           !- Rated No Load Loss {W}
+  ,                           !- Rated Load Loss {W}
+  0.985,                      !- Nameplate Efficiency
+  0.35,                       !- Per Unit Load for Nameplate Efficiency
+  75,                         !- Reference Temperature for Nameplate Efficiency { &deg;C}
+  ,                           !- Per Unit Load for Maximum Efficiency
+  Yes,                        !- Consider Transformer Loss for Utility Cost
+  Electricity:Building;       !- Meter 1 Name
 
-
-  Schedule:Compact,
-  Always On,                             !- Name
-  Fraction,                               !- ScheduleType
-  Through: 12/31,                   !- Field #1
-  For: AllDays,                       !- Field #2
-  Until: 24:00,                       !- Field #3
-  1.0;                                         !- Field #4
+Schedule:Compact,
+  Always On,                  !- Name
+  Fraction,                   !- ScheduleType
+  Through: 12/31,             !- Field #1
+  For: AllDays,               !- Field #2
+  Until: 24:00,               !- Field #3
+  1.0;                        !- Field #4
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-010}
@@ -383,29 +381,27 @@ This field is the name of schedule that modifies the utility demand power target
 Examples of this object are:
 
 \begin{lstlisting}
+ElectricLoadCenter:Distribution,
+  SOFC Electric Load Center,  !- Name
+  Micro-Generators,           !- Generator List Name
+  Baseload,                   !- Generator Operation Scheme Type
+  0.0,                        !- Demand Limit Scheme Purchased Electric Demand Limit {W}
+  ,                           !- Track Schedule Name Scheme Schedule Name
+  ,                           !- Track Meter Scheme Meter Name
+  AlternatingCurrent,         !- Electrical Buss Type
+  ,                           !- Inverter Object Name
+  ;                           !- Electrical Storage Object Name
 
 ElectricLoadCenter:Distribution,
-  SOFC Electric Load Center,      !- Name
-  Micro-Generators,               !- Generator List Name
-  Baseload,                       !- Generator Operation Scheme Type
-  0.0,                            !- Demand Limit Scheme Purchased Electric Demand Limit {W}
-  ,                               !- Track Schedule Name Scheme Schedule Name
-  ,                               !- Track Meter Scheme Meter Name
-  AlternatingCurrent,             !- Electrical Buss Type
-  ,                               !- Inverter Object Name
-  ;                               !- Electrical Storage Object Name
-
-
-  ElectricLoadCenter:Distribution,
   Electric Load Center,       !- Name
-  Backup Generators,             !- Generator List Name
-  DemandLimit,                         !- Generator Operation Scheme Type
-  10000.0,                                 !- Demand Limit Scheme Purchased Electric Demand Limit {W}
-  ,                                               !- Track Schedule Name Scheme Schedule Name
-  ,                                               !- Track Meter Scheme Meter Name
-  AlternatingCurrent,           !- Electrical Buss Type
-  ,                                               !- Inverter Object Name
-  ;                                               !- Electrical Storage Object Name
+  Backup Generators,          !- Generator List Name
+  DemandLimit,                !- Generator Operation Scheme Type
+  10000.0,                    !- Demand Limit Scheme Purchased Electric Demand Limit {W}
+  ,                           !- Track Schedule Name Scheme Schedule Name
+  ,                           !- Track Meter Scheme Meter Name
+  AlternatingCurrent,         !- Electrical Buss Type
+  ,                           !- Inverter Object Name
+  ;                           !- Electrical Storage Object Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-008}
@@ -580,24 +576,23 @@ This numeric field contains the ratio of the rated thermal output to the rated e
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Generators,
-  Backup Generators,             !- Name
-  Cat Diesel,                           !- Generator 1 Name
-  Generator:InternalCombustionEngine,   !- Generator 1 Object Type
-  50000,                                     !- Generator 1 Rated Electric Power Output
-  ON PEAK GENERATOR SCHEDULE,   !- Generator 1 Availability Schedule Name
-  ,                                               !- Generator 1 Rated Thermal to Electrical Power Ratio
-  Solar Turbine,                     !- Generator 2 Name
-  Generator:CombustionTurbine,   !- Generator 2 Object Type
-  30000,                                     !- Generator 2 Rated Electric Power Output
-  OFF PEAK GENERATOR SCHEDULE,   !- Generator 2 Availability Schedule Name
-  ,                                               !- Generator 2 Rated Thermal to Electrical Power Ratio
-  Capstone C65,                       !- Generator 3 Name
-  Generator:Microturbine,   !- Generator 3 Object Type
-  65000,                                     !- Generator 3 Rated Electric Power Output
-  MID PEAK GENERATOR SCHEDULE,   !- Generator 3 Availability Schedule Name
-  ;                                               !- Generator 3 Rated Thermal to Electrical Power Ratio
+  Backup Generators,          !- Name
+  Cat Diesel,                 !- Generator 1 Name
+  Generator:InternalCombustionEngine,  !- Generator 1 Object Type
+  50000,                      !- Generator 1 Rated Electric Power Output
+  ON PEAK GENERATOR SCHEDULE, !- Generator 1 Availability Schedule Name
+  ,                           !- Generator 1 Rated Thermal to Electrical Power Ratio
+  Solar Turbine,              !- Generator 2 Name
+  Generator:CombustionTurbine,!- Generator 2 Object Type
+  30000,                      !- Generator 2 Rated Electric Power Output
+  OFF PEAK GENERATOR SCHEDULE,!- Generator 2 Availability Schedule Name
+  ,                           !- Generator 2 Rated Thermal to Electrical Power Ratio
+  Capstone C65,               !- Generator 3 Name
+  Generator:Microturbine,     !- Generator 3 Object Type
+  65000,                      !- Generator 3 Rated Electric Power Output
+  MID PEAK GENERATOR SCHEDULE,!- Generator 3 Availability Schedule Name
+  ;                           !- Generator 3 Rated Thermal to Electrical Power Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-007}
@@ -643,13 +638,12 @@ This field contains the value for inverter efficiency. In the simple model, effi
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Inverter:Simple,
-  Simple Ideal Inverter,     !- Name
-  Always On,                             !- Availability Schedule Name
-  ,                                               !- Zone Name
-  0.0,                                         !- Radiative Fraction
-  1.0;                                         !- Inverter Efficiency
+  Simple Ideal Inverter,      !- Name
+  Always On,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  0.0,                        !- Radiative Fraction
+  1.0;                        !- Inverter Efficiency
 \end{lstlisting}
 
 \subsection{ElectricLoadCenter:Inverter:FunctionOfPower}\label{electricloadcenterinverterfunctionofpower}
@@ -705,19 +699,18 @@ This field contains the ancillary power in watts used by the inverter when not p
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Inverter:FunctionOfPower,
-  Curve Inverter,                   !- Name
-  ALWAYS_ON,                             !- Availability Schedule Name
-  ,                                               !- Zone Name
-  0.3,                                         !- Radiative Fraction
-  Inverter Curve,                   !- Efficiency Function of Power Curve Name
-  15000,                                     !- Rated Maximum Continuous Input Power {W}
-  0.0,                                         !- Minimum Efficiency
-  1.0,                                         !- Maximum Efficiency
-  200,                                         !- Minimum Power Output {W}
-  20000,                                     !- Maximum Power Output {W}
-  0.0;                                         !- Ancillary Power Consumed In Standby {W}
+  Curve Inverter,             !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  0.3,                        !- Radiative Fraction
+  Inverter Curve,             !- Efficiency Function of Power Curve Name
+  15000,                      !- Rated Maximum Continuous Input Power {W}
+  0.0,                        !- Minimum Efficiency
+  1.0,                        !- Maximum Efficiency
+  200,                        !- Minimum Power Output {W}
+  20000,                      !- Maximum Power Output {W}
+  0.0;                        !- Ancillary Power Consumed In Standby {W}
 \end{lstlisting}
 
 \subsection{ElectricLoadCenter:Inverter:LookUpTable}\label{electricloadcenterinverterlookuptable}
@@ -783,21 +776,20 @@ This field contains the fractional efficiency at nominal voltage and 100\% power
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Inverter:LookUpTable,
-  PV Inverter,                         !- Name
-  ALWAYS_ON,                             !- Availability Schedule Name
-  ,                                               !- Zone Name
-  0.25,                                       !- Radiative Fraction
-  14000,                                     !- Rated Maximum Continuous Output Power {W}
-  200.0,                                     !- Night Tare Loss Power {W}
-  368,                                         !- Nominal Voltage Input {V}
-  0.839,                                     !- Efficiency at 10% Power and Nominal Voltage
-  0.897,                                     !- Efficiency at 20% Power and Nominal Voltage
-  0.916,                                     !- Efficiency at 30% Power and Nominal Voltage
-  0.931,                                     !- Efficiency at 50% Power and Nominal Voltage
-  0.934,                                     !- Efficiency at 75% Power and Nominal Voltage
-  0.930;                                     !- Efficiency at 100% Power and Nominal Voltage
+  PV Inverter,                !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  0.25,                       !- Radiative Fraction
+  14000,                      !- Rated Maximum Continuous Output Power {W}
+  200.0,                      !- Night Tare Loss Power {W}
+  368,                        !- Nominal Voltage Input {V}
+  0.839,                      !- Efficiency at 10% Power and Nominal Voltage
+  0.897,                      !- Efficiency at 20% Power and Nominal Voltage
+  0.916,                      !- Efficiency at 30% Power and Nominal Voltage
+  0.931,                      !- Efficiency at 50% Power and Nominal Voltage
+  0.934,                      !- Efficiency at 75% Power and Nominal Voltage
+  0.930;                      !- Efficiency at 100% Power and Nominal Voltage
 \end{lstlisting}
 
 \subsection{ElectricLoadCenter:Inverter:PVWatts}\label{electricloadcenterinverterpvwatts}
@@ -954,16 +946,15 @@ This numeric field is the fraction of zone heat gains that are handled as infrar
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Storage:Converter,
-  Grid Charge Converter , !- Name
-  ALWAYS\_ON , !- Availability Schedule Name
-  SimpleFixed , !- Power Conversion Efficiency Method
-  0.95 , !- Simple Fixed Efficiency
-  , !- Design Maximum Continuous Input Power
-  , !- Efficiency Function of Power Curve Name 20
-  , !- Ancillary Power Consumed In Standby
-  , !- Zone Name 0.25; !- Radiative Fraction
+  Grid Charge Converter,      !- Name
+  ALWAYS\_ON,                 !- Availability Schedule Name
+  SimpleFixed,                !- Power Conversion Efficiency Method
+  0.95,                       !- Simple Fixed Efficiency
+  ,                           !- Design Maximum Continuous Input Power
+  ,                           !- Efficiency Function of Power Curve Name 20
+  ,                           !- Ancillary Power Consumed In Standby
+  ,                           !- Zone Name 0.25; !- Radiative Fraction
 \end{lstlisting}
 
 \subsection{Electric Load Center Converter Outputs}\label{electric-load-center-converter-outputs}
@@ -1083,18 +1074,17 @@ This field describes the value for the initial state of charge in Joules. This i
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Storage:Simple,
-  Battery,                                 !- Name
-  ALWAYS_ON,                             !- Availability Schedule Name
-  ,                                               !- Zone Name
-  0.0,                                         !- Radiative Fraction for Zone Heat Gains
-  0.7,                                         !- Nominal Energetic Efficiency for Charging
-  0.7,                                         !- Nominal Discharging Energetic Efficiency
-  1.0E11,                                   !- Maximum Storage Capacity {J}
-  50000,                                     !- Maximum Power for Discharging {W}
-  25000,                                     !- Maximum Power for Charging {W}
-  1.0E10;                                   !- Initial State of Charge {J}
+  Battery,                    !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  0.0,                        !- Radiative Fraction for Zone Heat Gains
+  0.7,                        !- Nominal Energetic Efficiency for Charging
+  0.7,                        !- Nominal Discharging Energetic Efficiency
+  1.0E11,                     !- Maximum Storage Capacity {J}
+  50000,                      !- Maximum Power for Discharging {W}
+  25000,                      !- Maximum Power for Charging {W}
+  1.0E10;                     !- Initial State of Charge {J}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-003}
@@ -1273,59 +1263,58 @@ This field specifies the name of a double exponential decay curve (ref: \hyperre
 An example input of the ElectricLoadCenter:Storage: Battery input is:
 
 \begin{lstlisting}
-
 ElectricLoadCenter:Storage:Battery,
-  Lead Acid Battery A,   !- Name
-  Always On,             !- Availability Schedule Name
-  ,                      !- Zone Name
-  ,                      !- Radiative Fraction
-  1,                     !- Number of Battery Modules in Parallel
-  1,                     !- Number of Battery Modules in Series
-  86.1,                  !- Maximum Module Capacity {Ah}
-  1.0,                   !- Initial Fractional State of Charge
-  0.3747,                !- Fraction of Available Charge Capacity
-  0.5874,                !- Change Rate from Bound Charge to Available Charge {hr$^{-1}$}
-  12.60,                 !- Fully Charged Module Open Circuit Voltage {V}
-  12.37,                 !- Fully Discharged Module Open Circuit Voltage {V}
-  BatteryChargeCurve,    !- Voltage Change Curve Name for Charging
-  BatteryDischargeCurve, !- Voltage Change Curve Name for Discharging
-  0.0538,                !- Module Internal Electrical Resistance {Ohm}
-  100,                   !- Maximum Module Discharging Current {A}
-  10.2,                  !- Module Cut-off Voltage {V}
-  1,                     !- Module Charge Rate Limit {1/hr}
-  Yes,                   !- Battery Life Calculation
-  10,                    !- Number of Cycle Bins
-  BatteryCycleCurve;     !- Battery Cycle Life Curve Name
+  Lead Acid Battery A,        !- Name
+  Always On,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  ,                           !- Radiative Fraction
+  1,                          !- Number of Battery Modules in Parallel
+  1,                          !- Number of Battery Modules in Series
+  86.1,                       !- Maximum Module Capacity {Ah}
+  1.0,                        !- Initial Fractional State of Charge
+  0.3747,                     !- Fraction of Available Charge Capacity
+  0.5874,                     !- Change Rate from Bound Charge to Available Charge {hr$^{-1}$}
+  12.60,                      !- Fully Charged Module Open Circuit Voltage {V}
+  12.37,                      !- Fully Discharged Module Open Circuit Voltage {V}
+  BatteryChargeCurve,         !- Voltage Change Curve Name for Charging
+  BatteryDischargeCurve,      !- Voltage Change Curve Name for Discharging
+  0.0538,                     !- Module Internal Electrical Resistance {Ohm}
+  100,                        !- Maximum Module Discharging Current {A}
+  10.2,                       !- Module Cut-off Voltage {V}
+  1,                          !- Module Charge Rate Limit {1/hr}
+  Yes,                        !- Battery Life Calculation
+  10,                         !- Number of Cycle Bins
+  BatteryCycleCurve;          !- Battery Cycle Life Curve Name
 
-  Curve:RectangularHyperbola2,
-  BatteryChargeCurve,    !- Name
-  -0.2765,               !- Coefficient1 C1
-  -93.27,                !- Coefficient2 C2
-  0.0068,                !- Coefficient3 C3
-  0,                     !- Minimum Value of x
-  1.0,                   !- Maximum Value of x
-  -100,                  !- Minimum Curve Output
-  100;                   !- Maximum Curve Output
+Curve:RectangularHyperbola2,
+  BatteryChargeCurve,         !- Name
+  -0.2765,                    !- Coefficient1 C1
+  -93.27,                     !- Coefficient2 C2
+  0.0068,                     !- Coefficient3 C3
+  0,                          !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  -100,                       !- Minimum Curve Output
+  100;                        !- Maximum Curve Output
 
-  Curve:RectangularHyperbola2,
-  BatteryDischargeCurve, !- Name
-  0.0899,                !- Coefficient1 C1
-  -98.24,                !- Coefficient2 C2
-  -0.0082,               !- Coefficient3 C3
-  0,                     !- Minimum Value of x
-  1.0,                   !- Maximum Value of x
-  -100,                  !- Minimum Curve Output
-  100;                   !- Maximum Curve Output
+Curve:RectangularHyperbola2,
+  BatteryDischargeCurve,      !- Name
+  0.0899,                     !- Coefficient1 C1
+  -98.24,                     !- Coefficient2 C2
+  -0.0082,                    !- Coefficient3 C3
+  0,                          !- Minimum Value of x
+  1.0,                        !- Maximum Value of x
+  -100,                       !- Minimum Curve Output
+  100;                        !- Maximum Curve Output
 
-  Curve:DoubleExponentialDecay,
-  BatteryCycleCurve,     !- Name
-  1380,                  !- Coefficient1 C1
-  6834,                  !- Coefficient2 C2
-  -8.75,                 !- Coefficient3 C3
-  6747,                  !- Coefficient4 C4
-  -6.22,                 !- Coefficient5 C5
-  0,                     !- Minimum Value of x
-  1.0;                   !- Maximum Value of x
+Curve:DoubleExponentialDecay,
+  BatteryCycleCurve,          !- Name
+  1380,                       !- Coefficient1 C1
+  6834,                       !- Coefficient2 C2
+  -8.75,                      !- Coefficient3 C3
+  6747,                       !- Coefficient4 C4
+  -6.22,                      !- Coefficient5 C5
+  0,                          !- Minimum Value of x
+  1.0;                        !- Maximum Value of x
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{electricloadcenter-storagebattery-outputs}
@@ -1507,22 +1496,20 @@ This field is included for those who want to modify the battery chemistry. Most 
 An example input of the ElectricLoadCenter:Storage:LiIonNMCBattery is:
 
 \begin{lstlisting}
-
-  ElectricLoadCenter:Storage:LiIonNMCBattery,
-    LiIonBattery,            !- Name
-    ALWAYS_ON,               !- Availability Schedule Name
-    ,                        !- Zone Name
-    0,                       !- Radiative Fraction
-    KandlerSmith,            !- Lifetime Model
-    139,                     !- Number of Cells in Series
-    25,                      !- Number of Strings in Parallel
-    0.7,                     !- Initial Fractional State of Charge
-    ,                        !- DC to DC Charging Efficiency
-    342,                     !- Battery Mass
-    4.26,                    !- Battery Surface Area
-    ,                        !- Battery Specific Heat Capacity
-    ;                        !- Heat Transfer Coefficient Between Battery and Ambient
-
+ElectricLoadCenter:Storage:LiIonNMCBattery,
+  LiIonBattery,               !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  ,                           !- Zone Name
+  0,                          !- Radiative Fraction
+  KandlerSmith,               !- Lifetime Model
+  139,                        !- Number of Cells in Series
+  25,                         !- Number of Strings in Parallel
+  0.7,                        !- Initial Fractional State of Charge
+  ,                           !- DC to DC Charging Efficiency
+  342,                        !- Battery Mass
+  4.26,                       !- Battery Surface Area
+  ,                           !- Battery Specific Heat Capacity
+  ;                           !- Heat Transfer Coefficient Between Battery and Ambient
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{electricloadcenter-storageliionnmcbatttery-outputs}
@@ -1751,68 +1738,67 @@ The temperature is specified in degrees C.
 An IDF example showing how it is used is provided below:
 
 \begin{lstlisting}
-
 Generator:InternalCombustionEngine,
-  Cat Diesel,                           !- Name
-  50000,                                     !- Rated Power Output {W}
-  Generator Diesel Electric Node,   !- Electric Circuit Node Name
-  0.15,                                       !- Minimum Part Load Ratio
-  1.0,                                         !- Maximum Part Load Ratio
-  0.65,                                       !- Optimum Part Load Ratio
+  Cat Diesel,                 !- Name
+  50000,                      !- Rated Power Output {W}
+  Generator Diesel Electric Node,  !- Electric Circuit Node Name
+  0.15,                       !- Minimum Part Load Ratio
+  1.0,                        !- Maximum Part Load Ratio
+  0.65,                       !- Optimum Part Load Ratio
   BG Shaft Power Curve,       !- Shaft Power Curve Name
-  BG Recovery Jacket Heat Curve,   !- Jacket Heat Recovery Curve Name
-  BG Recovery Lube Heat Curve,   !- Lube Heat Recovery Curve Name
-  BG Total Exhaust Energy Curve,   !- Total Exhaust Energy Curve Name
-  BG Exhaust Temperature Curve,   !- Exhaust Temperature Curve Name
-  0.00952329,                           !- Coefficient 1 of U-Factor Times Area Curve
-  0.9,                                         !- Coefficient 2 of U-Factor Times Area Curve
-  0.00000063,                           !- Maximum Exhaust Flow per Unit of Power Output {(kg/s)/W}
-  150,                                         !- Design Minimum Exhaust Temperature {C}
-  45500,                                     !- Fuel Higher Heating Value {kJ/kg}
-  0.0,                                         !- Design Heat Recovery Water Flow Rate {m3/s}
-  ,                                               !- Heat Recovery Inlet Node Name
-  ,                                               !- Heat Recovery Outlet Node Name
-  Diesel;                                   !- Fuel Type
+  BG Recovery Jacket Heat Curve,  !- Jacket Heat Recovery Curve Name
+  BG Recovery Lube Heat Curve,!- Lube Heat Recovery Curve Name
+  BG Total Exhaust Energy Curve,  !- Total Exhaust Energy Curve Name
+  BG Exhaust Temperature Curve,  !- Exhaust Temperature Curve Name
+  0.00952329,                 !- Coefficient 1 of U-Factor Times Area Curve
+  0.9,                        !- Coefficient 2 of U-Factor Times Area Curve
+  0.00000063,                 !- Maximum Exhaust Flow per Unit of Power Output {(kg/s)/W}
+  150,                        !- Design Minimum Exhaust Temperature {C}
+  45500,                      !- Fuel Higher Heating Value {kJ/kg}
+  0.0,                        !- Design Heat Recovery Water Flow Rate {m3/s}
+  ,                           !- Heat Recovery Inlet Node Name
+  ,                           !- Heat Recovery Outlet Node Name
+  Diesel;                     !- Fuel Type
 
-  Curve:Quadratic,
+Curve:Quadratic,
   BG Shaft Power Curve,       !- Name
-  0.09755,                                 !- Coefficient1 Constant
-  0.6318,                                   !- Coefficient2 x
-  -0.4165,                                 !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+  0.09755,                    !- Coefficient1 Constant
+  0.6318,                     !- Coefficient2 x
+  -0.4165,                    !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Recovery Jacket Heat Curve,   !- Name
-  0.25,                                       !- Coefficient1 Constant
-  0,                                             !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Recovery Jacket Heat Curve,  !- Name
+  0.25,                       !- Coefficient1 Constant
+  0,                          !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Recovery Lube Heat Curve,   !- Name
-  0.15,                                       !- Coefficient1 Constant
-  0,                                             !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Recovery Lube Heat Curve,!- Name
+  0.15,                       !- Coefficient1 Constant
+  0,                          !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Total Exhaust Energy Curve,   !- Name
-  0.1,                                         !- Coefficient1 Constant
-  0,                                             !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Total Exhaust Energy Curve,  !- Name
+  0.1,                        !- Coefficient1 Constant
+  0,                          !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Exhaust Temperature Curve,   !- Name
-  425,                                         !- Coefficient1 Constant
-  0,                                             !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Exhaust Temperature Curve,  !- Name
+  425,                        !- Coefficient1 Constant
+  0,                          !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-002}
@@ -2059,80 +2045,79 @@ This field is optional. It is used to explicitly define an outdoor air node for 
 An IDF example showing how it is used is provided below:
 
 \begin{lstlisting}
-
 Generator:CombustionTurbine,
-  Solar Turbine,                     !- Name
-  30000,                                     !- Rated Power Output {W}
+  Solar Turbine,              !- Name
+  30000,                      !- Rated Power Output {W}
   GT gen Electric Node,       !- Electric Circuit Node Name
-  0.15,                                       !- Minimum Part Load Ratio
-  1.0,                                         !- Maximum Part Load Ratio
-  0.65,                                       !- Optimum Part Load Ratio
-  BG PL Based Fuel Input Curve,   !- Part Load Based Fuel Input Curve Name
-  BG Temp Based Fuel Input Curve,   !- Temperature Based Fuel Input Curve Name
-  BG Exhaust Flow Curve,     !- Exhaust Flow Curve Name
-  BG PL Based Exhaust Temp Curve,   !- Part Load Based Exhaust Temperature Curve Name
-  BG Temp Based Exhaust Temp Curve,   !- Temperature Based Exhaust Temperature Curve Name
-  BG Tur Recovery Lube Heat Curve,   !- Heat Recovery Lube Energy Curve Name
-  0.01907045,                           !- Coefficient 1 of U-Factor Times Area Curve
-  0.9,                                         !- Coefficient 2 of U-Factor Times Area Curve
-  0.00000504,                           !- Maximum Exhaust Flow per Unit of Power Output {(Kg/s)/W}
-  150,                                         !- Design Minimum Exhaust Temperature {C}
-  25,                                           !- Design Air Inlet Temperature {C}
-  43500,                                     !- Fuel Higher Heating Value {kJ/kg}
-  0.0,                                         !- Design Heat Recovery Water Flow Rate {m3/s}
-  ,                                               !- Heat Recovery Inlet Node Name
-  ,                                               !- Heat Recovery Outlet Node Name
-  NaturalGas,                           !- Fuel Type
-  ,                                               !- Heat Recovery Maximum Temperature {C}
-  CT OA inlet;                         !- Outdoor Air Inlet Node Name
+  0.15,                       !- Minimum Part Load Ratio
+  1.0,                        !- Maximum Part Load Ratio
+  0.65,                       !- Optimum Part Load Ratio
+  BG PL Based Fuel Input Curve,  !- Part Load Based Fuel Input Curve Name
+  BG Temp Based Fuel Input Curve,  !- Temperature Based Fuel Input Curve Name
+  BG Exhaust Flow Curve,      !- Exhaust Flow Curve Name
+  BG PL Based Exhaust Temp Curve,  !- Part Load Based Exhaust Temperature Curve Name
+  BG Temp Based Exhaust Temp Curve,  !- Temperature Based Exhaust Temperature Curve Name
+  BG Tur Recovery Lube Heat Curve,  !- Heat Recovery Lube Energy Curve Name
+  0.01907045,                 !- Coefficient 1 of U-Factor Times Area Curve
+  0.9,                        !- Coefficient 2 of U-Factor Times Area Curve
+  0.00000504,                 !- Maximum Exhaust Flow per Unit of Power Output {(Kg/s)/W}
+  150,                        !- Design Minimum Exhaust Temperature {C}
+  25,                         !- Design Air Inlet Temperature {C}
+  43500,                      !- Fuel Higher Heating Value {kJ/kg}
+  0.0,                        !- Design Heat Recovery Water Flow Rate {m3/s}
+  ,                           !- Heat Recovery Inlet Node Name
+  ,                           !- Heat Recovery Outlet Node Name
+  NaturalGas,                 !- Fuel Type
+  ,                           !- Heat Recovery Maximum Temperature {C}
+  CT OA inlet;                !- Outdoor Air Inlet Node Name
 
-  Curve:Quadratic,
-  BG PL Based Fuel Input Curve,   !- Name
-  9.41,                                       !- Coefficient1 Constant
-  -9.48,                                     !- Coefficient2 x
-  4.32,                                       !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG PL Based Fuel Input Curve,  !- Name
+  9.41,                       !- Coefficient1 Constant
+  -9.48,                      !- Coefficient2 x
+  4.32,                       !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Temp Based Fuel Input Curve,   !- Name
-  1.0044,                                   !- Coefficient1 Constant
-  -0.0008,                                 !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  -30,                                         !- Minimum Value of x
-  +30;                                         !- Maximum Value of x
+Curve:Quadratic,
+  BG Temp Based Fuel Input Curve,  !- Name
+  1.0044,                     !- Coefficient1 Constant
+  -0.0008,                    !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  -30,                        !- Minimum Value of x
+  +30;                        !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Exhaust Flow Curve,     !- Name
-  0.05,                                       !- Coefficient1 Constant
-  0.0,                                         !- Coefficient2 x
-  0.0,                                         !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Exhaust Flow Curve,      !- Name
+  0.05,                       !- Coefficient1 Constant
+  0.0,                        !- Coefficient2 x
+  0.0,                        !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG PL Based Exhaust Temp Curve,   !- Name
-  450,                                         !- Coefficient1 Constant
-  0,                                             !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG PL Based Exhaust Temp Curve,  !- Name
+  450,                        !- Coefficient1 Constant
+  0,                          !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Temp Based Exhaust Temp Curve,   !- Name
-  1.005,                                     !- Coefficient1 Constant
-  0.0018,                                   !- Coefficient2 x
-  0,                                             !- Coefficient3 x**2
-  -30,                                         !- Minimum Value of x
-  +30;                                         !- Maximum Value of x
+Curve:Quadratic,
+  BG Temp Based Exhaust Temp Curve,  !- Name
+  1.005,                      !- Coefficient1 Constant
+  0.0018,                     !- Coefficient2 x
+  0,                          !- Coefficient3 x**2
+  -30,                        !- Minimum Value of x
+  +30;                        !- Maximum Value of x
 
-  Curve:Quadratic,
-  BG Tur Recovery Lube Heat Curve,   !- Name
-  0.223,                                     !- Coefficient1 Constant
-  -0.4,                                       !- Coefficient2 x
-  0.2286,                                   !- Coefficient3 x**2
-  0,                                             !- Minimum Value of x
-  1;                                             !- Maximum Value of x
+Curve:Quadratic,
+  BG Tur Recovery Lube Heat Curve,  !- Name
+  0.223,                      !- Coefficient1 Constant
+  -0.4,                       !- Coefficient2 x
+  0.2286,                     !- Coefficient3 x**2
+  0,                          !- Minimum Value of x
+  1;                          !- Maximum Value of x
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-002}
@@ -2357,90 +2342,89 @@ This alpha field specifies the name of a quadratic or cubic performance curve (r
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 Generator:MicroTurbine,
-  Generator 3,                         !- Name
-  65000,                                     !- Reference Electrical Power Output {W}
-  29900,                                     !- Minimum Full Load Electrical Power Output {W}
-  65000,                                     !- Maximum Full Load Electrical Power Output {W}
-  0.29,                                       !- Reference Electrical Efficiency Using Lower Heating Value
-  15.0,                                       !- Reference Combustion Air Inlet Temperature {C}
-  0.00638,                                 !- Reference Combustion Air Inlet Humidity Ratio (kgWater/kgDryAir)
-  0.0,                                         !- Reference Elevation {m}
-  Power_vs_Temp_Elev,           !- Electrical Power Function of Temperature and Elevation Curve Name
-  Efficiency_vs_Temp,           !- Electrical Efficiency Function of Temperature Curve Name
-  Efficiency_vs_PLR,             !- Electrical Efficiency Function of Part Load Ratio Curve Name
-  NaturalGas,                           !- Fuel Type
-  50000,                                     !- Fuel Higher Heating Value {kJ/kg}
-  45450,                                     !- Fuel Lower Heating Value {kJ/kg}
-  300,                                         !- Standby Power {W}
-  4500;                                       !- Ancillary Power {W}
+  Generator 3,                !- Name
+  65000,                      !- Reference Electrical Power Output {W}
+  29900,                      !- Minimum Full Load Electrical Power Output {W}
+  65000,                      !- Maximum Full Load Electrical Power Output {W}
+  0.29,                       !- Reference Electrical Efficiency Using Lower Heating Value
+  15.0,                       !- Reference Combustion Air Inlet Temperature {C}
+  0.00638,                    !- Reference Combustion Air Inlet Humidity Ratio (kgWater/kgDryAir)
+  0.0,                        !- Reference Elevation {m}
+  Power_vs_Temp_Elev,         !- Electrical Power Function of Temperature and Elevation Curve Name
+  Efficiency_vs_Temp,         !- Electrical Efficiency Function of Temperature Curve Name
+  Efficiency_vs_PLR,          !- Electrical Efficiency Function of Part Load Ratio Curve Name
+  NaturalGas,                 !- Fuel Type
+  50000,                      !- Fuel Higher Heating Value {kJ/kg}
+  45450,                      !- Fuel Lower Heating Value {kJ/kg}
+  300,                        !- Standby Power {W}
+  4500;                       !- Ancillary Power {W}
 
-  ! Electrical Power Modifier Curve (function of temperature and elevation)
-  ! x = Dry-Bulb Temperature of Combustion Inlet Air (C) and y = Elevation (meters)
+! Electrical Power Modifier Curve (function of temperature and elevation)
+! x = Dry-Bulb Temperature of Combustion Inlet Air (C) and y = Elevation (meters)
   Curve:Biquadratic,
-  Power_vs_Temp_Elev,           !- Name
-  1.2027697,                             !- Coefficient1 Constant
-  -9.671305E-03,                     !- Coefficient2 x
-  -4.860793E-06,                     !- Coefficient3 x**2
-  -1.542394E-04,                     !- Coefficient4 y
-  9.111418E-09,                       !- Coefficient5 y**2
-  8.797885E-07,                       !- Coefficient6 x*y
-  -17.8,                                     !- Minimum Value of x
-  50.0,                                       !- Maximum Value of x
-  0.0,                                         !- Minimum Value of y
-  3050.;                                     !- Maximum Value of y
+  Power_vs_Temp_Elev,         !- Name
+  1.2027697,                  !- Coefficient1 Constant
+  -9.671305E-03,              !- Coefficient2 x
+  -4.860793E-06,              !- Coefficient3 x**2
+  -1.542394E-04,              !- Coefficient4 y
+  9.111418E-09,               !- Coefficient5 y**2
+  8.797885E-07,               !- Coefficient6 x*y
+  -17.8,                      !- Minimum Value of x
+  50.0,                       !- Maximum Value of x
+  0.0,                        !- Minimum Value of y
+  3050.;                      !- Maximum Value of y
 
-  ! Electrical Efficiency Modifier Curve (function of temperature)
-  ! x = Dry-Bulb Temperature of Combustion Inlet Air (C)
+! Electrical Efficiency Modifier Curve (function of temperature)
+! x = Dry-Bulb Temperature of Combustion Inlet Air (C)
   Curve:Cubic,
-  Efficiency_vs_Temp,           !- Name
-  1.0402217,                             !- Coefficient1 Constant
-  -0.0017314,                           !- Coefficient2 x
-  -6.497040E-05,                     !- Coefficient3 x**2
-  5.133175E-07,                       !- Coefficient4 x**3
-  -20.0,                                     !- Minimum Value of x
-  50.0;                                       !- Maximum Value of x
+  Efficiency_vs_Temp,         !- Name
+  1.0402217,                  !- Coefficient1 Constant
+  -0.0017314,                 !- Coefficient2 x
+  -6.497040E-05,              !- Coefficient3 x**2
+  5.133175E-07,               !- Coefficient4 x**3
+  -20.0,                      !- Minimum Value of x
+  50.0;                       !- Maximum Value of x
 
-  ! Electrical Efficiency Modifier Curve (function of part-load ratio)
-  ! x = Part-Load Ratio (electrical load/steady-state electrical power output)
+! Electrical Efficiency Modifier Curve (function of part-load ratio)
+! x = Part-Load Ratio (electrical load/steady-state electrical power output)
   Curve:Cubic,
-  Efficiency_vs_PLR,             !- Name
-  0.215290,                               !- Coefficient1 Constant
-  2.561463,                               !- Coefficient2 x
-  -3.24613,                               !- Coefficient3 x**2
-  1.497306,                               !- Coefficient4 x**3
-  0.03,                                       !- Minimum Value of x
-  1.0;                                         !- Maximum Value of x!
+  Efficiency_vs_PLR,          !- Name
+  0.215290,                   !- Coefficient1 Constant
+  2.561463,                   !- Coefficient2 x
+  -3.24613,                   !- Coefficient3 x**2
+  1.497306,                   !- Coefficient4 x**3
+  0.03,                       !- Minimum Value of x
+  1.0;                        !- Maximum Value of x!
 
-  ElectricLoadCenter:Distribution,
+ElectricLoadCenter:Distribution,
   Electric Load Center,       !- Name
-  Backup Generators,             !- Generator List Name
-  DemandLimit,                         !- Generator Operation Scheme Type
-  10000.0,                                 !- Demand Limit Scheme Purchased Electric Demand Limit {W}
-  ,                                               !- Track Schedule Name Scheme Schedule Name
-  ,                                               !- Track Meter Scheme Meter Name
-  AlternatingCurrent,           !- Electrical Buss Type
-  ,                                               !- Inverter Object Name
-  ;                                               !- Electrical Storage Object Name
+  Backup Generators,          !- Generator List Name
+  DemandLimit,                !- Generator Operation Scheme Type
+  10000.0,                    !- Demand Limit Scheme Purchased Electric Demand Limit {W}
+  ,                           !- Track Schedule Name Scheme Schedule Name
+  ,                           !- Track Meter Scheme Meter Name
+  AlternatingCurrent,         !- Electrical Buss Type
+  ,                           !- Inverter Object Name
+  ;                           !- Electrical Storage Object Name
 
-  ElectricLoadCenter:Generators,
-  Backup Generators,             !- Name
-  Generator 1,                         !- Generator 1 Name
-  Generator:InternalCombustionEngine,   !- Generator 1 Object Type
-  50000,                                     !- Generator 1 Rated Electric Power Output
-  ON PEAK GENERATOR SCHEDULE,   !- Generator 1 Availability Schedule Name
-  ,                                               !- Generator 1 Rated Thermal to Electrical Power Ratio
-  Generator 2,                         !- Generator 2 Name
-  Generator:CombustionTurbine,   !- Generator 2 Object Type
-  30000,                                     !- Generator 2 Rated Electric Power Output
-  OFF PEAK GENERATOR SCHEDULE,   !- Generator 2 Availability Schedule Name
-  ,                                               !- Generator 2 Rated Thermal to Electrical Power Ratio
-  Generator 3,                         !- Generator 3 Name
-  Generator:MicroTurbine,   !- Generator 3 Object Type
-  65000,                                     !- Generator 3 Rated Electric Power Output
-  MID PEAK GENERATOR SCHEDULE,   !- Generator 3 Availability Schedule Name
-  ;                                               !- Generator 3 Rated Thermal to Electrical Power Ratio
+ElectricLoadCenter:Generators,
+  Backup Generators,          !- Name
+  Generator 1,                !- Generator 1 Name
+  Generator:InternalCombustionEngine,  !- Generator 1 Object Type
+  50000,                      !- Generator 1 Rated Electric Power Output
+  ON PEAK GENERATOR SCHEDULE, !- Generator 1 Availability Schedule Name
+  ,                           !- Generator 1 Rated Thermal to Electrical Power Ratio
+  Generator 2,                !- Generator 2 Name
+  Generator:CombustionTurbine,!- Generator 2 Object Type
+  30000,                      !- Generator 2 Rated Electric Power Output
+  OFF PEAK GENERATOR SCHEDULE,!- Generator 2 Availability Schedule Name
+  ,                           !- Generator 2 Rated Thermal to Electrical Power Ratio
+  Generator 3,                !- Generator 3 Name
+  Generator:MicroTurbine,     !- Generator 3 Object Type
+  65000,                      !- Generator 3 Rated Electric Power Output
+  MID PEAK GENERATOR SCHEDULE,!- Generator 3 Availability Schedule Name
+  ;                           !- Generator 3 Rated Thermal to Electrical Power Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-002}
@@ -2639,17 +2623,16 @@ This field contains the name of a schedule used to control whether or not the un
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 Generator:MicroCHP,
-  MicroCoGen1,                         !- Name
-  SENERTECH5_5KW,                   !- Performance Parameters Name
-  ZN_1_FLR_1_SEC_1,               !- Zone Name
-  MICROCHP SENERTECH Pump-MicroCoGen1Node,   !- Cooling Water Inlet Node Name
-  MICROCHP SENERTECH Supply Equipment Outlet Node,   !- Cooling Water Outlet Node Name
-  MicroCoGen1 air inlet node,   !- Air Inlet Node Name
-  ,                                               !- Air Outlet Node Name
-  NATURALGAS,                           !- Generator Fuel Supply Name
-  ALWAYS_ON;                             !- Availability Schedule Name
+  MicroCoGen1,                !- Name
+  SENERTECH5_5KW,             !- Performance Parameters Name
+  ZN_1_FLR_1_SEC_1,           !- Zone Name
+  MICROCHP SENERTECH Pump-MicroCoGen1Node,  !- Cooling Water Inlet Node Name
+  MICROCHP SENERTECH Supply Equipment Outlet Node,  !- Cooling Water Outlet Node Name
+  MicroCoGen1 air inlet node, !- Air Inlet Node Name
+  ,                           !- Air Outlet Node Name
+  NATURALGAS,                 !- Generator Fuel Supply Name
+  ALWAYS_ON;                  !- Availability Schedule Name
 \end{lstlisting}
 
 \subsection{Generator:MicroCHP:NonNormalizedParameters}\label{generatormicrochpnonnormalizedparameters}
@@ -2793,35 +2776,34 @@ This field is used to choose between two different control situations for the co
 An example IDF showing how this object is used is provided below:
 
 \begin{lstlisting}
-
 Generator:MicroCHP:NonNormalizedParameters,
-  SENERTECH5_5KW,         !- Name
-  5500.0000,              !- Maximum Electric Power {W}
-  0.0000,                 !- Minimum Electric Power {W}
-  0.0000,                 !- Minimum Cooling Water Flow Rate {kg/s}
-  80.0000,                !- Maximum Cooling Water Temperature {C}
-  SenerTechElEff,         !- Electrical Efficiency Curve Name
-  SenerTechThermEff,      !- Thermal Efficiency Curve Name
-  InternalControl,        !- Cooling Water Flow Rate Mode
-  SenerTechCoolWaterflow, !- Cooling Water Flow Rate Curve Name
-  SenerTechAirFlow,       !- Air Flow Rate Curve Name
-  1000000000.0000,        !- Maximum Net Electrical Power Rate of Change {W/s}
-  1000000000.0000,        !- Maximum Fuel Flow Rate of Change {kg/s2}
-  741.0000,               !- Heat Exchanger U-Factor Times Area Value {W/K}
-  13.7000,                !- Skin Loss U-Factor Times Area Value {W/K}
-  0.5000,                 !- Skin Loss Radiative Fraction
-  63605.6000,             !- Aggregated Thermal Mass of Energy Conversion Portion of Generator {W/K}
-  1000.7000,              !- Aggregated Thermal Mass of Heat Recovery Portion of Generator {W/K}
-  0.0000,                 !- Standby Power {W}
-  TimeDelay,              !- Warm Up Mode
-  ,                       !- Warm Up Fuel Flow Rate Coefficient
-  ,                       !- Nominal Engine Operating Temperature {C}
-  ,                       !- Warm Up Power Coefficient
-  ,                       !- Warm Up Fuel Flow Rate Limit Ratio
-  60.0000,                !- Warm Up Delay Time {s}
-  0.0000,                 !- Cool Down Power {W}
-  60.0000,                !- Cool Down Delay Time {s}
-  OptionalCoolDown;       !- Restart Mode
+  SENERTECH5_5KW,             !- Name
+  5500.0000,                  !- Maximum Electric Power {W}
+  0.0000,                     !- Minimum Electric Power {W}
+  0.0000,                     !- Minimum Cooling Water Flow Rate {kg/s}
+  80.0000,                    !- Maximum Cooling Water Temperature {C}
+  SenerTechElEff,             !- Electrical Efficiency Curve Name
+  SenerTechThermEff,          !- Thermal Efficiency Curve Name
+  InternalControl,            !- Cooling Water Flow Rate Mode
+  SenerTechCoolWaterflow,     !- Cooling Water Flow Rate Curve Name
+  SenerTechAirFlow,           !- Air Flow Rate Curve Name
+  1000000000.0000,            !- Maximum Net Electrical Power Rate of Change {W/s}
+  1000000000.0000,            !- Maximum Fuel Flow Rate of Change {kg/s2}
+  741.0000,                   !- Heat Exchanger U-Factor Times Area Value {W/K}
+  13.7000,                    !- Skin Loss U-Factor Times Area Value {W/K}
+  0.5000,                     !- Skin Loss Radiative Fraction
+  63605.6000,                 !- Aggregated Thermal Mass of Energy Conversion Portion of Generator {W/K}
+  1000.7000,                  !- Aggregated Thermal Mass of Heat Recovery Portion of Generator {W/K}
+  0.0000,                     !- Standby Power {W}
+  TimeDelay,                  !- Warm Up Mode
+  ,                           !- Warm Up Fuel Flow Rate Coefficient
+  ,                           !- Nominal Engine Operating Temperature {C}
+  ,                           !- Warm Up Power Coefficient
+  ,                           !- Warm Up Fuel Flow Rate Limit Ratio
+  60.0000,                    !- Warm Up Delay Time {s}
+  0.0000,                     !- Cool Down Power {W}
+  60.0000,                    !- Cool Down Delay Time {s}
+  OptionalCoolDown;           !- Restart Mode
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-001}
@@ -3056,17 +3038,16 @@ This field contains the name of a \hyperref[generatorfuelcellstackcooler]{Genera
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell,
-  FCT SOFC,                               !- Name
-  FCT SOFC Power Module,     !- Power Module Name
-  FCT SOFC Air Supply,         !- Air Supply Name
+  FCT SOFC,                   !- Name
+  FCT SOFC Power Module,      !- Power Module Name
+  FCT SOFC Air Supply,        !- Air Supply Name
   FCT SOFC Fuel Supply,       !- Fuel Supply Name
-  FCT SOFC Water Supply,     !- Water Supply Name
-  FCT SOFC Auxiliary Heater,   !- Auxiliary Heater Name
-  FCT SOFC Exhaust HX,         !- Heat Exchanger Name
-  FCT SOFC Battery,               !- Electrical Storage Name
-  FCT SOFC Inverter;             !- Inverter Name
+  FCT SOFC Water Supply,      !- Water Supply Name
+  FCT SOFC Auxiliary Heater,  !- Auxiliary Heater Name
+  FCT SOFC Exhaust HX,        !- Heat Exchanger Name
+  FCT SOFC Battery,           !- Electrical Storage Name
+  FCT SOFC Inverter;          !- Inverter Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-001}
@@ -3600,41 +3581,40 @@ This field is used to describe the maximum operating point for the net DC electr
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:PowerModule,
-  FCT SOFC Power Module,     !- Name
-  Annex42,                                 !- Efficiency Curve Mode
-  FCT Power Curve,                 !- Efficiency Curve Name
-  0.354,                                     !- Nominal Efficiency
-  3400,                                       !- Nominal Electrical Power {W}
-  0,                                             !- Number of Stops at Start of Simulation
-  0.0,                                         !- Cycling Performance Degradation Coefficient
-  0,                                             !- Number of Run Hours at Beginning of Simulation {hr}
-  0.0,                                         !- Accumulated Run Time Degradation Coefficient
-  10000,                                     !- Run Time Degradation Initiation Time Threshold {hr}
-  1.4,                                         !- Power Up Transient Limit {W/s}
-  0.2,                                         !- Power Down Transient Limit {W/s}
-  0.0,                                         !- Start Up Time {s}
-  0.2,                                         !- Start Up Fuel {kmol}
-  ,                                               !- Start Up Electricity Consumption {J}
-  0.0,                                         !- Start Up Electricity Produced {J}
-  0.0,                                         !- Shut Down Time {s}
-  0.2,                                         !- Shut Down Fuel {kmol}
-  ,                                               !- Shut Down Electricity Consumption {J}
-  0.0,                                         !- Ancillary Electricity Constant Term
-  0.0,                                         !- Ancillary Electricity Linear Term
-  ConstantRate,                       !- Skin Loss Calculation Mode
-  ZN_1_FLR_1_SEC_5,               !- Zone Name
-  0.6392,                                   !- Skin Loss Radiative Fraction
-  729,                                         !- Constant Skin Loss Rate {W}
-  0.0,                                         !- Skin Loss U-Factor Times Area Term {W/K}
-  ,                                               !- Skin Loss Quadratic Curve Name
-  6.156E-3,                               !- Dilution Air Flow Rate {kmol/s}
-  2307,                                       !- Stack Heat loss to Dilution Air {W}
-  SOFC Air HR Inlet,             !- Dilution Inlet Air Node Name
-  SOFC Air HR Outlet,           !- Dilution Outlet Air Node Name
-  3010,                                       !- Minimum Operating Point {W}
-  3728;                                       !- Maximum Operating Point {W}
+  FCT SOFC Power Module,      !- Name
+  Annex42,                    !- Efficiency Curve Mode
+  FCT Power Curve,            !- Efficiency Curve Name
+  0.354,                      !- Nominal Efficiency
+  3400,                       !- Nominal Electrical Power {W}
+  0,                          !- Number of Stops at Start of Simulation
+  0.0,                        !- Cycling Performance Degradation Coefficient
+  0,                          !- Number of Run Hours at Beginning of Simulation {hr}
+  0.0,                        !- Accumulated Run Time Degradation Coefficient
+  10000,                      !- Run Time Degradation Initiation Time Threshold {hr}
+  1.4,                        !- Power Up Transient Limit {W/s}
+  0.2,                        !- Power Down Transient Limit {W/s}
+  0.0,                        !- Start Up Time {s}
+  0.2,                        !- Start Up Fuel {kmol}
+  ,                           !- Start Up Electricity Consumption {J}
+  0.0,                        !- Start Up Electricity Produced {J}
+  0.0,                        !- Shut Down Time {s}
+  0.2,                        !- Shut Down Fuel {kmol}
+  ,                           !- Shut Down Electricity Consumption {J}
+  0.0,                        !- Ancillary Electricity Constant Term
+  0.0,                        !- Ancillary Electricity Linear Term
+  ConstantRate,               !- Skin Loss Calculation Mode
+  ZN_1_FLR_1_SEC_5,           !- Zone Name
+  0.6392,                     !- Skin Loss Radiative Fraction
+  729,                        !- Constant Skin Loss Rate {W}
+  0.0,                        !- Skin Loss U-Factor Times Area Term {W/K}
+  ,                           !- Skin Loss Quadratic Curve Name
+  6.156E-3,                   !- Dilution Air Flow Rate {kmol/s}
+  2307,                       !- Stack Heat loss to Dilution Air {W}
+  SOFC Air HR Inlet,          !- Dilution Inlet Air Node Name
+  SOFC Air HR Outlet,         !- Dilution Outlet Air Node Name
+  3010,                       !- Minimum Operating Point {W}
+  3728;                       !- Maximum Operating Point {W}
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:StackCooler}\label{generatorfuelcellstackcooler}
@@ -3649,7 +3629,7 @@ This field contains a unique name for the PEM fuel cell stack cooler
 
 This field contains the node name for the water inlet to the stack cooler.
 
-\subsubsection{Field: Heat Recovery Water Outlet Node Nane}\label{field-heat-recovery-water-outlet-node-nane}
+\subsubsection{Field: Heat Recovery Water Outlet Node Name}\label{field-heat-recovery-water-outlet-node-nane}
 
 This field contains the node name for the water outlet from the stack cooler.
 
@@ -3841,30 +3821,29 @@ These fields describe the molar fraction of the air stream constituents. It is v
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:AirSupply,
-  FCT SOFC Air Supply,         !- Name
-  SOFC Air Inlet Node,         !- Air Inlet Node Name
-  FCT Blower Power Curve,   !- Blower Power Curve Name
-  1.0,                                         !- Blower Heat Loss Factor
-  QuadraticFunctionofElectricPower,   !- Air Supply Rate Calculation Mode
-  ,                                               !- Stoichiometric Ratio
-  FCT Excess Air Ratio Curve,   !- Air Rate Function of Electric Power Curve Name
-  2.83507E-3,                           !- Air Rate Air Temperature Coefficient
-  ,                                               !- Air Rate Function of Fuel Rate Curve Name
-  NoRecovery,                           !- Air Intake Heat Recovery Mode
-  UserDefinedConstituents,   !- Air Supply Constituent Mode
-  5,                                             !- Number of UserDefined Constituents
-  Nitrogen,                               !- Constituent 1 Name
-  0.7728,                                   !- Molar Fraction 1
-  Oxygen,                                   !- Constituent 2 Name
-  0.2073,                                   !- Molar Fraction 2
-  Water,                                     !- Constituent 3 Name
-  0.0104,                                   !- Molar Fraction 3
-  Argon,                                     !- Constituent 4 Name
-  0.0092,                                   !- Molar Fraction 4
-  CarbonDioxide,                     !- Constituent 5 Name
-  0.0003;                                   !- Molar Fraction 5
+  FCT SOFC Air Supply,        !- Name
+  SOFC Air Inlet Node,        !- Air Inlet Node Name
+  FCT Blower Power Curve,     !- Blower Power Curve Name
+  1.0,                        !- Blower Heat Loss Factor
+  QuadraticFunctionofElectricPower,  !- Air Supply Rate Calculation Mode
+  ,                           !- Stoichiometric Ratio
+  FCT Excess Air Ratio Curve, !- Air Rate Function of Electric Power Curve Name
+  2.83507E-3,                 !- Air Rate Air Temperature Coefficient
+  ,                           !- Air Rate Function of Fuel Rate Curve Name
+  NoRecovery,                 !- Air Intake Heat Recovery Mode
+  UserDefinedConstituents,    !- Air Supply Constituent Mode
+  5,                          !- Number of UserDefined Constituents
+  Nitrogen,                   !- Constituent 1 Name
+  0.7728,                     !- Molar Fraction 1
+  Oxygen,                     !- Constituent 2 Name
+  0.2073,                     !- Molar Fraction 2
+  Water,                      !- Constituent 3 Name
+  0.0104,                     !- Molar Fraction 3
+  Argon,                      !- Constituent 4 Name
+  0.0092,                     !- Molar Fraction 4
+  CarbonDioxide,              !- Constituent 5 Name
+  0.0003;                     !- Molar Fraction 5
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:WaterSupply}\label{generatorfuelcellwatersupply}
@@ -3873,26 +3852,27 @@ This object is used to provide details of the water supply subsystem. This water
 
 \begin{lstlisting}
 Generator:FuelCell:WaterSupply,
-   A1, \field Name
-           \required-field
-           \reference FCWaterSupNames
-   A2, \field Reformer Water Flow Rate Function of Fuel Rate Curve Name
-           \type object-list
-           \object-list QuadraticCurves
-   A3, \field Reformer Water Pump Power Function of Fuel Rate Curve Name
-           \type object-list
-           \object-list QubicCurves
-   N1, \field Pump Heat Loss Factor
-   A4, \field Water Temperature Modeling Mode
-           \type choice
-           \key TemperatureFromAirNode
-           \key TemperatureFromWaterNode
-           \key TemperatureFromSchedule
-           \key MainsWaterTemperature
-   A5, \field Water Temperature Reference Node Name
-   A6; \field Water Temperature Schedule Name
-           \type object-list
-           \object-list ScheduleNames
+  A1, \field Name
+  \required-field
+  \reference FCWaterSupNames
+  A2, \field Reformer Water Flow Rate Function of Fuel Rate Curve Name
+  \type object-list
+  \object-list QuadraticCurves
+  A3, \field Reformer Water Pump Power Function of Fuel Rate Curve Name
+  \type object-list
+  \object-list QubicCurves
+  N1, \field Pump Heat Loss Factor
+  A4, \field Water Temperature Modeling Mode
+  \type choice
+  \key TemperatureFromAirNode
+  \key TemperatureFromWaterNode
+  \key TemperatureFromSchedule
+  \key MainsWaterTemperature
+  A5, \field Water Temperature Reference Node Name
+  A6; \field Water Temperature Schedule Name
+
+\type object-list
+  \object-list ScheduleNames
 \end{lstlisting}
 
 \subsubsection{Inputs}\label{inputs-15-003}
@@ -3940,32 +3920,31 @@ This field is used to define the name of a schedule, defined elsewhere in the in
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:WaterSupply,
-  FCT SOFC Water Supply,     !- Name
-  Null Quadratic,                   !- Reformer Water Flow Rate Function of Fuel Rate Curve Name
-  Null Cubic,                           !- Reformer Water Pump Power Function of Fuel Rate Curve Name
-  0.0,                                         !- Pump Heat Loss Factor
-  TemperatureFromAirNode,   !- Water Temperature Modeling Mode
-  SOFC Air Inlet Node,         !- Water Temperature Reference Node Name
-  ;                                               !- Water Temperature Schedule Name
+  FCT SOFC Water Supply,      !- Name
+  Null Quadratic,             !- Reformer Water Flow Rate Function of Fuel Rate Curve Name
+  Null Cubic,                 !- Reformer Water Pump Power Function of Fuel Rate Curve Name
+  0.0,                        !- Pump Heat Loss Factor
+  TemperatureFromAirNode,     !- Water Temperature Modeling Mode
+  SOFC Air Inlet Node,        !- Water Temperature Reference Node Name
+  ;                           !- Water Temperature Schedule Name
 
-  Curve:Quadratic,
-  Null Quadratic,                   !- Name
-  0.0,                                         !- Coefficient1 Constant
-  0.0,                                         !- Coefficient2 x
-  0.0,                                         !- Coefficient3 x**2
-  -1.0E+10,                               !- Minimum Value of x
-  1.0E+10;                                 !- Maximum Value of x
+Curve:Quadratic,
+  Null Quadratic,             !- Name
+  0.0,                        !- Coefficient1 Constant
+  0.0,                        !- Coefficient2 x
+  0.0,                        !- Coefficient3 x**2
+  -1.0E+10,                   !- Minimum Value of x
+  1.0E+10;                    !- Maximum Value of x
 
-  Curve:Cubic,
-  Null Cubic,                           !- Name
-  0.0,                                         !- Coefficient1 Constant
-  0.0,                                         !- Coefficient2 x
-  0.0,                                         !- Coefficient3 x**2
-  0.0,                                         !- Coefficient4 x**3
-  -1.0E+10,                               !- Minimum Value of x
-  1.0E+10;                                 !- Maximum Value of x
+Curve:Cubic,
+  Null Cubic,                 !- Name
+  0.0,                        !- Coefficient1 Constant
+  0.0,                        !- Coefficient2 x
+  0.0,                        !- Coefficient3 x**2
+  0.0,                        !- Coefficient4 x**3
+  -1.0E+10,                   !- Minimum Value of x
+  1.0E+10;                    !- Maximum Value of x
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:AuxiliaryHeater}\label{generatorfuelcellauxiliaryheater}
@@ -4035,20 +4014,19 @@ This field is used to describe the minimum fuel use rate for the auxiliary burne
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:AuxiliaryHeater,
-  FCT SOFC Auxiliary Heater,   !- Name
-  0.0,                                         !- Excess Air Ratio
-  0.0,                                         !- Ancillary Power Constant Term
-  0.0,                                         !- Ancillary Power Linear Term
-  0.5,                                         !- Skin Loss U-Factor Times Area Value
-  SurroundingZone,                 !- Skin Loss Destination
-  ZN_1_FLR_1_SEC_5,               !- Zone Name to Receive Skin Losses
-  Watts,                                     !- Heating Capacity Units
-  0.0,                                         !- Maximum Heating Capacity in Watts
-  0.0,                                         !- Minimum Heating Capacity in Watts
-  ,                                               !- Maximum Heating Capacity in Kmol per Second
-  ;                                               !- Minimum Heating Capacity in Kmol per Second
+  FCT SOFC Auxiliary Heater,  !- Name
+  0.0,                        !- Excess Air Ratio
+  0.0,                        !- Ancillary Power Constant Term
+  0.0,                        !- Ancillary Power Linear Term
+  0.5,                        !- Skin Loss U-Factor Times Area Value
+  SurroundingZone,            !- Skin Loss Destination
+  ZN_1_FLR_1_SEC_5,           !- Zone Name to Receive Skin Losses
+  Watts,                      !- Heating Capacity Units
+  0.0,                        !- Maximum Heating Capacity in Watts
+  0.0,                        !- Minimum Heating Capacity in Watts
+  ,                           !- Maximum Heating Capacity in Kmol per Second
+  ;                           !- Minimum Heating Capacity in Kmol per Second
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:ExhaustGasToWaterHeatExchanger}\label{generator-fuelcell-exhaustgastowaterheatexchanger}
@@ -4194,32 +4172,31 @@ This field describes the value of \({T_{cond - threshold}}\) in the relation abo
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:ExhaustGasToWaterHeatExchanger,
-  FCT SOFC Exhaust HX,         !- Name
-  Small SOFC Heat Rec Inlet Node,   !- Heat Recovery Water Inlet Node Name
-  Small SOFC Heat Rec Outlet Node,   !- Heat Recovery Water Outlet Node Name
-  0.0004,                                   !- Heat Recovery Water Maximum Flow Rate {m3/s}
+  FCT SOFC Exhaust HX,        !- Name
+  Small SOFC Heat Rec Inlet Node,  !- Heat Recovery Water Inlet Node Name
+  Small SOFC Heat Rec Outlet Node,  !- Heat Recovery Water Outlet Node Name
+  0.0004,                     !- Heat Recovery Water Maximum Flow Rate {m3/s}
   SOFC Air Outlet Node,       !- Exhaust Outlet Air Node Name
-  CONDENSING,                           !- Heat Exchanger Calculation Method
-  ,                                               !- Method 1 Heat Exchanger Effectiveness
-  83.1,                                       !- Method 2 Parameter hxs0
-  4798,                                       !- Method 2 Parameter hxs1
-  -138E+3,                                 !- Method 2 Parameter hxs2
-  -353.8E+3,                             !- Method 2 Parameter hxs3
-  5.15E+8,                                 !- Method 2 Parameter hxs4
-  ,                                               !- Method 3 h0Gas Coefficient
-  ,                                               !- Method 3 NdotGasRef Coefficient
-  ,                                               !- Method 3 n Coefficient
-  ,                                               !- Method 3 Gas Area
-  ,                                               !- Method 3 h0 Water Coefficient
-  ,                                               !- Method 3 N dot Water ref Coefficient
-  ,                                               !- Method 3 m Coefficient
-  ,                                               !- Method 3 Area Water Coefficient
-  ,                                               !- Method 3 F Adjustment Factor
-  -1.96E-4,                               !- Method 4 hxl1 Coefficient
-  3.1E-3,                                   !- Method 4 hxl2 Coefficient
-  35.0;                                       !- Method 4 Condensation Threshold {C}
+  CONDENSING,                 !- Heat Exchanger Calculation Method
+  ,                           !- Method 1 Heat Exchanger Effectiveness
+  83.1,                       !- Method 2 Parameter hxs0
+  4798,                       !- Method 2 Parameter hxs1
+  -138E+3,                    !- Method 2 Parameter hxs2
+  -353.8E+3,                  !- Method 2 Parameter hxs3
+  5.15E+8,                    !- Method 2 Parameter hxs4
+  ,                           !- Method 3 h0Gas Coefficient
+  ,                           !- Method 3 NdotGasRef Coefficient
+  ,                           !- Method 3 n Coefficient
+  ,                           !- Method 3 Gas Area
+  ,                           !- Method 3 h0 Water Coefficient
+  ,                           !- Method 3 N dot Water ref Coefficient
+  ,                           !- Method 3 m Coefficient
+  ,                           !- Method 3 Area Water Coefficient
+  ,                           !- Method 3 F Adjustment Factor
+  -1.96E-4,                   !- Method 4 hxl1 Coefficient
+  3.1E-3,                     !- Method 4 hxl2 Coefficient
+  35.0;                       !- Method 4 Condensation Threshold {C}
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:ElectricalStorage}\label{generatorfuelcellelectricalstorage}
@@ -4275,16 +4252,15 @@ This field describes the value for the initial state of charge (J). This allows 
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:ElectricalStorage,
-  FCT SOFC Battery,               !- Name
-  SimpleEfficiencyWithConstraints,   !- Choice of Model
-  1.0,                                         !- Nominal Charging Energetic Efficiency
-  1.0,                                         !- Nominal Discharging Energetic Efficiency
-  0,                                             !- Simple Maximum Capacity {J}
-  0,                                             !- Simple Maximum Power Draw {W}
-  0,                                             !- Simple Maximum Power Store {W}
-  0;                                             !- Initial Charge State {J}
+  FCT SOFC Battery,           !- Name
+  SimpleEfficiencyWithConstraints,  !- Choice of Model
+  1.0,                        !- Nominal Charging Energetic Efficiency
+  1.0,                        !- Nominal Discharging Energetic Efficiency
+  0,                          !- Simple Maximum Capacity {J}
+  0,                          !- Simple Maximum Power Draw {W}
+  0,                          !- Simple Maximum Power Store {W}
+  0;                          !- Initial Charge State {J}
 \end{lstlisting}
 
 \subsection{Generator:FuelCell:Inverter}\label{generatorfuelcellinverter}
@@ -4316,21 +4292,19 @@ This field names a \hyperref[curvequadratic]{Curve:Quadratic} object defined els
 An example input data file (IDF) entry for this object is provided below:
 
 \begin{lstlisting}
-
 Generator:FuelCell:Inverter,
-  FCT SOFC Inverter,             !- Name
-  Quadratic,                             !- Inverter Efficiency Calculation Mode
-  ,                                               !- Inverter Efficiency
-  FCT Inverter Quadratic;   !- Efficiency Function of DC Power Curve Name
+  FCT SOFC Inverter,          !- Name
+  Quadratic,                  !- Inverter Efficiency Calculation Mode
+  ,                           !- Inverter Efficiency
+  FCT Inverter Quadratic;     !- Efficiency Function of DC Power Curve Name
 
-
-  Curve:Quadratic,
-  FCT Inverter Quadratic,   !- Name
-  0.560717,                               !- Coefficient1 Constant
-  1.24019E-4,                           !- Coefficient2 x
-  -2.01648E-8,                         !- Coefficient3 x**2
-  -1.0E+10,                               !- Minimum Value of x
-  1.0E+10;                                 !- Maximum Value of x
+Curve:Quadratic,
+  FCT Inverter Quadratic,     !- Name
+  0.560717,                   !- Coefficient1 Constant
+  1.24019E-4,                 !- Coefficient2 x
+  -2.01648E-8,                !- Coefficient3 x**2
+  -1.0E+10,                   !- Minimum Value of x
+  1.0E+10;                    !- Maximum Value of x
 \end{lstlisting}
 
 \subsection{Generator:FuelSupply}\label{generatorfuelsupply}
@@ -4571,13 +4545,12 @@ This field should be set to the name of schedule defined elsewhere in the input 
 An example idf instance of this object follows:
 
 \begin{lstlisting}
-
 PhotovoltaicPerformance:Simple,
-  Simple PV Flat, !- Name
-  0.1044 , !- Fraction of Surface area that has active solar cells
-  FIXED ,   !- Conversion efficiency input mode
-  0.12 ,     !- Value for cell efficiency if fixed
-  ;           !- Name of Schedule that Defines Efficiency
+  Simple PV Flat,             !- Name
+  0.1044,                     !- Fraction of Surface area that has active solar cells
+  FIXED,                      !- Conversion efficiency input mode
+  0.12,                       !- Value for cell efficiency if fixed
+  ;                           !- Name of Schedule that Defines Efficiency
 \end{lstlisting}
 
 \subsection{PhotovoltaicPerformance:EquivalentOne-Diode}\label{photovoltaicperformanceequivalentone-diode}
@@ -4736,28 +4709,27 @@ This field is the heat capacity (in J/m\(^{2}\).K) of the modules in the array. 
 An IDF example:
 
 \begin{lstlisting}
-
 PhotovoltaicPerformance:EquivalentOne-Diode,
-  Siemens, ! Name
-  CrystallineSilicon, !cell Type
-  36,           !cells in series [-]
-  1.0,         !module area [m2]
-  0.9,         !tau alpha product at normal incidence [-]
-  1.12,       !electron bandgap [eV]
-  1000000, !shunt resistance [ohms]
-  6.5,         !short circuit current at reference conditions [A/K]
-  21.6,       !open circuit voltage at reference conditions [V/K]
-  25,           !temperature at reference conditions [C]
-  1000,       !radiation at reference conditions [W/m2]
-  5.9,         !current at max power
-  17,           !voltage at max power
-  0.002,     !temperature coefficient of short circuit current
-  -0.079,   !temperature coefficient of open circuit voltage
-  20,           !ambient temperature at NOCT [C]
-  45,           !cell temperature at NOCT [C]
-  800,         !radiation at NOCT [W/m2]
-  30,           !heat loss coefficient [W/m2.K]
-  50000;     !total heat capacity (only used in TC mode 1)
+  Siemens,                    !- Name
+  CrystallineSilicon,         !- cell Type
+  36,                         !- cells in series [-]
+  1.0,                        !- module area [m2]
+  0.9,                        !- tau alpha product at normal incidence [-]
+  1.12,                       !- electron bandgap [eV]
+  1000000,                    !- shunt resistance [ohms]
+  6.5,                        !- short circuit current at reference conditions [A/K]
+  21.6,                       !- open circuit voltage at reference conditions [V/K]
+  25,                         !- temperature at reference conditions [C]
+  1000,                       !- radiation at reference conditions [W/m2]
+  5.9,                        !- current at max power
+  17,                         !- voltage at max power
+  0.002,                      !- temperature coefficient of short circuit current
+  -0.079,                     !- temperature coefficient of open circuit voltage
+  20,                         !- ambient temperature at NOCT [C]
+  45,                         !- cell temperature at NOCT [C]
+  800,                        !- radiation at NOCT [W/m2]
+  30,                         !- heat loss coefficient [W/m2.K]
+  50000;                      !- total heat capacity (only used in TC mode 1)
 \end{lstlisting}
 
 \subsection{PhotovoltaicPerformance:Sandia}\label{photovoltaicperformancesandia}
@@ -4937,53 +4909,50 @@ C7 in Sandia Database (non-dimensional)
 An example of the object follows:
 
 \begin{lstlisting}
-
 PhotovoltaicPerformance:Sandia,
-  ASE-50-ATF-17_45, ! Module Name (production Name)
-  0.43, ! field Active Area Acoll {m2}, single module
-  36, ! NcellSer {unitless}
-  1, ! NparSerCells
-  2.90, ! Isc0 {Amps}
-  20.70, ! Voc0 {Volts}
-  2.65, ! Imp0 {Amps}
-  17.00, ! Vmp0 {Volts}
-  7.8e-04, ! aIsc {1/degC}
-  1.0e-04, ! aImp {1/degC}
-  0.99, ! C0 {unitless}
-  3.0e-03, ! C1 {unitless}
-  -0.07, ! BVoc0 {Volts/degC}
-  0.00, ! mBVoc {Volts/degC}
-  -0.07, ! BVmp0 {Volts/degC}
-  0.00, ! mBVmp {Volts/degC}
-  1.29, ! Diode Factor (n) {Unitless}
-
-
-  0.20, ! C2 {Unitless}
-  -8.60, ! C3 {Unitless}
-  0.93, ! A0 {Unitless}
-  0.05, ! A1 {Unitless}
-  -7.9402e-03, ! A2 {Unitless}
-  5.2228e-04, ! A3 {Unitless}
-  -1.3142e-05, ! A4 {Unitless}
-  1.00, ! B0 {Unitless}
-  -2.438e-03, ! B1 {Unitless}
-  3.103e-04, ! B2 {Unitless}
-  -1.246e-05, ! B3 {Unitless}
-  2.112e-07, ! B4 {Unitless}
-  -1.359e-09, ! B5 {Unitless}
-  3.00, ! dT0 {degC}
-  1.00, ! fd {Unitless}
-  -3.47, ! a {Unitless}
-  -0.05, ! b {Unitless}
-  0.98, ! C4 {Unitless}
-  0.01, ! C5 {Unitless}
-  2.86, ! Ix0 {Amps}
-  1.85, ! Ixx0 {Amps}
-  1.13, ! C6 {Unitless}
-  -0.13, ! C7 {Unitless}
-  -1.359e-09, ! B5 {Unitless}
-  3.00, ! dT0 {degC}
-  1.00; ! fd {Unitless}
+  ASE-50-ATF-17_45,           !- Module Name (production Name)
+  0.43,                       !- field Active Area Acoll {m2}, single module
+  36,                         !- NcellSer {unitless}
+  1,                          !- NparSerCells
+  2.90,                       !- Isc0 {Amps}
+  20.70,                      !- Voc0 {Volts}
+  2.65,                       !- Imp0 {Amps}
+  17.00,                      !- Vmp0 {Volts}
+  7.8e-04,                    !- aIsc {1/degC}
+  1.0e-04,                    !- aImp {1/degC}
+  0.99,                       !- C0 {unitless}
+  3.0e-03,                    !- C1 {unitless}
+  -0.07,                      !- BVoc0 {Volts/degC}
+  0.00,                       !- mBVoc {Volts/degC}
+  -0.07,                      !- BVmp0 {Volts/degC}
+  0.00,                       !- mBVmp {Volts/degC}
+  1.29,                       !- Diode Factor (n) {Unitless}
+  0.20,                       !- C2 {Unitless}
+  -8.60,                      !- C3 {Unitless}
+  0.93,                       !- A0 {Unitless}
+  0.05,                       !- A1 {Unitless}
+  -7.9402e-03,                !- A2 {Unitless}
+  5.2228e-04,                 !- A3 {Unitless}
+  -1.3142e-05,                !- A4 {Unitless}
+  1.00,                       !- B0 {Unitless}
+  -2.438e-03,                 !- B1 {Unitless}
+  3.103e-04,                  !- B2 {Unitless}
+  -1.246e-05,                 !- B3 {Unitless}
+  2.112e-07,                  !- B4 {Unitless}
+  -1.359e-09,                 !- B5 {Unitless}
+  3.00,                       !- dT0 {degC}
+  1.00,                       !- fd {Unitless}
+  -3.47,                      !- a {Unitless}
+  -0.05,                      !- b {Unitless}
+  0.98,                       !- C4 {Unitless}
+  0.01,                       !- C5 {Unitless}
+  2.86,                       !- Ix0 {Amps}
+  1.85,                       !- Ixx0 {Amps}
+  1.13,                       !- C6 {Unitless}
+  -0.13,                      !- C7 {Unitless}
+  -1.359e-09,                 !- B5 {Unitless}
+  3.00,                       !- dT0 {degC}
+  1.00;                       !- fd {Unitless}
 \end{lstlisting}
 
 When using EpMacro with a typical installation of EnergyPlus, the above entry can be included in an input file by adding the following two lines to an input macro file (*.imf).
@@ -5300,34 +5269,33 @@ These fields are only valid for HAWT systems.
 An example input for the wind turbine is shown in below.
 
 \begin{lstlisting}
-
 Generator:WindTurbine,
-  WT1,                     ! Name
-  WT Schedule,     ! Availability Schedule Name
-  HorizontalAxisWindTurbine,     ! Rotor type
-  FixedSpeedVariablePitch,         ! Power control type
-  41,                       ! Maximum rotational speed of the rotor {rev/min}
-  19.2,                   ! Diameter of the rotor {m}
-  30.5,                   ! Overall height of the system {m}
-  3,                         ! Number of blades
-  55000,                 ! Rated power output at the rated wind speed {W}
-  11,                       ! Rated wind speed {m/s}
-  3.5,                     ! Cut In wind speed {m/s}
-  25,                       ! Cut Out wind speed {m/s}
-  0.835,                 ! Overall wind turbine system efficiency
-  8,                         ! Maximum tip speed ratio
-  0.4,                     ! Maximum power coefficient
-  6.4,                     ! Annual local wind speed {m/s}
-  50,                       ! Height of local meteorological station {m}
-  ,                           ! Blade chord area {m2}
-  ,                           ! Blade drag coefficient
-  ,                           ! Blade lift coefficient
-  0.5176,               ! Power Coefficient C1
-  116,                     ! Power Coefficient C2
-  0.4,                     ! Power Coefficient C3
-  0,                         ! Power Coefficient C4
-  5,                         ! Power Coefficient C5
-  21;                       ! Power Coefficient C6
+  WT1,                        !- Name
+  WT Schedule,                !- Availability Schedule Name
+  HorizontalAxisWindTurbine,  !- Rotor type
+  FixedSpeedVariablePitch,    !- Power control type
+  41,                         !- Maximum rotational speed of the rotor {rev/min}
+  19.2,                       !- Diameter of the rotor {m}
+  30.5,                       !- Overall height of the system {m}
+  3,                          !- Number of blades
+  55000,                      !- Rated power output at the rated wind speed {W}
+  11,                         !- Rated wind speed {m/s}
+  3.5,                        !- Cut In wind speed {m/s}
+  25,                         !- Cut Out wind speed {m/s}
+  0.835,                      !- Overall wind turbine system efficiency
+  8,                          !- Maximum tip speed ratio
+  0.4,                        !- Maximum power coefficient
+  6.4,                        !- Annual local wind speed {m/s}
+  50,                         !- Height of local meteorological station {m}
+  ,                           !- Blade chord area {m2}
+  ,                           !- Blade drag coefficient
+  ,                           !- Blade lift coefficient
+  0.5176,                     !- Power Coefficient C1
+  116,                        !- Power Coefficient C2
+  0.4,                        !- Power Coefficient C3
+  0,                          !- Power Coefficient C4
+  5,                          !- Power Coefficient C5
+  21;                         !- Power Coefficient C6
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12-001}

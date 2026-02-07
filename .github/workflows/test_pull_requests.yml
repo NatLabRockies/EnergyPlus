@@ -248,7 +248,7 @@ jobs:
       continue-on-error: true
       run: python ./scripts/dev/gha_regressions.py ./build/testfiles-develop ./build/testfiles ./regressions
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       id: upload_regressions
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'  # only run this if regressions were encountered "failed"
       with:

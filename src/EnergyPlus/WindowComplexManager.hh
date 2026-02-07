@@ -233,7 +233,7 @@ namespace WindowComplexManager {
                                   Real64 &SurfInsideTemp,     // Inside window surface temperature
                                   Real64 &SurfOutsideTemp,    // Outside surface temperature (C)
                                   Real64 &SurfOutsideEmiss,
-                                  DataBSDFWindow::Condition const CalcCondition // Calucation condition (summer, winter or no condition)
+                                  DataBSDFWindow::Condition const CalcCondition // Calculation condition (summer, winter or no condition)
     );
 
     // This function check if gas with molecular weight has already been feed into coefficients and
@@ -303,7 +303,7 @@ struct WindowComplexManagerData : BaseGlobalStruct
     Array2D<Real64> gcp = Array2D<Real64>(3, TARCOGGassesParams::maxgas, 0.0); // Matrix of constants for gas specific heat calc at constant pressure
     //     (A, B, C for max of 10 gasses) {maxgas x 3}
     Array1D<Real64> wght = Array1D<Real64>(TARCOGGassesParams::maxgas, 0.0); // Vector of Molecular weights for gasses {maxgas}
-    Array1D<Real64> gama = Array1D<Real64>(TARCOGGassesParams::maxgas, 0.0); // Vector of spefic heat ration for low pressure calc {maxgas}
+    Array1D<Real64> gama = Array1D<Real64>(TARCOGGassesParams::maxgas, 0.0); // Vector of specific heat ration for low pressure calc {maxgas}
     Array1D_int nmix = Array1D_int(TARCOGParams::maxlay + 1, 0);             // Vector of number of gasses in gas mixture of each gap {maxlay+1}
     Array1D_int ibc = Array1D_int(2, 0);                                     // Vector of boundary condition flags (ibc(1) - outdoor, ibc(2) - indoor)
     //             0 - h to be calculated;

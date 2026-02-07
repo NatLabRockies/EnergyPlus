@@ -738,7 +738,7 @@ void ConvertCaseToUpper(std::string_view InputString, // Input string
     // Convert a string to upper case
 
     // METHODOLOGY EMPLOYED:
-    // This routine is not dependant upon the ASCII
+    // This routine is not dependent upon the ASCII
     // code.  It works by storing the upper and lower case alphabet.  It
     // scans the whole input string.  If it finds a character in the lower
     // case alphabet, it makes an appropriate substitution.
@@ -770,7 +770,7 @@ void ConvertCaseToLower(std::string_view InputString, // Input string
     // Convert a string to lower case
 
     // METHODOLOGY EMPLOYED:
-    // This routine is not dependant upon the ASCII
+    // This routine is not dependent upon the ASCII
     // code.  It works by storing the upper and lower case alphabet.  It
     // scans the whole input string.  If it finds a character in the lower
     // case alphabet, it makes an appropriate substitution.

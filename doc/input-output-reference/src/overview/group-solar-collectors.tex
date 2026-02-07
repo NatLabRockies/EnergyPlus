@@ -39,14 +39,13 @@ The maximum flow rate {[}m\(^{3}\)/s{]} allowed through the collector. This fiel
 An example follows.
 
 \begin{lstlisting}
-
 SolarCollector:FlatPlate:Water,
-  Collector 1,                                                       !- Name
-  ACR Solar International Fireball 2001,   !- Solar Collector Performance Name
-  Collector Surface,                                           !- Surface Name
-  Collector Inlet Node,                                     !- Inlet Node Name
-  Collector Outlet Node,                                   !- Outlet Node Name
-  0.00005;                                                               !- Maximum Flow Rate (m3/s)
+  Collector 1,                !- Name
+  ACR Solar International Fireball 2001,  !- Solar Collector Performance Name
+  Collector Surface,          !- Surface Name
+  Collector Inlet Node,       !- Inlet Node Name
+  Collector Outlet Node,      !- Outlet Node Name
+  0.00005;                    !- Maximum Flow Rate (m3/s)
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-034}
@@ -173,18 +172,17 @@ Third coefficient of the incident angle modifier equation. This is the second-or
 An example of this object follows.
 
 \begin{lstlisting}
-
 SolarCollectorPerformance:FlatPlate,
-  Alternate Energy Technologies AE-32,   !- Name
-  2.9646,                                   !- Gross Area {m2}
-  WATER,                                     !- Test Fluid
-  0.0000388,                             !- Test Flow Rate {m3/s}
-  INLET,                                     !- Test Correlation Type
-  0.691,                                     !- Coefficient 1 of Efficiency Equation {dimensionless}
-  -3.396,                                   !- Coefficient 2 of Efficiency Equation {W/m2-K}
-  -0.00193,                               !- Coefficient 3 of Efficiency Equation {W/m2-K2}
-  -0.1939,                                 !- Coefficient 2 of Incident Angle Modifier
-  -0.0055;                                 !- Coefficient 3 of Incident Angle Modifier
+  Alternate Energy Technologies AE-32,  !- Name
+  2.9646,                     !- Gross Area {m2}
+  WATER,                      !- Test Fluid
+  0.0000388,                  !- Test Flow Rate {m3/s}
+  INLET,                      !- Test Correlation Type
+  0.691,                      !- Coefficient 1 of Efficiency Equation {dimensionless}
+  -3.396,                     !- Coefficient 2 of Efficiency Equation {W/m2-K}
+  -0.00193,                   !- Coefficient 3 of Efficiency Equation {W/m2-K2}
+  -0.1939,                    !- Coefficient 2 of Incident Angle Modifier
+  -0.0055;                    !- Coefficient 3 of Incident Angle Modifier
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-025}
@@ -232,16 +230,15 @@ The maximum flow rate {[}m3/s{]} allowed through the collector. This field is op
 An example follows.
 
 \begin{lstlisting}
-
 SolarCollector:IntegralCollectorStorage,
-  Collector 1,                                                       !- Name
-  ICS Solar Collector,                                       !- Solar Collector Performance Name
-  ICS Collector Surface,                                   !- Surface Name
-  OtherSideConditionsModel,                             !- Bottom Surface Boundary Conditions Type
-  ICS OSCM,                                                             !- Boundary Condition Model Name
-  Collector Inlet Node,                                     !- Inlet Node Name
-  Collector Outlet Node,                                   !- Outlet Node Name
-  0.00005;                                                               !- Maximum Flow Rate (m3/s)
+  Collector 1,                !- Name
+  ICS Solar Collector,        !- Solar Collector Performance Name
+  ICS Collector Surface,      !- Surface Name
+  OtherSideConditionsModel,   !- Bottom Surface Boundary Conditions Type
+  ICS OSCM,                   !- Boundary Condition Model Name
+  Collector Inlet Node,       !- Inlet Node Name
+  Collector Outlet Node,      !- Outlet Node Name
+  0.00005;                    !- Maximum Flow Rate (m3/s)
 \end{lstlisting}
 
 \subsection{SolarCollectorPerformance:IntegralCollectorStorage}\label{solarcollectorperformanceintegralcollectorstorage}
@@ -329,27 +326,26 @@ This input field value is thermal emissivity of the absorber plate. Default valu
 An example follows.
 
 \begin{lstlisting}
-
 SolarCollectorPerformance:IntegralCollectorStorage,
-  ICS Experimental,               !- Name
-  RectangularTank,                 !- ICS Collector Type
-  0.37275,                                 !- Gross Area {m2}
-  0.0195875,                             !- Collector Water Volume {m3}
-  0.10,                                       !- Bottom Heat Loss Conductance
-  1.00,                                       !- Side Heat Loss Conductance
-  0.8,                                         !- Collector Aspect Ratio {dimensionless}
-  0.08,                                       !- Collector Side Height {m}
-  5800.0,                                         !- Thermal Mass of Absorber Plate {J/m2K}
-  1,                                             !- Number of Covers {dimensionless}
-  0.05,                                       !- Cover Spacing {m}
-  1.526,                                     !- Refractive Index of Outer Cover {dimensionless}
-  0.0125,           !- Extinction Coefficient Times Thickness of Outer Cover {dimensionless}
-  0.88,                                       !- Emissivity of Outer Cover
-  1.126,                                     !- Refractive Index of Inner Cover {dimensionless}
-  0.0126,           !- Extinction Coefficient Times Thickness of Inner Cover {dimensionless}
-  0.88,                                       !- Emissivity of Inner Cover {dimensionless}
-  0.96,                                       !- Absorptance of Absorber Plate {dimensionless}
-  0.60;                                       !- Emissivity of Absorber Plate {dimensionless}
+  ICS Experimental,           !- Name
+  RectangularTank,            !- ICS Collector Type
+  0.37275,                    !- Gross Area {m2}
+  0.0195875,                  !- Collector Water Volume {m3}
+  0.10,                       !- Bottom Heat Loss Conductance
+  1.00,                       !- Side Heat Loss Conductance
+  0.8,                        !- Collector Aspect Ratio {dimensionless}
+  0.08,                       !- Collector Side Height {m}
+  5800.0,                     !- Thermal Mass of Absorber Plate {J/m2K}
+  1,                          !- Number of Covers {dimensionless}
+  0.05,                       !- Cover Spacing {m}
+  1.526,                      !- Refractive Index of Outer Cover {dimensionless}
+  0.0125,                     !- Extinction Coefficient Times Thickness of Outer Cover {dimensionless}
+  0.88,                       !- Emissivity of Outer Cover
+  1.126,                      !- Refractive Index of Inner Cover {dimensionless}
+  0.0126,                     !- Extinction Coefficient Times Thickness of Inner Cover {dimensionless}
+  0.88,                       !- Emissivity of Inner Cover {dimensionless}
+  0.96,                       !- Absorptance of Absorber Plate {dimensionless}
+  0.60;                       !- Emissivity of Absorber Plate {dimensionless}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-020}
@@ -470,18 +466,17 @@ This field is used to describe the nominal volume flow rate of the thermal worki
 An example of this object follows.
 
 \begin{lstlisting}
-
 SolarCollector:FlatPlate:PhotovoltaicThermal,
-  PVT: 1_Ceiling ,                                             !- Name
-  1_Ceiling ,                                                       !- Surface Name
-  30percentPVThalfArea ,                                 !- Photovoltaic-Thermal Model Performance Name
-  PV:ZN_1_FLR_1_SEC_1_Ceiling ,                   !- Photovoltaic Name
-  Air ,                                                                   !- Thermal Working Fluid Type
-  ,                                                                           !- Water Inlet Node Name
-  ,                                                                           !- Water Outlet Node Name
-  ZN_1_FLR_1_SEC_1:Sys_OAInlet Node ,       !- Air Inlet Node Name
-  PVT:ZN_1_FLR_1_SEC_1_Ceiling Outlet ,   !- Air Outlet Node Name
-  Autosize ;                                                         !- Design Flow Rate
+  PVT: 1_Ceiling,             !- Name
+  1_Ceiling,                  !- Surface Name
+  30percentPVThalfArea,       !- Photovoltaic-Thermal Model Performance Name
+  PV:ZN_1_FLR_1_SEC_1_Ceiling,!- Photovoltaic Name
+  Air,                        !- Thermal Working Fluid Type
+  ,                           !- Water Inlet Node Name
+  ,                           !- Water Outlet Node Name
+  ZN_1_FLR_1_SEC_1:Sys_OAInlet Node,  !- Air Inlet Node Name
+  PVT:ZN_1_FLR_1_SEC_1_Ceiling Outlet,  !- Air Outlet Node Name
+  Autosize;                   !- Design Flow Rate
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-018}
@@ -558,14 +553,13 @@ This field is used to describe an average value for the total hemispherical emit
 An example input object follows.
 
 \begin{lstlisting}
-
 SolarCollectorPerformance:PhotovoltaicThermal:Simple,
-  20percentEffPVhalfArea ,                 !- Name
-  0.5 ,                                                       !- Fraction of Surface Area with Active Thermal Collector
-  Fixed ,                                                   !- Thermal Conversion Efficiency Input Mode Type
-  0.2 ,                                                       !- Value for Thermal Conversion Efficiency if Fixed
-  ,                                                             !- Name of Schedule for Thermal Conversion Efficiency
-  0.84 ;                                                     !- Front Surface Emittance
+  20percentEffPVhalfArea,     !- Name
+  0.5,                        !- Fraction of Surface Area with Active Thermal Collector
+  Fixed,                      !- Thermal Conversion Efficiency Input Mode Type
+  0.2,                        !- Value for Thermal Conversion Efficiency if Fixed
+  ,                           !- Name of Schedule for Thermal Conversion Efficiency
+  0.84;                       !- Front Surface Emittance
 \end{lstlisting}
 
 \subsection{SolarCollectorPerformance:PhotovoltaicThermal:BIPVT}\label{solarcollectorperformancephotovoltaicthermalBIPVT}
@@ -646,27 +640,25 @@ An example input object follows.
 
 
 \begin{lstlisting}
-
-  SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
-    ZN_1_FLR_1_SEC_5_Ceiling_BIPVT, !- Name
-    OSCM_ZN_1_FLR_1_SEC_5,  !- Boundary Conditions Model Name
-    , !- Availability Schedule Name
-    0.1, !- Effective Plenum Gap Thickness Behind PV Modules
-    12.616, !- Effective Overall Height of Collector
-    8.795, !- Effective Overall Width of Collector
-    0.957, !- PV Cell Normal Transmittance-Absorptance Product
-    0.87, !- Backing Material Normal Transmittance-Absorptance Product
-    0.85, !- Cladding Normal Transmittance-Absorptance Product
-    0.85, !- Fraction of Collector Gross Area Covered by PV module
-    0.9, !- Fraction of PV cell area to PV module area
-    0.0044, !- PV Module Thermal Resistance - Top
-    0.0039, !- PV Module Thermal Resistance - Bottom
-    0.85, !- PV Module Longwave Emissivity
-    0.9, !- Backing Material Longwave Emissivity
-    0.002, !- Glass Thickness
-    1.526, !- Glass Refraction Index
-    4.0; !- Glass Extinction Coefficient
-
+SolarCollectorPerformance:PhotovoltaicThermal:BIPVT,
+  ZN_1_FLR_1_SEC_5_Ceiling_BIPVT,  !- Name
+  OSCM_ZN_1_FLR_1_SEC_5,      !- Boundary Conditions Model Name
+  ,                           !- Availability Schedule Name
+  0.1,                        !- Effective Plenum Gap Thickness Behind PV Modules
+  12.616,                     !- Effective Overall Height of Collector
+  8.795,                      !- Effective Overall Width of Collector
+  0.957,                      !- PV Cell Normal Transmittance-Absorptance Product
+  0.87,                       !- Backing Material Normal Transmittance-Absorptance Product
+  0.85,                       !- Cladding Normal Transmittance-Absorptance Product
+  0.85,                       !- Fraction of Collector Gross Area Covered by PV module
+  0.9,                        !- Fraction of PV cell area to PV module area
+  0.0044,                     !- PV Module Thermal Resistance - Top
+  0.0039,                     !- PV Module Thermal Resistance - Bottom
+  0.85,                       !- PV Module Longwave Emissivity
+  0.9,                        !- Backing Material Longwave Emissivity
+  0.002,                      !- Glass Thickness
+  1.526,                      !- Glass Refraction Index
+  4.0;                        !- Glass Extinction Coefficient
 \end{lstlisting}
 
 \subsection{Solar Collector Heating System Plant Connections}\label{solar-collector-heating-system-plant-connections}
@@ -730,35 +722,31 @@ In addition to freeze prevention, it is also necessary to prevent the system fro
 To use the availability managers for the control cases described above, a \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList} must be defined and referenced in the \hyperref[plantloop]{PlantLoop} object of the collector loop. An example of a differential thermostat, recirculation for freeze prevention, and high temperature cutoff is shown below:
 
 \begin{lstlisting}
-
 AvailabilityManagerAssignmentList,
-  Collector Loop Availability Manager List,             !- Name
-  AvailabilityManager:HighTemperatureTurnOff,         !- Availability Manager 1 Object Type
-  High Temperature Turn Off Availability Manager, !- Availability Manager 1 Name
-  AvailabilityManager:HighTemperatureTurnOn,           !- Availability Manager 2 Object Type
-  Low Temperature Turn On Availability Manager,     !- Availability Manager 2 Name
-  AvailabilityManager:DifferentialThermostat,         !- Availability Manager 3 Object Type
-  Differential Thermostat Availability Manager;     !- Availability Manager 3 Name
+  Collector Loop Availability Manager List,  !- Name
+  AvailabilityManager:HighTemperatureTurnOff,  !- Availability Manager 1 Object Type
+  High Temperature Turn Off Availability Manager,  !- Availability Manager 1 Name
+  AvailabilityManager:HighTemperatureTurnOn,  !- Availability Manager 2 Object Type
+  Low Temperature Turn On Availability Manager,  !- Availability Manager 2 Name
+  AvailabilityManager:DifferentialThermostat,  !- Availability Manager 3 Object Type
+  Differential Thermostat Availability Manager;  !- Availability Manager 3 Name
 
+AvailabilityManager:HighTemperatureTurnOff,  !- For water heater safety
+  High Temperature Turn Off Availability Manager,  !- Name
+  Water Heater Use Outlet Node,  !- Sensor Node Name
+  60.0;                       !- Temperature (C)
 
-  AvailabilityManager:HighTemperatureTurnOff,           ! For water heater safety
-  High Temperature Turn Off Availability Manager, !- Name
-  Water Heater Use Outlet Node,                                     !- Sensor Node Name
-  60.0;                                                                                     !- Temperature (C)
+AvailabilityManager:HighTemperatureTurnOn,  !- For freeze prevention by recirculation
+  Low Temperature Turn On Availability Manager,  !- Name
+  Collector Outlet Node,      !- Sensor Node Name
+  0.0;                        !- Temperature (C)
 
-
-  AvailabilityManager:HighTemperatureTurnOn,             ! For freeze prevention by recirculation
-  Low Temperature Turn On Availability Manager,     !- Name
-  Collector Outlet Node,                                                   !- Sensor Node Name
-  0.0;                                                                                       !- Temperature (C)
-
-
-  AvailabilityManager:DifferentialThermostat,           ! For useful heat gain from collector to tank
-  Differential Thermostat Availability Manager,     !- Name
-  Collector Outlet Node,                                                   !- Hot Node Name
-  Water Heater Source Outlet Node,                               !- Cold Node Name
-  .0,                                                                                     !- Temperature Difference On Limit (delta C)
-  2.0;                                                                                       !- Temperature Difference Off Limit (delta C)
+AvailabilityManager:DifferentialThermostat,  !- For useful heat gain from collector to tank
+  Differential Thermostat Availability Manager,  !- Name
+  Collector Outlet Node,      !- Hot Node Name
+  Water Heater Source Outlet Node,  !- Cold Node Name
+  .0,                         !- Temperature Difference On Limit (delta C)
+  2.0;                        !- Temperature Difference Off Limit (delta C)
 \end{lstlisting}
 
 The \hyperref[availabilitymanagerdifferentialthermostat]{AvailabilityManager:DifferentialThermostat} object must always be the last manager in the availability manager list. See the \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList} object documentation for more information.
@@ -913,31 +901,30 @@ The remaining fields are used to name the \hyperref[buildingsurfacedetailed]{Bui
 An example of this object follows.
 
 \begin{lstlisting}
-
 SolarCollector:UnglazedTranspired,
-  Shop OA UTSC ZN11,                               ! Name
-  UTSC OSCM ZN11,                                     ! Boundary Conditions Model Name
-  HeatingAvailSched ,                             ! Availability Schedule Name
-  Outside Air Inlet Node ZN11 ,         ! Inlet Node Name
-  UTSC Outlet Node ZN11 ,                     ! Outlet Node Name
-  Mixed Air Node ZN11 ,                         ! Setpoint Node Name
-  ZN11 Node,                                               ! Zone Node Name
-  ShopFreeHeatingSetpoints,                 ! Free Heating Setpoint Schedule Name
-  0.0016,                                                     ! Diameter of Perforations in Collector
-  0.01689,                                                   ! Distance Between Perforations in Collector
-  0.9,                                                           ! Thermal Emissivity of Collector Surface
-  0.9,                                                           ! Solar Absorbtivity of Collector Surface
-  4.0,                                                           ! Effective Overall Height of Collector
-  0.1,                                                           ! Effective Gap Thickness of Plenum Behind Collector
-  2.0,                                                           ! Effective Cross Section Area of Plenum Behind Collector
-  Triangle,                                                 ! Hole Layout Pattern for Pitch
-  Kutscher1994,                                         ! Heat Exchange Effectiveness Correlation
-  1.165,                                           ! Ratio of Actual Collector Surface Area to Projected Surface Area
-  MediumRough ,                                         ! Roughness of Collector
-  0.00086,                                                   ! Collector Thickness
-  0.25,                                                         ! Effectiveness for Perforations with Respect to Wind
-  0.5,                                 ! Discharge Coefficient for Openings with Respect to Buoyancy Driven Flow
-  ZN11_Shop_1:ExtWall:South;               ! Surface 1 Name
+  Shop OA UTSC ZN11,          !- Name
+  UTSC OSCM ZN11,             !- Boundary Conditions Model Name
+  HeatingAvailSched,          !- Availability Schedule Name
+  Outside Air Inlet Node ZN11,!- Inlet Node Name
+  UTSC Outlet Node ZN11,      !- Outlet Node Name
+  Mixed Air Node ZN11,        !- Setpoint Node Name
+  ZN11 Node,                  !- Zone Node Name
+  ShopFreeHeatingSetpoints,   !- Free Heating Setpoint Schedule Name
+  0.0016,                     !- Diameter of Perforations in Collector
+  0.01689,                    !- Distance Between Perforations in Collector
+  0.9,                        !- Thermal Emissivity of Collector Surface
+  0.9,                        !- Solar Absorbtivity of Collector Surface
+  4.0,                        !- Effective Overall Height of Collector
+  0.1,                        !- Effective Gap Thickness of Plenum Behind Collector
+  2.0,                        !- Effective Cross Section Area of Plenum Behind Collector
+  Triangle,                   !- Hole Layout Pattern for Pitch
+  Kutscher1994,               !- Heat Exchange Effectiveness Correlation
+  1.165,                      !- Ratio of Actual Collector Surface Area to Projected Surface Area
+  MediumRough,                !- Roughness of Collector
+  0.00086,                    !- Collector Thickness
+  0.25,                       !- Effectiveness for Perforations with Respect to Wind
+  0.5,                        !- Discharge Coefficient for Openings with Respect to Buoyancy Driven Flow
+  ZN11_Shop_1:ExtWall:South;  !- Surface 1 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-015}
@@ -1080,27 +1067,26 @@ This field contains the name of an air node for a thermal zone that is ultimatel
 An example of this object follows.
 
 \begin{lstlisting}
-
 SolarCollector:UnglazedTranspired:Multisystem,
-  OFFICE MultiSystem OA UTSC ,   ! Solar Collector Name
-  Outside Air Inlet Node ZN1,     ! Outdoor Air System 1 Collector Inlet Node
-  UTSC Outlet Node ZN1,                 ! Outdoor Air System 1 Collector Outlet Node
-  Mixed Air Node ZN1,                     ! Outdoor Air System 1 Mixed Air Node
-  ZN1 Node,                                         ! Outdoor Air System 1 Zone Node
-  Outside Air Inlet Node ZN2,     ! Outdoor Air System 2 Collector Inlet Node
-  UTSC Outlet Node ZN2,                 ! Outdoor Air System 2 Collector Outlet Node
-  Mixed Air Node ZN2,                     ! Outdoor Air System 2 Mixed Air Node
-  ZN2 Node,                                         ! Outdoor Air System 2 Zone Node
-  Outside Air Inlet Node ZN3,     ! Outdoor Air System 3 Collector Inlet Node
-  UTSC Outlet Node ZN3,                 ! Outdoor Air System 3 Collector Outlet Node
-  Mixed Air Node ZN3,                     ! Outdoor Air System 3 Mixed Air Node
-  ZN3 Node,                                         ! Outdoor Air System 3 Zone Node
-  Outside Air Inlet Node ZN4,     ! Outdoor Air System 4 Collector Inlet Node
-  UTSC Outlet Node ZN4,                 ! Outdoor Air System 4 Collector Outlet Node
-  Mixed Air Node ZN4,                     ! Outdoor Air System 4 Mixed Air Node
-  ZN4 Node,                                         ! Outdoor Air System 4 Zone Node
-  Outside Air Inlet Node ZN5,     ! Outdoor Air System 5 Collector Inlet Node
-  UTSC Outlet Node ZN5,                 ! Outdoor Air System 5 Collector Outlet Node
-  Mixed Air Node ZN5,                     ! Outdoor Air System 5 Mixed Air Node
-  ZN5 Node;                                         ! Outdoor Air System 5 Zone Node
+  OFFICE MultiSystem OA UTSC, !- Solar Collector Name
+  Outside Air Inlet Node ZN1, !- Outdoor Air System 1 Collector Inlet Node
+  UTSC Outlet Node ZN1,       !- Outdoor Air System 1 Collector Outlet Node
+  Mixed Air Node ZN1,         !- Outdoor Air System 1 Mixed Air Node
+  ZN1 Node,                   !- Outdoor Air System 1 Zone Node
+  Outside Air Inlet Node ZN2, !- Outdoor Air System 2 Collector Inlet Node
+  UTSC Outlet Node ZN2,       !- Outdoor Air System 2 Collector Outlet Node
+  Mixed Air Node ZN2,         !- Outdoor Air System 2 Mixed Air Node
+  ZN2 Node,                   !- Outdoor Air System 2 Zone Node
+  Outside Air Inlet Node ZN3, !- Outdoor Air System 3 Collector Inlet Node
+  UTSC Outlet Node ZN3,       !- Outdoor Air System 3 Collector Outlet Node
+  Mixed Air Node ZN3,         !- Outdoor Air System 3 Mixed Air Node
+  ZN3 Node,                   !- Outdoor Air System 3 Zone Node
+  Outside Air Inlet Node ZN4, !- Outdoor Air System 4 Collector Inlet Node
+  UTSC Outlet Node ZN4,       !- Outdoor Air System 4 Collector Outlet Node
+  Mixed Air Node ZN4,         !- Outdoor Air System 4 Mixed Air Node
+  ZN4 Node,                   !- Outdoor Air System 4 Zone Node
+  Outside Air Inlet Node ZN5, !- Outdoor Air System 5 Collector Inlet Node
+  UTSC Outlet Node ZN5,       !- Outdoor Air System 5 Collector Outlet Node
+  Mixed Air Node ZN5,         !- Outdoor Air System 5 Mixed Air Node
+  ZN5 Node;                   !- Outdoor Air System 5 Zone Node
 \end{lstlisting}

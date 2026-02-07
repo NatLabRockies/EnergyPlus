@@ -410,7 +410,7 @@
     BLDG Sch   2,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -424,7 +424,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -457,12 +457,12 @@
     MyETparameters;          !- Earth Tube Model Parameters
 
   ZoneEarthtube:Parameters,
-    MyETparameters,          !- Earth Tube Model Parameters (Name)
-    5,                       !- Earth Tube Nodes Above
-    3,                       !- Earth Tube Nodes Below
-    1.0,                     !- Earth Tube Dimensionless Boundary Above
-    0.25,                    !- Earth Tube Dimensionless Boundary Below
-    4.0;                     !- Earth Tube Dimensionless Solution Space Width
+    MyETparameters,          !- Earth Tube Model Parameters Name
+    5,                       !- Nodes Above Earth Tube {dimensionless}
+    3,                       !- Nodes Below Earth Tube {dimensionless}
+    1.0,                     !- Earth Tube Dimensionless Boundary Above {dimensionless}
+    0.25,                    !- Earth Tube Dimensionless Boundary Below {dimensionless}
+    4.0;                     !- Earth Tube Solution Space Width {dimensionless}
 
   Zone,
     ZONE 2,                  !- Name
@@ -493,7 +493,7 @@
     BLDG Sch   2,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -507,7 +507,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -540,13 +540,12 @@
     MyETparameters2;         !- Earth Tube Model Parameters
 
   ZoneEarthtube:Parameters,
-    MyETparameters2,         !- Earth Tube Model Parameters (Name)
-    10,                      !- Earth Tube Nodes Above
-    10,                      !- Earth Tube Nodes Below
-    1.0,                     !- Earth Tube Dimensionless Boundary Above
-    1.0,                     !- Earth Tube Dimensionless Boundary Below
-    20.0;                    !- Earth Tube Dimensionless Solution Space Width
-
+    MyETparameters2,         !- Earth Tube Model Parameters Name
+    10,                      !- Nodes Above Earth Tube {dimensionless}
+    10,                      !- Nodes Below Earth Tube {dimensionless}
+    1.0,                     !- Earth Tube Dimensionless Boundary Above {dimensionless}
+    1.0,                     !- Earth Tube Dimensionless Boundary Below {dimensionless}
+    20.0;                    !- Earth Tube Solution Space Width {dimensionless}
 
   Zone,
     ZONE 3,                  !- Name
@@ -577,7 +576,7 @@
     BLDG Sch   2,            !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -591,7 +590,7 @@
     BLDG Sch   2,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2228,37 +2227,37 @@
 
   Output:Surfaces:Drawing,DXF,ThickPolyline;
 
-  Output:Variable,*,Site Outdoor Air Drybulb Temperature, timestep;
+  Output:Variable,*,Site Outdoor Air Drybulb Temperature,timestep;
 
-  Output:Variable,*,Zone Air Temperature, timestep;
+  Output:Variable,*,Zone Air Temperature,timestep;
 
-  Output:Variable,*,Zone Air Humidity Ratio, timestep;
+  Output:Variable,*,Zone Air Humidity Ratio,timestep;
 
-  Output:Variable,*,Zone Air System Sensible Cooling Energy, timestep;
+  Output:Variable,*,Zone Air System Sensible Cooling Energy,timestep;
 
-  Output:Variable,*,Zone Air System Sensible Cooling Rate, timestep;
+  Output:Variable,*,Zone Air System Sensible Cooling Rate,timestep;
 
-  Output:Variable,*,Earth Tube Zone Sensible Cooling Energy, timestep;
+  Output:Variable,*,Earth Tube Zone Sensible Cooling Energy,timestep;
 
-  Output:Variable,*,Earth Tube Zone Sensible Heating Energy, timestep;
+  Output:Variable,*,Earth Tube Zone Sensible Heating Energy,timestep;
 
-  Output:Variable,*,Earth Tube Air Flow Volume, timestep;
+  Output:Variable,*,Earth Tube Air Flow Volume,timestep;
 
-  Output:Variable,*,Earth Tube Current Density Air Volume Flow Rate, timestep;
+  Output:Variable,*,Earth Tube Current Density Air Volume Flow Rate,timestep;
 
-  Output:Variable,*,Earth Tube Air Flow Mass, timestep;
+  Output:Variable,*,Earth Tube Air Flow Mass,timestep;
 
-  Output:Variable,*,Earth Tube Air Mass Flow Rate, timestep;
+  Output:Variable,*,Earth Tube Air Mass Flow Rate,timestep;
 
-  Output:Variable,*,Earth Tube Water Mass Flow Rate, timestep;
+  Output:Variable,*,Earth Tube Water Mass Flow Rate,timestep;
 
-  Output:Variable,*,Earth Tube Fan Electricity Energy, timestep;
+  Output:Variable,*,Earth Tube Fan Electricity Energy,timestep;
 
-  Output:Variable,*,Earth Tube Zone Inlet Air Temperature, timestep;
+  Output:Variable,*,Earth Tube Zone Inlet Air Temperature,timestep;
 
-  Output:Variable,*,Earth Tube Zone Inlet Wet Bulb Temperature, timestep;
+  Output:Variable,*,Earth Tube Zone Inlet Wet Bulb Temperature,timestep;
 
-  Output:Variable,*,Earth Tube Zone Inlet Humidity Ratio, timestep;
+  Output:Variable,*,Earth Tube Zone Inlet Humidity Ratio,timestep;
 
   Output:Variable,*,Earth Tube Node Temperature 1,timestep;
 

@@ -822,8 +822,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.167,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -848,7 +848,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -862,7 +862,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1037,8 +1037,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .0717,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1063,7 +1063,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1077,7 +1077,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1217,8 +1217,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.167,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1243,7 +1243,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1257,7 +1257,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1412,8 +1412,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .0717,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1438,7 +1438,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1452,7 +1452,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1592,8 +1592,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .31089,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1618,7 +1618,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1632,7 +1632,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1772,7 +1772,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -1808,7 +1815,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE2-1,        !- Name
@@ -1844,7 +1858,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE3-1,        !- Name
@@ -1880,7 +1901,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE4-1,        !- Name
@@ -1916,7 +1944,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE5-1,        !- Name
@@ -2200,7 +2235,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2210,9 +2245,9 @@
     23125.6,                 !- Gross Rated Total Cooling Capacity {W}
     16267.06,                !- Gross Rated Sensible Cooling Capacity {W}
     7.007757577,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -2225,7 +2260,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2461,7 +2496,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Cooling Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2471,9 +2506,9 @@
     11562.8,                 !- Gross Rated Total Cooling Capacity {W}
     8133.53,                 !- Gross Rated Sensible Cooling Capacity {W}
     7.007757577,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -2486,7 +2521,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Heating Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2722,7 +2757,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 3 Heat Pump Cooling Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 3 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 3 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 3 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2732,9 +2767,9 @@
     23125.6,                 !- Gross Rated Total Cooling Capacity {W}
     16267.06,                !- Gross Rated Sensible Cooling Capacity {W}
     7.007757577,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -2747,7 +2782,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 3 Heat Pump Heating Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 3 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 3 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 3 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2983,7 +3018,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 4 Heat Pump Cooling Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 4 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 4 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 4 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -2993,9 +3028,9 @@
     11562.8,                 !- Gross Rated Total Cooling Capacity {W}
     8133.53,                 !- Gross Rated Sensible Cooling Capacity {W}
     7.007757577,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3008,7 +3043,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 4 Heat Pump Heating Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 4 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 4 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 4 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -3244,7 +3279,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 5 Heat Pump Cooling Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 5 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -3254,9 +3289,9 @@
     23125.59,                !- Gross Rated Total Cooling Capacity {W}
     16267,                   !- Gross Rated Sensible Cooling Capacity {W}
     7.007757577,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
@@ -3269,7 +3304,7 @@
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 5 Heat Pump Heating Mode,  !- Name
-    ,                              !- Availability Schedule Name
+    ,                        !- Availability Schedule Name
     Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 5 Heating Coil Air Inlet Node,  !- Air Inlet Node Name

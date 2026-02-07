@@ -1046,8 +1046,8 @@
     Always 1,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    0,                       !- Flow per Zone Floor Area {m3/s-m2}
-    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow Rate per Floor Area {m3/s-m2}
+    0,                       !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0,                       !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -1060,8 +1060,8 @@
     Always 1,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.01,                    !- Design Flow Rate {m3/s}
-    0,                       !- Flow per Zone Floor Area {m3/s-m2}
-    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow Rate per Floor Area {m3/s-m2}
+    0,                       !- Flow Rate per Exterior Surface Area {m3/s-m2}
     0,                       !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -1077,9 +1077,9 @@
     10.0,                    !- Width of the Absorber Wall {m}
     0.08,                    !- Cross Sectional Area of Air Channel Outlet {m2}
     0.8,                     !- Discharge Coefficient
-    ZONE 1,                  !- Zone 1 Name
+    ZONE 1,                  !- Zone or Space Name 1
     6.0,                     !- Distance from Top of Thermal Chimney to Inlet 1 {m}
-    1.0,                     !- Relative Ratios of Air Flow Rates Passing through Zone 1
+    1.0,                     !- Relative Ratios of Air Flow Rates Passing through Inlet 1
     0.035;                   !- Cross Sectional Areas of Air Channel Inlet 1 {m2}
 
   ZoneThermalChimney,
@@ -1089,9 +1089,9 @@
     10.0,                    !- Width of the Absorber Wall {m}
     0.08,                    !- Cross Sectional Area of Air Channel Outlet {m2}
     0.8,                     !- Discharge Coefficient
-    ZONE 3,                  !- Zone 1 Name
+    ZONE 3,                  !- Zone or Space Name 1
     6.0,                     !- Distance from Top of Thermal Chimney to Inlet 1 {m}
-    1.0,                     !- Relative Ratios of Air Flow Rates Passing through Zone 1
+    1.0,                     !- Relative Ratios of Air Flow Rates Passing through Inlet 1
     0.035;                   !- Cross Sectional Areas of Air Channel Inlet 1 {m2}
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLEDICTIONARY ===========

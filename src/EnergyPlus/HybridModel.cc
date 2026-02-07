@@ -173,7 +173,7 @@ namespace HybridModel {
                         }
 
                         if (temperatureSched == nullptr) {
-                            ShowSevereError(state, format("Measured Zone Air Tempearture Schedule is not defined for: {}", CurrentModuleObject));
+                            ShowSevereError(state, format("Measured Zone Air Temperature Schedule is not defined for: {}", CurrentModuleObject));
                             ErrorsFound = true;
                         } else {
                             hmZone.InternalThermalMassCalc_T = true;
@@ -198,7 +198,7 @@ namespace HybridModel {
                             ErrorsFound = true;
                         } else {
                             if (temperatureSched != nullptr && !state.dataHybridModel->FlagHybridModel_TM) {
-                                // Temperature schedule is provided, igonore humidity ratio and CO2 concentration schedules.
+                                // Temperature schedule is provided, ignore humidity ratio and CO2 concentration schedules.
                                 hmZone.InfiltrationCalc_T = true;
                                 if (humidityRatioSched != nullptr) {
                                     ShowWarningError(state, format("Field \"{}\" is provided.", cAlphaFieldNames(6)));
@@ -237,7 +237,7 @@ namespace HybridModel {
                             ErrorsFound = true;
                         } else {
                             if (temperatureSched != nullptr && !state.dataHybridModel->FlagHybridModel_TM) {
-                                // Temperature schedule is provided, igonore humidity ratio and CO2 concentration schedules.
+                                // Temperature schedule is provided, ignore humidity ratio and CO2 concentration schedules.
                                 hmZone.PeopleCountCalc_T = true;
                                 if (humidityRatioSched != nullptr) {
                                     ShowWarningError(

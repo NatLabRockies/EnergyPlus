@@ -247,7 +247,8 @@ namespace UnitarySystems {
         bool m_Humidistat = false;
         bool m_ValidASHRAECoolCoil = false;
         bool m_ValidASHRAEHeatCoil = false;
-        bool m_SimASHRAEModel = false; // flag denoting that ASHRAE model (SZVAV) should be used
+        bool m_SimASHRAEModel = false;   // flag denoting that ASHRAE model (SZVAV) should be used
+        bool m_SimASHRAEModelOn = false; // flag denoting that the SZVAV calculation is active
         bool m_setFaultModelInput = true;
         int m_FanIndex = 0;
         HVAC::FanPlace m_FanPlace = HVAC::FanPlace::Invalid;

@@ -126,7 +126,7 @@ jobs:
 
       - name: Upload clang-format patch as artifact
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
             name: EnergyPlus-${{ github.sha }}-clang_format.patch
             path: clang_format.patch
@@ -193,7 +193,7 @@ jobs:
 
       - name: Upload cppcheck results as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: EnergyPlus-${{ github.sha }}-cppcheck_results.txt
           path: cppcheck.txt

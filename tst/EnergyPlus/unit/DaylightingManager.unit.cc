@@ -2049,7 +2049,7 @@ TEST_F(EnergyPlusFixture, DaylightingManager_GetInputDaylightingControls_Roundin
     // It does sum up to 1.0
     EXPECT_DOUBLE_EQ(1.0, sum);
     EXPECT_FALSE(std::abs(sum - 1.0) > std::numeric_limits<double>::epsilon());
-    // Yet, if you are being very litteral, then it's slightly more
+    // Yet, if you are being very literal, then it's slightly more
     EXPECT_TRUE(sum > 1.0);
     EXPECT_FALSE(sum < 1.0);
 }

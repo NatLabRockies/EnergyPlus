@@ -2757,7 +2757,7 @@ namespace VentilatedSlab {
                         break;
                     }
                     case OutsideAirControlType::VariablePercent: {
-                        // In heating mode, the ouside air for "variable percent" control
+                        // In heating mode, the outside air for "variable percent" control
                         // is set to the minimum value
 
                         state.dataVentilatedSlab->OAMassFlowRate = MinOAFrac * state.dataLoopNodes->Node(OutsideAirNode).MassFlowRate;
@@ -3506,7 +3506,7 @@ namespace VentilatedSlab {
                         //     or cooling &
                         //                             in heating mode')
                         //     CALL ShowContinueError(state, 'Ventilated Slab Name = '//TRIM(VentSlab(Item)%Name))
-                        //     CALL ShowContinueError(state, 'All node temperature are reseted at the ventilated slab surface temperature = '// &
+                        //     CALL ShowContinueError(state, 'All node temperature are reset at the ventilated slab surface temperature = '// &
                         //                            RoundSigDigits(TH(VentSlab(Item)%SurfacePtr(RadSurfNum),1,2),2))
                         //     CALL ShowContinueErrorTimeStamp(state, ' ')
                         //   ELSE
@@ -3798,7 +3798,7 @@ namespace VentilatedSlab {
                             state.dataLoopNodes->Node(ReturnAirNode).Temp = state.dataHeatBalSurf->SurfInsideTempHist(1)(ventSlab.SurfacePtr(1));
                             state.dataLoopNodes->Node(FanOutletNode).Temp = state.dataLoopNodes->Node(ReturnAirNode).Temp;
                             state.dataLoopNodes->Node(SlabInNode).Temp = state.dataLoopNodes->Node(FanOutletNode).Temp;
-                            // Each Internal node is reseted at the surface temperature
+                            // Each Internal node is reset at the surface temperature
 
                             break; // outer do loop
                         }

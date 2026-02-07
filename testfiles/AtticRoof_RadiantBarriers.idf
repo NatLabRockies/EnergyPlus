@@ -353,7 +353,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -368,7 +368,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.17,                    !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -383,7 +383,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -741,7 +741,7 @@
     lighting schedule,       !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     237.287858616023,        !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.6,                     !- Fraction Radiant
@@ -1804,7 +1804,7 @@
     clothes dryer schedule,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     80533.1207326169,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.015,                   !- Fraction Latent
     0.081,                   !- Fraction Radiant
@@ -1817,7 +1817,7 @@
     clothes washer schedule, !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     19448.4454267132,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.03,                    !- Fraction Latent
     0.162,                   !- Fraction Radiant
@@ -1830,7 +1830,7 @@
     cooking range,           !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     201.330571702405,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0799999999999999,      !- Fraction Latent
     0.432,                   !- Fraction Radiant
@@ -1843,7 +1843,7 @@
     dishwasher schedule,     !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     9828.32941160075,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.3,                     !- Fraction Latent
     0.18,                    !- Fraction Radiant
@@ -1856,7 +1856,7 @@
     fridge,                  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     97.4834259275168,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.6,                     !- Fraction Radiant
@@ -1869,7 +1869,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1882,7 +1882,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1895,7 +1895,7 @@
     misc plug loads schedule,!- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     224.435610249806,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.045,                   !- Fraction Latent
     0.513,                   !- Fraction Radiant
@@ -1908,7 +1908,7 @@
     misc tv schedule,        !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     274.705334312761,        !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.6,                     !- Fraction Radiant
@@ -1921,7 +1921,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1935,7 +1935,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1950,7 +1950,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1965,7 +1965,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1980,7 +1980,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1995,7 +1995,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.17,                    !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2010,7 +2010,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2025,7 +2025,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2040,7 +2040,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2055,7 +2055,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2070,7 +2070,7 @@
     Always On Discrete,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     0.01,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2085,7 +2085,7 @@
     dhw fixtures schedule,   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     5740.21365641083,        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -2100,7 +2100,7 @@
     dhw fixtures schedule,   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -5657.22261559525,       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0.6,                     !- Fraction Radiant
@@ -2114,8 +2114,8 @@
     Always On Discrete,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -2128,8 +2128,8 @@
     Always On Discrete,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -2142,8 +2142,8 @@
     Always On Discrete,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0,                       !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     ,                        !- Constant Term Coefficient
     ,                        !- Temperature Term Coefficient
@@ -10870,8 +10870,8 @@
     0.740612186094823,       !- Gross Rated Sensible Heat Ratio
     4.03878394144749,        !- Gross Rated Cooling COP {W/W}
     0.744166728437762,       !- Rated Air Flow Rate {m3/s}
-    773.3912012006,          !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    773.3912012006,          !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     central ac and furnace unitary system Fan - Cooling Coil Node,  !- Air Inlet Node Name
     central ac and furnace unitary system Cooling Coil - Heating Coil Node,  !- Air Outlet Node Name
     Cool-Cap-fT1,            !- Total Cooling Capacity Function of Temperature Curve Name

@@ -255,7 +255,7 @@
     1.08,                    !- Soil Thermal Conductivity {W/m-K}
     962,                     !- Soil Density {kg/m3}
     2576,                    !- Soil Specific Heat {J/kg-K}
-    11.3,                    !- Average Soil Surface Tempeature {C}
+    11.3,                    !- Average Soil Surface Temperature {C}
     10.9,                    !- Soil Surface Temperature Amplitude 1 {deltaC}
     -0.5,                    !- Soil Surface Temperature Amplitude 2 {deltaC}
     26,                      !- Phase Shift of Temperature Amplitude 1 {days}

@@ -71,8 +71,10 @@ public:
     json decode(std::string_view csv, char t_delimiter = ',', int t_rows_to_skip = 0);
 
     std::vector<std::pair<std::string, bool>> const &errors();
+    std::vector<std::pair<std::string, bool>> const &warnings();
 
     bool hasErrors();
+    bool hasWarnings();
 
     enum class Token : size_t
     {
@@ -93,7 +95,8 @@ private:
     char delimiter = ',';
     int rows_to_skip = 0;
     char s[129] = {};
-    std::vector<std::pair<std::string, bool>> errors_; // the boolean is for continuing lines
+    std::vector<std::pair<std::string, bool>> errors_;   // the boolean is for continuing lines
+    std::vector<std::pair<std::string, bool>> warnings_; // the boolean is for continuing lines
 
     static void increment_both_index(size_t &index, size_t &line_index);
 

@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -54,9 +55,11 @@
 #include <EnergyPlus/GroundHeatExchangers/BoreholeArray.hh>
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
 #include <EnergyPlus/GroundHeatExchangers/Vertical.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+#include <EnergyPlus/WeatherManager.hh>
 
 namespace EnergyPlus::GroundHeatExchangers {
 GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::json const &j)
@@ -64,10 +67,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Check for duplicates
     for (auto &existingObj : state.dataGroundHeatExchanger->verticalGLHE) {
         if (objName == existingObj.name) {
-            ShowFatalError(state,
-                           format("Invalid input for {} object: Duplicate name found: {}",
-                                  EnergyPlus::GroundHeatExchangers::GLHEVert::moduleName,
-                                  existingObj.name));
+            ShowFatalError(state, format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
         }
     }
 
@@ -103,7 +103,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     this->available = true;
     this->on = true;
 
-    BranchNodeConnections::TestCompSet(state, this->moduleName, objName, inletNodeName, outletNodeName, "Condenser Water Nodes");
+    BranchNodeConnections::TestCompSet(state, moduleName, objName, inletNodeName, outletNodeName, "Condenser Water Nodes");
 
     this->designFlow = j["design_flow_rate"].get<Real64>();
     PlantUtilities::RegisterPlantCompDesignFlow(state, this->inletNodeNum, this->designFlow);
@@ -127,6 +127,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 this->gFuncCalcMethod = GFuncCalcMethod::UniformHeatFlux;
             } else if (gFunctionMethodStr == "UBHWTCALC") {
                 this->gFuncCalcMethod = GFuncCalcMethod::UniformBoreholeWallTemp;
+            } else if (gFunctionMethodStr == "FULLDESIGN") {
+                this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
             } else {
                 errorsFound = true;
                 ShowSevereError(state, fmt::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
@@ -134,7 +136,165 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
         }
 
         // get borehole data from array or individual borehole instance objects
-        if (j.find("ghe_vertical_array_object_name") != j.end()) {
+        if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
+#ifndef PYTHON_CLI
+            ShowFatalError(state, "Attempted to use borehole field design in a build without PYTHON_CLI, which is invalid");
+#endif
+            // g-functions won't be calculated until after sizing is complete
+            bool foundSizing = false;
+            bool objTypeFound = j.find("ghe_vertical_sizing_object_type") != j.end();
+            bool objNameFound = j.find("ghe_vertical_sizing_object_name") != j.end();
+
+            if (!objTypeFound) {
+                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowContinueError(state, "GHE:Vertical:Sizing Object Type not specified.");
+                errorsFound = true;
+            }
+            if (!objNameFound) {
+                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowContinueError(state, "GHE:Vertical:Sizing Object Name not specified.");
+                errorsFound = true;
+            }
+
+            this->sizingData.name = j.at("ghe_vertical_sizing_object_name");
+            this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
+
+            if (Util::makeUPPER(this->sizingData.type) != "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE") {
+                ShowSevereError(state, format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
+                errorsFound = true;
+            }
+
+            auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("GroundHeatExchanger:Vertical:Sizing:Rectangle");
+            if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+                ShowSevereError(state,
+                                format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
+                errorsFound = true;
+            }
+
+            auto &instanceValues = instances.value();
+            for (auto instance = instanceValues.begin(); instance != instanceValues.end(); ++instance) {
+                auto const &fields = instance.value();
+                std::string const &thisSizingObjName = instance.key();
+                std::string const &objNameUC = Util::makeUPPER(thisSizingObjName);
+                if (objNameUC == Util::makeUPPER(this->sizingData.name)) {
+                    foundSizing = true;
+
+                    this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
+                    auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
+                    if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+                        ShowSevereError(
+                            state,
+                            format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing", this->sizingData.sizingPeriodName));
+                        errorsFound = true;
+                    }
+
+                    bool spIsAnnual = false;
+                    for (auto &designPeriod : state.dataWeather->RunPeriodDesignInput) {
+                        if (Util::makeUPPER(designPeriod.title) == Util::makeUPPER((this->sizingData.sizingPeriodName)) &&
+                            (designPeriod.totalDays == 365)) {
+                            spIsAnnual = true;
+                            break;
+                        }
+                    }
+
+                    if (!spIsAnnual) {
+                        ShowSevereError(state,
+                                        format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
+                                               this->sizingData.sizingPeriodName));
+                        errorsFound = true;
+                    }
+
+                    if (auto it = fields.find("design_flow_rate_per_borehole"); it != fields.end()) {
+                        this->sizingData.designFlowRatePerBorehole = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "design_flow_rate_per_borehole", this->sizingData.designFlowRatePerBorehole);
+                    }
+
+                    this->sizingData.length = fields.at("available_borehole_field_length");
+                    this->sizingData.width = fields.at("available_borehole_field_width");
+                    this->sizingData.numBoreholes = fields.at("maximum_number_of_boreholes");
+
+                    if (auto it = fields.find("minimum_borehole_spacing"); it != fields.end()) {
+                        this->sizingData.minSpacing = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "minimum_borehole_spacing", this->sizingData.minSpacing);
+                    }
+
+                    if (auto it = fields.find("maximum_borehole_spacing"); it != fields.end()) {
+                        this->sizingData.maxSpacing = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "maximum_borehole_spacing", this->sizingData.maxSpacing);
+                    }
+
+                    if (auto it = fields.find("minimum_borehole_vertical_length"); it != fields.end()) {
+                        this->sizingData.minLength = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "minimum_borehole_vertical_length", this->sizingData.minLength);
+                    }
+
+                    if (auto it = fields.find("maximum_borehole_vertical_length"); it != fields.end()) {
+                        this->sizingData.maxLength = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "maximum_borehole_vertical_length", this->sizingData.maxLength);
+                    }
+
+                    if (auto it = fields.find("minimum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                        this->sizingData.minEFT = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "minimum_exiting_fluid_temperature_for_sizing", this->sizingData.minEFT);
+                    }
+
+                    if (auto it = fields.find("maximum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                        this->sizingData.maxEFT = it.value().get<Real64>();
+                    } else {
+                        state.dataInputProcessing->inputProcessor->getDefaultValue(
+                            state, this->sizingData.type, "maximum_exiting_fluid_temperature_for_sizing", this->sizingData.maxEFT);
+                    }
+
+                    state.dataInputProcessing->inputProcessor->markObjectAsUsed("GroundHeatExchanger:Vertical:Sizing:Rectangle",
+                                                                                this->sizingData.name);
+                    break;
+                }
+            }
+
+            if (!foundSizing) {
+                ShowSevereError(state, "Could not find matching GroundHeatExchanger:Vertical:Sizing:Rectangle");
+                errorsFound = true;
+            }
+            // Need to construct response factors with a single borehole representation, then later we'll override the system g-function
+            if (j.find("vertical_well_locations") == j.end()) {
+                ShowSevereError(state, "For a full design GHE simulation, you must provide a GHE:Vertical:Single object");
+                ShowContinueError(state, "If you enter more than one, only the first is used to specify the borehole design");
+                ShowContinueError(state, format("Check references to these objects for GHE:System object: {}", this->name));
+                errorsFound = true;
+            }
+
+            std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
+            auto const &vars = j.at("vertical_well_locations");
+            for (auto const &var : vars) {
+                if (!var.at("ghe_vertical_single_object_name").empty()) {
+                    std::shared_ptr<GLHEVertSingle> tempBHptr =
+                        GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                    tempVectOfBHObjects.push_back(tempBHptr);
+                    this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
+                }
+                break;
+            }
+            if (!this->myRespFactors) {
+                ShowSevereError(state, "Something went wrong creating response factor for GroundHeatExchanger, check previous errors.");
+                errorsFound = true;
+            }
+
+        } else if (j.find("ghe_vertical_array_object_name") != j.end()) {
             // Response factors come from array object
             this->myRespFactors = BuildAndGetResponseFactorObjectFromArray(
                 state, GLHEVertArray::GetVertArray(state, Util::makeUPPER(j["ghe_vertical_array_object_name"].get<std::string>())));
@@ -142,7 +302,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 // No ResponseFactors, GHEArray, or SingleBH object are referenced
                 ShowSevereError(state, "No GHE:ResponseFactors, GHE:Vertical:Array, or GHE:Vertical:Single objects found");
-                ShowFatalError(state, format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, format("Check references to these objects for GHE:System object: {}", this->name));
+                errorsFound = true;
             }
 
             auto const &vars = j.at("vertical_well_locations");
@@ -163,8 +324,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
 
             if (!this->myRespFactors) {
-                errorsFound = true;
                 ShowSevereError(state, "GroundHeatExchanger:Vertical:Single objects not found.");
+                errorsFound = true;
             }
         }
     }
@@ -225,8 +386,82 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
     // Check for Errors
     if (errorsFound) {
-        ShowFatalError(state, format("Errors found in processing input for {}", this->moduleName));
+        ShowFatalError(state, format("Errors found in processing input for {}", moduleName));
     }
+}
+
+void GLHEVert::simulate(EnergyPlusData &state,
+                        [[maybe_unused]] const PlantLocation &calledFromLocation,
+                        [[maybe_unused]] bool const FirstHVACIteration,
+                        [[maybe_unused]] Real64 &CurLoad,
+                        [[maybe_unused]] bool const RunFlag)
+{
+
+    if (this->needToSetupOutputVars) {
+        this->setupOutput(state);
+        this->needToSetupOutputVars = false;
+    }
+
+    this->initGLHESimVars(state);
+    if (state.dataGlobal->KickOffSimulation) {
+        return;
+    }
+
+    if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
+        // we need to do some special things for the full design mode
+        this->outletTemp = this->tempGround;
+        this->inletTemp = state.dataLoopNodes->Node(this->inletNodeNum).Temp;
+        if (this->fullDesignCompleted) {
+            // nothing here
+        } else if (!state.dataGlobal->WarmupFlag) {
+            if (this->fullDesignLoadAccrualStarted) {
+                // if load accrual is already started, continue to accrue until hvac sizing is done
+                if (state.dataGlobal->DoingHVACSizingSimulations) {
+                    Real64 const cpFluid =
+                        state.dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getSpecificHeat(state, this->inletTemp, "GLHEVert::simulate");
+                    Real64 const q = this->massFlowRate * cpFluid * (this->outletTemp - this->inletTemp);
+                    Real64 const timeStamp = (state.dataGlobal->DayOfSim - 1) * 24 + state.dataGlobal->CurrentTime;
+                    this->loadsDuringSizingForDesign[timeStamp] = q;
+                } else {
+                    this->fullDesignCompleted = true;
+                    if (this->loadsDuringSizingForDesign.size() % 8760 != 0) {
+                        ShowFatalError(state, "Bad number of load values found when trying to accumulate ghe loads for design");
+                    }
+                    std::vector<Real64> timeStepValues;
+                    timeStepValues.reserve(this->loadsDuringSizingForDesign.size());
+                    for (auto const &kv : this->loadsDuringSizingForDesign) {
+                        timeStepValues.push_back(kv.second);
+                    }
+                    std::vector<Real64> hourlyValues;
+                    hourlyValues.reserve(8760);
+                    unsigned int const numPerHour = timeStepValues.size() / 8760;
+                    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(timeStepValues.size()); i += numPerHour) {
+                        const Real64 sum = std::accumulate(timeStepValues.begin() + i, timeStepValues.begin() + i + numPerHour, 0.0);
+                        hourlyValues.push_back(sum / static_cast<double>(numPerHour));
+                    }
+                    this->performBoreholeFieldDesignAndSizingWithGHEDesigner(state, hourlyValues);
+                }
+            } else {
+                // if load accrual is not started yet, just do nothing until the hvac sizing simulation has begun
+                if (state.dataGlobal->DoingHVACSizingSimulations) {
+                    this->fullDesignLoadAccrualStarted = true;
+                    Real64 const cpFluid =
+                        state.dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getSpecificHeat(state, this->inletTemp, "GLHEVert::simulate");
+                    Real64 const q = this->massFlowRate * cpFluid * (this->outletTemp - this->inletTemp);
+                    Real64 const timeStamp = (state.dataGlobal->DayOfSim - 1) * 24 + state.dataGlobal->CurrentTime;
+                    this->loadsDuringSizingForDesign[timeStamp] = q;
+                } else {
+                    // nothing
+                }
+            }
+        }
+        if (this->fullDesignCompleted) {
+            this->calcGroundHeatExchanger(state);
+        }
+    } else {
+        this->calcGroundHeatExchanger(state);
+    }
+    this->updateGHX(state);
 }
 
 void GLHEVert::getAnnualTimeConstant()
@@ -404,12 +639,15 @@ void GLHEVert::calcLongTimestepGFunctions(EnergyPlusData &state) const
     case GFuncCalcMethod::UniformBoreholeWallTemp:
         this->calcUniformBHWallTempGFunctionsWithGHEDesigner(state);
         break;
+    case GFuncCalcMethod::FullDesign:
+        // this->performBoreholeFieldDesignAndSizingWithGHEDesigner(state);
+        break;
     default:
         assert(false);
     }
 }
 
-void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &state) const
+nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
 {
     nlohmann::json gheDesignerInputs;
     gheDesignerInputs["version"] = 2; // If you update GHEDesigner, you may need to use a new input version here
@@ -438,6 +676,222 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
             ShowFatalError(state, p + "Could not identify glycol for setting up GHEDesigner run");
         }
     }
+
+    return gheDesignerInputs;
+}
+
+fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &inputs)
+{
+    // we'll drop the ghedesigner input file and output directory in the same folder as the input file
+    auto ghe_designer_input_file_path = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_input.json";
+    auto ghe_designer_output_directory = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_outputs";
+    try {
+        // If file already exists, try removing it
+        if (fs::exists(ghe_designer_input_file_path)) {
+            std::error_code ec;
+            if (!fs::remove(ghe_designer_input_file_path, ec)) {
+                if (ec) {
+                    ShowFatalError(state, "Failed to remove existing GHEDesigner input: " + ec.message());
+                }
+                // If remove returned false but no error, it wasn't a regular file
+                ShowFatalError(state, "Path exists but is not a removable file.");
+            }
+        }
+
+        // Now create the file fresh
+        std::ofstream ghe_designer_input_file(ghe_designer_input_file_path, std::ios::out | std::ios::trunc);
+        if (!ghe_designer_input_file) {
+            ShowFatalError(state, "Failed to create file: " + ghe_designer_input_file_path.string());
+        }
+        if (!ghe_designer_input_file.is_open()) {
+            ShowFatalError(state, "Failed to open output file");
+        }
+        ghe_designer_input_file << inputs;
+        ghe_designer_input_file.close();
+
+    } catch (const fs::filesystem_error &) {
+        ShowFatalError(state, "Filesystem error");
+    }
+
+    DisplayString(state, "Starting up GHEDesigner");
+    fs::path exePath;
+    if (state.dataGlobal->installRootOverride) {
+        exePath = state.dataStrGlobals->exeDirectoryPath / "energyplus";
+    } else {
+        exePath = FileSystem::getAbsolutePath(FileSystem::getProgramPath()); // could be /path/to/energyplus(.exe) or /path/to/energyplus_tests(.exe)
+        exePath = exePath.parent_path() / ("energyplus" + FileSystem::exeExtension);
+    }
+    std::string const cmd = fmt::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
+                                        FileSystem::toString(exePath),
+                                        FileSystem::toGenericString(ghe_designer_input_file_path),
+                                        FileSystem::toGenericString(ghe_designer_output_directory));
+    int const status = FileSystem::systemCall(cmd);
+    if (status != 0) {
+        ShowFatalError(state, "GHEDesigner failed to calculate G-functions.");
+    }
+    DisplayString(state, "GHEDesigner complete");
+    return ghe_designer_output_directory;
+}
+
+void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData &state, std::vector<Real64> const &hourlyLoads) const
+{
+    nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
+    std::string const p = fmt::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
+
+    // grab thermal and borehole properties
+    nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
+    nlohmann::json soil = {
+        {"conductivity", this->soil.k},
+        {"rho_cp", this->soil.rhoCp},
+        {"undisturbed_temp", this->tempGround},
+    };
+    Real64 const shankSpacingForGHEDesigner = this->bhUTubeDist - this->pipe.outDia;
+    nlohmann::json pipe = {{"inner_diameter", this->pipe.innerDia},
+                           {"outer_diameter", this->pipe.outDia},
+                           {"shank_spacing", shankSpacingForGHEDesigner},
+                           {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
+                           {"conductivity", this->pipe.k},
+                           {"rho_cp", this->pipe.rhoCp},
+                           {"arrangement", "SINGLEUTUBE"}};
+    nlohmann::json borehole = {{"buried_depth", this->myRespFactors->props->bhTopDepth}, // TODO: Confirm this is ready for access
+                               {"diameter", this->bhDiameter}};
+
+    nlohmann::json geometricConstraints = {
+        {"length", this->sizingData.length},
+        {"width", this->sizingData.width},
+        {"b_min", this->sizingData.minSpacing},
+        {"b_max", this->sizingData.maxSpacing},
+        {"method", "RECTANGLE"},
+    };
+    nlohmann::json design = {
+        {"max_eft", this->sizingData.maxEFT},
+        {"min_eft", this->sizingData.minEFT},
+        {"max_height", this->sizingData.maxLength},
+        {"min_height", this->sizingData.minLength},
+        {"max_boreholes", this->sizingData.numBoreholes},
+    };
+
+    nlohmann::json loads = {};
+    loads["load_values"] = hourlyLoads;
+
+    // set up the final borehole structure to fill out the input file
+    nlohmann::json ghe1 = {{"flow_rate", this->sizingData.designFlowRatePerBorehole * 1000}, // convert m3/s to lps
+                           {"flow_type", "BOREHOLE"}, //"SYSTEM"},  // TODO: I could NOT get it to size with SYSTEM...do I need to adjust flow rate?
+                           // We should just delete SYSTEM from GHEDesigner.
+                           {"grout", grout},
+                           {"soil", soil},
+                           {"pipe", pipe},
+                           {"borehole", borehole},
+                           {"geometric_constraints", geometricConstraints},
+                           {"design", design},
+                           {"loads", loads}};
+    gheDesignerInputs["ground_heat_exchanger"] = {{"ghe1", ghe1}};
+    gheDesignerInputs["simulation_control"] = {
+        {"sizing_run", false}, {"hourly_run", false}, {"sizing_months", 240}}; // TODO: Expose design period length through inputs
+    // then run it, this function can fatal for multiple reasons, otherwise it should just assign the g-function and time series and return
+    fs::path const ghe_designer_output_directory = runGHEDesigner(state, gheDesignerInputs);
+    auto const output_json_file = ghe_designer_output_directory / "SimulationSummary.json";
+    if (!exists(output_json_file)) {
+        ShowFatalError(state, "Although GHEDesigner appeared successful, the output file was not found, aborting ");
+    }
+    auto const output_borefield_file = ghe_designer_output_directory / "BoreFieldData.csv";
+    if (!exists(output_borefield_file)) {
+        ShowFatalError(state, "Although GHEDesigner appeared successful, the output borefield file was not found, aborting ");
+    }
+
+    // so it seems on the design run, you only get the long time step g-function, not the full STS + LTS
+    // may be silly, but for now I'm actually going to run ghedesigner again, taking the sized system this time
+    Real64 found_length = 0.0;
+    std::ifstream file(output_json_file);
+    try {
+        nlohmann::json data = nlohmann::json::parse(file);
+        found_length = data["ghe_system"]["active_borehole_length"]["value"];
+    } catch (const nlohmann::json::exception &) {
+        ShowFatalError(state, "GHEDesigner completed, and output file found, but could not parse JSON");
+    }
+
+    std::ifstream file2(output_borefield_file);
+    if (!file2.is_open()) {
+        ShowFatalError(state, "Could not open file: " + output_borefield_file.string());
+    }
+
+    std::vector<Real64> x, y;
+    std::string line;
+
+    // Skip header
+    if (!std::getline(file2, line)) {
+        ShowFatalError(state, "File is empty or missing header: " + output_borefield_file.string());
+    }
+
+    // Read data lines
+    while (std::getline(file2, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
+        std::istringstream ss(line);
+        std::string field;
+        double x1, y1;
+
+        if (!std::getline(ss, field, ',')) {
+            continue;
+        }
+        try {
+            x1 = std::stod(field);
+        } catch (...) {
+            ShowFatalError(state, "Bad data in GHEDesigner borefield results");
+        }
+
+        if (!std::getline(ss, field, ',')) {
+            continue;
+        }
+        try {
+            y1 = std::stod(field);
+        } catch (...) {
+            ShowFatalError(state, "Bad data in GHEDesigner borefield results");
+        }
+
+        x.emplace_back(x1);
+        y.emplace_back(y1);
+    }
+    nlohmann::json preDesigned = {{"arrangement", "MANUAL"}, {"H", found_length}, {"x", x}, {"y", y}};
+    ghe1["pre_designed"] = preDesigned;
+    ghe1.erase("geometric_constraints");
+    ghe1.erase("design");
+    ghe1.erase("loads");
+    gheDesignerInputs["ground_heat_exchanger"]["ghe1"] = ghe1;
+    fs::path const ghe_designer_output_directory2 = runGHEDesigner(state, gheDesignerInputs);
+    auto output_json_file2 = ghe_designer_output_directory2 / "SimulationSummary.json";
+    if (!exists(output_json_file2)) {
+        ShowFatalError(state, "Although GHEDesigner appeared successful, the output file was not found, aborting ");
+    }
+
+    std::ifstream file3(output_json_file2);
+    try {
+        nlohmann::json data = nlohmann::json::parse(file3);
+        std::vector<double> t = data["log_time"];
+        std::vector<double> g = data["g_values"];
+        std::vector<double> gbhw = data["g_bhw_values"];
+        this->myRespFactors->time = t;
+        this->myRespFactors->LNTTS = t;
+        this->myRespFactors->GFNC = g;
+    } catch (const nlohmann::json::exception &) {
+        ShowFatalError(state, "GHEDesigner completed, and output file found, but could not parse JSON");
+    }
+
+    // TODO: Make sure x and y are the same size, although I doubt they ever won't be.
+    std::ostringstream oss;
+    for (std::size_t i = 0; i < x.size(); ++i) {
+        oss << " (" << x[i] << " " << y[i] << ")";
+    }
+    BaseSizer::reportSizerStrOutput(state, "GroundHeatExchanger:System", this->name, "Borehole Field Locations (x1 y1) (x2 y2) ...", oss.str());
+}
+
+void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &state) const
+{
+    nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
+
+    std::string const p = fmt::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
 
     // check the heights of the EnergyPlus boreholes to make sure they don't vary
     auto const &bhs = this->myRespFactors->myBorholes;
@@ -485,55 +939,9 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
                            {"borehole", borehole},
                            {"pre_designed", preDesigned}};
     gheDesignerInputs["ground_heat_exchanger"] = {{"ghe1", ghe1}};
+    // then run it, this function can fatal for multiple reasons, otherwise it should just assign the g-function and time series and return
+    fs::path const ghe_designer_output_directory = runGHEDesigner(state, gheDesignerInputs);
 
-    // we'll drop the ghedesigner input file and output directory in the same folder as the input file
-    auto ghe_designer_input_file_path = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_input.json";
-    auto ghe_designer_output_directory = state.dataStrGlobals->inputDirPath / "eplus_ghedesigner_outputs";
-    try {
-        // If file already exists, try removing it
-        if (fs::exists(ghe_designer_input_file_path)) {
-            std::error_code ec;
-            if (!fs::remove(ghe_designer_input_file_path, ec)) {
-                if (ec) {
-                    ShowFatalError(state, "Failed to remove existing GHEDesigner input: " + ec.message());
-                }
-                // If remove returned false but no error, it wasn't a regular file
-                ShowFatalError(state, "Path exists but is not a removable file.");
-            }
-        }
-
-        // Now create the file fresh
-        std::ofstream ghe_designer_input_file(ghe_designer_input_file_path, std::ios::out | std::ios::trunc);
-        if (!ghe_designer_input_file) {
-            ShowFatalError(state, "Failed to create file: " + ghe_designer_input_file_path.string());
-        }
-        if (!ghe_designer_input_file.is_open()) {
-            ShowFatalError(state, "Failed to open output file");
-        }
-        ghe_designer_input_file << gheDesignerInputs;
-        ghe_designer_input_file.close();
-
-    } catch (const fs::filesystem_error &) {
-        ShowFatalError(state, "Filesystem error");
-    }
-
-    DisplayString(state, "Starting up GHEDesigner");
-    fs::path exePath;
-    if (state.dataGlobal->installRootOverride) {
-        exePath = state.dataStrGlobals->exeDirectoryPath / "energyplus";
-    } else {
-        exePath = FileSystem::getAbsolutePath(FileSystem::getProgramPath()); // could be /path/to/energyplus(.exe) or /path/to/energyplus_tests(.exe)
-        exePath = exePath.parent_path() / ("energyplus" + FileSystem::exeExtension);
-    }
-    std::string const cmd = fmt::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
-                                        FileSystem::toString(exePath),
-                                        FileSystem::toGenericString(ghe_designer_input_file_path),
-                                        FileSystem::toGenericString(ghe_designer_output_directory));
-    int const status = FileSystem::systemCall(cmd);
-    if (status != 0) {
-        ShowFatalError(state, "GHEDesigner failed to calculate G-functions.");
-    }
-    DisplayString(state, "GHEDesigner complete");
     auto output_json_file = ghe_designer_output_directory / "SimulationSummary.json";
     if (!exists(output_json_file)) {
         ShowFatalError(state, "Although GHEDesigner appeared successful, the output file was not found, aborting ");
@@ -1074,21 +1482,19 @@ void GLHEVert::initGLHESimVars(EnergyPlusData &state)
     }
 
     // Calculate the average ground temperature over the depth of the borehole
-    Real64 minDepth = this->myRespFactors->props->bhTopDepth;
-    Real64 maxDepth = this->myRespFactors->props->bhLength + minDepth;
-    Real64 oneQuarterDepth = minDepth + (maxDepth - minDepth) * 0.25;
-    Real64 halfDepth = minDepth + (maxDepth - minDepth) * 0.5;
-    Real64 threeQuarterDepth = minDepth + (maxDepth - minDepth) * 0.75;
+    Real64 const minDepth = this->myRespFactors->props->bhTopDepth;
+    Real64 const maxDepth = this->myRespFactors->props->bhLength + minDepth;
+    Real64 const oneQuarterDepth = minDepth + (maxDepth - minDepth) * 0.25;
+    Real64 const halfDepth = minDepth + (maxDepth - minDepth) * 0.5;
+    Real64 const threeQuarterDepth = minDepth + (maxDepth - minDepth) * 0.75;
 
     this->tempGround = 0;
-
     this->tempGround += this->groundTempModel->getGroundTempAtTimeInSeconds(state, minDepth, currTime);
     this->tempGround += this->groundTempModel->getGroundTempAtTimeInSeconds(state, maxDepth, currTime);
     this->tempGround += this->groundTempModel->getGroundTempAtTimeInSeconds(state, oneQuarterDepth, currTime);
     this->tempGround += this->groundTempModel->getGroundTempAtTimeInSeconds(state, halfDepth, currTime);
     this->tempGround += this->groundTempModel->getGroundTempAtTimeInSeconds(state, threeQuarterDepth, currTime);
-
-    this->tempGround /= 5;
+    this->tempGround /= 5.0;
 
     this->massFlowRate = PlantUtilities::RegulateCondenserCompFlowReqOp(state, this->plantLoc, this->designMassFlow);
 

@@ -923,7 +923,7 @@
     ON,                      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     5000,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.5,                     !- Fraction Radiant
@@ -936,7 +936,7 @@
     ON,                      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3000,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Fraction Latent
     0.0,                     !- Fraction Radiant

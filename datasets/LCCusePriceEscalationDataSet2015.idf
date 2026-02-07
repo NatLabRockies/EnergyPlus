@@ -16,11 +16,8 @@
 ! converted into EnergyPlus objects using a spreadsheet called ConvertENCOSTtoEnergyPlusLifeCycleCost.xls
 ! which is available upon request.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Residential-Electricity,  !- Name
+    NorthEast  Residential-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -56,8 +53,8 @@
     1.3667;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Residential-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    NorthEast  Residential-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9839,                  !- Year 1 Escalation
@@ -92,7 +89,7 @@
     1.7842;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Residential-Natural gas,  !- Name
+    NorthEast  Residential-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -128,7 +125,7 @@
     1.7495;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Residential-LPG,  !- Name
+    NorthEast  Residential-LPG,  !- LCC Price Escalation Name
     Propane,                 !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -164,7 +161,7 @@
     1.2509;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Commercial-Electricity,  !- Name
+    NorthEast  Commercial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -200,8 +197,8 @@
     1.3483;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Commercial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    NorthEast  Commercial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9834,                  !- Year 1 Escalation
@@ -236,8 +233,8 @@
     1.7879;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Commercial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    NorthEast  Commercial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0084,                  !- Year 1 Escalation
@@ -272,7 +269,7 @@
     2.1351;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Commercial-Natural gas,  !- Name
+    NorthEast  Commercial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -308,7 +305,7 @@
     1.8143;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Commercial-Coal,  !- Name
+    NorthEast  Commercial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -344,7 +341,7 @@
     1.1588;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Industrial-Electricity,  !- Name
+    NorthEast  Industrial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -380,8 +377,8 @@
     1.3047;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Industrial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    NorthEast  Industrial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9843,                  !- Year 1 Escalation
@@ -416,8 +413,8 @@
     1.8070;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Industrial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    NorthEast  Industrial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0093,                  !- Year 1 Escalation
@@ -452,7 +449,7 @@
     2.1762;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Industrial-Natural gas,  !- Name
+    NorthEast  Industrial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -488,7 +485,7 @@
     2.6482;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    NorthEast  Industrial-Coal,  !- Name
+    NorthEast  Industrial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -524,7 +521,7 @@
     1.2530;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Residential-Electricity,  !- Name
+    MidWest  Residential-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -560,8 +557,8 @@
     1.2380;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Residential-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    MidWest  Residential-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9833,                  !- Year 1 Escalation
@@ -596,7 +593,7 @@
     1.7800;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Residential-Natural gas,  !- Name
+    MidWest  Residential-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -632,7 +629,7 @@
     1.5093;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Residential-LPG,!- Name
+    MidWest  Residential-LPG,!- LCC Price Escalation Name
     Propane,                 !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -668,7 +665,7 @@
     1.2484;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Commercial-Electricity,  !- Name
+    MidWest  Commercial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -704,8 +701,8 @@
     1.1938;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Commercial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    MidWest  Commercial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9835,                  !- Year 1 Escalation
@@ -740,8 +737,8 @@
     1.7984;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Commercial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    MidWest  Commercial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0077,                  !- Year 1 Escalation
@@ -776,7 +773,7 @@
     2.4380;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Commercial-Natural gas,  !- Name
+    MidWest  Commercial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -812,7 +809,7 @@
     1.4976;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Commercial-Coal,!- Name
+    MidWest  Commercial-Coal,!- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -848,7 +845,7 @@
     1.2516;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Industrial-Electricity,  !- Name
+    MidWest  Industrial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -884,8 +881,8 @@
     1.2341;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Industrial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    MidWest  Industrial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9837,                  !- Year 1 Escalation
@@ -920,8 +917,8 @@
     1.7490;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Industrial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    MidWest  Industrial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0080,                  !- Year 1 Escalation
@@ -956,7 +953,7 @@
     2.5169;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Industrial-Natural gas,  !- Name
+    MidWest  Industrial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -992,7 +989,7 @@
     1.8152;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    MidWest  Industrial-Coal,!- Name
+    MidWest  Industrial-Coal,!- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1028,7 +1025,7 @@
     1.3438;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Residential-Electricity,  !- Name
+    South  Residential-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1064,8 +1061,8 @@
     1.2369;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Residential-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    South  Residential-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9836,                  !- Year 1 Escalation
@@ -1100,7 +1097,7 @@
     1.7780;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Residential-Natural gas,  !- Name
+    South  Residential-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1136,7 +1133,7 @@
     1.5276;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Residential-LPG,  !- Name
+    South  Residential-LPG,  !- LCC Price Escalation Name
     Propane,                 !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1172,7 +1169,7 @@
     1.2637;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Commercial-Electricity,  !- Name
+    South  Commercial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1208,8 +1205,8 @@
     1.2023;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Commercial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    South  Commercial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9839,                  !- Year 1 Escalation
@@ -1244,8 +1241,8 @@
     1.8023;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Commercial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    South  Commercial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0077,                  !- Year 1 Escalation
@@ -1280,7 +1277,7 @@
     2.2812;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Commercial-Natural gas,  !- Name
+    South  Commercial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1316,7 +1313,7 @@
     1.4776;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Commercial-Coal,  !- Name
+    South  Commercial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1352,7 +1349,7 @@
     1.2222;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Industrial-Electricity,  !- Name
+    South  Industrial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1388,8 +1385,8 @@
     1.2409;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Industrial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    South  Industrial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9832,                  !- Year 1 Escalation
@@ -1424,8 +1421,8 @@
     1.7777;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Industrial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    South  Industrial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0093,                  !- Year 1 Escalation
@@ -1460,7 +1457,7 @@
     2.2754;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Industrial-Natural gas,  !- Name
+    South  Industrial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1496,7 +1493,7 @@
     2.0935;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    South  Industrial-Coal,  !- Name
+    South  Industrial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1532,7 +1529,7 @@
     1.2487;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Residential-Electricity,  !- Name
+    West  Residential-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1568,8 +1565,8 @@
     1.1393;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Residential-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    West  Residential-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9841,                  !- Year 1 Escalation
@@ -1604,7 +1601,7 @@
     1.7540;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Residential-Natural gas,  !- Name
+    West  Residential-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1640,7 +1637,7 @@
     1.4733;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Residential-LPG,   !- Name
+    West  Residential-LPG,   !- LCC Price Escalation Name
     Propane,                 !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1676,7 +1673,7 @@
     1.2620;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Commercial-Electricity,  !- Name
+    West  Commercial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1712,8 +1709,8 @@
     1.0543;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Commercial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    West  Commercial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9832,                  !- Year 1 Escalation
@@ -1748,8 +1745,8 @@
     1.8033;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Commercial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    West  Commercial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0082,                  !- Year 1 Escalation
@@ -1784,7 +1781,7 @@
     2.5679;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Commercial-Natural gas,  !- Name
+    West  Commercial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1820,7 +1817,7 @@
     1.5462;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Commercial-Coal,   !- Name
+    West  Commercial-Coal,   !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1856,7 +1853,7 @@
     1.3367;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Industrial-Electricity,  !- Name
+    West  Industrial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -1892,8 +1889,8 @@
     1.1288;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Industrial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    West  Industrial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9838,                  !- Year 1 Escalation
@@ -1928,8 +1925,8 @@
     1.7627;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Industrial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    West  Industrial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0093,                  !- Year 1 Escalation
@@ -1964,7 +1961,7 @@
     2.5782;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Industrial-Natural gas,  !- Name
+    West  Industrial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2000,7 +1997,7 @@
     1.8279;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    West  Industrial-Coal,   !- Name
+    West  Industrial-Coal,   !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2036,7 +2033,7 @@
     1.2787;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Residential-Electricity,  !- Name
+    U.S. Avg  Residential-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2072,8 +2069,8 @@
     1.2291;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Residential-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    U.S. Avg  Residential-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9843,                  !- Year 1 Escalation
@@ -2108,7 +2105,7 @@
     1.7837;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Residential-Natural gas,  !- Name
+    U.S. Avg  Residential-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2144,7 +2141,7 @@
     1.5632;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Residential-LPG,  !- Name
+    U.S. Avg  Residential-LPG,  !- LCC Price Escalation Name
     Propane,                 !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2180,7 +2177,7 @@
     1.2686;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Commercial-Electricity,  !- Name
+    U.S. Avg  Commercial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2216,8 +2213,8 @@
     1.1838;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Commercial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    U.S. Avg  Commercial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9840,                  !- Year 1 Escalation
@@ -2252,8 +2249,8 @@
     1.7987;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Commercial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    U.S. Avg  Commercial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0078,                  !- Year 1 Escalation
@@ -2288,7 +2285,7 @@
     2.1584;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Commercial-Natural gas,  !- Name
+    U.S. Avg  Commercial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2324,7 +2321,7 @@
     1.5711;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Commercial-Coal,  !- Name
+    U.S. Avg  Commercial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2360,7 +2357,7 @@
     1.2552;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Industrial-Electricity,  !- Name
+    U.S. Avg  Industrial-Electricity,  !- LCC Price Escalation Name
     Electricity,             !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2396,8 +2393,8 @@
     1.2229;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Industrial-Distillate Oil,  !- Name
-    FuelOilNo1,                !- Resource
+    U.S. Avg  Industrial-Distillate Oil,  !- LCC Price Escalation Name
+    FuelOilNo1,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     0.9839,                  !- Year 1 Escalation
@@ -2432,8 +2429,8 @@
     1.7688;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Industrial-Residual Oil,  !- Name
-    FuelOilNo2,                !- Resource
+    U.S. Avg  Industrial-Residual Oil,  !- LCC Price Escalation Name
+    FuelOilNo2,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
     1.0086,                  !- Year 1 Escalation
@@ -2468,7 +2465,7 @@
     2.3087;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Industrial-Natural gas,  !- Name
+    U.S. Avg  Industrial-Natural gas,  !- LCC Price Escalation Name
     NaturalGas,              !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month
@@ -2504,7 +2501,7 @@
     1.9979;                  !- Year 30 Escalation
 
   LifeCycleCost:UsePriceEscalation,
-    U.S. Avg  Industrial-Coal,  !- Name
+    U.S. Avg  Industrial-Coal,  !- LCC Price Escalation Name
     Coal,                    !- Resource
     2016,                    !- Escalation Start Year
     January,                 !- Escalation Start Month

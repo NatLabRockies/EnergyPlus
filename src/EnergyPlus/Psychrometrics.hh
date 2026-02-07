@@ -132,7 +132,7 @@ namespace Psychrometrics {
                                 // 14 - HR | 15 - max iter | 16 - HR | 17 - max iter | 18 -
                                 // PsyTwbFnTdbWPb_raw (raw calc) | 19 - PsyPsatFnTemp_raw
                                 // (raw calc)
-                                // sample bin size =64 Pa; sample size =1651 (continous)
+                                // sample bin size =64 Pa; sample size =1651 (continuous)
     static constexpr std::array<Real64, 1651> tsat_fn_pb_y = {
         -100,        -24.88812836, -17.74197121, -13.36696483, -10.17031904, -7.635747635, -5.528025298, -3.719474549, -2.132789207, -0.717496548,
         0.635182846, 1.961212857,  3.184455749,  4.320585222,  5.381890646,  6.378191532,  7.317464071,  8.206277019,  9.050107781,  9.853572827,

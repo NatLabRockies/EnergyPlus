@@ -6,7 +6,7 @@
 ! Basic file description: A 186 m^2 (2000 ft^2) residential house with slab-on-grade (no ground contact).
 !
 ! Highlights:             This file does the basic test of duct losses in an air distribution system in a residential home.
-!                         It provides 8 types of duct conduction and leakage losses in 4 different types of ducts: 
+!                         It provides 8 types of duct conduction and leakage losses in 4 different types of ducts:
 !                         Supply trunk, Supply branch, Return branch and Return trunk.
 !
 ! Simulation Location/Run: CHICAGO_IL_USA TMY2-94846, 2 design days, 2 run periods,
@@ -28,7 +28,7 @@
 !                          Building aspect ratio: 1:1.6
 !
 ! Control logic:
-!           
+!
 !
 ! Floor Area:        186 m^2 (2000 ft^2)
 ! Number of Stories: 1
@@ -1147,7 +1147,7 @@
     HOUSE LIGHTING,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1000,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1161,7 +1161,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     500,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1312,57 +1312,57 @@
     Air Loop Outlet Node;    !- Supply Side Outlet Node Names
 
   Duct:Loss:Conduction,
-    Supply trunck,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    Main Link,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
-    Attic Zone;                     !- Ambient temperature zone
+    Supply trunck,           !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    Main Link,               !- AirflowNetwork:Distribution:Linkage Name
+    Zone,                    !- Environment Type
+    Attic Zone;              !- Ambient Zone Name
 
   Duct:Loss:Conduction,
-    Supply branch,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ZoneSupplyLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
-    Attic Zone;                     !- Ambient temperature zone
+    Supply branch,           !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ZoneSupplyLink,          !- AirflowNetwork:Distribution:Linkage Name
+    Zone,                    !- Environment Type
+    Attic Zone;              !- Ambient Zone Name
 
   Duct:Loss:Conduction,
-    Return Branch,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ZoneReturnLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
-    Attic Zone;                     !- Ambient temperature zone
+    Return Branch,           !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ZoneReturnLink,          !- AirflowNetwork:Distribution:Linkage Name
+    Zone,                    !- Environment Type
+    Attic Zone;              !- Ambient Zone Name
 
   Duct:Loss:Conduction,
-    Return trunck,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ReturnMixerLink,  !- AirflowNetwork:Distribution:Linkage name
-    Zone,                   !- Enviroment type
-    Attic Zone;                     !- Ambient temperature zone
+    Return trunck,           !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ReturnMixerLink,         !- AirflowNetwork:Distribution:Linkage Name
+    Zone,                    !- Environment Type
+    Attic Zone;              !- Ambient Zone Name
 
   Duct:Loss:Leakage,
-    Supply leak,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ZoneSupplyLeakLink;  !- AirflowNetwork:Distribution:Linkage name
+    Supply leak,             !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ZoneSupplyLeakLink;      !- AirflowNetwork:Distribution:Linkage Name
 
   Duct:Loss:Leakage,
-    Return leak,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ZoneReturnLeakLink;  !- AirflowNetwork:Distribution:Linkage name
+    Return leak,             !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ZoneReturnLeakLink;      !- AirflowNetwork:Distribution:Linkage Name
 
   Duct:Loss:Leakage,
-    SupplyBranchleak,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    SupplyBranchLeakLink;  !- AirflowNetwork:Distribution:Linkage name
+    SupplyBranchleak,        !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    SupplyBranchLeakLink;    !- AirflowNetwork:Distribution:Linkage Name
 
   Duct:Loss:Leakage,
-    ReturnBranchleak,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ReturnBranchLeakLink;  !- AirflowNetwork:Distribution:Linkage name
+    ReturnBranchleak,        !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ReturnBranchLeakLink;    !- AirflowNetwork:Distribution:Linkage Name
 
   Duct:Loss:MakeupAir,
-    ReturnMakeup,      !- Name
-    Typical Residential System,  !- AirLoopHVAC name
-    ReturnMakeupLink;  !- AirflowNetwork:Distribution:Linkage name
+    ReturnMakeup,            !- Name
+    Typical Residential System,  !- AirLoopHVAC Name
+    ReturnMakeupLink;        !- AirflowNetwork:Distribution:Linkage Name
 
   AirflowNetwork:Distribution:Node,
     EquipmentInletNode,      !- Name
@@ -1401,21 +1401,21 @@
     3.0;                     !- Node Height {m}
 
   AirflowNetwork:Distribution:Node,
-    Attic Zone,          !- Name
-    Attic Zone, !- Component Name or Node Name
-    Zone,                   !- Component Object Type or Node Type
+    Attic Zone,              !- Name
+    Attic Zone,              !- Component Name or Node Name
+    Zone,                    !- Component Object Type or Node Type
     3.0;                     !- Node Height {m}
 
   AirflowNetwork:Distribution:Node,
-    Garage Zone,          !- Name
-    Garage Zone, !- Component Name or Node Name
-    Zone,                   !- Component Object Type or Node Type
+    Garage Zone,             !- Name
+    Garage Zone,             !- Component Name or Node Name
+    Zone,                    !- Component Object Type or Node Type
     3.0;                     !- Node Height {m}
 
   AirflowNetwork:Distribution:Node,
-    OutdoorNode,          !- Name
-    Outside Air Inlet Node, !- Component Name or Node Name
-    OutdoorAir:Node,        !- Component Object Type or Node Type
+    OutdoorNode,             !- Name
+    Outside Air Inlet Node,  !- Component Name or Node Name
+    OutdoorAir:Node,         !- Component Object Type or Node Type
     3.0;                     !- Node Height {m}
 
   NodeList,
@@ -1440,21 +1440,21 @@
     0.65;                    !- Air Mass Flow Exponent {dimensionless}
 
   AirflowNetwork:Distribution:Component:LeakageRatio,
-    SupplyBranchLeak,              !- Name
-    0.05,                     !- Effective Leakage Ratio {dimensionless}
+    SupplyBranchLeak,        !- Name
+    0.05,                    !- Effective Leakage Ratio {dimensionless}
     1.9,                     !- Maximum Flow Rate {m3/s}
     60,                      !- Reference Pressure Difference {Pa}
     0.65;                    !- Air Mass Flow Exponent {dimensionless}
 
   AirflowNetwork:Distribution:Component:LeakageRatio,
-    ReturnBranchLeak,              !- Name
+    ReturnBranchLeak,        !- Name
     0.02,                    !- Effective Leakage Ratio {dimensionless}
     1.9,                     !- Maximum Flow Rate {m3/s}
     15,                      !- Reference Pressure Difference {Pa}
     0.65;                    !- Air Mass Flow Exponent {dimensionless}
 
   AirflowNetwork:Distribution:Component:LeakageRatio,
-    ReturnMakeupAir,              !- Name
+    ReturnMakeupAir,         !- Name
     0.07,                    !- Effective Leakage Ratio {dimensionless}
     1.9,                     !- Maximum Flow Rate {m3/s}
     15,                      !- Reference Pressure Difference {Pa}
@@ -1540,16 +1540,16 @@
     Attic Zone;              !- Thermal Zone Name
 
   AirflowNetwork:Distribution:Linkage,
-    ZoneSupplyLink,         !- Name
+    ZoneSupplyLink,          !- Name
     SplitterNode,            !- Node 1 Name
-    ZoneSupplyRegisterNode ATInlet,          !- Node 2 Name
+    ZoneSupplyRegisterNode ATInlet,  !- Node 2 Name
     ZoneSupply,              !- Component Name
     Attic Zone;              !- Thermal Zone Name
 
   AirflowNetwork:Distribution:Linkage,
-    ZoneReturnLink,         !- Name
+    ZoneReturnLink,          !- Name
     ZoneOutletNode,          !- Node 1 Name
-    MixerNode,          !- Node 2 Name
+    MixerNode,               !- Node 2 Name
     ZoneReturn,              !- Component Name
     Attic Zone;              !- Thermal Zone Name
 
@@ -1562,33 +1562,33 @@
 
   AirflowNetwork:Distribution:Linkage,
     ZoneSupplyLeakLink,      !- Name
-    SplitterNode,          !- Node 1 Name
+    SplitterNode,            !- Node 1 Name
     Attic Zone,              !- Node 2 Name
     SupplyLeak;              !- Component Name
 
   AirflowNetwork:Distribution:Linkage,
     ZoneReturnLeakLink,      !- Name
     Garage Zone,             !- Node 1 Name
-    MixerNode,          !- Node 2 Name
+    MixerNode,               !- Node 2 Name
     ReturnLeak;              !- Component Name
 
   AirflowNetwork:Distribution:Linkage,
-    SupplyBranchLeakLink,      !- Name
-    ZoneSupplyRegisterNode ATInlet,          !- Node 1 Name
+    SupplyBranchLeakLink,    !- Name
+    ZoneSupplyRegisterNode ATInlet,  !- Node 1 Name
     Attic Zone,              !- Node 2 Name
-    SupplyBranchLeak;              !- Component Name
+    SupplyBranchLeak;        !- Component Name
 
   AirflowNetwork:Distribution:Linkage,
-    ReturnBranchLeakLink,      !- Name
+    ReturnBranchLeakLink,    !- Name
     Garage Zone,             !- Node 1 Name
     ZoneOutletNode,          !- Node 2 Name
-    ReturnBranchLeak;              !- Component Name
+    ReturnBranchLeak;        !- Component Name
 
   AirflowNetwork:Distribution:Linkage,
-    ReturnMakeupLink,      !- Name
+    ReturnMakeupLink,        !- Name
     OutdoorNode,             !- Node 1 Name
-    Garage Zone,          !- Node 2 Name
-    ReturnMakeupAir;              !- Component Name
+    Garage Zone,             !- Node 2 Name
+    ReturnMakeupAir;         !- Component Name
 
   AvailabilityManagerAssignmentList,
     Reheat System 1 Avail List,  !- Name
@@ -1707,15 +1707,18 @@
     0.8,                     !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     1.18,                    !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
     Heating Coil Air Inlet Node,  !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Heating:DX:SingleSpeed,
     Heat Pump DX Heating Coil 1,  !- Name
@@ -1723,8 +1726,8 @@
     21000,                   !- Gross Rated Heating Capacity {W}
     2.75,                    !- Gross Rated Heating COP {W/W}
     1.18,                    !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}
     Heating Coil Air Inlet Node,  !- Air Inlet Node Name
     SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
     HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name
@@ -1742,7 +1745,12 @@
     Resistive,               !- Defrost Strategy
     TIMED,                   !- Defrost Control
     0.166667,                !- Defrost Time Period Fraction
-    20000;                   !- Resistive Defrost Heater Capacity {W}
+    20000,                   !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
   Fan:OnOff,
     Supply Fan 1,            !- Name

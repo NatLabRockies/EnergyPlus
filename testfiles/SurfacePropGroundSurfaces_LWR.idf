@@ -579,7 +579,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     23190.00,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -593,7 +593,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     11600.00,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -627,7 +627,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -641,7 +641,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -675,7 +675,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -689,7 +689,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -723,7 +723,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -737,7 +737,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3870.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -771,7 +771,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     7750.000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -785,7 +785,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     3880.000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -2310,14 +2310,14 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall002,    !- Name
     Zn005:Wall002,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     SrdSurfs:Zn005:Wall002,  !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall002:Win001,  !- Name
     Zn005:Wall002:Win001,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     SrdSurfs:Zn005:Wall002:Win001,  !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn005:Wall002:Win001;  !- Ground Surfaces Object Name
@@ -2325,7 +2325,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn003:Roof001,    !- Name
     Zn003:Roof001,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     SrdSurfs:Zn003:Roof001,  !- Surrounding Surfaces Object Name
     ;                        !- Outdoor Air Node Name
 
@@ -2375,7 +2375,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn004:Wall001,    !- Name
     Zn004:Wall001,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn004:Wall001;  !- Ground Surfaces Object Name
@@ -2383,7 +2383,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn004:Wall001:Win001,  !- Name
     Zn004:Wall001:Win001,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn004:Wall001;  !- Ground Surfaces Object Name
@@ -2391,7 +2391,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn004:Wall001:Win002,  !- Name
     Zn004:Wall001:Win002,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn004:Wall001;  !- Ground Surfaces Object Name
@@ -2414,7 +2414,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn003:Wall001,    !- Name
     Zn003:Wall001,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn003:Wall001;  !- Ground Surfaces Object Name
@@ -2422,7 +2422,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn003:Wall001:Win001,  !- Name
     Zn003:Wall001:Win001,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn003:Wall001;  !- Ground Surfaces Object Name
@@ -2430,7 +2430,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn003:Wall001:Win002,  !- Name
     Zn003:Wall001:Win002,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn003:Wall001;  !- Ground Surfaces Object Name
@@ -2453,7 +2453,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn002:Wall003,    !- Name
     Zn002:Wall003,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn002:Wall003;  !- Ground Surfaces Object Name
@@ -2461,7 +2461,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn002:Wall003:Win001,  !- Name
     Zn002:Wall003:Win001,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn002:Wall003;  !- Ground Surfaces Object Name
@@ -2469,7 +2469,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn002:Wall003:Win002,  !- Name
     Zn002:Wall003:Win002,    !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn002:Wall003;  !- Ground Surfaces Object Name
@@ -2488,7 +2488,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall003,    !- Name
     Zn005:Wall003,           !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn005:Wall003;  !- Ground Surfaces Object Name
@@ -2496,7 +2496,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall003:Door001,  !- Name
     Zn005:Wall003:Door001,   !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn005:Wall003;  !- Ground Surfaces Object Name
@@ -2504,7 +2504,7 @@
   SurfaceProperty:LocalEnvironment,
     LocEnv:Zn005:Wall003:Door002,  !- Name
     Zn005:Wall003:Door002,   !- Exterior Surface Name
-    ,                        !- External Shading Fraction Schedule Name
+    ,                        !- Sunlit Fraction Schedule Name
     ,                        !- Surrounding Surfaces Object Name
     ,                        !- Outdoor Air Node Name
     GndSurfs:Zn005:Wall003;  !- Ground Surfaces Object Name

@@ -361,7 +361,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_GetWindowConstructData)
 
     state->dataHeatBal->NominalRforNominalUCalculation.allocate(1);
     state->dataHeatBal->NominalRforNominalUCalculation(1) = 0.0;
-    mat1->NominalR = 0.4; // Set these explicity for each material layer to avoid random failures of check for
+    mat1->NominalR = 0.4; // Set these explicitly for each material layer to avoid random failures of check for
                           // NominalRforNominalUCalculation == 0.0 at end of GetConstructData
     mat2->NominalR = 0.4;
 

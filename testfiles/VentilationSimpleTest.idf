@@ -410,7 +410,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -424,7 +424,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -436,7 +436,7 @@
     Constant,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     6.131944,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     NATURAL,                 !- Ventilation Type
@@ -481,7 +481,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -495,7 +495,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -507,7 +507,7 @@
     Constant,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     6.131944,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     INTAKE,                  !- Ventilation Type
@@ -552,7 +552,7 @@
     Residence Lighting,      !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     950.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Return Air Fraction
     0.4000000,               !- Fraction Radiant
@@ -566,7 +566,7 @@
     Residence Lighting,      !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     480.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000000E+00,           !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -578,7 +578,7 @@
     Constant,                !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     6.131944,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     EXHAUST,                 !- Ventilation Type

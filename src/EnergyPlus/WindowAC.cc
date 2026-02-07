@@ -1110,7 +1110,7 @@ namespace WindowAC {
 
         CalcWindowACOutput(state, WindACNum, FirstHVACIteration, fanOp, PartLoadFrac, HXUnitOn, QUnitOut);
 
-        // Reseting AirMassFlow to inlet node mass flow rate since inlet mass flow rate may be getting
+        // Resetting AirMassFlow to inlet node mass flow rate since inlet mass flow rate may be getting
         // manipulated in subroutine CalcWindowACOutput
 
         AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate;

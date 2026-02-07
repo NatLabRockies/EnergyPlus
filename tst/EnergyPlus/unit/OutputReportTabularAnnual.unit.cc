@@ -295,7 +295,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults)
     // UpdateDataandReport( 1 ); not sure if this is needed
     GatherAnnualResultsForTimeStep(*state, OutputProcessor::TimeStepType::Zone);
 
-    // STOPPPED HERE. NOT SEEING THE POWER VARIABLE SHOWING UP
+    // STOPPED HERE. NOT SEEING THE POWER VARIABLE SHOWING UP
 
     std::vector<AnnualTable>::iterator firstTable = state->dataOutputReportTabularAnnual->annualTables.begin();
     std::vector<std::string> fieldSetParams = firstTable->inspectTableFieldSets(0);
@@ -318,7 +318,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults_MinMaxHrsShown
     state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:MYTH", state->dataOutputProcessor->meters.size() - 1);
 
     std::vector<AnnualTable> annualTables;
-    annualTables.push_back(AnnualTable(*state, "PEAK ELECTRICTY ANNUAL MYTH REPORT", "", ""));
+    annualTables.push_back(AnnualTable(*state, "PEAK ELECTRICITY ANNUAL MYTH REPORT", "", ""));
     annualTables.back().addFieldSet("HEATING:MYTH:VARIABLE", AnnualFieldSet::AggregationKind::hoursPositive, 2);
     annualTables.back().addFieldSet("ELECTRICITY:MYTH", AnnualFieldSet::AggregationKind::maximumDuringHoursShown, 2);
     annualTables.back().setupGathering(*state);

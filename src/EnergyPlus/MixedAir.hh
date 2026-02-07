@@ -368,7 +368,7 @@ namespace MixedAir {
                         bool FirstHVACIteration,
                         int &CompIndex,
                         int AirLoopNum,      // air loop index for economizer lockout coordination
-                        bool Sim,            // if TRUE, simulate component; if FALSE, just set the coil exisitence flags
+                        bool Sim,            // if TRUE, simulate component; if FALSE, just set the coil existence flags
                         int OASysNum,        // index to outside air system
                         bool &OAHeatingCoil, // TRUE indicates a heating coil has been found
                         bool &OACoolingCoil, // TRUE indicates a cooling coil has been found

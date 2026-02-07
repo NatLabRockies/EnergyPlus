@@ -78,7 +78,7 @@ namespace ThermalChimney {
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS MODULE:
-    // To encapsulate the data and algorithyms required to manage the ThermalChimney System Component
+    // To encapsulate the data and algorithm required to manage the ThermalChimney System Component
 
     // METHODOLOGY EMPLOYED:
     // na
@@ -697,11 +697,11 @@ namespace ThermalChimney {
         // To be obtained from other modules and subroutines
         Real64 SurfTempAbsorberWall;     // Absorber wall surface temperature (K)
         Real64 SurfTempGlassCover;       // Glass cover surface temperature (K)
-        Real64 ConvTransCoeffWallFluid;  // Absorber wall convection trasnfer coefficient
-        Real64 ConvTransCoeffGlassFluid; // Glass cover convection trasnfer coefficient
+        Real64 ConvTransCoeffWallFluid;  // Absorber wall convection transfer coefficient
+        Real64 ConvTransCoeffGlassFluid; // Glass cover convection transfer coefficient
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        // Real local vaiables
+        // Real local variables
         Real64 minorW; // width of enclosure (narrow dimension)
         Real64 majorW; // width of major surface
         Real64 TempmajorW;
@@ -733,7 +733,7 @@ namespace ThermalChimney {
         Real64 DeltaL; // OverallThermalChimLength / NTC
         int ThermChimLoop1;
         int ThermChimLoop2;
-        Array2D<Real64> EquaCoef(NTC, NTC);    // Coefficients in Linear Algebraic Euqation for FINITE DIFFERENCE
+        Array2D<Real64> EquaCoef(NTC, NTC);    // Coefficients in Linear Algebraic Equation for FINITE DIFFERENCE
         Array1D<Real64> EquaConst(NTC);        // Constants in Linear Algebraic Equation for FINITE DIFFERENCE
         Array1D<Real64> ThermChimSubTemp(NTC); // Air temperature of each thermal chimney air channel subregion
 
@@ -842,7 +842,7 @@ namespace ThermalChimney {
             for (IterationLoop = 1; IterationLoop <= 10; ++IterationLoop) {
 
                 if (IterationLoop == 1) {
-                    TempTCMassAirFlowRate(IterationLoop) = 0.05; // Inital Guess
+                    TempTCMassAirFlowRate(IterationLoop) = 0.05; // Initial Guess
 
                 } else {
                     TempTCMassAirFlowRate(IterationLoop) = TempTCVolumeAirFlowRate(IterationLoop - 1) * AirDensityThermalChim;
@@ -1059,7 +1059,7 @@ namespace ThermalChimney {
     void GaussElimination(Array2A<Real64> EquaCoef, Array1D<Real64> &EquaConst, Array1D<Real64> &ThermChimSubTemp, int const NTC)
     {
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine sovles linear algebraic equations using Gauss Elimination Method.
+        // This subroutine solves linear algebraic equations using Gauss Elimination Method.
 
         EquaCoef.dim(NTC, NTC);
         EP_SIZE_CHECK(EquaConst, NTC);

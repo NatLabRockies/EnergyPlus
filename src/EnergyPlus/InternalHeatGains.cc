@@ -977,7 +977,7 @@ namespace InternalHeatGains {
                 std::string_view const levelField = IHGNumericFieldNames(fieldNum);
 
                 // Create one Lights instance for every space associated with this Lights input object
-                // Why? Why can't multple spaces share a single lights instance?
+                // Why? Why can't multiple spaces share a single lights instance?
                 // Answer: It followed the same pattern as when a ZoneList was used. It might/should be possible to refactor this.
                 for (int Item1 = 1; Item1 <= thisLightsInput.numOfSpaces; ++Item1) {
                     ++lightsNum;
@@ -8652,7 +8652,7 @@ namespace InternalHeatGains {
                 enclCLDayTS.powerGenRadSeq = SumEnclosureInternalRadiationGainsByTypes(state, iEncl, IntGainTypesPowerGen);
             }
             if (state.dataHeatBal->doSpaceHeatBalanceSizing) {
-                for (int iSpace = 1; iSpace <= state.dataGlobal->NumOfZones; ++iSpace) {
+                for (int iSpace = 1; iSpace <= state.dataGlobal->numSpaces; ++iSpace) {
                     auto &spCLDayTS =
                         state.dataOutRptTab->spCompLoads[state.dataSize->CurOverallSimDay - 1].ts[TimeStepInDay - 1].spacezone[iSpace - 1];
                     gatherCompLoadIntGain2(state, spCLDayTS, state.dataHeatBal->space(iSpace).zoneNum, iSpace);

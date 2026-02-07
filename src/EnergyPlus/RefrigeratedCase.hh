@@ -670,9 +670,9 @@ namespace RefrigeratedCase {
             0.0;                             // Total Elec consump for the low- and high-stage compressors on this system (two-stage systems only) (J)
         Real64 TotRejectHeatRecovered = 0.0; // Total reject heat recovered for hot gas or hot brine defrost or
         //     desuperheater coils (W)
-        Real64 TotTransferLoad = 0.0; // Total load from other systems transferred to this sytem, incl mech subcoolers,
+        Real64 TotTransferLoad = 0.0; // Total load from other systems transferred to this system, incl mech subcoolers,
         // cascade, and secondary loops (W)
-        Real64 TotTransferEnergy = 0.0; // Total energy from other systems transferred to this sytem, incl mech subcoolers,
+        Real64 TotTransferEnergy = 0.0; // Total energy from other systems transferred to this system, incl mech subcoolers,
         // cascade, and secondary loops (J)
         Real64 UnmetEnergy = 0.0; // Accumulative loads unmet by total compressors (for single-stage systems) or
         // by low-stage compressors (for two-stage systems) on this system (J)
@@ -764,8 +764,8 @@ namespace RefrigeratedCase {
         Real64 PipeHeatEnergyLT = 0.0;                     // Total low temperature suction pipe heat gains, optional (J)
         Real64 RefMassFlowtoMTLoads = 0.0;                 // Refrigerant mass flow through medium temperature cases(kg/s)
         Real64 RefMassFlowtoLTLoads = 0.0;                 // Refrigerant mass flow through low temperature cases(kg/s)
-        Real64 RefMassFlowCompsHP = 0.0;                   // Total system refrigerant mass flow through high pressue compressors(kg/s)
-        Real64 RefMassFlowCompsLP = 0.0;                   // Total system refrigerant mass flow through low pressue compressors(kg/s)
+        Real64 RefMassFlowCompsHP = 0.0;                   // Total system refrigerant mass flow through high pressure compressors(kg/s)
+        Real64 RefMassFlowCompsLP = 0.0;                   // Total system refrigerant mass flow through low pressure compressors(kg/s)
         Real64 RefMassFlowComps = 0.0;                     // Total system refrigerant mass flow through all compressors (kg/s)
         Real64 RefMassFlowReceiverBypass = 0.0;            // Refrigerant mass flow through receiver bypass (kg/s)
         Real64 RefInventory = 0.0;                         // Approximate refrigerant inventory entered by user (kg)
@@ -891,7 +891,7 @@ namespace RefrigeratedCase {
         int InletAirNodeNum = 0;                                          // Inlet air node number, can be outside or in a zone
         int InletAirZoneNum = 0;                                          // Inlet air zone number, if located in a zone
         FanSpeedCtrlType FanSpeedControlType = FanSpeedCtrlType::Invalid; // fixed, two-speed, or variable
-        int CapCurvePtr = 0;                                              // capcity curve pointer for air-cooled condensers
+        int CapCurvePtr = 0;                                              // capacity curve pointer for air-cooled condensers
         int CascadeSysID = 0;                                             // System ID number for system rejecting heat to cascade condenser
         CascadeCndsrTempCtrlType CascadeTempControl =
             CascadeCndsrTempCtrlType::Invalid; // Determines whether cascade condenser evaporating temperature set by
@@ -1014,7 +1014,7 @@ namespace RefrigeratedCase {
         Real64 HGasCoolerOut = 0.0;                                       // Specific enthalpy at the gas cooler outlet (C)
         Real64 InternalEnergyRecovered = 0.0;                             // InternalHeatRecovered, J
         Real64 InternalHeatRecoveredLoad = 0.0;                           // Sum of all heat recovered for defrost purposes [W]
-        Real64 MinCondLoad = 0.0;                                         // minimun gas cooler load for air-cooled gas cooler (W)
+        Real64 MinCondLoad = 0.0;                                         // minimum gas cooler load for air-cooled gas cooler (W)
         Real64 MinCondTemp = 1.0e1;                                       // Minimum condensing temperature during subcritical operation (C)
         Real64 PGasCoolerOut = 0.0;                                       // Optimum pressure at the gas cooler outlet (C)
         Real64 RatedApproachT = 3.0;                                      // Rated approach temperature difference(C)

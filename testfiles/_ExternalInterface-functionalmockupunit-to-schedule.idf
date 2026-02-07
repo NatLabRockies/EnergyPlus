@@ -583,7 +583,7 @@
     Sch Equ,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     768,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -596,7 +596,7 @@
     Sch Lig,                 !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1632.0,                  !- Lighting Level {W}
-    0,                       !- Watts per Zone Floor Area {W/m2}
+    0,                       !- Watts per Floor Area {W/m2}
     0,                       !- Watts per Person {W/person}
     0.000,                   !- Return Air Fraction
     0.400,                   !- Fraction Radiant
@@ -1151,8 +1151,8 @@
     Sch 1,                   !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.036,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1209,7 +1209,7 @@
     FMU_OthEquSen_ZoneOne,   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -1224,7 +1224,7 @@
     FMU_OthEquLat_ZoneOne,   !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1,                       !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     1,                       !- Fraction Latent
     0,                       !- Fraction Radiant

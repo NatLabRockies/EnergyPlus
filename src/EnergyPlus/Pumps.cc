@@ -357,7 +357,7 @@ void GetPumpInput(EnergyPlusData &state)
                                      thisPump.NomVolFlowRate));
             ShowContinueError(
                 state,
-                format("Reseting value of '{}' to the value of 99% of '{}'.", thisInput->cNumericFieldNames(10), thisInput->cNumericFieldNames(1)));
+                format("Resetting value of '{}' to the value of 99% of '{}'.", thisInput->cNumericFieldNames(10), thisInput->cNumericFieldNames(1)));
             // Set min to roughly max, but not quite, otherwise it can't turn on, ever
             thisPump.MinVolFlowRate = minToMaxRatioMax * thisPump.NomVolFlowRate;
         }
@@ -1723,7 +1723,7 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
 
     // PURPOSE OF THIS SUBROUTINE:
     // This subroutines simulates a pump following
-    // the methodology oulined in ASHRAE's secondary toolkit.
+    // the methodology outlined in ASHRAE's secondary toolkit.
 
     // METHODOLOGY EMPLOYED:
     // Calculates power and updates other pump things.
@@ -2310,7 +2310,7 @@ void GetRequiredMassFlowRate(EnergyPlusData &state,
     MinPress = thisPump.VFD.lowerPsetSched->getCurrentVal();
     MaxPress = thisPump.VFD.upperPsetSched->getCurrentVal();
 
-    // Calculate maximum and minimum mass flow rate associated with maximun and minimum RPM
+    // Calculate maximum and minimum mass flow rate associated with maximum and minimum RPM
     if (thisPump.plantLoc.loopNum > 0) {
         auto const &thisPlantLoop = state.dataPlnt->PlantLoop(thisPump.plantLoc.loopNum);
         if (thisPlantLoop.UsePressureForPumpCalcs && thisPlantLoop.PressureSimType == DataPlant::PressSimType::FlowCorrection &&

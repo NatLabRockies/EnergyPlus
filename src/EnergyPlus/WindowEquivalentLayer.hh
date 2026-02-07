@@ -100,11 +100,11 @@ namespace WindowEquivalentLayer {
 
     void EQLWindowSurfaceHeatBalance(EnergyPlusData &state,
                                      int const SurfNum,       // Surface number
-                                     Real64 const HcOut,      // outside convection coeficient at this timestep, W/m2K
+                                     Real64 const HcOut,      // outside convection coefficient at this timestep, W/m2K
                                      Real64 &SurfInsideTemp,  // Inside window surface temperature (innermost face) [C]
                                      Real64 &SurfOutsideTemp, // Outside surface temperature (C)
                                      Real64 &SurfOutsideEmiss,
-                                     DataBSDFWindow::Condition const CalcCondition // Calucation condition (summer, winter or no condition)
+                                     DataBSDFWindow::Condition const CalcCondition // Calculation condition (summer, winter or no condition)
     );
 
     void OPENNESS_LW(Real64 const OPENNESS, // shade openness (=tausbb at normal incidence)

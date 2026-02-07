@@ -783,7 +783,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
             Real64 totalExposedPerimeter = exposedFraction * totalPerimeter;
 
-            // Remaining exposed perimeter will be alloted to each instance as appropriate
+            // Remaining exposed perimeter will be allotted to each instance as appropriate
             Real64 remainingExposedPerimeter = totalExposedPerimeter;
 
             // Get combinations of wall constructions and wall heights -- each different

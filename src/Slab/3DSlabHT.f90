@@ -3889,7 +3889,7 @@ IMPLICIT NONE
     ! WRITE (SurfaceTemps,4302)
 4302 FORMAT (7X,'Day',7X,'Hour',5X,'Floor TS')
      WRITE (SplitSurfTemps,4303)
-4303 FORMAT (7X,'Day',7X'Hour',3X,'Perim Out Ts', 4X,'Core Out Ts',4X,'Inside Temp')
+4303 FORMAT (7X,'Day',7X,'Hour',3X,'Perim Out Ts', 4X,'Core Out Ts',4X,'Inside Temp')
      WRITE (CLTemps,4304)
 4304 FORMAT (7X,'FXCL',12X,'FYCL')
      RETURN

@@ -60,19 +60,18 @@ This field specifies the design air loop return air flow rate as a fraction of t
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AirLoopHVAC,
-    Main Dual Duct Air Loop,           !- Name
-    Dual Duct System 1 Controllers,    !- Controller List Name
-    Dual Duct System 1 Schedule List , !- Availability Manager List Name
-    1.3 ,                              !- Design Supply Air Flow Rate {m3/s}
-    Dual Duct Air Loop Branches ,      !- Branch List Name
-    Dual Duct Connectors ,             !- Connector List Name
-    Supply Fan Inlet Node ,            !- Supply Side Inlet Node Name
-    Return Air Mixer Outlet ,          !- Demand Side Outlet Node Name
-    Zone Equipment Inlet Node List ,   !- Demand Side Inlet Node Names
-    Air Loop Outlet Node List,         !- Supply Side Outlet Node Names
-    1.0;                               !- Design Return Air Flow Fraction of Supply Air Flow
+  Main Dual Duct Air Loop,    !- Name
+  Dual Duct System 1 Controllers,  !- Controller List Name
+  Dual Duct System 1 Schedule List,  !- Availability Manager List Name
+  1.3,                        !- Design Supply Air Flow Rate {m3/s}
+  Dual Duct Air Loop Branches,!- Branch List Name
+  Dual Duct Connectors,       !- Connector List Name
+  Supply Fan Inlet Node,      !- Supply Side Inlet Node Name
+  Return Air Mixer Outlet,    !- Demand Side Outlet Node Name
+  Zone Equipment Inlet Node List,  !- Demand Side Inlet Node Names
+  Air Loop Outlet Node List,  !- Supply Side Outlet Node Names
+  1.0;                        !- Design Return Air Flow Fraction of Supply Air Flow
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-001}
@@ -374,29 +373,18 @@ Reporting on a timestep or hourly level would produce a detailed report with var
 Another method will more easily encapsulate the report:
 
 \begin{lstlisting}
-
-OutputControl:Table:Style, HTML;     !- ColumnSeparator
-
-
-  Output:Table:Monthly,
-    Ventilation Loads,       !- Name
-    ,                        !- DigitsAfterDecimal
-  Zone Mechanical Ventilation No Load Heat Removal Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Cooling Load Increase Due to Overheating Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Cooling Load Decrease Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Cooling Load Increase Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation No Load Heat Addition Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Heating Load Increase Due to Overcooling Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Heating Load Decrease Energy,
-           SumOrAverage,
-  Zone Mechanical Ventilation Heating Load Increase Energy,
-           SumOrAverage;
+OutputControl:Table:Style, HTML;  !- ColumnSeparator
+Output:Table:Monthly,
+  Ventilation Loads,          !- Name
+  ,                           !- DigitsAfterDecimal
+  Zone Mechanical Ventilation No Load Heat Removal Energy, SumOrAverage,
+  Zone Mechanical Ventilation Cooling Load Increase Due to Overheating Energy, SumOrAverage,
+  Zone Mechanical Ventilation Cooling Load Decrease Energy, SumOrAverage,
+  Zone Mechanical Ventilation Cooling Load Increase Energy, SumOrAverage,
+  Zone Mechanical Ventilation No Load Heat Addition Energy, SumOrAverage,
+  Zone Mechanical Ventilation Heating Load Increase Due to Overcooling Energy, SumOrAverage,
+  Zone Mechanical Ventilation Heating Load Decrease Energy, SumOrAverage,
+  Zone Mechanical Ventilation Heating Load Increase Energy, SumOrAverage;
 \end{lstlisting}
 
 This combination will report the ventilation loads on a monthly basis in a HTML style report that can be easily read in a web browser. Review the Output:Table:Monthly object for other methods of display or further options on this report item.
@@ -430,14 +418,12 @@ Heat Removal from the Air Loop (Sum of all components) in Joules
 In `\hyperref[outputtablemonthly]{Output:Table:Monthly}' format shown below.
 
 \begin{lstlisting}
-
-  OutputControl:Table:Style,HTML;
-
-    Output:Table:Monthly,
-      System Loads,       !- Name
-      ,                        !- DigitsAfterDecimal
-      Air System Total Heating Energy,  SumOrAverage,
-      Air System Total Cooling Energy,  SumOrAverage;
+OutputControl:Table:Style,HTML;
+Output:Table:Monthly,
+  System Loads,               !- Name
+  ,                           !- DigitsAfterDecimal
+  Air System Total Heating Energy,  SumOrAverage,
+  Air System Total Cooling Energy,  SumOrAverage;
 \end{lstlisting}
 
 \subsection{System Energy Use Outputs}\label{system-energy-use-outputs}
@@ -475,18 +461,16 @@ Water Consumption for the system (humidifiers and evaporative coolers) (m3).
 The Standard reports file includes these variables reporting in the Tabular report form as ``Air Loop System Energy and Water Use''.
 
 \begin{lstlisting}
-
-  OutputControl:Table:Style,HTML;
-
-    Output:Table:Monthly,
-      Air Loop System Energy and Water Use,       !- Name
-      ,                        !- DigitsAfterDecimal
-      Air System Hot Water Energy ,  SumOrAverage,
-      Air System Steam Energy ,  SumOrAverage,
-      Air System Chilled Water Energy,  SumOrAverage,
-      Air System Electricity Energy,  SumOrAverage,
-      Air System NaturalGas Energy,  SumOrAverage,
-      Air System Water Volume,  SumOrAverage;
+OutputControl:Table:Style,HTML;
+Output:Table:Monthly,
+  Air Loop System Energy and Water Use,  !- Name
+  ,                           !- DigitsAfterDecimal
+  Air System Hot Water Energy ,  SumOrAverage,
+  Air System Steam Energy ,  SumOrAverage,
+  Air System Chilled Water Energy,  SumOrAverage,
+  Air System Electricity Energy,  SumOrAverage,
+  Air System NaturalGas Energy,  SumOrAverage,
+  Air System Water Volume,  SumOrAverage;
 \end{lstlisting}
 
 \subsection{System Component Loads Outputs}\label{system-component-loads-outputs}
@@ -496,21 +480,18 @@ Reporting System Component Loads shows the energy transferred to or extracted fr
 The Standard reports file includes these variables reporting in the Tabular report form as ``Air Loop System Component Loads''.
 
 \begin{lstlisting}
-
-  OutputControl:Table:Style,HTML;
-
-
-    Output:Table:Monthly,
-      Air Loop System Component Loads,       !- Name
-      ,                        !- DigitsAfterDecimal
-      Air System Fan Air Heating Energy,  SumOrAverage,
-      Air System Cooling Coil Total Cooling Energy,  SumOrAverage,
-      Air System Heating Coil Total Heating Energy,  SumOrAverage,
-      Air System Heat Exchanger Total Heating Energy,  SumOrAverage,
-      Air System Heat Exchanger Total Cooling Energy,  SumOrAverage,
-      Air System Humidifier Total Heating Energy,  SumOrAverage,
-      Air System Evaporative Cooler Total Cooling Energy,  SumOrAverage,
-      Air System Desiccant Dehumidifier Total Cooling Energy,  SumOrAverage;
+OutputControl:Table:Style,HTML;
+Output:Table:Monthly,
+  Air Loop System Component Loads,  !- Name
+  ,                           !- DigitsAfterDecimal
+  Air System Fan Air Heating Energy,  SumOrAverage,
+  Air System Cooling Coil Total Cooling Energy,  SumOrAverage,
+  Air System Heating Coil Total Heating Energy,  SumOrAverage,
+  Air System Heat Exchanger Total Heating Energy,  SumOrAverage,
+  Air System Heat Exchanger Total Cooling Energy,  SumOrAverage,
+  Air System Humidifier Total Heating Energy,  SumOrAverage,
+  Air System Evaporative Cooler Total Cooling Energy,  SumOrAverage,
+  Air System Desiccant Dehumidifier Total Cooling Energy,  SumOrAverage;
 \end{lstlisting}
 
 \subsubsection{Air System Fan Air Heating Energy}\label{air-system-fan-air-heating-energy}
@@ -616,24 +597,21 @@ Electricity consumption for the desiccant dehumidifiers. (Joules)
 The Standard reports file includes these variables reporting in the Tabular report form as ``Air Loop System Component Energy Use''.
 
 \begin{lstlisting}
-
-  OutputControl:Table:Style,HTML;
-
-
-    Output:Table:Monthly,
-      Air Loop System Component Energy Use,       !- Name
-      ,                        !- DigitsAfterDecimal
-      Air System Fan Electricity Energy,  SumOrAverage,
-      Air System Heating Coil Hot Water Energy,  SumOrAverage,
-      Air System Cooling Coil Chilled Water Energy,  SumOrAverage,
-      Air System DX Heating Coil Electricity Energy,  SumOrAverage,
-      Air System DX Cooling Coil Electricity Energy,  SumOrAverage,
-      Air System Heating Coil Electricity Energy,  SumOrAverage,
-      Air System Heating Coil NaturalGas Energy,  SumOrAverage,
-      Air System Heating Coil Steam Energy,  SumOrAverage,
-      Air System Humidifier Electricity Energy,  SumOrAverage,
-      Air System Evaporative Cooler Electricity Energy,  SumOrAverage,
-      Air System Desiccant Dehumidifier Electricity Energy,  SumOrAverage;
+OutputControl:Table:Style,HTML;
+Output:Table:Monthly,
+  Air Loop System Component Energy Use,  !- Name
+  ,                           !- DigitsAfterDecimal
+  Air System Fan Electricity Energy,  SumOrAverage,
+  Air System Heating Coil Hot Water Energy,  SumOrAverage,
+  Air System Cooling Coil Chilled Water Energy,  SumOrAverage,
+  Air System DX Heating Coil Electricity Energy,  SumOrAverage,
+  Air System DX Cooling Coil Electricity Energy,  SumOrAverage,
+  Air System Heating Coil Electricity Energy,  SumOrAverage,
+  Air System Heating Coil NaturalGas Energy,  SumOrAverage,
+  Air System Heating Coil Steam Energy,  SumOrAverage,
+  Air System Humidifier Electricity Energy,  SumOrAverage,
+  Air System Evaporative Cooler Electricity Energy,  SumOrAverage,
+  Air System Desiccant Dehumidifier Electricity Energy,  SumOrAverage;
 \end{lstlisting}
 
 \subsection{Overall Air Loop Syntax}\label{overall-air-loop-syntax}
@@ -671,11 +649,10 @@ The name of a controller object (such as a \hyperref[controllerwatercoil]{Contro
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AirLoopHVAC:ControllerList,
-             Dual Duct System 1 Controllers,
-             Controller:WaterCoil, Main Cooling Coil Controller,
-             Controller:WaterCoil, Main Heating Coil Controller;
+  Dual Duct System 1 Controllers,
+  Controller:WaterCoil, Main Cooling Coil Controller,
+  Controller:WaterCoil, Main Heating Coil Controller;
 \end{lstlisting}
 
 \subsection{AvailabilityManagerAssignmentList}\label{availabilitymanagerassignmentlist}
@@ -705,15 +682,14 @@ The name of a AvailabilityManager object defined elsewhere in the input file.
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 AvailabilityManagerAssignmentList,
-    Collector Loop Availability Manager List,  !- Name
-    AvailabilityManager:HighTemperatureTurnOff,    !- System Availability Manager Type 1
-    High Temperature Turn Off Availability Manager,  !- System Availability Manager Name 1
-    AvailabilityManager:LowTemperatureTurnOn ,     !- System Availability Manager Type 2
-    Low Temperature Turn On Availability Manager,  !- System Availability Manager Name 2
-    AvailabilityManager:DifferentialThermostat,    !- System Availability Manager Type 3
-    Differential Thermostat Availability Manager;  !- System Availability Manager Name 3
+  Collector Loop Availability Manager List,  !- Name
+  AvailabilityManager:HighTemperatureTurnOff,  !- System Availability Manager Type 1
+  High Temperature Turn Off Availability Manager,  !- System Availability Manager Name 1
+  AvailabilityManager:LowTemperatureTurnOn,  !- System Availability Manager Type 2
+  Low Temperature Turn On Availability Manager,  !- System Availability Manager Name 2
+  AvailabilityManager:DifferentialThermostat,  !- System Availability Manager Type 3
+  Differential Thermostat Availability Manager;  !- System Availability Manager Name 3
 \end{lstlisting}
 
 \subsection{AirLoopHVAC:OutdoorAirSystem}\label{airloophvacoutdoorairsystem}
@@ -747,50 +723,52 @@ When this object is referred in \hyperref[airloophvacdedicatedoutdoorairsystem]{
 An IDF example, including the \hyperref[airloophvac]{AirLoopHVAC}, and the controller and equipment lists.
 
 \begin{lstlisting}
-
 AirLoopHVAC,Typical Terminal Reheat 1,
-             Reheat System 1 Controllers,
-             Reheat System 1 Avail List,
-             1.3,
-             Air Loop Branches,
-             Air Loop Inlet Node, Return Air Mixer Outlet,
-             Zone Equipment Inlet Node, Air Loop Outlet Node;
+  Reheat System 1 Controllers,
+  Reheat System 1 Avail List,
+  1.3,
+  Air Loop Branches,
+  Air Loop Inlet Node, Return Air Mixer Outlet,
+  Zone Equipment Inlet Node, Air Loop Outlet Node;
 
-  AirLoopHVAC:ControllerList,
-             Reheat System 1 Controllers,
-             Controller:WaterCoil, Main Cooling Coil Controller;
+AirLoopHVAC:ControllerList,
+  Reheat System 1 Controllers,
+  Controller:WaterCoil, Main Cooling Coil Controller;
 
-  BranchList, Air Loop Branches,
-             Air Loop Main Branch;
+BranchList, Air Loop Branches,
+  Air Loop Main Branch;
 
-  Branch, Air Loop Main Branch,
-             1.3,
-             AirLoopHVAC:OutdoorAirSystem, OA Sys 1,
-             Air Loop Inlet Node, Mixed Air Node,PASSIVE
-             Fan:ConstantVolume, Supply Fan 1,
-             Mixed Air Node, Cooling Coil Air Inlet Node, ACTIVE,
-             Coil:Cooling:Water:DetailedGeometry, Detailed Cooling Coil,
-             Cooling Coil Air Inlet Node, Air Loop Outlet Node;
+Branch, Air Loop Main Branch,
+  1.3,
+  AirLoopHVAC:OutdoorAirSystem, OA Sys 1,
+  Air Loop Inlet Node, Mixed Air Node,PASSIVE
+  Fan:ConstantVolume, Supply Fan 1,
+  Mixed Air Node, Cooling Coil Air Inlet Node, ACTIVE,
+  Coil:Cooling:Water:DetailedGeometry, Detailed Cooling Coil,
+  Cooling Coil Air Inlet Node, Air Loop Outlet Node;
 
-  AvailabilityManagerAssignmentList, Reheat System 1 Avail List,
-             AvailabilityManager:Scheduled, Reheat System 1 Avail;
+AvailabilityManagerAssignmentList, 
+  Reheat System 1 Avail List,
+  AvailabilityManager:Scheduled,
+  Reheat System 1 Avail;
 
-  AvailabilityManager:Scheduled, Reheat System 1 Avail,
-             FanAndCoilAvailSched;
+AvailabilityManager:Scheduled, 
+  Reheat System 1 Avail,
+  FanAndCoilAvailSched;
 
-  AirLoopHVAC:OutdoorAirSystem,
-             OA Sys 1,
-             OA Sys 1 Controllers,
-             OA Sys 1 Equipment;
+AirLoopHVAC:OutdoorAirSystem,
+  OA Sys 1,
+  OA Sys 1 Controllers,
+  OA Sys 1 Equipment;
 
-  AirLoopHVAC:ControllerList,
-             OA Sys 1 Controllers,
-             Controller:OutdoorAir, OA Controller 1;
+AirLoopHVAC:ControllerList,
+  OA Sys 1 Controllers,
+  Controller:OutdoorAir, OA Controller 1;
 
-  AirLoopHVAC:OutdoorAirSystem:EquipmentList,
-             OA Sys 1 Equipment,
-             HeatExchanger:AirToAir:FlatPlate,OA Heat Recovery 1,
-             OutdoorAir:Mixer, OA Mixing Box 1;
+AirLoopHVAC:OutdoorAirSystem:EquipmentList,
+  OA Sys 1 Equipment,
+  HeatExchanger:AirToAir:FlatPlate,OA Heat Recovery 1,
+  OutdoorAir:Mixer, OA Mixing Box 1;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-001}
@@ -830,11 +808,10 @@ This field is the unique name of the component specified in the previous field. 
 An example from an IDF:
 
 \begin{lstlisting}
-
 AirLoopHVAC:OutdoorAirSystem:EquipmentList,
-             OA Sys 1 Equipment,
-             HeatExchanger:AirToAir:FlatPlate,OA Heat Recovery 1,
-             OutdoorAir:Mixer, OA Mixing Box 1;
+  OA Sys 1 Equipment,
+  HeatExchanger:AirToAir:FlatPlate,OA Heat Recovery 1,
+  OutdoorAir:Mixer, OA Mixing Box 1;
 \end{lstlisting}
 
 \subsection{OutdoorAir:Node}\label{outdoorairnode}
@@ -906,24 +883,23 @@ This field is used to specify whether the angle used to compute the wind pressur
 An example IDF:
 
 \begin{lstlisting}
-
 OutdoorAir:Node,
-  OA Node 1;  !- Name
+  OA Node 1;                  !- Name
 
 OutdoorAir:Node,
   Floor 10 Outdoor air Inlet Node,  !- Name
-  30.0;  !- Height Above Ground {m}
+  30.0;                       !- Height Above Ground {m}
 
 OutdoorAir:Node,
-  LocalOutdoorAirNode:0001,     !- Name
-  ,                             !- Height Above Ground
-  OutdoorAirNodeDryBulb:0001,   !- Drybulb Temperature Schedule Name
-  OutdoorAirNodeWetBulb:0001,   !- Wetbulb Temperature Schedule Name
-  OutdoorAirNodeWindSpeed:0001, !- Wind Speed Schedule Name
-  OutdoorAirNodeWindDir:0001;   !- Wind Direction Schedule Name
+  LocalOutdoorAirNode:0001,   !- Name
+  ,                           !- Height Above Ground
+  OutdoorAirNodeDryBulb:0001, !- Drybulb Temperature Schedule Name
+  OutdoorAirNodeWetBulb:0001, !- Wetbulb Temperature Schedule Name
+  OutdoorAirNodeWindSpeed:0001,  !- Wind Speed Schedule Name
+  OutdoorAirNodeWindDir:0001, !- Wind Direction Schedule Name
   NFacade_WPCValue,             !- Wind Pressure Coefficient Curve Name
-  No,                           !- Symmetric Wind Pressure Coefficient Curve
-  Absolute;                     !- Wind Angle Type
+  No,                         !- Symmetric Wind Pressure Coefficient Curve
+  Absolute;                   !- Wind Angle Type
 \end{lstlisting}
 
 \subsection{Outdoor Air Node outputs:}\label{outdoor-air-node-outputs}
@@ -946,7 +922,6 @@ The ambient dry-bulb, wet-bulb air temperature, wind speed and direction, and fl
 e.g.
 
 \begin{lstlisting}
-
 Output:Variable,
   Floor 10 Outdoor air Inlet Node,
   System Node Temperature,
@@ -971,12 +946,11 @@ The name of an HVAC system node or of a \hyperref[nodelist]{NodeList} object. Th
 An example IDF:
 
 \begin{lstlisting}
-
 OutdoorAir:NodeList,
-      OutsideAirInletNodes;
+  OutsideAirInletNodes;
 
-  NodeList,OutsideAirInletNodes,
-      Outdoor air Inlet Node;
+NodeList,OutsideAirInletNodes,
+  Outdoor air Inlet Node;
 \end{lstlisting}
 
 \subsection{OutdoorAir:Mixer}\label{outdoorairmixer}
@@ -1010,11 +984,10 @@ The name of the HVAC system node which is the inlet for the return air stream.
 An IDF example:
 
 \begin{lstlisting}
-
 OutdoorAir:Mixer,
-      Zone1WindACOAMixer,           ! name
-      Zone1WindACOAMixerOutletNode, ! mixer outlet node
-      Zone1WindACOAInNode,          ! mixer OA node
-      Zone1WindACExhNode,           ! mixer relief node
-      Zone1WindACAirInletNode;      ! mixer inlet node
+  Zone1WindACOAMixer,         !- name
+  Zone1WindACOAMixerOutletNode,  !- mixer outlet node
+  Zone1WindACOAInNode,        !- mixer OA node
+  Zone1WindACExhNode,         !- mixer relief node
+  Zone1WindACAirInletNode;    !- mixer inlet node
 \end{lstlisting}

@@ -247,13 +247,13 @@ void GetGshpInput(EnergyPlusData &state)
 
         thisGSHP.LoadSideUACoeff = NumArray(8);
         if (NumArray(8) == 0.0) {
-            ShowSevereError(state, format("{}:Load Side Heat Transfer Coeffcient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, format("{}:Load Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
         thisGSHP.SourceSideUACoeff = NumArray(9);
         if (NumArray(9) == 0.0) {
-            ShowSevereError(state, format("{}:Source Side Heat Transfer Coeffcient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
+            ShowSevereError(state, format("{}:Source Side Heat Transfer Coefficient = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
             ErrorsFound = true;
         }
 
@@ -735,7 +735,7 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
                 ShowContinueError(state, format("Heatpump Name = {}", this->Name));
                 ShowContinueError(
                     state,
-                    format("Heat Inbalance (%)             = {:G}", std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
+                    format("Heat Imbalance (%)             = {:G}", std::abs(100.0 * (this->QLoad - initialQLoad) / (initialQLoad + SmallNum))));
                 ShowContinueError(state, format("Load-side heat transfer rate   = {:G}", this->QLoad));
                 ShowContinueError(state, format("Source-side heat transfer rate = {:G}", this->QSource));
                 ShowContinueError(state, format("Source-side mass flow rate     = {:G}", this->SourceSideWaterMassFlowRate));

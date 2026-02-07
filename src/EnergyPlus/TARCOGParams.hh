@@ -120,7 +120,7 @@ int constexpr NumOfIterations(100);
 // In case that is not happening program will tolerate certain number of tries before declare convergence
 // (or decrease relaxation parameter)
 int constexpr NumOfTries(5);
-// integer, parameter :: NewtonIterations = 75 ! shows when to swith to Newton
+// integer, parameter :: NewtonIterations = 75 ! shows when to switch to Newton
 Real64 constexpr RelaxationStart(0.6);    // Has to be between 0 and 1
 Real64 constexpr RelaxationDecrease(0.1); // Step for which relaxation parameter will decrease
 

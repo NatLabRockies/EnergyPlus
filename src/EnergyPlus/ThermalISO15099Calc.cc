@@ -2261,7 +2261,7 @@ void hatter(EnergyPlusData &state,
     //   hin   Indoor Indoor combined film coefficient (if non-zero)
     //   hout  Outdoor combined film coefficient (if non-zero)
     //   nmix  vector of number of gasses in a mixture for each gap
-    // Ouputs
+    // Outputs
     //   hhat     vector of all film coefficients (maxlay3)
     //   hgas     vector of gap 'film' coeff.
     //   hcin  Indoor convective surface heat transfer coefficient

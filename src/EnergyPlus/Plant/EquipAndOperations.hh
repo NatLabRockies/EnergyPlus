@@ -188,9 +188,9 @@ struct ReportData
     int DedicHR_OpMode = 0;                 // not dispatched = 0, heating led = 1, cooling led = 2
     int BoilerAux_OpMode = 0;               // not Dispatched = 0, Boiler(s) On = 1
     Real64 BuildingPolledHeatingLoad = 0.0; // current  building heating loads from predicted sensible zone loads, air system ventilation loads, and
-                                            // any plant load profile process laods
+                                            // any plant load profile process loads
     Real64 BuildingPolledCoolingLoad = 0.0; //  current building Cooling loads from predicted sensible zone loads, air system ventilation loads, and
-                                            //  any plant load profile process laods
+                                            //  any plant load profile process loads
     Real64 PrimaryPlantHeatingLoad = 0.0;   // current apparent plant load on primary hot water plant served by heatpumps
     Real64 PrimaryPlantCoolingLoad = 0.0;   // current apparent plant load on primary chilled water plant served by heatpumps
     Real64 SecondaryPlantHeatingLoad = 0.0; // current apparent plant load on secondary hot water plant served by heatpumps
@@ -228,7 +228,7 @@ struct ChillerHeaterSupervisoryOperationData
     Array1D<int> PlantLoopIndicesBeingSupervised;          // if non zero then points to index of a plant loop that has this supervisory scheme as its
                                                            // operation scheme
     Array1D<int> SecondaryPlantLoopIndicesBeingSupervised; // if not zero then points to index of a plant loop that is treated as being a
-                                                           // seconday loop, as in primary secondary distribution plant configurations.
+                                                           // secondary loop, as in primary secondary distribution plant configurations.
     Array1D<PlantLocation> PlantLoadProfileComps;          // LoadProfile:Plant objects that may be loading loop
     Array1D<PlantLocation> PlantBoilerComps;               // Boilers that may need to be managed.
     Array1D<PlantLocation>

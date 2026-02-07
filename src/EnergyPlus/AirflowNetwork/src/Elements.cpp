@@ -1363,7 +1363,7 @@ namespace AirflowNetwork {
         // METHODOLOGY EMPLOYED:
         // Purpose:  This routine calculates the massflow and its derivative
         //       through a large opening in both flow directions. As input
-        //       the density profiles RhoProfF/T are required aswell as the
+        //       the density profiles RhoProfF/T are required as well as the
         //       effective pressure difference profile DpProfNew, which is the
         //       sum of the stack pressure difference profile DpProf and the
         //       difference of the actual pressures at reference height. The
@@ -3807,7 +3807,7 @@ namespace AirflowNetwork {
         // way:    - the opening is divided into NrInt vertical intervals
         //         - the stack pressure difference and densities in From-
         //           and To-zone are calculated at the centre of each
-        //           interval aswell as at the top and bottom of the LO
+        //           interval as well as at the top and bottom of the LO
         //          - these values are stored in the (NrInt+2)-dimensional
         //             arrays DpProf, RhoProfF, RhoProfT.
         // The calculation of stack pressure and density in the two zones

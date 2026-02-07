@@ -310,7 +310,7 @@ namespace Window {
 
     void W5LsqFit(std::array<Real64, numPhis> const &ivars,       // Independent variables
                   std::array<Real64, numPhis> const &dvars,       // Dependent variables
-                  std::array<Real64, Window::maxPolyCoef> &coeffs // Polynomial coeffients from fit
+                  std::array<Real64, Window::maxPolyCoef> &coeffs // Polynomial coefficients from fit
     );
 
     Real64 DiffuseAverage(std::array<Real64, numPhis> const &props); // Property value at angles of incidence
@@ -347,7 +347,7 @@ namespace Window {
     void WindowTempsForNominalCond(EnergyPlusData &state,
                                    int ConstrNum,        // Construction number
                                    Array1A<Real64> hgap, // Gap gas conductive conductance (W/m2-K)
-                                   Real64 adjRatio       // adjusment Ratio to hcin
+                                   Real64 adjRatio       // adjustment Ratio to hcin
     );
 
     void StartingWinTempsForNominalCond(EnergyPlusData &state);

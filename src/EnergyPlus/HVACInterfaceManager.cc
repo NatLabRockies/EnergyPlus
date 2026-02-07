@@ -477,7 +477,7 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
 
     // METHODOLOGY EMPLOYED:
     // This is a simple "forward" interface where all of the properties
-    // from the outlet of one side of the loop get transfered
+    // from the outlet of one side of the loop get transferred
     // to the inlet node of the corresponding other side of the loop.
     // Temperatures are 'lagged' by loop capacitance (i.e. a 'tank')
     // between the outlet and inlet nodes.
