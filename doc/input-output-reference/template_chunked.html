@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en" class="h-100" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="generator" content="pandoc">
+  $for(author-meta)$
+    <meta name="author" content="$author-meta$" />
+  $endfor$
+  $if(date-meta)$
+    <meta name="dcterms.date" content="$date-meta$" />
+  $endif$
+  $if(keywords)$
+    <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+  $endif$
+  $if(description-meta)$
+    <meta name="description" content="$description-meta$" />
+  $endif$
+    <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Bootstrap Icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+
+    <!-- Highlight.js Styles -->
+    <link rel="stylesheet" id="highlight-style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+
+    <!-- Custom Styles -->
+  $for(css)$
+    <link rel="stylesheet" href="$css$" />
+  $endfor$
+
+    <!-- After header contents -->
+  $for(header-includes)$
+    $header-includes$
+  $endfor$
+
+  $if(math)$
+    $math$
+  $endif$
+
+  </head>
+  <body class="d-flex flex-column h-100">
+    <header id="header">
+      <!-- Before body contents -->
+      $for(include-before)$
+      $include-before$
+      $endfor$
+
+      <nav class="navbar bd-navbar navbar-expand-lg fixed-top">
+        <div class="container-xxl bd-gutter flex-wrap flex-lg-nowrap">
+          <!-- Brand -->
+          <a class="navbar-brand" href="index.html">
+            <img src="media/ep_nobg.png" alt="EnergyPlus Documentation" width="300" height="216"
+                 style="height: 30px; width: 100%;">
+          </a>
+
+          <!-- Toggler -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list fs-1"></i>
+          </button>
+
+          <!-- Navbar Content -->
+          <div class="collapse navbar-collapse scrollable-navbar" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://github.com/NatLabRockies/EnergyPlus">GitHub</a>
+              </li>
+            $if(top.url)$
+              <li class="nav-item">
+                <a class="nav-link" href="$top.url$" accesskey="t" rel="top" title="$top.title$"><i class="bi bi-house-door"></i></a>
+              </li>
+            $endif$
+            $if(up.url)$
+              <li class="nav-item">
+                <a class="nav-link" href="$up.url$" accesskey="u" rel="up" title="$up.title$"><i class="bi bi-arrow-up"></i></a>
+              </li>
+            $endif$
+            $if(previous.url)$
+              <li class="nav-item">
+                <a class="nav-link" href="$previous.url$" accesskey="p" rel="previous" title="$previous.title$"><i class="bi bi-chevron-left"></i></a>
+              </li>
+            $endif$
+            $if(next.url)$
+              <li class="nav-item">
+                <a class="nav-link" href="$next.url$" accesskey="n" rel="next" title="$next.title$"><i class="bi bi-chevron-right"></i></a>
+              </li>
+            $endif$
+            </ul>
+
+            <!-- Search -->
+            <form class="d-flex mx-lg-2" role="search">
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+
+            <!-- Divider for larger screens -->
+            <div class="vr d-none d-lg-flex mx-2 my-1 nav-line"></div>
+
+            <!-- Divider for smaller screens -->
+            <hr class="d-lg-none nav-line">
+
+            <!-- Theme Dropdown -->
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <button class="btn btn-link nav-link dropdown-toggle" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-circle-half"></i>
+                  <span class="d-lg-none ms-2">Toggle theme</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
+                  <li>
+                    <a class="dropdown-item align-items-center" data-theme="light">
+                      <i class="bi bi-sun-fill me-2 opacity-50"></i> Light
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item align-items-center" data-theme="dark">
+                      <i class="bi bi-moon-stars-fill me-2 opacity-50"></i> Dark
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-xxl bd-gutter bd-layout mb-5">
+      <main class="bd-main order-1">
+
+    $if(top)$
+    $-- top is set on sub-pages (provides link back to index); skip title block here
+    $else$
+    $-- top is unset: we ARE the index page; show title block
+    $if(title)$
+    <header id="title-block-header" class="ps-lg-2 pt-2">
+      <h1 class="bd-intro" id="title">$title$</h1>
+    $if(subtitle)$
+      <p class="subtitle lead">$subtitle$</p>
+    $endif$
+    $for(author)$
+      <p class="author text-body-secondary">$author$</p>
+    $endfor$
+    $if(date)$
+      <p class="date text-body-secondary">$date$</p>
+    $endif$
+    </header>
+    $endif$
+    $endif$
+
+    $if(toc)$
+    <!-- Table of Contents -->
+    <div class="bd-toc mt-lg-0 mb-lg-5 mt-3 mb-5 px-sm-1 text-body-secondary">
+      <h2 id="toc-header">Table Of Content</h2>
+      <nav id="TableOfContents">
+        $table-of-contents$
+      </nav>
+    </div>
+    $endif$
+
+    <!-- Main Content -->
+    <div class="bd-content ps-lg-2">
+      $body$
+    </div>
+
+    <!-- Chunk Navigation (bottom) -->
+    <nav aria-label="Page navigation" class="ps-lg-2 py-3">
+      <ul class="pagination flex-wrap">
+        <li class="page-item">
+        $if(previous.url)$
+          <a class="page-link" href="$previous.url$" accesskey="p" rel="previous"><i class="bi bi-chevron-left"></i> $previous.title$</a>
+        $endif$
+        </li>
+        <li class="page-item ms-auto">
+        $if(next.url)$
+          <a class="page-link" href="$next.url$" accesskey="n" rel="next">$next.title$ <i class="bi bi-chevron-right"></i></a>
+        $endif$
+        </li>
+      </ul>
+    </nav>
+
+      </main>
+    </div>
+
+    <!-- After body contents -->
+    $for(include-after)$
+    $include-after$
+    $endfor$
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.1.1/dist/energyplus.min.js"></script>
+
+
+    $if(mathjax)$
+    <!-- Mathjax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js" defer></script>
+    $endif$
+
+    <!-- Custom Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const htmlElement = document.documentElement;
+        const highlightStyle = document.getElementById("highlight-style");
+
+        // Function to update Highlight.js style based on theme
+        const updateHighlightStyle = (theme) => {
+          const lightTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-light.min.css";
+          const darkTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css";
+          highlightStyle.href = theme === "dark" ? darkTheme : lightTheme;
+        };
+
+        // Function to set the theme
+        const setTheme = (theme) => {
+          htmlElement.setAttribute("data-bs-theme", theme);
+          localStorage.setItem("theme", theme); // Save the theme to localStorage
+          updateHighlightStyle(theme);
+        };
+
+        // Get saved theme from localStorage or fallback to default ("light")
+        const savedTheme = localStorage.getItem("theme") || "light";
+        setTheme(savedTheme);
+
+        // Event listener for theme dropdown
+        document.querySelectorAll(".dropdown-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const selectedTheme = item.getAttribute("data-theme");
+            setTheme(selectedTheme);
+          });
+        });
+
+        // Classify h4 headings as inputs/outputs for color-coded badges
+        document.querySelectorAll(".bd-content h4").forEach((h4) => {
+          const text = h4.textContent.trim().toLowerCase();
+          if (text.startsWith("input")) h4.classList.add("heading-inputs");
+          else if (text.startsWith("output")) h4.classList.add("heading-outputs");
+        });
+
+        // Add anchor links to headings
+        document.querySelectorAll(".bd-content h1[id], .bd-content h2[id], .bd-content h3[id], .bd-content h4[id], .bd-content h5[id], .bd-content h6[id]").forEach((heading) => {
+          const link = document.createElement("a");
+          link.href = "#" + heading.id;
+          link.className = "anchor-link";
+          link.setAttribute("aria-label", "Link to this section");
+          link.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          heading.appendChild(link);
+        });
+
+        // Initialize Highlight.js
+        hljs.highlightAll();
+      });
+    </script>
+  </body>
+</html>

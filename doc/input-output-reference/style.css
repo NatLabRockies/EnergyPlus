@@ -1,0 +1,172 @@
+/* Global Variables */
+:root {
+    --navbar-padding: 8px;
+    --navbar-height: calc(42px + 2 * var(--navbar-padding));
+    --navbar-font-color: var(--bs-white-rgb);
+    --navbar-bg-color: var(--bs-dark-rgb);
+    --bd-toc-color: rgba(var(--bs-dark-rgb), 1);
+}
+
+/* Dark Theme Variables */
+[data-bs-theme="dark"] {
+    --bd-toc-color: rgba(var(--bs-white-rgb), 1);
+}
+
+/* Offset anchor scroll for fixed navbar */
+html {
+    scroll-padding-top: calc(var(--navbar-height) + 1rem);
+}
+
+/* General Link Styles */
+a {
+    text-decoration: none;
+}
+
+/* Layout Styles */
+.bd-layout {
+    margin-top: calc(var(--navbar-height) + 1.5rem);
+}
+
+/* Code Block Styles */
+.hljs {
+    padding: 1.25rem 1em !important;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bd-pre-bg);
+}
+
+/* Heading Anchor Links */
+.anchor-link {
+    opacity: 0;
+    margin-left: 0.25rem;
+    font-size: 0.75em;
+    transition: opacity 0.15s;
+}
+
+h1:hover .anchor-link,
+h2:hover .anchor-link,
+h3:hover .anchor-link,
+h4:hover .anchor-link,
+h5:hover .anchor-link,
+h6:hover .anchor-link {
+    opacity: 0.5;
+}
+
+.anchor-link:hover {
+    opacity: 1 !important;
+}
+
+/* Heading Styles — h2: Group, h3: Object, h4: Inputs/Outputs, h5: Field */
+.bd-content h2 {
+    border-bottom: 2px solid var(--bs-primary);
+    padding-bottom: 0.5rem;
+    margin-top: 2.5rem;
+}
+
+.bd-content h3 {
+    border-left: 4px solid var(--bs-primary);
+    padding-left: 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding-bottom: 0.4rem;
+    margin-top: 2rem;
+}
+
+.bd-content h4 {
+    display: inline-block;
+    padding: 0.2rem 0.75rem;
+    border-radius: var(--bs-border-radius);
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+.bd-content h4.heading-inputs {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+    border-color: rgba(var(--bs-success-rgb), 0.3);
+}
+
+.bd-content h4.heading-outputs {
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+    border-color: rgba(var(--bs-info-rgb), 0.3);
+}
+
+.bd-content h5 {
+    border-left: 3px solid rgba(var(--bs-secondary-rgb), 0.4);
+    padding-left: 0.6rem;
+    font-size: 1rem;
+    margin-top: 1.25rem;
+}
+
+/* Blockquote Styles */
+blockquote {
+    font-size: 1.35rem;
+    color: var(--bs-secondary-color);
+    margin: 1rem 0 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--bs-secondary-border-subtle);
+}
+
+/* Pagination Styles */
+.pagination {
+    margin-top: 3rem;
+}
+
+/* Footer Styles */
+.footer {
+    font-size: 0.875rem;
+}
+
+/* Navbar Styles */
+.navbar,
+.navbar::after {
+    padding-top: var(--navbar-padding);
+    padding-bottom: var(--navbar-padding);
+    background-image: linear-gradient(rgba(var(--navbar-bg-color), 1), rgba(var(--navbar-bg-color), 0.95));
+}
+
+/* Navbar Brand Styles */
+.navbar .navbar-brand,
+.navbar .navbar-brand:hover {
+    color: rgba(var(--navbar-font-color), 1);
+    transform: none;
+}
+
+/* Navbar Items Styles */
+.navbar .nav-link,
+.navbar .nav-line,
+.navbar .navbar-toggler {
+    color: rgba(var(--navbar-font-color), 0.85);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active,
+.navbar .nav-link.show,
+.navbar .navbar-toggler:hover {
+    color: rgba(var(--navbar-font-color), 1);
+}
+
+/* Navbar Dropdown Menu Styles */
+.navbar .dropdown-menu {
+    --bs-dropdown-link-active-bg: unset;
+    --bs-dropdown-link-hover-bg: var(--bs-tertiary-bg);
+}
+
+/* Navbar Toggler Styles */
+.navbar .navbar-toggler {
+    border: none;
+}
+
+/* Scrollable Navbar for Small Screens */
+@media (max-width: 992px) {
+    .scrollable-navbar {
+        max-height: calc(100vh - var(--navbar-height));
+        overflow-y: auto;
+	scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    /* Hide scrollbar in Chrome, Edge, Safari */
+    .scrollable-navbar::-webkit-scrollbar {
+	display: none;
+    }
+}
