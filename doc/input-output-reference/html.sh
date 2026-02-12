@@ -11,6 +11,7 @@ pandoc \
   --include-before-body navbar.html \
   --include-after-body footer.html \
   --lua-filter=bootstrap-tables.lua \
+  --lua-filter=object-index.lua \
   input-output-reference.tex
 
 # Multi page
@@ -39,8 +40,10 @@ pandoc --to=chunkedhtml \
   --template template_chunked.html \
   --css=style.css \
   --number-sections=false \
+  --include-in-header header.html \
   --include-after-body footer.html \
   --lua-filter=bootstrap-tables.lua \
+  --lua-filter=object-index.lua \
   input-output-reference.tex
 
 # Copy assets that pandoc doesn't copy for chunked output
