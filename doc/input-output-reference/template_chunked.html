@@ -223,7 +223,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.2.0/dist/energyplus-err.min.js"></script>
 
 
-    <!-- Fuse.js for fuzzy search -->
+    <!-- Search: index + Fuse.js -->
+    <script src="search-index.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0/dist/fuse.min.js" defer></script>
 
     $if(mathjax)$
@@ -298,17 +299,15 @@
         let fuse = null;
         let activeIdx = -1;
 
-        // Load index & init Fuse
-        fetch("search-index.json")
-          .then(r => r.json())
-          .then(data => {
-            fuse = new Fuse(data, {
-              keys: ["t"],
-              threshold: 0.4,
-              includeMatches: true,
-              minMatchCharLength: 2
-            });
+        // Init Fuse from preloaded index
+        if (window.SEARCH_INDEX) {
+          fuse = new Fuse(window.SEARCH_INDEX, {
+            keys: ["t"],
+            threshold: 0.4,
+            includeMatches: true,
+            minMatchCharLength: 2
           });
+        }
 
         // Keyboard shortcut to open
         document.addEventListener("keydown", (e) => {

@@ -45,18 +45,18 @@ pandoc --to=chunkedhtml \
   --lua-filter=object-index.lua \
   input-output-reference.tex
 
-# Build search index from sitemap (levels 2 & 3 only)
+# Build search index from sitemap (levels 2, 3 & 5)
 python3 -c "
 import json, pathlib
 def collect(node, out):
     s = node['section']
-    if int(s['level']) in (2, 3):
+    if int(s['level']) in (2, 3, 5):
         out.append({'t': s['title'], 'p': s['path']})
     for sub in node.get('subsections', []):
         collect(sub, out)
 idx = []
 collect(json.loads(pathlib.Path('chunked/sitemap.json').read_text()), idx)
-pathlib.Path('chunked/search-index.json').write_text(json.dumps(idx))
+pathlib.Path('chunked/search-index.js').write_text('window.SEARCH_INDEX=' + json.dumps(idx) + ';')
 "
 
 # Copy assets that pandoc doesn't copy for chunked output
