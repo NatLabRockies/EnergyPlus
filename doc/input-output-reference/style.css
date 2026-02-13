@@ -157,6 +157,40 @@ blockquote {
     border: none;
 }
 
+/* Search trigger button */
+.search-trigger {
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.search-trigger kbd {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Search modal */
+#searchModal .modal-body {
+    max-height: 60vh;
+}
+
+#searchModal .search-result {
+    padding: 0.6rem 1rem;
+    border-left: 3px solid transparent;
+}
+
+#searchModal .search-result.active {
+    border-left-color: var(--bs-primary);
+}
+
+#searchModal .search-result mark {
+    padding: 0;
+    background-color: rgba(var(--bs-warning-rgb), 0.35);
+    border-radius: 2px;
+}
+
 /* Scrollable Navbar for Small Screens */
 @media (max-width: 992px) {
     .scrollable-navbar {

@@ -94,10 +94,11 @@
             </ul>
 
             <!-- Search -->
-            <form class="d-flex mx-lg-2" role="search">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <button class="btn btn-outline-light d-flex align-items-center mx-lg-2 search-trigger" type="button" data-bs-toggle="modal" data-bs-target="#searchModal">
+              <i class="bi bi-search me-2"></i>
+              <span class="d-none d-lg-inline me-3">Search</span>
+              <kbd class="d-none d-lg-inline ms-auto opacity-75">Ctrl K</kbd>
+            </button>
 
             <!-- Divider for larger screens -->
             <div class="vr d-none d-lg-flex mx-2 my-1 nav-line"></div>
@@ -129,6 +130,26 @@
           </div>
         </div>
       </nav>
+
+      <!-- Search Modal -->
+      <div class="modal fade" id="searchModal" tabindex="-1" aria-label="Search documentation" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="search" class="form-control" id="searchInput" placeholder="Search documentation..." autocomplete="off" autofocus>
+              </div>
+              <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+              <div id="searchResults" class="list-group list-group-flush"></div>
+              <div id="searchEmpty" class="text-center text-body-secondary py-5 d-none">No results found</div>
+              <div id="searchHint" class="text-center text-body-secondary py-5">Start typing to search across all pages</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="container-xxl bd-gutter bd-layout mb-5">
@@ -198,9 +219,12 @@
 
     <!-- Highlight.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.1.1/dist/energyplus.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.2.0/dist/energyplus.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.2.0/dist/energyplus-err.min.js"></script>
 
+
+    <!-- Fuse.js for fuzzy search -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0/dist/fuse.min.js" defer></script>
 
     $if(mathjax)$
     <!-- Mathjax -->
@@ -215,8 +239,8 @@
 
         // Function to update Highlight.js style based on theme
         const updateHighlightStyle = (theme) => {
-          const lightTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-light.min.css";
-          const darkTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css";
+          const lightTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css";
+          const darkTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css";
           highlightStyle.href = theme === "dark" ? darkTheme : lightTheme;
         };
 
@@ -257,8 +281,136 @@
           heading.appendChild(link);
         });
 
+        hljs.configure({
+          languages: ['energyplus', 'energyplus-err', 'python', 'c', 'cpp']
+        });
+
         // Initialize Highlight.js
         hljs.highlightAll();
+
+        // --- Search ---
+        const searchModal = document.getElementById("searchModal");
+        const searchInput = document.getElementById("searchInput");
+        const searchResults = document.getElementById("searchResults");
+        const searchEmpty = document.getElementById("searchEmpty");
+        const searchHint = document.getElementById("searchHint");
+        const bsModal = new bootstrap.Modal(searchModal);
+        let fuse = null;
+        let activeIdx = -1;
+
+        // Load index & init Fuse
+        fetch("search-index.json")
+          .then(r => r.json())
+          .then(data => {
+            fuse = new Fuse(data, {
+              keys: ["t"],
+              threshold: 0.4,
+              includeMatches: true,
+              minMatchCharLength: 2
+            });
+          });
+
+        // Keyboard shortcut to open
+        document.addEventListener("keydown", (e) => {
+          if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !isInputFocused())) {
+            e.preventDefault();
+            bsModal.show();
+          }
+        });
+
+        function isInputFocused() {
+          const el = document.activeElement;
+          return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+        }
+
+        // Focus input when modal opens
+        searchModal.addEventListener("shown.bs.modal", () => {
+          searchInput.focus();
+          searchInput.select();
+        });
+
+        // Clear on close
+        searchModal.addEventListener("hidden.bs.modal", () => {
+          searchInput.value = "";
+          searchResults.innerHTML = "";
+          searchEmpty.classList.add("d-none");
+          searchHint.classList.remove("d-none");
+          activeIdx = -1;
+        });
+
+        // Debounced search
+        let debounceTimer;
+        searchInput.addEventListener("input", () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(doSearch, 150);
+        });
+
+        function doSearch() {
+          const q = searchInput.value.trim();
+          if (!q || !fuse) {
+            searchResults.innerHTML = "";
+            searchEmpty.classList.add("d-none");
+            searchHint.classList.toggle("d-none", !!q);
+            activeIdx = -1;
+            return;
+          }
+          searchHint.classList.add("d-none");
+          const results = fuse.search(q, { limit: 20 });
+          searchEmpty.classList.toggle("d-none", results.length > 0);
+          activeIdx = results.length > 0 ? 0 : -1;
+
+          searchResults.innerHTML = results.map((r, i) => {
+            const title = highlightMatches(r.item.t, r.matches);
+            return '<a class="list-group-item list-group-item-action search-result' +
+              (i === 0 ? ' active' : '') + '" href="' + r.item.p + '">' + title + '</a>';
+          }).join("");
+        }
+
+        function highlightMatches(text, matches) {
+          if (!matches || !matches.length) return escapeHtml(text);
+          const m = matches.find(m => m.key === "t");
+          if (!m) return escapeHtml(text);
+          const chars = Array.from(text);
+          const hl = new Uint8Array(chars.length);
+          for (const [start, end] of m.indices) {
+            for (let i = start; i <= end && i < chars.length; i++) hl[i] = 1;
+          }
+          let out = "", inMark = false;
+          for (let i = 0; i < chars.length; i++) {
+            if (hl[i] && !inMark) { out += "<mark>"; inMark = true; }
+            if (!hl[i] && inMark) { out += "</mark>"; inMark = false; }
+            out += escapeHtml(chars[i]);
+          }
+          if (inMark) out += "</mark>";
+          return out;
+        }
+
+        function escapeHtml(s) {
+          return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Keyboard navigation inside results
+        searchInput.addEventListener("keydown", (e) => {
+          const items = searchResults.querySelectorAll(".search-result");
+          if (!items.length) return;
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            activeIdx = Math.min(activeIdx + 1, items.length - 1);
+            updateActive(items);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            activeIdx = Math.max(activeIdx - 1, 0);
+            updateActive(items);
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].click();
+          }
+        });
+
+        function updateActive(items) {
+          items.forEach((el, i) => el.classList.toggle("active", i === activeIdx));
+          if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: "nearest" });
+        }
       });
     </script>
   </body>
