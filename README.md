@@ -15,8 +15,8 @@ This is the EnergyPlus Development Repository.  EnergyPlus™ is a whole buildin
 
 ## Testing
 
-[![](https://github.com/NatLabRockies/EnergyPlus/workflows/Code%20Integrity/badge.svg)](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/test_code_integrity.yml)
-[![](https://github.com/NatLabRockies/EnergyPlus/workflows/Documentation/badge.svg)](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/build_documentation.yml)
+[![](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/test_code_integrity.yml/badge.svg?branch=develop)](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/test_code_integrity.yml)
+[![](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/build_documentation.yml/badge.svg?branch=develop)](https://github.com/NatLabRockies/EnergyPlus/actions/workflows/build_documentation.yml)
 
 Every commit and every release of EnergyPlus undergoes rigorous testing.
 The testing consists of building EnergyPlus, of course, then there are unit tests, integration tests, API tests, and regression tests.

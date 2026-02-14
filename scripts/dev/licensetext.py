@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -64,7 +64,7 @@ from base_hook import ErrorMessage, LogMessage, relative_path_from_root
 #
 # The previous year that is in the license. It should be a string
 #
-_previous_year = "2025"
+_previous_year = "2026"
 #
 # From file "EnergyPlus License DRAFT 112015 100 fixed.txt"
 #
@@ -145,11 +145,7 @@ def merge_paragraphs(text: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def pythonize(
-    text,
-    line_limit: int = 79,
-    toolname: str = "unspecified",
-) -> str:
+def pythonize(text, line_limit: int = 79, toolname: str = "unspecified") -> str:
     """Convert the C++ comment text into Python comments"""
     paragraphs = [el for el in merge_paragraphs(text).splitlines() if el != ""]
     if len(paragraphs) != 8 or line_limit < 7:
@@ -210,8 +206,8 @@ def current() -> str:
     """Return the current license text, as of today."""
     # Modify the year in the text
     originalYear = "2015"
-    currentYear = "%d" % datetime.date.today().year
-    txt = _original.replace(originalYear, currentYear)
+    currentYear = "present"
+    txt = _original.replace(originalYear, currentYear, 1)
     # Modify and delete some lines with LBNL IP permission
     # Keep in mind that the line numbering here starts with 0
     lines = txt.splitlines()
@@ -243,18 +239,14 @@ def original():
 
 
 def check_license(
-    filepath: Path,
-    possible: str,
-    correct: str,
-    offset: int = 0,
-    toolname: str = "unspecified",
+    filepath: Path, possible: str, correct: str, offset: int = 0, toolname: str = "unspecified"
 ) -> LogMessage | None:
     """Check for a few of the usual issues with the license"""
     if possible == correct:
         return None
     try:
-        possibleYear = possible[offset + 31 : offset + 35]
-        correctYear = correct[offset + 31 : offset + 35]
+        before_year = possible[: offset + 31]
+        after_year = possible[offset + 35 :]
     except IndexError:
         return ErrorMessage(
             tool=toolname,
@@ -267,7 +259,7 @@ def check_license(
         # report overall differences. Switch that around a bit so there are no
         # double reports. Now report incorrect license year only if that is all
         # that is wrong.
-        corrected = possible[: offset + 31] + correctYear + possible[offset + 35 :]
+        corrected = before_year + "present" + after_year
         if corrected == correct:
             return ErrorMessage(
                 tool=toolname,

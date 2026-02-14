@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -847,6 +847,11 @@ void GetDXCoils(EnergyPlusData &state)
             MaxAlphas = max(MaxAlphas, NumAlphas);
         }
     }
+
+    // Some special case
+    s_ip->getObjectDefMaxArgs(state, "CoilPerformance:DX:Cooling", TotalArgs, NumAlphas, NumNumbers);
+    MaxNumbers = max(MaxNumbers, NumNumbers);
+    MaxAlphas = max(MaxAlphas, NumAlphas);
     
     Alphas.allocate(MaxAlphas);
     cAlphaFields.allocate(MaxAlphas);

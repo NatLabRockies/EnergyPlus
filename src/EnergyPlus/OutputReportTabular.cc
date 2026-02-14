@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -7225,7 +7225,7 @@ void WriteMonthlyTables(EnergyPlusData &state)
                         maxVal = storedMinVal;
                         for (lMonth = 1; lMonth <= 12; ++lMonth) {
                             if (ort->MonthlyColumns(curCol).avgSum ==
-                                OutputProcessor::StoreType::Average) { // if it is a average variable divide by duration
+                                OutputProcessor::StoreType::Average) { // if it is an average variable divide by duration
                                 if (ort->MonthlyColumns(curCol).duration(lMonth) != 0) {
                                     curVal = ((ort->MonthlyColumns(curCol).reslt(lMonth) / ort->MonthlyColumns(curCol).duration(lMonth)) *
                                               curConversionFactor) +
@@ -7233,8 +7233,12 @@ void WriteMonthlyTables(EnergyPlusData &state)
                                 } else {
                                     curVal = 0.0;
                                 }
-                                sumVal +=
-                                    (ort->MonthlyColumns(curCol).reslt(lMonth) * curConversionFactor) + state.dataOutRptTab->curConversionOffset;
+                                if (ort->MonthlyColumns(curCol).duration(lMonth) > 0) {
+                                    sumVal += ((ort->MonthlyColumns(curCol).reslt(lMonth) / ort->MonthlyColumns(curCol).duration(lMonth) *
+                                                curConversionFactor) +
+                                               state.dataOutRptTab->curConversionOffset) *
+                                              ort->MonthlyColumns(curCol).duration(lMonth);
+                                }
                                 sumDuration += ort->MonthlyColumns(curCol).duration(lMonth);
                             } else {
                                 curVal = (ort->MonthlyColumns(curCol).reslt(lMonth) * curConversionFactor) + state.dataOutRptTab->curConversionOffset;
