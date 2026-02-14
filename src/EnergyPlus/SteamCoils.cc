@@ -2221,7 +2221,7 @@ namespace SteamCoils {
         return state.dataSteamCoils->SteamCoil(coilNum).MaxSteamVolFlowRate;
     }
     
-    Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state, int const coilNum)
+    Real64 GetCoilMaxWaterFlowRate([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int const coilNum)
     {
         assert(coilNum > 0 && coilNum <= state.dataSteamCoils->NumSteamCoils);
         return 0.0;

@@ -1330,7 +1330,7 @@ namespace HXAssistCoil {
     }
 
 
-    Real64 GetCoilScheduleValue(EnergyPlusData &state, int const coilNum) 
+    Real64 GetCoilScheduleValue([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int const coilNum) 
     {
         assert(coilNum > 0 && coilNum <= (int)state.dataHVACAssistedCC->HXAssistedCoils.size());
         return 1.0; // Not scheduled? Always available?
