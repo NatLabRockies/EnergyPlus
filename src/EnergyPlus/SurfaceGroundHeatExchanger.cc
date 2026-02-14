@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -469,19 +469,16 @@ namespace SurfaceGroundHeatExchanger {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
 
         Real64 DesignFlow; // Hypothetical design flow rate
-        int Cons;          // construction counter
-        int LayerNum;      // material layer number for bottom
         Real64 OutDryBulb; // Height Dependent dry bulb.
-
-        auto &s_mat = state.dataMaterial;
 
         // get QTF data - only once
         if (this->InitQTF) {
-            for (Cons = 1; Cons <= state.dataHeatBal->TotConstructs; ++Cons) {
+            for (int Cons = 1; Cons <= state.dataHeatBal->TotConstructs; ++Cons) { // construction counter
                 if (Util::SameString(state.dataConstruction->Construct(Cons).Name, this->ConstructionName)) {
                     // some error checking ??
                     // CTF stuff
-                    LayerNum = state.dataConstruction->Construct(Cons).TotLayers;
+                    int LayerNum = state.dataConstruction->Construct(Cons).TotLayers; // material layer number for bottom
+                    auto &s_mat = state.dataMaterial;
                     this->NumCTFTerms = state.dataConstruction->Construct(Cons).NumCTFTerms;
                     this->CTFin = state.dataConstruction->Construct(Cons).CTFInside;   // Z coefficients
                     this->CTFout = state.dataConstruction->Construct(Cons).CTFOutside; // X coefficients
@@ -621,21 +618,20 @@ namespace SurfaceGroundHeatExchanger {
         Real64 PastTempTop;    // top surface temp - past value
         Real64 OldPastFluxTop; // top surface flux - past value used during iteration
         Real64 OldPastFluxBtm; // bottom surface flux - past value used during iteration
-        // variables used with current environmental conditions
-        auto &FluxTop = state.dataSurfaceGroundHeatExchangers->FluxTop; // top surface flux
-        auto &FluxBtm = state.dataSurfaceGroundHeatExchangers->FluxBtm; // bottom surface flux
-        auto &TempBtm = state.dataSurfaceGroundHeatExchangers->TempBtm; // bottom surface temp
-        auto &TempTop = state.dataSurfaceGroundHeatExchangers->TempTop; // top surface temp
-        Real64 TempT;                                                   // top surface temp - used in underrelaxation
-        Real64 TempB;                                                   // bottom surface temp - used in underrelaxation
-        Real64 OldFluxTop;                                              // top surface flux - value used during iteration
-        Real64 OldFluxBtm;                                              // bottom surface flux - value used during iteration
-        Real64 OldSourceFlux;                                           // previous value of source flux - used during iteration
-        int iter;
-        int iter1;
+        Real64 TempT;          // top surface temp - used in underrelaxation
+        Real64 TempB;          // bottom surface temp - used in underrelaxation
+        Real64 OldFluxTop;     // top surface flux - value used during iteration
+        Real64 OldFluxBtm;     // bottom surface flux - value used during iteration
+        Real64 OldSourceFlux;  // previous value of source flux - used during iteration
 
         // check if we are in very first call for this zone time step
         if (FirstHVACIteration && !state.dataHVACGlobal->ShortenTimeStepSys && this->firstTimeThrough) {
+            // variables used with current environmental conditions
+            auto &FluxTop = state.dataSurfaceGroundHeatExchangers->FluxTop; // top surface flux
+            auto &FluxBtm = state.dataSurfaceGroundHeatExchangers->FluxBtm; // bottom surface flux
+            auto &TempBtm = state.dataSurfaceGroundHeatExchangers->TempBtm; // bottom surface temp
+            auto &TempTop = state.dataSurfaceGroundHeatExchangers->TempTop; // top surface temp
+
             this->firstTimeThrough = false;
             // calc temps and fluxes with past env. conditions and average source flux
             state.dataSurfaceGroundHeatExchangers->SourceFlux = this->QSrcAvg;
@@ -646,7 +642,7 @@ namespace SurfaceGroundHeatExchanger {
             OldPastFluxBtm = 1.0e+30;
             TempB = 0.0;
             TempT = 0.0;
-            iter = 0;
+            int iter = 0;
             while (true) { // iterate to find surface heat balances
                 // update coefficients
 
@@ -750,7 +746,7 @@ namespace SurfaceGroundHeatExchanger {
             iter = 0;
             while (true) { // iterate to find source flux
                 ++iter;
-                iter1 = 0;
+                int iter1 = 0;
                 while (true) { // iterate to find surface heat balances
                     ++iter1;
                     // update top coefficients

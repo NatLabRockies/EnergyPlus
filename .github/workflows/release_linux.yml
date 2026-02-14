@@ -43,7 +43,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
@@ -96,7 +96,7 @@ jobs:
       run: cmake --build . --target package -j 4
 
     - name: Upload Tarball as artifact for testing
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: energyplus-${{ matrix.os }}
         path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
@@ -152,7 +152,7 @@ jobs:
             test_key: ubuntu2404-arm64
 
     steps:
-      - uses: actions/checkout@v5  # Still need E+ checked out to get testing scripts
+      - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
         with:
           path: checkout
 
@@ -164,7 +164,7 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Gather Test Package from Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: energyplus-${{ matrix.os }}
           path: package

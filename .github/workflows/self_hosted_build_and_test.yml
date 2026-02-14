@@ -1,0 +1,42 @@
+name: Self-Hosted Build and Test
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or SHA to test (leave empty for current ref)"
+        required: false
+        default: ""
+
+jobs:
+  build_and_test:
+    name: Build and Test (Ubuntu matrix)
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - [self-hosted, linux, x64, ubuntu-22.04]
+          - [self-hosted, linux, x64, ubuntu-24.04]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout EnergyPlus
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -G "Unix Makefiles"
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DBUILD_PACKAGE=OFF
+          -DDOCUMENTATION_BUILD=DoNotBuild
+
+      - name: Build
+        run: cmake --build build -j "$(nproc)"
+
+      - name: Run tests
+        run: ctest --test-dir build -j "$(nproc)"

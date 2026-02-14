@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -232,7 +232,7 @@ TEST_F(AutoSizingFixture, HeatingWaterDesAirInletHumRatSizingGauntlet)
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SystemAirFlow = false;
 
     // Test 9 - Zone Equipment, Zone Eq Fan Coil, parent set heating flow
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = true;
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = 1.0;
     // start with an auto-sized value as the user input
     inputValue = DataSizing::AutoSize;
     // do sizing
@@ -244,7 +244,7 @@ TEST_F(AutoSizingFixture, HeatingWaterDesAirInletHumRatSizingGauntlet)
     EXPECT_NEAR(0.00592, sizedValue, 0.00001);
     sizer.autoSizedValue = 0.0; // reset for next test
 
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = false;
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = 0.0;
 
     // Test 10 - Zone Equipment w/ 10% OA
     state->dataSize->ZoneEqSizing(1).OAVolFlow =

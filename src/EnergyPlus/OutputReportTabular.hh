@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -432,17 +432,17 @@ namespace OutputReportTabular {
     struct CompLoadTablesType
     {
         // members
-        int desDayNum = 0;              // design day number
-        int timeStepMax = 0;            // times step of the day that the maximum occurs
-        Array2D<Real64> cells;          // main component table results (column, row)
-        Array2D_bool cellUsed;          // flag if the cell is used for the table of results (column, row)
-        std::string peakDateHrMin = ""; // string containing peak timestamp
-        Real64 outsideDryBulb = 0.0;    // outside dry bulb temperature at peak
-        Real64 outsideWetBulb = 0.0;    // outside wet bulb temperature at peak
-        Real64 outsideHumRatio = 0.0;   // outside humidity ratio at peak
-        Real64 zoneDryBulb = 0.0;       // zone dry bulb temperature at peak
-        Real64 zoneRelHum = 0.0;        // zone relative humidity at peak
-        Real64 zoneHumRatio = 0.0;      // zone humidity ratio at peak
+        int desDayNum = 0;            // design day number
+        int timeStepMax = 0;          // times step of the day that the maximum occurs
+        Array2D<Real64> cells;        // main component table results (column, row)
+        Array2D_bool cellUsed;        // flag if the cell is used for the table of results (column, row)
+        std::string peakDateHrMin;    // string containing peak timestamp
+        Real64 outsideDryBulb = 0.0;  // outside dry bulb temperature at peak
+        Real64 outsideWetBulb = 0.0;  // outside wet bulb temperature at peak
+        Real64 outsideHumRatio = 0.0; // outside humidity ratio at peak
+        Real64 zoneDryBulb = 0.0;     // zone dry bulb temperature at peak
+        Real64 zoneRelHum = 0.0;      // zone relative humidity at peak
+        Real64 zoneHumRatio = 0.0;    // zone humidity ratio at peak
 
         Real64 supAirTemp = 0.0;     // supply air temperature
         Real64 mixAirTemp = 0.0;     // mixed air temperature

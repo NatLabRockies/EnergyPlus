@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -109,7 +109,7 @@ void EIRPlantLoopHeatPump::simulate(
                                                                 this->EIRHPType,
                                                                 this->sourceSideNodes.inlet,
                                                                 this->sourceSideNodes.outlet,
-                                                                this->sourceSideHeatTransfer,
+                                                                sourceQdotArg,
                                                                 this->sourceSideInletTemp,
                                                                 this->sourceSideOutletTemp,
                                                                 this->sourceSideMassFlowRate,
@@ -139,7 +139,8 @@ void EIRPlantLoopHeatPump::simulate(
 
     if (this->running) {
         if (this->sysControlType == ControlType::Setpoint) {
-            Real64 leavingSetpoint = state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPoint;
+            // Call the helper so we handle SingleSetpoint versus DualSetpointDeadband instead of just grabbing TempSetPoint;
+            Real64 leavingSetpoint = this->getLoadSideOutletSetPointTemp(state);
             Real64 CurSpecHeat = this->loadSidePlantLoc.loop->glycol->getSpecificHeat(state, loadSideInletTemp, "EIRPlantLoopHeatPump::simulate");
             Real64 controlLoad = this->loadSideMassFlowRate * CurSpecHeat * (leavingSetpoint - loadSideInletTemp);
 
@@ -160,32 +161,29 @@ Real64 EIRPlantLoopHeatPump::getLoadSideOutletSetPointTemp(EnergyPlusData &state
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
         if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
             // there will be a valid set-point on outlet
-            return state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPoint;
-        } else { // use plant loop overall set-point
-            return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint;
-        }
-    } else if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
+            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPoint;
+        } // use plant loop overall set-point
+        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint;
+    }
+    if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
         if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
             // there will be a valid set-point on outlet
             if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-                return state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPointHi;
-            } else {
-                return state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPointLo;
+                return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointHi;
             }
-        } else { // use plant loop overall set-point
-            if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-                return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointHi;
-            } else {
-                return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointLo;
-            }
+            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointLo;
+
+        } // use plant loop overall set-point
+        if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
+            return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointHi;
         }
-    } else {
-        // there's no other enums for loop demand calcs, so I don't have a reasonable unit test for these
-        // lines, they simply should not be able to get here.  But a fatal is here anyway just in case,
-        // and the lines are excluded from coverage.
-        ShowFatalError(state, "Unsupported loop demand calculation scheme in EIR heat pump"); // LCOV_EXCL_LINE
-        return -999; // not actually returned with Fatal Error call above  // LCOV_EXCL_LINE
-    }
+        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointLo;
+
+    } // there's no other enums for loop demand calcs, so I don't have a reasonable unit test for these
+    // lines, they simply should not be able to get here.  But a fatal is here anyway just in case,
+    // and the lines are excluded from coverage.
+    ShowFatalError(state, "Unsupported loop demand calculation scheme in EIR heat pump"); // LCOV_EXCL_LINE
+    return -999; // not actually returned with Fatal Error call above  // LCOV_EXCL_LINE
 }
 
 void EIRPlantLoopHeatPump::resetReportingVariables()
@@ -582,15 +580,12 @@ Real64 EIRPlantLoopHeatPump::heatingCapacityModifierASHP(EnergyPlusData &state) 
         if (state.dataEnvrn->OutRelHum <= RH60) {
             // dry heating capacity correction factor is a function of outdoor dry-bulb temperature
             return dryCorrectionFactor;
-        } else {
-            // interpolation of heating capacity between wet and dry is based on outdoor relative humidity over 60%-90% range
-            Real64 semiDryFactor = dryCorrectionFactor + (1.0 - dryCorrectionFactor) * (1.0 - ((RH90 - state.dataEnvrn->OutRelHum) / rangeRH));
-            return semiDryFactor;
-        }
-    } else {
-        // no correction needed, use full capacity
-        return 1.0;
-    }
+        } // interpolation of heating capacity between wet and dry is based on outdoor relative humidity over 60%-90% range
+        Real64 semiDryFactor = dryCorrectionFactor + (1.0 - dryCorrectionFactor) * (1.0 - ((RH90 - state.dataEnvrn->OutRelHum) / rangeRH));
+        return semiDryFactor;
+
+    } // no correction needed, use full capacity
+    return 1.0;
 }
 
 void EIRPlantLoopHeatPump::setPartLoadAndCyclingRatio([[maybe_unused]] EnergyPlusData &state, Real64 &partLoadRatio)
@@ -666,10 +661,9 @@ void HeatPumpAirToWater::calcPowerUsage(EnergyPlusData &state, Real64 availableC
         speedLevel = i;
         if (std::fabs(currentLoadNthUnit) <= capacityHigh) {
             break;
-        } else {
-            capacityLow = capacityHigh;
-            capacityModifierFuncTempLow = capacityModifierFuncTempHigh;
         }
+        capacityLow = capacityHigh;
+        capacityModifierFuncTempLow = capacityModifierFuncTempHigh;
     }
     // calculate power usage from EIR curves
     Real64 eirModifierFuncTempLow = 1.0;
@@ -1159,9 +1153,9 @@ void HeatPumpAirToWater::reportEquipmentSummary(EnergyPlusData &state)
     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
         std::string_view const typeName = DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)];
         std::string objectName = this->name;
-        std::string modeKeyWord;
         if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating ||
             this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
+            std::string modeKeyWord;
             if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
                 modeKeyWord = "Heating";
             } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
@@ -1243,7 +1237,6 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
 
     std::string capacityKW = "Nominal Capacity";
     std::string flowRateKW = "Load Side Volume Flow Rate";
-    std::string flowRateKW_no_v = "Load Side Flow Rate";
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
         capacityKW = "Rated Cooling Capacity";
         flowRateKW = "Rated Water Volume Flow Rate in Cooling Mode";
@@ -1271,7 +1264,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
         if (state.dataSize->PlantSizData(pltLoadSizNum).DesVolFlowRate > HVAC::SmallWaterVolFlow) {
             tmpLoadVolFlow = state.dataSize->PlantSizData(pltLoadSizNum).DesVolFlowRate * this->sizingFactor;
             Real64 deltaT = state.dataSize->PlantSizData(pltLoadSizNum).DeltaT;
-            if (this->companionHeatPumpCoil) {
+            if (this->companionHeatPumpCoil != nullptr) {
                 if (this->companionHeatPumpCoil->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRHeating) {
                     heatingSizingMethod = this->companionHeatPumpCoil->heatSizingMethod;
                 }
@@ -1332,7 +1325,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
             } else {
                 tmpCapacity = Cp * rho * deltaT * tmpLoadVolFlow * this->heatSizingRatio;
             }
-        } else if (this->companionHeatPumpCoil && this->companionHeatPumpCoil->loadSideDesignVolFlowRate > 0.0) {
+        } else if ((this->companionHeatPumpCoil != nullptr) && this->companionHeatPumpCoil->loadSideDesignVolFlowRate > 0.0) {
             tmpLoadVolFlow = this->companionHeatPumpCoil->loadSideDesignVolFlowRate;
             if (this->companionHeatPumpCoil->referenceCapacity == DataSizing::AutoSize) {
                 // use reverse init temp, e.g., if this is cooling use HWInitConvTemp
@@ -1450,7 +1443,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
         }
     } else {
         // no plant sizing available...try to use the companion coil
-        if (this->companionHeatPumpCoil) {
+        if (this->companionHeatPumpCoil != nullptr) {
             if (this->companionHeatPumpCoil->loadSideDesignVolFlowRateWasAutoSized && this->companionHeatPumpCoil->loadSideDesignVolFlowRate > 0.0) {
                 tmpLoadVolFlow = this->companionHeatPumpCoil->loadSideDesignVolFlowRate;
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -1485,6 +1478,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
             }
         }
         if (!this->loadSideDesignVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport) {
+            std::string flowRateKW_no_v = "Load Side Flow Rate";
             BaseSizer::reportSizerOutput(
                 state, typeName, this->name, fmt::format("User-Specified {} [m3/s]", flowRateKW_no_v), this->loadSideDesignVolFlowRate);
         }
@@ -1584,7 +1578,7 @@ void EIRPlantLoopHeatPump::sizeSrcSideWSHP(EnergyPlusData &state)
             tmpSourceVolFlow = hardSizedSourceSideFlow;
         }
     }
-    if (this->companionHeatPumpCoil) {
+    if (this->companionHeatPumpCoil != nullptr) {
         tmpSourceVolFlow *= this->companionHeatPumpCoil->heatSizingRatio;
     } else {
         tmpSourceVolFlow *= this->heatSizingRatio;
@@ -1673,7 +1667,7 @@ void EIRPlantLoopHeatPump::sizeSrcSideASHP(EnergyPlusData &state)
         tmpSourceVolFlow = tmpLoadVolFlow; // LCOV_EXCL_LINE
     }
 
-    if (this->companionHeatPumpCoil) {
+    if (this->companionHeatPumpCoil != nullptr) {
         tmpSourceVolFlow *= this->companionHeatPumpCoil->heatSizingRatio;
     } else {
         tmpSourceVolFlow *= this->heatSizingRatio;
@@ -1764,7 +1758,7 @@ void EIRPlantLoopHeatPump::sizeHeatRecoveryASHP(EnergyPlusData &state)
         tmpHeatRecoveryVolFlow = tmpLoadVolFlow;
     }
     // check if the sizing ratio is based on the this->EIRHPType
-    if (this->companionHeatPumpCoil) {
+    if (this->companionHeatPumpCoil != nullptr) {
         tmpHeatRecoveryVolFlow *= this->companionHeatPumpCoil->heatSizingRatio;
     } else {
         tmpHeatRecoveryVolFlow *= this->heatSizingRatio;
@@ -1857,7 +1851,7 @@ void EIRPlantLoopHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
                     break;
                 }
             }
-            if (!thisHP.companionHeatPumpCoil) {
+            if (thisHP.companionHeatPumpCoil == nullptr) {
                 ShowSevereError(state, "Could not find matching companion heat pump coil.");
                 ShowContinueError(state, format("Base coil: {}", thisCoilName));
                 ShowContinueError(state, format("Looking for companion coil named: {}", targetCompanionName));
@@ -1908,9 +1902,8 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                                                          EIRPlantLoopHeatPumps::EIRPlantLoopHeatPump::subtract}};
 
     bool errorsFound = false;
-    std::string &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
     for (auto const &classToInput : classesToInput) {
-        cCurrentModuleObject = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
+        auto cCurrentModuleObject = static_cast<std::string>(DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)]);
         DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
             getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
         int numPLHP = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
@@ -2288,7 +2281,7 @@ void EIRPlantLoopHeatPump::checkConcurrentOperation(EnergyPlusData &state)
     //  vector each pass, and check then each loop.  This seemed really bulky and inefficient, so I chose to
     //  leave a tight loop here of just reporting for each coil if it and the companion are running.
     for (auto &thisPLHP : state.dataEIRPlantLoopHeatPump->heatPumps) {
-        if (!thisPLHP.companionHeatPumpCoil) {
+        if (thisPLHP.companionHeatPumpCoil == nullptr) {
             continue;
         }
         if (thisPLHP.running && thisPLHP.companionHeatPumpCoil->running && !thisPLHP.companionHeatPumpCoil->heatRecoveryAvailable) {
@@ -2333,7 +2326,7 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
 
     if (this->oneTimeInitFlag) {
         bool errFlag = false;
-        std::string suffix = "";
+        std::string suffix;
         if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
             suffix = " in Heating Mode";
         } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
@@ -2581,21 +2574,6 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
             errFlag = true;
         }
 
-        if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating ||
-            this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
-            if (state.dataPlnt->PlantLoop(this->loadSidePlantLoc.loopNum).TypeOfWaterLoop == DataPlant::WaterLoopType::None) {
-                ShowSevereError(state,
-                                format("{}: Missing value for input field \"Water Loop Type\" in Plant Loop = {}. It's required for {} name = \"{}\"",
-                                       routineName,
-                                       state.dataPlnt->PlantLoop(this->loadSidePlantLoc.loopNum).Name,
-                                       "HeatPump:AirToWater",
-                                       this->name));
-                ShowContinueError(state,
-                                  "The Hot Water nodes must be connected to a HotWater loop. The Chilled Water nodes must be ChilledWater loop");
-                errFlag = true;
-            }
-        }
-
         thisErrFlag = false;
         if (this->waterSource) {
             PlantUtilities::ScanPlantLoopsForObject(
@@ -2672,6 +2650,50 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
             }
         }
 
+        if (this->sysControlType == ControlType::Setpoint) {
+
+            // check if setpoint on outlet node
+            if ((state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPoint == DataLoopNode::SensedNodeFlagValue) &&
+                (state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPointHi == DataLoopNode::SensedNodeFlagValue)) {
+                if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                    if (!this->SetpointSetToLoopErrDone) {
+                        ShowWarningError(state,
+                                         format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
+                                                routineName,
+                                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                this->name));
+                        ShowContinueError(state, "  A temperature setpoint is needed at the load side outlet node, use a SetpointManager");
+                        ShowContinueError(state, "  The overall loop setpoint will be assumed for the Heat Pump. The simulation continues ... ");
+                        this->SetpointSetToLoopErrDone = true;
+                    }
+                } else {
+                    // need call to EMS to check node
+                    bool fatalError = false; // but not really fatal yet, but should be.
+                    EMSManager::CheckIfNodeSetPointManagedByEMS(state, this->loadSideNodes.outlet, HVAC::CtrlVarType::Temp, fatalError);
+                    state.dataLoopNodes->NodeSetpointCheck(this->loadSideNodes.outlet).needsSetpointChecking = false;
+                    if (fatalError) {
+                        if (!this->SetpointSetToLoopErrDone) {
+                            ShowWarningError(state,
+                                             format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
+                                                    routineName,
+                                                    DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                    this->name));
+                            ShowContinueError(state, "  A temperature setpoint is needed at the load side outlet node when ControlType = Setpoint");
+                            ShowContinueError(state, "  use a Setpoint Manager to establish a setpoint at the outlet node ");
+                            ShowContinueError(state, "  or use an EMS actuator to establish a setpoint at the outlet node ");
+                            ShowContinueError(state, "  The overall loop setpoint will be assumed for the Heat Pump. The simulation continues ... ");
+                            this->SetpointSetToLoopErrDone = true;
+                        }
+                    }
+                }
+                this->setPointNodeNum = this->loadSidePlantLoc.loop->TempSetPointNodeNum;
+            } else {
+                this->setPointNodeNum = this->loadSideNodes.outlet;
+            }
+        } else {
+            this->setPointNodeNum = this->loadSidePlantLoc.loop->TempSetPointNodeNum;
+        }
+
         if (errFlag) {
             ShowFatalError(state, format("{}: Program terminated due to previous condition(s).", routineName));
         }
@@ -2685,8 +2707,8 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
         return;
     }
     EIRPlantLoopHeatPump::oneTimeInit(state);
-    std::string suffix = "";
-    std::string mode_keyword = "";
+    std::string suffix;
+    std::string mode_keyword;
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
         suffix = " in Heating Mode";
         mode_keyword = "Heating";
@@ -2830,9 +2852,8 @@ bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
             return false;
         }
         return true;
-    } else {
-        return true;
     }
+    return true;
 }
 
 Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
@@ -3254,7 +3275,8 @@ PlantComponent *EIRFuelFiredHeatPump::factory(EnergyPlusData &state, DataPlant::
     return nullptr; // LCOV_EXCL_LINE
 }
 
-PlantComponent *HeatPumpAirToWater::factory(EnergyPlusData &state, DataPlant::PlantEquipmentType hp_type, const std::string &hp_name)
+PlantComponent *HeatPumpAirToWater::factory(
+    EnergyPlusData &state, DataPlant::PlantEquipmentType &hp_type, const std::string &hp_name, int const inletNodeNum, int const outletNodeNum)
 {
     if (state.dataHeatPumpAirToWater->getInputsAWHP) {
         HeatPumpAirToWater::processInputForEIRPLHP(state);
@@ -3263,12 +3285,19 @@ PlantComponent *HeatPumpAirToWater::factory(EnergyPlusData &state, DataPlant::Pl
     }
 
     for (auto &awhp : state.dataHeatPumpAirToWater->heatPumps) {
-        if (awhp.name == Util::makeUPPER(hp_name) && awhp.EIRHPType == hp_type) {
-            return &awhp;
+        if (awhp.name == Util::makeUPPER(hp_name)) {
+            // Match specific equipment type or match nodes to determine correct equipment type
+            if (awhp.EIRHPType == hp_type) {
+                return &awhp;
+            }
+            if ((awhp.loadSideNodes.inlet == inletNodeNum) && (awhp.loadSideNodes.outlet == outletNodeNum)) {
+                hp_type = awhp.EIRHPType;
+                return &awhp;
+            }
         }
     }
 
-    ShowFatalError(state, format("Air To Water Heat Pump factory: Error getting inputs for PLFFHP named: {}.", hp_name));
+    ShowFatalError(state, format("Air To Water Heat Pump factory: Error getting inputs for AWHP named: {}.", hp_name));
     return nullptr; // LCOV_EXCL_LINE
 }
 
@@ -3297,7 +3326,7 @@ void EIRFuelFiredHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
                     break;
                 }
             }
-            if (!thisHP.companionHeatPumpCoil) {
+            if (thisHP.companionHeatPumpCoil == nullptr) {
                 ShowSevereError(state, "Could not find matching companion heat pump coil.");
                 ShowContinueError(state, format("Base coil: {}", thisCoilName));
                 ShowContinueError(state, format("Looking for companion coil named: {}", targetCompanionName));
@@ -3360,10 +3389,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
     };
 
     bool errorsFound = false;
-    std::string &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
     for (auto &classToInput : classesToInput) {
-        cCurrentModuleObject = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
-
+        auto cCurrentModuleObject = static_cast<std::string>(DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)]);
         DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
             getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
 
@@ -3422,7 +3449,7 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
 
             // A7 End use category
             thisPLHP.endUseSubcat = Util::makeUPPER(fields.at("end_use_subcategory").get<std::string>());
-            if (thisPLHP.endUseSubcat == "") {
+            if (thisPLHP.endUseSubcat.empty()) {
                 thisPLHP.endUseSubcat = "Heat Pump Fuel Fired"; // or "General"?
             }
 
@@ -3738,7 +3765,6 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
 
 void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
 {
-    std::string routineName = "HeatPumpAirToWater::processInputForEIRPLHP";
     struct ClassType
     {
         DataPlant::PlantEquipmentType thisType;
@@ -3770,7 +3796,6 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                   EIRPlantLoopHeatPumps::HeatPumpAirToWater::subtract},
     };
 
-    bool errorsFound = false;
     std::string cCurrentModuleObject = "HeatPump:AirToWater";
     auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(cCurrentModuleObject);
     auto const &schemaProps = state.dataInputProcessing->inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
@@ -3782,12 +3807,13 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
     constexpr std::array<std::string_view, static_cast<int>(ControlType::Num)> AWHPControlTypeUC = {"FIXEDSPEED", "VARIABLESPEED"};
     if (instances != state.dataInputProcessing->inputProcessor->epJSON.end()) {
         auto &instancesValue = instances.value();
+        std::string &cCurrentModuleObjectSingleMode = state.dataIPShortCut->cCurrentModuleObject;
+        bool errorsFound = false;
+        std::string routineName = "HeatPumpAirToWater::processInputForEIRPLHP";
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
             auto const &fields = instance.value();
             auto const &thisObjectName = instance.key();
             state.dataInputProcessing->inputProcessor->markObjectAsUsed(cCurrentModuleObject, thisObjectName);
-
-            std::string &cCurrentModuleObjectSingleMode = state.dataIPShortCut->cCurrentModuleObject;
             for (auto &classToInput : classesToInput) {
                 cCurrentModuleObjectSingleMode = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
                 DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
@@ -4236,7 +4262,7 @@ void EIRPlantLoopHeatPump::setUpEMS(EnergyPlusData &)
 void HeatPumpAirToWater::setUpEMS(EnergyPlusData &state)
 {
 
-    std::string mode_keyword = "";
+    std::string mode_keyword;
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
         // defrost related actuators
         mode_keyword = "Heating";

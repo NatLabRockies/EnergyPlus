@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -123,10 +123,9 @@ namespace HVACVariableRefrigerantFlow {
     {
         if (i == 1) {
             return "AirConditioner:VariableRefrigerantFlow";
-        } else {
-            assert(false);
-            return "";
         }
+        assert(false);
+        return "";
     }
 
     // Flag for hex operation
@@ -315,8 +314,14 @@ namespace HVACVariableRefrigerantFlow {
         int CoolCapFTErrorIndex = 0;   // warning message index
         int HeatEIRFPLRErrorIndex = 0; // warning message index
         int CoolEIRFPLRErrorIndex = 0; // warning message index
-        int LowLoadTeError = 0;
-        int LowLoadTeErrorIndex = 0; // warning message index
+        int LowLoadTeIterError = 0;
+        int LowLoadTeError2Neg = 0;
+        int LowLoadTeError2NegIndex = 0; // warning message index
+        int LowLoadTeError2PosTsuc = 0;
+        int LowLoadTeError2PosTsucIndex = 0; // warning message index
+        int LowLoadTeError2PosOUTe = 0;
+        int LowLoadTeError2PosOUTeIndex = 0; // warning message index
+        int LowLoadTeErrorIndex = 0;         // warning message index
         // The following are for the Algorithm Type: VRF model based on physics, applicable for Fluid Temperature Control
         int AlgorithmIUCtrl;             // VRF indoor unit control algorithm, 1-High sensible, 2-Te/Tc constant
         Array1D<Real64> CompressorSpeed; // compressor speed array [rps]

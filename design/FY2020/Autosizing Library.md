@@ -36,12 +36,12 @@ A possible autosizing derived class could look like the following:
 // declaration
 struct ChilledWaterCoilFlowSizer : BaseSizer {
     constexpr coefficientAlpha = 3.14159;
-    
+
     ChilledWaterCoilFlowSizer() {
             this->sizingType = AutoSizingType::ChilledWaterCoilFlowSizing;
     }
     ~ChilledWaterCoilFlowSizer() = default;
-    
+
     void initializeWithinEP(...) override;
     SizingStatus size(EnergyPlusData &state,Real64 &_originalSize) override;
 }
@@ -112,13 +112,13 @@ We won't do this at first because we will want to simplify and solidify the inte
 
 The base class will be inherited by all sizer classes to minimize the coding effort in new sizer classes. This NFP concept was applied to the base and sizer classes for review and comments. Two existing water heating coil sizing functions have been tested using this method (see enum class AutoSizingType).
 
-    #ifndef Base_hh_INCLUDED   
+    #ifndef Base_hh_INCLUDED
     #define Base_hh_INCLUDED
 
-    #include <EnergyPlus/AirLoopHVACDOAS.hh>  
-    #include <EnergyPlus/DataAirLoop.hh>  
-    #include <EnergyPlus/DataSizing.hh>  
-    #include <EnergyPlus/api/TypeDefs.h>  
+    #include <EnergyPlus/AirLoopHVACDOAS.hh>
+    #include <EnergyPlus/DataAirLoop.hh>
+    #include <EnergyPlus/DataSizing.hh>
+    #include <EnergyPlus/api/TypeDefs.h>
 
     namespace EnergyPlus {
 
@@ -230,7 +230,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
         }
         ~HeatingAirflowUASizer() = default;
 
-        void initializeWithinEP(EnergyPlusData &state, 
+        void initializeWithinEP(EnergyPlusData &state,
             std::string const &_compType, std::string const &_compName,
             bool printWarningFlag) override;
 
@@ -246,7 +246,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
 
     EnergyPlus::AutoSizingResultType HeatingAirflowUASizer::size
                      (EnergyPlusData &state, Real64 _originalValue) {
-        
+
         AutoSizingResultType errorsFound = AutoSizingResultType::NoError;
         // perform any necessary checks for sizing (e.g., SizingRunDone)
         this->preSize(state, _originalValue);
@@ -261,7 +261,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
                 }
                 this->autoSizedValue = _originalValue;
             } else {
-                if (this->termUnitSingDuct && 
+                if (this->termUnitSingDuct &&
                    (this->curTermUnitSizingNum > 0)) {
                     this->autoSizedValue = DataEnvironment::StdRhoAir *
                         this->termUnitSizing(this->curTermUnitSizingNum)
@@ -273,19 +273,19 @@ The base class will be inherited by all sizer classes to minimize the coding eff
                         this->termUnitSizing(this->curTermUnitSizingNum).ReheatAirFlowMult;
                 } else if (this->zoneEqFanCoil) {
                     this->autoSizedValue =
-                            DataEnvironment::StdRhoAir * 
+                            DataEnvironment::StdRhoAir *
                             this->finalZoneSizing(this->curZoneEqNum).DesHeatVolFlow;
                 } else if (this->otherEqType) {
                     if (this->zoneEqSizing(this->curZoneEqNum).SystemAirFlow) {
                         this->autoSizedValue =
-                            this->zoneEqSizing(this->curZoneEqNum).AirVolFlow * 
+                            this->zoneEqSizing(this->curZoneEqNum).AirVolFlow *
                             DataEnvironment::StdRhoAir;
                     } else if (this->zoneEqSizing(this->curZoneEqNum).HeatingAirFlow) {
-                        this->autoSizedValue = 
+                        this->autoSizedValue =
                             this->zoneEqSizing(this->curZoneEqNum).HeatingAirVolFlow *
                             DataEnvironment::StdRhoAir;
                     } else {
-                        this->autoSizedValue = 
+                        this->autoSizedValue =
                             this->finalZoneSizing(this->curZoneEqNum).DesHeatMassFlow;
                     }
                 } else {
@@ -296,7 +296,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
             if (!this->wasAutoSized && !this->sizingDesRunThisAirSys) {
                 if (this->printWarningFlag && this->originalValue > 0.0) {
                     HeatingAirflowUASizer::reportSizerOutput(
-                        this->compType, this->compName, 
+                        this->compType, this->compName,
                         "User-Specified " + this->sizingString, _originalValue);
                 }
                 this->autoSizedValue = _originalValue;
@@ -307,7 +307,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
                                 this->curOASysNum).AirLoopDOASNum].SizingMassFlow /
                                                DataEnvironment::StdRhoAir;
                     } else {
-                        this->autoSizedValue = 
+                        this->autoSizedValue =
                             this->finalSysSizing(this->curSysNum).DesOutAirVolFlow;
                     }
                 } else {
@@ -326,14 +326,14 @@ The base class will be inherited by all sizer classes to minimize the coding eff
                                 this->finalSysSizing(this->curSysNum).SysAirMinFlowRat *
                                     this->finalSysSizing(this->curSysNum).DesCoolVolFlow;
                         } else {
-                            this->autoSizedValue = 
+                            this->autoSizedValue =
                                 this->finalSysSizing(this->curSysNum).DesCoolVolFlow;
                         }
                     } else if (this->curDuctType == DataHVACGlobals::Heating) {
-                        this->autoSizedValue = 
+                        this->autoSizedValue =
                             this->finalSysSizing(this->curSysNum).DesHeatVolFlow;
                     } else {
-                        this->autoSizedValue = 
+                        this->autoSizedValue =
                             this->finalSysSizing(this->curSysNum).DesMainVolFlow;
                     }
                 }
@@ -361,16 +361,16 @@ The base class will be inherited by all sizer classes to minimize the coding eff
 
     // get sizing result
     AutoSizingResultType result = sizer.size(state, DataSizing::AutoSize);
-    
+
     // set component sizing
     WaterCoil(CoilNum).DesAirMassFlowRate = sizer.autoSizedValue;
     WaterCoil(CoilNum).InletAirMassFlowRate = sizer.autoSizedValue;
-    
-    // coil sizing reports as needed    
+
+    // coil sizing reports as needed
     coilSelectionReportObj->setCoilEntAirMassFlow(CompName, CompType,
         WaterCoil(CoilNum).DesAirMassFlowRate, CurSysNum, CurZoneEqNum);
 
-    
+
     if (result != AutoSizingResultType::NoError) {
         ShowSevereError("Developer Error: autosizing of water Heating
             coil air flow used for UA failed.");
@@ -412,7 +412,7 @@ The base class will be inherited by all sizer classes to minimize the coding eff
         std::string("! <Component Sizing Information>, Component Type,
                         Component Name, Input Field Description, Value\n"
                       " Component Sizing Information, Coil:Heating:Water,
-                        MyWaterCoil, 
+                        MyWaterCoil,
                         User-Specified Heating Coil Airflow For UA, 5.00000\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));

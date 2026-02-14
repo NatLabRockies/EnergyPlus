@@ -1235,59 +1235,59 @@ The higher setpoint temperature to be used with the DOAS design control strategy
 
 \paragraph{Field: Zone Load Sizing Method}\label{field-zone-load-sizing-method}
 
-Specifies the basis for sizing the zone supply air flow rate. Valid choices are Sensible Load, Latent Load, Sensible And Latent Load and Sensible Load Only No Latent Load. 
-Zone latent loads will not be used during sizing only when Zone Load Sizing Method = Sensible Load Only No Latent Load (default). For this case the zone humidity level 
-will float according to the fields Cooling and Heating Design Supply Air Humidity Ratio. For all other choices the zone humidity level will be controlled. Sensible Load will 
-use zone sensible air flow rate for zone component sizing. Latent loads will also be reported during sizing. Latent Load will use zone latent air flow rate for zone component 
-sizing. Sensible loads will also be reported during sizing. Sensible and Latent Load will use the larger of sensible and latent air flow rate for zone component sizing. Sensible 
+Specifies the basis for sizing the zone supply air flow rate. Valid choices are Sensible Load, Latent Load, Sensible And Latent Load and Sensible Load Only No Latent Load.
+Zone latent loads will not be used during sizing only when Zone Load Sizing Method = Sensible Load Only No Latent Load (default). For this case the zone humidity level
+will float according to the fields Cooling and Heating Design Supply Air Humidity Ratio. For all other choices the zone humidity level will be controlled. Sensible Load will
+use zone sensible air flow rate for zone component sizing. Latent loads will also be reported during sizing. Latent Load will use zone latent air flow rate for zone component
+sizing. Sensible loads will also be reported during sizing. Sensible and Latent Load will use the larger of sensible and latent air flow rate for zone component sizing. Sensible
 Load Only No Latent Load or leaving this field blank will disable zone latent sizing and reporting. Latent loads will not be reported during sizing (reported as 0's).
 
 \paragraph{Field: Zone Latent Cooling Design Supply Air Humidity Ratio Input Method}\label{field-zone-latent-cooling-design-supply-air-humidity-ratio-input-method}
 
-Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use 
-SupplyAirHumidityRatio to enter the humidity ratio when zone dehumidification is required. The supply air humidity ratio should be less than the zone humidity 
-ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and 
+Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use
+SupplyAirHumidityRatio to enter the humidity ratio when zone dehumidification is required. The supply air humidity ratio should be less than the zone humidity
+ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and
 humidistat set point condition.
 
 \paragraph{Field: Zone Dehumidification Design Supply Air Humidity Ratio}\label{field-zone-dehumidification-design-supply-air-humidity-ratio}
 
-Zone Dehumidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input Method = 
+Zone Dehumidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input Method =
 SupplyAirHumidityRatio. This input must be less than the zone humidity ratio at the humidistat set point so that dehumidification can occur.
 
 \paragraph{Field: Zone Cooling Design Supply Air Humidity Ratio Difference}\label{field-zone-cooling-design-supply-air-humidity-ratio-difference}
 
-Zone Dehumidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input 
-Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point 
-condition and the supply air humidity ratio entering the zone. 
+Zone Dehumidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input
+Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point
+condition and the supply air humidity ratio entering the zone.
 
 \paragraph{Field: Zone Latent Heating Design Supply Air Humidity Ratio Input Method}\label{field-zone-latent-heating-design-supply-air-humidity-ratio-input-method}
 
-Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use 
-SupplyAirHumidityRatio to enter the humidity ratio when zone humidification is required. The supply air humidity ratio should be greater than the zone humidity 
-ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and 
+Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use
+SupplyAirHumidityRatio to enter the humidity ratio when zone humidification is required. The supply air humidity ratio should be greater than the zone humidity
+ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and
 humidistat set point condition.
 
 \paragraph{Field: Zone Humidification Design Supply Air Humidity Ratio}\label{field-zone-humidification-design-supply-air-humidity-ratio}
 
-Zone Humidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input Method = 
+Zone Humidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input Method =
 SupplyAirHumidityRatio. This input must be greater than the zone humidity ratio at the humidistat set point so that humidification can occur.
 
 \paragraph{Field: Zone Heating Design Supply Air Humidity Ratio Difference}\label{field-zone-heating-design-supply-air-humidity-ratio-difference}
 
-Zone Humidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input 
-Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point 
-condition and the supply air humidity ratio entering the zone. 
+Zone Humidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input
+Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point
+condition and the supply air humidity ratio entering the zone.
 
 \paragraph{Field: Zone Humidistat Dehumidification Set Point Schedule Name}\label{field-zone-humidistat-dehumidification-set-point-schedule-name}
 
-Enter the zone relative humidity schedule used for zone latent cooling calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load 
-Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is 
+Enter the zone relative humidity schedule used for zone latent cooling calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load
+Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is
 associated with this zone.
 
 \paragraph{Field: Zone Humidistat Humidification Set Point Schedule Name}\label{field-zone-humidistat-humidification-set-point-schedule-name}
 
-Enter the zone relative humidity schedule used for zone latent heating calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load 
-Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is 
+Enter the zone relative humidity schedule used for zone latent heating calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load
+Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is
 associated with this zone.
 
 \paragraph{Field: Type of Space Sum to Use}\label{field-type-of-space-sum-to-use}
@@ -1298,7 +1298,7 @@ If the input is \emph{coincident} the zone equipment will be sized on the coinci
 
 This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
 
-Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} above to correctly account for latent loads. 
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} above to correctly account for latent loads.
 
 \paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0101}
 
@@ -1802,8 +1802,8 @@ Enter the heating supply air volume flow rate per unit heating capacity in m3/s-
 
 \paragraph{Field: System Outdoor Air Method}\label{field-system-outdoor-air-method-000}
 
-The method used to calculate the system minimum outdoor air flow. The three choices are ZoneSum, Standard62.1VentilationRateProcedure (VRP), and Standard62.1SimplifiedProcedure (SP). ZoneSum sums the outdoor air flows across all zones served by the system. VRP uses the multi-zone equations defined in ASHRAE Standard 62.1 to calculate the system outdoor air flow. VRP considers zone air distribution effectiveness and zone diversification of outdoor air fractions. VRP may also adjust autosized air terminal maximum and minimum supply flow rates if needed to ensure adequate outdoor air flow rate to each zone. SP is similar to VRP and was introduced in ASHRAE Standard 62.1-2019. The main difference with VRP is that it uses a simplified approach to calculate a system's ventilation efficiency which is in turn used to calculate the system outdoor air flow. Additionally, when set to autosize, the minimum (primary) air flow (or air flow fraction) of these types of air terminals will be calculated following SP: \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), 
-\hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), \hyperref[airterminalsingleductseriespiureheat]{AirTerminal:SingleDuct:SeriesPIU:Reheat} (\emph{Minimum Primary Air Flow Fraction}), 
+The method used to calculate the system minimum outdoor air flow. The three choices are ZoneSum, Standard62.1VentilationRateProcedure (VRP), and Standard62.1SimplifiedProcedure (SP). ZoneSum sums the outdoor air flows across all zones served by the system. VRP uses the multi-zone equations defined in ASHRAE Standard 62.1 to calculate the system outdoor air flow. VRP considers zone air distribution effectiveness and zone diversification of outdoor air fractions. VRP may also adjust autosized air terminal maximum and minimum supply flow rates if needed to ensure adequate outdoor air flow rate to each zone. SP is similar to VRP and was introduced in ASHRAE Standard 62.1-2019. The main difference with VRP is that it uses a simplified approach to calculate a system's ventilation efficiency which is in turn used to calculate the system outdoor air flow. Additionally, when set to autosize, the minimum (primary) air flow (or air flow fraction) of these types of air terminals will be calculated following SP: \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}),
+\hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), \hyperref[airterminalsingleductseriespiureheat]{AirTerminal:SingleDuct:SeriesPIU:Reheat} (\emph{Minimum Primary Air Flow Fraction}),
  \hyperref[airterminalsingleductparallelpiureheat]{AirTerminal:SingleDuct:ParallelPIU:Reheat}(\emph{Minimum Primary Air Flow Fraction}).
 
 \paragraph{Field: Zone Maximum Outdoor Air Fraction}\label{field-zone-maximum-outdoor-air-fraction-000}
@@ -1854,7 +1854,7 @@ The Occupant Diversity (D) as defined in ASHRAE Standard 62.1. The Occupant Dive
 
 This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
 
-Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} in the \hyperref[sizingzone]{Sizing:Zone} object to correctly account for latent loads. 
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} in the \hyperref[sizingzone]{Sizing:Zone} object to correctly account for latent loads.
 
 \paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0102}
 

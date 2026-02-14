@@ -5,7 +5,7 @@ Implement Optional Time Delay Between Mode Changeover for Low Temperature Radian
 
  - Original Date: July 2, 2020
  - Revision Date: Version 2—July 2, 2020
- 
+
 
 ## Justification for New Feature ##
 
@@ -70,6 +70,3 @@ A new example file that shows the use of the new parameter as well as verifies t
 ## References ##
 
 Communications from CBE and the summary written by the author of this NFP are available upon request.
-
-
-

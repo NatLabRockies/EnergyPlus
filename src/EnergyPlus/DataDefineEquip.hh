@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -102,34 +102,37 @@ namespace DataDefineEquip {
         std::shared_ptr<AirTerminalUnit> airTerminalPtr = nullptr;
         Array1D_string EquipName; // name of subcomponent
         Array1D_int EquipIndex;
-        int AirTerminalSizingSpecIndex = 0; // index to DesignSpecification:AirTerminal:Sizing object
-        int TermUnitSizingNum = 0;          // index to TermUnitSizing and TermUnitFinalZoneSizing for this air distribution unit
-        Real64 UpStreamLeakFrac = 0.0;      // upstream nominal leakage fraction
-        Real64 DownStreamLeakFrac = 0.0;    // downstream constant leakage fraction
-        Real64 MassFlowRateUpStrLk = 0.0;   // current air mass flow rate of the upstream leak [kg/s]
-        Real64 MassFlowRateDnStrLk = 0.0;   // current air mass flow rate of the downstream leak [kg/s]
-        Real64 MassFlowRateTU = 0.0;        // current air mass flow rate through the terminal unit [kg/s]
-        Real64 MassFlowRateZSup = 0.0;      // current air mass flow rate of zone supply air [kg/s]
-        Real64 MassFlowRateSup = 0.0;       // current air mass flow rate of supply air upstream of upstream leak [kg/s]
-        Real64 MassFlowRatePlenInd = 0.0;   // current air mass flow rate of induced air from plenum [kg/s]
-        Real64 MaxAvailDelta = 0.0;         // change in max avail mass low rate due to leaks [kg/s]
-        Real64 MinAvailDelta = 0.0;         // change in min avail mass low rate due to leaks [kg/s]
-        int InletNodeNum = 0;               // index of inlet node 1
-        int InletNodeNum2 = 0;              // index of inlet node 2 (used for dual duct airterminals)
-        int ZoneEqNum = 0;                  // index of zone equipment object for this terminal unit
-        int AirLoopNum = 0;                 // index to airloop that this terminal unit is connected to
-        Real64 LeakLoadMult = 0.0;          // zome load multiplier to adjust for downstream leak
-        bool UpStreamLeak = false;          // if true, there is an upstream leak
-        bool DownStreamLeak = false;        // if true, there is an downstream leak
-        int RetPlenumNum = 0;               // return plenum number that this ADU can leak to, zero if none
-        int ZoneNum = 0;                    // index of the zone object for this terminal unit
-        bool AccountForDOAS = false;        // if true user has asked for DOAS
-        Real64 HeatRate = 0.0;              // [W]
-        Real64 CoolRate = 0.0;              // [W]
-        Real64 HeatGain = 0.0;              // [J]
-        Real64 CoolGain = 0.0;              // [J]
+        int AirTerminalSizingSpecIndex = 0;       // index to DesignSpecification:AirTerminal:Sizing obect
+        int TermUnitSizingNum = 0;                // index to TermUnitSizing and TermUnitFinalZoneSizing for this air distribution unit
+        Real64 UpStreamLeakFrac = 0.0;            // upstream nominal leakage fraction
+        Real64 DownStreamLeakFrac = 0.0;          // downstream constant leakage fraction
+        Real64 parallelPIUTerminalLeakFrac = 0.0; // PIU terminal leakage fraction
+        Real64 MassFlowRateUpStrLk = 0.0;         // current air mass flow rate of the upstream leak [kg/s]
+        Real64 MassFlowRateDnStrLk = 0.0;         // current air mass flow rate of the downstream leak [kg/s]
+        Real64 MassFlowRateTU = 0.0;              // current air mass flow rate through the terminal unit [kg/s]
+        Real64 MassFlowRateZSup = 0.0;            // current air mass flow rate of zone supply air [kg/s]
+        Real64 massFlowRateParallelPIULk = 0.0;   // current air mass flow rate of parallel piu leak [kg/s]
+        Real64 MassFlowRateSup = 0.0;             // current air mass flow rate of supply air upstream of upstream leak [kg/s]
+        Real64 MassFlowRatePlenInd = 0.0;         // current air mass flow rate of induced air from plenum [kg/s]
+        Real64 MaxAvailDelta = 0.0;               // change in max avail mass low rate due to leaks [kg/s]
+        Real64 MinAvailDelta = 0.0;               // change in min avail mass low rate due to leaks [kg/s]
+        int InletNodeNum = 0;                     // index of inlet node 1
+        int InletNodeNum2 = 0;                    // index of inlet node 2 (used for dual duct airterminals)
+        int ZoneEqNum = 0;                        // index of zone equipment object for this terminal unit
+        int AirLoopNum = 0;                       // index to airloop that this terminal unit is connected to
+        Real64 LeakLoadMult = 0.0;                // zome load multiplier to adjust for downstream leak
+        bool UpStreamLeak = false;                // if true, there is an upstream leak
+        bool DownStreamLeak = false;              // if true, there is an downstream leak
+        int RetPlenumNum = 0;                     // return plenum number that this ADU can leak to, zero if none
+        int ZoneNum = 0;                          // index of the zone object for this terminal unit
+        bool AccountForDOAS = false;              // if true user has asked for DOAS
+        Real64 HeatRate = 0.0;                    // [W]
+        Real64 CoolRate = 0.0;                    // [W]
+        Real64 HeatGain = 0.0;                    // [J]
+        Real64 CoolGain = 0.0;                    // [J]
         bool EachOnceFlag = true;
         bool IsConstLeakageRate = false; // if true, constant leakage rate, if false proportional leakage rate will be calculated
+        int piuLkZoneNum = 0;            // zone index designated as the destination for the PIU backdraft damper leaks
 
         // Default Constructor
         ZoneAirEquip()

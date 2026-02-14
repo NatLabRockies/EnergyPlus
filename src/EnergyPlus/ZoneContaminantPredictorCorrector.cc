@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -71,6 +71,7 @@
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/PoweredInductionUnits.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -2101,9 +2102,9 @@ void InverseModelCO2(EnergyPlusData &state,
         // Hybrid Model calculate people count
         if (hmZone.PeopleCountCalc_C && state.dataHVACGlobal->UseZoneTimeStepHistory) {
             state.dataHeatBal->Zone(ZoneNum).ZonePeopleActivityLevel =
-                hmZone.peopleActivityLevelSched ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
-            Real64 ActivityLevel = hmZone.peopleActivityLevelSched ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
-            Real64 CO2GenRate = hmZone.peopleCO2GenRateSched ? hmZone.peopleCO2GenRateSched->getCurrentVal() : 0.0;
+                (hmZone.peopleActivityLevelSched != nullptr) ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
+            Real64 ActivityLevel = (hmZone.peopleActivityLevelSched != nullptr) ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
+            Real64 CO2GenRate = (hmZone.peopleCO2GenRateSched != nullptr) ? hmZone.peopleCO2GenRateSched->getCurrentVal() : 0.0;
             if (ActivityLevel <= 0.0) {
                 ActivityLevel = 130.0; // 130.0 is the default people activity level [W]
             }
@@ -2317,6 +2318,20 @@ void CorrectZoneContaminants(EnergyPlusData &state,
                 GCMassFlowRate += (node.MassFlowRate * node.GenContam) / ZoneMult;
             }
             ZoneMassFlowRate += node.MassFlowRate / ZoneMult;
+        }
+
+        if (!state.dataHeatBal->Zone(ZoneNum).leakageParallelPIUNums.empty()) {
+            for (int piuNum = 1; piuNum <= static_cast<int>(state.dataHeatBal->Zone(ZoneNum).leakageParallelPIUNums.size()); ++piuNum) {
+                if (const auto &thisPIU = state.dataPowerInductionUnits->PIU(piuNum); thisPIU.leakFlow > 0) {
+                    if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
+                        CO2MassFlowRate += (thisPIU.leakFlow * state.dataLoopNodes->Node(thisPIU.PriAirInNode).CO2) / ZoneMult;
+                    }
+                    if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
+                        GCMassFlowRate += (thisPIU.leakFlow * state.dataLoopNodes->Node(thisPIU.PriAirInNode).GenContam) / ZoneMult;
+                    }
+                    ZoneMassFlowRate += thisPIU.leakFlow / ZoneMult;
+                }
+            }
         }
 
         Real64 timeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;

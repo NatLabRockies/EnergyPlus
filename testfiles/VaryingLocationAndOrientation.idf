@@ -3,7 +3,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Shoebox,                 !- Name
@@ -119,9 +119,10 @@
     1.00;                    !- Sky Clearness
 
   Site:VariableLocation,
-    VaryingLatitude,         !- Name
-    VaryingLongitude,        !- Building Location Latitude Schedule
-    VaryingOrientation;      !- Building Location Longitude Schedule
+    VaryingBuilding,         !- Name
+    VaryingLatitude,         !- Building Location Latitude Schedule
+    VaryingLongitude,        !- Building Location Longitude Schedule
+    VaryingOrientation;      !- Building Location Orientation Schedule
 
   Schedule:Compact,
     VaryingLatitude,         !- Name

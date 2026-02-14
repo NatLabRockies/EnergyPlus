@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -191,16 +191,7 @@ namespace WaterManager {
         static constexpr std::string_view routineName = "GetWaterManagerInput";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int Item;                // Item to be "gotten"
-        int NumAlphas(0);        // Number of Alphas for each GetObjectItem call
-        int NumNumbers(0);       // Number of Numbers for each GetObjectItem call
-        int IOStatus(0);         // Used in GetObjectItem
-        bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
-        int MaxNumAlphas(0);     // argument for call to GetObjectDefMaxArgs
-        int MaxNumNumbers(0);    // argument for call to GetObjectDefMaxArgs
-        int TotalArgs(0);        // argument for call to GetObjectDefMaxArgs
-        int alphaOffset(0);
-        std::string objNameMsg;
+
         Array1D_string cAlphaFieldNames;
         Array1D_string cNumericFieldNames;
         Array1D_bool lNumericFieldBlanks;
@@ -208,10 +199,20 @@ namespace WaterManager {
         Array1D_string cAlphaArgs;
         Array1D<Real64> rNumericArgs;
         std::string cCurrentModuleObject;
-        int NumIrrigation;
-        int Dummy;
 
         if ((state.dataWaterManager->MyOneTimeFlag) && (!(state.dataWaterData->WaterSystemGetInputCalled))) { // big block for entire subroutine
+
+            int Item;                // Item to be "gotten"
+            int NumAlphas(0);        // Number of Alphas for each GetObjectItem call
+            int NumNumbers(0);       // Number of Numbers for each GetObjectItem call
+            int IOStatus(0);         // Used in GetObjectItem
+            bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
+            int MaxNumAlphas(0);     // argument for call to GetObjectDefMaxArgs
+            int MaxNumNumbers(0);    // argument for call to GetObjectDefMaxArgs
+            int TotalArgs(0);        // argument for call to GetObjectDefMaxArgs
+            std::string objNameMsg;
+            int NumIrrigation;
+
             // initialize rainfall model
             state.dataWaterData->RainFall.ModeID = RainfallMode::None;
 
@@ -473,7 +474,7 @@ namespace WaterManager {
                     }
 
                     // number of surfaces is extensible and = NumAlphas - alphaOffset
-                    alphaOffset = 4; // update this if more alphas inserted ahead of extensible surface listing
+                    int alphaOffset = 4; // update this if more alphas inserted ahead of extensible surface listing
                     state.dataWaterData->RainCollector(Item).NumCollectSurfs = NumAlphas - alphaOffset;
                     state.dataWaterData->RainCollector(Item).SurfName.allocate(state.dataWaterData->RainCollector(Item).NumCollectSurfs);
                     state.dataWaterData->RainCollector(Item).SurfID.allocate(state.dataWaterData->RainCollector(Item).NumCollectSurfs);
@@ -603,6 +604,7 @@ namespace WaterManager {
                     // setup tanks whose level is controlled by supply from another tank
                     if ((state.dataWaterData->WaterStorage(Item).ControlSupply == ControlSupplyType::OtherTankFloatValve) ||
                         (state.dataWaterData->WaterStorage(Item).ControlSupply == ControlSupplyType::TankMainsBackup)) {
+                        int Dummy;
                         state.dataWaterData->WaterStorage(Item).SupplyTankID =
                             Util::FindItemInList(state.dataWaterData->WaterStorage(Item).SupplyTankName, state.dataWaterData->WaterStorage);
                         if (state.dataWaterData->WaterStorage(Item).SupplyTankID == 0) {

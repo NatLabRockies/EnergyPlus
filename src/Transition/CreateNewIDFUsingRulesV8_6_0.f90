@@ -741,7 +741,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                       OutArgs(1) = TRIM(InArgs(1)) // '_DaylCtrl'
                      ENDIF
                   ENDIF
-                  
+
                   IF (SameString(InArgs(2),'Daylighting Lighting Power Multiplier')) THEN
                     DO iRefPt = 1,NumDElightRefPt
                       IF (MakeUPPERCase(InArgs(1)) == MakeUPPERCase(DElightRefPt(iRefPt)%ZoneName)) THEN
@@ -755,7 +755,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                   ENDIF
                 ENDIF
 
-                
+
 
                 CALL ScanOutputVariablesForReplacement(  &
                    2,  &

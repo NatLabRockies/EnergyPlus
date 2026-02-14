@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -752,10 +752,10 @@ void RegisterNodeConnection(EnergyPlusData &state,
             }
 
             // Check out AirTerminal inlet/outlet nodes
-            bool Found = Util::FindItemInList(NodeName,
-                                              state.dataBranchNodeConnections->AirTerminalNodeConnections,
-                                              &EqNodeConnectionDef::NodeName,
-                                              state.dataBranchNodeConnections->NumOfAirTerminalNodes - 1);
+            int Found = Util::FindItemInList(NodeName,
+                                             state.dataBranchNodeConnections->AirTerminalNodeConnections,
+                                             &EqNodeConnectionDef::NodeName,
+                                             state.dataBranchNodeConnections->NumOfAirTerminalNodes - 1);
             if (Found != 0) { // Nodename already used
                 ShowSevereError(state, fmt::format("{}{}=\"{}\" node name duplicated", RoutineName, ObjectType, ObjectName));
                 ShowContinueError(state, format("NodeName=\"{}\", entered as type={}", NodeName, conTypeStr));
@@ -2081,8 +2081,9 @@ void SetUpCompSets(EnergyPlusData &state,
             if (InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) {
                 continue;
                 // If parent type is undefined then no error
-            } else if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
-                       (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
+            }
+            if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
+                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
                 // If node name is undefined then no error
             } else if (InletNode != undefined) {
                 // If the matching node name does not belong to the parent or child object, then error
@@ -2132,8 +2133,9 @@ void SetUpCompSets(EnergyPlusData &state,
             if (OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) {
                 continue;
                 // If parent type is undefined then no error
-            } else if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
-                       (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
+            }
+            if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
+                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
                 // If node name is undefined then no error
             } else if (OutletNode != undefined) {
                 if ((ParentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) &&

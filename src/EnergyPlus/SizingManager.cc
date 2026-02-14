@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -755,9 +755,8 @@ bool CalcdoLoadComponentPulseNow(EnergyPlusData const &state,
     if ((isPulseZoneSizing) && (!WarmupFlag) && (HourOfDay == HourDayToPulse) && (TimeStep == TimeStepToPulse) &&
         ((KindOfSim == Constant::KindOfSim::RunPeriodDesign) || (state.dataGlobal->DayOfSim == 1))) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void ManageSystemSizingAdjustments(EnergyPlusData &state)
@@ -3274,7 +3273,7 @@ void GetZoneSizingInput(EnergyPlusData &state)
                                             state.dataIPShortCut->cAlphaFieldNames(14),
                                             state.dataIPShortCut->cAlphaArgs(14),
                                             "Schedule will not be used and simulation continues.");
-                } else if (zoneSizingIndex.zoneRHDehumidifySched) {
+                } else if (zoneSizingIndex.zoneRHDehumidifySched != nullptr) {
                     // check max and min of each schedule and compare RHHumidify > RHDehumidify and warn
                     Real64 maxHumidify = zoneSizingIndex.zoneRHHumidifySched->getMaxVal(state);
                     Real64 minDehumidify = zoneSizingIndex.zoneRHDehumidifySched->getMinVal(state);

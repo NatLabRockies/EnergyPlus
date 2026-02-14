@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1978,7 +1978,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionSwitchTest)
     state->dataIPShortCut->lAlphaFieldBlanks = true;
 
     std::string const idf_objects = delimited_string({
-        "Version,9.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  SimulationControl,",
         "    No,                      !- Do Zone Sizing Calculation",
         "    No,                      !- Do System Sizing Calculation",
@@ -2175,6 +2175,228 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionSwitchTest)
     SimulationManager::ManageSimulation(*state);
 
     int surfNum = Util::FindItemInList("FENESTRATIONSURFACE", state->dataSurface->Surface);
+    EXPECT_EQ(state->dataSurface->Surface(surfNum).Construction, state->dataSurface->SurfEMSConstructionOverrideValue(surfNum));
+    EXPECT_TRUE(state->dataSurface->SurfEMSConstructionOverrideON(surfNum));
+}
+
+TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionSwitchTestCondFD)
+{
+    state->dataIPShortCut->lAlphaFieldBlanks = true;
+
+    std::string const idf_objects = delimited_string({
+        "Version," + DataStringGlobals::MatchVersion + ";",
+
+        "SimulationControl,",
+        "  No,                                     !- Do Zone Sizing Calculation",
+        "  No,                                     !- Do System Sizing Calculation",
+        "  No,                                     !- Do Plant Sizing Calculation",
+        "  Yes,                                    !- Run Simulation for Sizing Periods",
+        "  No;                                     !- Run Simulation for Weather File Run Periods",
+
+        "SizingPeriod:DesignDay,",
+        "  SunnyWinterDay,                         !- Name",
+        "  1,                                      !- Month",
+        "  21,                                     !- Day of Month",
+        "  WinterDesignDay,                        !- Day Type",
+        "  5.0,                                    !- Maximum Dry-Bulb Temperature {C}",
+        "  0.0,                                    !- Daily Dry-Bulb Temperature Range {deltaC}",
+        "  ,                                       !- Dry-Bulb Temperature Range Modifier Type",
+        "  ,                                       !- Dry-Bulb Temperature Range Modifier Day Schedule Name",
+        "  Wetbulb,                                !- Humidity Condition Type",
+        "  4.0,                                    !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}",
+        "  ,                                       !- Humidity Condition Day Schedule Name",
+        "  ,                                       !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}",
+        "  ,                                       !- Enthalpy at Maximum Dry-Bulb {J/kg}",
+        "  ,                                       !- Daily Wet-Bulb Temperature Range {deltaC}",
+        "  83411.,                                 !- Barometric Pressure {Pa}",
+        "  4,                                      !- Wind Speed {m/s}",
+        "  120,                                    !- Wind Direction {deg}",
+        "  No,                                     !- Rain Indicator",
+        "  No,                                     !- Snow Indicator",
+        "  No,                                     !- Daylight Saving Time Indicator",
+        "  ASHRAEClearSky,                         !- Solar Model Indicator",
+        "  ,                                       !- Beam Solar Day Schedule Name",
+        "  ,                                       !- Diffuse Solar Day Schedule Name",
+        "  ,                                       !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}",
+        "  ,                                       !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}",
+        "  1.00;                                   !- Sky Clearness",
+
+        "Site:Location,",
+        "  Denver Stapleton Intl Arpt CO USA,      !- Name",
+        "  39.77,                                  !- Latitude {deg}",
+        "  -104.87,                                !- Longitude {deg}",
+        "  -7.00,                                  !- Time Zone {hr}",
+        "  1611.00;                                !- Elevation {m}",
+
+        "HeatBalanceAlgorithm,",
+        "  ConductionTransferFunction,             !- Algorithm",
+        "  200;                                    !- Surface Temperature Upper Limit {C}",
+
+        "HeatBalanceSettings:ConductionFiniteDifference,",
+        "  ,                                       !- Difference Scheme",
+        "  3.0,                                    !- Space Discretization Constant",
+        "  1.0,                                    !- Relaxation Factor",
+        "  0.002;                                  !- Inside Face Surface Temperature Convergence Criteria",
+
+        "Zone,",
+        "  Zone1,                                  !- Name",
+        "  ,                                       !- Direction of Relative North {deg}",
+        "  0,                                      !- X Origin {m}",
+        "  0,                                      !- Y Origin {m}",
+        "  0,                                      !- Z Origin {m}",
+        "  ,                                       !- Type",
+        "  1,                                      !- Multiplier",
+        "  3,                                      !- Ceiling Height {m}",
+        "  27,                                     !- Volume {m3}",
+        "  ,                                       !- Floor Area {m2}",
+        "  ,                                       !- Zone Inside Convection Algorithm",
+        "  ,                                       !- Zone Outside Convection Algorithm",
+        "  Yes;                                    !- Part of Total Floor Area",
+
+        "BuildingSurface:Detailed,",
+        "  Surface1,                               !- Name",
+        "  Wall,                                   !- Surface Type",
+        "  WallPcmInternal,                        !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  0, 3, 3,                                !- X,Y,Z Vertex 1 {m}",
+        "  0, 3, 0,                                !- X,Y,Z Vertex 2 {m}",
+        "  0, 0, 0,                                !- X,Y,Z Vertex 3 {m}",
+        "  0, 0, 3;                                !- X,Y,Z Vertex 4 {m}",
+
+        "Construction,",
+        "  WallPcmInternal,                        !- Name",
+        "  PLA+,                                   !- Layer 1",
+        "  EPSInsulation,                          !- Layer 2",
+        "  PLA+,                                   !- Layer 3",
+        "  PCM,                                    !- Layer 4",
+        "  PLA+,                                   !- Layer 5",
+        "  AirGap,                                 !- Layer 6",
+        "  Brick;                                  !- Layer 7",
+
+        "Construction,",
+        "  WallPcmExternal,                        !- Name",
+        "  PLA+,                                   !- Layer 1",
+        "  PCM,                                    !- Layer 2",
+        "  PLA+,                                   !- Layer 3",
+        "  EPSInsulation,                          !- Layer 4",
+        "  PLA+,                                   !- Layer 5",
+        "  AirGap,                                 !- Layer 6",
+        "  Brick;                                  !- Layer 7",
+
+        "Material,",
+        "  PLA+,                                   !- Name",
+        "  MediumRough,                            !- Roughness",
+        "  0.001,                                  !- Thickness {m}",
+        "  0.13,                                   !- Conductivity {W/m-K}",
+        "  1240.0,                                 !- Density {kg/m3}",
+        "  1800.0,                                 !- Specific Heat {J/kg-K}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "Material,",
+        "  EPSInsulation,                          !- Name",
+        "  MediumRough,                            !- Roughness",
+        "  0.04,                                   !- Thickness {m}",
+        "  0.039,                                  !- Conductivity {W/m-K}",
+        "  30.0,                                   !- Density {kg/m3}",
+        "  1200.0,                                 !- Specific Heat {J/kg-K}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "Material:NoMass,",
+        "  AirGap,                                 !- Name",
+        "  Smooth,                                 !- Roughness",
+        "  0.149925037481,                         !- R-Value {m2-K/W}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "Material,",
+        "  Brick,                                  !- Name",
+        "  MediumRough,                            !- Roughness",
+        "  0.15,                                   !- Thickness {m}",
+        "  0.84,                                   !- Conductivity {W/m-K}",
+        "  1700,                                   !- Density {kg/m3}",
+        "  800,                                    !- Specific Heat {J/kg-K}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "Material,",
+        "  PCM,                                    !- Name",
+        "  MediumRough,                            !- Roughness",
+        "  0.15,                                   !- Thickness {m}",
+        "  0.84,                                   !- Conductivity {W/m-K}",
+        "  1700,                                   !- Density {kg/m3}",
+        "  800,                                    !- Specific Heat {J/kg-K}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "MaterialProperty:PhaseChangeHysteresis,",
+        "  PCM,                                    !- Name",
+        "  190000,                                 !- Latent Heat of Fusion {J/kg}",
+        "  0.24,                                   !- Liquid State Thermal Conductivity {W/m-K}",
+        "  820,                                    !- Liquid State Density {kg/m3}",
+        "  2400,                                   !- Liquid State Specific Heat {J/kg-K}",
+        "  1.5,                                    !- High Temperature Difference of Melting Curve {deltaC}",
+        "  55,                                     !- Peak Melting Temperature {C}",
+        "  1.5,                                    !- Low Temperature Difference of Melting Curve {deltaC}",
+        "  0.21,                                   !- Solid State Thermal Conductivity {W/m-K}",
+        "  900,                                    !- Solid State Density {kg/m3}",
+        "  2100,                                   !- Solid State Specific Heat {J/kg-K}",
+        "  1.5,                                    !- High Temperature Difference of Freezing Curve {deltaC}",
+        "  43.0,                                   !- Peak Freezing Temperature {C}",
+        "  1.5;                                    !- Low Temperature Difference of Freezing Curve {deltaC}",
+
+        "SurfaceProperty:HeatTransferAlgorithm:Construction,",
+        "  WallPcmInternal Heat Transfer,          !- Name",
+        "  ConductionFiniteDifference,             !- Algorithm",
+        "  WallPcmInternal;                        !- Construction Name",
+
+        "SurfaceProperty:HeatTransferAlgorithm:Construction,",
+        "  WallPcmExternal Heat Transfer,          !- Name",
+        "  ConductionFiniteDifference,             !- Algorithm",
+        "  WallPcmExternal;                        !- Construction Name",
+
+        "EnergyManagementSystem:ConstructionIndexVariable,",
+        "  VarWallPcmInternal,                     !- Name",
+        "  WallPcmInternal;                        !- Construction Object Name",
+
+        "EnergyManagementSystem:ConstructionIndexVariable,",
+        "  VarWallPcmExternal,                     !- Name",
+        "  WallPcmExternal;                        !- Construction Object Name",
+
+        "EnergyManagementSystem:Actuator,",
+        "  Actuator1,                              !- Name",
+        "  Surface1,                               !- Actuated Component Unique Name",
+        "  Surface,                                !- Actuated Component Type",
+        "  Construction State;                     !- Actuated Component Control Type",
+
+        "EnergyManagementSystem:ProgramCallingManager,",
+        "  Manager1,                               !- Name",
+        "  BeginNewEnvironment,                    !- Calling Point",
+        "  Program1;                               !- Program Name",
+
+        "EnergyManagementSystem:Program,",
+        "  Program1,                               !- Name",
+        "  SET Actuator1 = VarWallPcmExternal;     !- Program Line",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    SimulationManager::ManageSimulation(*state);
+
+    int surfNum = Util::FindItemInList("SURFACE1", state->dataSurface->Surface);
     EXPECT_EQ(state->dataSurface->Surface(surfNum).Construction, state->dataSurface->SurfEMSConstructionOverrideValue(surfNum));
     EXPECT_TRUE(state->dataSurface->SurfEMSConstructionOverrideON(surfNum));
 }

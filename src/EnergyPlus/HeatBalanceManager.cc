@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1341,7 +1341,7 @@ namespace HeatBalanceManager {
         static constexpr std::string_view routineName = "GetConstructData";
 
         // If UniqueConstructionNames size, then input has already been gotten
-        if (state.dataHeatBalMgr->UniqueConstructNames.size()) {
+        if (!state.dataHeatBalMgr->UniqueConstructNames.empty()) {
             return;
         }
 
@@ -1698,7 +1698,6 @@ namespace HeatBalanceManager {
                     if (ConstructNumAlpha <= 2) {
 
                     } else {
-                        auto const *mat = s_mat->materials(state.dataConstruction->Construct(TotRegConstructs + ConstrNum).LayerPoint(Layer));
                         state.dataHeatBal->NominalRforNominalUCalculation(TotRegConstructs + ConstrNum) += mat->NominalR;
                     }
                 }
@@ -1752,7 +1751,7 @@ namespace HeatBalanceManager {
             // frame or divider.)
 
             fs::path window5DataFilePath;
-            if (ConstructAlphas(1) == "") {
+            if (ConstructAlphas(1).empty()) {
                 window5DataFilePath = state.dataStrGlobals->CurrentWorkingFolder / "Window5DataFile.dat";
             } else {
                 window5DataFilePath = ConstructAlphas(1);
@@ -1774,15 +1773,15 @@ namespace HeatBalanceManager {
         WConstructNames.deallocate();
 
         // set some (default) properties of the Construction Derived Type
-        for (int ConstrNum = 1; ConstrNum <= state.dataHeatBal->TotConstructs; ++ConstrNum) {
+        for (int ConstrIndex = 1; ConstrIndex <= state.dataHeatBal->TotConstructs; ++ConstrIndex) {
 
-            auto &thisConstruct = state.dataConstruction->Construct(ConstrNum);
+            auto &thisConstruct = state.dataConstruction->Construct(ConstrIndex);
             // For air boundaries, skip TypeIsAirBoundary
             if (thisConstruct.TypeIsAirBoundary) {
                 continue;
             }
-            if (state.dataHeatBal->NominalRforNominalUCalculation(ConstrNum) != 0.0) {
-                state.dataHeatBal->NominalU(ConstrNum) = 1.0 / state.dataHeatBal->NominalRforNominalUCalculation(ConstrNum);
+            if (state.dataHeatBal->NominalRforNominalUCalculation(ConstrIndex) != 0.0) {
+                state.dataHeatBal->NominalU(ConstrIndex) = 1.0 / state.dataHeatBal->NominalRforNominalUCalculation(ConstrIndex);
             } else {
                 if (!thisConstruct.WindowTypeEQL) {
                     ShowSevereError(state, format("Nominal U is zero, for construction={}", thisConstruct.Name));
@@ -1790,7 +1789,7 @@ namespace HeatBalanceManager {
                 }
             }
 
-            DataHeatBalance::CheckAndSetConstructionProperties(state, ConstrNum, ErrorsFound);
+            DataHeatBalance::CheckAndSetConstructionProperties(state, ConstrIndex, ErrorsFound);
 
         } // End of ConstrNum DO loop
     }

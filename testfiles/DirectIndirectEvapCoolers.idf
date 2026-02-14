@@ -2,9 +2,7 @@
 !-Option OriginalOrderTop UseSpecialFormat
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
-! Start SimMetaData
 ! WeatherFileName=USA_AZ_Phoenix_TMY2.epw
-! End SimMetaData
 !
 ! DirectIndirectEvapCoolers.idf
 ! Basic file description:  1 story building divided into 4 zones.
@@ -73,7 +71,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     barracks2,               !- Name

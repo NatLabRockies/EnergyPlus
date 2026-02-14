@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -99,7 +99,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
 
     state->afn->node_states.clear();
     for (int it = 0; it < 2; ++it) {
-        state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+        state->afn->node_states.emplace_back(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0));
     }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.18;
@@ -118,14 +118,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
     Real64 control = 1.0;
 
     NF = state->afn->MultizoneCompHorOpeningData(1).calculate(
-        *state, 1, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(3.47863, F[0], 0.00001);
     EXPECT_NEAR(34.7863, DF[0], 0.0001);
     EXPECT_NEAR(2.96657, F[1], 0.00001);
     EXPECT_EQ(0.0, DF[1]);
 
     NF = state->afn->MultizoneCompHorOpeningData(1).calculate(
-        *state, 1, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(-3.42065, F[0], 0.00001);
     EXPECT_NEAR(34.20649, DF[0], 0.0001);
     EXPECT_NEAR(2.96657, F[1], 0.00001);
@@ -154,7 +154,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_Coil)
 
     state->afn->node_states.clear();
     for (int it = 0; it < 2; ++it) {
-        state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+        state->afn->node_states.emplace_back(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0));
     }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.2;
@@ -168,14 +168,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_Coil)
     Real64 control = 1.0;
 
     NF = state->afn->DisSysCompCoilData[0].calculate(
-        *state, 1, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(-294.5243112740431, F[0], 0.00001);
     EXPECT_NEAR(5890.4862254808613, DF[0], 0.0001);
     EXPECT_EQ(0.0, F[1]);
     EXPECT_EQ(0.0, DF[1]);
 
     NF = state->afn->DisSysCompCoilData[0].calculate(
-        *state, 1, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(294.5243112740431, F[0], 0.00001);
     EXPECT_NEAR(5890.4862254808613, DF[0], 0.0001);
     EXPECT_EQ(0.0, F[1]);

@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -76,7 +76,9 @@ class CalculateAverageTrend(EnergyPlusPlugin):
                 handle = self.api.exchange.get_internal_variable_handle(state, "Zone Air Volume", zone_name)
                 zone_volume = self.api.exchange.get_internal_variable_value(state, handle)
                 self.zone_volumes.append(zone_volume)
-                self.t_handles.append(self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", zone_name))
+                self.t_handles.append(
+                    self.api.exchange.get_variable_handle(state, "Zone Mean Air Temperature", zone_name)
+                )
             self.avg_temp_variable_handle = self.api.exchange.get_global_handle(state, "AverageBuildingTemp")
             self.trend_avg_var_handle = self.api.exchange.get_global_handle(state, "TrendAverageTemp")
             self.one_time = False

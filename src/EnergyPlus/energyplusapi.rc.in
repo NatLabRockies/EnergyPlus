@@ -11,7 +11,7 @@ BEGIN
             VALUE "FileDescription",  "EnergyPlus API\0"
             VALUE "FileVersion",      "${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}\0"
             VALUE "InternalName",     "energyplusapi\0"
-            VALUE "LegalCopyright",   "Copyright (c) 1996-${CMAKE_YEAR}, The Board of Trustees of the University of Illinois, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All rights reserved.\0"
+            VALUE "LegalCopyright",   "Copyright (c) 1996-${CMAKE_YEAR}, The Board of Trustees of the University of Illinois, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other contributors. All rights reserved.\0"
             VALUE "LegalTrademarks",  "EnergyPlus (TM) is a trademark of the US Department of Energy.\0"
             VALUE "OriginalFilename", "energyplusapi.dll\0"
             VALUE "ProductName",      "EnergyPlus\0"

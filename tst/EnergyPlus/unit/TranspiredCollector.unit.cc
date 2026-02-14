@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,7 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
+#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
@@ -62,7 +63,6 @@
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/Psychrometrics.hh>
-#include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/TranspiredCollector.hh>
 

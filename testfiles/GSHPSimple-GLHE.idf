@@ -26,7 +26,7 @@
 !           tries to meet the load.
 ! SolDis=FullInteriorAndExterior, Aniso, Detailed Interior and Exterior Convection
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 

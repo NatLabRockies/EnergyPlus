@@ -26,20 +26,20 @@ https://github.com/JasonGlazer/createRulesetProjectDescription
 
 The title, purpose, and scope of ASHRAE Standard 229 are:
 
-Title: 
+Title:
 
 - Protocols for Evaluating Ruleset Application in Building Performance Models
 
-Purpose: 
+Purpose:
 
-- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building 
+- This standard establishes tests and acceptance criteria for application of rulesets and related reporting for building
 performance models.
 
 Scope:
 
-- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their 
-systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:  
-- 2.1 building performance modeling software    
+- This standard applies to evaluation of the implementation of rulesets associated with new or existing buildings, their
+systems, controls, sites, and other aspects described by the ruleset. It establishes requirements for:
+- 2.1 building performance modeling software
 - 2.2 software that evaluates building performance models and associated information to check the application of a ruleset
 
 ASHRAE Standard 229 has not been published and is under development by the ASHRAE SPC 229P committee. The first public
@@ -50,7 +50,7 @@ Ruleset Checking Tool (currently, an example is under development at PNNL) to au
 90.1 Appendix G, RESNET, California Title 24 performance paths, or Canada National Energy Code for Buildings performance
 path) has been implemented correctly. Since each EnergyPlus IDF file could generate an RPD file, the Ruleset Checking
 Tool will be able to see if the changes between the RPD files correspond to rules in the ruleset by looking at both the
-baseline and proposed RPD file. 
+baseline and proposed RPD file.
 
 The schema is described here:
 
@@ -94,11 +94,11 @@ borrowed.
 Since this NFP builds on the efforts described in previous NFPs, some details are skipped that are already described in
 those earlier NFPs:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2023/NFP-RulesetModelDescriptionPhase2.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2023/NFP-RulesetModelDescriptionPhase2.md
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2024/NFP-RulesetModelDescriptionPhase3.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2024/NFP-RulesetModelDescriptionPhase3.md
 
 Some lessons learned from the initial effort in 2022 are described here:
 
@@ -206,7 +206,7 @@ additional programming in createRPD.
 
 Data Elements that Require New Outputs from EnergyPlus
 ------------------------------------------------------
-The following list was updated July 9 when we had a shift to focus on EnergyPlus table enhancements. The 
+The following list was updated July 9 when we had a shift to focus on EnergyPlus table enhancements. The
 list was redone to include all data elements used by the PNNL RCT for 90.1-2019 appendix G based on RDS.
 This included service water heating and refrigation.
 
@@ -558,7 +558,7 @@ The current columns are:
 
 The new columns would be:
 - AirLoop Name^ (not done because connection alreaady appears in HVAC Topology)
-- AirLoopHVAC:OutdoorAirSystem Name^ 
+- AirLoopHVAC:OutdoorAirSystem Name^
 
 This suppports (indirectly):
 - AirEconomizer.id
@@ -609,7 +609,7 @@ This suppports:
 - FluidLoopDesignAndControl.outdoor_low_for_loop_supply_reset_temperature
 - FluidLoopDesignAndControl.loop_supply_temperature_at_outdoor_high
 - FluidLoopDesignAndControl.loop_supply_temperature_at_outdoor_low
-- FluidLoopDesignAndControl.temperature_reset_type (OUTSIDE_AIR_RESET) 
+- FluidLoopDesignAndControl.temperature_reset_type (OUTSIDE_AIR_RESET)
 
 #### Controls Summary - SetpointManager:ReturnTemperature ####
 
@@ -626,7 +626,7 @@ The new columns would be:
 
 This suppports:
 - FluidLoopDesignAndControl.loop_supply_temperature_at_low_load
-- FluidLoopDesignAndControl.temperature_reset_type (LOAD_RESET) 
+- FluidLoopDesignAndControl.temperature_reset_type (LOAD_RESET)
 
 
 #### System Summary - Demand Controlled Ventilation using Controller:MechanicalVentilation ####
@@ -651,9 +651,9 @@ This suppports:
 - Terminal.has_demand_control_ventilation
 
 
-#### Controls Summary - AvailabilityManager:Scheduled #### 
+#### Controls Summary - AvailabilityManager:Scheduled ####
 
-New Table 
+New Table
 
 The new columns would be:
 - Name%
@@ -666,7 +666,7 @@ This suppports:
 
 Covers AvailabilityManager:Scheduled, AvailabilityManager:ScheduledOn, AvailabilityManager:ScheduledOff
 
-Note: Hours Supply Fan Operating Mode Cycling was previously part of this planned table but it seems to be 
+Note: Hours Supply Fan Operating Mode Cycling was previously part of this planned table but it seems to be
 covered separately by new System Summary - Fan Operation report under MJW PR#11138.
 
 
@@ -708,7 +708,7 @@ The current columns are:
 - Storage Volume [m3]
 - Input [W]
 - Thermal Efficiency [W/W]
-- Recovery Efficiency [W/W] 
+- Recovery Efficiency [W/W]
 - Energy Factor
 
 The new columns would be:
@@ -716,7 +716,7 @@ The new columns would be:
 - Daytime Setpoint Temperature^
 - Draw pattern (this is a new input for Uniform Energy Factor calculation)
 - Uniform Energy Factor^ (this will require new calculations and new input)
-- Standby Loss Fraction^ (not needed by 90.1) 
+- Standby Loss Fraction^ (not needed by 90.1)
 - Standby Loss Energy^ (not needed by 90.1)
 - First hour rating^ (not needed by 90.1)
 - Peak Use Flow Rate% (for water heaters in stand-alone operation)
@@ -735,11 +735,11 @@ This suppports:
 - ServiceWaterHeatingUse.use_units (in stand-alone operation)
 - ServiceWaterHeatingUse.use_multiplier_schedule (in stand-alone operation)
 
-Note: Recovery Efficiency and Energy Factor do not seem to be working for WaterHeater:Stratified. Uniform 
+Note: Recovery Efficiency and Energy Factor do not seem to be working for WaterHeater:Stratified. Uniform
 Energy Factor calculation would need to be added which, I believe uses draw factor as an input.
-(For Peak Use Flow Rate need to add some Output:Table:Annual reports when water use equipment/connections 
+(For Peak Use Flow Rate need to add some Output:Table:Annual reports when water use equipment/connections
 are used see https://github.com/JasonGlazer/createRulesetProjectDescription/issues/77)
- 
+
 
 #### EquipmentSummary -  Water Use Equipment ####
 
@@ -792,8 +792,8 @@ This suppports:
 - ServiceWaterPiping.id
 - ServiceWaterPiping.are_thermal_losses_modeled
 
-(Note Pipe:Indoor, Pipe:Outdoor, Pipe:Underground, PipingSystem:Underground:PipeCircuit were not 
-added to the report since they are in the HVAC Topology report - if present. So this report just 
+(Note Pipe:Indoor, Pipe:Outdoor, Pipe:Underground, PipingSystem:Underground:PipeCircuit were not
+added to the report since they are in the HVAC Topology report - if present. So this report just
 has the PlantLoop and Branch Names)
 
 #### EquipmentSummary -  Refrigeration:Case ####
@@ -811,7 +811,7 @@ The new columns would be:
 
 This suppports:
 - Building.refrigerated_cases
-- RefrigeratedCase.id 
+- RefrigeratedCase.id
 
 #### Envelope Summary - At or Below Grade Constructions ####
 
@@ -823,7 +823,7 @@ The new columns would be:
 - C-Factor^
 - F-Factor^
 
-(note the calculation of these may require additional inputs for all the different ways to 
+(note the calculation of these may require additional inputs for all the different ways to
 describe slab-on-grade and below-grade surfaces)
 
 This suppports:
@@ -850,7 +850,7 @@ This suppports:
 - Schedule.hourly_heating_design_day
 - Schedule.hourly_cooling_design_day
 
-(this change is not needed with a fix to the EIO/Schedule-Hourly table) 
+(this change is not needed with a fix to the EIO/Schedule-Hourly table)
 
 #### report name - table name ####
 
@@ -868,15 +868,15 @@ This suppports:
 In order fill in any gaps that might have been found, a new output object is recommended
 
 Output:Table:InputEcho
-- Input Object Name 
+- Input Object Name
 - Show number of extensible sets of fields
- 
+
 These would appear in a new report called "InputEcho" which would simply echo the input from the IDF or epJSON
-file into the output. A table for each type of input object. Within each table, one column for each field. For 
+file into the output. A table for each type of input object. Within each table, one column for each field. For
 extensible input objects it would be specified by user how many to produce
 
 A second table would be created that would show uses of the each input object and would contain:
-- Input Object Name 
+- Input Object Name
 - Used by Input Object Class
 - Used by Input Object Name
 - Used by Object Field Name
@@ -889,7 +889,7 @@ This new input echo report may not be necessary if reading the epJSON is done in
 
 Add a switch to disable rounding or truncating digits for tabular reports.
 
-https://github.com/NREL/EnergyPlus/issues/10896
+https://github.com/NatLabRockies/EnergyPlus/issues/10896
 
 The Equipment Summary - Air Heat Recovery table does not show the input object type and should instead just shows
 "generic" for each one, and the outdoor and exhaust airflow columns show zeros for some example files (not yet posted).
@@ -959,15 +959,15 @@ previous work and will continue to include unit tests. This includes:
 
 The original NFP is here:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2022/NFP-InitialRulesetModelDescription.md
 
 The 2023 NFP is here:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2023/NFP-RulesetModelDescriptionPhase2.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2023/NFP-RulesetModelDescriptionPhase2.md
 
 The 2023 NFP is here:
 
-https://github.com/NREL/EnergyPlus/blob/develop/design/FY2024/NFP-RulesetModelDescriptionPhase3.md
+https://github.com/NatLabRockies/EnergyPlus/blob/develop/design/FY2024/NFP-RulesetModelDescriptionPhase3.md
 
 The repo for the script development is here:
 

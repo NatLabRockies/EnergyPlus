@@ -2,7 +2,7 @@ VERSION 5.00
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
-Begin VB.Form IDFEdit 
+Begin VB.Form IDFEdit
    Caption         =   "IDF Edit"
    ClientHeight    =   7275
    ClientLeft      =   150
@@ -13,7 +13,7 @@ Begin VB.Form IDFEdit
    MDIChild        =   -1  'True
    ScaleHeight     =   7275
    ScaleWidth      =   10035
-   Begin VB.CommandButton cmdDuplicateObjectAndChange 
+   Begin VB.CommandButton cmdDuplicateObjectAndChange
       Caption         =   "Dup Obj + Chg"
       Height          =   330
       Left            =   3120
@@ -21,12 +21,12 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   1260
    End
-   Begin VB.Timer timerJumpList 
+   Begin VB.Timer timerJumpList
       Interval        =   100
       Left            =   1680
       Top             =   480
    End
-   Begin VB.ComboBox cboClassCategories 
+   Begin VB.ComboBox cboClassCategories
       BackColor       =   &H00E1FFFF&
       Height          =   315
       Left            =   135
@@ -36,7 +36,7 @@ Begin VB.Form IDFEdit
       Top             =   870
       Width           =   4980
    End
-   Begin VB.ComboBox cboClasses 
+   Begin VB.ComboBox cboClasses
       BackColor       =   &H00E1FFFF&
       Height          =   315
       Left            =   135
@@ -46,12 +46,12 @@ Begin VB.Form IDFEdit
       Top             =   1305
       Width           =   4950
    End
-   Begin VB.Timer mainTimer 
+   Begin VB.Timer mainTimer
       Interval        =   500
       Left            =   8520
       Top             =   480
    End
-   Begin VB.PictureBox picRightSplitter 
+   Begin VB.PictureBox picRightSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -67,7 +67,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   135
    End
-   Begin VB.PictureBox picLeftSplitter 
+   Begin VB.PictureBox picLeftSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -83,7 +83,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   135
    End
-   Begin VB.PictureBox picLowerSplitter 
+   Begin VB.PictureBox picLowerSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -99,7 +99,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   2535
    End
-   Begin VB.PictureBox picUpperSplitter 
+   Begin VB.PictureBox picUpperSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -115,7 +115,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   2535
    End
-   Begin VB.CommandButton cmdCopyObject 
+   Begin VB.CommandButton cmdCopyObject
       Caption         =   "Copy Obj"
       Height          =   330
       Left            =   5400
@@ -123,7 +123,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdPasteObject 
+   Begin VB.CommandButton cmdPasteObject
       Caption         =   "Paste Obj"
       Enabled         =   0   'False
       Height          =   330
@@ -132,7 +132,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdNewObject 
+   Begin VB.CommandButton cmdNewObject
       Caption         =   "New Obj"
       Height          =   330
       Left            =   1200
@@ -140,7 +140,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdDuplicateObject 
+   Begin VB.CommandButton cmdDuplicateObject
       Caption         =   "Dup Obj"
       Height          =   330
       Left            =   2160
@@ -148,7 +148,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdDeleteObject 
+   Begin VB.CommandButton cmdDeleteObject
       Caption         =   "Del Obj"
       Height          =   330
       Left            =   4440
@@ -156,7 +156,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin MSComctlLib.ImageList ilToolBar 
+   Begin MSComctlLib.ImageList ilToolBar
       Left            =   7680
       Top             =   480
       _ExtentX        =   1005
@@ -166,59 +166,59 @@ Begin VB.Form IDFEdit
       ImageHeight     =   16
       MaskColor       =   12632256
       _Version        =   393216
-      BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
+      BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628}
          NumListImages   =   12
-         BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":08CA
             Key             =   ""
          EndProperty
-         BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":09DC
             Key             =   ""
          EndProperty
-         BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0AEE
             Key             =   ""
          EndProperty
-         BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0C00
             Key             =   ""
          EndProperty
-         BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0D12
             Key             =   ""
          EndProperty
-         BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0E24
             Key             =   ""
          EndProperty
-         BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0F36
             Key             =   ""
          EndProperty
-         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":1048
             Key             =   ""
          EndProperty
-         BeginProperty ListImage9 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage9 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":115A
             Key             =   ""
          EndProperty
-         BeginProperty ListImage10 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage10 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":12B4
             Key             =   ""
          EndProperty
-         BeginProperty ListImage11 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage11 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":1B8E
             Key             =   ""
          EndProperty
-         BeginProperty ListImage12 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage12 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":2468
             Key             =   ""
          EndProperty
       EndProperty
    End
-   Begin MSComctlLib.Toolbar Toolbar1 
+   Begin MSComctlLib.Toolbar Toolbar1
       Align           =   1  'Align Top
       Height          =   336
       Left            =   0
@@ -233,32 +233,32 @@ Begin VB.Form IDFEdit
       Appearance      =   1
       ImageList       =   "ilToolBar"
       _Version        =   393216
-      BeginProperty Buttons {66833FE8-8583-11D1-B16A-00C0F0283628} 
+      BeginProperty Buttons {66833FE8-8583-11D1-B16A-00C0F0283628}
          NumButtons      =   5
-         BeginProperty Button1 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button1 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Style           =   3
          EndProperty
-         BeginProperty Button2 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button2 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "newIDF"
             Description     =   "New IDF File"
             Object.ToolTipText     =   "Create New IDF File"
             ImageIndex      =   1
          EndProperty
-         BeginProperty Button3 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button3 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "openIDF"
             Object.ToolTipText     =   "Open IDF File"
             ImageIndex      =   2
          EndProperty
-         BeginProperty Button4 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button4 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "saveIDF"
             Object.ToolTipText     =   "Save Current IDF File"
             ImageIndex      =   3
          EndProperty
-         BeginProperty Button5 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button5 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Style           =   3
          EndProperty
       EndProperty
-      Begin VB.Label Label5 
+      Begin VB.Label Label5
          Caption         =   "Object"
          Height          =   255
          Left            =   3960
@@ -266,7 +266,7 @@ Begin VB.Form IDFEdit
          Top             =   2160
          Width           =   1215
       End
-      Begin VB.Label Label4 
+      Begin VB.Label Label4
          Caption         =   "Label4"
          Height          =   255
          Left            =   3360
@@ -275,7 +275,7 @@ Begin VB.Form IDFEdit
          Width           =   1575
       End
    End
-   Begin VSFlex7LCtl.VSFlexGrid grdNew 
+   Begin VSFlex7LCtl.VSFlexGrid grdNew
       Height          =   2415
       Left            =   120
       TabIndex        =   14
@@ -287,7 +287,7 @@ Begin VB.Form IDFEdit
       Appearance      =   1
       BorderStyle     =   1
       Enabled         =   -1  'True
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851}
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -366,14 +366,14 @@ Begin VB.Form IDFEdit
       ForeColorFrozen =   0
       WallPaperAlignment=   9
    End
-   Begin MSComDlg.CommonDialog CommonDialog1 
+   Begin MSComDlg.CommonDialog CommonDialog1
       Left            =   6960
       Top             =   480
       _ExtentX        =   847
       _ExtentY        =   847
       _Version        =   393216
    End
-   Begin VB.TextBox txtExplain 
+   Begin VB.TextBox txtExplain
       BackColor       =   &H8000000F&
       Height          =   1575
       Left            =   5280
@@ -384,7 +384,7 @@ Begin VB.Form IDFEdit
       Top             =   2760
       Width           =   4575
    End
-   Begin VB.TextBox txtComment 
+   Begin VB.TextBox txtComment
       BackColor       =   &H00C0C0C0&
       Height          =   1695
       Left            =   5280
@@ -395,42 +395,42 @@ Begin VB.Form IDFEdit
       Top             =   720
       Width           =   4575
    End
-   Begin VB.ListBox lstObjectTypes 
+   Begin VB.ListBox lstObjectTypes
       Height          =   2205
       Left            =   120
       TabIndex        =   9
       Top             =   1725
       Width           =   5055
    End
-   Begin VB.Image imgRightSplitter 
+   Begin VB.Image imgRightSplitter
       Height          =   2295
       Left            =   9840
       MousePointer    =   9  'Size W E
       Top             =   720
       Width           =   135
    End
-   Begin VB.Image imgLeftSplitter 
+   Begin VB.Image imgLeftSplitter
       Height          =   2295
       Left            =   5160
       MousePointer    =   9  'Size W E
       Top             =   720
       Width           =   135
    End
-   Begin VB.Image imgLowerSplitter 
+   Begin VB.Image imgLowerSplitter
       Height          =   135
       Left            =   120
       MousePointer    =   7  'Size N S
       Top             =   4320
       Width           =   6975
    End
-   Begin VB.Image imgUpperSplitter 
+   Begin VB.Image imgUpperSplitter
       Height          =   135
       Left            =   5280
       MousePointer    =   7  'Size N S
       Top             =   2400
       Width           =   1935
    End
-   Begin VB.Label lblExplain 
+   Begin VB.Label lblExplain
       Caption         =   "Explanation of Object and Current Field"
       Height          =   255
       Left            =   5280
@@ -438,7 +438,7 @@ Begin VB.Form IDFEdit
       Top             =   2520
       Width           =   3500
    End
-   Begin VB.Label lblObjectList 
+   Begin VB.Label lblObjectList
       Caption         =   "Class List"
       Height          =   255
       Left            =   120
@@ -446,7 +446,7 @@ Begin VB.Form IDFEdit
       Top             =   480
       Width           =   975
    End
-   Begin VB.Label lblComment 
+   Begin VB.Label lblComment
       Caption         =   "Comments from IDF"
       Height          =   255
       Left            =   5280
@@ -454,363 +454,363 @@ Begin VB.Form IDFEdit
       Top             =   480
       Width           =   1695
    End
-   Begin VB.Menu mnuFileTop 
+   Begin VB.Menu mnuFileTop
       Caption         =   "&File"
-      Begin VB.Menu mnuFileNew 
+      Begin VB.Menu mnuFileNew
          Caption         =   "&New"
          Shortcut        =   ^N
       End
-      Begin VB.Menu mnuFileOpen 
+      Begin VB.Menu mnuFileOpen
          Caption         =   "&Open..."
          Shortcut        =   ^O
       End
-      Begin VB.Menu mnuFileOpenDataSet 
+      Begin VB.Menu mnuFileOpenDataSet
          Caption         =   "Open &DataSet"
-         Begin VB.Menu mnuFileOpenDataSetSub 
+         Begin VB.Menu mnuFileOpenDataSetSub
             Caption         =   "datasetfile"
             Index           =   1
          End
       End
-      Begin VB.Menu mnuFileClose 
+      Begin VB.Menu mnuFileClose
          Caption         =   "&Close"
       End
-      Begin VB.Menu mnuFileSpace1 
+      Begin VB.Menu mnuFileSpace1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileSave 
+      Begin VB.Menu mnuFileSave
          Caption         =   "&Save"
          Enabled         =   0   'False
          Shortcut        =   ^S
       End
-      Begin VB.Menu mnuFileSaveAs 
+      Begin VB.Menu mnuFileSaveAs
          Caption         =   "Save &As..."
       End
-      Begin VB.Menu mnuFileSaveOption 
+      Begin VB.Menu mnuFileSaveOption
          Caption         =   "Sa&ve Options..."
       End
-      Begin VB.Menu mnuFileSpace2 
+      Begin VB.Menu mnuFileSpace2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFilePageSetup 
+      Begin VB.Menu mnuFilePageSetup
          Caption         =   "Page Set&up"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuFilePrint 
+      Begin VB.Menu mnuFilePrint
          Caption         =   "&Print"
          Enabled         =   0   'False
          Shortcut        =   ^P
       End
-      Begin VB.Menu mnuFileSpace3 
+      Begin VB.Menu mnuFileSpace3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru1"
          Index           =   1
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru2"
          Index           =   2
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru3"
          Index           =   3
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru4"
          Index           =   4
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru5"
          Index           =   5
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru6"
          Index           =   6
       End
-      Begin VB.Menu mnuFileSpace4 
+      Begin VB.Menu mnuFileSpace4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileExit 
+      Begin VB.Menu mnuFileExit
          Caption         =   "E&xit"
       End
    End
-   Begin VB.Menu mnuEditTop 
+   Begin VB.Menu mnuEditTop
       Caption         =   "&Edit"
-      Begin VB.Menu mnuEditUndo 
+      Begin VB.Menu mnuEditUndo
          Caption         =   "&Undo"
          Enabled         =   0   'False
          Shortcut        =   ^Z
       End
-      Begin VB.Menu mnuEditRedo 
+      Begin VB.Menu mnuEditRedo
          Caption         =   "Red&o"
          Enabled         =   0   'False
          Shortcut        =   ^Y
       End
-      Begin VB.Menu mnuEditDiv1 
+      Begin VB.Menu mnuEditDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditCut 
+      Begin VB.Menu mnuEditCut
          Caption         =   "Cu&t Object"
          Enabled         =   0   'False
          Shortcut        =   ^X
       End
-      Begin VB.Menu mnuEditCopy 
+      Begin VB.Menu mnuEditCopy
          Caption         =   "&Copy Object"
          Shortcut        =   ^C
       End
-      Begin VB.Menu mnuEditPaste 
+      Begin VB.Menu mnuEditPaste
          Caption         =   "&Paste Object"
          Shortcut        =   ^V
       End
-      Begin VB.Menu mnuEditCopySpread 
+      Begin VB.Menu mnuEditCopySpread
          Caption         =   "Copy for &Spreadsheet"
       End
-      Begin VB.Menu mnuEditDiv4 
+      Begin VB.Menu mnuEditDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditFillRight 
+      Begin VB.Menu mnuEditFillRight
          Caption         =   "Fill Right"
          Shortcut        =   ^D
       End
-      Begin VB.Menu mnuEditDiv2 
+      Begin VB.Menu mnuEditDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditNew 
+      Begin VB.Menu mnuEditNew
          Caption         =   "&New Object"
       End
-      Begin VB.Menu mnuEditDuplicate 
+      Begin VB.Menu mnuEditDuplicate
          Caption         =   "Dup&licate Object"
       End
-      Begin VB.Menu mnuEditDuplicateAndChange 
+      Begin VB.Menu mnuEditDuplicateAndChange
          Caption         =   "Duplicate and Change Object"
       End
-      Begin VB.Menu mnuEditDelete 
+      Begin VB.Menu mnuEditDelete
          Caption         =   "&Delete Object"
       End
-      Begin VB.Menu mnuEditDiv3 
+      Begin VB.Menu mnuEditDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditFind 
+      Begin VB.Menu mnuEditFind
          Caption         =   "Find Class.."
          Shortcut        =   ^F
       End
-      Begin VB.Menu mnuEditFindPrevious 
+      Begin VB.Menu mnuEditFindPrevious
          Caption         =   "Find Previous Class"
          Shortcut        =   ^T
       End
-      Begin VB.Menu mnuEditFindNext 
+      Begin VB.Menu mnuEditFindNext
          Caption         =   "Find Next Class"
          Shortcut        =   ^G
       End
-      Begin VB.Menu mnuEditSearch 
+      Begin VB.Menu mnuEditSearch
          Caption         =   "Search and Replace.."
          Shortcut        =   ^H
       End
-      Begin VB.Menu mnuEditDiv5 
+      Begin VB.Menu mnuEditDiv5
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditNextRowAfterEnter 
+      Begin VB.Menu mnuEditNextRowAfterEnter
          Caption         =   "Next Row after Enter"
          Checked         =   -1  'True
       End
    End
-   Begin VB.Menu mnuViewTop 
+   Begin VB.Menu mnuViewTop
       Caption         =   "&View"
-      Begin VB.Menu mnuViewIP 
+      Begin VB.Menu mnuViewIP
          Caption         =   "&Inch-Pound"
       End
-      Begin VB.Menu mnuViewSi 
+      Begin VB.Menu mnuViewSi
          Caption         =   "&SI Units"
          Checked         =   -1  'True
       End
-      Begin VB.Menu mnuViewDiv1 
+      Begin VB.Menu mnuViewDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewNarrowColumn 
+      Begin VB.Menu mnuViewNarrowColumn
          Caption         =   "&Narrow Column"
       End
-      Begin VB.Menu mnuViewMediumColumn 
+      Begin VB.Menu mnuViewMediumColumn
          Caption         =   "&Medium Column"
       End
-      Begin VB.Menu mnuViewWideColumn 
+      Begin VB.Menu mnuViewWideColumn
          Caption         =   "&Wide Column"
       End
-      Begin VB.Menu mnuViewWider 
+      Begin VB.Menu mnuViewWider
          Caption         =   "W&ider"
-         Begin VB.Menu mnuViewWidth30 
+         Begin VB.Menu mnuViewWidth30
             Caption         =   "30"
          End
-         Begin VB.Menu mnuViewWidth40 
+         Begin VB.Menu mnuViewWidth40
             Caption         =   "40"
          End
-         Begin VB.Menu mnuViewWidth50 
+         Begin VB.Menu mnuViewWidth50
             Caption         =   "50"
          End
-         Begin VB.Menu mnuViewWidth60 
+         Begin VB.Menu mnuViewWidth60
             Caption         =   "60"
          End
-         Begin VB.Menu mnuViewWidth70 
+         Begin VB.Menu mnuViewWidth70
             Caption         =   "70"
          End
-         Begin VB.Menu mnuViewWidth80 
+         Begin VB.Menu mnuViewWidth80
             Caption         =   "80"
          End
-         Begin VB.Menu mnuViewWidth90 
+         Begin VB.Menu mnuViewWidth90
             Caption         =   "90"
          End
       End
-      Begin VB.Menu mnuViewDiv2 
+      Begin VB.Menu mnuViewDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewWordWrap 
+      Begin VB.Menu mnuViewWordWrap
          Caption         =   "Word Wrap"
       End
-      Begin VB.Menu mnuDiv5 
+      Begin VB.Menu mnuDiv5
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewClassesWithObjs 
+      Begin VB.Menu mnuViewClassesWithObjs
          Caption         =   "Show Classes with Objects Only"
          Shortcut        =   ^L
       End
-      Begin VB.Menu mnuQuickSelect 
+      Begin VB.Menu mnuQuickSelect
          Caption         =   "Show Quick Select Dropdowns"
          Checked         =   -1  'True
          Shortcut        =   ^Q
       End
-      Begin VB.Menu mnuDiv7 
+      Begin VB.Menu mnuDiv7
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewUseNodeEditor 
+      Begin VB.Menu mnuViewUseNodeEditor
          Caption         =   "Use Node Name Editor"
          Checked         =   -1  'True
       End
-      Begin VB.Menu mnuDiv3 
+      Begin VB.Menu mnuDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewLayoutOptions 
+      Begin VB.Menu mnuViewLayoutOptions
          Caption         =   "Layout Options.."
       End
-      Begin VB.Menu mnuViewDiv4 
+      Begin VB.Menu mnuViewDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewValidityCheck 
+      Begin VB.Menu mnuViewValidityCheck
          Caption         =   "Validity Check.."
          Shortcut        =   ^R
       End
    End
-   Begin VB.Menu mnuJumpTop 
+   Begin VB.Menu mnuJumpTop
       Caption         =   "&Jump"
-      Begin VB.Menu mnuJumpItem 
+      Begin VB.Menu mnuJumpItem
          Caption         =   "No items"
          Index           =   0
       End
    End
-   Begin VB.Menu mnuWindow 
+   Begin VB.Menu mnuWindow
       Caption         =   "&Window"
       WindowList      =   -1  'True
-      Begin VB.Menu mnuWindowCascade 
+      Begin VB.Menu mnuWindowCascade
          Caption         =   "&Cascade"
       End
-      Begin VB.Menu mnuWindowTileHoriz 
+      Begin VB.Menu mnuWindowTileHoriz
          Caption         =   "Tile &Horizontal"
       End
-      Begin VB.Menu mnuWindowTileVert 
+      Begin VB.Menu mnuWindowTileVert
          Caption         =   "Tile &Vertical"
       End
-      Begin VB.Menu mnuWindowArrange 
+      Begin VB.Menu mnuWindowArrange
          Caption         =   "&Arrange Icons"
       End
    End
-   Begin VB.Menu mnuHelp 
+   Begin VB.Menu mnuHelp
       Caption         =   "&Help"
-      Begin VB.Menu mnuHelpWhatsNew 
+      Begin VB.Menu mnuHelpWhatsNew
          Caption         =   "&Whats New"
       End
-      Begin VB.Menu mnuHelpDiv0 
+      Begin VB.Menu mnuHelpDiv0
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpContents 
+      Begin VB.Menu mnuHelpContents
          Caption         =   "&Contents"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpIndex 
+      Begin VB.Menu mnuHelpIndex
          Caption         =   "&Index"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDocs 
+      Begin VB.Menu mnuHelpDocs
          Caption         =   "&Documentation"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDiv1 
+      Begin VB.Menu mnuHelpDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpQuickStart 
+      Begin VB.Menu mnuHelpQuickStart
          Caption         =   "EnergyPlus QuickStart Webpage"
       End
-      Begin VB.Menu mnuHelpEssentials 
+      Begin VB.Menu mnuHelpEssentials
          Caption         =   "EnergyPlus Essentials"
       End
-      Begin VB.Menu mnuHelpIORef 
+      Begin VB.Menu mnuHelpIORef
          Caption         =   "EnergyPlus I/O Reference"
       End
-      Begin VB.Menu mnuHelpOutDetails 
+      Begin VB.Menu mnuHelpOutDetails
          Caption         =   "EnergyPlus Output Details and Examples"
       End
-      Begin VB.Menu mnuHelpEngRef 
+      Begin VB.Menu mnuHelpEngRef
          Caption         =   "EnergyPlus Engineering Reference"
       End
-      Begin VB.Menu mnuHelpDiv6 
+      Begin VB.Menu mnuHelpDiv6
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpPlant 
+      Begin VB.Menu mnuHelpPlant
          Caption         =   "EnergyPlus Plant Applications Guide"
       End
-      Begin VB.Menu mnuHelpEMSguide 
+      Begin VB.Menu mnuHelpEMSguide
          Caption         =   "EnergyPlus EMS Application Guide"
       End
-      Begin VB.Menu mnuHelpCompliance 
+      Begin VB.Menu mnuHelpCompliance
          Caption         =   "Using EnergyPlus for Compliance"
       End
-      Begin VB.Menu mnuHelpExtInterface 
+      Begin VB.Menu mnuHelpExtInterface
          Caption         =   "External Interface Application Guide "
       End
-      Begin VB.Menu mnuHelpDiv5 
+      Begin VB.Menu mnuHelpDiv5
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpGettingStarted 
+      Begin VB.Menu mnuHelpGettingStarted
          Caption         =   "EnergyPlus Getting Started"
       End
-      Begin VB.Menu mnuHelpAuxProgs 
+      Begin VB.Menu mnuHelpAuxProgs
          Caption         =   "EnergyPlus Auxiliary Programs"
       End
-      Begin VB.Menu mnuHelpTips 
+      Begin VB.Menu mnuHelpTips
          Caption         =   "EnergyPlus Tips and Tricks"
       End
-      Begin VB.Menu mnuHelpAcknowledge 
+      Begin VB.Menu mnuHelpAcknowledge
          Caption         =   "EnergyPlus Acknowledgments"
       End
-      Begin VB.Menu mnuHelpDiv3 
+      Begin VB.Menu mnuHelpDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuCreateObjectList 
+      Begin VB.Menu mnuCreateObjectList
          Caption         =   "Create objectList.txt"
       End
-      Begin VB.Menu mnuCreateAllObjectIDF 
+      Begin VB.Menu mnuCreateAllObjectIDF
          Caption         =   "Create allObject.idf"
       End
-      Begin VB.Menu mnuCreateFieldsMissingUnits 
+      Begin VB.Menu mnuCreateFieldsMissingUnits
          Caption         =   "Create fieldsMissingUnits.txt"
       End
-      Begin VB.Menu mnuCreateRefObjListTxt 
+      Begin VB.Menu mnuCreateRefObjListTxt
          Caption         =   "Create RefObjList.txt"
       End
-      Begin VB.Menu mnuHelpDiv4 
+      Begin VB.Menu mnuHelpDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpAbout 
+      Begin VB.Menu mnuHelpAbout
          Caption         =   "About IDF Editor"
       End
-      Begin VB.Menu mnuCreateRangeTestFiles 
+      Begin VB.Menu mnuCreateRangeTestFiles
          Caption         =   "Run Range Tests"
          Visible         =   0   'False
       End
@@ -2717,7 +2717,7 @@ fn = FreeFile
 Open App.Path & "\RefObjList.txt" For Output As fn
 For i = 1 To maxUsedObjListName
   Print #fn, IDDObjListName(i).name
-  
+
 Next i
 Close fn
 End Sub
@@ -2905,7 +2905,7 @@ Do While curObject > 0
     If IDDField(curField).required And Trim(grdNew.TextMatrix(j, i)) = "" And Not IDDField(curField).defSpecified Then
       grdNew.Cell(flexcpBackColor, j, i) = outOfRangeColor
     End If
-    
+
     'indicate the REQUIRED by a grey bar in each cell
     'If IDDField(curField).required Then
       'grdNew.Cell(flexcpFloodPercent, j, i) = -3
@@ -4606,7 +4606,7 @@ For iClass = 1 To maxUsedIDDClass
           'if an alpha leave more room for alpha prior to field name
           tabPlace = 30
         Else  'if a numeric
-        
+
           '========== TESTING SECTION START
           ' replace the current value of t with a test value
           If IDFValue(iValue).rangeTestStatus Then  'if part of the range testing
@@ -4718,7 +4718,7 @@ For iClass = 1 To maxUsedIDDClass
             End If
           End If
           '========== TESTING SECTION END
-          
+
           If LTrim(t) <> "" Then  'if blank leave blank - don't convert to a zero
             Print #3, Tab(5); LTrim(Val(t));
           Else

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -63,21 +63,16 @@ extern "C" {
 // EnergyPlus Headers
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
-// #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
-// #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataReportingFlags.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/DataSystemVariables.hh>
-// #include <EnergyPlus/DataTimings.hh>
 #include <EnergyPlus/DaylightingManager.hh>
-// #include <EnergyPlus/DisplayRoutines.hh>
 #include <EnergyPlus/ExternalInterface.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
-// #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutputReports.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -88,6 +83,7 @@ extern "C" {
 #include <EnergyPlus/SystemReports.hh>
 #include <EnergyPlus/Timer.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+
 // Third Party Headers
 #include <fast_float/fast_float.h>
 
@@ -130,9 +126,8 @@ namespace Util {
         size_t const back_trim = String.find_last_not_of(' ');
         if (front_trim == std::string::npos || back_trim == std::string::npos) {
             return rProcessNumber;
-        } else {
-            String = String.substr(front_trim, back_trim - front_trim + 1);
         }
+        String = String.substr(front_trim, back_trim - front_trim + 1);
 
         auto result = fast_float::from_chars(String.data(), String.data() + String.size(), rProcessNumber); // (AUTO_OK_OBJ)
         size_t remaining_size = result.ptr - String.data();
@@ -154,11 +149,12 @@ namespace Util {
                 std::string str{String};
                 std::replace_if(str.begin(), str.end(), [](const char c) { return c == 'D' || c == 'd'; }, 'e');
                 return ProcessNumber(str, ErrorFlag);
-            } else if (*result.ptr == 'e' || *result.ptr == 'E') {
+            }
+            if (*result.ptr == 'e' || *result.ptr == 'E') {
                 ++result.ptr;
                 remaining_size = result.ptr - String.data();
                 for (size_t i = remaining_size; i < String.size(); ++i, ++result.ptr) {
-                    if (!std::isdigit(*result.ptr)) {
+                    if (std::isdigit(*result.ptr) == 0) {
                         rProcessNumber = 0.0;
                         ErrorFlag = true;
                         return rProcessNumber;
@@ -246,7 +242,8 @@ namespace Util {
             if (equali(String, ListOfItems(Probe))) {
                 Found = true;
                 break;
-            } else if (lessthani(String, ListOfItems(Probe))) {
+            }
+            if (lessthani(String, ListOfItems(Probe))) {
                 UBnd = Probe;
             } else {
                 LBnd = Probe;
@@ -321,7 +318,7 @@ namespace Util {
         //       DATE WRITTEN   February 2000
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine verifys that a new name can be added to the
+        // This subroutine verifies that a new name can be added to the
         // list of names for this item (i.e., that there isn't one of that
         // name already and that this name is not blank).
 
@@ -357,7 +354,7 @@ namespace Util {
         //       DATE WRITTEN   February 2000
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine verifys that a new name can be added to the
+        // This subroutine verifies that a new name can be added to the
         // list of names for this item (i.e., that there isn't one of that
         // name already and that this name is not blank).
 
@@ -393,10 +390,10 @@ namespace Util {
     void setDesignObjectNameAndPointer(EnergyPlusData &state,
                                        std::string &nameToBeSet,
                                        int &ptrToBeSet,
-                                       std::string const userName,
-                                       Array1S_string const listOfNames,
-                                       std::string const itemType,
-                                       std::string const itemName,
+                                       std::string const &userName,
+                                       Array1S_string const &listOfNames,
+                                       std::string const &itemType,
+                                       std::string const &itemName,
                                        bool &errorFound)
     {
         nameToBeSet = userName;
@@ -707,7 +704,7 @@ int EndEnergyPlus(EnergyPlusData &state)
         ExternalInterface::CloseSocket(state, 1);
     }
 
-    if (state.dataGlobal->fProgressPtr) {
+    if (state.dataGlobal->fProgressPtr != nullptr) {
         state.dataGlobal->fProgressPtr(100);
     }
     if (state.dataGlobal->progressCallback) {
@@ -1512,13 +1509,13 @@ void ShowErrorMessage(EnergyPlusData &state, std::string const &ErrorMessage, Op
 
     auto *err_stream = state.files.err_stream.get();
 
-    if (state.dataUtilityRoutines->outputErrorHeader && err_stream) {
+    if (state.dataUtilityRoutines->outputErrorHeader && (err_stream != nullptr)) {
         *err_stream << "Program Version," << state.dataStrGlobals->VerStringVar << ',' << state.dataStrGlobals->IDDVerString << '\n';
         state.dataUtilityRoutines->outputErrorHeader = false;
     }
 
     if (!state.dataGlobal->DoingInputProcessing) {
-        if (err_stream) {
+        if (err_stream != nullptr) {
             *err_stream << "  " << ErrorMessage << '\n';
         }
     } else {
@@ -1633,7 +1630,7 @@ void ShowRecurringErrors(EnergyPlusData &state)
                     state.dataGlobal->errorCallback(Error::Continue, "");
                 }
             }
-            std::string StatMessage = "";
+            std::string StatMessage;
             if (error.ReportMax) {
                 std::string MaxOut = format("{:.6f}", error.MaxValue);
                 StatMessage += "  Max=" + MaxOut;

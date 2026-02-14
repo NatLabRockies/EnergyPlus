@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -73,51 +73,31 @@ class InitChiller(EnergyPlusPlugin):
 
     def get_handles(self, state):
         self.handles["h_intvar_design_flow"] = self.api.exchange.get_internal_variable_handle(
-            state,
-            "Plant Design Volume Flow Rate",
-            "Chilled Water Loop"
+            state, "Plant Design Volume Flow Rate", "Chilled Water Loop"
         )
         self.handles["h_act_chiller_design_flow"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Design Volume Flow Rate",
-            "Central Chiller"
+            state, "Plant Connection 1", "Design Volume Flow Rate", "Central Chiller"
         )
         self.handles["h_act_chiller_min_flow"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Minimum Mass Flow Rate",
-            "Central Chiller"
+            state, "Plant Connection 1", "Minimum Mass Flow Rate", "Central Chiller"
         )
         self.handles["h_act_mdot_max"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Maximum Mass Flow Rate",
-            "Central Chiller"
+            state, "Plant Connection 1", "Maximum Mass Flow Rate", "Central Chiller"
         )
         self.handles["h_act_min_cap"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Minimum Loading Capacity",
-            "Central Chiller"
+            state, "Plant Connection 1", "Minimum Loading Capacity", "Central Chiller"
         )
         self.handles["h_act_max_cap"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Maximum Loading Capacity",
-            "Central Chiller"
+            state, "Plant Connection 1", "Maximum Loading Capacity", "Central Chiller"
         )
         self.handles["h_act_opt_cap"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Optimal Loading Capacity",
-            "Central Chiller"
+            state, "Plant Connection 1", "Optimal Loading Capacity", "Central Chiller"
         )
         self.need_to_get_handles = False
 
     def handles_are_valid(self, state):
         handles_are_valid = True
-        for (k, v) in self.handles.items():
+        for k, v in self.handles.items():
             if v == -1:
                 handles_are_valid = False
                 print(k, v)
@@ -126,7 +106,7 @@ class InitChiller(EnergyPlusPlugin):
 
     def on_user_defined_component_model(self, state) -> int:
         if not self.glycol:
-            self.glycol = self.api.functional.glycol(state, u"water")
+            self.glycol = self.api.functional.glycol(state, "water")
         # for many use cases, the client will want to check `self.api.exchange.api_data_fully_ready before
         # attempting to get handles and such.  In the case of user defined components, however, the calling structure
         # shouldn't need it, so it isn't used in this example.
@@ -162,54 +142,33 @@ class SimChiller(EnergyPlusPlugin):
 
     def get_handles(self, state):
         self.handles["h_act_mdot_max"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Maximum Mass Flow Rate",
-            "Central Chiller"
+            state, "Plant Connection 1", "Maximum Mass Flow Rate", "Central Chiller"
         )
         self.handles["h_act_max_cap"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Maximum Loading Capacity",
-            "Central Chiller"
+            state, "Plant Connection 1", "Maximum Loading Capacity", "Central Chiller"
         )
         self.handles["h_intvar_chiller_load"] = self.api.exchange.get_internal_variable_handle(
-            state,
-            "Load Request for Plant Connection 1",
-            "Central Chiller"
+            state, "Load Request for Plant Connection 1", "Central Chiller"
         )
         self.handles["h_intvar_inlet_temp"] = self.api.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Temperature for Plant Connection 1",
-            "Central Chiller"
+            state, "Inlet Temperature for Plant Connection 1", "Central Chiller"
         )
         self.handles["h_intvar_inlet_mass_flow"] = self.api.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Mass Flow Rate for Plant Connection 1",
-            "Central Chiller"
+            state, "Inlet Mass Flow Rate for Plant Connection 1", "Central Chiller"
         )
         self.handles["h_act_outlet_temp"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Outlet Temperature",
-            "Central Chiller"
+            state, "Plant Connection 1", "Outlet Temperature", "Central Chiller"
         )
         self.handles["h_act_mass_flow_request"] = self.api.exchange.get_actuator_handle(
-            state,
-            "Plant Connection 1",
-            "Mass Flow Rate",
-            "Central Chiller"
+            state, "Plant Connection 1", "Mass Flow Rate", "Central Chiller"
         )
-        self.handles["h_global_chiller_energy"] = self.api.exchange.get_global_handle(
-            state,
-            "Chiller_ElectEnergy"
-        )
+        self.handles["h_global_chiller_energy"] = self.api.exchange.get_global_handle(state, "Chiller_ElectEnergy")
 
         self.need_to_get_handles = False
 
     def handles_are_valid(self, state):
         handles_are_valid = True
-        for (k, v) in self.handles.items():
+        for k, v in self.handles.items():
             if v == -1:
                 handles_are_valid = False
                 print(k, v)
@@ -218,7 +177,7 @@ class SimChiller(EnergyPlusPlugin):
 
     def on_user_defined_component_model(self, state) -> int:
         if not self.glycol:
-            self.glycol = self.api.functional.glycol(state, u"water")
+            self.glycol = self.api.functional.glycol(state, "water")
         # for many use cases, the client will want to check `self.api.exchange.api_data_fully_ready before
         # attempting to get handles and such.  In the case of user defined components, however, the calling structure
         # shouldn't need it, so it isn't used in this example.

@@ -52,7 +52,7 @@ Finally, EnergyPlus is open source and available under a
 permissive license with no “give back” provisions. The
 source code of the program is available and open for
 public inspection and revision, hosted at
-`www.github.com/NREL/EnergyPlus <https://www.github.com/NREL/EnergyPlus>`__
+`www.github.com/NatLabRockies/EnergyPlus <https://www.github.com/NatLabRockies/EnergyPlus>`__
 . The program is not intended to be a black box that is
 unintelligible to the users and developers around the
 world. The hope is that this access to source code will
@@ -66,7 +66,7 @@ Installing EnergyPlus
 EnergyPlus is provided in compiled form for several major
 operating systems, including Windows, Mac, and Linux.
 Check
-`www.github.com/NREL/EnergyPlus/releases <https://www.github.com/NREL/EnergyPlus/releases>`__
+`www.github.com/NatLabRockies/EnergyPlus/releases <https://www.github.com/NatLabRockies/EnergyPlus/releases>`__
 to see if your system is supported. After downloading the
 correct installer, install the program. If your operating
 system allows for the selection of a custom installation

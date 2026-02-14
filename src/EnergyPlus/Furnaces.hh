@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -115,6 +115,7 @@ namespace Furnaces {
         Sched::Schedule *fanOpModeSched = nullptr;                 // fan operating mode schedule
         Sched::Schedule *fanAvailSched = nullptr;                  // fan availability schedule
         int ControlZoneNum;                                        // Index to controlled zone
+        int airloopNum;                                            // Index to air loop
         int ZoneSequenceCoolingNum;                                // Index to cooling sequence/priority for this zone
         int ZoneSequenceHeatingNum;                                // Index to heating sequence/priority for this zone
 
@@ -141,11 +142,11 @@ namespace Furnaces {
         Real64 HeatSizingRatio = 1.0;
       
         HVAC::CoilType suppHeatCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent for Supplemental Heat Coil Type
-        std::string SuppCoilName;                              // name of supplemental heating coil
-        int SuppCoilNum = 0;                                     // Index to supplemental heater
-        int SuppCoilControlNode = 0;                                   // control node for steam and hot water heating coil
-        int SuppCoilAirInletNode = 0;                                  // air inlet node number of HW coil for HeatCool Reheat Coil
-        int SuppCoilAirOutletNode = 0;                                 // air outlet node number of HW coil for HeatCool Reheat Coil
+        std::string SuppHeatCoilName;                              // name of supplemental heating coil
+        int SuppHeatCoilNum = 0;                                     // Index to supplemental heater
+        int SuppHeatCoilControlNode = 0;                                   // control node for steam and hot water heating coil
+        int SuppHeatCoilAirInletNode = 0;                                  // air inlet node number of HW coil for HeatCool Reheat Coil
+        int SuppHeatCoilAirOutletNode = 0;                                 // air outlet node number of HW coil for HeatCool Reheat Coil
       
         bool isIHP = false;
         std::string ihpName;                                       // Save IHP name and index
@@ -191,7 +192,7 @@ namespace Furnaces {
         Real64 MaxHeatAirMassFlow;                          // supply air mass flow rate during heating operation [kg/s]
         Real64 MaxNoCoolHeatAirMassFlow;                    // supply air mass flow rate when no cooling or heating [kg/s]
         Real64 MaxHeatCoilFluidFlow;                        // water or steam mass flow rate for heating coil [kg/s]
-        Real64 MaxSuppCoilFluidFlow;                        // water or steam mass flow rate for supplemental heating coil [kg/s]
+        Real64 MaxSuppHeatCoilFluidFlow;                        // water or steam mass flow rate for supplemental heating coil [kg/s]
         Real64 ControlZoneMassFlowFrac;                     // Fraction of furnace flow to control zone
         Real64 DesignMaxOutletTemp;                         // Maximum supply air temperature from furnace heater [C]
         Real64 MdotFurnace;                                 // Mass flow rate through furnace [kg/s]
@@ -271,8 +272,9 @@ namespace Furnaces {
         int ErrCountVar2 = 0; // Counter used to minimize the occurrence of output warnings
 
         FurnaceEquipConditions()
-            : FurnaceIndex(0), ControlZoneNum(0), ZoneSequenceCoolingNum(0),
-              ZoneSequenceHeatingNum(0), ActualDXCoilIndexForHXAssisted(0), 
+            : FurnaceIndex(0), ControlZoneNum(0), airloopNum(0), ZoneSequenceCoolingNum(0), ZoneSequenceHeatingNum(0), 
+              ActualDXCoilIndexForHXAssisted(0), 
+              SuppHeatCoilControlNode(0),
               fanType(HVAC::FanType::Invalid), FanIndex(0), 
               LastMode(Furnaces::ModeOfOperation::Invalid), AirFlowControl(AirFlowControlConstFan::Invalid), fanPlace(HVAC::FanPlace::Invalid),
               NodeNumOfControlledZone(0), CoolingConvergenceTolerance(0.0), HeatingConvergenceTolerance(0.0), DesignHeatingCapacity(0.0),
@@ -282,7 +284,7 @@ namespace Furnaces {
               MaxCoolAirVolFlowEMSOverrideValue(0.0), MaxHeatAirVolFlow(0.0), MaxHeatAirVolFlowEMSOverrideOn(false),
               MaxHeatAirVolFlowEMSOverrideValue(0.0), MaxNoCoolHeatAirVolFlow(0.0), MaxNoCoolHeatAirVolFlowEMSOverrideOn(false),
               MaxNoCoolHeatAirVolFlowEMSOverrideValue(0.0), MaxCoolAirMassFlow(0.0), MaxHeatAirMassFlow(0.0), MaxNoCoolHeatAirMassFlow(0.0),
-              MaxHeatCoilFluidFlow(0.0), MaxSuppCoilFluidFlow(0.0), ControlZoneMassFlowFrac(0.0), DesignMaxOutletTemp(9999.0), MdotFurnace(0.0),
+              MaxHeatCoilFluidFlow(0.0), MaxSuppHeatCoilFluidFlow(0.0), ControlZoneMassFlowFrac(0.0), DesignMaxOutletTemp(9999.0), MdotFurnace(0.0),
               FanPartLoadRatio(0.0), CompPartLoadRatio(0.0), CoolPartLoadRatio(0.0), HeatPartLoadRatio(0.0), MinOATCompressorCooling(0.0),
               MinOATCompressorHeating(0.0), MaxOATSuppHeat(0.0), CondenserNodeNum(0), Humidistat(false), InitHeatPump(false),
               DehumidControlType_Num(DehumidificationControlMode::None), LatentMaxIterIndex(0), LatentRegulaFalsiFailedIndex(0),
@@ -577,7 +579,7 @@ struct FurnacesData : BaseGlobalStruct
     Array1D_bool MyCheckFlag;             // Used to obtain the zone inlet node number in the controlled zone
     Array1D_bool MyFlowFracFlag;          // Used for calculatig flow fraction once
     Array1D_bool MyPlantScanFlag;         // used to initialize plant comp for water and steam heating coils
-    Array1D_bool MySuppCoilPlantScanFlag; // used to initialize plant comp for water and steam heating coils
+    Array1D_bool MySuppHeatCoilPlantScanFlag; // used to initialize plant comp for water and steam heating coils
 
     // used to be statistics
     Real64 CoolCoilLoad;        // Negative value means cooling required
@@ -634,7 +636,7 @@ struct FurnacesData : BaseGlobalStruct
         MyCheckFlag.clear();
         MyFlowFracFlag.clear();
         MyPlantScanFlag.clear();
-        MySuppCoilPlantScanFlag.clear();
+        MySuppHeatCoilPlantScanFlag.clear();
 
         SpeedNum = 1;
         SupHeaterLoad = 0.0;

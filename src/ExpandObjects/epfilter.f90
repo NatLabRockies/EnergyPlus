@@ -9589,7 +9589,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Fan Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN
@@ -9627,7 +9626,6 @@ DO iZone = 1, numCompactZoneFPVAV
     END IF
     CALL AddToObjFld('Secondary Air Inlet Node Name', base + fpvzNameOff,' PIU Secondary Inlet')
     CALL AddToObjFld('Outlet Node Name', base + fpvzNameOff,' Supply Inlet')
-    CALL AddToObjFld('Reheat Coil Air Inlet Node Name', base + fpvzNameOff,' PIU Mixer Outlet')
     CALL AddToObjFld('Zone Mixer Name', base + fpvzNameOff,' PIU Mixer')
     CALL AddToObjFld('Fan Name', base + fpvzNameOff,' PIU Fan')
     IF (reheatCoilType .EQ. ctHotWater) THEN
@@ -30463,7 +30461,7 @@ DO iZone = 1, numCompactWaterAirHP
   CALL WriteComment('21.11C (70F) entering air dry-bulb temperature and 21.11C (70F) entering water temperature')
   CALL CreateNewObj('Coil:Heating:WaterToAirHeatPump:EquationFit')
   CALL AddToObjFld('Name', base + wahpNameOff,' WAHP Heating Coil')
-  CALL AddToObjStr('Availability Schedule Name','')   
+  CALL AddToObjStr('Availability Schedule Name','')
   CALL AddToObjFld('Water Inlet Node Name', base + wahpNameOff,' WAHP Heating Water Inlet Node')
   CALL AddToObjFld('Water Outlet Node Name', base + wahpNameOff,' WAHP Heating Water Outlet Node')
   CALL AddToObjFld('Air Inlet Node Name', base + wahpNameOff,' WAHP Cooling Coil Outlet')

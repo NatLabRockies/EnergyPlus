@@ -9,7 +9,7 @@
 ! System:   None.
 ! Plant:    The heating loop is served by air-to-water heat pump.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -176,8 +176,7 @@
     ,                        !- Plant Loop Demand Calculation Scheme
     ,                        !- Common Pipe Simulation
     ,                        !- Pressure Simulation Type
-    ,                        !- Loop Circulation Time {minutes}
-    HotWater;                !- Water Loop Type
+    ;                        !- Loop Circulation Time {minutes}
 
   Sizing:Plant,
     Heating Coil Load Loop,  !- Plant or Condenser Loop Name

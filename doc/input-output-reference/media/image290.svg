@@ -353,28 +353,28 @@
 		<clipPath id="SVGID_6_">
 			<use xlink:href="#SVGID_5_"  overflow="visible"/>
 		</clipPath>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="0.373" y1="0.371" x2="0.373" y2="50.387"/>
 		<rect y="0" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="0.963" height="50.136"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="102.833" y1="1.327" x2="102.833" y2="50.387"/>
 		<rect x="102.454" y="0.956" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="0.963" height="49.18"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="210.084" y1="1.327" x2="210.084" y2="50.387"/>
 		<rect x="209.706" y="0.956" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="0.963" height="49.18"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="1.336" y1="0.371" x2="210.92" y2="0.371"/>
 		<rect x="0.963" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="209.706" height="0.957"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="1.336" y1="12.66" x2="210.92" y2="12.66"/>
 		<rect x="0.963" y="12.289" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="209.706" height="0.957"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="1.336" y1="24.973" x2="210.92" y2="24.973"/>
 		<rect x="0.963" y="24.602" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="209.706" height="0.957"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="1.336" y1="37.261" x2="210.92" y2="37.261"/>
 		<rect x="0.963" y="36.891" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="209.706" height="0.956"/>
-		
+
 			<line clip-path="url(#SVGID_6_)" fill="none" stroke="#000000" stroke-width="0.1388" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="10" x1="1.336" y1="49.55" x2="210.92" y2="49.55"/>
 		<rect x="0.963" y="49.18" clip-path="url(#SVGID_6_)" fill-rule="evenodd" clip-rule="evenodd" width="209.706" height="0.957"/>
 	</g>

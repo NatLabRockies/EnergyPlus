@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -121,11 +121,10 @@ namespace DXFEarClipping {
             if (m1 * m2 <= epsilon) {
                 InPolygon = true;
                 break;
-            } else {
-                costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
-                acosval = std::acos(costheta);
-                anglesum += acosval;
             }
+            costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
+            acosval = std::acos(costheta);
+            anglesum += acosval;
         }
 
         if (std::abs(anglesum - Constant::TwoPi) <= epsilon) {
@@ -502,10 +501,9 @@ namespace DXFEarClipping {
                 r_vertices(nrverts) = mvert;
                 rangles(nrverts) = ang;
                 continue;
-            } else {
-                ++ncverts;
-                c_vertices(ncverts) = mvert;
             }
+            ++ncverts;
+            c_vertices(ncverts) = mvert;
 
             // convex angle, see if it's an ear
             testtri(1) = vertex(svert);

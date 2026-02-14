@@ -38,7 +38,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup System
       id: setup-runner
@@ -67,7 +67,7 @@ jobs:
         echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
     - name: Baseline Regression Testing caching
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       id: cachebaselineregression
       with:
         path: |
@@ -83,7 +83,7 @@ jobs:
         echo "ENABLE_PCH=OFF" >> $GITHUB_ENV
 
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       id: cacheccache-restore
       with:
         path: |
@@ -138,7 +138,7 @@ jobs:
     # Checkout baseline, overrides the branch basically
     - name: Baseline Checkout
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: develop
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
@@ -182,7 +182,7 @@ jobs:
 
     - name: Checkout Branch again
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 
@@ -207,7 +207,7 @@ jobs:
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
@@ -248,7 +248,7 @@ jobs:
       continue-on-error: true
       run: python ./scripts/dev/gha_regressions.py ./build/testfiles-develop ./build/testfiles ./regressions
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       id: upload_regressions
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'  # only run this if regressions were encountered "failed"
       with:
@@ -266,7 +266,7 @@ jobs:
         ${{ steps.upload_regressions.outputs.artifact-url }}
 
     - uses: actions/github-script@v8
-      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == 'NREL/EnergyPlus'
+      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == 'NatLabRockies/EnergyPlus'
       with:
         script: |
           const path = require('path')
@@ -277,7 +277,7 @@ jobs:
     # - uses: lhotari/action-upterm@v1
 
     - name: Fail on Regressions from Forked Repository
-      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != 'NREL/EnergyPlus'
+      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != 'NatLabRockies/EnergyPlus'
       run: |
         echo "::error::Regressions detected in pull request from forked repository, check job summary for details and to download regression results"
         exit 1

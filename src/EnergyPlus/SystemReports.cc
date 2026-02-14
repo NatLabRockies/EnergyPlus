@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -806,10 +806,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneCompToPlant(CompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneCompToPlant(CompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -827,10 +827,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
 
             bool ConnectionFlag = false;
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -848,10 +848,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -868,10 +868,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysCompToPlant(CompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysCompToPlant(CompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -889,10 +889,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -910,10 +910,10 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
@@ -1062,7 +1062,6 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
     int DemandSideLoopNum;
     int DemandSideBranchNum;
     int DemandSideCompNum;
-    int SupplySideCompNum;
     int DemandSideLoopType;
     bool found;
 
@@ -1146,7 +1145,7 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
         } else if (LoopType == 2) {
             for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
                  ++BranchNum) {
-                for (SupplySideCompNum = 1;
+                for (int SupplySideCompNum = 1;
                      SupplySideCompNum <=
                      state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
                      ++SupplySideCompNum) {
@@ -4204,11 +4203,9 @@ void ReportVentilationLoads(EnergyPlusData &state)
             int AirLoopNum = thisZoneEquipConfig.InletNodeAirLoopNum(ZoneInNum);
             int MixedAirNode = 0;
             int ReturnAirNode = 0;
-            int AirDistCoolInletNodeNum = 0;
-            int AirDistHeatInletNodeNum = 0;
             if (AirLoopNum != 0) { // deal with primary air system
-                AirDistCoolInletNodeNum = max(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode, 0);
-                AirDistHeatInletNodeNum = max(thisZoneEquipConfig.AirDistUnitHeat(ZoneInNum).InNode, 0);
+                int AirDistCoolInletNodeNum = max(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode, 0);
+                int AirDistHeatInletNodeNum = max(thisZoneEquipConfig.AirDistUnitHeat(ZoneInNum).InNode, 0);
                 // Set for cooling or heating path
                 if (AirDistCoolInletNodeNum > 0 && AirDistHeatInletNodeNum == 0) {
                     ADUCoolFlowrate = max(Node(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode).MassFlowRate,
@@ -4779,9 +4776,8 @@ void ReportAirLoopConnections(EnergyPlusData &state)
         const auto oaSysExists = [&]() {
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysExists) {
                 return "Yes";
-            } else {
-                return "No";
             }
+            return "No";
         }();
 
         print(state.files.bnd,

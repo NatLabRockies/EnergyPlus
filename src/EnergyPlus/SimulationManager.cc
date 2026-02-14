@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1520,9 +1520,8 @@ namespace SimulationManager {
     {
         if (logical) {
             return ("True");
-        } else {
-            return ("False");
         }
+        return ("False");
     }
 
     void CheckForMisMatchedEnvironmentSpecifications(EnergyPlusData &state)
@@ -2513,11 +2512,11 @@ namespace SimulationManager {
                 const auto LoopString = [&]() {
                     if (LoopSideNum == DataPlant::LoopSideLocation::Demand) {
                         return "Demand";
-                    } else if (LoopSideNum == DataPlant::LoopSideLocation::Supply) {
-                        return "Supply";
-                    } else {
-                        return "";
                     }
+                    if (LoopSideNum == DataPlant::LoopSideLocation::Supply) {
+                        return "Supply";
+                    }
+                    return "";
                 }();
 
                 print(state.files.bnd,

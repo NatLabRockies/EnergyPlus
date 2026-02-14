@@ -1,231 +1,249 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/jumbotron/">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
-          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/jumbotron/" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+      crossorigin="anonymous"
+    />
     <title>EnergyPlus Deprecation Status</title>
     <style>
-        h2 {
-            margin-top: 6px;
-        }
+      h2 {
+        margin-top: 6px;
+      }
 
-        .margin-bottom-6 {
-            margin-bottom: 6px;
-        }
+      .margin-bottom-6 {
+        margin-bottom: 6px;
+      }
 
-        .list-group {
-            padding-bottom: 6px;
-        }
+      .list-group {
+        padding-bottom: 6px;
+      }
 
-        .transition-object-name {
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
+      .transition-object-name {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
     </style>
-</head>
-<body id="preview">
-
-<div class="jumbotron" style="padding-bottom: 32px; padding-top: 32px;">
-    <div class="container">
+  </head>
+  <body id="preview">
+    <div class="jumbotron" style="padding-bottom: 32px; padding-top: 32px">
+      <div class="container">
         <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-8 text-center">
-                <h1><img src="favicon.png" alt="EnergyPlus Logo" width="98" height="98"> EnergyPlus</h1>
-                <p>
-                    Version @CMAKE_VERSION_MAJOR@.@CMAKE_VERSION_MINOR@.@CMAKE_VERSION_PATCH@<br>
-                    @CMAKE_PROJECTED_RELEASE_DATE@<br>
-                    <em>EnergyPlus is a trademark of the US Department of Energy.</em>
-                </p>
-            </div>
-            <div class="col-md-2"></div>
+          <div class="col-md-2"></div>
+          <div class="col-md-8 text-center">
+            <h1>
+              <img src="favicon.png" alt="EnergyPlus Logo" width="98" height="98" />
+              EnergyPlus
+            </h1>
+            <p>
+              Version @CMAKE_VERSION_MAJOR@.@CMAKE_VERSION_MINOR@.@CMAKE_VERSION_PATCH@<br />
+              @CMAKE_PROJECTED_RELEASE_DATE@<br />
+              <em>EnergyPlus is a trademark of the US Department of Energy.</em>
+            </p>
+          </div>
+          <div class="col-md-2"></div>
         </div>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-12" style="text-align:center;">
-            <a class="btn btn-primary margin-bottom-6" href="https://energyplus.net" role="button">
-                <span class="fa fa-external-link"></span> Go to the EnergyPlus Website
-            </a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12" style="text-align:center;">
-            <a class="btn btn-primary margin-bottom-6" href="https://energyplus.net/quickstart" role="button">
-                <span class="fa fa-external-link"></span> Go to the EnergyPlus Quick-Start Guide
-            </a>
-        </div>
+      </div>
     </div>
 
-    <h2>Background</h2>
-    <p>
-        As EnergyPlus evolves, features and capabilities are added to ensure the tool keeps up with demand.
-        However, some features and capabilities may grow outdated and potentially be removed from the tool.
-        For most changes to EnergyPlus between versions, an automated conversion is possible.
-        When an automatic conversion is not possible, the relevant input objects are marked as deprecated,
-        a warning message is emitted from the simulation engine, and eventually the user must manually
-        convert the file once the feature is fully removed.
-    </p>
-    <p>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12" style="text-align: center">
+          <a class="btn btn-primary margin-bottom-6" href="https://energyplus.net" role="button">
+            <span class="fa fa-external-link"></span> Go to the EnergyPlus Website
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12" style="text-align: center">
+          <a class="btn btn-primary margin-bottom-6" href="https://energyplus.net/quickstart" role="button">
+            <span class="fa fa-external-link"></span> Go to the EnergyPlus Quick-Start Guide
+          </a>
+        </div>
+      </div>
+
+      <h2>Background</h2>
+      <p>
+        As EnergyPlus evolves, features and capabilities are added to ensure the tool keeps up with demand. However,
+        some features and capabilities may grow outdated and potentially be removed from the tool. For most changes to
+        EnergyPlus between versions, an automated conversion is possible. When an automatic conversion is not possible,
+        the relevant input objects are marked as deprecated, a warning message is emitted from the simulation engine,
+        and eventually the user must manually convert the file once the feature is fully removed.
+      </p>
+      <p>
         The justification for removing capabilities is to reduce the maintenance burden of the program, allowing more
         effort to be placed in adding newer, more vital, capabilities, and also to streamline the internal structure of
         the program to improve the runtime burden of the program.
-    </p>
-    <p>
-        This document discusses those aspects which are on the roadmap for deprecation from the engine.
-        The full deprecation process consists of several steps to ensure that users are not suddenly impacted
-        by the change. This document will be included in each installer and also sent to major stakeholders and users.
-    </p>
+      </p>
+      <p>
+        This document discusses those aspects which are on the roadmap for deprecation from the engine. The full
+        deprecation process consists of several steps to ensure that users are not suddenly impacted by the change. This
+        document will be included in each installer and also sent to major stakeholders and users.
+      </p>
 
-    <h2>Deprecation Process</h2>
-    <p>
-        The deprecation process consists of a number of steps.  The deprecation process will gnerally follow each of
-        these steps one release at a time.  However, the development reserves the right to alter the deprecation
-        timeline of features as needed.
-    </p>
-    <dl class="dl-horizontal">
+      <h2>Deprecation Process</h2>
+      <p>
+        The deprecation process consists of a number of steps. The deprecation process will gnerally follow each of
+        these steps one release at a time. However, the development reserves the right to alter the deprecation timeline
+        of features as needed.
+      </p>
+      <dl class="dl-horizontal">
         <dt>Level 1 - Gathering Feedback</dt>
         <dd>
-            In this first phase of the process we will list items in this deprecation document, with the hopes of
-            hearing back from users about the potential deprecation. EnergyPlus does not have a way to feed back
-            information to the development team about how frequently objects are being used, so this step is all about
-            gathering feedback. Objects are not yet marked as deprecated at this stage.
+          In this first phase of the process we will list items in this deprecation document, with the hopes of hearing
+          back from users about the potential deprecation. EnergyPlus does not have a way to feed back information to
+          the development team about how frequently objects are being used, so this step is all about gathering
+          feedback. Objects are not yet marked as deprecated at this stage.
         </dd>
         <dt>Level 2 - Deprecation</dt>
         <dd>
-            If a release cycle is completed, and a capability is still planned for deprecation, then the relevant input
-            objects will be marked with a deprecation tag, and the object will be marked as Level 2 in this document.
+          If a release cycle is completed, and a capability is still planned for deprecation, then the relevant input
+          objects will be marked with a deprecation tag, and the object will be marked as Level 2 in this document.
         </dd>
         <dt>Level 3 - Removal</dt>
         <dd>
-            If an additional release cycle completes and the object is still marked for deprecation, the capability will
-            then be removed from EnergyPlus, and any input objects will be removed from the input schema.  Warning
-            messages will be emitted into the version translator to alert the user that the capability was removed.
-            Deprecated objects will be placed into the level 3 section of this document.
+          If an additional release cycle completes and the object is still marked for deprecation, the capability will
+          then be removed from EnergyPlus, and any input objects will be removed from the input schema. Warning messages
+          will be emitted into the version translator to alert the user that the capability was removed. Deprecated
+          objects will be placed into the level 3 section of this document.
         </dd>
-    </dl>
+      </dl>
 
-    <h2>Level 1 Deprecation Status</h2>
+      <h2>Level 1 Deprecation Status</h2>
 
-    <h3>DElight</h3>
-    <p>
-        DElight daylighting capabilities provides an alternative to the split-flux method.  The DElight library has not
+      <h3>DElight</h3>
+      <p>
+        DElight daylighting capabilities provides an alternative to the split-flux method. The DElight library has not
         been updated in several years, and there is little user activity (support questions, etc.) related to this
-        feature.  This library is considered for potential deprecation.
-    </p>
+        feature. This library is considered for potential deprecation.
+      </p>
 
-    <h3>Component Costs</h3>
-    <p>
-        EnergyPlus, as a physics calculation engine, does include some extra "non-physics" calculations.  Component cost
+      <h3>Component Costs</h3>
+      <p>
+        EnergyPlus, as a physics calculation engine, does include some extra "non-physics" calculations. Component cost
         is one calculation that can be performed fully outside EnergyPlus, unrelated to the direct physics of the
-        simulation.  The ComponentCost objects are considered for potential deprecation.
-    </p>
+        simulation. The ComponentCost objects are considered for potential deprecation.
+      </p>
 
-    <h3>Geometry Transformation</h3>
-    <p>
+      <h3>Geometry Transformation</h3>
+      <p>
         Geometry transformation allows for users to enter inputs that transform the building inside the simulation
-        itself.  It has been suggested that this capability should live outside of EnergyPlus, so objects related to
-        this capability are now considered potentially deprecated.
-    </p>
+        itself. It has been suggested that this capability should live outside of EnergyPlus, so objects related to this
+        capability are now considered potentially deprecated.
+      </p>
 
-    <h2>Level 2 Deprecation Status</h2>
+      <h2>Level 2 Deprecation Status</h2>
 
-    <h3>EP-Launch (Classic)</h3>
-    <p>
+      <h3>EP-Launch (Classic)</h3>
+      <p>
         The EP-Launch tool that has been packaged with EnergyPlus for decades is tabbed for potential removal in a
-        future release.  A new Python-based cross-platform version of EP-Launch has been developed, tested, and is now
-        packaged right with the EnergyPlus installation on all platforms.  On Windows, the start menu now includes
-        both the EPLaunch (classic) tool, along with an EPLaunch Python shortcut.  We encourage users to try out the
-        new Python-based tool, and see how it can unlock new workflows and capabilities.  Although it has been tested
-        heavily in-house, we are excited for feedback.  To learn more about this new version of EP-Launch, you can find
-        information on the <a href="https://github.com/NREL/EP-Launch">GitHub repository</a>. Users are also welcome to
-        install the new EP-Launch tool into their Python environment which would allow getting updates to the tool more
-        frequently.  The classic EP-Launch tool is going to be removed from our maintenance and package at a future date
-        based on user feedback on the new tool.
-    </p>
+        future release. A new Python-based cross-platform version of EP-Launch has been developed, tested, and is now
+        packaged right with the EnergyPlus installation on all platforms. On Windows, the start menu now includes both
+        the EPLaunch (classic) tool, along with an EPLaunch Python shortcut. We encourage users to try out the new
+        Python-based tool, and see how it can unlock new workflows and capabilities. Although it has been tested heavily
+        in-house, we are excited for feedback. To learn more about this new version of EP-Launch, you can find
+        information on the
+        <a href="https://github.com/NatLabRockies/EP-Launch">GitHub repository</a>. Users are also welcome to install the new
+        EP-Launch tool into their Python environment which would allow getting updates to the tool more frequently. The
+        classic EP-Launch tool is going to be removed from our maintenance and package at a future date based on user
+        feedback on the new tool.
+      </p>
 
-    <h3>IDFVersionUpdater (Classic)</h3>
-    <p>
+      <h3>IDFVersionUpdater (Classic)</h3>
+      <p>
         EnergyPlus has maintained and provided a small client app that made it easier for users to update their input
-        files between versions of EnergyPlus.  The tool is written in a relatively uncommon language, and the team
-        is not able to readily maintain this version of the tool.  The team created a very similar tool in Python, and
-        as of EnergyPlus 25.1.0, the tool was packaged up with the installer, and is ready for user testing.  The tool
-        has undergone significant testing, but we are excited to get feedback from users.  On Windows and Mac, we are
-        still including the classic version of the tool, for now, in case of any unforeseen issues.  However, on Linux,
-        we discovered that the classic tool was not functional anymore as of Ubuntu 24.04, and so we removed the classic
-        tool completely.  On all platforms, it is expected that the classic version updater tool will be removed in the
+        files between versions of EnergyPlus. The tool is written in a relatively uncommon language, and the team is not
+        able to readily maintain this version of the tool. The team created a very similar tool in Python, and as of
+        EnergyPlus 25.1.0, the tool was packaged up with the installer, and is ready for user testing. The tool has
+        undergone significant testing, but we are excited to get feedback from users. On Windows and Mac, we are still
+        including the classic version of the tool, for now, in case of any unforeseen issues. However, on Linux, we
+        discovered that the classic tool was not functional anymore as of Ubuntu 24.04, and so we removed the classic
+        tool completely. On all platforms, it is expected that the classic version updater tool will be removed in the
         next version.
-    </p>
+      </p>
 
-    <h3>32-bit Windows Builds</h3>
-    <p>
+      <h3>32-bit Windows Builds</h3>
+      <p>
         EnergyPlus has provided 32-bit Windows builds since the very early days of development, and 64-bit Windows
-        builds since version 6.0.0 (Fall 2010).  Microsoft has begun the process of stopping 32-bit development and
+        builds since version 6.0.0 (Fall 2010). Microsoft has begun the process of stopping 32-bit development and
         invoked new requirements on system memory that effectively eliminate 32-bit systems except in the most niche
-        circumstances.  As of 2020, Steam software reported that 32-bit Windows usage was down to 0.2% of users.
-        All of this would be sufficient for us to justify eliminating 32-bit builds, however some EnergyPlus interfaces
-        are still built as 32-bit binaries, and we try hard to provide interfaces with everything they need from
-        EnergyPlus.  Our CI systems are no longer able to build 32-bit Windows packages, but we still have dev
-        machines that can do it, so for now we will provide 32-bit builds, but they won't be around much longer.
-    </p>
+        circumstances. As of 2020, Steam software reported that 32-bit Windows usage was down to 0.2% of users. All of
+        this would be sufficient for us to justify eliminating 32-bit builds, however some EnergyPlus interfaces are
+        still built as 32-bit binaries, and we try hard to provide interfaces with everything they need from EnergyPlus.
+        Our CI systems are no longer able to build 32-bit Windows packages, but we still have dev machines that can do
+        it, so for now we will provide 32-bit builds, but they won't be around much longer.
+      </p>
 
-    <h2>Level 3 Deprecation Status</h2>
+      <h2>Level 3 Deprecation Status</h2>
 
-    <h3>Version Numbering Scheme</h3>
-    <p>
-        EnergyPlus historically used version numbers that varied the major number and sometimes the minor
-        number. Starting with the March 2022 release, we moved forward with a more modern version numbering scheme.
-        The EnergyPlus version is now based on the year and the release number. The March 2022 release was
-        EnergyPlus 22.1 and the Fall release was be EnergyPlus 22.2. If additional major releases are created
-        for some reason, they would increment the release number further. Rare intermediate releases may be numbered
-        with a patch number such as 22.1.1.
-    </p>
+      <h3>Version Numbering Scheme</h3>
+      <p>
+        EnergyPlus historically used version numbers that varied the major number and sometimes the minor number.
+        Starting with the March 2022 release, we moved forward with a more modern version numbering scheme. The
+        EnergyPlus version is now based on the year and the release number. The March 2022 release was EnergyPlus 22.1
+        and the Fall release was be EnergyPlus 22.2. If additional major releases are created for some reason, they
+        would increment the release number further. Rare intermediate releases may be numbered with a patch number such
+        as 22.1.1.
+      </p>
 
-    <h3>Outdated Linux Builds</h3>
-    <p>
-        Ubuntu 18.04 and 20.04 builds are no longer provided.  These versions are at, or near, end of life.  Moving
+      <h3>Outdated Linux Builds</h3>
+      <p>
+        Ubuntu 18.04 and 20.04 builds are no longer provided. These versions are at, or near, end of life. Moving
         forward, we will continue providing Linux builds for the two most recent Linux LTS versions.
-    </p>
+      </p>
 
-    <h3>Outdated Mac Builds</h3>
-    <p>
-        Mac 10.15 builds will not be provided after the release of 23.2.
-    </p>
+      <h3>Outdated Mac Builds</h3>
+      <p>Mac 10.15 builds will not be provided after the release of 23.2.</p>
 
-    <h3>EP-Compare</h3>
-    <p>
-        The EP-Compare utility has been removed from the EnergyPlus install package.  The program had issues which
-        had not been reported, hinting that it was not being used.  The code and binaries have been archived at
+      <h3>EP-Compare</h3>
+      <p>
+        The EP-Compare utility has been removed from the EnergyPlus install package. The program had issues which had
+        not been reported, hinting that it was not being used. The code and binaries have been archived at
         <a href="https://github.com/JasonGlazer/ep-compare">https://github.com/JasonGlazer/ep-compare</a>.
-    </p>
+      </p>
 
-    <hr>
+      <hr />
 
-    <footer>
-        <p>Copyright © 1996-@CMAKE_YEAR@ The Board of Trustees of the University of Illinois, The Regents of the
-            University of California through Ernest Orlando Lawrence Berkeley National Laboratory, Oak Ridge National
-            Laboratory, managed by
-            UT-Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All rights reserved.</p>
-        <p>Other Notices and Acknowledgments are found in the <a
-                href="Documentation/Acknowledgments.pdf">Acknowledgments</a>
-            document.</p>
-    </footer>
+      <footer>
+        <p>
+          Copyright © 1996-@CMAKE_YEAR@ The Board of Trustees of the University of Illinois, The Regents of the
+          University of California through Ernest Orlando Lawrence Berkeley National Laboratory, Oak Ridge National
+          Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other contributors. All rights
+          reserved.
+        </p>
+        <p>
+          Other Notices and Acknowledgments are found in the
+          <a href="Documentation/Acknowledgments.pdf">Acknowledgments</a>
+          document.
+        </p>
+      </footer>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-</div>
-</body>
+      <script
+        src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"
+      ></script>
+      <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"
+      ></script>
+      <script
+        src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"
+      ></script>
+    </div>
+  </body>
 </html>

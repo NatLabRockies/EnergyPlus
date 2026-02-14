@@ -2896,25 +2896,25 @@ These diagram the flow of procedures during a run from top to bottom.
 .. _fig-overall-program-flow-and-ems-calling-points:
 
 .. figure:: media/image003.jpg
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Overall Program Flow and EMS Calling Points
 
 .. _fig-timestep-sequence-with-ems-calling-points:
 
 .. figure:: media/image004.jpg
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Timestep Sequence with EMS Calling Points
 
 .. _fig-system-timestep-sequence-with-ems-calling:
 
 .. figure:: media/image005.jpg
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    System Timestep Sequence with EMS Calling Points
 
 When EnergyPlus runs a model, it first does various sizing and setup
@@ -4899,7 +4899,7 @@ equation for opening factor as
    F_{open} = \begin{array}{ll}
        0.0 & RH < 25\% \\
        \frac{RH-25}{60-25} & 25\% \leq RH \leq 60\% \\
-       1.0 & RH > 60\%  
+       1.0 & RH > 60\%
      \end{array}
 
 .. _ems-input-objects-005:
@@ -5155,7 +5155,7 @@ setpoints follows and are contained in the example file called
           Set myHTGSETP_SCH = 15.6  ,
         ELSEIF (Holiday = = 3.0) && (DayOfYear = = 21),  !winter design day
           Set myHTGSETP_SCH = 21.0 ,
-        ELSEIF HOUR < 5       ,        
+        ELSEIF HOUR < 5       ,
           Set myHTGSETP_SCH = 15.6  ,
         ELSEIF (Hour > = 5) && (Hour < 19)  && (DayOfWeek > = 2) && (DayOfWeek < = 6) ,
           Set myHTGSETP_SCH = 21.0  ,
@@ -6700,9 +6700,9 @@ difference in the cooling capacity above 31°C.
           System Node Wetbulb Temperature, Hourly;
 
 .. figure:: media/image011.jpg
-   :align: center 
+   :align: center
    :width: 50%
-   
+
    Results of Performance Curve Override
 
 Example 12. Variable Refrigerant Flow System Override

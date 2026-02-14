@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -57,66 +57,86 @@
 # Attempt to automatically change the version number of all idf and imf files in a repo
 # Two arguments: old version number and new version number
 
-import codecs
-import fnmatch
 import json
-import os
 import sys
+from pathlib import Path
 
 EPJSON_INDENT = 4  # Note, this essentially standardizes our indent for EpJSON files
 
 
-# provide a nice usage function
-def usage():
-    print("""Call this script with three command line arguments:
+def usage() -> None:
+    print(
+        """Call this script with three command line arguments:
  $ change_version.py <path to repo> <old version number> <new version number>
- $ change_version.py /repos/eplus 8.7 8.8""")
+ $ change_version.py /repos/eplus 8.7 8.8"""
+    )
 
 
 # check the command line argument status
-if not len(sys.argv) == 4:
+if len(sys.argv) != 4:
     print("Invalid command line arguments")
     usage()
     sys.exit(1)
 
 # store the command line arguments since they appear valid so far
-repo = sys.argv[1]
+repo = Path(sys.argv[1]).resolve()
 v_old = sys.argv[2]
 v_new = sys.argv[3]
 
-# walk across the idf and imf files
-for extension in ['*.idf', '*.imf']:
-    for folder in ['testfiles', 'performance_tests', 'datasets', os.path.join('testfiles', 'BasicsFiles')]:
-        this_dir = os.path.join(repo, folder)
-        for root, dir_names, file_names in os.walk(this_dir):
-            for filename in fnmatch.filter(file_names, extension):
-                with codecs.open(os.path.join(root, filename), encoding='utf-8', errors='ignore') as input_file:
-                    file_data = input_file.read()
-                    file_data = file_data.replace('Version,' + v_old, 'Version,' + v_new)
-                    file_data = file_data.replace('VERSION,' + v_old, 'Version,' + v_new)
-                with codecs.open(os.path.join(root, filename), 'w', encoding='utf-8') as output_file:
-                    output_file.write(file_data)
+# folders to search
+idf_folders = [
+    Path("testfiles"),
+    Path("performance_tests"),
+    Path("datasets"),
+    Path("testfiles") / "BasicsFiles",
+]
 
-# also epJSON files
-for folder in ['testfiles', 'performance_tests', 'datasets', os.path.join('testfiles', 'BasicsFiles')]:
-    this_dir = os.path.join(repo, folder)
-    for root, dir_names, file_names in os.walk(this_dir):
-        for filename in fnmatch.filter(file_names, '*.epJSON'):
-            with codecs.open(os.path.join(root, filename), encoding='utf-8', errors='ignore') as input_file:
-                file_data = input_file.read()
-                json_data = json.loads(file_data)
-                json_data['Version']['Version 1']['version_identifier'] = v_new
-            with codecs.open(os.path.join(root, filename), 'w', encoding='utf-8') as output_file:
-                output_file.write(json.dumps(json_data, indent=EPJSON_INDENT))
+# walk across the idf and imf files
+for extension in ("*.idf", "*.imf"):
+    for folder in idf_folders:
+        this_dir = repo / folder
+        if not this_dir.exists():
+            continue
+        for path in this_dir.rglob(extension):
+            try:
+                file_data = path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue  # skip unreadable files
+
+            file_data = file_data.replace(f"Version,{v_old}", f"Version,{v_new}")
+            file_data = file_data.replace(f"VERSION,{v_old}", f"Version,{v_new}")
+
+            path.write_text(file_data, encoding="utf-8")
+
+# handle epJSON files
+for folder in idf_folders:
+    this_dir = repo / folder
+    if not this_dir.exists():
+        continue
+    for path in this_dir.rglob("*.epJSON"):
+        try:
+            file_data = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+
+        json_data = json.loads(file_data)
+        json_data["Version"]["Version 1"]["version_identifier"] = v_new
+
+        path.write_text(
+            json.dumps(json_data, indent=EPJSON_INDENT),
+            encoding="utf-8",
+        )
 
 # then walk across all the unit test files too
-for folder in [os.path.join('tst', 'EnergyPlus', 'unit')]:
-    this_dir = os.path.join(repo, folder)
-    for root, dir_names, file_names in os.walk(this_dir):
-        for filename in fnmatch.filter(file_names, '*.cc'):
-            with codecs.open(os.path.join(root, filename), encoding='utf-8', errors='ignore') as input_file:
-                file_data = input_file.read()
-                file_data = file_data.replace('Version,' + v_old, 'Version,' + v_new)
-                file_data = file_data.replace('VERSION,' + v_old, 'Version,' + v_new)
-            with codecs.open(os.path.join(root, filename), 'w', encoding='utf-8') as output_file:
-                output_file.write(file_data)
+unit_dir = repo / "tst" / "EnergyPlus" / "unit"
+if unit_dir.exists():
+    for path in unit_dir.rglob("*.cc"):
+        try:
+            file_data = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+
+        file_data = file_data.replace(f"Version,{v_old}", f"Version,{v_new}")
+        file_data = file_data.replace(f"VERSION,{v_old}", f"Version,{v_new}")
+
+        path.write_text(file_data, encoding="utf-8")

@@ -6,7 +6,7 @@
 !                          The CRAC system has been setup to represent a Lieber DSE 125 with pumped
 !                          refrigerant economizer DX cooling coil system.
 !
-!                          file adapted from example file "1ZoneEvapCooler.idf" which is adpated from
+!                          file adapted from example file "1ZoneEvapCooler.idf" which is adapted from
 !                          1zoneuncontrolled
 !
 ! Simulation Location/Run: Denver Centennial Golden CO USA WMO=724666, 2 design days, 1 run period,
@@ -26,7 +26,7 @@
 ! Floor Area:              232.25 m2
 ! Number of Stories:       1
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 

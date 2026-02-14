@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -135,15 +135,6 @@ namespace DataHeatBalance {
         Indiv,
         Close,
         Global,
-        Num
-    };
-
-    // System type, detailed refrigeration or refrigerated case rack
-    enum class RefrigSystemType
-    {
-        Invalid = -1,
-        Detailed,
-        Rack,
         Num
     };
 
@@ -611,6 +602,7 @@ namespace DataHeatBalance {
         Real64 ExtGrossGroundWallArea_Multiplied = 0.0;            // Ground contact Wall Area for Zone (Gross) with multipliers
         bool IsSupplyPlenum = false;                               // True when this zone is a supply plenum
         bool IsReturnPlenum = false;                               // True when this zone is a return plenum
+        std::vector<Real64> leakageParallelPIUNums;                // parallel PIU index for backdraft damper leakage
         int PlenumCondNum = 0;                                     // Supply or return plenum conditions number, 0 if this is not a plenum zone
         int TempControlledZoneIndex = 0;                           // this is the index number for TempControlledZone structure for lookup
         int humidityControlZoneIndex = 0;                          // this is the index number for HumidityControlZone structure for lookup

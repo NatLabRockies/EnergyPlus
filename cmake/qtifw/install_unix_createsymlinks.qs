@@ -59,7 +59,7 @@ function Component()
                                        "UNDOEXECUTE", "rm", linktarget + "/parser");
       }
 
-      // TODO: we should perhaps create symlinks to 
+      // TODO: we should perhaps create symlinks to
       // IDFVersionUpdater and and FMUparser on mac too, eg:
 
       // man page:
@@ -72,12 +72,3 @@ function Component()
     }
   }
 }
-
-
-
-
-
-
-
-
-

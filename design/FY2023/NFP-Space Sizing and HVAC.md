@@ -36,18 +36,18 @@ Space was added as a new concept in v9.6. Each EnergyPlus Zone contains one or m
 
   * assigning and allocating internal gains
   * specifying enclosure boundaries,
-  * reporting inputs grouped by space types, and 
+  * reporting inputs grouped by space types, and
   * reporting select output grouped by space types.
-  
+
 For the zone heat balance each thermal Zone is composed of one or more Spaces controlled by a single thermostat or HVAC system control point such as a VAV terminal unit.
 
 In version 23.1 options were added to perform the air heat balance for each Space or each Zone, and space-level heat balance output variables were added.
 
 This NFP proposes additional optional capabilities:
 
-  * Space-level (room-by-room) sizing to size individual room diffusers or equipment such as PTACs. 
-  
-  * Zone-level equipment may be sized to either the coincident or non-coincident peak across the Spaces (rooms). 
+  * Space-level (room-by-room) sizing to size individual room diffusers or equipment such as PTACs.
+
+  * Zone-level equipment may be sized to either the coincident or non-coincident peak across the Spaces (rooms).
 
   * Space-by-space HVAC simulation to allow modeling the impact of thermostat placement in a specific space (room). This may result in less-than-ideal temperature control for other spaces in the same Zone. For some applications, such as a unitary system with a single thermostat, this can already be modeled with the "control zone" options. This feature would extend to other system types, including VAV systems or unitary systems with zoning controls.
 
@@ -311,7 +311,7 @@ ZoneHVAC:SpaceDistribution:NonAirFlow,
   A3 , \field Space Distribution 1 Name
        \required-field
        \type object-list
-       \object-list SpaceDistributionNames   
+       \object-list SpaceDistributionNames
 ```
 
 ### ZoneHVAC:EquipmentConnections
@@ -351,7 +351,7 @@ ZoneHVAC:EquipmentConnections,
   ,                        !- Zone Return Air Node 1 Flow Rate Fraction Schedule Name
   ,                        !- Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name
   Zone 1 Space Distribution; !- Space Distribution List Name
-  
+
 ZoneHVAC:EquipmentList,
   Zone 1 Eq,               !- Name
   SequentialLoad,          !- Load Distribution Scheme
@@ -374,7 +374,7 @@ ZoneHVAC:SpaceDistributionList,
   Zone 1 VAV Splitter,     !- Space Distribution 1 Object Name
   ZoneHVAC:SpaceDistribution:NonAirFlow, !- Space Distribution 1 Object Type
   Zone 1 Baseboard Splitter; !- Space Distribution 2 Object Name
-    
+
 SpaceHVAC:EquipmentConnections,
   Space 1A,                !-Space Name
   Space 1A VAV Supply Node, !-Space Air Inlet Node or NodeList Name
@@ -386,7 +386,7 @@ SpaceHVAC:EquipmentConnections,
   Space 1B VAV Supply Node, !-Space Air Inlet Node or NodeList Name
   ,                        !-Space Air Exhanust Node or NodeList Name
   Space 1B Node;           !-Space Air Node Name
- 
+
 ZoneHVAC:SpaceDistribution:AirFlow,
    Zone 1 VAV Splitter,    !-Name
    ZoneHVAC:AirDistributionUnit, !-Zone Equipment Object Type
@@ -560,7 +560,7 @@ The main calculation flow for Zone sizing is:
      * When doing Space sizing, which arrays are really needed?
          * All four arrays will be needed for Space `SpaceSizing`, `CalcSpaceSizing`, `CalcFinalSpaceSizing`, and `FinalSpaceSizing`
          * It's possible that only `FinalZoneSizing` is needed at the zone level. But will need to search the code to see if any of the other zone sizing arrays might be accessed elsewhere outside of the zone sizing calcs.
-         
+
 ### HVAC ###
 
 The main calculation flow for Zone and Space HVAC in `HVACManager:ManageHVAC` is as follows, with notes about changes required for Space-HVAC.
@@ -584,6 +584,3 @@ The main calculation flow for Zone and Space HVAC in `HVACManager:ManageHVAC` is
     * `correctZoneAirTemps`
        * Space-level corrections for air temps and humidity are already implemented.
        * Some "TODO: For Now" comments need to be replaced with full Space-level assignments
-
-
-

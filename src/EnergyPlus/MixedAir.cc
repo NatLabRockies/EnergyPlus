@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1768,7 +1768,10 @@ void GetOAControllerInputs(EnergyPlusData &state)
             "Name,DSZAD Name");
         print(state.files.eio, "{}\n", Format_700);
         for (auto const &ventMech : state.dataMixedAir->VentilationMechanical) {
-            print(state.files.eio, " Controller:MechanicalVentilation,{},{},", ventMech.Name, ventMech.availSched ? ventMech.availSched->Name : "");
+            print(state.files.eio,
+                  " Controller:MechanicalVentilation,{},{},",
+                  ventMech.Name,
+                  (ventMech.availSched != nullptr) ? ventMech.availSched->Name : "");
 
             print(state.files.eio, format("{},", yesNoNames[(int)ventMech.DCVFlag]));
 
@@ -5294,7 +5297,7 @@ bool CheckForControllerWaterCoil(EnergyPlusData &state,
         state.dataMixedAir->GetOASysInputFlag = false;
     }
 
-    int OnControllerList = false;
+    bool OnControllerList = false;
 
     for (int Num = 1; Num <= state.dataMixedAir->NumControllerLists; ++Num) {
         for (int CompNum = 1; CompNum <= state.dataMixedAir->ControllerLists(Num).NumControllers; ++CompNum) {
@@ -5340,7 +5343,7 @@ void CheckControllerLists(EnergyPlusData &state, bool &ErrFound)
 
     int NumControllers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
     int NumAirLoop = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, AirLoopObject);
-    std::string_view AirLoopName = "";
+    std::string_view AirLoopName;
 
     for (int Item = 1; Item <= NumControllers; ++Item) {
 

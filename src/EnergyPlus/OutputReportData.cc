@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -61,10 +61,8 @@
 namespace EnergyPlus {
 
 AnnualFieldSet::AnnualFieldSet(std::string varName, AnnualFieldSet::AggregationKind kindOfAggregation, int numDigitsShown)
+    : m_variMeter(std::move(varName)), m_aggregate(kindOfAggregation), m_showDigits(numDigitsShown)
 {
-    m_variMeter = varName;
-    m_aggregate = kindOfAggregation;
-    m_showDigits = numDigitsShown;
 }
 
 int AnnualFieldSet::getVariableKeyCountandTypeFromFldSt(EnergyPlusData &state,
@@ -73,7 +71,7 @@ int AnnualFieldSet::getVariableKeyCountandTypeFromFldSt(EnergyPlusData &state,
                                                         OutputProcessor::TimeStepType &stepTypeVar,
                                                         Constant::Units &unitsVar)
 {
-    int numkeys;
+    int numkeys = 0;
     GetVariableKeyCountandType(
         state, m_variMeter, numkeys, typeVar, avgSumVar, stepTypeVar, unitsVar); // call outputprocessor routine with member variable
     return numkeys;

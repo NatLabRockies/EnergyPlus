@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -178,15 +178,14 @@ Real64 WindSpeedAt(const EnergyPlusData &state, Real64 const Z) // Height above 
 
     if (Z <= 0.0) {
         return 0.0;
-    } else if (state.dataEnvrn->SiteWindExp == 0.0) {
-        return state.dataEnvrn->WindSpeed;
-    } else {
-        //  [Met] - at meterological Station, Height of measurement is usually 10m above ground
-        //  LocalWindSpeed = Windspeed [Met] * (Wind Boundary LayerThickness [Met]/Height [Met])**Wind Exponent[Met] &
-        //                     * (Height above ground / Site Wind Boundary Layer Thickness) ** Site Wind Exponent
-        return state.dataEnvrn->WindSpeed * state.dataEnvrn->WeatherFileWindModCoeff *
-               std::pow(Z / state.dataEnvrn->SiteWindBLHeight, state.dataEnvrn->SiteWindExp);
     }
+    if (state.dataEnvrn->SiteWindExp == 0.0) {
+        return state.dataEnvrn->WindSpeed;
+    } //  [Met] - at meterological Station, Height of measurement is usually 10m above ground
+    //  LocalWindSpeed = Windspeed [Met] * (Wind Boundary LayerThickness [Met]/Height [Met])**Wind Exponent[Met] &
+    //                     * (Height above ground / Site Wind Boundary Layer Thickness) ** Site Wind Exponent
+    return state.dataEnvrn->WindSpeed * state.dataEnvrn->WeatherFileWindModCoeff *
+           std::pow(Z / state.dataEnvrn->SiteWindBLHeight, state.dataEnvrn->SiteWindExp);
 }
 
 Real64 OutBaroPressAt(EnergyPlusData &state, Real64 const Z) // Height above ground (m)

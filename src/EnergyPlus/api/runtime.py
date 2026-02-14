@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,12 +53,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import cdll, c_int, c_char_p, c_void_p, CFUNCTYPE
-from inspect import signature
-from typing import Union, List
-from types import FunctionType
 import os
-
+from ctypes import CFUNCTYPE, c_char_p, c_int, c_void_p, cdll
+from inspect import signature
+from types import FunctionType
+from typing import List, Union
 
 # CFUNCTYPE wrapped Python callbacks need to be kept in memory explicitly, otherwise GC takes it
 # This causes undefined behavior but generally segfaults and illegal access violations
@@ -149,7 +148,9 @@ class Runtime:
         sig = signature(function_to_check)
         num_args = len(sig.parameters)
         if num_args != expected_num_args:
-            raise TypeError(f"Registering function with incorrect arguments, calling point = {calling_point_name} needs {expected_num_args} arguments")
+            raise TypeError(
+                f"Registering function with incorrect arguments, calling point = {calling_point_name} needs {expected_num_args} arguments"
+            )
 
     def _set_energyplus_root_directory(self, state, path: str):
         """
@@ -170,7 +171,7 @@ class Runtime:
                      bytes before calling the C function to set to the install root inside the running EnergyPlus.
         :return: Nothing
         """
-        path = path.encode('utf-8')
+        path = path.encode("utf-8")
         self.api.setEnergyPlusRootDirectory(state, path)
 
     def run_energyplus(self, state: c_void_p, command_line_args: List[Union[str, bytes]]) -> int:
@@ -195,11 +196,11 @@ class Runtime:
         this_script_dir = os.path.dirname(this_file)  # returns C:\EnergyPlus\pyenergyplus
         eplus_root_dir = os.path.dirname(os.path.normpath(this_script_dir))  # returns C:\EnergyPlus
         self._set_energyplus_root_directory(state, eplus_root_dir)
-        
+
         args_with_program_name = [b"energyplus"]  # don't require the program name argument, just add it here
         for cla in command_line_args:
             if isinstance(cla, str):
-                prepped_cla = cla.encode('utf-8')
+                prepped_cla = cla.encode("utf-8")
             else:
                 prepped_cla = cla
             args_with_program_name.append(prepped_cla)
@@ -209,7 +210,7 @@ class Runtime:
         # this is something to do with the dynamic nature of the ctypes "type" objects.
         # For now I'm adding this noinspection marker to get it to hush
         # noinspection PyTypeChecker
-        cli_arg_type = (c_char_p * len(args_with_program_name))
+        cli_arg_type = c_char_p * len(args_with_program_name)
         # OK, so now that we have the argument "type" set as a fixed length array of char*, we assign it to the
         # DLL function call.  This must be done here because the arg count may change with each call.
         self.api.energyplus.argtypes = [c_void_p, c_int, cli_arg_type]
@@ -251,7 +252,7 @@ class Runtime:
         :return: Nothing
         """
         if isinstance(message, str):
-            message = message.encode('utf-8')
+            message = message.encode("utf-8")
         self.api.issueWarning(state, message)
 
     def issue_severe(self, state: c_void_p, message: Union[str, bytes]) -> None:
@@ -274,7 +275,7 @@ class Runtime:
         :return: Nothing
         """
         if isinstance(message, str):
-            message = message.encode('utf-8')
+            message = message.encode("utf-8")
         self.api.issueSevere(state, message)
 
     def issue_text(self, state: c_void_p, message: Union[str, bytes]) -> None:
@@ -294,7 +295,7 @@ class Runtime:
         :return: Nothing
         """
         if isinstance(message, str):
-            message = message.encode('utf-8')
+            message = message.encode("utf-8")
         self.api.issueText(state, message)
 
     def callback_progress(self, state: c_void_p, f: FunctionType) -> None:
@@ -306,7 +307,7 @@ class Runtime:
         :param f: A python function which takes an integer argument and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_progress')
+        self._check_callback_args(f, 1, "callback_progress")
         cb_ptr = self.py_progress_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.registerProgressCallback(state, cb_ptr)
@@ -322,7 +323,7 @@ class Runtime:
         :param f: A python function which takes a string (bytes) argument and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_message')
+        self._check_callback_args(f, 1, "callback_message")
         cb_ptr = self.py_message_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.registerStdOutCallback(state, cb_ptr)
@@ -336,7 +337,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_begin_new_environment')
+        self._check_callback_args(f, 1, "callback_begin_new_environment")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackBeginNewEnvironment(state, cb_ptr)
@@ -350,7 +351,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_after_new_environment_warmup_complete')
+        self._check_callback_args(f, 1, "callback_after_new_environment_warmup_complete")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackAfterNewEnvironmentWarmupComplete(state, cb_ptr)
@@ -364,7 +365,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_begin_zone_timestep_before_init_heat_balance')
+        self._check_callback_args(f, 1, "callback_begin_zone_timestep_before_init_heat_balance")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackBeginZoneTimeStepBeforeInitHeatBalance(state, cb_ptr)
@@ -378,7 +379,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_begin_zone_timestep_after_init_heat_balance')
+        self._check_callback_args(f, 1, "callback_begin_zone_timestep_after_init_heat_balance")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackBeginZoneTimeStepAfterInitHeatBalance(state, cb_ptr)
@@ -392,7 +393,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_begin_system_timestep_before_predictor')
+        self._check_callback_args(f, 1, "callback_begin_system_timestep_before_predictor")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackBeginTimeStepBeforePredictor(state, cb_ptr)
@@ -406,7 +407,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_begin_zone_timestep_before_set_current_weather')
+        self._check_callback_args(f, 1, "callback_begin_zone_timestep_before_set_current_weather")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackBeginZoneTimestepBeforeSetCurrentWeather(state, cb_ptr)
@@ -420,7 +421,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_after_predictor_before_hvac_managers')
+        self._check_callback_args(f, 1, "callback_after_predictor_before_hvac_managers")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackAfterPredictorBeforeHVACManagers(state, cb_ptr)
@@ -434,7 +435,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_after_predictor_after_hvac_managers')
+        self._check_callback_args(f, 1, "callback_after_predictor_after_hvac_managers")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackAfterPredictorAfterHVACManagers(state, cb_ptr)
@@ -448,7 +449,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_inside_system_iteration_loop')
+        self._check_callback_args(f, 1, "callback_inside_system_iteration_loop")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackInsideSystemIterationLoop(state, cb_ptr)
@@ -462,7 +463,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_zone_timestep_before_zone_reporting')
+        self._check_callback_args(f, 1, "callback_end_zone_timestep_before_zone_reporting")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfZoneTimeStepBeforeZoneReporting(state, cb_ptr)
@@ -476,7 +477,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_zone_timestep_after_zone_reporting')
+        self._check_callback_args(f, 1, "callback_end_zone_timestep_after_zone_reporting")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfZoneTimeStepAfterZoneReporting(state, cb_ptr)
@@ -490,7 +491,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_system_timestep_before_hvac_reporting')
+        self._check_callback_args(f, 1, "callback_end_system_timestep_before_hvac_reporting")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfSystemTimeStepBeforeHVACReporting(state, cb_ptr)
@@ -504,7 +505,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_system_timestep_after_hvac_reporting')
+        self._check_callback_args(f, 1, "callback_end_system_timestep_after_hvac_reporting")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfSystemTimeStepAfterHVACReporting(state, cb_ptr)
@@ -518,7 +519,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_zone_sizing')
+        self._check_callback_args(f, 1, "callback_end_zone_sizing")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfZoneSizing(state, cb_ptr)
@@ -532,7 +533,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_end_system_sizing')
+        self._check_callback_args(f, 1, "callback_end_system_sizing")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfSystemSizing(state, cb_ptr)
@@ -546,7 +547,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_after_component_get_input')
+        self._check_callback_args(f, 1, "callback_after_component_get_input")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackEndOfAfterComponentGetInput(state, cb_ptr)
@@ -563,11 +564,11 @@ class Runtime:
                              initialization program name or a simulation program name.
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_user_defined_component_model')
+        self._check_callback_args(f, 1, "callback_user_defined_component_model")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         if isinstance(program_name, str):
-            program_name = program_name.encode('utf-8')
+            program_name = program_name.encode("utf-8")
         self.api.callbackUserDefinedComponentModel(state, cb_ptr, program_name)
 
     def callback_unitary_system_sizing(self, state: c_void_p, f: FunctionType) -> None:
@@ -578,7 +579,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_unitary_system_sizing')
+        self._check_callback_args(f, 1, "callback_unitary_system_sizing")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.callbackUnitarySystemSizing(state, cb_ptr)
@@ -594,7 +595,7 @@ class Runtime:
         :param f: A python function which takes one argument, the current state instance, and returns nothing
         :return: Nothing
         """
-        self._check_callback_args(f, 1, 'callback_register_external_hvac_manager')
+        self._check_callback_args(f, 1, "callback_register_external_hvac_manager")
         cb_ptr = self.py_state_callback_type(f)
         all_callbacks.append(cb_ptr)
         self.api.registerExternalHVACManager(state, cb_ptr)

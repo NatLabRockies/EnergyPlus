@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.OCX"
-Begin VB.Form frmNodeSelect 
+Begin VB.Form frmNodeSelect
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Edit or Select Node Name"
    ClientHeight    =   8520
@@ -14,7 +14,7 @@ Begin VB.Form frmNodeSelect
    ScaleWidth      =   19485
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.ListBox lstCurrentClassObjField 
+   Begin VB.ListBox lstCurrentClassObjField
       BackColor       =   &H8000000F&
       Height          =   645
       ItemData        =   "frmNodeSelect.frx":0000
@@ -24,7 +24,7 @@ Begin VB.Form frmNodeSelect
       Top             =   120
       Width           =   8775
    End
-   Begin VB.TextBox txtCurrentNodeName 
+   Begin VB.TextBox txtCurrentNodeName
       Height          =   285
       Left            =   2040
       TabIndex        =   15
@@ -32,7 +32,7 @@ Begin VB.Form frmNodeSelect
       Top             =   840
       Width           =   8760
    End
-   Begin VB.ListBox lstContaining 
+   Begin VB.ListBox lstContaining
       Height          =   5715
       ItemData        =   "frmNodeSelect.frx":005C
       Left            =   14280
@@ -42,7 +42,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1560
       Width           =   4815
    End
-   Begin VB.ListBox lstOtherAppearances 
+   Begin VB.ListBox lstOtherAppearances
       BackColor       =   &H8000000F&
       Height          =   1425
       ItemData        =   "frmNodeSelect.frx":01DB
@@ -52,14 +52,14 @@ Begin VB.Form frmNodeSelect
       Top             =   6840
       Width           =   6495
    End
-   Begin VB.TextBox txtSearchText 
+   Begin VB.TextBox txtSearchText
       Height          =   375
       Left            =   8760
       TabIndex        =   6
       Top             =   7440
       Width           =   2655
    End
-   Begin VB.CommandButton cmdCancel 
+   Begin VB.CommandButton cmdCancel
       Cancel          =   -1  'True
       Caption         =   "Cancel"
       Height          =   375
@@ -68,7 +68,7 @@ Begin VB.Form frmNodeSelect
       Top             =   8040
       Width           =   1500
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375
@@ -77,7 +77,7 @@ Begin VB.Form frmNodeSelect
       Top             =   8040
       Width           =   1500
    End
-   Begin VB.ListBox lstOtherNodeNames 
+   Begin VB.ListBox lstOtherNodeNames
       Height          =   4935
       Left            =   120
       Sorted          =   -1  'True
@@ -85,7 +85,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1560
       Width           =   6495
    End
-   Begin VB.OptionButton optAll 
+   Begin VB.OptionButton optAll
       Caption         =   "All"
       Height          =   255
       Left            =   2400
@@ -93,7 +93,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1320
       Width           =   495
    End
-   Begin VB.OptionButton optRecent 
+   Begin VB.OptionButton optRecent
       Caption         =   "Recent"
       Height          =   255
       Left            =   3120
@@ -101,7 +101,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1320
       Width           =   855
    End
-   Begin VB.OptionButton optContaining 
+   Begin VB.OptionButton optContaining
       Caption         =   "Containing"
       Height          =   255
       Left            =   4200
@@ -109,7 +109,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1320
       Width           =   1095
    End
-   Begin VB.OptionButton OptClassOrField 
+   Begin VB.OptionButton OptClassOrField
       Caption         =   "Class or Field"
       Height          =   255
       Left            =   5400
@@ -118,7 +118,7 @@ Begin VB.Form frmNodeSelect
       Value           =   -1  'True
       Width           =   1335
    End
-   Begin MSComctlLib.TreeView treeClassField 
+   Begin MSComctlLib.TreeView treeClassField
       Height          =   5715
       Left            =   8400
       TabIndex        =   18
@@ -134,7 +134,7 @@ Begin VB.Form frmNodeSelect
       SingleSel       =   -1  'True
       Appearance      =   1
    End
-   Begin VB.Label Label6 
+   Begin VB.Label Label6
       Caption         =   "Node Name"
       Height          =   255
       Left            =   120
@@ -142,7 +142,7 @@ Begin VB.Form frmNodeSelect
       Top             =   840
       Width           =   1575
    End
-   Begin VB.Label lblSelection 
+   Begin VB.Label lblSelection
       Caption         =   "Selection"
       Height          =   255
       Left            =   7080
@@ -150,7 +150,7 @@ Begin VB.Form frmNodeSelect
       Top             =   1320
       Width           =   3615
    End
-   Begin VB.Label Label2 
+   Begin VB.Label Label2
       Caption         =   "Containing Text"
       Height          =   375
       Left            =   7560
@@ -158,13 +158,13 @@ Begin VB.Form frmNodeSelect
       Top             =   7440
       Width           =   1575
    End
-   Begin VB.Line Line2 
+   Begin VB.Line Line2
       X1              =   0
       X2              =   10800
       Y1              =   1200
       Y2              =   1200
    End
-   Begin VB.Label Label3 
+   Begin VB.Label Label3
       Caption         =   "Class/Object Name/Field"
       Height          =   255
       Left            =   120
@@ -172,7 +172,7 @@ Begin VB.Form frmNodeSelect
       Top             =   120
       Width           =   1935
    End
-   Begin VB.Label Label7 
+   Begin VB.Label Label7
       Caption         =   "Where Selected Other Node Name Appears in File"
       Height          =   255
       Left            =   120
@@ -180,7 +180,7 @@ Begin VB.Form frmNodeSelect
       Top             =   6600
       Width           =   5775
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Other Node Names"
       Height          =   255
       Left            =   120
@@ -542,15 +542,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

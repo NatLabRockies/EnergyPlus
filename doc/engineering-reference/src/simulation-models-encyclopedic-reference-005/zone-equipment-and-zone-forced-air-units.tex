@@ -223,6 +223,33 @@ Wray, C.P. and N.E. Matson. 2003. ``Duct Leakage Impacts on VAV System Performan
 
 Wray, C.P., R.C. Diamond, and M.H. Sherman. 2005. ``Rationale for Measuring Duct Leakage Flows in Large Commercial Buildings''. Proceedings -- 26th AIVC Conference, Brussels, Belgium, September. LBNL-58252.
 
+\subsection{Air Leakage in Parallel Fan-Powered Terminal Units}\label{parallel_piu_leakage}
+As described in (O'Neal et al., 2016) and (Sardoueinasab et al., 2018), backdraft damper leakage in parallel fan-powered terminal units can be characterized using a leakage fraction at a constant static pressure setpoint:
+
+\begin{equation}
+{f_{leakage}} = \frac{\dot m_{leakage}}{\dot m_{primary}}
+\end{equation}
+
+Leakage is only simulated when the terminal fan is off. The impact of the simulated leakage is twofold:
+\begin{enumerate}
+    \item To make up for the leaked air, the primary air flow rate should be increased to meet the zone load
+    \item The air escaping from the terminal impacts the heat balance of the thermal zone designated as the destination for the leaks
+\end{enumerate}
+
+The new primary flow rate is adjusted as follows:
+\begin{equation}
+{\dot m_{primary, adj}} = {\dot m_{primary}} \times \frac{1}{1 - {f_{leakage}}}
+\end{equation}
+
+The new primary flow rate won't exceed the maximum primary flow rate of the terminal.
+
+Since leakage only occurs during dead-band and cooling operation (i.e., not during heating operation), the new primary air flow rate doesn't have an impact on the terminal mixer and heater. Leaks are accounted for after the terminal has been simulated, outlet nodes are updated then. The last step is to account for the thermal impact of the leakage on the thermal zone designated as the destination for the leaks. When an `AirLoopHVAC:ReturnPlenum`, this is handled in a similar fashion as leakage simulation using the Simplified Duct Leakage Model, see \ref{implementation-000}. Since users can select the thermal zone designated as the destination for the leaks, this feature also supports models that use an AirLoopHVAC:ZoneMixer as the return path. The leakage flow rate (at the conditions of each destination zone) is added to the mixer to calculate the new mixed air conditions.
+
+\subsubsection{References}\label{references_parallel_piu_leakage}
+D.L. O'Neal, J.L. Edmondson, Characterizing air leakage in parallel fan-powered terminal units, ASHRAE Trans., 122 (1) (2016), pp. 343-353
+
+Zahra Sardoueinasab, Peng Yin, Dennis O'Neal, Energy modeling and analysis of inherent air leakage from parallel fan-powered terminal units using EMS in EnergyPlus, (2018), Energy and Buildings, https://doi.org/10.1016/j.enbuild.2018.07.019
+
 \subsection{Fan Coil Unit}\label{fan-coil-unit}
 
 \subsubsection{Overview}\label{overview-4-003}

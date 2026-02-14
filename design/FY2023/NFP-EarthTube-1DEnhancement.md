@@ -8,7 +8,7 @@ Earth Tube 1-D Conduction Enhancement (Design Document)
  - Revision Date (Version 3): May 12, 2023
  - Revision Date (Version 4): June 7, 2023 (converted to a design document, minor grammatical edits, addition of the Code Development setion)
  - Revision Date (Version 5): June 27, 2023 (switch to LU decomposition)
- 
+
 
 ## Justification for New Feature ##
 
@@ -17,7 +17,7 @@ The improvement of the earth tube model will be done in stages.  The first step 
 
 ## E-mail, Slack, and Conference Call Conclusions ##
 
-Technicalities Meeting (5/3/23): team review the document briefly and stated the desire for this to get additional feedback in the next technicalities meeting.  Two initial requests from the team included modifying the proposal to factor in the impact of the soil at the depth of the earth tube since this would be more realistic of the situation (as in, the earth tube in not infinite in width) and to contact John Nelson who has expertise in earth tube modeling and has requested improved earth tube simulation capabilities in EnergyPlus in the past.  This update includes a modification of the finite difference scheme to address the concern regarding what is happening at the depth of the earth tube itself.  In addition, GitHub was used to contact John Nelson and that conversation is contained in the comments for the GitHub issue regarding earth tubes (https://github.com/NREL/EnergyPlus/issues/6627).  John suggested that the model at some point include the ability to model temperature variation axially along the earth tube (something already logged as a potential future enhancement) and also to provide some improved controls where air might bypass the earth tube and use heat recovery in certain situations to save the earth tube’s ability to cool.  This is an interesting idea but may also be fairly complicated because it may deal with specific control algorithms and bridging between the zone and air loop simulations.  Such a concept is different from what is currently in EnergyPlus and there doesn’t appear to be another model in E+ that bridges with air flow at the zone and air loop level.  Such a concept is definitely beyond the scope of this initial enhancement.
+Technicalities Meeting (5/3/23): team review the document briefly and stated the desire for this to get additional feedback in the next technicalities meeting.  Two initial requests from the team included modifying the proposal to factor in the impact of the soil at the depth of the earth tube since this would be more realistic of the situation (as in, the earth tube in not infinite in width) and to contact John Nelson who has expertise in earth tube modeling and has requested improved earth tube simulation capabilities in EnergyPlus in the past.  This update includes a modification of the finite difference scheme to address the concern regarding what is happening at the depth of the earth tube itself.  In addition, GitHub was used to contact John Nelson and that conversation is contained in the comments for the GitHub issue regarding earth tubes (https://github.com/NatLabRockies/EnergyPlus/issues/6627).  John suggested that the model at some point include the ability to model temperature variation axially along the earth tube (something already logged as a potential future enhancement) and also to provide some improved controls where air might bypass the earth tube and use heat recovery in certain situations to save the earth tube’s ability to cool.  This is an interesting idea but may also be fairly complicated because it may deal with specific control algorithms and bridging between the zone and air loop simulations.  Such a concept is different from what is currently in EnergyPlus and there doesn’t appear to be another model in E+ that bridges with air flow at the zone and air loop level.  Such a concept is definitely beyond the scope of this initial enhancement.
 
 Slack Discussion (5/11/23): Neal Kruis brought up two issues in this NFP.  First, there is the issue of the infinitely wide domain which is unrealistic.  Second, there is the question of what air temperature is being used for heat transfer between the earth tube and the air passing through it.  The second issue will be resolved by adding the discussion of the effectiveness-NTU heat exchanger model that is being used.  This will be similar in the assumptions as the heat exchanger algorithm used in the low temperature radiant system model (solid side with a “constant” temperature and a fluid side which has a temperature which varies throughout).  The first issue will be addressed by modifying the solution domain to have a user-defined width with adiabatic boundary conditions on either side.  In reality, at some distance from the earth tube there will be negligible heat transfer toward/away from the earth tube.  Making this a user-defined input parameter will allow the width to be studied.
 
@@ -240,7 +240,7 @@ EARTHTUBE,
   0.0000000E+00,    !- Velocity**2 Term Flow Coef
   Vertical,         !- Earth Tube Model Type
   EarthTubeParams;  !- Earth Tube Model Parameters
-  
+
 EarthTube:Parameters,
   EarthTubeParams,  !- Earth Tube Model Parameters (Name)
   5,                !- Earth Tube Nodes Above
@@ -248,7 +248,7 @@ EarthTube:Parameters,
   1.0,              !- Earth Tube Dimensionless Boundary Above
   0.5,              !- Earth Tube Dimensionless Boundary Below
   4.0;              !- Earth Tube Dimensionless Solution Space Width
-  
+
 \end{lstlisting}
 
 ## Outputs Description ##
@@ -405,6 +405,3 @@ One potential improvememt that could be considered in the future for the model i
 Existing EnergyPlus Earth Tube Model, EnergyPlus Engineering Reference, EnergyPlus Input-Output Reference.
 
 Liu, X., M. Xu, J. Guo, and R. Zhu.  2019.  “Conceptual Development of the Earth Tube Cooling System For a Tall Building,” Journal of Green Building (2019) 14 (2): 1–28.
-
-
-

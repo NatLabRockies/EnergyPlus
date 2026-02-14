@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -55,23 +55,41 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import difflib
-import os
 import sys
 import unittest
+from collections import Counter
 from pathlib import Path
 
-valid_null_enum_value_names = ["INVALID"]
-valid_num_enum_value_names = ["NUM"]
+from base_hook import (
+    SRC_DIR,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    collect_files,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+EXTENSIONS = {".hh", ".cc"}
+
+VALID_NULL_ENUM_VALUE_NAMES = ["INVALID"]
+VALID_NUM_ENUM_VALUE_NAMES = ["NUM"]
 
 
-def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors: bool = True) -> int:
-    """Process enum string, return true false for errors found flag"""
+def process_enum_str(input_str: str, filepath: Path, line_no: int) -> list[LogMessage]:
+    """Process enum string."""
+
+    log_messages: list[LogMessage] = []
 
     # skip "enum class SomeEnum;"
     if "{" not in input_str:
-        return 0
+        return log_messages
 
-    error_str = ""
+    file_name = filepath.name
+
     input_str = input_str.replace("enum class", "")
     input_str = input_str.replace("};", "")
     tokens = input_str.split("{")
@@ -88,7 +106,7 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
     # split into names and integer values, in present
     keys = []
     keys_uc = []
-    values = []
+    values: list[str | int] = []
     for e in tokens:
         if "=" in e:
             tokens = e.replace(" ", "").split("=")
@@ -104,7 +122,7 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
             values.append("")
 
     # check for null names at 0-th position
-    if keys_uc[0] not in valid_null_enum_value_names:
+    if keys_uc[0] not in VALID_NULL_ENUM_VALUE_NAMES:
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = [
             "CsvParser.hh:Token",
@@ -114,173 +132,247 @@ def process_enum_str(input_str: str, file_name: str, line_no: int, print_errors:
             "HVACInterfaceManager.cc:UpdateType",
             "DataHeatBalance.hh:PERptVars",
             "EconomicTariff.hh:StepType",
-            "LowTempRadiantSystem.hh:OpMode"
+            "LowTempRadiantSystem.hh:OpMode",
         ]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tMissing 'Invalid' at position 0\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - Missing 'Invalid' at position 0",
+                )
+            )
 
     # check for null value = -1 at 0-th position
-    if keys_uc[0] in valid_null_enum_value_names and values[0] != -1:
+    if keys_uc[0] in VALID_NULL_ENUM_VALUE_NAMES and values[0] != -1:
         # exceptions listed by <FILE>:<ENUM NAME>
-        exceptions = [
-            "HVACInterfaceManager.cc:UpdateType"
-        ]
+        exceptions = ["HVACInterfaceManager.cc:UpdateType"]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += f"\t{keys_uc[0]} must = -1\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - {keys_uc[0]} must = -1",
+                )
+            )
 
     # check for num names at N-th position
-    if keys_uc[-1] not in valid_num_enum_value_names:
+    if keys_uc[-1] not in VALID_NUM_ENUM_VALUE_NAMES:
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = [
             "HVACInterfaceManager.cc:UpdateType",
             "IdfParser.hh:Token",
             "EconomicTariff.hh:StepType",
-            "LowTempRadiantSystem.hh:OpMode"
+            "LowTempRadiantSystem.hh:OpMode",
         ]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tMissing 'Num' at position N\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - Missing 'Num' at position N",
+                )
+            )
 
     # check for "unassigned" in names
     if "UNASSIGNED" in keys_uc:
-        error_str += "\tUNASSIGNED in enum names\n"
+        log_messages.append(
+            ErrorMessage(
+                tool="check_for_malformed_enums",
+                filepath=filepath,
+                line_number=line_no,
+                line=input_str,
+                message=f"Malformed 'enum class' '{name}' - UNASSIGNED in enum names",
+            )
+        )
 
     # check for "unknown" in names
     if "UNKNOWN" in keys_uc:
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = ["DataGlobalConstants.hh:Units"]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tUNKNOWN in enum names\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - UNKNOWN in enum names",
+                )
+            )
 
     # check for proper casing
     if str(name[0]).islower():
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = [
-            "DataGlobalConstants.hh:eResource", "DataGlobalConstants.hh:eFuel",
-            "DataGlobalConstants.hh:ePollutant", "OutputProcessor.hh:eResourceSOV"
+            "DataGlobalConstants.hh:eResource",
+            "DataGlobalConstants.hh:eFuel",
+            "DataGlobalConstants.hh:ePollutant",
+            "OutputProcessor.hh:eResourceSOV",
         ]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tenum name must begin with upper case letter\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - enum name must begin with upper case letter",
+                )
+            )
 
     if "ENUM" in str(name).upper():
-        error_str += "\tenum name should not contain 'enum'\n"
+        log_messages.append(
+            ErrorMessage(
+                tool="check_for_malformed_enums",
+                filepath=filepath,
+                line_number=line_no,
+                line=input_str,
+                message=f"Malformed 'enum class' '{name}' - enum name should not contain 'enum'",
+            )
+        )
 
     if any([str(x[0]).islower() for x in keys]):
         # exceptions listed by <FILE>:<ENUM NAME>
         exceptions = ["FileSystem.hh:FileTypes", "DataGlobalConstants.hh:Units"]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tenum keys must begin with upper case letter\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - enum keys must begin with upper case letter",
+                )
+            )
 
     if difflib.get_close_matches(name, keys, cutoff=0.7):
-        exceptions = ["DataGlobalConstants.hh:HeatOrCool", "DataHVACGlobals.hh:UnitarySysType", "DataGenerators.hh:WaterTempMode"]
+        exceptions = [
+            "DataGlobalConstants.hh:HeatOrCool",
+            "DataHVACGlobals.hh:UnitarySysType",
+            "DataGenerators.hh:WaterTempMode",
+        ]
         if f"{file_name}:{name}" not in exceptions:
-            error_str += "\tenum keys are too similar to enum name\n"
+            log_messages.append(
+                ErrorMessage(
+                    tool="check_for_malformed_enums",
+                    filepath=filepath,
+                    line_number=line_no,
+                    line=input_str,
+                    message=f"Malformed 'enum class' '{name}' - enum keys are too similar to enum name",
+                )
+            )
 
-    # # check for non-allowed enum values
+    # check for non-allowed enum values
     # if any([x != -1 for x in values if type(x) == int]):
-    #     error_str += "\texplicit numbers not allowed in enum values except 'Invalid=-1'\n"
-
-    if error_str:
-        if print_errors:
-            print(f"ERROR: malformed 'enum class'")
-            print(f"{file_name}: {line_no} - {name}")
-            print(error_str)
-        return 1
-    else:
-        return 0
+    #      error_str = f"Malformed 'enum class' '{name}' - explicit numbers not allowed in enum values except 'Invalid=-1'"
+    return log_messages
 
 
-def find_enums(search_path: Path) -> int:
-    """Checks for malformed enums, returns the number of errors found"""
-    num_errors = 0
+def check_for_malformed_enums(filepath: Path) -> list[LogMessage]:
+    """Check a single file for malformed enums."""
+    lines = [x.strip() for x in filepath.read_text(encoding="utf-8").splitlines()]
 
-    files_to_search = []
-    for p in [search_path]:
-        for root, dirs, files in os.walk(p):
-            for file in files:
-                f_path = Path(root) / Path(file)
-                f_extension = f_path.suffix
-                if f_extension == ".hh":
-                    files_to_search.append(f_path)
-                elif f_extension == ".cc":
-                    files_to_search.append(f_path)
+    start_found = False
+    start_line = 0
+    end_found = False
+    enum_str = ""
 
-    files_to_search.sort()
+    log_messages: list[LogMessage] = []
 
-    for file in files_to_search:
+    for line_num, line in enumerate(lines, start=1):
 
-        try:
-            with open(file, "r") as f:
-                lines = f.readlines()
-        except UnicodeDecodeError:
-            with open(file, "r", encoding='utf-8') as f:
-                lines = f.readlines()
+        # skip blank lines
+        if line == "":
+            continue
 
-        lines = [x.strip() for x in lines]
+        # skip comment lines
+        if line[0:2] == "//":
+            continue
 
-        start_found = False
-        start_line = 0
-        end_found = False
-        enum_str = ""
+        # strip trailing comments
+        if "//" in line:
+            tokens = line.split("//")
+            line = tokens[0].strip()
 
-        for idx, line in enumerate(lines):
+        if "enum class" in line:
+            start_found = True
+            start_line = line_num
 
-            # skip blank lines
-            if line == "":
-                continue
+        if start_found and (";" in line):
+            end_found = True
 
-            # skip comment lines
-            if line[0:2] == "//":
-                continue
+        if start_found:
+            enum_str += line
 
-            # strip trailing comments
-            if "//" in line:
-                tokens = line.split("//")
-                line = tokens[0].strip()
+        if end_found:
+            log_messages += process_enum_str(input_str=enum_str, filepath=filepath, line_no=start_line)
+            start_found = False
+            end_found = False
+            enum_str = ""
 
-            if "enum class" in line:
-                start_found = True
-                start_line = idx + 1
-
-            if start_found and (";" in line):
-                end_found = True
-
-            if start_found:
-                enum_str += line
-
-            if end_found:
-                num_errors += process_enum_str(enum_str, file.name, start_line)
-                start_found = False
-                end_found = False
-                enum_str = ""
-
-    return num_errors
+    return log_messages
 
 
 class TestProcessEnums(unittest.TestCase):
-    def test_process_enum_str(self):
+    def test_process_enum_str(self) -> None:
+
+        dummy_file = Path("DummyFile")
+
         # forward decl
         s = "enum class SomeType;"
-        self.assertFalse(process_enum_str(s, "DummyFile", 1, False))
+        log_messages: list[LogMessage] = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
+        self.assertEqual(len(log_messages), 0)
 
         # proper format
         s = "enum class SomeType : int {Invalid = -1, Valid, Num};"
-        self.assertFalse(process_enum_str(s, "DummyFile", 1, False))
+        log_messages = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
+        self.assertEqual(len(log_messages), 0)
 
         # missing 'invalid'
         s = "enum class SomeType {Valid, Num};"
-        self.assertTrue(process_enum_str(s, "DummyFile", 1, False))
+        log_messages = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
+        self.assertEqual(len(log_messages), 1)
+        self.assertEqual(log_messages[0].message, "Malformed 'enum class' 'SomeType' - Missing 'Invalid' at position 0")
 
         # missing 'num'
         s = "enum class SomeType {Invalid = -1, Valid};"
-        self.assertTrue(process_enum_str(s, "DummyFile", 1, False))
+        log_messages = process_enum_str(input_str=s, filepath=dummy_file, line_no=1)
+        self.assertEqual(len(log_messages), 1)
+        self.assertEqual(log_messages[0].message, "Malformed 'enum class' 'SomeType' - Missing 'Num' at position N")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
         del sys.argv[1:]
-        unittest.main(exit=False, verbosity=0)
-    root_path = Path(__file__).parent.parent.parent
-    src_path = root_path / "src" / "EnergyPlus"
-    errors_found = find_enums(src_path)
-    if errors_found > 0:
-        raise sys.exit(1)
+        unittest.main(exit=True, verbosity=0)
+
+    parser = get_base_parser(description="Check for malformed enums")
+    args = parser.parse_args()
+    if args.files:
+        n_ori = len(args.files)
+        files = [f for f in args.files if f.suffix in EXTENSIONS and f.is_relative_to(SRC_DIR)]
+        if args.verbose:
+            print(f"Checking {len(files)} of {n_ori} specified files")
+    else:
+        files = list(collect_files(base_dir=SRC_DIR, extensions=EXTENSIONS, recursive=True, dirs_to_skip=[]))
+        if args.verbose:
+            counter_info = ", ".join([f"{num} {ext}" for ext, num in Counter([f.suffix for f in files]).items()])
+            print(f"Checking {len(files)} files: {counter_info}")
+
+    run_synchronously = False
+    if run_synchronously:
+        log_messages: list[LogMessage] = []
+        for filepath in files:
+            log_messages += check_for_malformed_enums(filepath=filepath)
+    else:
+        errors_list_of_lists = parallel_apply(func=check_for_malformed_enums, filepaths=files)
+        log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

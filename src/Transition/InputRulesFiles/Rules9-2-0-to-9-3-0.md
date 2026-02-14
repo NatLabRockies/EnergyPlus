@@ -7,8 +7,8 @@ This was previously an Excel workbook that made for very difficult version contr
 # Object Change: Fuel type synonyms
 For all Boiler:\*, WaterHeater:\* , Generator:\* ,
 OtherEquipment, Exterior:FuelEquipment, HVACTemplate:System:VRF, HVACTemplate:Plant:Boiler, ZoneHVAC:HybridUnitaryHVAC
-Coil:Cooling:DX:MultiSpeed, Coil:Heating:Fuel, Coil:Heating:DX:MultiSpeed, AirConditioner:VariableRefrigerantFlow, Chiller:EngineDriven, Chiller:CombustionTurbine, 
-ChillerHeater:Absorption:DirectFired, EnergyManagementSystem:MeteredOutputVariable, LifeCycleCost:UsePriceEscalation, LifeCycleCost:UseAdjustment, 
+Coil:Cooling:DX:MultiSpeed, Coil:Heating:Fuel, Coil:Heating:DX:MultiSpeed, AirConditioner:VariableRefrigerantFlow, Chiller:EngineDriven, Chiller:CombustionTurbine,
+ChillerHeater:Absorption:DirectFired, EnergyManagementSystem:MeteredOutputVariable, LifeCycleCost:UsePriceEscalation, LifeCycleCost:UseAdjustment,
 Meter:Custom, Meter:CustomDecrement, FuelFactors and other objects with a fuel type or resource type field
 
 Field: Fuel Type (or similar)
@@ -50,7 +50,7 @@ b) change "Rel\*" or "Relative\*" or "Local" to "Relative"
 
 # Object Change: ShadowCalculations
 Insert field 1, Shading Calculation Method, if "External Shading Calculation Method" was specified use:
- 
+
  - "Scheduled" for "ScheduledShading"
  - "Imported" for "ImportedShading"
  - "PolygonClipping" for "InternalCalculation" or if not specified
@@ -101,13 +101,13 @@ After field 3, insert 'Condenser Type'. The field has two key options of 'WaterS
 
 ## (1) Replace Object: replace the "AirTerminal:SingleDuct:Uncontrolled" with "AirTerminal:SingleDuct:ConstantVolume:NoReheat"
 
-Field F1(A1): Name, no change 
+Field F1(A1): Name, no change
 
-Field F2(A2): Availability Schedule Name, no change. 
+Field F2(A2): Availability Schedule Name, no change.
 
 Insert Field F3(A3): Air Inlet Node Name, create a new inlet node name using the original Field F3(A3) value
 
-          Field F4(A4 = Field F3(A3) + "ATInlet" -> example, "SPACE3-1 Supply Inlet ATInlet", 
+          Field F4(A4 = Field F3(A3) + "ATInlet" -> example, "SPACE3-1 Supply Inlet ATInlet",
 
           save this new inlet node name for use as the "AirLoopHVAC:ZoneSplitter" or "AirLoopHVAC:SupplyPlenum" outlet node name
 
@@ -141,7 +141,7 @@ Field F1(A1): Name, insert the unique name created for "ZoneHVAC:AirDistribution
 
 Field F2(A2): Air Distribution Unit Outlet Node Name, use Zone Supply Air Node Name input field (A3) value of the "AirTerminal:SingleDuct:Uncontrolled" object
 
-Field F3(A3): Air Terminal Object Type, insert "AirTerminal:SingleDuct:ConstantVolume:NoReheat"  
+Field F3(A3): Air Terminal Object Type, insert "AirTerminal:SingleDuct:ConstantVolume:NoReheat"
 
 Field F4(A4): Air Terminal Object Type, insert the Name of the "AirTerminal:SingleDuct:Uncontrolled" object, example "SPACE3-1 Direct Air"
 
@@ -182,7 +182,7 @@ Field F4(A4): Inlet Node Name, no change
 
     modify one of the "Outlet X Node Name" of the "AirLoopHVAC:SupplyPlenum" that matches the Zone Supply Air Node Name input field value of current "AirTerminal:SingleDuct:Uncontrolled" object
 
-    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object. 
+    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object.
 
 Field >=FX(AX): Outlet X Node Name, modify the matching Outlet X Node Name, should be the same node name as the new Air Inlet Node Name of "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object, old name + ATInlet -> example, "SPACE3-1 Supply Inlet ATInlet"
 
@@ -202,7 +202,7 @@ Field F4(A4): Inlet Node Name, no change
 
     modify one of the "Outlet X Node Name" of the "AirLoopHVAC:SupplyPlenum" that matches the Zone Supply Air Node Name input field value of current "AirTerminal:SingleDuct:Uncontrolled" object
 
-    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object. 
+    use the new Air Inlet Node Name created in Step 3 above for "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object.
 
 Field >=FX(AX): Outlet X Node Name, modify the matching Outlet X Node Name, should be the same node name as the new Air Inlet Node Name of "AirTerminal:SingleDuct:ConstantVolume:NoReheat" object, old name + ATInlet -> example, "SPACE3-1 Supply Inlet ATInlet"
 
@@ -233,7 +233,7 @@ object and create a new one as shown in this exmple.
       Zone3SupplyRegisterNode, !- Node 2 Name
       Zone3Supply,             !- Component Name
       Attic Zone;              !- Thermal Zone Name
-  
+
     AirflowNetwork:Distribution:Linkage,
       Zone3SupplyLink,         !- Name
       Zone3SupplyNode,         !- Node 1 Name
@@ -246,7 +246,6 @@ For all `EnergyManagementSystem:Program` and `EnergyManagementSystem:Subroutine`
 
 ### Before
     SET cp_air = @CpAirFnWTdb HumRatAir TdbAir, !- Program Line
-    
+
 ### After
     SET cp_air = @CpAirFnW HumRatAir, !- Program Line
-    

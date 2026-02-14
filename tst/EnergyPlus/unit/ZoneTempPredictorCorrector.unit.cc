@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -71,6 +71,7 @@
 #include <EnergyPlus/HybridModel.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
+#include <EnergyPlus/PoweredInductionUnits.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -980,7 +981,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_calcZoneOrSpaceSums_SurfCon
     state->dataHeatBal->space(1).HTSurfaceLast = 3;
     state->dataSurface->Surface.allocate(3);
     state->dataHeatBalSurf->SurfHConvInt.allocate(3);
-    state->dataLoopNodes->Node.allocate(4);
+    state->dataLoopNodes->Node.allocate(5);
     state->dataHeatBal->SurfTempEffBulkAir.allocate(3);
     state->dataHeatBalSurf->SurfTempInTmp.allocate(3);
 
@@ -1040,6 +1041,20 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_calcZoneOrSpaceSums_SurfCon
     thisZoneHB.calcZoneOrSpaceSums(*state, false, ZoneNum);
     EXPECT_EQ(0.0, thisZoneHB.SumSysMCp);
     EXPECT_EQ(0.0, thisZoneHB.SumSysMCpT);
+
+    // Check that parallel PIU leakage is accounted for
+    state->dataHeatBal->Zone(1).leakageParallelPIUNums.push_back(1);
+    state->dataPowerInductionUnits->GetPIUInputFlag = false;
+    state->dataPowerInductionUnits->NumPIUs = 1;
+    state->dataPowerInductionUnits->PIU.allocate(1);
+    state->dataPowerInductionUnits->PIU(1).SecAirInNode = 3; // exhaust node
+    state->dataPowerInductionUnits->PIU(1).PriAirInNode = 5; // primary air node
+    state->dataPowerInductionUnits->PIU(1).leakFlow = 0.1;
+    state->dataLoopNodes->Node(5).HumRat = 0.008;
+    state->dataLoopNodes->Node(5).Temp = 12.8;
+    thisZoneHB.calcZoneOrSpaceSums(*state, true, ZoneNum);
+    EXPECT_NEAR(402.67958, thisZoneHB.SumSysMCp, 0.0001);
+    EXPECT_NEAR(7328.768356, thisZoneHB.SumSysMCpT, 0.0001);
 }
 
 TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_EMSOverrideSetpointTest)

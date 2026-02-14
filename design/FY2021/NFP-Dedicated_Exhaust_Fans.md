@@ -5,7 +5,7 @@ Dedicated Exhaust System for Flexible Exhaust Configurations
 
  - Original Date: July 30, 2021
  - Revised: August 2, 2021, revise and start design
- - Revised: Dec 9, 2021, 
+ - Revised: Dec 9, 2021,
 
 
 ## Justification for New Feature ##
@@ -25,7 +25,7 @@ Another application for such exhaust systems is health care. ANSI/ASHRAE/ASHE St
 
 - A few email exchanges with the original requester prior to and during the development of the NFP to clarify the development needs;
 
-- Comment in [pull request #9925](https://github.com/NREL/EnergyPlus/pull/8925#issuecomment-891994628) regarding application for health care spaces with requirement that "All Room Air Exhausted Directly to Outdoors."
+- Comment in [pull request #9925](https://github.com/NatLabRockies/EnergyPlus/pull/8925#issuecomment-891994628) regarding application for health care spaces with requirement that "All Room Air Exhausted Directly to Outdoors."
 
 ### Conference Call Communications ###
 
@@ -61,7 +61,7 @@ An AirLoopHVAC:ExhaustSystem defines how the exhaust air goes out from the zone(
 AirLoopHVAC:ExhaustSystem,
     Central Exhaust 1,            !- Name
     Exhaust Avail List,         !- Availability Manager List Name
-    AirLoopExhaustMixer1,        !- AirLoopHVAC:ZoneMixer Name    
+    AirLoopExhaustMixer1,        !- AirLoopHVAC:ZoneMixer Name
     Fan:SystemModel,            !- Fan Object Type
     CentralExhaustFan1;        !- Fan Name
 ```
@@ -98,7 +98,7 @@ ZoneHVAC:ExhaustControl,
     FlowBalancedSched;              !- Balanced Exhaust Fraction Schedule Name
 ```
 
-It is also possible to included multiple ZoneHVAC:ExhaustControl objects for a single zone, such as multiple exhaust hoods in a laboratory [4, 5] which may operate on different schedules. 
+It is also possible to included multiple ZoneHVAC:ExhaustControl objects for a single zone, such as multiple exhaust hoods in a laboratory [4, 5] which may operate on different schedules.
 
 ### Reporting ###
 
@@ -141,17 +141,17 @@ AirLoopHVAC:ExhaustSystem,
 
 #### #### IDD Addition for ZoneHVAC:ExhaustControl ####
 
-At the end of the `ZoneHVAC Forced Air Units` group (or another position might be at the end of the `Zone HVAC Air Loop Terminal Units` group): 
+At the end of the `ZoneHVAC Forced Air Units` group (or another position might be at the end of the `Zone HVAC Air Loop Terminal Units` group):
 
 ```
 ZoneHVAC:ExhaustControl,
-       \memo Defines a controlled exhaust flow from a zone which feeds into 
+       \memo Defines a controlled exhaust flow from a zone which feeds into
        \memo an AirloopHVAC:Exhaust system inlet.
   A1 , \field Name
        \required-field
   A2 , \field Availability Schedule Name
        \note Availability schedule name for this exhaust system. Schedule value > 0 means it is available.
-       \note If this field is blank, the exhaust system is always available. If the attached 
+       \note If this field is blank, the exhaust system is always available. If the attached
        \note AirloopHVAC:ExhaustSystem is off, then the flow will be zero.
        \type object-list
        \object-list ScheduleNames
@@ -163,7 +163,7 @@ ZoneHVAC:ExhaustControl,
        \note Outlet node name for the exhaust system
        \required-field
        \type node
-  N1 , \field Design Exhaust Flow Rate 
+  N1 , \field Design Exhaust Flow Rate
        \autosizable
        \units m3/s
        \minimum> 0
@@ -202,7 +202,7 @@ The exhaust flows from ZoneHVAC:ExhaustControl will be treated the same as any e
 
 ### Controls and operation modes ###
 
-For the control and operation modes of such an exhaust system, two scenarios will be considered: 
+For the control and operation modes of such an exhaust system, two scenarios will be considered:
 
 1. The first scenario will cover the mode where the central exhaust flow will be driven by the upstream airflow rates; in this case the exhaust system main flow will be determined by the individual ZoneHVAC:ExhaustControl flow rates and fraction schedules.
 
@@ -219,7 +219,7 @@ Although the central exhaust fan has its own report as an individual component, 
 
 ## Testing and Validation ##
 
-A few unit tests will be developed to verify that: 
+A few unit tests will be developed to verify that:
 1. the new input objects can be processed correctly, via one or two unit test case(s);
 2. the zone and central exhaust air mass flow balances, via one or more unit test case(s);
 3. the exhaust system results, output variables, and reports are working properly via one unit test.
@@ -227,7 +227,7 @@ A few unit tests will be developed to verify that:
 
 ## Example File and Transition Changes ##
 
-One new example file will be added to the test suite to demonstrate how to use this feature. 
+One new example file will be added to the test suite to demonstrate how to use this feature.
 
 Since the feature is based on completely newly added blocks, an older version would not carry the feature. Therefore a transition program is not needed for converting from earlier versions.
 
@@ -267,7 +267,7 @@ An example of the AirLoopHVAC:ExhaustSystem input object is like this:
 AirLoopHVAC:ExhaustSystem,
     Central Exhaust 1,            !- Name
     Exhaust Avail List,         !- Availability Manager List Name
-    AirLoopExhaustMixer1,        !- AirLoopHVAC:ZoneMixer Name    
+    AirLoopExhaustMixer1,        !- AirLoopHVAC:ZoneMixer Name
     Fan:SystemModel,            !- Fan Object Type
     CentralExhaustFan1;        !- Fan Name
 ```
@@ -344,7 +344,7 @@ See the Input Output Reference documentation contents update above.
 
 ## Outputs Description ##
 
-The following output will be added the to the new exhaust system: 
+The following output will be added the to the new exhaust system:
 
 ```
 Central Exhaust Fan Energy [J]
@@ -353,7 +353,7 @@ Central Exhaust Fan Runtime Fraction [];
 Central Exhaust Fan Volumetric Flow Rate [m3/s];
 Central Exhaust Fan Mass Flow Rate [kg/s];
 Central Exhaust Fan pressure drop [Pa];
-Individual Exhaust Volumetric Flow Rate [m3/s]; 
+Individual Exhaust Volumetric Flow Rate [m3/s];
 Individual Exhaust Mass Flow Rate Rate [kg/s];
 ```
 
@@ -408,11 +408,10 @@ A new case will be added to `SimZoneEquipment` to call `SimZoneExhaustAirSystem(
 
 However, the situation could be complicated by the general exhaust system's operation. Here based on If the AirloopHVAC:ExhaustSystem's condition, (e.g. "is on" or "is off"), the zone air balance will be treated differently. For example, when the AirLoopHVAC:ExhaustSystem is off, all inlet flows for the connected zone exhausts should be set to zero. This needs to be known at the time of the zone air mass balance. The call to `SimAirLoopExhaustSystem()` will be before the zone mass balance calculation (`CalcZoneMassBalance()`) which is near the end of `SimZoneEquipment`. `SimAirLoopExhaustSystem()` will reset the zone exhaust flow rates if needed.
 
-#### ZoneHVAC:ExhaustControl data struct #### 
+#### ZoneHVAC:ExhaustControl data struct ####
 
 This struct definition and declaration will create a new data struct for the ZoneHVAC:ExhaustControl object.
 
 ### ReportAirLoopExhaustSystem() ###
 
 The function is for reporting the variables related to the exhaust systems, such as the exhaust fans' flow rates, energy usages, and pressure drops.
-

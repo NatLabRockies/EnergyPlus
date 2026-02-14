@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -127,7 +127,7 @@ namespace PoweredInductionUnits {
         int PriAirInNode;                                 // unit primary air inlet node number
         int SecAirInNode;                                 // unit secondary air inlet node number
         int OutAirNode;                                   // unit air outlet node number
-        int HCoilInAirNode;                               // unit mixed air node number
+        int heatCoilAirInletNode = 0;                               // unit mixed air node number
         int ControlCompTypeNum;
         int CompErrIndex;
         std::string MixerName;                    // name of air mixer component
@@ -185,6 +185,10 @@ namespace PoweredInductionUnits {
         Real64 DischargeAirTemp = 0.0;      // current operating discharge air temperature at outlet, for reporting
         HeatOpModeType heatingOperatingMode = HeatOpModeType::HeaterOff;
         CoolOpModeType coolingOperatingMode = CoolOpModeType::CoolerOff;
+        Real64 leakFrac;          // parallel PIU backdraft damper leakage fraction
+        Real64 leakFlow;          // parallel PIU backdraft damper leakage mass flow rate
+        int leakFracCurve;        // parallel PIU backdraft damper leakage fraction curve
+        int damperLeakageZoneNum; // zone index designated as the destination for the PIU backdraft damper leaks
 
         int CurOperationControlStage = -1; // integer reference for what stage of control the unit is in
         int plenumIndex = 0;
@@ -192,13 +196,13 @@ namespace PoweredInductionUnits {
         PowIndUnitData()
             : UnitType_Num(DataDefineEquip::ZnAirLoopEquipType::Invalid), MaxTotAirVolFlow(0.0), MaxTotAirMassFlow(0.0), MaxPriAirVolFlow(0.0),
               MaxPriAirMassFlow(0.0), MinPriAirFlowFrac(0.0), MinPriAirMassFlow(0.0), PriDamperPosition(0.0), MaxSecAirVolFlow(0.0),
-              MaxSecAirMassFlow(0.0), FanOnFlowFrac(0.0), FanOnAirMassFlow(0.0), PriAirInNode(0), SecAirInNode(0), OutAirNode(0), HCoilInAirNode(0),
+              MaxSecAirMassFlow(0.0), FanOnFlowFrac(0.0), FanOnAirMassFlow(0.0), PriAirInNode(0), SecAirInNode(0), OutAirNode(0), 
               ControlCompTypeNum(0), CompErrIndex(0), Mixer_Num(0), fanType(HVAC::FanType::Invalid), Fan_Index(0), 
               MaxVolHotWaterFlow(0.0), MaxVolHotSteamFlow(0.0),
               MaxHotWaterFlow(0.0), MaxHotSteamFlow(0.0), MinVolHotWaterFlow(0.0), MinHotSteamFlow(0.0), MinVolHotSteamFlow(0.0),
               MinHotWaterFlow(0.0), HotControlNode(0), HotCoilOutNodeNum(0), HotControlOffset(0.0), HWplantLoc{}, ADUNum(0), InducesPlenumAir(false),
               HeatingRate(0.0), HeatingEnergy(0.0), SensCoolRate(0.0), SensCoolEnergy(0.0), CtrlZoneNum(0), ctrlZoneInNodeIndex(0), AirLoopNum(0),
-              OutdoorAirFlowRate(0.0)
+              OutdoorAirFlowRate(0.0), leakFrac(0.0), leakFlow(0.0), leakFracCurve(0), damperLeakageZoneNum(0)
         {
         }
 
@@ -262,6 +266,8 @@ namespace PoweredInductionUnits {
     bool PIUnitHasMixer(EnergyPlusData &state, std::string_view CompName); // component (mixer) name
 
     void PIUInducesPlenumAir(EnergyPlusData &state, int NodeNum, int const plenumNum); // induced air node number
+
+    int getParallelPIUNumFromSecNodeNum(EnergyPlusData &state, int const zoneNum); // get parallel PIU index
 
     Real64 CalcVariableSpeedPIUHeatingResidual(EnergyPlusData &state,
                                                Real64 const fanSignal,

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1687,7 +1687,7 @@ namespace HeatRecovery {
             OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAirHRLatEffAt100PerCoolAirFlow, this->Name, "N/A");
         }
 
-        std::string_view loopName = "";
+        std::string_view loopName;
 
         if ((state.dataSize->CurSysNum > 0) && (state.dataSize->CurSysNum <= state.dataHVACGlobal->NumPrimaryAirSys)) {
             loopName = state.dataAirSystemsData->PrimaryAirSystems(state.dataSize->CurSysNum).Name;
@@ -3148,9 +3148,8 @@ namespace HeatRecovery {
 
         if (std::abs(b) < SMALL) {
             return a / sign(SMALL, b);
-        } else {
-            return a / b;
         }
+        return a / b;
     }
 
     Real64 CalculateEpsFromNTUandZ(EnergyPlusData &state,
@@ -4874,6 +4873,7 @@ namespace HeatRecovery {
         }
     }
 
+#ifdef OLD_API
     int GetHeatExchangerIndex(EnergyPlusData &state, std::string const &hxName, bool &ErrorsFound) {
         // Obtains and Allocates heat exchanger related parameters from input file
         if (state.dataHeatRecovery->GetInputFlag) { // First time subroutine has been entered
@@ -4881,21 +4881,13 @@ namespace HeatRecovery {
             state.dataHeatRecovery->GetInputFlag = false;
         }
 
-        int hxNum = Util::FindItemInList(hxName, state.dataHeatRecovery->ExchCond);
-        if (hxNum == 0) {
-            ShowSevereError(state, format("GetHeatExchangerIndex: Could not find heat exchanger = \"{}\"", hxName));
-            ErrorsFound = true;
+        int const WhichHX = Util::FindItemInList(hxName, state.dataHeatRecovery->ExchCond);
+        if (WhichHX != 0) {
+            return WhichHX;
         }
-        return hxNum;
-    }
-
-    int GetSupplyInletNode(EnergyPlusData &state,
-                           std::string const &hxName, 
-                           bool &ErrorsFound          
-    )
-    {
-        int hxNum = GetHeatExchangerIndex(state, hxName, ErrorsFound);
-        return (hxNum == 0) ? 0 : state.dataHeatRecovery->ExchCond(hxNum).SupInletNode;
+        ShowSevereError(state, format("GetSupplyInletNode: Could not find heat exchanger = \"{}\"", hxName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetSupplyOutletNode(EnergyPlusData &state,
@@ -4942,7 +4934,8 @@ namespace HeatRecovery {
         int hxNum = GetHeatExchangerIndex(state, hxName, ErrorsFound);
         return (hxNum == 0) ? HVAC::HXType::Invalid : state.dataHeatRecovery->ExchCond(hxNum).type;
     }
-
+#endif // OLD_API
+  
     int GetHeatExchangerIndex(EnergyPlusData &state, std::string const &hxName) {
         // Obtains and Allocates heat exchanger related parameters from input file
         if (state.dataHeatRecovery->GetInputFlag) { 

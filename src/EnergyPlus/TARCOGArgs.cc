@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -574,13 +574,11 @@ void PrepVariablesISO15099(int const nlayer,
     EP_SIZE_CHECK(rir, maxlay2);
     EP_SIZE_CHECK(vfreevent, maxlay1);
 
-    int k1;
     Real64 tiltr;
     Real64 Rsky;
     Real64 Fsky;
     Real64 Fground;
     Real64 e0;
-    std::string a;
 
     //! Scalars:
     ShadeEmisRatioOut = 1.0;
@@ -689,7 +687,7 @@ void PrepVariablesISO15099(int const nlayer,
 
     // calculate ir reflectance:
     for (int k = 1; k <= nlayer; ++k) {
-        k1 = 2 * k - 1;
+        int k1 = 2 * k - 1;
         rir(k1) = 1 - tir(k1) - emis(k1);
         rir(k1 + 1) = 1 - tir(k1) - emis(k1 + 1);
         if ((tir(k1) < 0.0) || (tir(k1) > 1.0) || (tir(k1 + 1) < 0.0) || (tir(k1 + 1) > 1.0)) {

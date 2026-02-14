@@ -10,7 +10,7 @@ This will eventually become a more structured file, but currently it isn't clear
 ### System Summary table report, Demand Controlled Ventilation using Controller:MechanicalVentilation" Subtable
 In the first column use ZoneName for zones with a simple DSOA reference (same as before), and use ZoneName:SpaceName for the spaces in a DSOA:SpaceList.
 
-See Pull Request [#11051](https://github.com/NREL/EnergyPlus/pull/11051).
+See Pull Request [#11051](https://github.com/NatLabRockies/EnergyPlus/pull/11051).
 
 ### Table Output, Equipment Summary Report, Air Heat Recovery subtable
 
@@ -34,22 +34,22 @@ See Pull Request [#11051](https://github.com/NREL/EnergyPlus/pull/11051).
   - OA System Name
   - OA Controller Name
 
-See Pull Request [#10995](https://github.com/NREL/EnergyPlus/pull/10995).
-See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+See Pull Request [#10995](https://github.com/NatLabRockies/EnergyPlus/pull/10995).
+See Pull Request [#11138](https://github.com/NatLabRockies/EnergyPlus/pull/11138).
 
 ### Table Output, Equipment Summary Report, Air Terminals subtable
 Add two new columns:
 - PIU Heating Control Type
 - PIU Fan Control Type
 
-See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+See Pull Request [#11138](https://github.com/NatLabRockies/EnergyPlus/pull/11138).
 
 ### Table Output, Equipment Summary Report, Fans subtable
 Add two new columns:
 - Speed Control Method
 - Number of Speeds
 
-See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+See Pull Request [#11138](https://github.com/NatLabRockies/EnergyPlus/pull/11138).
 
 ### Table Output, System Summary Report, Fan Operation subtable
 New subtable with the following columns:
@@ -62,7 +62,7 @@ New subtable with the following columns:
 - Unoccupied Cycling Fan [hr]
 - Unoccupied Fan Off [hr]
 
-See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
+See Pull Request [#11138](https://github.com/NatLabRockies/EnergyPlus/pull/11138).
 
 ### Component Sizing (eio and tables) for PlantLoop and CondenserLoop
 
@@ -70,7 +70,7 @@ See Pull Request [#11138](https://github.com/NREL/EnergyPlus/pull/11138).
 
 * Always report sizing values whether autosized or hard-sized.
 
-See Pull Request [#10998](https://github.com/NREL/EnergyPlus/pull/10998).
+See Pull Request [#10998](https://github.com/NatLabRockies/EnergyPlus/pull/10998).
 
 ### Table Output, Equipment Summary, PlantLoop or CondenserLoop subtable
 
@@ -78,29 +78,29 @@ See Pull Request [#10998](https://github.com/NREL/EnergyPlus/pull/10998).
 
 * Add columns for "Design Supply Temperature", "Design ReturnTemperature", and "Design Capacity".
 
-See Pull Request [#10998](https://github.com/NREL/EnergyPlus/pull/10998).
+See Pull Request [#10998](https://github.com/NatLabRockies/EnergyPlus/pull/10998).
 
 ### Table Output, Equipment Summary Report, Fan Power Fractions subtable
 New table output showing fraction of full load fan power vs flow fraction.
 
-See Pull Request [#11153](https://github.com/NREL/EnergyPlus/pull/11153).
+See Pull Request [#11153](https://github.com/NatLabRockies/EnergyPlus/pull/11153).
 
 ### Table Output, DX Heating Coils
 * Add column Heating to Cooling Capacity Sizing Ratio
 
-See Pull Request [#11130](https://github.com/NREL/EnergyPlus/pull/11130).
+See Pull Request [#11130](https://github.com/NatLabRockies/EnergyPlus/pull/11130).
 
 ### Table Output, Heat Pump ACCA Manual S Report
 * New Table added.
 * Columns: Heat Pump Name, Heat Pump Type, Heat Pump Coil Type, Sizing Method, Total Load, Sensible Load, Total Capacity, Sensible Capacity, Total Capacity Sizing Factor, Sensible Capacity Sizing Factor, Latent Capacity Sizing Factor
 
-See Pull Request [#11130](https://github.com/NREL/EnergyPlus/pull/11130).
+See Pull Request [#11130](https://github.com/NatLabRockies/EnergyPlus/pull/11130).
 
 ### EIO and HTML Table Output: Initialization Summary
 
 A number of changes related to finding duplicated HTML tables (based on FullName) have been made.
 
-See Pull Request [#11106](https://github.com/NREL/EnergyPlus/pull/11106).
+See Pull Request [#11106](https://github.com/NatLabRockies/EnergyPlus/pull/11106).
 
 #### Schedules
 
@@ -203,7 +203,7 @@ after change:
 - Chilled/Hot Water Thermal Storage Tank Temperature Node
 - Chilled/Hot Water Thermal Storage Tank Final Temperature Node
 
-See Pull Request [#11033](https://github.com/NREL/EnergyPlus/pull/11033).
+See Pull Request [#11033](https://github.com/NatLabRockies/EnergyPlus/pull/11033).
 
 ### ZoneHVAC:IdealLoadsAirSystem
 
@@ -220,7 +220,7 @@ See Pull Request [#11033](https://github.com/NREL/EnergyPlus/pull/11033).
    (8) * Zone Ideal Loads Supply Air Total Cooling Fuel Energy [J] *
 ```
 
-See pull request [#10971](https://github.com/NREL/EnergyPlus/pull/109710)
+See pull request [#10971](https://github.com/NatLabRockies/EnergyPlus/pull/109710)
 
 ### EIO and HTML Table Output Changes and New Tables
 
@@ -327,7 +327,7 @@ This is entirely new table
 - Equipment List Name
 - Equipment
 
-See pull request [#10949](https://github.com/NREL/EnergyPlus/pull/10949)
+See pull request [#10949](https://github.com/NatLabRockies/EnergyPlus/pull/10949)
 
 
 ### Predefined Monthly Summary Reports - Additional Columns
@@ -365,8 +365,8 @@ New:
 ! <Tabular Report>,Style,Unit Conversion, Format Reals
 Tabular Report,HTML,NONE,Yes
 ```
-See Pull Request [#11260](https://github.com/NREL/EnergyPlus/pull/11260).
-See pull request [#10209](https://github.com/NREL/EnergyPlus/pull/10209)
+See Pull Request [#11260](https://github.com/NatLabRockies/EnergyPlus/pull/11260).
+See pull request [#10209](https://github.com/NatLabRockies/EnergyPlus/pull/10209)
 
 ### Table and eio Output Changes Related to Zone Multipliers
 
@@ -376,4 +376,4 @@ See pull request [#10209](https://github.com/NREL/EnergyPlus/pull/10209)
 
 * HVAC Sizing Summary table output values for "User Design Load per Area" have been corrected to properly account for zone multipliers.
 
-See pull request [#11259](https://github.com/NREL/EnergyPlus/pull/11259)
+See pull request [#11259](https://github.com/NatLabRockies/EnergyPlus/pull/11259)

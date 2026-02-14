@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1933,7 +1933,6 @@ void MTGeneratorSpecs::oneTimeInit(EnergyPlusData &state)
 {
 
     std::string const RoutineName("InitMTGenerators");
-    bool errFlag;
 
     if (this->myFlag) {
         this->setupOutputVars(state);
@@ -1941,7 +1940,7 @@ void MTGeneratorSpecs::oneTimeInit(EnergyPlusData &state)
     }
 
     if (this->MyPlantScanFlag && allocated(state.dataPlnt->PlantLoop) && this->HeatRecActive) {
-        errFlag = false;
+        bool errFlag = false;
         PlantUtilities::ScanPlantLoopsForObject(
             state, this->Name, DataPlant::PlantEquipmentType::Generator_MicroTurbine, this->HRPlantLoc, errFlag, _, _, _, _, _);
         if (errFlag) {

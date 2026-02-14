@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -82,7 +82,7 @@
 // water heaters were developed by University of Central Florida, Florida Solar Energy Center (FSEC),
 // 1679 Clearlake Road, Cocoa, FL  32922, www.fsec.ucf.edu/.
 
-// Portions of EnergyPlus were developed by the National Renewable Energy Laboratory (NREL), 1617 Cole
+// Portions of EnergyPlus were developed by the National Laboratory of the Rockies (NREL), 1617 Cole
 // Blvd, Golden, CO 80401.
 
 // EnergyPlus v1.0.1, v1.0.2, v1.0.3, v1.1, v1.1.1 (Wintel platform) includes a link to TRNSYS (The Transient
@@ -256,7 +256,7 @@ void commonInitialize(EnergyPlus::EnergyPlusData &state)
 
 #ifdef DEBUG_ARITHM_MSVC
     // the following enables NaN detection in Visual Studio debug builds. See
-    // https://github.com/NREL/EnergyPlus/wiki/Debugging-Tips
+    // https://github.com/NatLabRockies/EnergyPlus/wiki/Debugging-Tips
 
     // Note: what you need to pass to the _controlfp_s is actually the opposite
     // By default all bits are 1, and the exceptions are turned off, so you need to turn off the bits for the exceptions you want to enable
@@ -294,7 +294,7 @@ int commonRun(EnergyPlus::EnergyPlusData &state)
     using namespace EnergyPlus;
 
     int errStatus = initErrorFile(state);
-    if (errStatus) {
+    if (errStatus != 0) {
         return errStatus;
     }
 
@@ -384,7 +384,7 @@ int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state)
                 ShowWarningMessage(state, "This will overwrite the native CSV output.");
             }
             int status = CommandLineInterface::runReadVarsESO(state);
-            if (status) {
+            if (status != 0) {
                 return status;
             }
         }
@@ -416,7 +416,7 @@ int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath
     // as possible and contain all "simulation" code in other modules and files.
     using namespace EnergyPlus;
     int status = initializeEnergyPlus(state, filepath);
-    if (status || state.dataGlobal->outputEpJSONConversionOnly) {
+    if ((status != 0) || state.dataGlobal->outputEpJSONConversionOnly) {
         return status;
     }
     try {
@@ -465,13 +465,14 @@ int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<
     int return_code = EnergyPlus::CommandLineInterface::ProcessArgs(state, args);
     if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::Failure)) {
         return return_code;
-    } else if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::SuccessButHelper)) {
+    }
+    if (return_code == static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::SuccessButHelper)) {
         // If it was "--version" or "--help", you do not want to continue trying to run the simulation, but do not want to indicate failure either
         return static_cast<int>(EnergyPlus::CommandLineInterface::ReturnCodes::Success);
     }
 
     int status = initializeAsLibrary(state);
-    if (status || state.dataGlobal->outputEpJSONConversionOnly) {
+    if ((status != 0) || state.dataGlobal->outputEpJSONConversionOnly) {
         return status;
     }
     try {
@@ -524,7 +525,6 @@ std::string CreateCurrentDateTimeString()
     date_and_time(datestring, _, _, value);
     if (!datestring.empty()) {
         return EnergyPlus::format(" YMD={:4}.{:02}.{:02} {:02}:{:02}", value(1), value(2), value(3), value(5), value(6));
-    } else {
-        return " unknown date/time";
     }
+    return " unknown date/time";
 }

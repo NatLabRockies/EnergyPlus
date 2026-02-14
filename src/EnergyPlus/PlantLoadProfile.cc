@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -311,10 +311,10 @@ void PlantProfileData::InitPlantProfile(EnergyPlusData &state)
                 }
             }
             auto &plntCoilData = state.dataPlnt->PlantLoop(this->plantLoc.loopNum).compDesWaterFlowRate;
-            size_t arrayIndex = plntCoilData.size() + 1;
-            plntCoilData.resize(arrayIndex);
-            plntCoilData[arrayIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
-            plntCoilData[arrayIndex - 1].tsDesWaterFlowRate = tmpFlowData;
+            size_t newEntryIndex = plntCoilData.size() + 1;
+            plntCoilData.resize(newEntryIndex);
+            plntCoilData[newEntryIndex - 1].tsDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
+            plntCoilData[newEntryIndex - 1].tsDesWaterFlowRate = tmpFlowData;
         } // if PeakVolFlowRate is ever autosized this will need the else
         this->InitSizing = false; // if PeakVolFlowRate is ever autosized this will need to repeat
     }

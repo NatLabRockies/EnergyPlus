@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,14 +55,12 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array1S.fwd.hh>
-#include <ObjexxFCL/MArray1.fwd.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 #include <GSL/span.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
@@ -415,9 +413,8 @@ namespace Util {
         auto it = std::find(first, last, str);
         if (it != last) {
             return std::distance(first, it) + 1;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     inline int FindItemInList(std::string_view const String, Array1S_string const ListOfItems)
@@ -502,7 +499,8 @@ namespace Util {
             if (equali(String, ListOfItems(Probe))) {
                 Found = true;
                 break;
-            } else if (lessthani(String, ListOfItems(Probe))) {
+            }
+            if (lessthani(String, ListOfItems(Probe))) {
                 UBnd = Probe;
             } else {
                 LBnd = Probe;
@@ -803,13 +801,13 @@ namespace Util {
     bool IsNameEmpty(EnergyPlusData &state, std::string &NameToVerify, std::string_view StringToDisplay, bool &ErrorFound);
 
     void setDesignObjectNameAndPointer(EnergyPlusData &state,
-                                       std::string &nameToBeSet,         // field that is being set once a match is found
-                                       int &ptrToBeSet,                  // pointer that is being set once a match is found
-                                       std::string const userName,       // name to be found searching through the list
-                                       Array1S_string const listOfNames, // list of names in which the userName must be found
-                                       std::string const itemType,       // string containing type of base object
-                                       std::string const itemName,       // string containing name of base object
-                                       bool &errorFound);                // set to true if an error is found
+                                       std::string &nameToBeSet,          // field that is being set once a match is found
+                                       int &ptrToBeSet,                   // pointer that is being set once a match is found
+                                       std::string const &userName,       // name to be found searching through the list
+                                       Array1S_string const &listOfNames, // list of names in which the userName must be found
+                                       std::string const &itemType,       // string containing type of base object
+                                       std::string const &itemName,       // string containing name of base object
+                                       bool &errorFound);                 // set to true if an error is found
 
     // Two structs for case insensitive containers.
     // Eg: for unordered_map, we need to have a case insensitive hasher and a case insensitive comparator

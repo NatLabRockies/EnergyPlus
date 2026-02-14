@@ -48,9 +48,9 @@ The most basic configuration is selected with the keyword “AlternatingCurrent�
 \caption{Basic Alternating Current Schematic \protect \label{fig:basic-alternating-current-schematic}}
 \end{figure}
 
-The \emph{AlternatingCurrent} load centers have AC generators with no storage and behave in the following way. All electric demand not met by the sum of the electrical power produced by the available generators will be met by purchased electricity.  If a generator is needed in the simulation for a small load and the load is less than the generator’s minimum part load ratio, the generator will operate at the minimum part load ratio and the excess will either reduce demand or the excess energy will be exported back to the electric utility company. 
+The \emph{AlternatingCurrent} load centers have AC generators with no storage and behave in the following way. All electric demand not met by the sum of the electrical power produced by the available generators will be met by purchased electricity.  If a generator is needed in the simulation for a small load and the load is less than the generator’s minimum part load ratio, the generator will operate at the minimum part load ratio and the excess will either reduce demand or the excess energy will be exported back to the electric utility company.
 
-A configuration with AC generators with on-site electrical storage is selected with the keyword “AlternatingCurrentWithStorage” and is shown in Figure~\ref{fig:ac-generators-with-on-site-electrical-storage}. 
+A configuration with AC generators with on-site electrical storage is selected with the keyword “AlternatingCurrentWithStorage” and is shown in Figure~\ref{fig:ac-generators-with-on-site-electrical-storage}.
 
 \begin{figure}[hbtp] % fig 334
 \centering
@@ -68,7 +68,7 @@ The basic configuration for photovoltaic generators is selected using the “Dir
 \caption{Direct Current With Inverter Photovoltaic Generators Schematic \protect \label{fig:direct-current-with-inverter-photovoltaic}}
 \end{figure}
 
-The \emph{DirectCurrentWithInverter} load centers collect DC power from various generators, usually PV arrays, run the DC power through an inverter and produce AC power. The PV arrays produce DC power based on the availability of sunshine and do not respond to load requests made by the electric load center. 
+The \emph{DirectCurrentWithInverter} load centers collect DC power from various generators, usually PV arrays, run the DC power through an inverter and produce AC power. The PV arrays produce DC power based on the availability of sunshine and do not respond to load requests made by the electric load center.
 
 If the PV-based load center is equipped with DC electrical storage that is connected before the inverter, then the buss type should be “DirectCurrentWithInverterDCStorage” and is shown Figure~\ref{fig:pv-based-load-center-with-dc-electrical}.
 
@@ -104,11 +104,11 @@ EnergyPlus includes three models for converting Direct Current (DC) electrical p
 
 The inverter efficiency is determined using one of the three models. For the ``Simple'' inverter model, efficiency is constant and input by the user. For the ``Look Up Table'' model, the efficiency is calculated using linear interpolation. For the ``Function of Power'' model, the efficiency is calculating using a single-variable curve object. For both the Look Up Table and Function of Power models, the power production is normalized by \({P_{DC - in}}\).
 
-The conversion power losses are calculated from the difference between ${P_{DC,in}}$ and ${P_{AC,out}}$ and are metered as negative values on PowerConversion:ElectricityProduced.  The thermal losses include the conversion power losses plus any ancillary power consumed during standby.  The ancillary electric power consumption occurs when the inverter is scheduled to be available but it is not conditioning any power flows at the time. 
+The conversion power losses are calculated from the difference between ${P_{DC,in}}$ and ${P_{AC,out}}$ and are metered as negative values on PowerConversion:ElectricityProduced.  The thermal losses include the conversion power losses plus any ancillary power consumed during standby.  The ancillary electric power consumption occurs when the inverter is scheduled to be available but it is not conditioning any power flows at the time.
 
 \subsection{Converter}
 
-EnergyPlus includes a model for converting Alternating Current (AC) electric power into Direct Current (DC) electric power.  This device is used to charge DC electric storage devices with AC drawn from the main panel.  Although the physical device may be a two-way inverter, the modeling is separated so that the converter appears on its own in the modeling. The AC power into the converter, ${P_{AC,in}}$, is converted to DC power out, ${P_{DC,out}}$, of the converter using: 
+EnergyPlus includes a model for converting Alternating Current (AC) electric power into Direct Current (DC) electric power.  This device is used to charge DC electric storage devices with AC drawn from the main panel.  Although the physical device may be a two-way inverter, the modeling is separated so that the converter appears on its own in the modeling. The AC power into the converter, ${P_{AC,in}}$, is converted to DC power out, ${P_{DC,out}}$, of the converter using:
 
 \begin{equation}
   {P_{DC,out}} = {P_{AC,in}} \cdot {\varepsilon_{converter}}
@@ -116,13 +116,13 @@ EnergyPlus includes a model for converting Alternating Current (AC) electric pow
 
 The converter efficiency is determined using one of two method.  For the "SimpleFixed" method the efficiency is constant and input by the user.  For the "FunctionOfPower" method the user defined performance curve or lookup table is evaluated using the normalized power into the converter.
 
-The conversion power losses are calculated from the difference between ${P_{AC,in}}$ and ${P_{DC,out}}$ and are metered as negative values on PowerConversion:ElectricityProduced.  The thermal losses include the conversion power losses plus any ancillary power consumed during standby.  The ancillary electric power consumption occurs when the converter is scheduled to be available but it is not conditioning any power flows at the time. 
+The conversion power losses are calculated from the difference between ${P_{AC,in}}$ and ${P_{DC,out}}$ and are metered as negative values on PowerConversion:ElectricityProduced.  The thermal losses include the conversion power losses plus any ancillary power consumed during standby.  The ancillary electric power consumption occurs when the converter is scheduled to be available but it is not conditioning any power flows at the time.
 
 \subsection{Storage Operation Schemes}
 
-The available storage operation schemes are "TrackFacilityElectricDemandStoreExcessOnSite", "TrackMeterDemandStoreExcessOnSite", "TrackChargeDischargeSchedules", and "FacilityDemandLeveling".  
+The available storage operation schemes are "TrackFacilityElectricDemandStoreExcessOnSite", "TrackMeterDemandStoreExcessOnSite", "TrackChargeDischargeSchedules", and "FacilityDemandLeveling".
 
-Figure~\ref{fig:storage-operation-control-volume} shows the control volume and electrical power flows that are used to model all of the storage operation schemes.  Conservation of energy is used to formulate the calculations based on this control volume and the five terms shown in the diagram.  This control volume is inside a given load center. 
+Figure~\ref{fig:storage-operation-control-volume} shows the control volume and electrical power flows that are used to model all of the storage operation schemes.  Conservation of energy is used to formulate the calculations based on this control volume and the five terms shown in the diagram.  This control volume is inside a given load center.
 
 \begin{figure}[hbtp] % fig 337
 \centering
@@ -130,17 +130,17 @@ Figure~\ref{fig:storage-operation-control-volume} shows the control volume and e
 \caption{Storage operation control volume \protect \label{fig:storage-operation-control-volume}}
 \end{figure}
 
-${P_{gen}}$:  This is the sum of electric power produced by the generators on the load center entering the control volume.  The generator operation is run before the storage operation so that this value is current at the time the storage operation control is evaluated 
+${P_{gen}}$:  This is the sum of electric power produced by the generators on the load center entering the control volume.  The generator operation is run before the storage operation so that this value is current at the time the storage operation control is evaluated
 
 ${P_{feed}}$:  This is the flow of electric power out of the control volume feeding toward the main panel.  This is power being supplied by the generators and storage and serving the building loads or perhaps being exported.  This power level might be reduced by power conversion losses before it reaches the main panel.  The method used to determine $ {P_{feed}}  $ depends on the operation scheme.
-  
-${P_{draw}}$:  This is the flow of electric power into the control volume drawing from the main panel.  This is power being drawn in order to charge storage as desired by the storage operation scheme.  This power level might be increased by power conversion losses once it is drawn from the main panel.  
+
+${P_{draw}}$:  This is the flow of electric power into the control volume drawing from the main panel.  This is power being drawn in order to charge storage as desired by the storage operation scheme.  This power level might be increased by power conversion losses once it is drawn from the main panel.
 
 ${P_{charge}}$:  This is the flow of electric power into the storage device from the control volume.  This is power being supplied by the generators and/or drawn from the main panel and then directed into storage to charge the device.
 
-${P_{discharge}}:$  This is the flow of electric power out of the storage device into the control volume.  This power is being pulled from storage and added to the power from generators to feed toward the main panel. 
+${P_{discharge}}:$  This is the flow of electric power out of the storage device into the control volume.  This power is being pulled from storage and added to the power from generators to feed toward the main panel.
 
-The \emph{TrackFacilityElectricDemandStoreExcessOnSite} method tries to run the storage to follow the facility electric demand while storing any excess on-site power production that is above what is needed to run the facility.  This is mainly appropriate for island operation.  This is the intended legacy behavior before version 8.5.  This scheme does not draw from the main panel to charge, so we have  ${P_{draw}} = 0.0 $.  The value for ${P_{feed}}$ is determined from the whole-facility total electric power demand.  (When there is more than one load center in the model, it is actually the portion of the total that remains after previous load centers have been simulated.)  This requested feed in rate is adjusted to be increased by any power conversion losses that may occur in an inverter or a transformer.  This adjusted feed in request is used for ${P_{feed}}$. 
+The \emph{TrackFacilityElectricDemandStoreExcessOnSite} method tries to run the storage to follow the facility electric demand while storing any excess on-site power production that is above what is needed to run the facility.  This is mainly appropriate for island operation.  This is the intended legacy behavior before version 8.5.  This scheme does not draw from the main panel to charge, so we have  ${P_{draw}} = 0.0 $.  The value for ${P_{feed}}$ is determined from the whole-facility total electric power demand.  (When there is more than one load center in the model, it is actually the portion of the total that remains after previous load centers have been simulated.)  This requested feed in rate is adjusted to be increased by any power conversion losses that may occur in an inverter or a transformer.  This adjusted feed in request is used for ${P_{feed}}$.
 
 If ${P_{gen}} > {P_{feed}}$,  then we have charging:
 
@@ -160,9 +160,9 @@ If ${P_{gen}} < {P_{feed}}$, then we have discharging:
   \end{array}
 \end{equation}
 
-The \emph{TrackMeterDemandStoreExcessOnSite} method is very similar to the TrackFacilityElectricDemandStoreExcessOnSite method except that instead of using the whole-facility total electric demand, the value for ${P_{feed}}$ is determined from a user-specified meter.  The same charge and discharge logic is used. 
+The \emph{TrackMeterDemandStoreExcessOnSite} method is very similar to the TrackFacilityElectricDemandStoreExcessOnSite method except that instead of using the whole-facility total electric demand, the value for ${P_{feed}}$ is determined from a user-specified meter.  The same charge and discharge logic is used.
 
-The \emph{TrackChargeDischargeSchedules} method tries to run the storage to follow user-defined schedules and design power levels for charging and discharging.  The user inputs a design charge rate ${P_{charge,design}}$, a charge modification schedule ${f_{sched,charge}}$, a design discharge rate ${P_{discharge,design}}$, and a discharge modification schedule ${f_{sched,discharge}}$.  The scheduled power flows will be used to determine charging and discharging as long as other limits on rates or state of charge are not triggered.  The schedules should be arranged to only charge or only discharge at a given time.  
+The \emph{TrackChargeDischargeSchedules} method tries to run the storage to follow user-defined schedules and design power levels for charging and discharging.  The user inputs a design charge rate ${P_{charge,design}}$, a charge modification schedule ${f_{sched,charge}}$, a design discharge rate ${P_{discharge,design}}$, and a discharge modification schedule ${f_{sched,discharge}}$.  The scheduled power flows will be used to determine charging and discharging as long as other limits on rates or state of charge are not triggered.  The schedules should be arranged to only charge or only discharge at a given time.
 
 If charging, we have:
 
@@ -202,13 +202,13 @@ If discharging, we have:
   \end{array}
 \end{equation}
 
-The \emph{FacilityDemandLeveling} method tries to run the storage to follow a user-defined schedule for the net purchased power, ${P_{net,purch}}$.  This is similar to demand limit operation but instead of just attempting to cap the facility demand, it will also manipulate storage to increase utility grid supply electric to meet the target for net purchased power.  The user inputs a design demand target for net purchase power rate, ${P_{net,purch,design}} $, and a demand level modification schedule ${f_{sched,dmd,target}}$.  
+The \emph{FacilityDemandLeveling} method tries to run the storage to follow a user-defined schedule for the net purchased power, ${P_{net,purch}}$.  This is similar to demand limit operation but instead of just attempting to cap the facility demand, it will also manipulate storage to increase utility grid supply electric to meet the target for net purchased power.  The user inputs a design demand target for net purchase power rate, ${P_{net,purch,design}} $, and a demand level modification schedule ${f_{sched,dmd,target}}$.
 
 \begin{equation}
   {P_{net,purch,target}} = {P_{net,purch,design}} *{f_{sched,dmd,target}}
 \end{equation}
 
-This target is compared to an adjusted feed in request, ${P_{feed, request}}$, from the (remaining, adjusted) whole-facility total electric power demand. 
+This target is compared to an adjusted feed in request, ${P_{feed, request}}$, from the (remaining, adjusted) whole-facility total electric power demand.
 
 \begin{equation}
   {P_{feed}} = {P_{feed,request}} - {P_{net,purch,target}}
@@ -232,7 +232,7 @@ Or if ${P_{gen}} > {P_{feed}}$, then we have excess power we can use for chargin
   \end{array}
 \end{equation}
 
-However, if ${P_{feed}} < 0.0$, then the facility needs less power than the target demand.  We therefore draw power from the main panel to increase power purchased to meet target demand level. 
+However, if ${P_{feed}} < 0.0$, then the facility needs less power than the target demand.  We therefore draw power from the main panel to increase power purchased to meet target demand level.
 
 \begin{equation}
   \begin{array}{rl}
@@ -246,9 +246,9 @@ However, if ${P_{feed}} < 0.0$, then the facility needs less power than the targ
 
 EnergyPlus includes two models for storing electrical energy: a simple model that is not intended to represent any specific type of storage technology and a battery model that represents the kinetic battery model originally developed by Manwell and McGowan which discussed in the next section.
 
-The simple model treats the battery as a black box, counting energy added and removed, with losses due to charge/discharge inefficiencies. The model is a reasonable starting point for simulation of Li-ion and other battery technologies without significant rate limitations. The simple model might be called constrained bucket with energy losses.  The bucket holds a quantity of Joules of electrical energy, referred to as the state of charge. There are losses and limits to storing and drawing power but otherwise the bucket just holds electricity. The user sets constraints on the rates of charging, ${P_{stor-charge-max}}$, and drawing, ${P_{stor-draw-max}}$. The user defines efficiency values for charging, ${\varepsilon_{charge}}$, and drawing, ${\varepsilon_{draw}}$. 
+The simple model treats the battery as a black box, counting energy added and removed, with losses due to charge/discharge inefficiencies. The model is a reasonable starting point for simulation of Li-ion and other battery technologies without significant rate limitations. The simple model might be called constrained bucket with energy losses.  The bucket holds a quantity of Joules of electrical energy, referred to as the state of charge. There are losses and limits to storing and drawing power but otherwise the bucket just holds electricity. The user sets constraints on the rates of charging, ${P_{stor-charge-max}}$, and drawing, ${P_{stor-draw-max}}$. The user defines efficiency values for charging, ${\varepsilon_{charge}}$, and drawing, ${\varepsilon_{draw}}$.
 
-The user defines an initial state of charge and a maximum state of charge. The storage operation scheme makes supervisory control decisions and determines a value for the charging power, ${P_{stor-charge}}$, or the discharging power, ${P_{stor-draw}}$ and passes in control limits for the minimum and maximum state of charge fraction.  The maximum state of charge is the physical capacity of the storage device, however the storage control applies a separate layer of minimum and maximum state of charge used to model controller behavior designed to protect the battery from abuse. 
+The user defines an initial state of charge and a maximum state of charge. The storage operation scheme makes supervisory control decisions and determines a value for the charging power, ${P_{stor-charge}}$, or the discharging power, ${P_{stor-draw}}$ and passes in control limits for the minimum and maximum state of charge fraction.  The maximum state of charge is the physical capacity of the storage device, however the storage control applies a separate layer of minimum and maximum state of charge used to model controller behavior designed to protect the battery from abuse.
 
 The control requests are constrained by the device's physical limits for how fast it can be charged or discharged, ${P_{stor-charge-max}}$ and ${P_{stor-draw-max}}$ are applied.
 
@@ -266,7 +266,7 @@ Q_{stor}^{t + \Delta t} = Q_{stor}^t - \frac{{{P_{stor - draw}} \cdot \Delta t}}
 
 where \(\Delta t\) is the length of the system time step in seconds.
 
-The storage device has an availability schedule. If it is not available then no power can be drawn or stored.  The state of charge minimum and maximum that are passed into the storage model are used to decide if the device can be further charged or discharged.  The separate control limits allow modeling battery preservation strategies where the full capacity of the storage device is not really used. 
+The storage device has an availability schedule. If it is not available then no power can be drawn or stored.  The state of charge minimum and maximum that are passed into the storage model are used to decide if the device can be further charged or discharged.  The separate control limits allow modeling battery preservation strategies where the full capacity of the storage device is not really used.
 
 The gross electric power drawn and stored includes losses in the form of heat. These thermal losses are calculated from the user-specified efficiencies for charging and drawing and gross electric power stored and drawn. The thermal (heat) losses are included in a zone heat balance if the user specifies a thermal zone. A user-defined radiative split is used to divide thermal losses into radiation and convection portions. If no zone is specified, then the thermal losses are simply disregarded (e.g., rejected to outdoors and do not impact the zone air heat balance).
 
@@ -411,7 +411,7 @@ Manwell J. F. and McGowan J. G. 1993. A lead acid battery storage model for hybr
 
 \subsection{Electrical Storage – Lithium-Ion NMC Model with Capacity Degradation Estimation}
 
-The Lithium-Ion NMC Model (object: ElectricLoadCenter:Storage:LithiumIonNMC) comprises a performance model and a capacity degradation model. The performance model captures the dynamics of the voltage, charging and discharging power of the battery, and battery temperature, and the capacity degradation model  estimates the loss in maximum available capacity with calendar age, and use. The performance and capacity degradation models are imported from the shared library of the System Advisory Model (SAM). The models are intended to represent Lithium-ion batteries with NMC chemistry. A detailed description of the performance model can be obtained from (DiOrio, 2015), and the capacity degradation model from (Smith 2017). A brief description of the performance, and capacity degradation models are provided below. 
+The Lithium-Ion NMC Model (object: ElectricLoadCenter:Storage:LithiumIonNMC) comprises a performance model and a capacity degradation model. The performance model captures the dynamics of the voltage, charging and discharging power of the battery, and battery temperature, and the capacity degradation model  estimates the loss in maximum available capacity with calendar age, and use. The performance and capacity degradation models are imported from the shared library of the System Advisory Model (SAM). The models are intended to represent Lithium-ion batteries with NMC chemistry. A detailed description of the performance model can be obtained from (DiOrio, 2015), and the capacity degradation model from (Smith 2017). A brief description of the performance, and capacity degradation models are provided below.
 
 \subsubsection{Voltage Model}
  The SAM model strikes a balance between complexity and the computational requirements that would enable real-time control. The battery terminal voltage V is expressed as a function of the open circuit voltage $V_o$, the internal resistance $R_{int}$, the current $I$, the state of charge, and the battery capacity ($q_{max}$) as shown in the equation below.
@@ -421,45 +421,45 @@ The Lithium-Ion NMC Model (object: ElectricLoadCenter:Storage:LithiumIonNMC) com
 \label{Equation: Voltage}
 \end{equation}
 
-The expression $\int{Idt}$ is the amount of capacity removed and can be calculated from the following equation. 
+The expression $\int{Idt}$ is the amount of capacity removed and can be calculated from the following equation.
 
 \begin{equation}
 \int{Idt} = q_{max} - q
 \label{Equation: charge_removed}
 \end{equation}
-The parameters $V_o$, $K$,$a$, and $B$ are dependent on battery chemistry and can be obtained from the manufacturer's voltage vs charge-removed curves. Default values are included in the Lithium-Ion NMC model with the parameter values obtained from   (Tremblay 2007). The voltage model does not incorporate temperature effects, but the impact of temperature is indirectly implemented through battery capacity which is coupled with the thermal model. 
+The parameters $V_o$, $K$,$a$, and $B$ are dependent on battery chemistry and can be obtained from the manufacturer's voltage vs charge-removed curves. Default values are included in the Lithium-Ion NMC model with the parameter values obtained from   (Tremblay 2007). The voltage model does not incorporate temperature effects, but the impact of temperature is indirectly implemented through battery capacity which is coupled with the thermal model.
 
 \subsubsection{Thermal Model}
-The thermal effects of the battery are important to model since they impact both the instantaneous available capacity, and also the rate of lifetime capacity degradation. An energy balance equation is used to model the battery temperature. The heat transfer between the battery and the room is depends on the temperature difference between them $T_{room}-T_{batt}$. In addition to the heat transfer between the room and battery, the battery generates its own heat due to internal resistance. The differential equation used to model the battery temperature is shown below. 
+The thermal effects of the battery are important to model since they impact both the instantaneous available capacity, and also the rate of lifetime capacity degradation. An energy balance equation is used to model the battery temperature. The heat transfer between the battery and the room is depends on the temperature difference between them $T_{room}-T_{batt}$. In addition to the heat transfer between the room and battery, the battery generates its own heat due to internal resistance. The differential equation used to model the battery temperature is shown below.
 
 \begin{equation}
 f(T_{batt}) = \frac{dT_{batt}}{dt}= \frac{hA(T_{room} - T_{batt}) + I^2R}{mC_p}
 \label{Equation: battery_temp_nmc}
 \end{equation}
 
-The SAM model uses the trapezoidal method to numerically step the temperature forward in time as described in the equation below. 
+The SAM model uses the trapezoidal method to numerically step the temperature forward in time as described in the equation below.
 
 \begin{equation}
-T_{batt,n+1} = T_{batt,n+1} = \frac{\Delta t}{2}\left[f(T_{batt,n+1} + f(T_{batt,n})\right] 
+T_{batt,n+1} = T_{batt,n+1} = \frac{\Delta t}{2}\left[f(T_{batt,n+1} + f(T_{batt,n})\right]
 \label{Equation: batt_temp_trapezoidal}
 \end{equation}
-The model outputs the bulk average temperature of the battery which is used in the computation of the maximum available capacity and lifetime capacity degradation. 
+The model outputs the bulk average temperature of the battery which is used in the computation of the maximum available capacity and lifetime capacity degradation.
 
 \subsubsection{Capacity Model}
-The lithium ion capacity model updates the charge of the battery depending on the charging and discharging current. A positive value indicates charging and negative value of current indicates discharging. The updated capacity at each time-step is computed using the following equation. 
+The lithium ion capacity model updates the charge of the battery depending on the charging and discharging current. A positive value indicates charging and negative value of current indicates discharging. The updated capacity at each time-step is computed using the following equation.
 \begin{equation}
 q = q - I\Delta t
 \label{Equation: capacity_update_nmc}
 \end{equation}
 
-The battery is only allowed to charge and discharge to the user defined maximum and minimum state of charge. Capacity relates to the battery energy through voltage as shown below. 
+The battery is only allowed to charge and discharge to the user defined maximum and minimum state of charge. Capacity relates to the battery energy through voltage as shown below.
 
 \begin{equation}
 E = qV
 \label{Equation: energy_nmc}
 \end{equation}
 
-The power is related to battery energy and voltage as follows. 
+The power is related to battery energy and voltage as follows.
 
 \begin{equation}
 P = IV = \frac{\Delta E}{\Delta t} = \frac{V \Delta q}{\Delta t}
@@ -467,19 +467,19 @@ P = IV = \frac{\Delta E}{\Delta t} = \frac{V \Delta q}{\Delta t}
 \end{equation}
 
 \subsubsection{Capacity degradation}
-The  model  developed by Smith et.al in (Smith 2017) for the LithiumIon NMC battery is used to estimate capacity degradation. 
+The  model  developed by Smith et.al in (Smith 2017) for the LithiumIon NMC battery is used to estimate capacity degradation.
 The charge capacity degradation is modeled by taking into consideration two mechanisms: 1) the loss of cyclable Lithium due to formation of solid electrolyte interface (SEI) represented by $(Q_{max}^{Li})$, and 2) the mechanical damage of the negative electrode due to the charge/discharge cycles $(Q_{max}^{neg})$. The battery capacity degradation due to each of the mechanisms is briefly described below.
 
-The primary factor driving the formation of SEI is the calendar time $t$, but formation is accelerated by factors such as state of charge at which the battery is stored, the depth of discharge during cycling and the number of charge and discharge cycles. The battery charge capacity $(q_{max}^{Li})$ and its degradation due to the formation of SEI is shown in Equation~\ref{Equation: Q_li}. 
+The primary factor driving the formation of SEI is the calendar time $t$, but formation is accelerated by factors such as state of charge at which the battery is stored, the depth of discharge during cycling and the number of charge and discharge cycles. The battery charge capacity $(q_{max}^{Li})$ and its degradation due to the formation of SEI is shown in Equation~\ref{Equation: Q_li}.
 
 \begin{equation}
 Q_{max}^{Li} = d_0 \left[b_0 - b_1t^{1/2} - b_2N - b_3\left(1-exp (\frac{-t}{\tau_{b_3}})\right)\right]
 \label{Equation: Q_li}
 \end{equation}
 
-where $t$ is the calendar time in days, $N$ is the total number of charge/discharge cycles over the battery's lifetime, and $\tau_{b_3}$ is an experimentally determined constant. Battery temperature affects the available maximum capacity at the current time instant as well as the rate of charge degradation. The parameter $d_0$ captures the effect of the former as shown in Equation~\ref{Equation: d0_computation}. 
+where $t$ is the calendar time in days, $N$ is the total number of charge/discharge cycles over the battery's lifetime, and $\tau_{b_3}$ is an experimentally determined constant. Battery temperature affects the available maximum capacity at the current time instant as well as the rate of charge degradation. The parameter $d_0$ captures the effect of the former as shown in Equation~\ref{Equation: d0_computation}.
 
-Equation~\ref{Equation: d0_computation}. 
+Equation~\ref{Equation: d0_computation}.
 \begin{equation}
 \begin{split}
 d_0 = d_{0,ref} \cdot exp\left[\frac{E_{a,d_0,1}}{R_{ug}}\left(\frac{1}{T_{bat}} - \frac{1}{T_{ref}}\right) \right. \left. - \left(\frac{E_{a,d_0,2}}{R_{ug}}\right)^2 \left(\frac{1}{T_{bat}} - \frac{1}{T_{ref}}\right)^2 \right]
@@ -513,12 +513,12 @@ exp\left(-\frac{\alpha_{ab3}\cdot F}{R_{ug}} \cdot \left(\frac{V_{oc}}{T_{batt}}
 \label{Equation: b3_computation}
 \end{equation}
 
-During the second half of the battery life cycle degradation is dominated by the charge discharge cycles. The battery capacity during this period is expressed as shown below.  
+During the second half of the battery life cycle degradation is dominated by the charge discharge cycles. The battery capacity during this period is expressed as shown below.
 \begin{equation}
-Q_{max}^{neg}=\sqrt{(c_0^2-2c_2 c_0 N)}                             
+Q_{max}^{neg}=\sqrt{(c_0^2-2c_2 c_0 N)}
 \label{Equation: qmax_computation_a}
 \end{equation}
-As in the case with the calendar life degradation, the parameters $c_0$ and $c_2$ were determined experimentally. 
+As in the case with the calendar life degradation, the parameters $c_0$ and $c_2$ were determined experimentally.
 
 The description of the model parameters, and constants can be found in (Smith, 2017), and the corresponding values can be found in (Mishra, 2020).
 

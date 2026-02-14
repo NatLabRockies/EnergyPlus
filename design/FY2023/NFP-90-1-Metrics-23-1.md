@@ -30,7 +30,7 @@ In a previous Task Order, we implemented support for calculation and reporting o
 In this Task Order we propose to implement support for calculating and reporting EER and IEER metrics for (5) cooling coils, according to the 2022 version of the AHRI Standard 340-360.
 
 ## IEER = Integrated Energy Efficiency Rating (2022)
-The Integrated Energy Efficiency Ratio (IEER) will be calculated and reported as defined in the 2022 version of the AHRI 340/360 standard -- "Performance Rating of Commercial and Industrial Unitary Air Conditioning and Heat Pump Equipment." 
+The Integrated Energy Efficiency Ratio (IEER) will be calculated and reported as defined in the 2022 version of the AHRI 340/360 standard -- "Performance Rating of Commercial and Industrial Unitary Air Conditioning and Heat Pump Equipment."
 This metric will be calculated and reported for Air-cooled Unitary Air-conditioners and Unitary Heat Pumps with capacities greater than 65,000 Btu/h (19,050) and less than 135,000 Btu/h (39,565 W). A previous attempt for reporting EER and IEER was implemented in 2010, based on the 2008 version of this standard.  That implementation was for the single speed DX cooling coil only.  In this implementation round, we intend to implement support for calculating and reporting EER and IEER, based on the 2022 version of the standard, for all the following:
 - Coil:Cooling:DX (+ :CurveFit:Performance, :CurveFit:OperatingMode, :CurveFit:Speed)
 - Coil:Cooling:DX:SingleSpeed – update
@@ -40,7 +40,7 @@ This metric will be calculated and reported for Air-cooled Unitary Air-condition
 <br/><br/>
 
 **General IEER Equations** <br/>
-For units covered by this standard, the IEER shall be calculated using test derived 
+For units covered by this standard, the IEER shall be calculated using test derived
 data and the below Equation<br/><br/>
 ![image](https://user-images.githubusercontent.com/78803858/205349295-b53d2fe9-c227-49a6-b926-fe00737e3b8c.png)<br/>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Where:<br/>
@@ -49,7 +49,7 @@ data and the below Equation<br/><br/>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;**C** = EER, (Btu/h)/W, at 50% Capacity and reduced condenser temperature (see Table 9)<br/>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;**D** = EER, (Btu/h)/W, at 25% Capacity and reduced condenser temperature (see Table 9)<br/>
 <br/>
-The IEER rating requires that the unit efficiency be determined at 100, 75, 50, and 25 Percent Load at the 
+The IEER rating requires that the unit efficiency be determined at 100, 75, 50, and 25 Percent Load at the
 conditions specified in Table 9 and at the part-load rated indoor airflow, if different than the Full Load Rated Indoor Airflow. <br/>
 ![image](https://user-images.githubusercontent.com/78803858/205340767-bb273a2b-c63a-4418-a0aa-585a8d3dad25.png)<br/>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Where:<br/>
@@ -59,7 +59,7 @@ conditions specified in Table 9 and at the part-load rated indoor airflow, if di
 part-load Rating Condition, W
 
 
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; ![image](https://user-images.githubusercontent.com/78803858/205343337-a93882e0-3689-4c1d-aa27-9e2ac06e041a.png) = Condenser Section power, at the applicable part-load Rating Condition, W 
+&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; ![image](https://user-images.githubusercontent.com/78803858/205343337-a93882e0-3689-4c1d-aa27-9e2ac06e041a.png) = Condenser Section power, at the applicable part-load Rating Condition, W
 
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; ![image](https://user-images.githubusercontent.com/78803858/205343408-24ab70c9-c15a-4a20-b1d6-1871f583c62a.png) = Control circuit power and any auxiliary loads, W
 
@@ -69,7 +69,7 @@ part-load Rating Condition, W
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; ![image](https://user-images.githubusercontent.com/78803858/205343556-cb53ba19-7b0a-4214-bb90-f0137e959ed1.png) = Cooling Capacity at the lowest machine unloading point operating at the applicable
 part-load Rating Condition, Btu/h<br/>
 
-The degradation coefficient, to account for cycling of the compressor for capacity less than the 
+The degradation coefficient, to account for cycling of the compressor for capacity less than the
 minimum step of capacity, shall be calculated using the Equation below:<br/>
 ![image](https://user-images.githubusercontent.com/78803858/205344387-f104632c-23dc-4b88-8d35-37f6fbadea64.png)<br/>
 &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Where:<br/>
@@ -94,7 +94,7 @@ For each metric, we will first identify a set of EnergyPlus components to which 
 
 For IEER, we will update code written in 2010, which calculated IEER for one coil type (Coil:Cooling:DX:SingleSpeed), based on the 2008 version of AHRI 340/360. We will update this code and expand generation of this metric to many other coil types.  This update will ensure that calculations are consistent with the newest version of this rating = the 2022 version of AHRI 340/360. The new code will include support for the updated Time Bins and expanded test conditions. We will also update existing unit tests and add more unit tests to verify IEER calculation and reporting for (6) new coil types.
 
-The budget in this round of development, will not support implementation of SEER2 and HSPF2 calculation & reporting for variable speed DX cooling & heating coils, as we had hoped.  However, we will add the new properties that are required for that work at the same time as we are adding properties for EER/IEER calculation.  This will enable implementation of SEER2 and HSPF2 in the EnergyPlus 23-2 implementation cycle.  Two new fields were implemented on these two coil types.  One to enable implementation of SEER & HSPF (based on the 2017 version of the standard), and one to enable implementation of SEER2 & HSPF2 (based on the 2022 version of the standard). 
+The budget in this round of development, will not support implementation of SEER2 and HSPF2 calculation & reporting for variable speed DX cooling & heating coils, as we had hoped.  However, we will add the new properties that are required for that work at the same time as we are adding properties for EER/IEER calculation.  This will enable implementation of SEER2 and HSPF2 in the EnergyPlus 23-2 implementation cycle.  Two new fields were implemented on these two coil types.  One to enable implementation of SEER & HSPF (based on the 2017 version of the standard), and one to enable implementation of SEER2 & HSPF2 (based on the 2022 version of the standard).
 
 Once the metrics are calculated we can integrate them into the corresponding report code of the equipment summary table.
 
@@ -133,7 +133,7 @@ New fields will be added to the following coils, to represent the static pressur
 The EPlusout-EIO.tex files will be updated to document the two new tables that have been added to the HTML report generated by EnergyPlus after simulation.  These updates will document the fields in the tables named “DX Cooling Coil Standard Ratings 2017” and “DX Cooling Coil Standard Ratings 2017.”  The (5) coil types listed above in the “IEER = Integrated Energy Efficiency Rating (2022)” section above.
 
 ## Engineering Reference
-The Engineering Reference will be updated with a high-level description of the calculations with links/references to Formulae defined in the standard - for the (5) coil types listed in the 'IEER = Integrated Energy Efficiency Rating (2022)' section above. 
+The Engineering Reference will be updated with a high-level description of the calculations with links/references to Formulae defined in the standard - for the (5) coil types listed in the 'IEER = Integrated Energy Efficiency Rating (2022)' section above.
 
 ## Example Files and Transition Changes
 Transition rules will be required to accommodate the new fields added to the VariableSpeed DX coils.
@@ -155,16 +155,16 @@ Comments from Technicalities call on 14-Dec-22:
     -   Will your calculations take into consideration the physical configuration of the coils -- i.e. in-building, rooftop, others?
     -   Not saying this is required, but am curious.
         -   This would require numerous new fields, which will impose a further burden on the EnergyPlus user.
-        -   Additionally, see Mike's caution below 
+        -   Additionally, see Mike's caution below
         -   Therefore we will not attempt it in this cycle.
 -   Mike Witte:
-    -   Caution against trying to make assumptions about the configuration of coils in EnergyPlus, 
+    -   Caution against trying to make assumptions about the configuration of coils in EnergyPlus,
         because they are analytical models rather that exact representations of manufactured equipment.
         -   Understood.
 -   Richard Roustad:
-    -   Might want to consider a user input field -- requesting that metrics be calculated and reported 
+    -   Might want to consider a user input field -- requesting that metrics be calculated and reported
         for that instance of the coil.
-        -   Interesting idea.  By default, these metrics will be calculated for all supported coil types. 
+        -   Interesting idea.  By default, these metrics will be calculated for all supported coil types.
 -   Jason Glazer:
     -   Will these be calculated and reported for the special coils that are specifically for Data Centers?
         -   This is a good idea!
@@ -174,7 +174,7 @@ Comments from Technicalities call on 14-Dec-22:
         -   We compared the 2022 version with the 2018 version and found only a few limited differences.
         -   It seems reasonable to expect that the 2022 version of 90.1 will update to the 2023 version of AHRI 21-/240
 -   Tianzhen Hong:
-    -   Suggestion that reporting of the metrics should be very clear about what version of the standard was used 
+    -   Suggestion that reporting of the metrics should be very clear about what version of the standard was used
         to do the calculations.
         -   Yes, we are making the clear in footnotes to the report tables.
 

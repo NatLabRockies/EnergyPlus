@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -86,36 +86,32 @@ class CoeffCheckWorkflow(BaseEPLaunchWorkflow1):
 
     def main(self, run_directory, file_name, args):
 
-        if 'workflow location' in args:
-            energyplus_root_folder, _ = os.path.split(args['workflow location'])
-            preprocess_folder = os.path.join(energyplus_root_folder, 'PreProcess')
-            coeffconv_folder = os.path.join(preprocess_folder, 'CoeffConv')
-            if platform.system() == 'Windows':
-                coeffcheck_binary = os.path.join(coeffconv_folder, 'CoeffCheck.exe')
+        if "workflow location" in args:
+            energyplus_root_folder, _ = os.path.split(args["workflow location"])
+            preprocess_folder = os.path.join(energyplus_root_folder, "PreProcess")
+            coeffconv_folder = os.path.join(preprocess_folder, "CoeffConv")
+            if platform.system() == "Windows":
+                coeffcheck_binary = os.path.join(coeffconv_folder, "CoeffCheck.exe")
             else:
-                coeffcheck_binary = os.path.join(coeffconv_folder, 'CoeffCheck')
+                coeffcheck_binary = os.path.join(coeffconv_folder, "CoeffCheck")
             if not os.path.exists(coeffcheck_binary):
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="CoeffCheck binary not found: {}!".format(coeffcheck_binary),
-                    column_data=[]
+                    success=False, message="CoeffCheck binary not found: {}!".format(coeffcheck_binary), column_data=[]
                 )
         else:
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="Workflow location missing: {}!".format(args['worflow location']),
-                column_data=[]
+                success=False, message="Workflow location missing: {}!".format(args["worflow location"]), column_data=[]
             )
 
         cci_file_with_path = os.path.join(run_directory, file_name)
         cci_file_no_ext, _ = os.path.splitext(cci_file_with_path)
-        cco_file_with_path = cci_file_no_ext + '.cco'
+        cco_file_with_path = cci_file_no_ext + ".cco"
 
         # clean up working directory
-        cc_input_txt_file = os.path.join(run_directory, 'CoeffCheckInput.txt')
+        cc_input_txt_file = os.path.join(run_directory, "CoeffCheckInput.txt")
         if os.path.exists(cc_input_txt_file):
             os.remove(cc_input_txt_file)
-        cc_output_txt_file = os.path.join(run_directory, 'CoeffCheckOutput.txt')
+        cc_output_txt_file = os.path.join(run_directory, "CoeffCheckOutput.txt")
         if os.path.exists(cc_output_txt_file):
             os.remove(cc_output_txt_file)
 
@@ -124,12 +120,10 @@ class CoeffCheckWorkflow(BaseEPLaunchWorkflow1):
             shutil.copy2(cci_file_with_path, cc_input_txt_file)
 
             # execute utility
-            command_line_args = [coeffcheck_binary, ]
-            process = subprocess.run(
-                command_line_args,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-                cwd=run_directory
-            )
+            command_line_args = [
+                coeffcheck_binary,
+            ]
+            process = subprocess.run(command_line_args, creationflags=subprocess.CREATE_NEW_CONSOLE, cwd=run_directory)
             if process.returncode == 0:
                 # Remove old version of the output file
                 if os.path.exists(cco_file_with_path):
@@ -145,19 +139,13 @@ class CoeffCheckWorkflow(BaseEPLaunchWorkflow1):
                     os.remove(cc_output_txt_file)
 
                 return EPLaunchWorkflowResponse1(
-                    success=True,
-                    message="Ran CoeffCheck OK for file: {}!".format(cci_file_with_path),
-                    column_data=[]
+                    success=True, message="Ran CoeffCheck OK for file: {}!".format(cci_file_with_path), column_data=[]
                 )
             else:
                 return EPLaunchWorkflowResponse1(
-                    success=False,
-                    message="CoeffCheck failed for file: {}!".format(cci_file_with_path),
-                    column_data=[]
+                    success=False, message="CoeffCheck failed for file: {}!".format(cci_file_with_path), column_data=[]
                 )
         else:
             return EPLaunchWorkflowResponse1(
-                success=False,
-                message="CoeffCheck file not found: {}!".format(cci_file_with_path),
-                column_data=[]
+                success=False, message="CoeffCheck file not found: {}!".format(cci_file_with_path), column_data=[]
             )

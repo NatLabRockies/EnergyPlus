@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -316,7 +316,6 @@ void GetDemandManagerListInput(EnergyPlusData &state)
     static constexpr std::string_view routineName = "GetDemandManagerListInput";
     constexpr std::string_view cCurrentModuleObject = "DemandManagerAssignmentList";
 
-    auto &s_ipsc = state.dataIPShortCut;
     auto const &s_ip = state.dataInputProcessing->inputProcessor;
 
     state.dataDemandManager->NumDemandManagerList = s_ip->getNumObjectsFound(state, cCurrentModuleObject);
@@ -326,13 +325,13 @@ void GetDemandManagerListInput(EnergyPlusData &state)
         int NumNums;   // Number of elements in the numeric array
         int IOStat;    // IO Status when calling get input subroutine
         bool ErrorsFound = false;
+        auto &s_ipsc = state.dataIPShortCut;
 
         state.dataDemandManager->DemandManagerList.allocate(state.dataDemandManager->NumDemandManagerList);
 
         for (int ListNum = 1; ListNum <= state.dataDemandManager->NumDemandManagerList; ++ListNum) {
 
             auto &thisDemandMgrList = state.dataDemandManager->DemandManagerList(ListNum);
-
             s_ip->getObjectItem(state,
                                 cCurrentModuleObject,
                                 ListNum,
@@ -544,7 +543,6 @@ void GetDemandManagerInput(EnergyPlusData &state)
 
     static constexpr std::string_view routineName = "GetDemandManagerInput";
 
-    auto &s_ipsc = state.dataIPShortCut;
     auto const &s_ip = state.dataInputProcessing->inputProcessor;
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
@@ -602,6 +600,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
         AlphArray.dimension(MaxAlphas, std::string());
         NumArray.dimension(MaxNums, 0.0);
         int IOStat; // IO Status when calling get input subroutine
+        auto &s_ipsc = state.dataIPShortCut;
 
         DemandMgr.allocate(state.dataDemandManager->NumDemandMgr);
         state.dataDemandManager->UniqueDemandMgrNames.reserve(state.dataDemandManager->NumDemandMgr);
@@ -1525,9 +1524,9 @@ void LoadInterface(EnergyPlusData &state, DemandAction const Action, int const M
         if (state.dataZoneCtrls->NumComfortControlledZones > 0) {
             auto &comfortZone = state.dataZoneCtrls->ComfortControlledZone(LoadPtr);
             if (state.dataHeatBalFanSys->ComfortControlType(comfortZone.ActualZoneNum) != HVAC::SetptType::Uncontrolled) {
-                auto &zoneTstatSetpt = s_dhbf->zoneTstatSetpts(comfortZone.ActualZoneNum);
+                auto &cmftzoneTstatSetpt = s_dhbf->zoneTstatSetpts(comfortZone.ActualZoneNum);
                 if (Action == DemandAction::CheckCanReduce) {
-                    if (zoneTstatSetpt.setptLo > demandMgr.LowerLimit || zoneTstatSetpt.setptHi < demandMgr.UpperLimit) {
+                    if (cmftzoneTstatSetpt.setptLo > demandMgr.LowerLimit || cmftzoneTstatSetpt.setptHi < demandMgr.UpperLimit) {
                         CanReduceDemand = true; // Heating
                     }
                 } else if (Action == DemandAction::SetLimit) {

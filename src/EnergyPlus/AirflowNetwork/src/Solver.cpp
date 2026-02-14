@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1657,7 +1657,6 @@ namespace AirflowNetwork {
         int count;
         bool NodeFound;
         bool found;
-        int NumAPL;
         Array1D_string CompName(2);
         std::string SimAirNetworkKey;
 
@@ -1863,7 +1862,7 @@ namespace AirflowNetwork {
                     }
                 }
                 // Check continuity of both curves at boundary point
-                if (OccupantVentilationControl(i).ComfortLowTempCurveNum > 0 && OccupantVentilationControl(i).ComfortHighTempCurveNum) {
+                if (OccupantVentilationControl(i).ComfortLowTempCurveNum > 0 && OccupantVentilationControl(i).ComfortHighTempCurveNum > 0) {
                     if (std::abs(CurveValue(m_state, OccupantVentilationControl(i).ComfortLowTempCurveNum, Numbers(3)) -
                                  CurveValue(m_state, OccupantVentilationControl(i).ComfortHighTempCurveNum, Numbers(3))) > 0.1) {
                         ShowSevereError(m_state,
@@ -2030,6 +2029,7 @@ namespace AirflowNetwork {
 
         // Check the number of primary air loops
         if (!simulation_control.DuctLoss) {
+            int NumAPL;
             if (distribution_simulated) {
                 NumAPL = m_state.dataInputProcessing->inputProcessor->getNumObjectsFound(m_state, "AirLoopHVAC");
                 if (NumAPL > 0) {
@@ -2685,7 +2685,7 @@ namespace AirflowNetwork {
                 MultizoneSurfaceData(i).OpeningName = Alphas(2); // Name of crack or opening component,
                 // either simple or detailed large opening, or crack
                 MultizoneSurfaceData(i).ExternalNodeName = Alphas(3); // Name of external node, but not used at WPC="INPUT"
-                if (Util::FindItemInList(Alphas(3), MultizoneExternalNodeData) &&
+                if ((Util::FindItemInList(Alphas(3), MultizoneExternalNodeData) != 0) &&
                     m_state.afn->MultizoneExternalNodeData(Util::FindItemInList(Alphas(3), MultizoneExternalNodeData)).curve == 0) {
                     ShowSevereError(m_state, format(RoutineName) + "Invalid " + cAlphaFields(3) + "=" + Alphas(3));
                     ShowContinueError(m_state,
@@ -3050,17 +3050,17 @@ namespace AirflowNetwork {
                         //          AirflowNetworkNumOfZones+NumOfExtNodes
                     }
                     continue;
-                } else {
-                    if (n < ExternalEnvironment &&
-                        !(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond == OtherSideCoefNoCalcExt &&
-                          m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtWind)) {
-                        ShowSevereError(m_state,
-                                        format(RoutineName) + CurrentModuleObject + ": Invalid " + cAlphaFields(1) + " = " +
-                                            MultizoneSurfaceData(i).SurfName);
-                        ShowContinueError(m_state, "This type of surface (has ground, etc exposure) cannot be used in the AiflowNetwork model.");
-                        ErrorsFound = true;
-                    }
                 }
+                if (n < ExternalEnvironment &&
+                    !(m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtBoundCond == OtherSideCoefNoCalcExt &&
+                      m_state.dataSurface->Surface(MultizoneSurfaceData(i).SurfNum).ExtWind)) {
+                    ShowSevereError(m_state,
+                                    format(RoutineName) + CurrentModuleObject + ": Invalid " + cAlphaFields(1) + " = " +
+                                        MultizoneSurfaceData(i).SurfName);
+                    ShowContinueError(m_state, "This type of surface (has ground, etc exposure) cannot be used in the AiflowNetwork model.");
+                    ErrorsFound = true;
+                }
+
                 found = false;
                 for (j = 1; j <= AirflowNetworkNumOfZones; ++j) {
                     if (MultizoneZoneData(j).ZoneNum == m_state.dataSurface->Surface(n).Zone) {
@@ -3580,11 +3580,9 @@ namespace AirflowNetwork {
                 if (MultizoneExternalNodeData(j - 1).curve != MultizoneExternalNodeData(j).curve) {
                     found = true;
                     break;
-                } else {
-                    // If the curves are the same, then check to see if the azimuths are different
-                    if (MultizoneExternalNodeData(j - 1).azimuth != MultizoneExternalNodeData(j).azimuth) {
-                        differentAngle = MultizoneExternalNodeData(j - 1).symmetricCurve || MultizoneExternalNodeData(j).symmetricCurve;
-                    }
+                } // If the curves are the same, then check to see if the azimuths are different
+                if (MultizoneExternalNodeData(j - 1).azimuth != MultizoneExternalNodeData(j).azimuth) {
+                    differentAngle = MultizoneExternalNodeData(j - 1).symmetricCurve || MultizoneExternalNodeData(j).symmetricCurve;
                 }
             }
             if (!found && !differentAngle) {
@@ -4908,7 +4906,7 @@ namespace AirflowNetwork {
                         }
                     }
 
-                    if (AirflowNetworkLinkageData(count).ZoneName != "") {
+                    if (!AirflowNetworkLinkageData(count).ZoneName.empty()) {
                         AirflowNetworkLinkageData(count).ZoneNum = Util::FindItemInList(AirflowNetworkLinkageData(count).ZoneName, Zone);
                         if (AirflowNetworkLinkageData(count).ZoneNum == 0) {
                             ShowSevereError(m_state,
@@ -6272,6 +6270,13 @@ namespace AirflowNetwork {
                                 OutputProcessor::StoreType::Sum,
                                 Zone(i).Name);
             SetupOutputVariable(m_state,
+                                "AFN Zone Infiltration Mass Flow Rate",
+                                Constant::Units::kg_s,
+                                AirflowNetworkZnRpt(i).infilMassFlow,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                Zone(i).Name);
+            SetupOutputVariable(m_state,
                                 "AFN Zone Infiltration Air Change Rate",
                                 Constant::Units::ach,
                                 AirflowNetworkZnRpt(i).InfilAirChangeRate,
@@ -7323,9 +7328,8 @@ namespace AirflowNetwork {
 
         if (hIn_final == 0) {
             return 0;
-        } else {
-            return 1 / hIn_final;
         }
+        return 1 / hIn_final;
     }
 
     Real64 Solver::duct_outside_convection_resistance(Real64 const Ts,   // Surface temperature
@@ -7412,9 +7416,8 @@ namespace AirflowNetwork {
 
         if (hOut_final == 0) {
             return 0;
-        } else {
-            return 1 / hOut_final;
         }
+        return 1 / hOut_final;
     }
 
     void Solver::calculate_heat_balance()
@@ -7463,7 +7466,7 @@ namespace AirflowNetwork {
                                  AirflowNetworkNodeSimu(AirflowNetworkLinkageData(i).NodeNums[1]).WZ) /
                                 2.0);
             // Calculate duct conduction loss
-            if (CompTypeNum == iComponentTypeNum::DWC && CompName == std::string()) { // Duct element only
+            if (CompTypeNum == iComponentTypeNum::DWC && CompName.empty()) { // Duct element only
                 int TypeNum = AirflowNetworkCompData(CompNum).TypeNum;
                 if (AirflowNetworkLinkSimu(i).FLOW > 0.0) { // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
@@ -7713,8 +7716,8 @@ namespace AirflowNetwork {
                 }
             }
             // Calculate temp in a constant pressure drop element
-            if (CompTypeNum == iComponentTypeNum::CPD && CompName == std::string()) { // constant pressure element only
-                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                           // flow direction is the same as input from node 1 to node 2
+            if (CompTypeNum == iComponentTypeNum::CPD && CompName.empty()) { // constant pressure element only
+                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                  // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
                     LT = AirflowNetworkLinkageData(i).NodeNums[1];
                 } else { // flow direction is the opposite as input from node 2 to node 1
@@ -7731,7 +7734,7 @@ namespace AirflowNetwork {
                 MV(LT) = 0.0;
             }
             // Calculate return leak
-            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName == std::string()) {
+            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName.empty()) {
                 // Return leak element only
                 if ((AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[0]).EPlusZoneNum > 0) &&
                     (AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[1]).EPlusZoneNum == 0) && (AirflowNetworkLinkSimu(i).FLOW > 0.0)) {
@@ -7941,7 +7944,7 @@ namespace AirflowNetwork {
             CompTypeNum = AirflowNetworkCompData(CompNum).CompTypeNum;
             std::string CompName = AirflowNetworkCompData(CompNum).EPlusName;
             // Calculate duct moisture diffusion loss
-            if (CompTypeNum == iComponentTypeNum::DWC && CompName == std::string()) { // Duct component only
+            if (CompTypeNum == iComponentTypeNum::DWC && CompName.empty()) { // Duct component only
                 TypeNum = AirflowNetworkCompData(CompNum).TypeNum;
                 if (AirflowNetworkLinkSimu(i).FLOW > 0.0) { // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
@@ -8016,8 +8019,8 @@ namespace AirflowNetwork {
                 }
             }
             // Calculate temp in a constant pressure drop component
-            if (CompTypeNum == iComponentTypeNum::CPD && CompName == std::string()) { // constant pressure element only
-                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                           // flow direction is the same as input from node 1 to node 2
+            if (CompTypeNum == iComponentTypeNum::CPD && CompName.empty()) { // constant pressure element only
+                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                  // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
                     LT = AirflowNetworkLinkageData(i).NodeNums[1];
                 } else { // flow direction is the opposite as input from node 2 to node 1
@@ -8034,7 +8037,7 @@ namespace AirflowNetwork {
                 MV(LT) = 0.0;
             }
             // Calculate return leak
-            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName == std::string()) {
+            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName.empty()) {
                 // Return leak component only
                 if ((AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[0]).EPlusZoneNum > 0) &&
                     (AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[1]).EPlusZoneNum == 0) && (AirflowNetworkLinkSimu(i).FLOW > 0.0)) {
@@ -8225,7 +8228,7 @@ namespace AirflowNetwork {
             CompTypeNum = AirflowNetworkCompData(CompNum).CompTypeNum;
             std::string CompName = AirflowNetworkCompData(CompNum).EPlusName;
             // Calculate duct moisture diffusion loss
-            if (CompTypeNum == iComponentTypeNum::DWC && CompName == std::string()) { // Duct component only
+            if (CompTypeNum == iComponentTypeNum::DWC && CompName.empty()) { // Duct component only
                 // TypeNum = AirflowNetworkCompData(CompNum).TypeNum;
                 if (AirflowNetworkLinkSimu(i).FLOW > 0.0) { // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
@@ -8266,8 +8269,8 @@ namespace AirflowNetwork {
                 }
             }
             // Calculate temp in a constant pressure drop component
-            if (CompTypeNum == iComponentTypeNum::CPD && CompName == std::string()) { // constant pressure element only
-                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                           // flow direction is the same as input from node 1 to node 2
+            if (CompTypeNum == iComponentTypeNum::CPD && CompName.empty()) { // constant pressure element only
+                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                  // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
                     LT = AirflowNetworkLinkageData(i).NodeNums[1];
                 } else { // flow direction is the opposite as input from node 2 to node 1
@@ -8279,7 +8282,7 @@ namespace AirflowNetwork {
                 MV(LT) = 0.0;
             }
             // Calculate return leak
-            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName == std::string()) {
+            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName.empty()) {
                 // Return leak component only
                 if ((AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[0]).EPlusZoneNum > 0) &&
                     (AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[1]).EPlusZoneNum == 0) && (AirflowNetworkLinkSimu(i).FLOW > 0.0)) {
@@ -8478,8 +8481,8 @@ namespace AirflowNetwork {
                 }
             }
             // Calculate temp in a constant pressure drop component
-            if (CompTypeNum == iComponentTypeNum::CPD && CompName == std::string()) { // constant pressure element only
-                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                           // flow direction is the same as input from node 1 to node 2
+            if (CompTypeNum == iComponentTypeNum::CPD && CompName.empty()) { // constant pressure element only
+                if (AirflowNetworkLinkSimu(i).FLOW > 0.0) {                  // flow direction is the same as input from node 1 to node 2
                     LF = AirflowNetworkLinkageData(i).NodeNums[0];
                     LT = AirflowNetworkLinkageData(i).NodeNums[1];
                 } else { // flow direction is the opposite as input from node 2 to node 1
@@ -8491,7 +8494,7 @@ namespace AirflowNetwork {
                 MV(LT) = 0.0;
             }
             // Calculate return leak
-            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName == std::string()) {
+            if ((CompTypeNum == iComponentTypeNum::PLR || CompTypeNum == iComponentTypeNum::ELR) && CompName.empty()) {
                 // Return leak component only
                 if ((AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[0]).EPlusZoneNum > 0) &&
                     (AirflowNetworkNodeData(AirflowNetworkLinkageData(i).NodeNums[1]).EPlusZoneNum == 0) && (AirflowNetworkLinkSimu(i).FLOW > 0.0)) {
@@ -9044,6 +9047,7 @@ namespace AirflowNetwork {
         for (auto &e : AirflowNetworkZnRpt) {
             e.InfilVolume = 0.0;
             e.InfilMass = 0.0;
+            e.infilMassFlow = 0.0;
             e.InfilAirChangeRate = 0.0;
             e.VentilVolume = 0.0;
             e.VentilMass = 0.0;
@@ -9053,7 +9057,7 @@ namespace AirflowNetwork {
         }
 
         for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
-            if (DisSysNumOfCVFs == 0) {
+            if (DisSysNumOfCVFs == 0 || !distribution_simulated) {
                 continue;
             }
             for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
@@ -9328,6 +9332,7 @@ namespace AirflowNetwork {
             AirDensity = PsyRhoAirFnPbTdbW(m_state, m_state.dataEnvrn->OutBaroPress, thisZoneHB.MAT, thisZoneHB.airHumRatAvg);
 
             AirflowNetworkZnRpt(i).InfilMass = (exchangeData(i).SumMCp / CpAir) * ReportingConstant;
+            AirflowNetworkZnRpt(i).infilMassFlow = (exchangeData(i).SumMCp / CpAir);
             AirflowNetworkZnRpt(i).InfilVolume = AirflowNetworkZnRpt(i).InfilMass / AirDensity;
             AirflowNetworkZnRpt(i).InfilAirChangeRate = AirflowNetworkZnRpt(i).InfilVolume / (TimeStepSys * Zone(i).Volume);
             AirflowNetworkZnRpt(i).VentilMass = (exchangeData(i).SumMVCp / CpAir) * ReportingConstant;
@@ -9382,7 +9387,7 @@ namespace AirflowNetwork {
 
         // Rewrite AirflowNetwork airflow rate
         for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
-            if (DisSysNumOfCVFs == 0) {
+            if (DisSysNumOfCVFs == 0 || !distribution_simulated) {
                 continue;
             }
             for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
@@ -10150,7 +10155,8 @@ namespace AirflowNetwork {
         // Note in the following that individual venting control for a window/door takes
         // precedence over zone-level control
         if (MultizoneSurfaceData(i).IndVentControl) {
-            VentTemp = MultizoneSurfaceData(i).ventTempControlSched ? MultizoneSurfaceData(i).ventTempControlSched->getCurrentVal() : 0.0;
+            VentTemp =
+                (MultizoneSurfaceData(i).ventTempControlSched != nullptr) ? MultizoneSurfaceData(i).ventTempControlSched->getCurrentVal() : 0.0;
             VentCtrlNum = MultizoneSurfaceData(i).VentSurfCtrNum;
             if (MultizoneSurfaceData(i).ventAvailSched != nullptr) {
                 VentingSchVal = MultizoneSurfaceData(i).ventAvailSched->getCurrentVal();
@@ -10161,7 +10167,7 @@ namespace AirflowNetwork {
             }
         } else {
             // Zone level only by Gu on Nov. 8, 2005
-            VentTemp = MultizoneZoneData(IZ).ventTempControlSched ? MultizoneZoneData(IZ).ventTempControlSched->getCurrentVal() : 0.0;
+            VentTemp = (MultizoneZoneData(IZ).ventTempControlSched != nullptr) ? MultizoneZoneData(IZ).ventTempControlSched->getCurrentVal() : 0.0;
             VentCtrlNum = MultizoneZoneData(IZ).VentCtrNum;
             if (MultizoneZoneData(IZ).ventAvailSched != nullptr) {
                 VentingSchVal = MultizoneZoneData(IZ).ventAvailSched->getCurrentVal();
@@ -10605,16 +10611,16 @@ namespace AirflowNetwork {
                         if (i == GetOAMixerReliefNodeNumber(m_state, OAMixerNum)) {
                             NodeFound(i) = true;
                             break;
-                        } else if (i == GetOAMixerInletNodeNumber(m_state, OAMixerNum)) {
+                        }
+                        if (i == GetOAMixerInletNodeNumber(m_state, OAMixerNum)) {
                             NodeFound(i) = true;
                             break;
-                        } else {
-                            if (OAMixerNum == GetNumOAMixers(m_state)) {
-                                ShowSevereError(m_state,
-                                                format(RoutineName) + "'" + m_state.dataLoopNodes->NodeID(i) +
-                                                    "' is not defined as an AirflowNetwork:Distribution:Node object.");
-                                ErrorsFound = true;
-                            }
+                        }
+                        if (OAMixerNum == GetNumOAMixers(m_state)) {
+                            ShowSevereError(m_state,
+                                            format(RoutineName) + "'" + m_state.dataLoopNodes->NodeID(i) +
+                                                "' is not defined as an AirflowNetwork:Distribution:Node object.");
+                            ErrorsFound = true;
                         }
                     }
                 } else if (GetNumOAMixers(m_state) == 0) {
@@ -11344,9 +11350,8 @@ namespace AirflowNetwork {
                     if (NumOfFans > 1) {
                         FanNames += m_state.dataAirSystemsData->PrimaryAirSystems(1).Branch(BranchNum).Comp(CompNum).Name;
                         break;
-                    } else {
-                        FanNames += m_state.dataAirSystemsData->PrimaryAirSystems(1).Branch(BranchNum).Comp(CompNum).Name + ",";
                     }
+                    FanNames += m_state.dataAirSystemsData->PrimaryAirSystems(1).Branch(BranchNum).Comp(CompNum).Name + ",";
                 }
             }
             if (NumOfFans > 1) {
@@ -13297,15 +13302,13 @@ namespace AirflowNetwork {
 
         if (openingProbSched == nullptr) {
             return true;
-        } else {
-            SchValue = openingProbSched->getCurrentVal();
-            RandomValue = Real64(rand()) / RAND_MAX;
-            if (SchValue > RandomValue) {
-                return true;
-            } else {
-                return false;
-            }
         }
+        SchValue = openingProbSched->getCurrentVal();
+        RandomValue = Real64(rand()) / RAND_MAX;
+        if (SchValue > RandomValue) {
+            return true;
+        }
+        return false;
     }
 
     bool OccupantVentilationControlProp::closing_probability(EnergyPlusData &state,
@@ -13319,15 +13322,13 @@ namespace AirflowNetwork {
         }
         if (closingProbSched == nullptr) {
             return true;
-        } else {
-            SchValue = closingProbSched->getCurrentVal();
-            RandomValue = Real64(rand()) / RAND_MAX;
-            if (SchValue > RandomValue) {
-                return true;
-            } else {
-                return false;
-            }
         }
+        SchValue = closingProbSched->getCurrentVal();
+        RandomValue = Real64(rand()) / RAND_MAX;
+        if (SchValue > RandomValue) {
+            return true;
+        }
+        return false;
     }
 
     void Solver::allocate()

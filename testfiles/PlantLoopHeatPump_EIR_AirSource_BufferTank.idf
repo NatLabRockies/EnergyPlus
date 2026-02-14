@@ -8,7 +8,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with District Heating and Cooling as necessary.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name

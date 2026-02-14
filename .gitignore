@@ -100,3 +100,6 @@ dist
 /idd/Energy+.schema.epJSON
 /idd/Energy+.schema.epJSON.in
 design/FY2023/earth_tube_solution_space_diagram.pdf
+
+# node modules in release/
+release/node_modules/*

@@ -5,7 +5,7 @@ if (NOT TARGET fmt)
     add_subdirectory(fmt)
 endif ()
 
-add_subdirectory(boost-1.77.0)
+add_subdirectory(boost-1.88.0) #set by update-boost.py
 
 if (KIVA_EXE_BUILD OR KIVA_GROUND_PLOT)
 
@@ -41,7 +41,7 @@ if (KIVA_EXE_BUILD OR KIVA_GROUND_PLOT)
     set(PNG_INCLUDE_DIR "${libpng_SOURCE_DIR}" "${libpng_BINARY_DIR}")
     set(PNG_LIBRARIES ${PNG_LIBRARY})
     set(PNG_INCLUDE_DIRS ${PNG_INCLUDE_DIR})
-    add_subdirectory(mathgl-2.4.4)
+    add_subdirectory(mathgl-8.0.1)
 
     if (MSVC)
         target_compile_options(mgl PRIVATE /wd4477 /wd4334)

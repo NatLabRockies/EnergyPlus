@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -5910,7 +5910,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestTDDSurfWinHeatGain)
     state->dataSurfaceGeometry->SinZoneRelNorth(2) = std::sin(-state->dataHeatBal->Zone(2).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
-    int const HoursInDay(24);
+    int constexpr HoursInDay(24);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
         state->dataSurface->SurfSunCosHourly(hour) = 0.0;
@@ -8653,7 +8653,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_UpdateThermalHistoriesIZSurf
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfQdotRadSolarInRepPerAreaCalc)
 {
-    Real64 const diffTol = 0.0000000001;
+    Real64 constexpr diffTol = 0.0000000001;
     Real64 expectedResult;
 
     state->dataHeatBal->Zone.allocate(1);

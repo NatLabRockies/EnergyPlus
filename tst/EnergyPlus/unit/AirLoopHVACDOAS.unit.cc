@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -4395,7 +4395,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompOutletNodeIndex)
 
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(2), "HUMIDIFIER:STEAM:ELECTRIC");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), 2);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 23);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 24);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestGetDesignDayConditions)
@@ -8874,7 +8874,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompFanNoDrawAndBlow)
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 3);
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(3), "HUMIDIFIER:STEAM:ELECTRIC");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(3), 3);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), 24);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), 25);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
@@ -8882,7 +8882,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
     // 9066
     std::string const idf_objects = delimited_string({
 
-        "  Version,25.2;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    YES,                     !- Do Zone Sizing Calculation",
@@ -10469,7 +10469,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
     // 9066
     std::string const idf_objects = delimited_string({
 
-        "  Version,25.2;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    YES,                     !- Do Zone Sizing Calculation",

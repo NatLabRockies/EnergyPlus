@@ -10,9 +10,9 @@ Usage:
 
 ```
 # You can get the latest version of this script by doing something similar to:
-wget https://raw.githubusercontent.com/NREL/EnergyPlus/develop/cmake/qtifw/install_script.qs
+wget https://raw.githubusercontent.com/NatLabRockies/EnergyPlus/develop/cmake/qtifw/install_script.qs
 # Windows Powershell
-wget https://raw.githubusercontent.com/NREL/EnergyPlus/develop/cmake/qtifw/install_script.qs -OutFile install_script.qs
+wget https://raw.githubusercontent.com/NatLabRockies/EnergyPlus/develop/cmake/qtifw/install_script.qs -OutFile install_script.qs
 
 # Linux
 sudo ./EnergyPlus-9.2.0-0e6e9c08a0-Linux-x86_64.run --verbose --platform minimal --script /path/to/install_script.qs

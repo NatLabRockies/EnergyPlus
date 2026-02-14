@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -169,14 +169,14 @@ namespace SurfaceGeometry {
         state.dataSurface->SurfWinProfileAngVert.dimension(NumSurfaces, 0);
 
         state.dataSurface->SurfWinShadingFlag.dimension(NumSurfaces, DataSurfaces::WinShadingType::ShadeOff);
-        state.dataSurface->SurfWinShadingFlagEMSOn.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinShadingFlagEMSOn.dimension(NumSurfaces, false);
         state.dataSurface->SurfWinShadingFlagEMSValue.dimension(NumSurfaces, 0.0);
         state.dataSurface->SurfWinStormWinFlag.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinStormWinFlagPrevDay.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinFracTimeShadingDeviceOn.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinExtIntShadePrevTS.dimension(NumSurfaces, DataSurfaces::WinShadingType::ShadeOff);
-        state.dataSurface->SurfWinHasShadeOrBlindLayer.dimension(NumSurfaces, 0);
-        state.dataSurface->SurfWinSurfDayLightInit.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinHasShadeOrBlindLayer.dimension(NumSurfaces, false);
+        state.dataSurface->SurfWinSurfDayLightInit.dimension(NumSurfaces, false);
         state.dataSurface->SurfWinDaylFacPoint.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinVisTransSelected.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinSwitchingFactor.dimension(NumSurfaces, 0);
@@ -225,7 +225,7 @@ namespace SurfaceGeometry {
         state.dataSurface->SurfWinAirflowReturnNodePtr.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinMaxAirflow.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinAirflowControlType.dimension(NumSurfaces, DataSurfaces::WindowAirFlowControlType::Invalid);
-        state.dataSurface->SurfWinAirflowHasSchedule.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinAirflowHasSchedule.dimension(NumSurfaces, false);
         state.dataSurface->SurfWinAirflowScheds.dimension(NumSurfaces, nullptr);
         state.dataSurface->SurfWinAirflowThisTS.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinTAirflowGapOutlet.dimension(NumSurfaces, 0);
@@ -235,7 +235,7 @@ namespace SurfaceGeometry {
         state.dataSurface->SurfWinVentingAvailabilityRep.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinSkyGndSolarInc.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinBmGndSolarInc.dimension(NumSurfaces, 0);
-        state.dataSurface->SurfWinSolarDiffusing.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinSolarDiffusing.dimension(NumSurfaces, false);
         state.dataSurface->SurfWinFrameHeatGain.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinFrameHeatLoss.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinDividerHeatLoss.dimension(NumSurfaces, 0);
@@ -1049,9 +1049,8 @@ namespace SurfaceGeometry {
 
         if (state.dataSurfaceGeometry->GetSurfaceDataOneTimeFlag) {
             return;
-        } else {
-            state.dataSurfaceGeometry->GetSurfaceDataOneTimeFlag = true;
         }
+        state.dataSurfaceGeometry->GetSurfaceDataOneTimeFlag = true;
 
         GetGeometryParameters(state, ErrorsFound);
 
@@ -1246,7 +1245,7 @@ namespace SurfaceGeometry {
                 newSurf.Zone = Found;
                 auto &newZone = state.dataHeatBal->Zone(Found);
                 newSurf.ZoneName = newZone.Name;
-                assert(newZone.spaceIndexes.size() >= 1);
+                assert(!newZone.spaceIndexes.empty());
                 newSurf.spaceNum = 0; // clear this here and set later
             } else if (surfTemp.ExtBoundCond == unenteredAdjacentSpaceSurface) {
                 int Found = Util::FindItemInList(surfTemp.ExtBoundCondName, state.dataHeatBal->space, state.dataGlobal->numSpaces);
@@ -2898,23 +2897,23 @@ namespace SurfaceGeometry {
                 thisSurf.spaceNum = Surfaces(thisSurf.BaseSurf).spaceNum;
             }
             if (thisSurf.spaceNum > 0) {
-                anySurfacesWithSpace(thisSurf.Zone) = true;
+                anySurfacesWithSpace(thisSurf.Zone) = 1u;
             } else if (thisSurf.ExtBoundCond != unreconciledZoneSurface) {
-                anySurfacesWithoutSpace(thisSurf.Zone) = true;
+                anySurfacesWithoutSpace(thisSurf.Zone) = 1u;
             } else if (thisSurf.Name.substr(0, 3) != "iz-") {
                 // Only trigger a new space if the spaceless surface is not an autogenerated interzone surface
-                anySurfacesWithoutSpace(thisSurf.Zone) = true;
+                anySurfacesWithoutSpace(thisSurf.Zone) = 1u;
             }
         }
 
         // Create any missing Spaces
         for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
             auto &thisZone = state.dataHeatBal->Zone(zoneNum);
-            if (anySurfacesWithoutSpace(zoneNum)) {
+            if (anySurfacesWithoutSpace(zoneNum) != 0u) {
                 // If any surfaces in the zone are not assigned to a space, may need to create a new space
                 // Every zone has at least one space, created in HeatBalanceManager::GetSpaceData
                 // If no surfaces have a space assigned, then the default space will be used, otherwise, create a new space
-                if (anySurfacesWithSpace(zoneNum)) {
+                if (anySurfacesWithSpace(zoneNum) != 0u) {
                     // Add new space
                     ++state.dataGlobal->numSpaces;
                     assert(static_cast<int>(state.dataHeatBal->space.size()) >= state.dataGlobal->numSpaces);
@@ -4328,7 +4327,7 @@ namespace SurfaceGeometry {
         int ExtSurfNum;
         for (int i = 1; i <= SurfNum; i++) {
             if (state.dataSurfaceGeometry->SurfaceTmp(i).ExtBoundCond == unreconciledZoneSurface &&
-                state.dataSurfaceGeometry->SurfaceTmp(i).ExtBoundCondName != "") {
+                !state.dataSurfaceGeometry->SurfaceTmp(i).ExtBoundCondName.empty()) {
                 ExtSurfNum = Util::FindItemInList(state.dataSurfaceGeometry->SurfaceTmp(i).ExtBoundCondName, state.dataSurfaceGeometry->SurfaceTmp);
                 // If we cannot find the referenced surface
                 if (ExtSurfNum == 0) {
@@ -5031,10 +5030,9 @@ namespace SurfaceGeometry {
                                        s_ipsc->cAlphaArgs(3)));
                 ErrorsFound = true;
                 continue;
-            } else {
-                state.dataConstruction->Construct(surfTemp.Construction).IsUsed = true;
-                surfTemp.ConstructionStoredInputValue = surfTemp.Construction;
             }
+            state.dataConstruction->Construct(surfTemp.Construction).IsUsed = true;
+            surfTemp.ConstructionStoredInputValue = surfTemp.Construction;
 
             if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::TDD_Diffuser ||
                 surfTemp.Class == SurfaceClass::TDD_Dome) {
@@ -5219,6 +5217,7 @@ namespace SurfaceGeometry {
                 }
             }
             surfTemp.Vertex.allocate(surfTemp.Sides);
+            surfTemp.NewVertex.allocate(surfTemp.Sides);
             if (surfTemp.Class == SurfaceClass::Window || surfTemp.Class == SurfaceClass::GlassDoor || surfTemp.Class == SurfaceClass::Door) {
                 surfTemp.Multiplier = int(s_ipsc->rNumericArgs(2));
             }
@@ -6738,19 +6737,21 @@ namespace SurfaceGeometry {
                     //        \units m
 
                     ++SurfNum;
-                    auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
-                    surfTemp.Name = s_ipsc->cAlphaArgs(1) + " Right"; // Set the Surface Name in the Derived Type
-                    surfTemp.Class = SurfaceClass::Shading;
-                    surfTemp.HeatTransSurf = false;
+                    auto &surfTemp_Rfin = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
+                    surfTemp_Rfin.Name = s_ipsc->cAlphaArgs(1) + " Right"; // Set the Surface Name in the Derived Type
+                    surfTemp_Rfin.Class = SurfaceClass::Shading;
+                    surfTemp_Rfin.HeatTransSurf = false;
                     BaseSurfNum = state.dataSurfaceGeometry->SurfaceTmp(Found).BaseSurf;
-                    surfTemp.BaseSurfName = state.dataSurfaceGeometry->SurfaceTmp(Found).BaseSurfName;
-                    surfTemp.ExtBoundCond = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtBoundCond;
-                    surfTemp.ExtSolar = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtSolar;
-                    surfTemp.ExtWind = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtWind;
-                    surfTemp.Zone = state.dataSurfaceGeometry->SurfaceTmp(Found).Zone; // Necessary to do relative coordinates in GetVertices below
-                    surfTemp.ZoneName = state.dataSurfaceGeometry->SurfaceTmp(Found).ZoneName; // Necessary to have surface drawn in OutputReports
+                    surfTemp_Rfin.BaseSurfName = state.dataSurfaceGeometry->SurfaceTmp(Found).BaseSurfName;
+                    surfTemp_Rfin.ExtBoundCond = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtBoundCond;
+                    surfTemp_Rfin.ExtSolar = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtSolar;
+                    surfTemp_Rfin.ExtWind = state.dataSurfaceGeometry->SurfaceTmp(Found).ExtWind;
+                    surfTemp_Rfin.Zone =
+                        state.dataSurfaceGeometry->SurfaceTmp(Found).Zone; // Necessary to do relative coordinates in GetVertices below
+                    surfTemp_Rfin.ZoneName =
+                        state.dataSurfaceGeometry->SurfaceTmp(Found).ZoneName; // Necessary to have surface drawn in OutputReports
 
-                    surfTemp.shadowSurfSched = nullptr;
+                    surfTemp_Rfin.shadowSurfSched = nullptr;
                     Length = s_ipsc->rNumericArgs(7) + s_ipsc->rNumericArgs(8) + state.dataSurfaceGeometry->SurfaceTmp(Found).Height;
                     if (Item == 3) {
                         Depth = s_ipsc->rNumericArgs(10);
@@ -6788,16 +6789,16 @@ namespace SurfaceGeometry {
                                Zp * state.dataSurfaceGeometry->SurfaceTmp(BaseSurfNum).SinTilt;
 
                         TiltAngle = state.dataSurfaceGeometry->SurfaceTmp(Found).Tilt;
-                        surfTemp.Tilt = TiltAngle;
-                        surfTemp.convOrientation = Convect::GetSurfConvOrientation(surfTemp.Tilt);
-                        surfTemp.Azimuth = state.dataSurfaceGeometry->SurfaceTmp(Found).Azimuth - (180.0 - s_ipsc->rNumericArgs(9));
-                        surfTemp.CosAzim = std::cos(surfTemp.Azimuth * Constant::DegToRad);
-                        surfTemp.SinAzim = std::sin(surfTemp.Azimuth * Constant::DegToRad);
-                        surfTemp.CosTilt = std::cos(surfTemp.Tilt * Constant::DegToRad);
-                        surfTemp.SinTilt = std::sin(surfTemp.Tilt * Constant::DegToRad);
+                        surfTemp_Rfin.Tilt = TiltAngle;
+                        surfTemp_Rfin.convOrientation = Convect::GetSurfConvOrientation(surfTemp_Rfin.Tilt);
+                        surfTemp_Rfin.Azimuth = state.dataSurfaceGeometry->SurfaceTmp(Found).Azimuth - (180.0 - s_ipsc->rNumericArgs(9));
+                        surfTemp_Rfin.CosAzim = std::cos(surfTemp_Rfin.Azimuth * Constant::DegToRad);
+                        surfTemp_Rfin.SinAzim = std::sin(surfTemp_Rfin.Azimuth * Constant::DegToRad);
+                        surfTemp_Rfin.CosTilt = std::cos(surfTemp_Rfin.Tilt * Constant::DegToRad);
+                        surfTemp_Rfin.SinTilt = std::sin(surfTemp_Rfin.Tilt * Constant::DegToRad);
 
-                        surfTemp.Sides = 4;
-                        surfTemp.Vertex.allocate(surfTemp.Sides);
+                        surfTemp_Rfin.Sides = 4;
+                        surfTemp_Rfin.Vertex.allocate(surfTemp_Rfin.Sides);
 
                         MakeRelativeRectangularVertices(state,
                                                         BaseSurfNum,
@@ -6811,8 +6812,8 @@ namespace SurfaceGeometry {
                         //    SurfaceTmp(SurfNum)%BaseSurfName='  '
                         //    SurfaceTmp(SurfNum)%ZoneName='  '
 
-                        surfTemp.BaseSurf = 0;
-                        surfTemp.Zone = 0;
+                        surfTemp_Rfin.BaseSurf = 0;
+                        surfTemp_Rfin.Zone = 0;
 
                         // and mirror
                         if (state.dataReportFlag->MakeMirroredAttachedShading) {
@@ -8751,6 +8752,9 @@ namespace SurfaceGeometry {
             }
 
             if (!ErrorsFoundByConstruct) {
+                if (tmpAlgoInput == DataSurfaces::HeatTransferModel::CondFD) {
+                    state.dataConstruction->Construct(Found).IsCondFD = true;
+                }
                 for (Item1 = 1; Item1 <= state.dataSurface->TotSurfaces; ++Item1) {
                     if (state.dataSurface->Surface(Item1).Construction == Found) {
                         state.dataSurface->Surface(Item1).HeatTransferAlgorithm = tmpAlgoInput;
@@ -10087,7 +10091,7 @@ namespace SurfaceGeometry {
             int curShadedConstruction = state.dataSurface->WindowShadingControl(iShadeCtrl).getInputShadedConstruction;
             for (int jFeneRef = 1; jFeneRef <= state.dataSurface->WindowShadingControl(iShadeCtrl).FenestrationCount; ++jFeneRef) {
                 if (Util::SameString(state.dataSurface->WindowShadingControl(iShadeCtrl).FenestrationName(jFeneRef), surfTemp.Name)) {
-                    state.dataGlobal->AndShadingControlInModel = true;
+                    state.dataGlobal->AnyShadingControlInModel = true;
                     surfTemp.HasShadeControl = true;
                     surfTemp.windowShadingControlList.push_back(iShadeCtrl);
                     surfTemp.activeWindowShadingControl = iShadeCtrl;
@@ -10286,14 +10290,13 @@ namespace SurfaceGeometry {
                     ErrorsFound = true;
                 }
                 break;
-            } else {
-                ShowSevereError(state,
-                                format("{}: Date On Month [{}], invalid for WindowProperty:StormWindow Input #{}",
-                                       s_ipsc->cCurrentModuleObject,
-                                       state.dataSurface->StormWindow(StormWinNum).MonthOn,
-                                       StormWinNum));
-                ErrorsFound = true;
             }
+            ShowSevereError(state,
+                            format("{}: Date On Month [{}], invalid for WindowProperty:StormWindow Input #{}",
+                                   s_ipsc->cCurrentModuleObject,
+                                   state.dataSurface->StormWindow(StormWinNum).MonthOn,
+                                   StormWinNum));
+            ErrorsFound = true;
 
             int const monthOff = state.dataSurface->StormWindow(StormWinNum).MonthOff;
             if (monthOff >= January && monthOff <= December) {
@@ -10307,14 +10310,13 @@ namespace SurfaceGeometry {
                     ErrorsFound = true;
                 }
                 break;
-            } else {
-                ShowSevereError(state,
-                                format("{}: Date Off Month [{}], invalid for WindowProperty:StormWindow Input #{}",
-                                       s_ipsc->cCurrentModuleObject,
-                                       state.dataSurface->StormWindow(StormWinNum).MonthOff,
-                                       StormWinNum));
-                ErrorsFound = true;
             }
+            ShowSevereError(state,
+                            format("{}: Date Off Month [{}], invalid for WindowProperty:StormWindow Input #{}",
+                                   s_ipsc->cCurrentModuleObject,
+                                   state.dataSurface->StormWindow(StormWinNum).MonthOff,
+                                   StormWinNum));
+            ErrorsFound = true;
         }
 
         // Error checks
@@ -10588,7 +10590,7 @@ namespace SurfaceGeometry {
 
                     // Set return air node number
                     state.dataSurface->SurfWinAirflowReturnNodePtr(SurfNum) = 0;
-                    std::string retNodeName = "";
+                    std::string retNodeName;
                     if (!s_ipsc->lAlphaFieldBlanks(7)) {
                         retNodeName = s_ipsc->cAlphaArgs(7);
                     }
@@ -10922,9 +10924,9 @@ namespace SurfaceGeometry {
                                                s_ipsc->cAlphaFieldNames(alpF - 1),
                                                s_ipsc->cNumericFieldNames(numF)));
                         continue;
-                    } else {
-                        fndInput.intHIns.width = -s_ipsc->rNumericArgs(numF);
                     }
+                    fndInput.intHIns.width = -s_ipsc->rNumericArgs(numF);
+
                     numF++;
                 } else {
                     if (!s_ipsc->lNumericFieldBlanks(numF)) {
@@ -10985,9 +10987,9 @@ namespace SurfaceGeometry {
                                                s_ipsc->cAlphaFieldNames(alpF - 1),
                                                s_ipsc->cNumericFieldNames(numF)));
                         continue;
-                    } else {
-                        fndInput.intVIns.depth = s_ipsc->rNumericArgs(numF);
                     }
+                    fndInput.intVIns.depth = s_ipsc->rNumericArgs(numF);
+
                     numF++;
                 } else {
                     if (!s_ipsc->lNumericFieldBlanks(numF)) {
@@ -11046,9 +11048,9 @@ namespace SurfaceGeometry {
                                                s_ipsc->cAlphaFieldNames(alpF - 1),
                                                s_ipsc->cNumericFieldNames(numF)));
                         continue;
-                    } else {
-                        fndInput.extHIns.width = s_ipsc->rNumericArgs(numF);
                     }
+                    fndInput.extHIns.width = s_ipsc->rNumericArgs(numF);
+
                     numF++;
                 } else {
                     if (!s_ipsc->lNumericFieldBlanks(numF)) {
@@ -11109,9 +11111,9 @@ namespace SurfaceGeometry {
                                                s_ipsc->cAlphaFieldNames(alpF - 1),
                                                s_ipsc->cNumericFieldNames(numF)));
                         continue;
-                    } else {
-                        fndInput.extVIns.depth = s_ipsc->rNumericArgs(numF);
                     }
+                    fndInput.extVIns.depth = s_ipsc->rNumericArgs(numF);
+
                     numF++;
                 } else {
                     if (!s_ipsc->lNumericFieldBlanks(numF)) {
@@ -11206,9 +11208,9 @@ namespace SurfaceGeometry {
                                                s_ipsc->cAlphaFieldNames(alpF - 1),
                                                s_ipsc->cNumericFieldNames(numF)));
                         continue;
-                    } else {
-                        fndInput.footing.depth = s_ipsc->rNumericArgs(numF);
                     }
+                    fndInput.footing.depth = s_ipsc->rNumericArgs(numF);
+
                     numF++;
                 } else {
                     if (!s_ipsc->lNumericFieldBlanks(numF)) {
@@ -11286,9 +11288,9 @@ namespace SurfaceGeometry {
                                                    s_ipsc->cAlphaFieldNames(alpF - 1),
                                                    s_ipsc->cNumericFieldNames(numF)));
                             continue;
-                        } else {
-                            block.x = s_ipsc->rNumericArgs(numF);
                         }
+                        block.x = s_ipsc->rNumericArgs(numF);
+
                         numF++;
 
                         if (s_ipsc->lNumericFieldBlanks(numF)) {
@@ -11738,7 +11740,8 @@ namespace SurfaceGeometry {
                 ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(4));
                 ErrorsFound = true;
                 continue;
-            } else if ((sched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(4))) == nullptr) {
+            }
+            if ((sched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(4))) == nullptr) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                 ErrorsFound = true;
                 continue;
@@ -12191,22 +12194,20 @@ namespace SurfaceGeometry {
         if (edgeNot2orig.empty()) {
             edgeNot2 = edgeNot2orig;
             return true;
-        } else { // if the count is three or greater it is likely that a vertex that is colinear was counted on the faces on one edge and not
-                 // on the "other side" of the edge Go through all the points looking for the number that are colinear and see if that is
-                 // consistent with the number of edges found that didn't have a count of two
-            DataVectorTypes::Polyhedron updatedZonePoly = updateZonePolygonsForMissingColinearPoints(
-                zonePoly, uniqueVertices); // this is done after initial test since it is computationally intensive.
-            std::vector<EdgeOfSurf> edgeNot2again = edgesNotTwoForEnclosedVolumeTest(updatedZonePoly, uniqueVertices);
-            if (edgeNot2again.empty()) {
-                return true;
-            } else {
-                edgeNot2 = edgesInBoth(edgeNot2orig,
-                                       edgeNot2again); // only return a list of those edges that appear in both the original edge and the
-                                                       // revised edges this eliminates added edges that will confuse users and edges that
-                                                       // were caught by the updateZonePoly routine
-                return false;
-            }
+        } // if the count is three or greater it is likely that a vertex that is colinear was counted on the faces on one edge and not
+          // on the "other side" of the edge Go through all the points looking for the number that are colinear and see if that is
+          // consistent with the number of edges found that didn't have a count of two
+        DataVectorTypes::Polyhedron updatedZonePoly = updateZonePolygonsForMissingColinearPoints(
+            zonePoly, uniqueVertices); // this is done after initial test since it is computationally intensive.
+        std::vector<EdgeOfSurf> edgeNot2again = edgesNotTwoForEnclosedVolumeTest(updatedZonePoly, uniqueVertices);
+        if (edgeNot2again.empty()) {
+            return true;
         }
+        edgeNot2 = edgesInBoth(edgeNot2orig,
+                               edgeNot2again); // only return a list of those edges that appear in both the original edge and the
+                                               // revised edges this eliminates added edges that will confuse users and edges that
+                                               // were caught by the updateZonePoly routine
+        return false;
     }
 
     // returns a vector of edges that are in both vectors
@@ -12318,7 +12319,7 @@ namespace SurfaceGeometry {
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             for (int jVertex = 1; jVertex <= zonePoly.SurfaceFace(iFace).NSides; ++jVertex) {
                 Vector curVertex = zonePoly.SurfaceFace(iFace).FacePoints(jVertex);
-                if (uniqVertices.size() == 0) {
+                if (uniqVertices.empty()) {
                     uniqVertices.emplace_back(curVertex);
                 } else {
                     bool found = false;
@@ -12423,7 +12424,7 @@ namespace SurfaceGeometry {
         // now make sure every point has been counted and even number of times (usually twice)
         // if they are then the ceiling and floor are (almost certainly) the same x and y coordinates.
         bool areFlrAndClgSame = true;
-        if (floorCeilingXY.size() > 0) {
+        if (!floorCeilingXY.empty()) {
             for (auto const &curFloorCeiling : floorCeilingXY) {
                 if (curFloorCeiling.count % 2 != 0) {
                     areFlrAndClgSame = false;
@@ -14625,7 +14626,7 @@ namespace SurfaceGeometry {
         bool anyGroupedSpaces = false;
         bool radiantSetup = false;
         bool solarSetup = false;
-        std::string RadiantOrSolar = "";
+        std::string RadiantOrSolar;
         int enclosureNum = 0;
         if (EnclosureType == RadiantEnclosures) {
             radiantSetup = true;
@@ -15231,12 +15232,10 @@ namespace SurfaceGeometry {
             DotProd = dot(Vect32, Vect21);
             if (std::abs(DotProd) <= cos89deg) {
                 return true;
-            } else {
-                return false;
             }
-        } else {
             return false;
         }
+        return false;
     }
 
     void MakeEquivalentRectangle(EnergyPlusData &state,
@@ -15277,7 +15276,8 @@ namespace SurfaceGeometry {
         if (surf.Sides != 4) {
             // the method is designed for 4-sided surface
             return;
-        } else if (isRectangle(state, SurfNum)) {
+        }
+        if (isRectangle(state, SurfNum)) {
             // no need to transform
             return;
         }

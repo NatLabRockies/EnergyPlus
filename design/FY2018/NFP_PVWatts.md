@@ -167,5 +167,5 @@ An example file will be created. No others will be modified No transition change
 
 ## References ##
 
- - <a name="pvwattsmanual" href="https://www.nrel.gov/docs/fy14osti/62641.pdf">PVWatts Version 5 Manual</a>
- - <a name="ssc" href="https://github.com/NREL/ssc">SAM Simulation Core GitHub repository</a>
+ - <a name="pvwattsmanual" href="https://www.nlr.gov/docs/fy14osti/62641.pdf">PVWatts Version 5 Manual</a>
+ - <a name="ssc" href="https://github.com/NatLabRockies/ssc">SAM Simulation Core GitHub repository</a>

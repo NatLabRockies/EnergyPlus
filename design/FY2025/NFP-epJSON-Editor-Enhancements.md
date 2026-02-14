@@ -14,7 +14,7 @@ Editor that uses Visual Basic. Unfortunately, the wxPython library could not be
 effectively integrated with the EnergyPlus installer. Also, the existence of the
 epJSON Editor was not widely publicized, and currently most users still use the
 IDF format. For these reasons, few users have used epJSON Editor. To solve
-these problems, epJSON Editor will be refactored to use the Tkinter library 
+these problems, epJSON Editor will be refactored to use the Tkinter library
 instead of wxPython, which is already part of the EnergyPlus installer. It will
 also support opening and saving the IDF format using convertInputFormat. These
 enhancements, along with some public notifications, should result in more users
@@ -32,7 +32,7 @@ language was previously developed called "epJSON Editor." The epJSON Editor
 focused on use with the JSON-based epJSON format as an alternative to the IDF
 format and used Python and a cross-platform GUI library so that it could be used
 on Windows, MacOS, and Linux. It was developed but not widely tested or
-publicized, and few users of EnergyPus have tried it even though it includes 
+publicized, and few users of EnergyPus have tried it even though it includes
 useful additional functionality compared to IDF Editor. GARD in conjunction with
 the NREL team, will update the epJSON Editor to use the EnergyPlus team's
 preferred GUI library called Tkinter instead of the wxPython library. To ease
@@ -56,7 +56,7 @@ https://github.com/ORNL-BTRIC/epJSON-Editor/issues/15
 
 The origin for editor came from this issue:
 
-https://github.com/NREL/EnergyPlus/issues/7418
+https://github.com/NatLabRockies/EnergyPlus/issues/7418
 
 That issue also includes a summary of a meeting with users of IDF Editor and what features they found most important.
 
@@ -64,11 +64,11 @@ Two issues related to convertInputFormat are planned to be addressed as part of 
 
 Populate comments (!-) from IDD/schema when converting from epJSON to IDF
 
-https://github.com/NREL/EnergyPlus/issues/8987 
+https://github.com/NatLabRockies/EnergyPlus/issues/8987
 
 Add ConvertInputFormat options to preserve object order and comments to facilitate round-tripping
 
-https://github.com/NREL/EnergyPlus/issues/8969 
+https://github.com/NatLabRockies/EnergyPlus/issues/8969
 
 One widget that is not included in Tkinter that will be used is Tksheet
 
@@ -90,14 +90,14 @@ The following steps are expected as part of this development effort:
 -	Test to ensure features are consistent
 -	Fix known bugs
 -	Add additional unit test coverage
--	Enable opening IDF file either by modifying convertInputFormat to save and use saved user comments and input 
+-	Enable opening IDF file either by modifying convertInputFormat to save and use saved user comments and input
  object order and include field names or else create a new Python library to perform these functions
 -	Create installers for all types of user groups including part of EnergyPlus installer, pip, and Windows installer
 -	Encourage beta testing on all platforms
 -	Test by opening a variety of files including large user files
 -	Maybe use automated testing for GUI
 -	Fix issues found during beta testing
--	Possibly add new features 
+-	Possibly add new features
 -	Release testing and make final installers
 -	Publicize more widely
 -	Maybe add pop-up screen to IDF Editor to encourage the use of epJSON Editor
@@ -130,6 +130,3 @@ N/A
 ## References ##
 
 None.
-
-
-

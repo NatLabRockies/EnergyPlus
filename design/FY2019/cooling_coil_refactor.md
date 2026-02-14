@@ -107,7 +107,7 @@ Diffs for Dry vs Evaporative condenser
 
 ### Appendage Pieces
 
-Condensate collection tank, Evaporative condenser supply water tank, basin heater, crankcase heater 
+Condensate collection tank, Evaporative condenser supply water tank, basin heater, crankcase heater
 
 ### Unit Tests
 

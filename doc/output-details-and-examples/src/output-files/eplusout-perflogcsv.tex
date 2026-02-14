@@ -1,9 +1,9 @@
 \section{eplusout\_perflog.csv}
 
-An output file ending with \_perflog.csv is created whenever the PerformancePrecisionTradeoffs object is present. This log file consists of echoing the settings in the PerformancePrecisionTradeoffs object, 
+An output file ending with \_perflog.csv is created whenever the PerformancePrecisionTradeoffs object is present. This log file consists of echoing the settings in the PerformancePrecisionTradeoffs object,
 some overall building energy results, the runtime of the simulation, oscillation outputs, and the number of warning and severe messages. The \_perflog.csv
-file is appended to instead of replaced each time a simulation is run to facilitate evaluation of the performance objects options and their impact on the runtime and other factors so  
-the user can determine which combination is best for their particular input file. It includes a timestamp. Since it is a CSV (comma separated value) file, it is easily opened in spreadsheet software. Please ensure that file is 
+file is appended to instead of replaced each time a simulation is run to facilitate evaluation of the performance objects options and their impact on the runtime and other factors so
+the user can determine which combination is best for their particular input file. It includes a timestamp. Since it is a CSV (comma separated value) file, it is easily opened in spreadsheet software. Please ensure that file is
 not open in the spreadsheet while EnergyPlus is running so that the file can be appended to. If the spreadsheet program is open with the file, it will be locked and not able to be appended. The fields in the
 file are shown below.
 
@@ -59,6 +59,5 @@ file are shown below.
   Number of Severe
 \end{itemize}
 
-When using this file it is good to set PerformancePrecisionTradeoffs to default values the first time to establish a baseline then change one input at a time and rerunning to understand the impact of that input. The total runtime decrease 
+When using this file it is good to set PerformancePrecisionTradeoffs to default values the first time to establish a baseline then change one input at a time and rerunning to understand the impact of that input. The total runtime decrease
 and the impact on energy and the ocscillation variables should be considered prior to committing to a specific PerformancePrecisionTradeoffs scheme.
-

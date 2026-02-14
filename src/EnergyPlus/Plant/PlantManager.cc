@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1215,31 +1215,11 @@ void GetPlantInput(EnergyPlusData &state)
                         break;
                     }
                     case PlantEquipmentType::HeatPumpAirToWater: {
-                        if (state.dataPlnt->PlantLoop(LoopNum).TypeOfWaterLoop == DataPlant::WaterLoopType::HotWater) {
-                            this_comp.compPtr = EIRPlantLoopHeatPumps::HeatPumpAirToWater::factory(
-                                state, PlantEquipmentType::HeatPumpAirToWaterHeating, CompNames(CompNum));
-                            this_comp.Type = PlantEquipmentType::HeatPumpAirToWaterHeating;
-                        } else if (state.dataPlnt->PlantLoop(LoopNum).TypeOfWaterLoop == DataPlant::WaterLoopType::ChilledWater) {
-                            this_comp.compPtr = EIRPlantLoopHeatPumps::HeatPumpAirToWater::factory(
-                                state, PlantEquipmentType::HeatPumpAirToWaterCooling, CompNames(CompNum));
-                            this_comp.Type = PlantEquipmentType::HeatPumpAirToWaterCooling;
-                        } else { // need to have this to reach later checks of TypeOfWaterLoop in onetimeInit
-                            this_comp.compPtr = EIRPlantLoopHeatPumps::HeatPumpAirToWater::factory(
-                                state, PlantEquipmentType::HeatPumpAirToWaterHeating, CompNames(CompNum));
-                            this_comp.Type = PlantEquipmentType::HeatPumpAirToWaterHeating;
-                        }
-                        this_comp.CurOpSchemeType = OpScheme::Invalid;
-                        break;
-                    }
-                    case PlantEquipmentType::HeatPumpAirToWaterHeating: {
+                        DataPlant::PlantEquipmentType eqType = PlantEquipmentType::HeatPumpAirToWater;
+                        // Compare node nums to identify which side of the heat pump this is
                         this_comp.compPtr = EIRPlantLoopHeatPumps::HeatPumpAirToWater::factory(
-                            state, PlantEquipmentType::HeatPumpAirToWaterHeating, CompNames(CompNum));
-                        this_comp.CurOpSchemeType = OpScheme::Invalid;
-                        break;
-                    }
-                    case PlantEquipmentType::HeatPumpAirToWaterCooling: {
-                        this_comp.compPtr = EIRPlantLoopHeatPumps::HeatPumpAirToWater::factory(
-                            state, PlantEquipmentType::HeatPumpAirToWaterCooling, CompNames(CompNum));
+                            state, eqType, CompNames(CompNum), InletNodeNumbers(CompNum), OutletNodeNumbers(CompNum));
+                        this_comp.Type = eqType; // reset by factory to heating or cooling
                         this_comp.CurOpSchemeType = OpScheme::Invalid;
                         break;
                     }
@@ -1449,7 +1429,7 @@ void GetPlantInput(EnergyPlusData &state)
                     }
                     }
 
-                    if (!this_comp.compPtr) {
+                    if (this_comp.compPtr == nullptr) {
                         ShowFatalError(state, format(" Plant component \"{}\" was not assigned a pointer.", this_comp_type));
                     }
 
@@ -4648,7 +4628,7 @@ void ReportPlantCompWaterFlowData(EnergyPlusData &state, bool const reportFlag)
     // Could be changed to report all loop's and components at the same time (i.e., as single group from 00:15 to 24:00 instead of multiple groups)
     // sum equipment water flow rate time series
     for (int LoopNum = 1; LoopNum <= state.dataHVACGlobal->NumPlantLoops; ++LoopNum) {
-        if (state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate.size() == 0) {
+        if (state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate.empty()) {
             continue;
         }
         OpenPszFile = true;

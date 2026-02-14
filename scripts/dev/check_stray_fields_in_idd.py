@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -54,15 +54,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import json
 import re
-import os
-import sys
+from pathlib import Path
 
-IDD_PATH = os.path.abspath('idd/Energy+.idd.in')
+from base_hook import (
+    IDD_PATH,
+    ErrorMessage,
+    LogLevel,
+    LogMessage,
+    WarningMessage,
+    exit_hook,
+    flatten_list_of_lists,
+    get_base_parser,
+    parallel_apply,
+    report_log_messages,
+)
+
+RE_FIELD = re.compile(r"\s*\\(\w+)\s*$")
 
 
-def check_for_stray_fields(idd_path):
+def check_for_stray_fields(idd_path: Path = IDD_PATH) -> list[LogMessage]:
     """
     Verifies that there aren't any stray fields in IDD that could cause
     parsing problems
@@ -76,37 +87,56 @@ def check_for_stray_fields(idd_path):
     offending_lines (list of dict): one entry per offending line,
     each entry is a dict that can be consumed by decent_ci
     """
+    assert idd_path.is_file(), f"Couldn't find IDD at '{idd_path}'"
 
-    with open(idd_path, 'r') as f:
-        lines = f.read().splitlines()
+    LogMessageClass = ErrorMessage if idd_path == IDD_PATH else WarningMessage
 
-    re_field = re.compile(r'\s*\\(\w+)\s*$')
-    exclude = ['autosizable',
-               'autocalculatable',
-               'retaincase']
+    lines = idd_path.read_text().splitlines()
 
-    _offending_lines = []
-    for i, line in enumerate(lines):
-        m = re_field.match(line)
+    exclude = ["autosizable", "autocalculatable", "retaincase"]
+
+    log_messages: list[LogMessage] = []
+
+    for line_num, line in enumerate(lines, start=1):
+        m = RE_FIELD.match(line)
         if m:
             field = m.groups()[0]
             if field not in exclude:
-                _offending_lines.append({'tool': 'check_stray_fields_in_idd',
-                                         'filename': idd_path,
-                                         'file': idd_path,
-                                         'line': i + 1,
-                                         'messagetype': 'error',
-                                         'message': ('Stray field '
-                                                     r'\{}'.format(field))
-                                         })
+                log_messages.append(
+                    LogMessageClass(
+                        tool="check_stray_fields_in_idd",
+                        filepath=idd_path,
+                        line_number=line_num,
+                        line=line,
+                        message=rf"Stray field \{field}",
+                    )
+                )
 
-    return _offending_lines
+    return log_messages
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    parser = get_base_parser(
+        description="Check Stray Fields in IDD", files_arg_help=f"Files to check (if omitted, checks '{IDD_PATH}')"
+    )
 
-    offending_lines = check_for_stray_fields(idd_path=IDD_PATH)
-    for offending_line in offending_lines:
-        print(json.dumps(offending_line))
-    if len(offending_lines) > 0:
-        sys.exit(1)
+    args = parser.parse_args()
+    files = args.files
+    if not files:
+        files = [IDD_PATH]
+
+    if args.verbose:
+        print(f"Checking {len(files)} files")
+
+    if len(files) == 0:
+        print("No files to check")
+        raise SystemExit(0)
+
+    if len(files) == 1:
+        log_messages = check_for_stray_fields(idd_path=files[0])
+    else:
+        errors_list_of_lists = parallel_apply(func=check_for_stray_fields, filepaths=files)
+        log_messages = flatten_list_of_lists(list_of_lists=errors_list_of_lists)
+
+    success = report_log_messages(log_messages=log_messages, fail_threshold=LogLevel.ERROR, verbose=args.verbose)
+    exit_hook(success=success)

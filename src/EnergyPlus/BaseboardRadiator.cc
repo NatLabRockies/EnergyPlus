@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -262,8 +262,7 @@ namespace BaseboardRadiator {
                 ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
                 auto &thisBaseboard = state.dataBaseboardRadiator->baseboards(ConvHWBaseboardNum);
-                thisBaseboard.FieldNames.allocate(NumNums);
-                thisBaseboard.FieldNames = s_ipsc->cNumericFieldNames;
+                thisBaseboard.FieldNames.assign(s_ipsc->cNumericFieldNames.begin(), s_ipsc->cNumericFieldNames.end());
 
                 // ErrorsFound will be set to True if problem was found, left untouched otherwise
                 VerifyUniqueBaseboardName(
@@ -607,7 +606,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = format("{} [W]", this->FieldNames(FieldNum));
+                    std::string const SizingString = format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
@@ -717,7 +716,7 @@ namespace BaseboardRadiator {
                     state.dataSize->DataZoneNumber = this->ZonePtr;
                     int SizingMethod = HVAC::HeatingCapacitySizing;
                     int FieldNum = 1;
-                    std::string const SizingString = format("{} [W]", this->FieldNames(FieldNum));
+                    std::string const SizingString = format("{} [W]", this->FieldNames[FieldNum - 1]);
                     int CapSizingMethod = this->HeatingCapMethod;
                     zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
                     if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -69,16 +69,11 @@ class RH_OpeningController(EnergyPlusPlugin):
         # get handles if needed
         if self.need_to_get_handles:
             self.ZoneRH_handle = self.api.exchange.get_variable_handle(
-                state,
-                "System Node Relative Humidity",
-                "Zone 1 Node"
+                state, "System Node Relative Humidity", "Zone 1 Node"
             )
 
             self.MyOpenFactor_handle = self.api.exchange.get_actuator_handle(
-                state,
-                "AirFlow Network Window/Door Opening",
-                "Venting Opening Factor",
-                "Zn001:Wall001:Win001"
+                state, "AirFlow Network Window/Door Opening", "Venting Opening Factor", "Zn001:Wall001:Win001"
             )
 
             self.need_to_get_handles = False

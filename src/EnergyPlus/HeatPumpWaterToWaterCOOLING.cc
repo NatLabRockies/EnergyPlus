@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -608,48 +608,47 @@ void GshpPeCoolingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
         return; // if heat pump is not running return without simulation
 
         // Set flows if the heat pump is running
-    } else { // the heat pump must run
-        this->LoadSideWaterMassFlowRate = this->LoadSideDesignMassFlow;
+    } // the heat pump must run
+    this->LoadSideWaterMassFlowRate = this->LoadSideDesignMassFlow;
+    PlantUtilities::SetComponentFlowRate(
+        state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
+
+    this->SourceSideWaterMassFlowRate = this->SourceSideDesignMassFlow;
+    PlantUtilities::SetComponentFlowRate(
+        state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
+    // get inlet temps
+    this->LoadSideWaterInletTemp = state.dataLoopNodes->Node(this->LoadSideInletNodeNum).Temp;
+    this->SourceSideWaterInletTemp = state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp;
+    // if there's no flow, turn the "heat pump off"
+    if (this->LoadSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance ||
+        this->SourceSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
+        this->LoadSideWaterMassFlowRate = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
-
-        this->SourceSideWaterMassFlowRate = this->SourceSideDesignMassFlow;
+        this->SourceSideWaterMassFlowRate = 0.0;
         PlantUtilities::SetComponentFlowRate(
             state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
-        // get inlet temps
-        this->LoadSideWaterInletTemp = state.dataLoopNodes->Node(this->LoadSideInletNodeNum).Temp;
-        this->SourceSideWaterInletTemp = state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp;
-        // if there's no flow, turn the "heat pump off"
-        if (this->LoadSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance ||
-            this->SourceSideWaterMassFlowRate < DataBranchAirLoopPlant::MassFlowTolerance) {
-            this->LoadSideWaterMassFlowRate = 0.0;
-            PlantUtilities::SetComponentFlowRate(
-                state, this->LoadSideWaterMassFlowRate, this->LoadSideInletNodeNum, this->LoadSideOutletNodeNum, this->LoadPlantLoc);
-            this->SourceSideWaterMassFlowRate = 0.0;
-            PlantUtilities::SetComponentFlowRate(
-                state, this->SourceSideWaterMassFlowRate, this->SourceSideInletNodeNum, this->SourceSideOutletNodeNum, this->SourcePlantLoc);
-            PlantUtilities::PullCompInterconnectTrigger(state,
-                                                        this->LoadPlantLoc,
-                                                        this->CondMassFlowIndex,
-                                                        this->SourcePlantLoc,
-                                                        DataPlant::CriteriaType::MassFlowRate,
-                                                        this->SourceSideWaterMassFlowRate);
-            this->QLoad = 0.0;
-            this->QSource = 0.0;
-            this->Power = 0.0;
-            this->LoadSideWaterInletTemp = state.dataLoopNodes->Node(this->LoadSideInletNodeNum).Temp;
-            this->LoadSideWaterOutletTemp = LoadSideWaterInletTemp;
-            this->SourceSideWaterInletTemp = state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp;
-            this->SourceSideWaterOutletTemp = SourceSideWaterInletTemp;
-            return;
-        }
         PlantUtilities::PullCompInterconnectTrigger(state,
                                                     this->LoadPlantLoc,
                                                     this->CondMassFlowIndex,
                                                     this->SourcePlantLoc,
                                                     DataPlant::CriteriaType::MassFlowRate,
                                                     this->SourceSideWaterMassFlowRate);
+        this->QLoad = 0.0;
+        this->QSource = 0.0;
+        this->Power = 0.0;
+        this->LoadSideWaterInletTemp = state.dataLoopNodes->Node(this->LoadSideInletNodeNum).Temp;
+        this->LoadSideWaterOutletTemp = LoadSideWaterInletTemp;
+        this->SourceSideWaterInletTemp = state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp;
+        this->SourceSideWaterOutletTemp = SourceSideWaterInletTemp;
+        return;
     }
+    PlantUtilities::PullCompInterconnectTrigger(state,
+                                                this->LoadPlantLoc,
+                                                this->CondMassFlowIndex,
+                                                this->SourcePlantLoc,
+                                                DataPlant::CriteriaType::MassFlowRate,
+                                                this->SourceSideWaterMassFlowRate);
 
     //**********BEGIN THE CALCULATION**************
 

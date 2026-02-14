@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2174,9 +2174,8 @@ namespace FanCoilUnits {
                             // Calculate residual based on output magnitude
                             if (std::abs(QZnReq) <= 100.0) {
                                 return (QUnitOut - QZnReq) / 100.0;
-                            } else {
-                                return (QUnitOut - QZnReq) / QZnReq;
                             }
+                            return (QUnitOut - QZnReq) / QZnReq;
                         };
                         General::SolveRoot(state, 0.001, MaxIterCycl, SolFlag, HWFlow, f, 0.0, MaxWaterFlow);
                         if (SolFlag == -1) {
@@ -4182,9 +4181,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilPLRResidual(EnergyPlusData &state,
@@ -4227,9 +4225,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilHeatCoilPLRResidual(EnergyPlusData &state,
@@ -4254,9 +4251,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilCWLoadResidual(EnergyPlusData &state,
@@ -4281,9 +4277,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilWaterFlowResidual(EnergyPlusData &state,
@@ -4330,9 +4325,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     Real64 CalcFanCoilAirAndWaterFlowResidual(EnergyPlusData &state,
@@ -4384,9 +4378,8 @@ namespace FanCoilUnits {
         // Calculate residual based on output magnitude
         if (std::abs(QZnReq) <= 100.0) {
             return (QUnitOut - QZnReq) / 100.0;
-        } else {
-            return (QUnitOut - QZnReq) / QZnReq;
         }
+        return (QUnitOut - QZnReq) / QZnReq;
     }
 
     int getEqIndex(EnergyPlusData &state, std::string_view CompName)

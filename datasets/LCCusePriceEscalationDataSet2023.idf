@@ -16,7 +16,7 @@
 ! converted into EnergyPlus objects using scripts/dev/update_nist_escalation.py
 ! https://www.energy.gov/eere/femp/building-life-cycle-cost-programs
 !
-! Joshua D. Kneifel (2023), Data tables for Energy Price Indices and Discount Factors for Life-Cycle Cost Analysis - 2023: 
+! Joshua D. Kneifel (2023), Data tables for Energy Price Indices and Discount Factors for Life-Cycle Cost Analysis - 2023:
 ! Annual Supplement to NIST Handbook 135, National Institute of Standards and Technology, https://doi.org/10.18434/mds2-3069
 
   LifeCycleCost:UsePriceEscalation,

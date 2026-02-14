@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -77,9 +77,8 @@ bool InputFile::good() const noexcept
 {
     if (is) {
         return is->good();
-    } else {
-        return false;
     }
+    return false;
 }
 
 void InputFile::close()
@@ -100,9 +99,8 @@ InputFile::ReadResult<std::string> InputFile::readLine() noexcept
         }
         // Use operator bool, see ReadResult::good() docstring
         return {std::move(line), is->eof(), bool(is)};
-    } else {
-        return {"", is->eof(), false};
     }
+    return {"", is->eof(), false};
 }
 
 std::string InputFile::readFile()
@@ -160,36 +158,34 @@ std::string InputFile::error_state_to_string() const
 
     if (state == std::ios_base::failbit) {
         return "io operation failed";
-    } else if (state == std::ios_base::badbit) {
-        return "irrecoverable stream error";
-    } else if (state == std::ios_base::eofbit) {
-        return "end of file reached";
-    } else {
-        return "no error";
     }
+    if (state == std::ios_base::badbit) {
+        return "irrecoverable stream error";
+    }
+    if (state == std::ios_base::eofbit) {
+        return "end of file reached";
+    }
+    return "no error";
 }
 
 std::istream::iostate InputFile::rdstate() const noexcept
 {
     if (is) {
         return is->rdstate();
-    } else {
-        return std::ios_base::badbit;
     }
+    return std::ios_base::badbit;
 }
 
 bool InputFile::is_open() const noexcept
 {
     if (is) {
         auto *ss = dynamic_cast<std::ifstream *>(is.get());
-        if (ss) {
+        if (ss != nullptr) {
             return ss->is_open();
-        } else {
-            return true;
         }
-    } else {
-        return false;
+        return true;
     }
+    return false;
 }
 
 void InputFile::backspace() noexcept
@@ -228,11 +224,11 @@ bool InputOutputFile::good() const
 {
     if (os && print_to_dev_null && os->bad()) { // badbit is set
         return true;
-    } else if (os) {
-        return os->good();
-    } else {
-        return false;
     }
+    if (os) {
+        return os->good();
+    }
+    return false;
 }
 
 void InputOutputFile::close()
@@ -263,11 +259,10 @@ void InputOutputFile::flush()
 std::string InputOutputFile::get_output()
 {
     auto *ss = dynamic_cast<std::stringstream *>(os.get());
-    if (ss) {
+    if (ss != nullptr) {
         return ss->str();
-    } else {
-        return "";
     }
+    return "";
 }
 
 InputOutputFile::InputOutputFile(fs::path FilePath, const bool DefaultToStdout) : filePath{std::move(FilePath)}, defaultToStdOut{DefaultToStdout}
@@ -284,9 +279,8 @@ void InputOutputFile::open(const bool forAppend, bool output_to_file)
     auto appendMode = [=]() {
         if (forAppend) {
             return std::ios_base::app;
-        } else {
-            return std::ios_base::trunc;
         }
+        return std::ios_base::trunc;
     }();
     if (!output_to_file) {
         os = std::make_unique<std::iostream>(nullptr);
@@ -350,7 +344,8 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
         auto boolean_choice = [=, &state](std::string const &input) -> bool {
             if (input == "YES") {
                 return true;
-            } else if (input == "NO") {
+            }
+            if (input == "NO") {
                 return false;
             }
             ShowFatalError(state, "Invalid boolean Yes/No choice input");

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1058,10 +1058,10 @@ namespace DataSizing {
         int NumTimeStepsInAvg = 1;                        // number of zone timesteps in the averaging window for coincident plant flow
         int SizingFactorOption = 0;                       // option for what sizing factor to apply
         // Calculated
-        Real64 DesVolFlowRate = 0.0; // loop design flow rate in m3/s
-        bool VolFlowSizingDone = 0;  // flag to indicate when this loop has finished sizing flow rate
-        Real64 PlantSizFac = 0.0;    // hold the loop and pump sizing factor
-        Real64 DesCapacity = 0.0;    // final capacity in W
+        Real64 DesVolFlowRate = 0.0;    // loop design flow rate in m3/s
+        bool VolFlowSizingDone = false; // flag to indicate when this loop has finished sizing flow rate
+        Real64 PlantSizFac = 0.0;       // hold the loop and pump sizing factor
+        Real64 DesCapacity = 0.0;       // final capacity in W
     };
 
     // based on ZoneSizingData but only have member variables that are related to the CheckSum/

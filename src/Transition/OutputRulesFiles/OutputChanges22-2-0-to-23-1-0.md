@@ -9,4 +9,4 @@ This will eventually become a more structured file, but currently it isn't clear
 
 ### Template Title
 
-Change description goes here, use links to the PR such as [#9117](https://github.com/NREL/EnergyPlus/pull/9117/files).
+Change description goes here, use links to the PR such as [#9117](https://github.com/NatLabRockies/EnergyPlus/pull/9117/files).

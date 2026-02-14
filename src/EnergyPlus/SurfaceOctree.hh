@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -97,16 +97,16 @@ public: // Creation
     // Default Constructor
     SurfaceOctreeCube() : d_(0u), n_(0u), l_(Vertex(0.0)), u_(Vertex(0.0)), c_(Vertex(0.0)), w_(0.0), r_(0.0)
     {
-        for (std::uint8_t i = 0; i < 8; ++i) {
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
         }
     }
 
     // Surfaces Outer Cube Constructor
     SurfaceOctreeCube(EPVector<Surface> &surfaces) : d_(0u), n_(0u), l_(Vertex(0.0)), u_(Vertex(0.0)), c_(Vertex(0.0)), w_(0.0), r_(0.0)
     {
-        for (std::uint8_t i = 0; i < 8; ++i) {
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
         }
         init(surfaces);
     }
@@ -115,8 +115,8 @@ public: // Creation
     SurfaceOctreeCube(std::uint8_t const d, Vertex const &l, Vertex const &u, Real const w)
         : d_(d), n_(0u), l_(l), u_(u), c_(cen(l, u)), w_(w), r_(0.75 * (w * w))
     {
-        for (std::uint8_t i = 0; i < 8; ++i) {
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
         }
         assert(valid());
     }
@@ -243,15 +243,13 @@ public: // Methods
         Real const ab_mag_squared(ab.mag_squared());
         if (ab_mag_squared == 0.0) { // Segment is a point
             return ObjexxFCL::distance_squared(a, c_) <= r_;
-        } else { // Might pay to check if a or b in sphere first in some applications
-            Vertex const ac(c_ - a);
-            Real const projection_fac(((ac.x * ab.x) + (ac.y * ab.y) + (ac.z * ab.z)) / ab_mag_squared);
-            if ((0.0 <= projection_fac) && (projection_fac <= 1.0)) { // Projected (closest) point is on ab segment
-                return ObjexxFCL::distance_squared(ac, projection_fac * ab) <= r_;
-            } else { // Projection (closest) point is outside of ab segment: Intersects iff a or b are in sphere
-                return (ObjexxFCL::distance_squared(a, c_) <= r_) || (ObjexxFCL::distance_squared(b, c_) <= r_);
-            }
-        }
+        } // Might pay to check if a or b in sphere first in some applications
+        Vertex const ac(c_ - a);
+        Real const projection_fac(((ac.x * ab.x) + (ac.y * ab.y) + (ac.z * ab.z)) / ab_mag_squared);
+        if ((0.0 <= projection_fac) && (projection_fac <= 1.0)) { // Projected (closest) point is on ab segment
+            return ObjexxFCL::distance_squared(ac, projection_fac * ab) <= r_;
+        } // Projection (closest) point is outside of ab segment: Intersects iff a or b are in sphere
+        return (ObjexxFCL::distance_squared(a, c_) <= r_) || (ObjexxFCL::distance_squared(b, c_) <= r_);
     }
 
     // Ray Intersects Enclosing Sphere?
@@ -263,9 +261,8 @@ public: // Methods
         Real const projection_fac((ac.x * dir.x) + (ac.y * dir.y) + (ac.z * dir.z));
         if (0.0 <= projection_fac) { // Projected (closest) point is on ray
             return ObjexxFCL::distance_squared(ac, projection_fac * dir) <= r_;
-        } else { // Projection (closest) point is outside of ray: Intersects iff a is in sphere
-            return ObjexxFCL::distance_squared(a, c_) <= r_;
-        }
+        } // Projection (closest) point is outside of ray: Intersects iff a is in sphere
+        return ObjexxFCL::distance_squared(a, c_) <= r_;
     }
 
     // Line Intersects Enclosing Sphere?
@@ -382,9 +379,8 @@ public: // Methods
                 }
             }
             return true;
-        } else { // Entry point is on backwards projection of ray
-            return false;
-        }
+        } // Entry point is on backwards projection of ray
+        return false;
     }
 
     // Ray Intersects Cube?

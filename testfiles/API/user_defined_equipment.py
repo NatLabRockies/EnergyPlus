@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -53,10 +53,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import math
 from pathlib import Path
 from sys import argv, float_info, path
 from tempfile import mkdtemp
-import math
 
 # convenience
 big = float_info.max
@@ -66,7 +66,7 @@ install_or_build_dir: Path = Path(__file__).resolve().parent.parent.parent
 if len(argv) == 2:
     # if running in a build tree, pass in the path to the <build>/Products directory that contains pyenergyplus
     install_or_build_dir: Path = Path(argv[1])
-example_file_to_run: str = str(Path(__file__).resolve().parent / 'user_defined_equipment.idf')
+example_file_to_run: str = str(Path(__file__).resolve().parent / "user_defined_equipment.idf")
 try:  # This is the new way, if the user's Python environment includes the pip installed energyplus-api-helpers
     # noinspection PyUnresolvedReferences
     from energyplus_api_helpers.import_helper import EPlusAPIHelper
@@ -95,8 +95,19 @@ class QuadraticCurve:
 
 
 class BiQuadraticCurve:
-    def __init__(self, c1: float, c2: float, c3: float, c4: float, c5: float, c6: float,
-                 min_x: float = -big, max_x: float = big, min_y: float = -big, max_y: float = big):
+    def __init__(
+        self,
+        c1: float,
+        c2: float,
+        c3: float,
+        c4: float,
+        c5: float,
+        c6: float,
+        min_x: float = -big,
+        max_x: float = big,
+        min_y: float = -big,
+        max_y: float = big,
+    ):
         self.c = [c1, c2, c3, c4, c5, c6]
         self.max_x = max_x
         self.min_x = min_x
@@ -106,8 +117,14 @@ class BiQuadraticCurve:
     def curve_value(self, x: float, y: float) -> float:
         x = max(min(x, self.max_x), self.min_x)
         y = max(min(y, self.max_y), self.min_y)
-        return self.c[0] + (self.c[1] * x) + (self.c[2] * pow(x, 2)) + (self.c[3] * y) + (self.c[4] * pow(y, 2)) + (
-                self.c[5] * x * y)
+        return (
+            self.c[0]
+            + (self.c[1] * x)
+            + (self.c[2] * pow(x, 2))
+            + (self.c[3] * y)
+            + (self.c[4] * pow(y, 2))
+            + (self.c[5] * x * y)
+        )
 
 
 class Zone1WinACModel:
@@ -142,141 +159,97 @@ class Zone1WinACModel:
         self.psych = None
 
         # curves
-        d_cap_f_t = {"c1": 0.942587793,  # Constant
-                     "c2": 0.00954334,  # x
-                     "c3": 0.000683770,  # x**2
-                     "c4": -0.011042676,  # y
-                     "c5": 0.000005249,  # y**2
-                     "c6": -0.000009720,  # x*y
-                     "min_x": 12.77778,
-                     "max_x": 23.88889,
-                     "min_y": 18.0,
-                     "max_y": 46.11111}
+        d_cap_f_t = {
+            "c1": 0.942587793,  # Constant
+            "c2": 0.00954334,  # x
+            "c3": 0.000683770,  # x**2
+            "c4": -0.011042676,  # y
+            "c5": 0.000005249,  # y**2
+            "c6": -0.000009720,  # x*y
+            "min_x": 12.77778,
+            "max_x": 23.88889,
+            "min_y": 18.0,
+            "max_y": 46.11111,
+        }
 
         self.window_ac_cool_cap_f_t = BiQuadraticCurve(*d_cap_f_t.values())
 
-        d_cap_f_ff = {"c1": 0.8,
-                      "c2": 0.2,
-                      "c3": 0.0,
-                      "min_x": 0.5,
-                      "max_x": 1.5}
+        d_cap_f_ff = {"c1": 0.8, "c2": 0.2, "c3": 0.0, "min_x": 0.5, "max_x": 1.5}
 
         self.window_ac_cool_cap_f_ff = QuadraticCurve(*d_cap_f_ff.values())
 
-        d_plf_f_plr = {"c1": 0.85,
-                       "c2": 0.15,
-                       "c3": 0.0,
-                       "min_x": 0.0,
-                       "max_x": 1.0}
+        d_plf_f_plr = {"c1": 0.85, "c2": 0.15, "c3": 0.0, "min_x": 0.0, "max_x": 1.0}
 
         self.window_ac_plf_f_plr = QuadraticCurve(*d_plf_f_plr.values())
 
-        d_eir_f_t = {"c1": 0.342414409,  # Constant
-                     "c2": 0.034885008,  # x
-                     "c3": -0.000623700,  # x**2
-                     "c4": 0.004977216,  # y
-                     "c5": 0.000437951,  # y**2
-                     "c6": -0.000728028,  # x*y
-                     "min_x": 12.77778,
-                     "max_x": 23.88889,
-                     "min_y": 18.0,
-                     "max_y": 46.11111}
+        d_eir_f_t = {
+            "c1": 0.342414409,  # Constant
+            "c2": 0.034885008,  # x
+            "c3": -0.000623700,  # x**2
+            "c4": 0.004977216,  # y
+            "c5": 0.000437951,  # y**2
+            "c6": -0.000728028,  # x*y
+            "min_x": 12.77778,
+            "max_x": 23.88889,
+            "min_y": 18.0,
+            "max_y": 46.11111,
+        }
 
         self.window_ac_eir_f_t = BiQuadraticCurve(*d_eir_f_t.values())
 
-        d_eir_f_ff = {"c1": 1.1552,
-                      "c2": -0.1808,
-                      "c3": 0.0256,
-                      "min_x": 0.5,
-                      "max_x": 1.0}
+        d_eir_f_ff = {"c1": 1.1552, "c2": -0.1808, "c3": 0.0256, "min_x": 0.5, "max_x": 1.0}
 
         self.window_ac_eir_f_ff = QuadraticCurve(*d_eir_f_ff.values())
 
     def get_handles(self, state):
         self.handles["Zone1WinAC_PrimAir_Tinlet"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Temperature for Primary Air Connection",
-            "Zone1WindAC"
+            state, "Inlet Temperature for Primary Air Connection", "Zone1WindAC"
         )
 
         self.handles["Zone1WinAC_PrimAir_Winlet"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Humidity Ratio for Primary Air Connection",
-            "Zone1WindAC"
+            state, "Inlet Humidity Ratio for Primary Air Connection", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_OA_Tdb"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Temperature for Secondary Air Connection",
-            "Zone1WindAC"
+            state, "Inlet Temperature for Secondary Air Connection", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_OA_W"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Humidity Ratio for Secondary Air Connection",
-            "Zone1WindAC"
+            state, "Inlet Humidity Ratio for Secondary Air Connection", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_Qdot_Request"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Remaining Sensible Load to Cooling Setpoint",
-            "Zone1WindAC"
+            state, "Remaining Sensible Load to Cooling Setpoint", "Zone1WindAC"
         )
         self.handles["Zone1_OADesign_Vdot"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Zone Outdoor Air Design Volume Flow Rate",
-            "West Zone"
+            state, "Zone Outdoor Air Design Volume Flow Rate", "West Zone"
         )
         self.handles["Zone1WinAC_OA_rho"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Inlet Density for Secondary Air Connection",
-            "Zone1WindAC"
+            state, "Inlet Density for Secondary Air Connection", "Zone1WindAC"
         )
         self.handles["Zone1_CoolDesign_Mdot"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Final Zone Design Cooling Air Mass Flow Rate",
-            "West Zone"
+            state, "Final Zone Design Cooling Air Mass Flow Rate", "West Zone"
         )
         self.handles["Zone1_CoolDesign_Cap"] = api_.exchange.get_internal_variable_handle(
-            state,
-            "Final Zone Design Cooling Load",
-            "West Zone"
+            state, "Final Zone Design Cooling Load", "West Zone"
         )
         self.handles["Zone1Cooling_Tstat"] = api_.exchange.get_variable_handle(
-            state,
-            "Zone Thermostat Cooling Setpoint Temperature",
-            "West Zone"
+            state, "Zone Thermostat Cooling Setpoint Temperature", "West Zone"
         )
         self.handles["COOLINGCOILAVAILSCHED"] = api_.exchange.get_variable_handle(
-            state,
-            "Schedule Value",
-            "COOLINGCOILAVAILSCHED"
+            state, "Schedule Value", "COOLINGCOILAVAILSCHED"
         )
         self.handles["OA_Press"] = api_.exchange.get_variable_handle(
-            state,
-            "Site Outdoor Air Barometric Pressure",
-            "Environment"
+            state, "Site Outdoor Air Barometric Pressure", "Environment"
         )
         self.handles["Zone1WinAC_PrimAir_MdotOut"] = api_.exchange.get_actuator_handle(
-            state,
-            "Primary Air Connection",
-            "Outlet Mass Flow Rate",
-            "Zone1WindAC"
+            state, "Primary Air Connection", "Outlet Mass Flow Rate", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_PrimAir_MdotIn"] = api_.exchange.get_actuator_handle(
-            state,
-            "Primary Air Connection",
-            "Inlet Mass Flow Rate",
-            "Zone1WindAC"
+            state, "Primary Air Connection", "Inlet Mass Flow Rate", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_PrimAir_Tout"] = api_.exchange.get_actuator_handle(
-            state,
-            "Primary Air Connection",
-            "Outlet Temperature",
-            "Zone1WindAC"
+            state, "Primary Air Connection", "Outlet Temperature", "Zone1WindAC"
         )
         self.handles["Zone1WinAC_PrimAir_Wout"] = api_.exchange.get_actuator_handle(
-            state,
-            "Primary Air Connection",
-            "Outlet Humidity Ratio",
-            "Zone1WindAC"
+            state, "Primary Air Connection", "Outlet Humidity Ratio", "Zone1WindAC"
         )
         # self.handles["Zone1WinAC_ElectPower"] = api_.exchange.get_global_handle(
         #     state,
@@ -291,17 +264,14 @@ class Zone1WinACModel:
         #     "Zone1WinAC_ElectEnergy"
         # )
         self.handles["Zone1WinAC_OA_MdotIn"] = api_.exchange.get_actuator_handle(
-            state,
-            "Secondary Air Connection",
-            "Inlet Mass Flow Rate",
-            "Zone1WindAC"
+            state, "Secondary Air Connection", "Inlet Mass Flow Rate", "Zone1WindAC"
         )
         self.need_to_get_handles = False
 
     def handles_gotten_properly(self, state):
         handles_ok = True
 
-        for (k, v) in self.handles.items():
+        for k, v in self.handles.items():
             if v == -1:
                 handles_ok = False
                 api_.runtime.issue_severe(state, f"Handle not found for '{k}'")
@@ -309,23 +279,26 @@ class Zone1WinACModel:
         return handles_ok
 
     def initialize(self, s):
-        self.primary_air_inlet_temp = api_.exchange.get_internal_variable_value(s, self.handles[
-            "Zone1WinAC_PrimAir_Tinlet"])
-        self.primary_air_hum_rat_inlet = api_.exchange.get_internal_variable_value(s, self.handles[
-            "Zone1WinAC_PrimAir_Winlet"])
+        self.primary_air_inlet_temp = api_.exchange.get_internal_variable_value(
+            s, self.handles["Zone1WinAC_PrimAir_Tinlet"]
+        )
+        self.primary_air_hum_rat_inlet = api_.exchange.get_internal_variable_value(
+            s, self.handles["Zone1WinAC_PrimAir_Winlet"]
+        )
         self.outdoor_air_dry_bulb = api_.exchange.get_internal_variable_value(s, self.handles["Zone1WinAC_OA_Tdb"])
         self.outdoor_air_hum_rat = api_.exchange.get_internal_variable_value(s, self.handles["Zone1WinAC_OA_W"])
         self.q_dot_request = api_.exchange.get_internal_variable_value(s, self.handles["Zone1WinAC_Qdot_Request"])
-        zone_1_outside_air_design_vol_flow = api_.exchange.get_internal_variable_value(s, self.handles[
-            "Zone1_OADesign_Vdot"])
+        zone_1_outside_air_design_vol_flow = api_.exchange.get_internal_variable_value(
+            s, self.handles["Zone1_OADesign_Vdot"]
+        )
         zone1_win_ac_oa_rho = api_.exchange.get_internal_variable_value(s, self.handles["Zone1WinAC_OA_rho"])
         self.outdoor_air_mass_flow_design = zone_1_outside_air_design_vol_flow * zone1_win_ac_oa_rho
-        self.supply_air_mass_flow_design = api_.exchange.get_internal_variable_value(s, self.handles[
-            "Zone1_CoolDesign_Mdot"])
+        self.supply_air_mass_flow_design = api_.exchange.get_internal_variable_value(
+            s, self.handles["Zone1_CoolDesign_Mdot"]
+        )
         self.fan_efficiency = 0.5
         self.fan_delta_pressure = 75.0
-        self.rated_capacity = api_.exchange.get_internal_variable_value(s,
-                                                                        self.handles["Zone1_CoolDesign_Cap"]) / 0.75
+        self.rated_capacity = api_.exchange.get_internal_variable_value(s, self.handles["Zone1_CoolDesign_Cap"]) / 0.75
         self.rated_eir = 1.0 / 3.0
         self.zone_cool_thermostat = api_.exchange.get_variable_value(s, self.handles["Zone1Cooling_Tstat"])
 
@@ -353,10 +326,14 @@ class Zone1WinACModel:
         recirculation_mass_flow = self.supply_air_mass_flow_design - self.outdoor_air_mass_flow_design
         recirculation_enthalpy = self.psych.enthalpy(state, self.primary_air_inlet_temp, self.primary_air_hum_rat_inlet)
         outdoor_air_enthalpy = self.psych.enthalpy(state, self.outdoor_air_dry_bulb, self.outdoor_air_hum_rat)
-        mixed_enthalpy = ((recirculation_mass_flow * recirculation_enthalpy) + (
-                self.outdoor_air_mass_flow_design * outdoor_air_enthalpy)) / self.supply_air_mass_flow_design
-        mixed_hum_rat = ((recirculation_mass_flow * self.primary_air_hum_rat_inlet) + (
-                self.outdoor_air_mass_flow_design * self.outdoor_air_hum_rat)) / self.supply_air_mass_flow_design
+        mixed_enthalpy = (
+            (recirculation_mass_flow * recirculation_enthalpy)
+            + (self.outdoor_air_mass_flow_design * outdoor_air_enthalpy)
+        ) / self.supply_air_mass_flow_design
+        mixed_hum_rat = (
+            (recirculation_mass_flow * self.primary_air_hum_rat_inlet)
+            + (self.outdoor_air_mass_flow_design * self.outdoor_air_hum_rat)
+        ) / self.supply_air_mass_flow_design
         mixed_dry_bulb = self.psych.dry_bulb(state, mixed_enthalpy, mixed_hum_rat)
         outdoor_air_pressure = api_.exchange.get_variable_value(state, self.handles["OA_Press"])
         mixed_density = self.psych.density(state, outdoor_air_pressure, mixed_dry_bulb, mixed_hum_rat)
@@ -441,19 +418,20 @@ class Zone1WinACModel:
         self.outdoor_air_mass_flow_inlet = self.outdoor_air_mass_flow_design
 
     def report(self, state):
-        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_PrimAir_MdotOut"],
-                                         self.primary_air_mass_flow_out)
-        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_PrimAir_MdotIn"],
-                                         self.primary_air_mass_flow_in)
-        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_PrimAir_Tout"],
-                                         self.primary_air_outlet_temp)
-        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_PrimAir_Wout"],
-                                         self.primary_air_hum_rat_outlet)
+        api_.exchange.set_actuator_value(
+            state, self.handles["Zone1WinAC_PrimAir_MdotOut"], self.primary_air_mass_flow_out
+        )
+        api_.exchange.set_actuator_value(
+            state, self.handles["Zone1WinAC_PrimAir_MdotIn"], self.primary_air_mass_flow_in
+        )
+        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_PrimAir_Tout"], self.primary_air_outlet_temp)
+        api_.exchange.set_actuator_value(
+            state, self.handles["Zone1WinAC_PrimAir_Wout"], self.primary_air_hum_rat_outlet
+        )
         # api_.exchange.set_global_value(state, self.handles["Zone1WinAC_ElectPower"], self.ElectPower)
         # api_.exchange.set_global_value(state, self.handles["Zone1WinAC_tot_cool_Power"], self.tot_cool_Power)
         # api_.exchange.set_global_value(state, self.handles["Zone1WinAC_ElectEnergy"], self.ElectEnergy)
-        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_OA_MdotIn"],
-                                         self.outdoor_air_mass_flow_inlet)
+        api_.exchange.set_actuator_value(state, self.handles["Zone1WinAC_OA_MdotIn"], self.outdoor_air_mass_flow_inlet)
 
     def operate(self, state):
         if not self.psych:
@@ -477,5 +455,5 @@ instance = Zone1WinACModel()
 api_.runtime.callback_user_defined_component_model(
     state_, on_user_defined_component_model, "ZONE 1 WINDOW AC MODEL PROGRAM MANAGER"
 )
-api_.runtime.run_energyplus(state_, ['-d', run_directory, '-D', example_file_to_run])
+api_.runtime.run_energyplus(state_, ["-d", run_directory, "-D", example_file_to_run])
 print(f"Finished running EnergyPlus, results available in {run_directory}")

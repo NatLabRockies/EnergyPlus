@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -582,7 +582,8 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
     PlantLocation myLoadLocation = PlantLocation(1, DataPlant::LoopSideLocation::Supply, 1, 1);
 
     // call the factory with a valid name to trigger reading inputs
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating, "TEST_AWHP");
+    DataPlant::PlantEquipmentType equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+    HeatPumpAirToWater::factory(*state, equipType, "TEST_AWHP");
 
     // verify the size of the vector and the processed condition
     EXPECT_EQ(2u, state->dataHeatPumpAirToWater->heatPumps.size());
@@ -610,6 +611,8 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
     thisAWHPCooling->loadSidePlantLoc.branchNum = 1;
     thisAWHPCooling->loadSidePlantLoc.compNum = 1;
 
+    thisAWHPHeating->setPointNodeNum = thisAWHPHeating->loadSideNodes.outlet;
+
     // call it from the load side, but this time there is a negative (cooling) load - shouldn't try to run
     {
         bool firstHVAC = true;
@@ -617,7 +620,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
         bool runFlag = true; // plant actually shouldn't do this but the component can be smart enough to handle it
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 constexpr loadInletTemp = 46;
-        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = loadInletTemp;
         state->dataLoopNodes->Node(thisAWHPHeating->sourceSideNodes.inlet).Temp = 30;
         thisAWHPHeating->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -635,7 +638,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisAWHPHeating->sourceSideNodes.inlet).Temp = 30;
         // if need to test defrost, uncomment this
@@ -656,7 +659,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisAWHPHeating->sourceSideNodes.inlet).Temp = 30;
         thisAWHPHeating->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -674,7 +677,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisAWHPHeating->sourceSideNodes.inlet).Temp = 30;
         thisAWHPHeating->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -972,8 +975,10 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating, "TEST_AWHP");
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling, "TEST_AWHP");
+    DataPlant::PlantEquipmentType equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+    HeatPumpAirToWater::factory(*state, equipType, "test_AWHP_defaults");
+    equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    HeatPumpAirToWater::factory(*state, equipType, "test_AWHP_defaults");
     // cooling component in the AWHP
     EXPECT_ENUM_EQ(state->dataHeatPumpAirToWater->heatPumps[0].EIRHPType, DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling);
     EXPECT_EQ(state->dataHeatPumpAirToWater->heatPumps[0].availSchedName, "");
@@ -1067,8 +1072,10 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
     EXPECT_ENUM_EQ(state->dataHeatPumpAirToWater->heatPumps[1].operatingModeControlOptionMultipleUnit,
                    HeatPumpAirToWater::OperatingModeControlOptionMultipleUnit::SingleMode);
 
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating, "test_AWHP_defaults");
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling, "test_AWHP_defaults");
+    equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+    HeatPumpAirToWater::factory(*state, equipType, "test_AWHP_defaults");
+    equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    HeatPumpAirToWater::factory(*state, equipType, "test_AWHP_defaults");
 
     // cooling component in the AWHP
     EXPECT_ENUM_EQ(state->dataHeatPumpAirToWater->heatPumps[2].EIRHPType, DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling);
@@ -1281,8 +1288,9 @@ TEST_F(EnergyPlusFixture, calcPowerUsage_AWHP)
 
     thisAWHP.loadSideNodes.inlet = 1;
     thisAWHP.loadSideNodes.outlet = 2;
+    thisAWHP.setPointNodeNum = thisAWHP.loadSideNodes.outlet;
     state->dataLoopNodes->Node.allocate(2);
-    state->dataLoopNodes->Node(2).TempSetPoint = 20;
+    state->dataLoopNodes->Node(thisAWHP.setPointNodeNum).TempSetPoint = 20;
     thisAWHP.sourceSideHeatTransfer = 100;
     thisAWHP.loadSideHeatTransfer = 90;
     thisAWHP.numSpeeds = 2;
@@ -1844,6 +1852,212 @@ TEST_F(EnergyPlusFixture, Initialization)
     EXPECT_NEAR(0.0, state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).MassFlowRateMinAvail, flowTol);
     EXPECT_NEAR(expectedSourceSideMassFlow, state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).MassFlowRateMax, flowTol);
     EXPECT_NEAR(expectedSourceSideMassFlow, state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).MassFlowRateMaxAvail, flowTol);
+}
+
+TEST_F(EnergyPlusFixture, EIRPLHP_Initialization_SetpointMissing)
+{
+    std::string const idf_objects = delimited_string({
+        "HeatPump:PlantLoop:EIR:Heating,",
+        "  Heating Coil,            !- Name",
+        "  Heating Coil Load Loop Intermediate Node,  !- Load Side Inlet Node Name",
+        "  Heating Coil Load Loop Supply Side Heating Coil Outlet Node,  !- Load Side Outlet Node Name",
+        "  AirSource,               !- Condenser Type",
+        "  Outdoor Air Inlet Node,  !- Source Side Inlet Node Name",
+        "  Outdoor Air Outlet Node, !- Source Side Outlet Node Name",
+        "  ,                        !- Heat Recovery Inlet Node Name",
+        "  ,                        !- Heat Recovery Outlet Node Name",
+        "  ,                        !- Companion Heat Pump Name",
+        "  0.005,                   !- Load Side Reference Flow Rate {m3/s}",
+        "  2,                       !- Source Side Reference Flow Rate {m3/s}",
+        "  autosize,                !- Heat Recovery Reference Flow Rate {m3/s}",
+        "  80000,                   !- Reference Capacity {W}",
+        "  3.5,                     !- Reference Coefficient of Performance {W/W}",
+        "  1.0,                     !- Sizing Factor",
+        "  CapCurveFuncTemp,        !- Capacity Modifier Function of Temperature Curve Name",
+        "  EIRCurveFuncTemp,        !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name",
+        "  EIRCurveFuncPLR,         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name",
+        "  1.0,                     !- Heating To Cooling Capacity Sizing Ratio",
+        "  CoolingCapacity,         !- Heat Pump Sizing Method",
+        "  Setpoint,                !- Control Type",
+        "  ConstantFlow,            !- Flow Mode",
+        "  0.0,                     !- Minimum Part Load Ratio",
+        "  -100.0,                  !- Minimum Source Inlet Temperature {C}",
+        "  100.0,                   !- Maximum Source Inlet Temperature {C}",
+        "  ,                        !- Minimum Supply Water Temperature Curve Name",
+        "  ,                        !- Maximum Supply Water Temperature Curve Name",
+        "  ,                        !- Dry Outdoor Correction Factor Curve Name",
+        "  10.0,                    !- Maximum Outdoor Dry Bulb Temperature For Defrost Operation",
+        "  ,                        !- Heat Pump Defrost Control",
+        "  0.058333,                !- Heat Pump Defrost Time Period Fraction",
+        "  ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
+        "  ,                        !- Timed Empirical Defrost Frequency Curve Name",
+        "  ,                        !- Timed Empirical Defrost Heat Load Penalty Curve Name",
+        "  ,                        !- Timed Empirical Defrost Heat Input Energy Fraction Curve Name",
+        "  4.5,                     !- Minimum Heat Recovery Outlet Temperature {C}",
+        "  ,                        !- Heat Recovery Capacity Modifier Function of Temperature Curve Name",
+        "  ;                        !- Heat Recovery Electric Input to Output Ratio Modifier Function of Temperature Curve Name",
+
+        "Curve:Biquadratic,",
+        "  CapCurveFuncTemp,        !- Name",
+        "  1.0,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  5.0,                     !- Minimum Value of x",
+        "  10.0,                    !- Maximum Value of x",
+        "  24.0,                    !- Minimum Value of y",
+        "  35.0,                    !- Maximum Value of y",
+        "  ,                        !- Minimum Curve Output",
+        "  ,                        !- Maximum Curve Output",
+        "  Temperature,             !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Biquadratic,",
+        "  EIRCurveFuncTemp,        !- Name",
+        "  1.0,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  5.0,                     !- Minimum Value of x",
+        "  10.0,                    !- Maximum Value of x",
+        "  24.0,                    !- Minimum Value of y",
+        "  35.0,                    !- Maximum Value of y",
+        "  ,                        !- Minimum Curve Output",
+        "  ,                        !- Maximum Curve Output",
+        "  Temperature,             !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Quadratic,",
+        "  EIRCurveFuncPLR,         !- Name",
+        "  1.0,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.0;                     !- Maximum Value of x",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    // call the factory with a valid name to trigger reading inputs
+    EIRPlantLoopHeatPump *thisHeatingPLHP =
+        static_cast<EIRPlantLoopHeatPump *>(EIRPlantLoopHeatPump::factory(*state, DataPlant::PlantEquipmentType::HeatPumpEIRHeating, "HEATING COIL"));
+
+    // the factory would've called GetOnlySingleNode for the in/out pairs on the PLHP, add another one for the loop
+    // outlet setpoint node
+    EXPECT_EQ(4, state->dataLoopNodes->NumOfNodes);
+    EXPECT_EQ(4, state->dataLoopNodes->Node.size());
+    state->dataLoopNodes->Node.redimension(5);
+    state->dataLoopNodes->NodeID.redimension(5);
+    int constexpr loadSidePlantOutletNodeIndex = 5;
+    state->dataLoopNodes->NodeID(loadSidePlantOutletNodeIndex) = "HEATING LOOP SUPPLY OUTLET NODE";
+
+    // set up the plant loops
+    // first the load side
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+
+    int constexpr loadSidePlantIndex = 1;
+
+    auto &loadSideLoop = state->dataPlnt->PlantLoop(loadSidePlantIndex);
+    loadSideLoop.FluidName = "WATER";
+    loadSideLoop.glycol = Fluid::GetWater(*state);
+    loadSideLoop.LoopSide(DataPlant::LoopSideLocation::Supply).TotalBranches = 1;
+    loadSideLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    loadSideLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).TotalComponents = 1;
+    loadSideLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+    loadSideLoop.TempSetPointNodeNum = loadSidePlantOutletNodeIndex;
+
+    auto &loadSideLoopComp = loadSideLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
+    loadSideLoopComp.Name = thisHeatingPLHP->name;
+    loadSideLoopComp.NodeNumIn = thisHeatingPLHP->loadSideNodes.inlet;
+    loadSideLoopComp.Type = DataPlant::PlantEquipmentType::HeatPumpEIRHeating;
+    loadSideLoopComp.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
+
+    // do a little setup here
+    thisHeatingPLHP->loadSidePlantLoc.loopNum = loadSidePlantIndex;
+    thisHeatingPLHP->loadSidePlantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+    thisHeatingPLHP->loadSidePlantLoc.branchNum = 1;
+    thisHeatingPLHP->loadSidePlantLoc.compNum = 1;
+
+    // This sets the loop, side,branch and comp on the PlantLoc
+    PlantUtilities::SetPlantLocationLinks(*state, thisHeatingPLHP->loadSidePlantLoc);
+
+    // Test SingleSetPoint operation first
+    loadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPoint = 30.0;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+    // This is already the case, but I'm being explicit
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+
+    // the init call expects a "from" calling point
+    PlantLocation myLocation = PlantLocation(loadSidePlantIndex, DataPlant::LoopSideLocation::Supply, 1, 1);
+
+    // call for initialization, oneTimeInit only first
+    state->dataGlobal->BeginEnvrnFlag = false;
+    thisHeatingPLHP->onInitLoopEquip(*state, myLocation);
+
+    compare_err_stream(delimited_string({
+        "   ** Warning ** EIRPlantLoopHeatPump : oneTimeInit: Missing temperature setpoint for Setpoint Controlled HeatPump:PlantLoop:EIR:Heating "
+        "name = \"HEATING COIL\"",
+        "   **   ~~~   **   A temperature setpoint is needed at the load side outlet node, use a SetpointManager",
+        "   **   ~~~   **   The overall loop setpoint will be assumed for the Heat Pump. The simulation continues ... ",
+    }));
+    EXPECT_TRUE(thisHeatingPLHP->SetpointSetToLoopErrDone);
+    EXPECT_EQ(loadSidePlantOutletNodeIndex, thisHeatingPLHP->setPointNodeNum);
+
+    EXPECT_NEAR(30.0, thisHeatingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
+    EXPECT_NEAR(30.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint, 0.001);
+    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi, 0.001);
+    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo, 0.001);
+
+    // test for dual setpoint operation
+    loadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointHi = 30.0;
+    state->dataLoopNodes->Node(loadSidePlantOutletNodeIndex).TempSetPointLo = 10.0;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = DataLoopNode::SensedNodeFlagValue;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = DataLoopNode::SensedNodeFlagValue;
+
+    // reset the flag to force re-running oneTimeInit
+    thisHeatingPLHP->oneTimeInitFlag = true;
+    thisHeatingPLHP->SetpointSetToLoopErrDone = false;
+    thisHeatingPLHP->onInitLoopEquip(*state, myLocation);
+
+    compare_err_stream(delimited_string({
+        "   ** Warning ** EIRPlantLoopHeatPump : oneTimeInit: Missing temperature setpoint for Setpoint Controlled HeatPump:PlantLoop:EIR:Heating "
+        "name = \"HEATING COIL\"",
+        "   **   ~~~   **   A temperature setpoint is needed at the load side outlet node, use a SetpointManager",
+        "   **   ~~~   **   The overall loop setpoint will be assumed for the Heat Pump. The simulation continues ... ",
+    }));
+    EXPECT_TRUE(thisHeatingPLHP->SetpointSetToLoopErrDone);
+    EXPECT_EQ(loadSidePlantOutletNodeIndex, thisHeatingPLHP->setPointNodeNum);
+
+    EXPECT_NEAR(10.0, thisHeatingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
+    EXPECT_NEAR(DataLoopNode::SensedNodeFlagValue, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint, 0.001);
+    EXPECT_NEAR(30.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi, 0.001);
+    EXPECT_NEAR(10.0, state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo, 0.001);
+
+    // validate that location work got done correctly
+    EXPECT_EQ(1, thisHeatingPLHP->loadSidePlantLoc.loopNum);
+    EXPECT_ENUM_EQ(DataPlant::LoopSideLocation::Supply, thisHeatingPLHP->loadSidePlantLoc.loopSideNum);
+    EXPECT_EQ(1, thisHeatingPLHP->loadSidePlantLoc.branchNum);
+    EXPECT_EQ(1, thisHeatingPLHP->loadSidePlantLoc.compNum);
+
+    // now call for initialization again, for begin environment
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
+    thisHeatingPLHP->onInitLoopEquip(*state, myLocation);
 }
 
 TEST_F(EnergyPlusFixture, TestSizing_FullyAutosizedCoolingWithCompanion_WaterSource)
@@ -2600,7 +2814,9 @@ TEST_F(EnergyPlusFixture, CoolingOutletSetpointWorker)
     // set up the plant setpoint conditions and test for single setpoint operation
     PLHPPlantLoadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
     PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
-    state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = 3.141;
+    // Normally done by oneTimeInit
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+    state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = 3.141;
     state->dataLoopNodes->Node(5).TempSetPoint = 2.718;
     EXPECT_NEAR(3.141, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
     PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CoolingRB;
@@ -2684,8 +2900,10 @@ TEST_F(EnergyPlusFixture, HeatingOutletSetpointWorker)
     // test for dual setpoint operation
     PLHPPlantLoadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
     PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointHi = 30.0;
-    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPointLo = 10.0;
+    // Normally done by oneTimeInit
+    thisHeatingPLHP->setPointNodeNum = thisHeatingPLHP->loadSideNodes.outlet;
+    state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointHi = 30.0;
+    state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPointLo = 10.0;
     state->dataLoopNodes->Node(5).TempSetPointHi = 30.0;
     state->dataLoopNodes->Node(5).TempSetPointLo = 12.0;
     EXPECT_NEAR(10.0, thisHeatingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
@@ -3064,6 +3282,8 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WaterSource)
     thisCoolingPLHP->simulate(*state, mySourceLocation, firstHVAC, curLoad, runFlag);
     EXPECT_TRUE(state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).SimLoopSideNeeded);
 
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+
     // now we can call it again from the load side, but this time there is load (still firsthvac, unit can meet load)
     {
         firstHVAC = true;
@@ -3073,7 +3293,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WaterSource)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisCoolingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3092,7 +3312,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WaterSource)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisCoolingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3181,6 +3401,8 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_WaterSource)
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
     thisHeatingPLHP->onInitLoopEquip(*state, myLoadLocation);
 
+    thisHeatingPLHP->setPointNodeNum = thisHeatingPLHP->loadSideNodes.outlet;
+
     // call it from the load side, but this time there is a negative (cooling) load - shouldn't try to run
     {
         bool firstHVAC = true;
@@ -3188,7 +3410,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_WaterSource)
         bool runFlag = true; // plant actually shouldn't do this but the component can be smart enough to handle it
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 constexpr loadInletTemp = 46;
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = loadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3206,7 +3428,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_WaterSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3225,7 +3447,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_WaterSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3412,6 +3634,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_AirSource)
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
     thisCoolingPLHP->onInitLoopEquip(*state, myLoadLocation);
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
 
     // call from load side location, firsthvac, no load, not running, verify the unit doesn't have any values lingering
     thisCoolingPLHP->loadSideHeatTransfer = 1000;
@@ -3440,7 +3663,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_AirSource)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisCoolingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3459,7 +3682,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_AirSource)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisCoolingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3540,6 +3763,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
     thisHeatingPLHP->onInitLoopEquip(*state, myLoadLocation);
+    thisHeatingPLHP->setPointNodeNum = thisHeatingPLHP->loadSideNodes.outlet;
 
     // call it from the load side, but this time there is a negative (cooling) load - shouldn't try to run
     {
@@ -3548,7 +3772,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
         bool runFlag = true; // plant actually shouldn't do this but the component can be smart enough to handle it
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 constexpr loadInletTemp = 46;
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = loadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3566,7 +3790,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3585,7 +3809,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3603,7 +3827,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -3621,7 +3845,7 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource)
         Real64 constexpr expectedCp = 4180;
         Real64 constexpr specifiedLoadSetpoint = 45;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisHeatingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30;
         thisHeatingPLHP->simulate(*state, myLoadLocation, firstHVAC, curLoad, runFlag);
@@ -4649,7 +4873,8 @@ TEST_F(EnergyPlusFixture, Test_DoPhysics_AWHP)
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp.allocate(1);
 
     // call the factory with a valid name to trigger reading inputs
-    HeatPumpAirToWater::factory(*state, DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling, "test_AWHP");
+    DataPlant::PlantEquipmentType equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    HeatPumpAirToWater::factory(*state, equipType, "test_AWHP");
 
     state->dataPlnt->PlantLoop(3).FluidName = "WATER";
     state->dataPlnt->PlantLoop(3).glycol = Fluid::GetWater(*state);
@@ -6598,6 +6823,9 @@ TEST_F(EnergyPlusFixture, CoolingwithHeatRecoverySimulate_AirSource)
     thisCoolingPLHP->onInitLoopEquip(*state, myCoolingLoadLocation);
     thisHeatingPLHP->onInitLoopEquip(*state, myHeatingLoadLocation);
 
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+    thisHeatingPLHP->setPointNodeNum = thisHeatingPLHP->loadSideNodes.outlet;
+
     // call from load side location, firsthvac, no load, not running, verify the unit doesn't have any values lingering
     thisCoolingPLHP->loadSideHeatTransfer = 2000;
     thisCoolingPLHP->loadSideInletTemp = 23.0;
@@ -6826,6 +7054,9 @@ TEST_F(EnergyPlusFixture, HeatingwithHeatRecoverySimulate_AirSource)
     thisCoolingPLHP->onInitLoopEquip(*state, myCoolingLoadLocation);
     thisHeatingPLHP->onInitLoopEquip(*state, myHeatingLoadLocation);
 
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+    thisHeatingPLHP->setPointNodeNum = thisHeatingPLHP->loadSideNodes.outlet;
+
     // call from load side location, firsthvac, no load, not running, verify the unit doesn't have any values lingering
     thisHeatingPLHP->loadSideHeatTransfer = 5000;
     thisHeatingPLHP->loadSideInletTemp = 43.0;
@@ -7017,6 +7248,8 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WSHP_SourceSideOutletTemp)
     thisCoolingPLHP->simulate(*state, mySourceLocation, firstHVAC, curLoad, runFlag);
     EXPECT_TRUE(state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).SimLoopSideNeeded);
 
+    thisCoolingPLHP->setPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+
     // now we can call it again from the load side, but this time there is load (still firsthvac, unit can meet load)
     {
         firstHVAC = true;
@@ -7028,7 +7261,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WSHP_SourceSideOutletTemp)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 45;
         thisCoolingPLHP->maxSourceTempLimit = 50.0;
@@ -7052,7 +7285,7 @@ TEST_F(EnergyPlusFixture, CoolingSimulate_WSHP_SourceSideOutletTemp)
         Real64 constexpr expectedCp = 4183;
         Real64 constexpr specifiedLoadSetpoint = 15;
         Real64 const calculatedLoadInletTemp = specifiedLoadSetpoint - curLoad / (expectedLoadMassFlowRate * expectedCp);
-        state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.outlet).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisCoolingPLHP->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
         state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).Temp = calculatedLoadInletTemp;
         state->dataLoopNodes->Node(thisCoolingPLHP->sourceSideNodes.inlet).Temp = 48;
         thisCoolingPLHP->maxSourceTempLimit = 50.0;

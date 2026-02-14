@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmOptions 
+Begin VB.Form frmOptions
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Options"
    ClientHeight    =   17520
@@ -14,14 +14,14 @@ Begin VB.Form frmOptions
    ScaleWidth      =   6375
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.Frame frmAssoc 
+   Begin VB.Frame frmAssoc
       Caption         =   "File Association"
       Height          =   1335
       Left            =   1800
       TabIndex        =   27
       Top             =   14280
       Width           =   4215
-      Begin VB.CommandButton cmdAssoc 
+      Begin VB.CommandButton cmdAssoc
          Caption         =   "Associate IDF, IMF and EPG files with EP-Launch..."
          Height          =   735
          Left            =   960
@@ -30,14 +30,14 @@ Begin VB.Form frmOptions
          Width           =   2415
       End
    End
-   Begin VB.Frame frmReset 
+   Begin VB.Frame frmReset
       Caption         =   "Reset"
       Height          =   1455
       Left            =   1800
       TabIndex        =   21
       Top             =   15720
       Width           =   4215
-      Begin VB.CommandButton cmdAutoFindAll 
+      Begin VB.CommandButton cmdAutoFindAll
          Caption         =   "Auto Find All File Viewers"
          Height          =   375
          Left            =   720
@@ -45,7 +45,7 @@ Begin VB.Form frmOptions
          Top             =   360
          Width           =   2895
       End
-      Begin VB.CommandButton cmdResetAllExit 
+      Begin VB.CommandButton cmdResetAllExit
          Caption         =   "Reset All Options and Exit"
          Height          =   375
          Left            =   720
@@ -54,14 +54,14 @@ Begin VB.Form frmOptions
          Width           =   2895
       End
    End
-   Begin VB.Frame frmProg 
+   Begin VB.Frame frmProg
       Caption         =   "Text Editor"
       Height          =   2655
       Left            =   1800
       TabIndex        =   17
       Top             =   11520
       Width           =   4215
-      Begin VB.CommandButton cmdClearApp 
+      Begin VB.CommandButton cmdClearApp
          Caption         =   "Clear"
          Height          =   375
          Left            =   3000
@@ -69,7 +69,7 @@ Begin VB.Form frmOptions
          Top             =   1440
          Width           =   1095
       End
-      Begin VB.CommandButton cmdUseOpera 
+      Begin VB.CommandButton cmdUseOpera
          Caption         =   "Use Opera"
          Height          =   375
          Left            =   2280
@@ -77,7 +77,7 @@ Begin VB.Form frmOptions
          Top             =   2040
          Width           =   1335
       End
-      Begin VB.CommandButton cmdUseFirefox 
+      Begin VB.CommandButton cmdUseFirefox
          Caption         =   "Use Firefox"
          Height          =   375
          Left            =   720
@@ -85,7 +85,7 @@ Begin VB.Form frmOptions
          Top             =   2040
          Width           =   1335
       End
-      Begin VB.CommandButton cmdAutoFindApp 
+      Begin VB.CommandButton cmdAutoFindApp
          Caption         =   "Auto Find"
          Height          =   375
          Left            =   120
@@ -93,7 +93,7 @@ Begin VB.Form frmOptions
          Top             =   1440
          Width           =   1095
       End
-      Begin VB.CommandButton cmdSelectApp 
+      Begin VB.CommandButton cmdSelectApp
          Caption         =   "Select..."
          Height          =   375
          Left            =   1560
@@ -101,7 +101,7 @@ Begin VB.Form frmOptions
          Top             =   1440
          Width           =   1095
       End
-      Begin VB.TextBox txtProgramPath 
+      Begin VB.TextBox txtProgramPath
          BackColor       =   &H80000004&
          Height          =   1095
          Left            =   120
@@ -114,21 +114,21 @@ Begin VB.Form frmOptions
          Width           =   3975
       End
    End
-   Begin VB.ListBox lstCategory 
+   Begin VB.ListBox lstCategory
       Height          =   2985
       Left            =   120
       TabIndex        =   16
       Top             =   120
       Width           =   1575
    End
-   Begin VB.Frame frmMisc 
+   Begin VB.Frame frmMisc
       Caption         =   "Miscellaneous"
       Height          =   3255
       Left            =   1800
       TabIndex        =   8
       Top             =   8160
       Width           =   4215
-      Begin VB.CheckBox chkAutoUpdates 
+      Begin VB.CheckBox chkAutoUpdates
          Caption         =   "Check for Updates to EnergyPlus"
          Height          =   375
          Left            =   240
@@ -136,7 +136,7 @@ Begin VB.Form frmOptions
          Top             =   2760
          Width           =   3135
       End
-      Begin VB.CheckBox chkRunParamPre 
+      Begin VB.CheckBox chkRunParamPre
          Caption         =   "Run ParametricPreprocessor"
          Height          =   375
          Left            =   240
@@ -144,7 +144,7 @@ Begin VB.Form frmOptions
          Top             =   2400
          Width           =   3735
       End
-      Begin VB.CheckBox chkCreateBatch 
+      Begin VB.CheckBox chkCreateBatch
          Caption         =   "Create Batch File to Run EnergyPlus"
          Height          =   375
          Left            =   240
@@ -152,7 +152,7 @@ Begin VB.Form frmOptions
          Top             =   2040
          Width           =   3135
       End
-      Begin VB.CheckBox chkCSVProc 
+      Begin VB.CheckBox chkCSVProc
          Caption         =   "Create Statistics File"
          Height          =   375
          Left            =   240
@@ -160,7 +160,7 @@ Begin VB.Form frmOptions
          Top             =   1680
          Width           =   3735
       End
-      Begin VB.CheckBox chkConvIP 
+      Begin VB.CheckBox chkConvIP
          Caption         =   "Convert ESO/MTR to IP Units"
          Height          =   375
          Left            =   240
@@ -168,7 +168,7 @@ Begin VB.Form frmOptions
          Top             =   1320
          Width           =   3855
       End
-      Begin VB.CheckBox chkVersion 
+      Begin VB.CheckBox chkVersion
          Caption         =   "Check VERSION Prior to Simulation"
          Height          =   375
          Left            =   240
@@ -176,7 +176,7 @@ Begin VB.Form frmOptions
          Top             =   960
          Width           =   3855
       End
-      Begin VB.CheckBox chkMore250 
+      Begin VB.CheckBox chkMore250
          Caption         =   "Allow More Than 250 Columns"
          Height          =   375
          Left            =   240
@@ -184,7 +184,7 @@ Begin VB.Form frmOptions
          Top             =   600
          Width           =   3855
       End
-      Begin VB.CheckBox chkTabOpen 
+      Begin VB.CheckBox chkTabOpen
          Caption         =   "Tab Delimited Open with Spreadsheet"
          Height          =   375
          Left            =   240
@@ -193,14 +193,14 @@ Begin VB.Form frmOptions
          Width           =   3855
       End
    End
-   Begin VB.Frame frmInterface 
+   Begin VB.Frame frmInterface
       Caption         =   "Interface Control"
       Height          =   1455
       Left            =   1800
       TabIndex        =   5
       Top             =   6600
       Width           =   4215
-      Begin VB.CheckBox chkAltLayout 
+      Begin VB.CheckBox chkAltLayout
          Caption         =   "Alternative Layout"
          Height          =   375
          Left            =   240
@@ -208,7 +208,7 @@ Begin VB.Form frmOptions
          Top             =   600
          Width           =   3855
       End
-      Begin VB.CheckBox chkWide 
+      Begin VB.CheckBox chkWide
          Caption         =   "Extra Wide Window"
          Height          =   375
          Left            =   240
@@ -217,14 +217,14 @@ Begin VB.Form frmOptions
          Width           =   3855
       End
    End
-   Begin VB.Frame frmCommand 
+   Begin VB.Frame frmCommand
       Caption         =   "Command Window Control"
       Height          =   2295
       Left            =   1800
       TabIndex        =   2
       Top             =   3840
       Width           =   4215
-      Begin VB.ComboBox cmbNumberProcesses 
+      Begin VB.ComboBox cmbNumberProcesses
          Height          =   315
          Left            =   2880
          Style           =   2  'Dropdown List
@@ -232,7 +232,7 @@ Begin VB.Form frmOptions
          Top             =   1320
          Width           =   735
       End
-      Begin VB.CheckBox chkMinSingleCmd 
+      Begin VB.CheckBox chkMinSingleCmd
          Caption         =   "Minimize Single Simulation Command Window"
          Height          =   375
          Left            =   240
@@ -240,7 +240,7 @@ Begin VB.Form frmOptions
          Top             =   600
          Width           =   3735
       End
-      Begin VB.CheckBox chkMinGroupCmd 
+      Begin VB.CheckBox chkMinGroupCmd
          Caption         =   "Minimize Group Simulation Command Window"
          Height          =   375
          Left            =   240
@@ -248,7 +248,7 @@ Begin VB.Form frmOptions
          Top             =   960
          Width           =   3855
       End
-      Begin VB.CheckBox chkPauseSim 
+      Begin VB.CheckBox chkPauseSim
          Caption         =   "Pause During Simulation (Unless Minimized)"
          Height          =   375
          Left            =   240
@@ -256,7 +256,7 @@ Begin VB.Form frmOptions
          Top             =   240
          Width           =   3855
       End
-      Begin VB.Label Label2 
+      Begin VB.Label Label2
          Caption         =   "Usually 1 to 4 for most PCs."
          Height          =   255
          Left            =   630
@@ -264,7 +264,7 @@ Begin VB.Form frmOptions
          Top             =   1575
          Width           =   3255
       End
-      Begin VB.Label Label1 
+      Begin VB.Label Label1
          Caption         =   "Number of Simultaneous Processes"
          Height          =   255
          Left            =   240
@@ -273,7 +273,7 @@ Begin VB.Form frmOptions
          Width           =   2535
       End
    End
-   Begin VB.CommandButton cmdCancel 
+   Begin VB.CommandButton cmdCancel
       Cancel          =   -1  'True
       Caption         =   "Cancel"
       Height          =   375
@@ -282,7 +282,7 @@ Begin VB.Form frmOptions
       Top             =   3480
       Width           =   1575
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375

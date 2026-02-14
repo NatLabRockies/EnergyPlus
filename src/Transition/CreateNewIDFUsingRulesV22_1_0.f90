@@ -429,7 +429,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               ! If your original object starts with R, insert the rules here
 
               ! If your original object starts with S, insert the rules here
-              
+
               ! If your original object starts with S, insert the rules here
 
               ! If your original object starts with T, insert the rules here

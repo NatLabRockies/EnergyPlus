@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -82,16 +82,16 @@ template <> struct fmt::formatter<PyStatus>
 
     static auto format(const PyStatus &status, format_context &ctx) -> format_context::iterator
     {
-        if (!PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) == 0) {
             return ctx.out();
         }
-        if (PyStatus_IsExit(status)) {
+        if (PyStatus_IsExit(status) != 0) {
             return format_to(ctx.out(), "Exited with code {}", status.exitcode);
         }
-        if (PyStatus_IsError(status)) {
+        if (PyStatus_IsError(status) != 0) {
             auto it = ctx.out();
             it = format_to(it, "Fatal Python error: ");
-            if (status.func) {
+            if (status.func != nullptr) {
                 it = format_to(it, "{}: ", status.func);
             }
             it = format_to(it, "{}", status.err_msg);
@@ -392,7 +392,7 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
     // PyPreConfig_InitIsolatedConfig(&preConfig);
     preConfig.utf8_mode = 1;
     status = Py_PreInitialize(&preConfig);
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         ShowFatalError(state, fmt::format("Could not pre-initialize Python to speak UTF-8... {}", status));
     }
 
@@ -401,12 +401,12 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
     config.isolated = 1;
 
     status = PyConfig_SetBytesString(&config, &config.program_name, PluginManagement::programName);
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         ShowFatalError(state, fmt::format("Could not initialize program_name on PyConfig... {}", status));
     }
 
     status = PyConfig_Read(&config);
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         ShowFatalError(state, fmt::format("Could not read back the PyConfig... {}", status));
     }
 
@@ -418,16 +418,16 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
         const wchar_t *wcharPath = ws.c_str();
 
         status = PyConfig_SetString(&config, &config.home, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         config.module_search_paths_set = 1;
         status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
         }
 
@@ -438,16 +438,16 @@ void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
         wchar_t *wcharPath = Py_DecodeLocale(pathToPythonPackages.generic_string().c_str(), nullptr); // This allocates!
 
         status = PyConfig_SetString(&config, &config.home, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
         }
         config.module_search_paths_set = 1;
         status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-        if (PyStatus_Exception(status)) {
+        if (PyStatus_Exception(status) != 0) {
             ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
         }
 
@@ -760,12 +760,12 @@ void PluginInstance::reportPythonError([[maybe_unused]] EnergyPlusData &state)
     PyObject *pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
     Py_DECREF(pyth_module); // PyImport_Import returns a new reference, decrement it
 
-    if (pyth_func || PyCallable_Check(pyth_func)) {
+    if ((pyth_func != nullptr) || (PyCallable_Check(pyth_func) != 0)) {
 
         PyObject *pyth_val = PyObject_CallFunction(pyth_func, "OOO", exc_type, exc_value, exc_tb);
 
         // traceback.format_exception returns a list, so iterate on that
-        if (!pyth_val || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
+        if ((pyth_val == nullptr) || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
             ShowContinueError(state, "In reportPythonError(), traceback.format_exception did not return a list.");
             return;
         }
@@ -822,11 +822,11 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     this->pModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 
-    if (!this->pModule) {
+    if (this->pModule == nullptr) {
         ShowSevereError(state, format("Failed to import module \"{:g}\"", this->modulePath));
         ShowContinueError(state, format("Current sys.path={}", PluginManager::currentPythonPath()));
         // ONLY call PyErr_Print if PyErr has occurred, otherwise it will cause other problems
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be that the module could not be found, or that there was an error in importing");
@@ -834,9 +834,9 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
         ShowFatalError(state, "Python import error causes program termination");
     }
     PyObject *pModuleDict = PyModule_GetDict(this->pModule);
-    if (!pModuleDict) {
+    if (pModuleDict == nullptr) {
         ShowSevereError(state, format("Failed to read module dictionary from module \"{:g}\"", this->modulePath));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be that the module was empty");
@@ -845,7 +845,7 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     }
     std::string fileVarName = "__file__";
     PyObject *pFullPath = PyDict_GetItemString(pModuleDict, fileVarName.c_str());
-    if (!pFullPath) {
+    if (pFullPath == nullptr) {
         // something went really wrong, this should only happen if you do some *weird* python stuff like
         // import from database or something
         ShowFatalError(state, "Could not get full path");
@@ -856,18 +856,18 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     }
     PyObject *pClass = PyDict_GetItemString(pModuleDict, className.c_str());
     // Py_DECREF(pModuleDict);  // PyModule_GetDict returns a borrowed reference, DO NOT decrement
-    if (!pClass) {
+    if (pClass == nullptr) {
         ShowSevereError(state, format(R"(Failed to get class type "{}" from module "{:g}")", className, modulePath));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be the class name is misspelled or missing.");
         }
         ShowFatalError(state, "Python class import error causes program termination");
     }
-    if (!PyCallable_Check(pClass)) {
+    if (PyCallable_Check(pClass) == 0) {
         ShowSevereError(state, format("Got class type \"{}\", but it cannot be called/instantiated", className));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "Is it possible the class name is actually just a variable?");
@@ -876,9 +876,9 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     }
     this->pClassInstance = PyObject_CallObject(pClass, nullptr);
     // Py_DECREF(pClass);  // PyDict_GetItemString returns a borrowed reference, DO NOT decrement
-    if (!this->pClassInstance) {
+    if (this->pClassInstance == nullptr) {
         ShowSevereError(state, format("Something went awry calling class constructor for class \"{}\"", className));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "It is possible the plugin class constructor takes extra arguments - it shouldn't.");
@@ -893,11 +893,11 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     // check which methods are overridden in the derived class
     std::string const detectOverriddenFunctionName = "_detect_overridden";
     PyObject *detectFunction = PyObject_GetAttrString(this->pClassInstance, detectOverriddenFunctionName.c_str());
-    if (!detectFunction || !PyCallable_Check(detectFunction)) {
+    if ((detectFunction == nullptr) || (PyCallable_Check(detectFunction) == 0)) {
         ShowSevereError(
             state,
             format(R"(Could not find or call function "{}" on class "{:g}.{}")", detectOverriddenFunctionName, this->modulePath, this->className));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "This function should be available on the base class, so this is strange.");
@@ -906,9 +906,9 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     }
     PyObject *pFunctionResponse = PyObject_CallFunction(detectFunction, nullptr);
     Py_DECREF(detectFunction); // PyObject_GetAttrString returns a new reference, decrement it
-    if (!pFunctionResponse) {
+    if (pFunctionResponse == nullptr) {
         ShowSevereError(state, format("Call to _detect_overridden() on {} failed!", this->stringIdentifier));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "This is available on the base class and should not be overridden...strange.");
@@ -1153,7 +1153,7 @@ bool PluginInstance::run(EnergyPlusData &state, EMSManager::EMSCallFrom iCalledF
     }
 
     // leave if we didn't find a match
-    if (!pFunctionName) {
+    if (pFunctionName == nullptr) {
         return false;
     }
 
@@ -1165,10 +1165,10 @@ bool PluginInstance::run(EnergyPlusData &state, EMSManager::EMSCallFrom iCalledF
     PyObject *pStateInstance = PyLong_FromVoidPtr(&state);
     PyObject *pFunctionResponse = PyObject_CallMethodObjArgs(this->pClassInstance, pFunctionName, pStateInstance, nullptr);
     Py_DECREF(pStateInstance);
-    if (!pFunctionResponse) {
+    if (pFunctionResponse == nullptr) {
         std::string const functionNameAsString(functionName); // only convert to string if an error occurs
         ShowSevereError(state, format("Call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             reportPythonError(state);
         } else {
             ShowContinueError(state, "This could happen for any number of reasons, check the plugin code.");
@@ -1244,7 +1244,7 @@ void PluginManager::addToPythonPath(EnergyPlusData &state, const fs::path &inclu
     Py_DECREF(unicodeIncludePath);
 
     if (ret != 0) {
-        if (PyErr_Occurred()) {
+        if (PyErr_Occurred() != nullptr) {
             PluginInstance::reportPythonError(state);
         }
         ShowFatalError(state, format("ERROR adding \"{:g}\" to the sys.path in Python", includePath));

@@ -979,21 +979,30 @@ if(LINK_WITH_PYTHON)
               ${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake)
   endif()
 
+  # Note for future readers as this gets extremely confusing to write (and read).
+  # The bottom line is that you should inspect the resulting `build/src/cmake_install.cmake` to see what's the resulting command and ensure that is correctly quoted and evaluated
+  # Couple of pointers:
+  # - `${VAR}` evaluates at *configure* time
+  # - `\${VAR}` writes `${VAR}` verbatim, so that will be evaluated at *install* time
+  #     - `\${CMAKE_COMMAND}` writes `${CMAKE_COMMAND}` verbatim, and I'm not doing `\"\${CMAKE_COMMAND}\"` because this is a single list argument and CMake will handle quoting appropriately already
+  #     - We do want `CMAKE_INSTALL_PREFIX` evaluated at install time
+  # - I'm using `\"-DXXX=${VAR}\"` so that this single argument is definitely properly quoted in the resulting cmake_install.cmake even if there is a space in the value after -DXXX
+  #     - eg: if RESOLVED_PYTHON_LIBRARY is `/path/to python/python.lib`, it becomes `"-DRESOLVED_PYTHON_LIB=/path/to python/python.lib"` which will be passed as single argument to the operating system which is what we want
   install(
     CODE "execute_process(
-      COMMAND ${CMAKE_COMMAND}
-      -DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}
-      -DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}
-      -P ${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake
+      COMMAND \${CMAKE_COMMAND}
+      \"-DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}\"
+      \"-DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}\"
+      -P \"${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake\"
     )")
   if(APPLE)
     install(
       CODE "execute_process(
-        COMMAND ${CMAKE_COMMAND}
-        -DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}
+        COMMAND \${CMAKE_COMMAND}
+        \"-DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}\"
         -DEPLUS_DYNAMIC_LIB_NAME=libenergyplusapi.${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}.dylib
-        -DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}
-        -P ${PROJECT_SOURCE_DIR}/cmake/PythonFixUpOnMac.cmake
+        \"-DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}\"
+        -P \"${PROJECT_SOURCE_DIR}/cmake/PythonFixUpOnMac.cmake\"
       )")
   endif()
   # along with the python standard lib

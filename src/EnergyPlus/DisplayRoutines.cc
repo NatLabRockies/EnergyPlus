@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,7 +74,7 @@ void DisplayString(EnergyPlusData &state, std::string const &String) // String t
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     // na
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(String);
     }
     if (state.dataGlobal->messageCallback) {
@@ -102,7 +102,7 @@ void DisplayString(EnergyPlusData &state, char const *String) // String to be di
     // PURPOSE OF THIS SUBROUTINE:
     // This subroutine provides a call to display strings during program execution.
 
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(String);
     }
     if (state.dataGlobal->messageCallback) {
@@ -140,7 +140,7 @@ void DisplayNumberAndString(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     std::stringstream sstm;
     sstm << String << ' ' << Number;
-    if (state.dataGlobal->fMessagePtr) {
+    if (state.dataGlobal->fMessagePtr != nullptr) {
         state.dataGlobal->fMessagePtr(sstm.str());
     }
     if (state.dataGlobal->messageCallback) {
@@ -185,7 +185,7 @@ void DisplaySimDaysProgress(EnergyPlusData &state,
         percent = 0;
     }
 
-    if (state.dataGlobal->fProgressPtr) {
+    if (state.dataGlobal->fProgressPtr != nullptr) {
         state.dataGlobal->fProgressPtr(percent);
     }
     if (state.dataGlobal->progressCallback) {

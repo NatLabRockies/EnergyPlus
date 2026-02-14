@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -64,7 +64,7 @@ class AverageZoneTempAndTests(EnergyPlusPlugin):
 
     @staticmethod
     def hpac_cool_plf_f_plr_curve(x: float) -> float:
-        y = 0.75 + 0.25 * x + 0.0 * x ** 2
+        y = 0.75 + 0.25 * x + 0.0 * x**2
         y = max(0.0, y)
         y = min(1.0, y)
         return y
@@ -73,14 +73,16 @@ class AverageZoneTempAndTests(EnergyPlusPlugin):
         if not self.api.exchange.api_data_fully_ready(state):
             return 0
         if self.do_setup:
-            self.data['h_zone_temp_var'] = self.api.exchange.get_global_handle(state, 'AverageZoneTemp')
-            self.data['h_zone_temp_running_avg'] = self.api.exchange.get_global_handle(state, 'RunningAveragedZoneTemp')
+            self.data["h_zone_temp_var"] = self.api.exchange.get_global_handle(state, "AverageZoneTemp")
+            self.data["h_zone_temp_running_avg"] = self.api.exchange.get_global_handle(state, "RunningAveragedZoneTemp")
             self.data["h_trend"] = self.api.exchange.get_trend_handle(state, "ZoneTempTrend")
-            self.data['h_zone_temp'] = self.api.exchange.get_variable_handle(state, 'Zone Mean Air Temperature', 'Core_ZN')
-            self.data['count'] = 0
+            self.data["h_zone_temp"] = self.api.exchange.get_variable_handle(
+                state, "Zone Mean Air Temperature", "Core_ZN"
+            )
+            self.data["count"] = 0
             self.do_setup = False
         current_zone_temp = self.api.exchange.get_variable_value(state, self.data["h_zone_temp"])
-        self.api.exchange.set_global_value(state, self.data['h_zone_temp_var'], current_zone_temp)
+        self.api.exchange.set_global_value(state, self.data["h_zone_temp_var"], current_zone_temp)
 
         if not self.do_trend_tests(state):
             return 1
@@ -95,15 +97,15 @@ class AverageZoneTempAndTests(EnergyPlusPlugin):
     def do_trend_tests(self, state) -> bool:
         trend_avg = self.api.exchange.get_trend_average(state, self.data["h_trend"], 5)
         print("Trend average: " + str(trend_avg))
-        self.api.exchange.set_global_value(state, self.data['h_zone_temp_running_avg'], trend_avg)
+        self.api.exchange.set_global_value(state, self.data["h_zone_temp_running_avg"], trend_avg)
         try:
             trend_min = self.api.exchange.get_trend_min(state, self.data["h_trend"], 5)
             print("Trend min: " + str(trend_min))
-            trend_max = self.api.exchange.get_trend_max(state, self.data['h_trend'], 5)
+            trend_max = self.api.exchange.get_trend_max(state, self.data["h_trend"], 5)
             print("Trend max: " + str(trend_max))
             trend_sum = self.api.exchange.get_trend_sum(state, self.data["h_trend"], 5)
             print("Trend sum: " + str(trend_sum))
-            trend_direction = self.api.exchange.get_trend_direction(state, self.data['h_trend'], 5)
+            trend_direction = self.api.exchange.get_trend_direction(state, self.data["h_trend"], 5)
             print("Trend direction: " + str(trend_direction))
         except:
             self.api.runtime.issue_severe(state, "Problem getting trend min/max values, aborting")
@@ -112,7 +114,7 @@ class AverageZoneTempAndTests(EnergyPlusPlugin):
             self.api.runtime.issue_severe(state, "Trend problem, min greater than max, aborting")
             return False
         elif trend_min > trend_avg:
-            self.api.runtime.issue_severe(state, 'Trend problem, min greater than average, aborting')
+            self.api.runtime.issue_severe(state, "Trend problem, min greater than average, aborting")
             return False
         return True
         # EnergyManagementSystem:Subroutine,
@@ -183,7 +185,7 @@ class AverageZoneTempAndTests(EnergyPlusPlugin):
         return True
 
     def kill_run_later(self) -> bool:
-        self.data['count'] += 1
-        if self.data['count'] > 8:
+        self.data["count"] += 1
+        if self.data["count"] > 8:
             return False
         return True

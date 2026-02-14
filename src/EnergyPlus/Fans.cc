@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2502,13 +2502,13 @@ Real64 FanComponent::getDesignHeatGain(EnergyPlusData &state,
         Real64 _motorInAirFrac = motorInAirFrac;
         Real64 _powerTot = (_volFlow * _deltaP) / _totalEff;
         return _motorEff * _powerTot + (_powerTot - _motorEff * _powerTot) * _motorInAirFrac;
-    } else {
-        if (!state.dataGlobal->SysSizingCalc && sizingFlag) {
-            set_size(state);
-            sizingFlag = false;
-        }
-        return shaftPower + (motorInputPower - shaftPower) * motorInAirFrac;
     }
+    if (!state.dataGlobal->SysSizingCalc && sizingFlag) {
+        set_size(state);
+        sizingFlag = false;
+    }
+    return shaftPower + (motorInputPower - shaftPower) * motorInAirFrac;
+
 } // FanComponent::getDesignHeatGain()
 
 void FanComponent::getInputsForDesignHeatGain(EnergyPlusData &state,
@@ -3153,11 +3153,9 @@ Real64 FanSystem::getDesignTemperatureRise(EnergyPlusData &state) const
     if (!sizingFlag) {
         Real64 _cpAir = Psychrometrics::PsyCpAirFnW(DataPrecisionGlobals::constant_zero);
         return (deltaPress / (rhoAirStdInit * _cpAir * totalEff)) * (motorEff + motorInAirFrac * (1.0 - motorEff));
-    } else {
-        // TODO throw warning, exception, call sizing?
-        ShowWarningError(state, "FanSystem::getDesignTemperatureRise called before fan sizing completed ");
-        return 0.0;
-    }
+    } // TODO throw warning, exception, call sizing?
+    ShowWarningError(state, "FanSystem::getDesignTemperatureRise called before fan sizing completed ");
+    return 0.0;
 }
 
 Real64 FanSystem::getDesignHeatGain(EnergyPlusData &state, Real64 const _volFlow // fan volume flow rate [m3/s]

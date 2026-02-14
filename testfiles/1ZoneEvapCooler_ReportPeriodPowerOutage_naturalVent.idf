@@ -36,7 +36,7 @@
 ! Floor Area:              232.25 m2
 ! Number of Stories:       1
 
-  Version,25.2;
+  Version,26.1;
 
   Timestep,6;
 

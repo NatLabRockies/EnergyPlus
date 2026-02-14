@@ -11,7 +11,7 @@ This will eventually become a more structured file, but currently it isn't clear
 
 A new column "Fan Energy Index" has been added to the Equipment Summary:Fans report
 
-See [6812](https://github.com/NREL/EnergyPlus/pull/6812)
+See [6812](https://github.com/NatLabRockies/EnergyPlus/pull/6812)
 
 ### Corrected EIO output of Advanced Single-Sided Natural Ventilation Wind Angles
 
@@ -31,4 +31,4 @@ Environment,RUNPERIOD 1,WeatherFileRunPeriod,01/01/2019,12/31/2019,Tuesday,365,U
 ```
 
 
-See [6478](https://github.com/NREL/EnergyPlus/pull/6478)
+See [6478](https://github.com/NatLabRockies/EnergyPlus/pull/6478)

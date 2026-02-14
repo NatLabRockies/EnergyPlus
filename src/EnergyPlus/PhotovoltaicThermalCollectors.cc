@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -197,11 +197,10 @@ namespace PhotovoltaicThermalCollectors {
 
         static constexpr std::string_view routineName = "GetPVTSimpleCollectorsInput";
 
-        int Item;                // Item to be "gotten"
-        int NumAlphas;           // Number of Alphas for each GetObjectItem call
-        int NumNumbers;          // Number of Numbers for each GetObjectItem call
-        int IOStatus;            // Used in GetObjectItem
-        bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
+        int Item;       // Item to be "gotten"
+        int NumAlphas;  // Number of Alphas for each GetObjectItem call
+        int NumNumbers; // Number of Numbers for each GetObjectItem call
+        int IOStatus;   // Used in GetObjectItem
 
         tmpSimplePVTperf.allocate(NumSimplePVTPerform);
         for (Item = 1; Item <= NumSimplePVTPerform; ++Item) {
@@ -230,10 +229,8 @@ namespace PhotovoltaicThermalCollectors {
             if (thisTmpSimplePVTperf.ThermEfficMode == ThermEfficEnum::SCHEDULED) {
                 if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
                     ShowSevereEmptyField(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3));
-                    ErrorsFound = true;
                 } else if ((thisTmpSimplePVTperf.thermEffSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(3))) == nullptr) {
                     ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3));
-                    ErrorsFound = true;
                 }
             }
             thisTmpSimplePVTperf.SurfEmissivity = state.dataIPShortCut->rNumericArgs(3);

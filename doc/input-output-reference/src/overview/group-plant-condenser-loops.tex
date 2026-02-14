@@ -131,17 +131,6 @@ This field specifies the time it takes the fluid to circulate through the entire
 
 An example of this statement used in an IDF is:
 
-\paragraph{Field: Water Loop Type}\label{plantloop-field-loop-water-loop-type}
-
-This field is added in Version 25.2.
-It specifies whether the loop is a hot water loop or a chilled water loop. This field is applicable when a HeatPump:AirToWater object is connected to the plant loop.
-
-\begin{itemize}
-\item If no HeatPump:AirToWater is connected, leave this field blank.
-\item If the HeatPump's hot water inlet and hot water outlet nodes are connected to the plant loop, set Water Loop Type to ``HotWater''.
-\item If the HeatPump's chilled water inlet and chilled water outlet nodes are connected to the plant loop, set Water Loop Type to ``ChilledWater''.
-\end{itemize}
-
 \begin{lstlisting}
 PlantLoop,
   Hot Water Loop,             !- Plant Loop Name

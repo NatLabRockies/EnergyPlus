@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -224,7 +224,6 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
     bool ErrorsFound(false);
     int NumAlphas;        // Number of elements in the alpha array
     int NumNums;          // Number of elements in the numeric array
-    int IOStat;           // IO Status when calling get input subroutine
     int MaxNumAlphas(0);  // argument for call to GetObjectDefMaxArgs
     int MaxNumNumbers(0); // argument for call to GetObjectDefMaxArgs
     int TotalArgs(0);     // argument for call to GetObjectDefMaxArgs
@@ -256,6 +255,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
 
     if (state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs > 0) {
         state.dataPlantHXFluidToFluid->FluidHX.allocate(state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs);
+        int IOStat; // IO Status when calling get input subroutine
         for (int CompLoop = 1; CompLoop <= state.dataPlantHXFluidToFluid->NumberOfPlantFluidHXs; ++CompLoop) {
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      cCurrentModuleObject,
@@ -467,7 +467,7 @@ void GetFluidHeatExchangerInput(EnergyPlusData &state)
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRejection;
             } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForCooling;
-            } else if (endUseCat == "HEATRECOVERYFORCOOLING") {
+            } else if (endUseCat == "HEATRECOVERYFORHEATING") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::HeatRecoveryForHeating;
             } else if (endUseCat == "LOOPTOLOOP") {
                 state.dataPlantHXFluidToFluid->FluidHX(CompLoop).HeatTransferMeteringEndUse = OutputProcessor::EndUseCat::LoopToLoop;
@@ -2026,8 +2026,8 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
     auto &supplyCoilData = state.dataPlnt->PlantLoop(this->SupplySideLoop.loopNum).compDesWaterFlowRate;
     std::vector<Real64> supplyFlowData;
     supplyFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
-    for (size_t i = 0; i < supplyFlowData.size(); ++i) {
-        supplyFlowData[i] = 0.0;
+    for (double &i : supplyFlowData) {
+        i = 0.0;
     }
     if (supplyCompSize > 0) {
         for (size_t comp = 0; comp < supplyCoilData.size(); ++comp) {
@@ -2054,8 +2054,8 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
         // if the supply side of the HX contains a TES system then copy demand side coil data to supply side so TES can size on the whole load
         std::vector<Real64> demandFlowData;
         demandFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
-        for (size_t i = 0; i < demandFlowData.size(); ++i) {
-            demandFlowData[i] = 0.0;
+        for (double &i : demandFlowData) {
+            i = 0.0;
         }
         if (demandCompSize > 0) {
             for (size_t comp = 0; comp < demandCoilData.size(); ++comp) {

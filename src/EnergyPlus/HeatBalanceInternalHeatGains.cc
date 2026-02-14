@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -154,40 +154,49 @@ void SetupSpaceInternalGain(EnergyPlusData &state,
 
     thisIntGain.device(thisIntGain.numberOfDevices).CompObjectName = UpperCaseObjectName;
     thisIntGain.device(thisIntGain.numberOfDevices).CompType = IntGainCompType;
+
+    // Tank losses should be distributed across multiplied zones/spaces - adjust the space gain fraction to account for this
+    if (std::find(AdjustTankLossMultipliers.begin(), AdjustTankLossMultipliers.end(), IntGainCompType) != AdjustTankLossMultipliers.end()) {
+        const int zoneNum = state.dataHeatBal->space(spaceNum).zoneNum;
+        const int multiplier = state.dataHeatBal->Zone(zoneNum).Multiplier * state.dataHeatBal->Zone(zoneNum).ListMultiplier;
+        if (multiplier > 1) {
+            spaceGainFraction /= multiplier;
+        }
+    }
     thisIntGain.device(thisIntGain.numberOfDevices).spaceGainFrac = spaceGainFraction;
 
     // note pointer assignments in code below!
-    if (ConvectionGainRate) {
+    if (ConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = ConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirConvectionGainRate) {
+    if (ReturnAirConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = ReturnAirConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ThermalRadiationGainRate) {
+    if (ThermalRadiationGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = ThermalRadiationGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (LatentGainRate) {
+    if (LatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = LatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirLatentGainRate) {
+    if (ReturnAirLatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = ReturnAirLatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (CarbonDioxideGainRate) {
+    if (CarbonDioxideGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = CarbonDioxideGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (GenericContamGainRate) {
+    if (GenericContamGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = GenericContamGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = &state.dataHeatBal->zeroPointerVal;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -530,26 +530,26 @@ struct ScheduleManagerData : BaseGlobalStruct
         ScheduleInputProcessed = false;
         ScheduleFileShadingProcessed = false;
 
-        for (int i = 0; i < (int)scheduleTypes.size(); ++i) {
-            delete scheduleTypes[i];
+        for (auto &scheduleType : scheduleTypes) {
+            delete scheduleType;
         }
         scheduleTypes.clear(); // Allowed Schedule Types
         scheduleTypeMap.clear();
 
-        for (int i = 0; i < (int)schedules.size(); ++i) {
-            delete schedules[i];
+        for (auto &schedule : schedules) {
+            delete schedule;
         }
         schedules.clear(); // Schedule Storage
         scheduleMap.clear();
 
-        for (int i = 0; i < (int)daySchedules.size(); ++i) {
-            delete daySchedules[i];
+        for (auto &daySchedule : daySchedules) {
+            delete daySchedule;
         }
         daySchedules.clear();
         dayScheduleMap.clear();
 
-        for (int i = 0; i < (int)weekSchedules.size(); ++i) {
-            delete weekSchedules[i];
+        for (auto &weekSchedule : weekSchedules) {
+            delete weekSchedule;
         }
         weekSchedules.clear();
         weekScheduleMap.clear();

@@ -18,7 +18,7 @@ Allow Multiple Air Loops to One Thermal Zone
  - January 5, 2017 - Final Design
  - January 6, 2017 - Document additional review comments
  - January 11 and later - As-built comments
- 
+
 *Reviewers - Hong, Griffith, Gu, Buhl, Raustad, Horowitz, Merket, Winkler, Scheier, Lee
 
 ## Table of Contents ##
@@ -51,11 +51,11 @@ The current limitation of one airloop (any system built using the `AirloopHVAC` 
 2. Model the space-conditioning equipment as an airloop and the DOAS as zone HVAC equipment (`ZoneHVAC:OutdoorAirUnit`).
 3. Model the DOAS and the space-conditioning equipment as a dual-duct airloop where one deck is the DOAS side and the other deck is the space-conditioning side. (`AirTerminal:DualDuct:VAV:OutdoorAir`).
 
-All of the current workarounds have limitations and none of them reflect the layout of the real systems.  
+All of the current workarounds have limitations and none of them reflect the layout of the real systems.
 
 Recently, the NREL Residential Group and a consultant for NRCan (Natural Resources Canada) asked how to model this common residential application:
 
-> The configuration in question is one where zone air is re-circulated through a furnace while a DOAS, generally including a HRV/ERV, handles ventilation.  So the conditioning and ventilation loops operate in parallel.   The furnace coil must be centralized to be able to impose a capacity and calculate part-load factors: so re-heating coils are also not acceptable.  
+> The configuration in question is one where zone air is re-circulated through a furnace while a DOAS, generally including a HRV/ERV, handles ventilation.  So the conditioning and ventilation loops operate in parallel.   The furnace coil must be centralized to be able to impose a capacity and calculate part-load factors: so re-heating coils are also not acceptable.
 
 None of the available workarounds will model both systems correctly. In this particular case, one solution would be to build on #3 above with a new terminal unit that has heating and cooling capability on the VAV side.  The other solution is to use #2, but this raises issues of the HRV/ERV efficiency and defrost operation as well as fan power.
 
@@ -118,7 +118,7 @@ The return air flow will be allocated as follows, similar to the current return 
   - Step 2 - Calculate remaining unallocated return air flow for each zone (*modified step*)
       - UnallocatedReturn = TotalSupply - UnbalancedExhaust - KnownReturnFlows
   - Step 3 - Set remaining return node flows (*new step*)
-      - Set remaining return node flows proportional to the supply flow to that zone from the corresponding airloop.  
+      - Set remaining return node flows proportional to the supply flow to that zone from the corresponding airloop.
       - For example, if Zone 1 is supplied with 0.8 m3/s from Air Loop A and 0.2 m3/s from Air Loop B, then allocate 80% of the remaining return flow to the return air node connected to Loop A and 20% to Loop B.
   - Step 4 - Allocate unbalanced exhaust air flows to each air loop (*modified step*)
       - For a given zone, the unbalanced exhaust air flow is distributed to any air loop that has an outdoor air system in proportion to the loop's supply flow to that zone. Air systems without an outdoor air inlet are excluded.
@@ -138,7 +138,7 @@ The present sizing inputs apply a single `Sizing:Zone` object to a given zone to
 
 ZoneHVAC:* equipment (such as fan coils or PTACs) can reference a `DesignSpecification:ZoneHVAC:Sizing` object to customize the sizing for a given ZoneHVAC unit.  A similar approach is proposed for air terminal units.
 
-A new object named `DesignSpecification:AirTerminal:Sizing` will be added to allow specification of any required differences from the base Sizing:Zone specifications. 
+A new object named `DesignSpecification:AirTerminal:Sizing` will be added to allow specification of any required differences from the base Sizing:Zone specifications.
 
 A new optional field will be added at the end of the `ZoneHVAC:AirDistributionUnit` and `AirTerminal:SingleDuct:Uncontrolled` objects to reference a `DesignSpecification:AirTerminal:Sizing` object as needed.
 
@@ -199,7 +199,7 @@ This field specifies the design air loop return air flow as a fraction of the su
 
 ### New Object: DesignSpecification:AirTerminal:Sizing###
 
-This object modifies the sizing of a given terminal unit given the base sizing results from the corresponding `Sizing:Zone` inputs. Any given `DesignSpecification:AirTerminal:Sizing` object is generic and may be used by multiple terminal units with similar characteristics. 
+This object modifies the sizing of a given terminal unit given the base sizing results from the corresponding `Sizing:Zone` inputs. Any given `DesignSpecification:AirTerminal:Sizing` object is generic and may be used by multiple terminal units with similar characteristics.
 
 
 *Name*
@@ -273,7 +273,7 @@ Recirculation terminal unit flow rate = Max(0.06375, 0.0) = 0.06375 [m3/s]
 
 ### Modified Objects: `ZoneHVAC:AirDistributionUnit` and `AirTerminal:SingleDuct:Uncontrolled` ###
 
-In the `ZoneHVAC:AirDistributionUnit` and `AirTerminal:SingleDuct:Uncontrolled` objects, add the following field at the end of the object. (At some point in the future, plan to address [#4988](https://github.com/NREL/EnergyPlus/issues/4988) which would create a new AirTerminal:SingleDuct:ConstantVolume:NoReheat that sits inside an ADU just like all the other terminal units.)
+In the `ZoneHVAC:AirDistributionUnit` and `AirTerminal:SingleDuct:Uncontrolled` objects, add the following field at the end of the object. (At some point in the future, plan to address [#4988](https://github.com/NatLabRockies/EnergyPlus/issues/4988) which would create a new AirTerminal:SingleDuct:ConstantVolume:NoReheat that sits inside an ADU just like all the other terminal units.)
 
 *New field:  Design Specification Air Terminal Sizing Name*
 
@@ -336,7 +336,7 @@ Name of the return air node for this airflow window if the Airflow Destination i
 
 ### Outputs Description ##
 
-Existing output variables for "Zone Air Terminal * " and "Air System * " should provide details about each airloop.  For other types of zone equipment, outputs are available by type of equipment, such as "Fan Coil * " and "Zone Radiant HVAC * ". It would be useful to have a general set of output variables that report the contribution of each piece of zone equipment, regardless of type.  
+Existing output variables for "Zone Air Terminal * " and "Air System * " should provide details about each airloop.  For other types of zone equipment, outputs are available by type of equipment, such as "Fan Coil * " and "Zone Radiant HVAC * ". It would be useful to have a general set of output variables that report the contribution of each piece of zone equipment, regardless of type.
 
 
 ## Engineering Reference ##
@@ -373,9 +373,9 @@ New example files will be made to show various combinations of systems.
 10/31 - Scheier - The proposed DesignSpecification:AirTerminal:Sizing object contains many fields that currently exist on some AirTerminal objects, but not others.
 
 1. Should users expect the new fields to be used solely for sizing the AT or will some also have an effect on the HVAC simulation? For example, for VAV AT's, will the "
-2. 
-3. 
-4. 
+2.
+3.
+4.
 5.  Spec OA Object Name" field on the new DesignSpecification:AirTerminal:Sizing object have an effect on the HVAC simulation of minimum airflow as is now done for the AT:SingleDuct:VAV:NoReheat and AT:SingleDuct:VAV:Reheat objects?
 
 	*MJW 1. Good point - I didn't think about those overlaps.  The intent of the proposal was that the new sizing object would work the same way that `Sizing:Zone` currently works - just for sizing.  Maybe a better solution is to allow generic `Sizing:Zone` objects that aren't linked to a specific zone?  Or to shorten the proposed new object to be exactly like `Sizing:Zone`.*
@@ -398,7 +398,7 @@ New example files will be made to show various combinations of systems.
 
 11/9 - Sizing Group Conference Call
 
-1. Try to minimize the size of the new DesignSpecification:AirTerminal:Sizing object.  Think in terms of only what might be different from the base Sizing:Zone inputs.  Fields such as VentilationRequirement, Do/Don't use OA specifications, 
+1. Try to minimize the size of the new DesignSpecification:AirTerminal:Sizing object.  Think in terms of only what might be different from the base Sizing:Zone inputs.  Fields such as VentilationRequirement, Do/Don't use OA specifications,
 
 ## Design ##
 ### 1. Remove error checks on number of air terminals in a zone ###
@@ -488,14 +488,14 @@ In struct `SurfaceWindowCalc` (WindowProperty:AirflowControl object)
 In struct `EquipConfiguration`
 *2/20/2017 - done*
 
- - Add `bool ZoneHasAirFlowWindowReturn` to avoid [looping over every zone surface](https://github.com/NREL/EnergyPlus/blob/2592ba992c6cba84395eef038be8d3a049304067/src/EnergyPlus/ZoneEquipmentManager.cc#L4178-L4183) every iteration in `ZoneEquipmentManager::CalcZoneLeavingConditions`
+ - Add `bool ZoneHasAirFlowWindowReturn` to avoid [looping over every zone surface](https://github.com/NatLabRockies/EnergyPlus/blob/2592ba992c6cba84395eef038be8d3a049304067/src/EnergyPlus/ZoneEquipmentManager.cc#L4178-L4183) every iteration in `ZoneEquipmentManager::CalcZoneLeavingConditions`
  - ~Possibly add an array of just the airflow window surface numbers to avoid looping over all the surfaces in the zone even when there *is* an airflow window~
 
 #### ZoneEquipmentManager::CalcZoneLeavingConditions ####
 
  - **NOT DONE** Do some minor reorganization
  - *Done* Add a for loop over all the return nodes in the zone
- - *Done* Add an if on `ZoneHasAirFlowWindow` to skip the for [loop over all the surfaces](https://github.com/NREL/EnergyPlus/blob/2592ba992c6cba84395eef038be8d3a049304067/src/EnergyPlus/ZoneEquipmentManager.cc#L4178-L4183) just to look for an airflow window
+ - *Done* Add an if on `ZoneHasAirFlowWindow` to skip the for [loop over all the surfaces](https://github.com/NatLabRockies/EnergyPlus/blob/2592ba992c6cba84395eef038be8d3a049304067/src/EnergyPlus/ZoneEquipmentManager.cc#L4178-L4183) just to look for an airflow window
  - *Done* Add a new argument `ReturnNodeNum` to `InternalHeatGains::SumAllReturnAirConvectionGains` to allocate gains for a specific return air node
  - *Done* Also add `ReturnAirNodeNum` optional argument to `HeatBalanceInternalHeatGains::SetupZoneInternalGain` - this only applies to Lights, because refrigerated case and airflow windows don't use this system for internal gains?
  - *Done* Add a new field for `ReturnNodeName` to struct `GenericComponentZoneIntGainStruct` in `DataHeatBalance`.
@@ -509,7 +509,7 @@ In struct `EquipConfiguration`
 
 
 ### 6. Revise other places that assume a single airloop is associated with a zone
-Searching on `.ReturnAirNode` and `.AirLoopNum` shows relevant hits in: 
+Searching on `.ReturnAirNode` and `.AirLoopNum` shows relevant hits in:
 
  - AirflowNetworkBalanceManager.cc
  - DualDuct.cc
@@ -572,7 +572,7 @@ Searching on `.ReturnAirNode` and `.AirLoopNum` shows relevant hits in:
 *Hmmm* `TermUnitSizing` isn't filled for everyone, only some parts are used for certain type of terminal units. Ones that currently don't rely on that don't fill it. But that may be ok.  The important info ends up in `TermUnitFinalZoneSizing`.
 
 - *Done* Change `TermUnitSizing` and `TermUnitFinalZoneSizing` to be indexed separately, not by zone.
-  - *If this proves to be too intrusive or risky, consider adding yet another array that is indexed by ADU.* 
+  - *If this proves to be too intrusive or risky, consider adding yet another array that is indexed by ADU.*
 - *Done* Expand `TermUnitSizing` to include pertinent inputs from a referenced `DesignSpecification:AirTerminal:Sizing` object. These fields will default to 1.0 if there is no `DesignSpecification:AirTerminal:Sizing` object for a given ADU.
 - *Done* In `UpdateSysSizing`, change some things that are indexed by CtrlZoneNum (or equivalent) to be indexed by terminal unit sizing index.
 - *Done* Add two arrays to `DataAirloop::AirLoopZoneEquipConnectData`
@@ -580,7 +580,7 @@ Searching on `.ReturnAirNode` and `.AirLoopNum` shows relevant hits in:
   - `Array1D_int TermUnitHeatSizingIndex`
   - These get filled in `SimAirServingZones::InitAirLoops`
 - *Done* Wherever sizing calculations are made in the ~~terminal unit~~ system sizing routines and ~~in `RequestSizing`~~ and when filling `TermUnitFinalZoneSizing`, apply the input factors from `DesignSpecification:AirTerminal:Sizing` which are stored in `TermUnitSizing`.
- 
+
 
 ### 8. Allow an airloop with no return path *(if budget allows)*
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -175,8 +175,6 @@ namespace BaseboardElectric {
         int constexpr iHeatFracOfAutosizedCapacityNumericNum(
             3); //  get input index to baseboard heating capacity sizing as fraction of autosized heating capacity
 
-        auto &s_ipsc = state.dataIPShortCut;
-
         auto &baseboard = state.dataBaseboardElectric;
         std::string_view cCurrentModuleObject = cCMO_BBRadiator_Electric;
 
@@ -190,8 +188,8 @@ namespace BaseboardElectric {
             int NumNums = 0;
             int IOStat = 0;
             int BaseboardNum = 0;
+            auto &s_ipsc = state.dataIPShortCut;
             for (int ConvElecBBNum = 1; ConvElecBBNum <= NumConvElecBaseboards; ++ConvElecBBNum) {
-
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                          cCurrentModuleObject,
                                                                          ConvElecBBNum,
@@ -205,9 +203,7 @@ namespace BaseboardElectric {
                                                                          s_ipsc->cAlphaFieldNames,
                                                                          s_ipsc->cNumericFieldNames);
 
-                baseboard->baseboards(ConvElecBBNum).FieldNames.allocate(NumNums);
-                baseboard->baseboards(ConvElecBBNum).FieldNames = "";
-                baseboard->baseboards(ConvElecBBNum).FieldNames = s_ipsc->cNumericFieldNames;
+                baseboard->baseboards(ConvElecBBNum).FieldNames.assign(s_ipsc->cNumericFieldNames.begin(), s_ipsc->cNumericFieldNames.end());
 
                 ErrorObjectHeader eoh{routineName, cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
@@ -425,7 +421,7 @@ namespace BaseboardElectric {
             state.dataSize->DataZoneNumber = baseboard.ZonePtr;
             int SizingMethod = HVAC::HeatingCapacitySizing;
             int FieldNum = 1;
-            std::string const SizingString = format("{} [W]", baseboard.FieldNames(FieldNum));
+            std::string const SizingString = format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
             int CapSizingMethod = baseboard.HeatingCapMethod;
             ZoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
             if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

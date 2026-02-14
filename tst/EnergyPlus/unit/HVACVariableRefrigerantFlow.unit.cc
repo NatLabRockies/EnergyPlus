@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2666,7 +2666,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_VRFOU_Compressor)
             thisVRF.RatedEvapCapacity * CurveValue(*state, thisVRF.OUCoolingCAPFT(1), thisVRF.CondensingTemp, thisVRF.EvaporatingTemp);
         Real64 CompEvaporatingPWRSpdMin =
             thisVRF.RatedCompPower * CurveValue(*state, thisVRF.OUCoolingPWRFT(1), thisVRF.CondensingTemp, thisVRF.EvaporatingTemp);
-        EXPECT_NEAR(0.36, CyclingRatio, 0.01);
+        EXPECT_NEAR(0.37, CyclingRatio, 0.01);
         EXPECT_NEAR(OUEvapHeatExtract, CompEvaporatingCAPSpdMin + Ncomp, 1e-4);
         EXPECT_NEAR(1500, CompSpdActual, 1);
         EXPECT_NEAR(Ncomp, CompEvaporatingPWRSpdMin, 1e-4);
@@ -13344,7 +13344,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_ReportOutputVerificationTest)
     EXPECT_NEAR(5645.5696, thisVRFTU.TotalCoolingRate, 0.0001);
     EXPECT_NEAR(84.8359, thisFan->totalPower, 0.0001);
     EXPECT_NEAR(thisDXCoolingCoil.TotalCoolingEnergyRate, (thisVRFTU.TotalCoolingRate + thisFan->totalPower), 0.0001);
-    EXPECT_NEAR(0.4772, state->dataHVACVarRefFlow->VRF(1).VRFCondCyclingRatio, 0.0001);
+    EXPECT_NEAR(0.4851, state->dataHVACVarRefFlow->VRF(1).VRFCondCyclingRatio, 0.0001);
     EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(1).OUFanPower,
                 state->dataHVACVarRefFlow->VRF(1).RatedOUFanPower * state->dataHVACVarRefFlow->VRF(1).VRFCondCyclingRatio,
                 0.0001);

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -88,6 +88,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/PoweredInductionUnits.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/RoomAirModelAirflowNetwork.hh>
 #include <EnergyPlus/RoomAirModelManager.hh>
@@ -357,10 +358,10 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
             TStatObjects(Item).ZoneListActive = false;
             TStatObjects(Item).ZoneOrZoneListPtr = Item1;
         } else if (ZLItem > 0) {
-            auto const &ZoneList = state.dataHeatBal->ZoneList(ZLItem);
+            auto const &ZnItem = state.dataHeatBal->ZoneList(ZLItem);
             TStatObjects(Item).TempControlledZoneStartPtr = state.dataZoneCtrls->NumTempControlledZones + 1;
-            state.dataZoneCtrls->NumTempControlledZones += ZoneList.NumOfZones;
-            TStatObjects(Item).NumOfZones = ZoneList.NumOfZones;
+            state.dataZoneCtrls->NumTempControlledZones += ZnItem.NumOfZones;
+            TStatObjects(Item).NumOfZones = ZnItem.NumOfZones;
             TStatObjects(Item).ZoneListActive = true;
             TStatObjects(Item).ZoneOrZoneListPtr = ZLItem;
         } else {
@@ -429,12 +430,12 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                 if (!TStatObjects(Item).ZoneListActive) {
                     tempZone.Name = s_ipsc->cAlphaArgs(1);
                 } else {
-                    auto &ZoneList = state.dataHeatBal->ZoneList(TStatObjects(Item).ZoneOrZoneListPtr);
+                    auto &ZnList = state.dataHeatBal->ZoneList(TStatObjects(Item).ZoneOrZoneListPtr);
                     CheckCreatedZoneItemName(state,
                                              RoutineName,
                                              s_ipsc->cCurrentModuleObject,
-                                             Zone(ZoneList.Zone(Item1)).Name,
-                                             ZoneList.MaxZoneNameLength,
+                                             Zone(ZnList.Zone(Item1)).Name,
+                                             ZnList.MaxZoneNameLength,
                                              TStatObjects(Item).Name,
                                              state.dataZoneCtrls->TempControlledZone,
                                              TempControlledZoneNum - 1,
@@ -476,8 +477,9 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(spIdx));
                         ErrorsFound = true;
                         continue;
-                    } else if ((setptType = static_cast<HVAC::SetptType>(getEnumValue(setptTypeNamesUC, s_ipsc->cAlphaArgs(spIdx)))) ==
-                               HVAC::SetptType::Invalid) {
+                    }
+                    if ((setptType = static_cast<HVAC::SetptType>(getEnumValue(setptTypeNamesUC, s_ipsc->cAlphaArgs(spIdx)))) ==
+                        HVAC::SetptType::Invalid) {
                         ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(spIdx), s_ipsc->cAlphaArgs(spIdx));
                         ErrorsFound = true;
                         continue;
@@ -505,7 +507,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                     }
                 }
 
-                if (tempZone.DeltaTCutSet > 0.0 && tempZone.setpts[(int)HVAC::SetptType::SingleHeatCool].Name != "") {
+                if (tempZone.DeltaTCutSet > 0.0 && !tempZone.setpts[(int)HVAC::SetptType::SingleHeatCool].Name.empty()) {
                     ShowWarningError(state,
                                      format("{}=\"{}: The choice of Temperature Difference Between Cutout And Setpoint will not be applied "
                                             "to ThermostatSetpoint:SingleHeatingOrCooling.",
@@ -710,8 +712,8 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
     // Now, Check the schedule values/indices for validity
 
-    for (int TempControlledZoneNum = 1; TempControlledZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TempControlledZoneNum) {
-        auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
+    for (int TempCtrlZoneNum = 1; TempCtrlZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TempCtrlZoneNum) {
+        auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempCtrlZoneNum);
 
         if (tempZone.setptTypeSched == nullptr) {
             continue; // error will be caught elsewhere
@@ -726,7 +728,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                 ShowContinueError(state, "..specifies control type 0 for all entries.");
                 ShowContinueError(state, "All zones using this Control Type Schedule have no heating or cooling available.");
             }
-            CTSchedMapToControlledZone(TempControlledZoneNum) = tempZone.setptTypeSched->Num;
+            CTSchedMapToControlledZone(TempCtrlZoneNum) = tempZone.setptTypeSched->Num;
         }
 
         for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
@@ -904,10 +906,10 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
             ComfortTStatObjects(Item).ZoneListActive = false;
             ComfortTStatObjects(Item).ZoneOrZoneListPtr = Item1;
         } else if (ZLItem > 0) {
-            auto const &ZoneList = state.dataHeatBal->ZoneList(ZLItem);
+            auto const &ZnList = state.dataHeatBal->ZoneList(ZLItem);
             ComfortTStatObjects(Item).ComfortControlledZoneStartPtr = state.dataZoneCtrls->NumComfortControlledZones + 1;
-            state.dataZoneCtrls->NumComfortControlledZones += ZoneList.NumOfZones;
-            ComfortTStatObjects(Item).NumOfZones = ZoneList.NumOfZones;
+            state.dataZoneCtrls->NumComfortControlledZones += ZnList.NumOfZones;
+            ComfortTStatObjects(Item).NumOfZones = ZnList.NumOfZones;
             ComfortTStatObjects(Item).ZoneListActive = true;
             ComfortTStatObjects(Item).ZoneOrZoneListPtr = ZLItem;
         } else {
@@ -1142,8 +1144,9 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(ctIdx));
                         ErrorsFound = true;
                         continue;
-                    } else if ((setptType = static_cast<HVAC::SetptType>(getEnumValue(comfortSetptTypeNamesUC, s_ipsc->cAlphaArgs(ctIdx)))) ==
-                               HVAC::SetptType::Invalid) {
+                    }
+                    if ((setptType = static_cast<HVAC::SetptType>(getEnumValue(comfortSetptTypeNamesUC, s_ipsc->cAlphaArgs(ctIdx)))) ==
+                        HVAC::SetptType::Invalid) {
                         ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(ctIdx), s_ipsc->cAlphaFieldNames(ctIdx));
                         ErrorsFound = true;
                         continue;
@@ -1412,21 +1415,21 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         } // for (setptType)
     } // for (ComfortControlledZoneNum)
 
-    for (int ComfortControlledZoneNum = 1; ComfortControlledZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++ComfortControlledZoneNum) {
+    for (int ComfortCtrlZoneNum = 1; ComfortCtrlZoneNum <= state.dataZoneCtrls->NumComfortControlledZones; ++ComfortCtrlZoneNum) {
 
-        auto &comfortZone = state.dataZoneCtrls->ComfortControlledZone(ComfortControlledZoneNum);
+        auto &comfortZone = state.dataZoneCtrls->ComfortControlledZone(ComfortCtrlZoneNum);
         ActualZoneNum = comfortZone.ActualZoneNum;
         if (comfortZone.setptTypeSched == nullptr) {
             continue;
         }
 
         for (HVAC::SetptType setptType : HVAC::controlledSetptTypes) {
-            if (TComfortControlTypes(ComfortControlledZoneNum).MustHave[(int)setptType] &&
-                TComfortControlTypes(ComfortControlledZoneNum).DidHave[(int)setptType]) {
+            if (TComfortControlTypes(ComfortCtrlZoneNum).MustHave[(int)setptType] &&
+                TComfortControlTypes(ComfortCtrlZoneNum).DidHave[(int)setptType]) {
                 continue;
             }
 
-            if (!TComfortControlTypes(ComfortControlledZoneNum).MustHave[(int)setptType]) {
+            if (!TComfortControlTypes(ComfortCtrlZoneNum).MustHave[(int)setptType]) {
                 continue;
             }
 
@@ -1456,12 +1459,11 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
     int NumZoneCapaMultiplier = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject); // Number of ZonesCapacityMultiplier object
     if (NumZoneCapaMultiplier == 0) {
         // Assign default multiplier values to all zones
-        for (int ZoneNum = 1; ZoneNum <= NumOfZones; ZoneNum++) {
-            auto &Zone = state.dataHeatBal->Zone(ZoneNum);
-            Zone.ZoneVolCapMultpSens = ZoneVolCapMultpSens;
-            Zone.ZoneVolCapMultpMoist = ZoneVolCapMultpMoist;
-            Zone.ZoneVolCapMultpCO2 = ZoneVolCapMultpCO2;
-            Zone.ZoneVolCapMultpGenContam = ZoneVolCapMultpGenContam;
+        for (auto &zn : state.dataHeatBal->Zone) {
+            zn.ZoneVolCapMultpSens = ZoneVolCapMultpSens;
+            zn.ZoneVolCapMultpMoist = ZoneVolCapMultpMoist;
+            zn.ZoneVolCapMultpCO2 = ZoneVolCapMultpCO2;
+            zn.ZoneVolCapMultpGenContam = ZoneVolCapMultpGenContam;
         }
 
     } else {
@@ -1528,12 +1530,11 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
         // Assign default multiplier values to all the other zones
         for (int ZoneNum = 1; ZoneNum <= NumOfZones; ZoneNum++) {
-            auto &Zone = state.dataHeatBal->Zone(ZoneNum);
-            if (!Zone.FlagCustomizedZoneCap) {
-                Zone.ZoneVolCapMultpSens = ZoneVolCapMultpSens;
-                Zone.ZoneVolCapMultpMoist = ZoneVolCapMultpMoist;
-                Zone.ZoneVolCapMultpCO2 = ZoneVolCapMultpCO2;
-                Zone.ZoneVolCapMultpGenContam = ZoneVolCapMultpGenContam;
+            if (!Zone(ZoneNum).FlagCustomizedZoneCap) {
+                Zone(ZoneNum).ZoneVolCapMultpSens = ZoneVolCapMultpSens;
+                Zone(ZoneNum).ZoneVolCapMultpMoist = ZoneVolCapMultpMoist;
+                Zone(ZoneNum).ZoneVolCapMultpCO2 = ZoneVolCapMultpCO2;
+                Zone(ZoneNum).ZoneVolCapMultpGenContam = ZoneVolCapMultpGenContam;
             }
         }
 
@@ -1545,11 +1546,10 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
             Real64 ZoneVolCapMultpGenContam_temp = 0.0;
 
             for (int ZoneNum = 1; ZoneNum <= NumOfZones; ZoneNum++) {
-                auto const &Zone = state.dataHeatBal->Zone(ZoneNum);
-                ZoneVolCapMultpSens_temp += Zone.ZoneVolCapMultpSens;
-                ZoneVolCapMultpMoist_temp += Zone.ZoneVolCapMultpMoist;
-                ZoneVolCapMultpCO2_temp += Zone.ZoneVolCapMultpCO2;
-                ZoneVolCapMultpGenContam_temp += Zone.ZoneVolCapMultpGenContam;
+                ZoneVolCapMultpSens_temp += Zone(ZoneNum).ZoneVolCapMultpSens;
+                ZoneVolCapMultpMoist_temp += Zone(ZoneNum).ZoneVolCapMultpMoist;
+                ZoneVolCapMultpCO2_temp += Zone(ZoneNum).ZoneVolCapMultpCO2;
+                ZoneVolCapMultpGenContam_temp += Zone(ZoneNum).ZoneVolCapMultpGenContam;
             }
 
             if (NumOfZones > 0) {
@@ -1588,9 +1588,9 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
             // find matching name of  ZONECONTROL:THERMOSTAT object
             if ((found = Util::FindItem(s_ipsc->cAlphaArgs(1), TStatObjects)) != 0) {
-                auto const &TStatObjects = state.dataZoneCtrls->TStatObjects(found);
-                for (Item = 1; Item <= TStatObjects.NumOfZones; ++Item) {
-                    TempControlledZoneNum = TStatObjects.TempControlledZoneStartPtr + Item - 1;
+                auto const &TStatObj = state.dataZoneCtrls->TStatObjects(found);
+                for (Item = 1; Item <= TStatObj.NumOfZones; ++Item) {
+                    TempControlledZoneNum = TStatObj.TempControlledZoneStartPtr + Item - 1;
                     if (state.dataZoneCtrls->NumTempControlledZones == 0) {
                         continue;
                     }
@@ -1647,7 +1647,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
                             int adaptiveComfortModelTypeIndex =
                                 Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                            if (!adaptiveComfortModelTypeIndex) {
+                            if (adaptiveComfortModelTypeIndex == 0) {
                                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                                 ErrorsFound = true;
                             } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
@@ -1717,7 +1717,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                     if (NumAlphas >= 4 && !s_ipsc->lAlphaFieldBlanks(4)) {
                         int adaptiveComfortModelTypeIndex =
                             Util::FindItem(s_ipsc->cAlphaArgs(4), AdaptiveComfortModelTypes, AdaptiveComfortModelTypes.isize());
-                        if (!adaptiveComfortModelTypeIndex) {
+                        if (adaptiveComfortModelTypeIndex == 0) {
                             ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                             ErrorsFound = true;
                         } else if (adaptiveComfortModelTypeIndex != static_cast<int>(AdaptiveComfortModel::ADAP_NONE)) {
@@ -1841,8 +1841,8 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                 }
 
             } else {
-                for (int Item = 1; Item <= TStatObjects(found).NumOfZones; ++Item) {
-                    TempControlledZoneNum = TStatObjects(found).TempControlledZoneStartPtr + Item - 1;
+                for (int item = 1; item <= TStatObjects(found).NumOfZones; ++item) {
+                    TempControlledZoneNum = TStatObjects(found).TempControlledZoneStartPtr + item - 1;
 
                     auto &tempZone = state.dataZoneCtrls->TempControlledZone(TempControlledZoneNum);
 
@@ -1858,13 +1858,13 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                     if (s_ipsc->cAlphaArgs(3) == "NONE") {
                         tempZone.OvercoolCtrl = DataZoneControls::TempCtrl::None;
                     } else if (s_ipsc->cAlphaArgs(3) != "OVERCOOL") {
-                        if (Item == 1) {
+                        if (item == 1) {
                             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                             ErrorsFound = true;
                         }
                     } else if ((tempZone.OvercoolCtrl = static_cast<DataZoneControls::TempCtrl>(
                                     getEnumValue(DataZoneControls::tempCtrlNamesUC, s_ipsc->cAlphaArgs(4)))) == DataZoneControls::TempCtrl::Invalid) {
-                        if (Item == 1) {
+                        if (item == 1) {
                             ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                             ErrorsFound = true;
                         }
@@ -1874,24 +1874,24 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
                     if (tempZone.OvercoolCtrl == DataZoneControls::TempCtrl::Scheduled) {
                         if (s_ipsc->lAlphaFieldBlanks(6)) {
-                            if (Item == 1) {
+                            if (item == 1) {
                                 ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(6));
                                 ErrorsFound = true;
                             }
                         } else if ((tempZone.zoneOvercoolRangeSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(6))) == nullptr) {
-                            if (Item == 1) {
+                            if (item == 1) {
                                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
                                 ErrorsFound = true;
                             }
                         } else if (!tempZone.zoneOvercoolRangeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 3.0)) {
-                            if (Item == 1) {
+                            if (item == 1) {
                                 Sched::ShowSevereBadMinMax(
                                     state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6), Clusive::In, 0.0, Clusive::In, 3.0);
                                 ErrorsFound = true;
                             }
                         }
                     } else { // tempZone.OvercoolCntrlModeScheduled
-                        if (Item == 1) {
+                        if (item == 1) {
                             if (tempZone.ZoneOvercoolConstRange < 0.0) {
                                 ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1), Clusive::In, 0.0);
                                 ErrorsFound = true;
@@ -1905,7 +1905,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                     tempZone.ZoneOvercoolControlRatio = s_ipsc->rNumericArgs(2);
                     // check Overcool Control Ratio limits
                     if (tempZone.ZoneOvercoolControlRatio < 0.0) {
-                        if (Item == 1) {
+                        if (item == 1) {
                             ShowSevereBadMin(state, eoh, s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2), Clusive::In, 0.0);
                             ErrorsFound = true;
                         }
@@ -2366,7 +2366,6 @@ void InitZoneAirSetPoints(EnergyPlusData &state)
     static constexpr std::string_view RoutineName("InitZoneAirSetpoints: ");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    int TRefFlag; // Flag for Reference Temperature process in Zones
 
     auto &s_ztpc = state.dataZoneTempPredictorCorrector;
     auto &s_hbfs = state.dataHeatBalFanSys;
@@ -2416,6 +2415,7 @@ void InitZoneAirSetPoints(EnergyPlusData &state)
             state.dataZoneEnergyDemand->spaceSysMoistureDemand.allocate(state.dataGlobal->numSpaces);
         }
 
+        int TRefFlag; // Flag for Reference Temperature process in Zones
         for (int zoneNum = 1; zoneNum <= NumOfZones; ++zoneNum) {
             bool FirstSurfFlag = true;
             for (int spaceNum : state.dataHeatBal->Zone(zoneNum).spaceIndexes) {
@@ -4127,8 +4127,8 @@ Real64 ZoneSpaceHeatBalanceData::correctAirTemp(
     bool isMixed = true;
     // SpaceHB TODO: For now, room air model is only for zones
     if (spaceNum == 0 && state.dataRoomAir->anyNonMixingRoomAirModel) {
-        isMixed = !((state.dataRoomAir->IsZoneDispVent3Node(zoneNum) && !state.dataRoomAir->ZoneDispVent3NodeMixedFlag(zoneNum)) ||
-                    (state.dataRoomAir->IsZoneUFAD(zoneNum) && !state.dataRoomAir->ZoneUFADMixedFlag(zoneNum)));
+        isMixed = !((state.dataRoomAir->IsZoneDispVent3Node(zoneNum) && (state.dataRoomAir->ZoneDispVent3NodeMixedFlag(zoneNum) == 0)) ||
+                    (state.dataRoomAir->IsZoneUFAD(zoneNum) && (state.dataRoomAir->ZoneUFADMixedFlag(zoneNum) == 0)));
     }
     switch (state.dataHeatBal->ZoneAirSolutionAlgo) {
     case DataHeatBalance::SolutionAlgo::ThirdOrder: {
@@ -4483,6 +4483,15 @@ void ZoneSpaceHeatBalanceData::correctHumRat(EnergyPlusData &state, int const zo
         ZoneMassFlowRate += inletNode.MassFlowRate / ZoneMult;
     }
 
+    if (!state.dataHeatBal->Zone(zoneNum).leakageParallelPIUNums.empty()) {
+        for (int piuNum = 1; piuNum <= static_cast<int>(state.dataHeatBal->Zone(zoneNum).leakageParallelPIUNums.size()); ++piuNum) {
+            if (const auto &thisPIU = state.dataPowerInductionUnits->PIU(piuNum); thisPIU.leakFlow > 0) {
+                MoistureMassFlowRate += (thisPIU.leakFlow * state.dataLoopNodes->Node(thisPIU.PriAirInNode).HumRat) / ZoneMult;
+                ZoneMassFlowRate += thisPIU.leakFlow / ZoneMult;
+            }
+        }
+    }
+
     // Calculate hourly humidity ratio from infiltration + humidity added from latent load + system added moisture
     Real64 LatentGain = this->latentGain + state.dataHeatBalFanSys->SumLatentHTRadSys(zoneNum) + state.dataHeatBalFanSys->SumLatentPool(zoneNum);
 
@@ -4766,8 +4775,10 @@ void InverseModelTemperature(EnergyPlusData &state,
 
             if (hmZone.IncludeSystemSupplyParameters) {
                 zone.ZoneMeasuredSupplyAirTemperature = hmZone.supplyAirTempSched->getCurrentVal();
-                zone.ZoneMeasuredSupplyAirFlowRate = hmZone.supplyAirMassFlowRateSched ? hmZone.supplyAirMassFlowRateSched->getCurrentVal() : 0.0;
-                zone.ZoneMeasuredSupplyAirHumidityRatio = hmZone.supplyAirHumRatSched ? hmZone.supplyAirHumRatSched->getCurrentVal() : 0.0;
+                zone.ZoneMeasuredSupplyAirFlowRate =
+                    (hmZone.supplyAirMassFlowRateSched != nullptr) ? hmZone.supplyAirMassFlowRateSched->getCurrentVal() : 0.0;
+                zone.ZoneMeasuredSupplyAirHumidityRatio =
+                    (hmZone.supplyAirHumRatSched != nullptr) ? hmZone.supplyAirHumRatSched->getCurrentVal() : 0.0;
                 // Calculate the air humidity ratio at supply air inlet.
                 Real64 CpAirInlet(0.0);
                 CpAirInlet = Psychrometrics::PsyCpAirFnW(zone.ZoneMeasuredSupplyAirHumidityRatio);
@@ -4867,13 +4878,13 @@ void InverseModelTemperature(EnergyPlusData &state,
         // Hybrid model people count calculation
         if (hmZone.PeopleCountCalc_T && state.dataHVACGlobal->UseZoneTimeStepHistory) {
             zone.ZoneMeasuredTemperature = hmZone.measuredTempSched->getCurrentVal();
-            zone.ZonePeopleActivityLevel = hmZone.peopleActivityLevelSched ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
-            zone.ZonePeopleSensibleHeatFraction = hmZone.peopleSensibleFracSched ? hmZone.peopleSensibleFracSched->getCurrentVal() : 0.0;
-            zone.ZonePeopleRadiantHeatFraction = hmZone.peopleRadiantFracSched ? hmZone.peopleRadiantFracSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleActivityLevel = (hmZone.peopleActivityLevelSched != nullptr) ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleSensibleHeatFraction = (hmZone.peopleSensibleFracSched != nullptr) ? hmZone.peopleSensibleFracSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleRadiantHeatFraction = (hmZone.peopleRadiantFracSched != nullptr) ? hmZone.peopleRadiantFracSched->getCurrentVal() : 0.0;
 
             Real64 FractionSensible = zone.ZonePeopleSensibleHeatFraction;
             Real64 FractionRadiation = zone.ZonePeopleRadiantHeatFraction;
-            Real64 ActivityLevel = hmZone.peopleActivityLevelSched ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
+            Real64 ActivityLevel = (hmZone.peopleActivityLevelSched != nullptr) ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
 
             if (FractionSensible <= 0.0) {
                 FractionSensible = 0.6;
@@ -4891,8 +4902,10 @@ void InverseModelTemperature(EnergyPlusData &state,
 
             if (hmZone.IncludeSystemSupplyParameters) {
                 zone.ZoneMeasuredSupplyAirTemperature = hmZone.supplyAirTempSched->getCurrentVal();
-                zone.ZoneMeasuredSupplyAirFlowRate = hmZone.supplyAirMassFlowRateSched ? hmZone.supplyAirMassFlowRateSched->getCurrentVal() : 0.0;
-                zone.ZoneMeasuredSupplyAirHumidityRatio = hmZone.supplyAirHumRatSched ? hmZone.supplyAirHumRatSched->getCurrentVal() : 0.0;
+                zone.ZoneMeasuredSupplyAirFlowRate =
+                    (hmZone.supplyAirMassFlowRateSched != nullptr) ? hmZone.supplyAirMassFlowRateSched->getCurrentVal() : 0.0;
+                zone.ZoneMeasuredSupplyAirHumidityRatio =
+                    (hmZone.supplyAirHumRatSched != nullptr) ? hmZone.supplyAirHumRatSched->getCurrentVal() : 0.0;
 
                 // Calculate the air humidity ratio at supply air inlet.
                 Real64 CpAirInlet = Psychrometrics::PsyCpAirFnW(zone.ZoneMeasuredSupplyAirHumidityRatio);
@@ -5052,9 +5065,9 @@ void InverseModelHumidity(EnergyPlusData &state,
 
         // Hybrid Model calculate people count
         if (hmZone.PeopleCountCalc_H && state.dataHVACGlobal->UseZoneTimeStepHistory) {
-            zone.ZonePeopleActivityLevel = hmZone.peopleActivityLevelSched ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
-            zone.ZonePeopleSensibleHeatFraction = hmZone.peopleSensibleFracSched ? hmZone.peopleSensibleFracSched->getCurrentVal() : 0.0;
-            zone.ZonePeopleRadiantHeatFraction = hmZone.peopleRadiantFracSched ? hmZone.peopleRadiantFracSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleActivityLevel = (hmZone.peopleActivityLevelSched != nullptr) ? hmZone.peopleActivityLevelSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleSensibleHeatFraction = (hmZone.peopleSensibleFracSched != nullptr) ? hmZone.peopleSensibleFracSched->getCurrentVal() : 0.0;
+            zone.ZonePeopleRadiantHeatFraction = (hmZone.peopleRadiantFracSched != nullptr) ? hmZone.peopleRadiantFracSched->getCurrentVal() : 0.0;
 
             Real64 FractionSensible = zone.ZonePeopleSensibleHeatFraction;
 
@@ -5224,6 +5237,21 @@ void ZoneSpaceHeatBalanceData::calcZoneOrSpaceSums(EnergyPlusData &state,
         }
 
         int ZoneMult = thisZone.Multiplier * thisZone.ListMultiplier;
+
+        if (!state.dataHeatBal->Zone(zoneNum).leakageParallelPIUNums.empty()) {
+            const Real64 CpAir = Psychrometrics::PsyCpAirFnW(this->airHumRat);
+            for (int piuNum = 1; piuNum <= static_cast<int>(state.dataHeatBal->Zone(zoneNum).leakageParallelPIUNums.size()); ++piuNum) {
+                if (const auto &thisPIU = state.dataPowerInductionUnits->PIU(piuNum); thisPIU.leakFlow > 0) {
+                    if (state.dataHeatBal->Zone(zoneNum).SystemZoneNodeNumber > 0) {
+                        this->SumSysMCp += thisPIU.leakFlow * CpAir;
+                        this->SumSysMCpT += thisPIU.leakFlow * CpAir * state.dataLoopNodes->Node(thisPIU.PriAirInNode).Temp;
+                    } else {
+                        this->SumMCp += thisPIU.leakFlow * CpAir / ZoneMult;
+                        this->SumMCpT += thisPIU.leakFlow * CpAir * state.dataLoopNodes->Node(thisPIU.PriAirInNode).Temp / ZoneMult;
+                    }
+                }
+            }
+        }
 
         this->SumSysMCp /= ZoneMult;
         this->SumSysMCpT /= ZoneMult;
@@ -5503,6 +5531,20 @@ void CalcZoneComponentLoadSums(EnergyPlusData &state,
         thisAirRpt.SumMCpDTsystem += QSensRate;
     }
 
+    if (!state.dataHeatBal->Zone(ZoneNum).leakageParallelPIUNums.empty()) {
+        for (int piuNum = 1; piuNum <= static_cast<int>(state.dataHeatBal->Zone(ZoneNum).leakageParallelPIUNums.size()); ++piuNum) {
+            if (const auto &thisPIU = state.dataPowerInductionUnits->PIU(piuNum); thisPIU.leakFlow > 0) {
+                QSensRate =
+                    calcZoneSensibleOutput(thisPIU.leakFlow, state.dataLoopNodes->Node(thisPIU.PriAirInNode).Temp, thisHB->MAT, thisHB->airHumRat);
+                if (state.dataHeatBal->Zone(ZoneNum).SystemZoneNodeNumber > 0) {
+                    thisAirRpt.SumMCpDTsystem += QSensRate;
+                } else {
+                    thisAirRpt.SumMCpDTzones += QSensRate;
+                }
+            }
+        }
+    }
+
     // non air system response.
     thisAirRpt.SumNonAirSystem =
         thisHB->NonAirSystemResponse + state.dataHeatBalFanSys->SumConvHTRadSys(ZoneNum) + state.dataHeatBalFanSys->SumConvPool(ZoneNum);
@@ -5643,9 +5685,8 @@ bool VerifyThermostatInZone(EnergyPlusData &state, std::string const &ZoneName) 
     if (state.dataZoneCtrls->NumTempControlledZones > 0) {
         if (Util::FindItemInList(ZoneName, state.dataZoneCtrls->TempControlledZone, &DataZoneControls::ZoneTempControls::ZoneName) > 0) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     return false;
 }
@@ -6295,8 +6336,6 @@ void GetComfortSetPoints(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     Real64 PMVResult = 0.0; // Calculated PMV value
 
-    auto &s_ztpc = state.dataZoneTempPredictorCorrector;
-
     auto &comfortControlledZone = state.dataZoneCtrls->ComfortControlledZone(ComfortControlNum);
     Real64 Tmin = comfortControlledZone.TdbMinSetPoint;
     Real64 Tmax = comfortControlledZone.TdbMaxSetPoint;
@@ -6315,6 +6354,7 @@ void GetComfortSetPoints(EnergyPlusData &state,
 
         int SolFla = 0; // feed back flag from SolveRoot
         General::SolveRoot(state, Acc, MaxIter, SolFla, Tset, f, Tmin, Tmax);
+        auto &s_ztpc = state.dataZoneTempPredictorCorrector;
         if (SolFla == -1) {
             if (!state.dataGlobal->WarmupFlag) {
                 ++s_ztpc->IterLimitExceededNum1;

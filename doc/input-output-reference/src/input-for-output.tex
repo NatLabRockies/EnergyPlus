@@ -494,13 +494,13 @@ Current resource types are shown in the table below:
 	Utility/Fuel Resource Types \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Table of Metered Resource Types---Fuels \label{table:table-of-metered-resource-types-Fuels}} \tabularnewline
 	\toprule
 	Utility/Fuel Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	Electricity \tabularnewline
 	NaturalGas \tabularnewline
 	Gasoline \tabularnewline
@@ -524,13 +524,13 @@ Current resource types are shown in the table below:
 	Pollutant Resource Types \tabularnewline
 	\midrule
 	\endfirsthead
-	
+
 	\caption[]{Table of Metered Resource Types---Pollutants} \tabularnewline
 	\toprule
 	Pollutant Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	SO2 \tabularnewline
 	NOx \tabularnewline
 	N2O \tabularnewline
@@ -548,7 +548,7 @@ Current resource types are shown in the table below:
 	NuclearLow \tabularnewline
 	\bottomrule
 \end{longtable}
-	
+
 \begin{longtable}[c]{@{}l@{}}
 	\caption{Table of Metered Resource Types---Others \label{table:table-of-metered-resource-types-others}} \tabularnewline
 	\toprule
@@ -561,7 +561,7 @@ Current resource types are shown in the table below:
 	Other Resource Types \tabularnewline
 	\midrule
 	\endhead
-	
+
 	EnergyTransfer \tabularnewline
 	ElectricityProduced \tabularnewline
 	ElectricityPurchased \tabularnewline
@@ -2192,20 +2192,20 @@ This field is optional and, if not specified, defaults to UseOutputControlTableS
  object. Five different input options are available:
 
 \begin{itemize}
-\item 
+\item
 UseOutputControlTableStyle -- use the same unit conversion as in   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
 
-\item 
+\item
 None -- no conversions performed
-\item 
+\item
 JtoKWH -- Joules converted into kWh (1 / 3,600,000)
-\item 
+\item
 JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
 \item
 JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
-\item 
+\item
 InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
-\item 
+\item
 InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
 \end{itemize}
 
@@ -2218,12 +2218,12 @@ This field determines if any rounding will be performed for the values in the ta
 An example IDF input object follows.
 \begin{lstlisting}
 Output:JSON,
-  TimeSeriesAndTabular,       !- Option Type
-  Yes,                        !- Output JSON
-  No,                         !- Output CBOR
-  No,                         !- Output MessagePack
-  None,                       !- Unit Conversion for Tabular Data
-  Yes;                        !- Format Numeric Values for Tabular Data
+   TimeSeriesAndTabular, !- Option Type
+   Yes,                  !- Output JSON
+   No,                   !- Output CBOR
+   No,                   !- Output MessagePack
+   None,                 !- Unit Conversion for Tabular Data
+   Yes;                  !- Format Numeric Values for Tabular Data
 \end{lstlisting}
 
 \subsection{Output:SQLite}\label{outputsqlite}
@@ -2244,27 +2244,27 @@ This field is optional and, if not specified, defaults to UseOutputControlTableS
  object. Five different input options are available:
 
 \begin{itemize}
-\item 
+\item
 UseOutputControlTableStyle -- use the same unit conversion as in \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
 
-\item 
+\item
 None -- no conversions performed
-\item 
+\item
 JtoKWH -- Joules converted into kWh (1 / 3,600,000)
-\item 
+\item
 JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
 \item
 JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
-\item 
+\item
 InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
-\item 
+\item
 InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
 \end{itemize}
 
 The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the SQL file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Codes and Standards (usually given in W or W/ft$^2$).
 
-Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables. 
- 
+Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables.
+
 % table X
 {\scriptsize
 \begin{longtable}[c]{p{4in}p{1in}}
@@ -2325,9 +2325,9 @@ This field determines if any rounding will be performed for the values in the ta
 An example IDF input object follows.
 \begin{lstlisting}
 Output:SQLite,
-  SimpleAndTabular,           !- Option Type
-  InchPound,                  !- Unit Conversion for Tabular Data
-  Yes;                        !- Format Numeric Values for Tabular Data
+   SimpleAndTabular,    !- Option Type
+   InchPound,           !- Unit Conversion for Tabular Data
+   Yes;                 !- Format Numeric Values for Tabular Data
 \end{lstlisting}
 
 \subsection{OutputControl:Files}\label{outputcontrolfiles}
@@ -2460,10 +2460,6 @@ Conditionally turn on or off ExtShd file output.
 
 Conditionally turn on or off Tarcog file output.
 
-\paragraph{Field: Output Plant Component Sizing}\label{field-output-plant-component-sizing}
-
-Conditionally turn on or off psz file output.
-
 An example of this object follows.
 
 \begin{lstlisting}
@@ -2508,7 +2504,7 @@ Controls the format of the timestamp used in the native CSV and JSON outputs whe
 as ``$MM$/$DD$ $hh$:$mm$:$ss$'', where
 
 \begin{wherelist}
-\item[MM] the two-digit month, 
+\item[MM] the two-digit month,
 \item[DD] the two-digit day of the month,
 \item[hh] the two-digit hours since the beginning of the day,
 \item[mm] the two-digit minutes since the beginning of the last hour, and
@@ -2525,7 +2521,7 @@ timestamp format is ``$YYYY$-$MM$-$DD$T$hh$:$mm$:$ss$'' where
 
 \begin{wherelist}
 \item[YYYY] the four-digit year,
-\item[MM] the two-digit month, 
+\item[MM] the two-digit month,
 \item[DD] the two-digit day of the month,
 \item[hh] the two-digit hours since the beginning of the day,
 \item[mm] the two-digit minutes since the beginning of the last hour,

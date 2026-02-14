@@ -44,7 +44,7 @@
 ! Chillers:                       HeatPump:PlantLoop:EIR:Cooling, HeatPump:PlantLoop:EIR:Heating
 ! Number of Zones: 19
 
-  Version,25.2;
+  Version,26.1;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation
@@ -4861,7 +4861,6 @@
     Core_bottom PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Core_bottom PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Core_bottom PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Core_bottom PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Core_bottom PIUHEATING Mixer,  !- Zone Mixer Name
     Core_bottom PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5003,7 +5002,6 @@
     Core_mid PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Core_mid PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Core_mid PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Core_mid PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Core_mid PIUHEATING Mixer,  !- Zone Mixer Name
     Core_mid PIUHEATING Fan, !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5132,7 +5130,6 @@
     Core_top PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Core_top PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Core_top PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Core_top PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Core_top PIUHEATING Mixer,  !- Zone Mixer Name
     Core_top PIUHEATING Fan, !- Fan Name
     Coil:Heating:Electric,   !- Reheat Coil Object Type
@@ -5252,7 +5249,6 @@
     Perimeter_bot_ZN_1 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_bot_ZN_1 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_bot_ZN_1 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_bot_ZN_1 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_bot_ZN_1 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_bot_ZN_1 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5381,7 +5377,6 @@
     Perimeter_bot_ZN_2 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_bot_ZN_2 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_bot_ZN_2 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_bot_ZN_2 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_bot_ZN_2 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_bot_ZN_2 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5510,7 +5505,6 @@
     Perimeter_bot_ZN_3 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_bot_ZN_3 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_bot_ZN_3 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_bot_ZN_3 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_bot_ZN_3 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_bot_ZN_3 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5639,7 +5633,6 @@
     Perimeter_bot_ZN_4 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_bot_ZN_4 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_bot_ZN_4 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_bot_ZN_4 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_bot_ZN_4 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_bot_ZN_4 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5768,7 +5761,6 @@
     Perimeter_mid_ZN_1 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_mid_ZN_1 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_mid_ZN_1 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_mid_ZN_1 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_mid_ZN_1 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_mid_ZN_1 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -5897,7 +5889,6 @@
     Perimeter_mid_ZN_2 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_mid_ZN_2 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_mid_ZN_2 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_mid_ZN_2 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_mid_ZN_2 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_mid_ZN_2 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6026,7 +6017,6 @@
     Perimeter_mid_ZN_3 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_mid_ZN_3 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_mid_ZN_3 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_mid_ZN_3 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_mid_ZN_3 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_mid_ZN_3 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6155,7 +6145,6 @@
     Perimeter_mid_ZN_4 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_mid_ZN_4 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_mid_ZN_4 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_mid_ZN_4 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_mid_ZN_4 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_mid_ZN_4 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6284,7 +6273,6 @@
     Perimeter_top_ZN_1 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_top_ZN_1 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_top_ZN_1 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_top_ZN_1 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_top_ZN_1 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_top_ZN_1 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6413,7 +6401,6 @@
     Perimeter_top_ZN_2 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_top_ZN_2 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_top_ZN_2 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_top_ZN_2 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_top_ZN_2 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_top_ZN_2 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6542,7 +6529,6 @@
     Perimeter_top_ZN_3 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_top_ZN_3 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_top_ZN_3 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_top_ZN_3 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_top_ZN_3 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_top_ZN_3 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -6671,7 +6657,6 @@
     Perimeter_top_ZN_4 PIUHEATING Primary Inlet Node Name,  !- Supply Air Inlet Node Name
     Perimeter_top_ZN_4 PIUHEATING Secondary Inlet Node,  !- Secondary Air Inlet Node Name
     Perimeter_top_ZN_4 PIUHEATING Outlet Node Name,  !- Outlet Node Name
-    Perimeter_top_ZN_4 PIUHEATING Reheat Coil Air In Node,  !- Reheat Coil Air Inlet Node Name
     Perimeter_top_ZN_4 PIUHEATING Mixer,  !- Zone Mixer Name
     Perimeter_top_ZN_4 PIUHEATING Fan,  !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type

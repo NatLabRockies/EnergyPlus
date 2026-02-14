@@ -34,7 +34,7 @@
 ! Chillers:                       Chiller:Electric:ReformulatedEIR (water-cooled)
 ! Number of Zones: 19
 
-  Version,25.2;
+  Version,26.1;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation

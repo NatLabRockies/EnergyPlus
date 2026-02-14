@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -964,8 +964,6 @@ void UpdateChillerComponentCondenserSide(EnergyPlusData &state,
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   February 2010
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     // provides reusable update routine for water cooled chiller's condenser water
@@ -975,10 +973,8 @@ void UpdateChillerComponentCondenserSide(EnergyPlusData &state,
     // check if anything changed or doesn't agree and set simulation flags.
     // update outlet conditions if needed or possible
 
-    // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("UpdateChillerComponentCondenserSide");
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool DidAnythingChange(false);             // set to true if conditions changed
     DataPlant::LoopSideLocation OtherLoopSide; // local loop side pointer for remote connected loop
     Real64 Cp;
@@ -986,28 +982,17 @@ void UpdateChillerComponentCondenserSide(EnergyPlusData &state,
     // check if any conditions have changed
     if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
+    } else if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
+    } else if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
+    } else if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
         DidAnythingChange = true;
-    }
-
-    // could also check heat rate against McDeltaT from node data
-
-    if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelCondenserHeatRate > 0.0)) {
-
+    } else if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (std::abs(ModelCondenserHeatRate) > 0.0)) {
         // TODO also send a request that condenser loop be made available, interlock message infrastructure??
-
         DidAnythingChange = true;
     }
+    // could also check heat rate against McDeltaT from node data
 
     if (DidAnythingChange || FirstHVACIteration) {
         // use current mass flow rate and inlet temp from Node and recalculate outlet temp
@@ -1060,8 +1045,6 @@ void UpdateComponentHeatRecoverySide(EnergyPlusData &state,
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   Sept 2010
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     // provides reusable update routine for heat recovery type
@@ -1071,10 +1054,8 @@ void UpdateComponentHeatRecoverySide(EnergyPlusData &state,
     // check if anything changed or doesn't agree and set simulation flags.
     // update outlet conditions if needed or possible
 
-    // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("UpdateComponentHeatRecoverySide");
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool DidAnythingChange(false);             // set to true if conditions changed
     DataPlant::LoopSideLocation OtherLoopSide; // local loop side pointer for remote connected loop
     Real64 Cp;                                 // local fluid specific heat
@@ -1082,27 +1063,17 @@ void UpdateComponentHeatRecoverySide(EnergyPlusData &state,
     // check if any conditions have changed
     if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
+    } else if (state.dataLoopNodes->Node(OutletNodeNum).MassFlowRate != ModelMassFlowRate) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
+    } else if (state.dataLoopNodes->Node(InletNodeNum).Temp != ModelInletTemp) {
         DidAnythingChange = true;
-    }
-
-    if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
+    } else if (state.dataLoopNodes->Node(OutletNodeNum).Temp != ModelOutletTemp) {
         DidAnythingChange = true;
-    }
-
-    // could also check heat rate against McDeltaT from node data
-
-    if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelRecoveryHeatRate > 0.0)) {
+    } else if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelRecoveryHeatRate > 0.0)) {
         // no flow but trying to move heat to this loop problem!
-
         DidAnythingChange = true;
     }
+    // could also check heat rate against McDeltaT from node data
 
     if (DidAnythingChange || FirstHVACIteration) {
         // use current mass flow rate and inlet temp from Node and recalculate outlet temp
@@ -1154,8 +1125,6 @@ void UpdateAbsorberChillerComponentGeneratorSide(EnergyPlusData &state,
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   February 2010
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     // provides reusable update routine for absoption chiller's generator
@@ -1165,19 +1134,14 @@ void UpdateAbsorberChillerComponentGeneratorSide(EnergyPlusData &state,
     // check if anything changed or doesn't agree and set simulation flags.
     // update outlet conditions if needed or possible
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool DidAnythingChange(false);             // set to true if conditions changed
     DataPlant::LoopSideLocation OtherLoopSide; // local loop side pointer for remote connected loop
 
     // check if any conditions have changed
     if (state.dataLoopNodes->Node(InletNodeNum).MassFlowRate != ModelMassFlowRate) {
         DidAnythingChange = true;
-    }
-
-    if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelGeneratorHeatRate > 0.0)) {
-
+    } else if ((state.dataLoopNodes->Node(InletNodeNum).MassFlowRate == 0.0) && (ModelGeneratorHeatRate > 0.0)) {
         //  TODO also send a request that generator loop be made available, interlock message infrastructure??
-
         DidAnythingChange = true;
     }
 

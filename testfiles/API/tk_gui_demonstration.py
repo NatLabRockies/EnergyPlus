@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -59,7 +59,7 @@ from sys import argv, path
 from tempfile import mkdtemp
 from threading import Thread
 from time import sleep
-from tkinter import Tk, Button, StringVar, Label, BOTH, ttk, HORIZONTAL
+from tkinter import BOTH, HORIZONTAL, Button, Label, StringVar, Tk, ttk
 
 
 class EPGui(Tk):
@@ -73,23 +73,25 @@ class EPGui(Tk):
         else:
             # if running in an installation, it will live at the <install>/ExampleFiles/API, and you don't need any args
             self.install_or_build_dir: Path = Path(__file__).resolve().parent.parent.parent
-            self.example_file_to_run: str = str(self.install_or_build_dir / 'ExampleFiles' / '5ZoneAirCooled.idf')
+            self.example_file_to_run: str = str(self.install_or_build_dir / "ExampleFiles" / "5ZoneAirCooled.idf")
         try:  # This is the new way, if the user's Python environment includes the pip installed energyplus-api-helpers
             # noinspection PyUnresolvedReferences
             from energyplus_api_helpers.import_helper import EPlusAPIHelper
+
             e = EPlusAPIHelper(self.install_or_build_dir)
             self.api = e.get_api_instance()
         except ImportError:  # This is the previous way, directly adding the E+ dir to the path before importing the API
             path.insert(0, str(self.install_or_build_dir))
             # noinspection PyUnresolvedReferences
             from pyenergyplus.api import EnergyPlusAPI
+
             self.api = EnergyPlusAPI()
         self.title("API/GUI Demonstration")
-        Button(self, text='Run EnergyPlus', command=self._start_thread).pack(expand=True)
+        Button(self, text="Run EnergyPlus", command=self._start_thread).pack(expand=True)
         ttk.Separator(self, orient=HORIZONTAL).pack(fill=BOTH, expand=False)
         self._tk_var_message = StringVar(value="<E+ Outputs>")
         Label(self, textvariable=self._tk_var_message).pack(fill=BOTH, expand=True)
-        self.geometry('600x100')
+        self.geometry("600x100")
         self._gui_queue = Queue()
         self._check_queue()
         self.mainloop()
@@ -115,7 +117,7 @@ class EPGui(Tk):
         run_directory = mkdtemp()
         state = self.api.state_manager.new_state()
         self.api.runtime.callback_message(state, self._callback)
-        self.api.runtime.run_energyplus(state, ['-d', run_directory, '-D', self.example_file_to_run])
+        self.api.runtime.run_energyplus(state, ["-d", run_directory, "-D", self.example_file_to_run])
         print(f"Finished running EnergyPlus, results available in {run_directory}")
 
 

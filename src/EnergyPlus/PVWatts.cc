@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -431,7 +431,7 @@ namespace PVWatts {
             int sscErrType;
             float time;
             int i = 0;
-            while ((errtext = ssc_module_log(pvwattsModule_, i++, &sscErrType, &time))) {
+            while ((errtext = ssc_module_log(pvwattsModule_, i++, &sscErrType, &time)) != nullptr) {
                 std::string err("PVWatts: ");
                 switch (sscErrType) {
                 case SSC_WARNING:

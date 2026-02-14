@@ -6,7 +6,7 @@ Modeling HVAC Operational Faults – Phase IV
 
  - Original Date: Nov 7, 2016
  - Updated Date: Dec 7, 2016
- 
+
 
 ## Justification for New Feature ##
 
@@ -14,36 +14,36 @@ Most of the buildings, either new or old, have operational faults in the sensors
 
 To date, the main practitioner use of EnergyPlus has been for new construction design. With the new high priority attached by DOE to retrofit and improved operation of existing buildings, there is a need to extend the capabilities of EnergyPlus to model existing buildings, including faulty operation:
 
--	Retrofit analysis: starts with calibrated simulation; the ability to estimate the severity of common faults is expected to improve the accuracy and transparency of the calibrated model and hence increase the accuracy of analyzing different retrofit measures.  
+-	Retrofit analysis: starts with calibrated simulation; the ability to estimate the severity of common faults is expected to improve the accuracy and transparency of the calibrated model and hence increase the accuracy of analyzing different retrofit measures.
 -	Commissioning providers can use the fault models to demonstrate the savings to be expected from fixing faults found in retro-commissioning
 -	Support for building operation by using the calibrated model, including unfixed faults, as a real-time reference model to detect, and verify the diagnosis of, newly occurring faults.
 
-The users in these cases will be practitioners, not the building modeling experts, so it is planned to implement the fault models using conventional EnergyPlus objects rather than the EMS, which, in any case, could only be used to implement a subset of the faults models.   Additional use cases are noted in Enhancement List document 'General_2009_08.doc'.   
+The users in these cases will be practitioners, not the building modeling experts, so it is planned to implement the fault models using conventional EnergyPlus objects rather than the EMS, which, in any case, could only be used to implement a subset of the faults models.   Additional use cases are noted in Enhancement List document 'General_2009_08.doc'.
 
 A literature review of operational faults in buildings was carried out and a number of common HVAC equipment faults were identified. These faults were then ranked for both complexity of implementation and the severity of the associated energy penalty. Based on the ranking, the following types of occurring faults have been implemented in EnergyPlus in Phase I to III:
 
 1.	Economizer-related Faults
 	a.	damper leakage
-	b.	temperature sensor offset 
-	c.	enthalpy sensor offset 
-	d.	humidity sensor offset 
-	e.	pressure sensor offset 
-2.	Thermostat/Humidistat Offset 
-3.	Coil Fouling 
-	a.	heating coils 
+	b.	temperature sensor offset
+	c.	enthalpy sensor offset
+	d.	humidity sensor offset
+	e.	pressure sensor offset
+2.	Thermostat/Humidistat Offset
+3.	Coil Fouling
+	a.	heating coils
 	b.	cooling coils
-4.	Air Filter Fouling 
+4.	Air Filter Fouling
 5.	Cooling Tower Scaling (under review)
 6.	Chiller Supply Water Temperature Sensor Offset (under review)
 7.	Condenser Supply Water Temperature Sensor Offset (under review)
 8.	Coil Supply Air Temperature Sensor Offset  (under review)
 
-Phase IV in FY17 will focus more on the faults in the plant loop, particularly on the fouling of water-based cooling and heating equipment. Fouling fault occurs when deposits get clogged, usually caused by poor water quality and treatment. It can considerably reduce the overall heat transfer coefficient and thus cause deficiency of equipment efficiency and waste of energy. 
+Phase IV in FY17 will focus more on the faults in the plant loop, particularly on the fouling of water-based cooling and heating equipment. Fouling fault occurs when deposits get clogged, usually caused by poor water quality and treatment. It can considerably reduce the overall heat transfer coefficient and thus cause deficiency of equipment efficiency and waste of energy.
 
-We propose to add the following fouling fault models to EnergyPlus: 
+We propose to add the following fouling fault models to EnergyPlus:
 
-1.	Fouling of hot-water boilers, 
-2.	Fouling of water-cooled chillers, 
+1.	Fouling of hot-water boilers,
+2.	Fouling of water-cooled chillers,
 3.	Fouling of evaporative coolers.
 
 This is a continuous effort from current and previous FYs to build a list of common and impactful fault models to EnergyPlus to improve modeling of existing buildings for retrofit or operational improvements to save energy.
@@ -108,7 +108,7 @@ The fault applies to the wetted coil evaporative cooler described by object Evap
 
 
 ## IDD Object (New) ##
-New objects will be created for the proposed fault types, namely: 
+New objects will be created for the proposed fault types, namely:
 -	FaultModel:Fouling:Boiler
 -	FaultModel:Fouling:Chiller
 -	FaultModel:Fouling:EvaporativeCooler
@@ -146,7 +146,7 @@ FaultModel:Fouling:Boiler,
        \maximum<= 1
        \default 1
        \units dimensionless
-   
+
 FaultModel:Fouling:Chiller,
    \memo This object describes the fouling fault of chillers with water-cooled condensers
    \min-fields 6
@@ -186,7 +186,7 @@ FaultModel:Fouling:Chiller,
        \units dimensionless
 
 FaultModel:Fouling:EvaporativeCooler,
-   \memo This object describes the fouling fault of the wetted coil evaporative cooler 
+   \memo This object describes the fouling fault of the wetted coil evaporative cooler
    \min-fields 6
    A1, \field Name
        \note Enter the name of the fault
@@ -200,7 +200,7 @@ FaultModel:Fouling:EvaporativeCooler,
        \object-list ScheduleNames
    A4, \field Evaporative Cooler Object Type
        \note Enter the type of a Evaporative Cooler object
-       \note The fault applies to the wetted coil evaporative cooler 
+       \note The fault applies to the wetted coil evaporative cooler
        \note The fault does not apply to direct evaporative coolers or the dry coil indirect evaporative coolers
        \required-field
        \type choice
@@ -221,11 +221,11 @@ FaultModel:Fouling:EvaporativeCooler,
 
 ## Model Implementation ##
 
-The proposed model implementation work will try to introduce more object oriented features to the fault modeling routines. Three new classes will be added in the EnergyPlus::FaultsManager namespace, namely: 
+The proposed model implementation work will try to introduce more object oriented features to the fault modeling routines. Three new classes will be added in the EnergyPlus::FaultsManager namespace, namely:
 -	(1) struct FaultPropertiesBoilerFouling : public FaultProperties, corresponding to the IDD object FaultModel:Fouling:Boiler
 -	(2) struct FaultPropertiesChillerFouling : public FaultProperties, corresponding to the IDD object FaultModel:Fouling:Chiller
 -	(3) struct FaultPropertiesEvaporativeCoolerFouling : public FaultProperties, corresponding to the IDD object FaultModel:Fouling:EvaporativeCooler
-These classes will be inherited from Class "FaultProperties" which is the base class for all the operational fault models. 
+These classes will be inherited from Class "FaultProperties" which is the base class for all the operational fault models.
 The new added functions will be defined as member functions of the corresponding fault class.
 
 The new added fault classes will contain the information about the faults as well as the links to the affected objects. Take class "FaultPropertiesChillerFouling" for example, it uses member variables "ChillerType" and "ChillerName" to specify the chiller that is affected by the fouling. Three new member variables will be added to the existing chiller class (e.g., "ReformulatedEIRChillerSpecs" in EnergyPlus::ChillerReformulatedEIR):
@@ -237,7 +237,7 @@ These three variables will be initialized in the method EnergyPlus::FaultsManage
 The model implementations will try to minimize the modification of the codes outside of the fault routine. Take the FaultModel:Fouling:Chiller for example, all the massive calculations about the chiller fouling will be put in "FaultsManager.cc" instead of the chiller routines. This will be achieved by defining a member function within class "FaultPropertiesChillerSWT". The chiller routines will call this function whenever the fault presents. Such implementation design will minimize the modifications of the chiller routines, and thus benefit their systematic organization and potential future maintenance.
 
 ## Testing/Validation/Data Source(s) ##
-Comparing simulation results with and without faults will be performed verify the new fault models. 
+Comparing simulation results with and without faults will be performed verify the new fault models.
 
 ## IDD Object(s) (Revised) ##
 None
@@ -268,4 +268,3 @@ N/A
 
 ## Reference ##
 N/A
-

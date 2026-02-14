@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -54,65 +54,124 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import re
+from pathlib import Path
+
 import licensetext
-import sys
-import os
+from base_hook import (
+    ROOT_DIR,
+    LogLevel,
+    LogMessage,
+    exit_hook,
+    get_base_parser,
+    relative_path_from_root,
+    report_log_messages,
+)
 
-TOOL_NAME = 'license-check'
-# Switch to more human-friendly output
-licensetext.report_error = licensetext.error_for_humans
+TOOL_NAME = "license-check"
 
-#
 # Directories to check
-#
-cpp_dirs = ["./src/",
-            "./tst/EnergyPlus/"]
+CPP_DIRS = [ROOT_DIR / "src", ROOT_DIR / "tst/EnergyPlus/"]
+PYTHON_DIRS = [ROOT_DIR]
 
-python_dirs = ["./"]
+CPP_CURRENT_LICENSE = licensetext.current()
+PYTHON_CURRENT_LICENSE = licensetext.current_python()
 
-current = licensetext.current()
+CPP_CHECKER = licensetext.Checker(CPP_CURRENT_LICENSE, toolname=TOOL_NAME)
+PYTHON_CHECKER = licensetext.Checker(
+    PYTHON_CURRENT_LICENSE, offset=2, extensions=["py"], toolname=TOOL_NAME, shebang=True, empty_passes=True
+)
 
-# Check LICENSE.txt
-# Create the text as it should be
-licensetxt = licensetext.merge_paragraphs(current)
-# Load the text file
-filename = "LICENSE.txt"
-fp = open(filename)
-filetxt = fp.read()
-fp.close()
-# Compare the two strings
-base_license_text_success = licensetext.check_license('LICENSE.txt', filetxt,
-                                                      licensetxt,
-                                                      toolname=TOOL_NAME)
+# Relative from ROOT_DIR patterns
+PYTHON_EXCLUDE_PATTERNS = [
+    r".*third_party.*",
+    r"^build.*",
+    r"^bin.*",
+    r".*readthedocs.*",
+    r".*venv.*",
+    r".*cmake-build-.*",
+    r".*colorize_cppcheck_results.py.*",
+    r".*__init__.py",
+]
 
-# Create C++ Checker object
-checker = licensetext.Checker(current, toolname=TOOL_NAME)
 
-# Check files
-cpp_file_license_success = True
-for base in cpp_dirs:
-    file_success = checker.visit(base)
-    if not file_success:
-        cpp_file_license_success = False
+def check_root_license_txt() -> LogMessage | None:
+    # Check LICENSE.txt
+    # Create the text as it should be
+    license_txt = licensetext.merge_paragraphs(CPP_CURRENT_LICENSE)
+    # Load the text file
+    license_txt_path = ROOT_DIR / "LICENSE.txt"
+    assert license_txt_path.is_file(), f"'{license_txt_path}' not found"
+    # Compare the two strings
+    return licensetext.check_license(
+        filepath=license_txt_path, possible=license_txt_path.read_text(), correct=license_txt, toolname=TOOL_NAME
+    )
 
-# Create Python Checker object
-checker = licensetext.Checker(licensetext.current_python(), offset=2,
-                              extensions=['py'], toolname=TOOL_NAME,
-                              shebang=True, empty_passes=True)
 
-# Check files
-python_file_license_success = True
-patterns = [r'.*third_party.*', r'^\.(\\|/)build.*',
-            r'^\.(\\|/)bin.*', r'.*readthedocs.*',
-            r'.*venv.*', r'.*cmake-build-.*',
-            r'.*colorize_cppcheck_results.py.*']
-for base in python_dirs:
-    file_success = checker.visit(base, exclude_patterns=patterns)
-    if not file_success:
-        python_file_license_success = False
+def check_full_repo() -> bool:
+    """Check LICENSE.txt, then scan all C++ and Python dirs."""
+    ok = True
+    for base in CPP_DIRS:
+        if not CPP_CHECKER.visit(path=base):
+            ok = False
 
-if (base_license_text_success and cpp_file_license_success
-   and python_file_license_success):
-    sys.exit(0)
-else:
-    sys.exit(1)
+    for base in PYTHON_DIRS:
+        if not PYTHON_CHECKER.visit(path=base, exclude_patterns=PYTHON_EXCLUDE_PATTERNS):
+            ok = False
+
+    return ok
+
+
+def check_files(filepaths: list[Path]) -> bool:
+    """Check only the given files (used in pre-commit mode)."""
+    ok = True
+    for path in filepaths:
+        if not path.exists():
+            continue
+
+        ext = path.suffix.lower()
+        if ext in {".cc", ".cpp", ".c", ".hh", ".hpp", ".h"}:
+            checker = CPP_CHECKER
+        elif ext == ".py":
+            checker = PYTHON_CHECKER
+        else:
+            # Skip unknown file types
+            continue
+
+        if not checker.visit_file(filepath=path):
+            ok = False
+
+    return ok
+
+
+def report_status(opt_base_msg: LogMessage | None, verbose: bool = False):
+    all_log_messages: list[LogMessage] = []
+    if opt_base_msg is not None:
+        all_log_messages = [opt_base_msg]
+    all_log_messages += CPP_CHECKER.log_messages + PYTHON_CHECKER.log_messages
+    report_log_messages(log_messages=all_log_messages, fail_threshold=LogLevel.ERROR, verbose=verbose)
+
+    if verbose:
+        print(f"C++: visited {len(CPP_CHECKER.visited_files)} files")
+        print(f"Python: visited {len(PYTHON_CHECKER.visited_files)} files")
+
+
+if __name__ == "__main__":
+    parser = get_base_parser(description="License checker")
+
+    opt_base_msg = check_root_license_txt()
+
+    args = parser.parse_args()
+    if not args.files:
+        success = check_full_repo()
+    else:
+        files = args.files
+        files = [f for f in files if f.suffix == ".py" or any(f.is_relative_to(d) for d in CPP_DIRS)]
+        for pattern in PYTHON_EXCLUDE_PATTERNS:
+            matcher = re.compile(pattern)
+            files = [f for f in files if not matcher.match(str(relative_path_from_root(f)))]
+        success = check_files(filepaths=files)
+    success = success and opt_base_msg is None
+    report_status(opt_base_msg=opt_base_msg, verbose=args.verbose)
+
+    exit_hook(success)

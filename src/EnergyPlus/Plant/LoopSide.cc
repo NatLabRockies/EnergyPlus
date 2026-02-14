@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1163,10 +1163,9 @@ namespace DataPlant {
                                         loop_side.Branch(BranchCounter).RequestedMassFlow = steps;
                                         LoopFlow = tmpLoopFlow;
                                         break;
-                                    } else {
-                                        AccumFlowSteps += steps;
-                                        loop_side.Branch(BranchCounter).RequestedMassFlow = steps;
                                     }
+                                    AccumFlowSteps += steps;
+                                    loop_side.Branch(BranchCounter).RequestedMassFlow = steps;
                                 }
                             }
                         }
@@ -1341,13 +1340,12 @@ namespace DataPlant {
                 state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = min(max(ThisLoopSideFlow, BranchMinAvail), BranchMaxAvail);
                 // now with flow locked, this single branch will just ran at the specified flow rate, so we are done
                 return;
-            } else {
-                ShowSevereError(state, "Plant topology problem on \"" + this->loopSideDescription + "\"");
-                ShowContinueError(state, "There are multiple branches, yet no splitter.  This is an invalid configuration.");
-                ShowContinueError(state, "Add a set of connectors, use put components on a single branch.");
-                ShowFatalError(state, "Invalid plant topology causes program termination.");
-                return;
             }
+            ShowSevereError(state, "Plant topology problem on \"" + this->loopSideDescription + "\"");
+            ShowContinueError(state, "There are multiple branches, yet no splitter.  This is an invalid configuration.");
+            ShowContinueError(state, "Add a set of connectors, use put components on a single branch.");
+            ShowFatalError(state, "Invalid plant topology causes program termination.");
+            return;
         }
 
         // If a splitter/mixer combination exist on the loop
@@ -1457,7 +1455,8 @@ namespace DataPlant {
                     }
                 }
                 return;
-            } else if (FlowRemaining >= TotParallelBranchFlowReq) {
+            }
+            if (FlowRemaining >= TotParallelBranchFlowReq) {
 
                 // 1) Satisfy flow demand of ACTIVE splitter outlet branches
                 for (int OutletNum = 1; OutletNum <= NumSplitOutlets; ++OutletNum) {
@@ -1618,64 +1617,63 @@ namespace DataPlant {
                 return;
 
                 // IF INSUFFICIENT FLOW TO MEET ALL PARALLEL BRANCH FLOW REQUESTS
-            } else {
+            }
+            // 1) apportion flow based on requested fraction of total
+            for (int OutletNum = 1; OutletNum <= NumSplitOutlets; ++OutletNum) {
 
-                // 1) apportion flow based on requested fraction of total
-                for (int OutletNum = 1; OutletNum <= NumSplitOutlets; ++OutletNum) {
+                int SplitterBranchOut = this->Splitter.BranchNumOut(OutletNum);
+                ThisBranchRequest = this->Branch(SplitterBranchOut).DetermineBranchFlowRequest(state);
+                FirstNodeOnBranch = this->Branch(SplitterBranchOut).NodeNumIn;
+                auto &this_splitter_outlet_branch(this->Branch(SplitterBranchOut));
 
-                    int SplitterBranchOut = this->Splitter.BranchNumOut(OutletNum);
-                    ThisBranchRequest = this->Branch(SplitterBranchOut).DetermineBranchFlowRequest(state);
-                    FirstNodeOnBranch = this->Branch(SplitterBranchOut).NodeNumIn;
-                    auto &this_splitter_outlet_branch(this->Branch(SplitterBranchOut));
+                if ((this_splitter_outlet_branch.controlType == DataBranchAirLoopPlant::ControlType::Active) ||
+                    (this_splitter_outlet_branch.controlType == DataBranchAirLoopPlant::ControlType::SeriesActive)) {
 
-                    if ((this_splitter_outlet_branch.controlType == DataBranchAirLoopPlant::ControlType::Active) ||
-                        (this_splitter_outlet_branch.controlType == DataBranchAirLoopPlant::ControlType::SeriesActive)) {
+                    // since we are calculating this fraction based on the total parallel request calculated above, we must mimic the logic to
+                    // make sure the math works every time that means we must make the variable speed pump correction here as well.
+                    for (int CompCounter = 1; CompCounter <= this_splitter_outlet_branch.TotalComponents; ++CompCounter) {
 
-                        // since we are calculating this fraction based on the total parallel request calculated above, we must mimic the logic to
-                        // make sure the math works every time that means we must make the variable speed pump correction here as well.
-                        for (int CompCounter = 1; CompCounter <= this_splitter_outlet_branch.TotalComponents; ++CompCounter) {
+                        auto const &this_comp(this_splitter_outlet_branch.Comp(CompCounter));
 
-                            auto const &this_comp(this_splitter_outlet_branch.Comp(CompCounter));
-
-                            // if this isn't a variable speed pump then just keep cycling
-                            if ((this_comp.Type != PlantEquipmentType::PumpVariableSpeed) &&
-                                (this_comp.Type != PlantEquipmentType::PumpBankVariableSpeed)) {
-                                continue;
-                            }
-
-                            int CompInletNode = this_comp.NodeNumIn;
-                            ThisBranchRequest = max(ThisBranchRequest, state.dataLoopNodes->Node(CompInletNode).MassFlowRateRequest);
+                        // if this isn't a variable speed pump then just keep cycling
+                        if ((this_comp.Type != PlantEquipmentType::PumpVariableSpeed) &&
+                            (this_comp.Type != PlantEquipmentType::PumpBankVariableSpeed)) {
+                            continue;
                         }
 
-                        ThisBranchRequestFrac = ThisBranchRequest / TotParallelBranchFlowReq;
-                        //    FracFlow = state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate/TotParallelBranchFlowReq
-                        //    state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate = MIN((FracFlow *
-                        //    state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate),FlowRemaining)
-                        state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = ThisBranchRequestFrac * ThisLoopSideFlow;
-                        this->PushBranchFlowCharacteristics(
-                            state, SplitterBranchOut, state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate, FirstHVACIteration);
-                        FlowRemaining -= state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate;
+                        int CompInletNode = this_comp.NodeNumIn;
+                        ThisBranchRequest = max(ThisBranchRequest, state.dataLoopNodes->Node(CompInletNode).MassFlowRateRequest);
                     }
+
+                    ThisBranchRequestFrac = ThisBranchRequest / TotParallelBranchFlowReq;
+                    //    FracFlow = state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate/TotParallelBranchFlowReq
+                    //    state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate = MIN((FracFlow *
+                    //    state.dataLoopNodes->Node(FirstNodeOnBranch)%MassFlowRate),FlowRemaining)
+                    state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = ThisBranchRequestFrac * ThisLoopSideFlow;
+                    this->PushBranchFlowCharacteristics(
+                        state, SplitterBranchOut, state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate, FirstHVACIteration);
+                    FlowRemaining -= state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate;
                 }
+            }
 
-                // 1b) check if flow all apportioned
-                if (FlowRemaining > DataBranchAirLoopPlant::MassFlowTolerance) {
-                    // Call fatal diagnostic error. !The math should work out!
-                    ShowSevereError(state, "ResolveParallelFlows: Dev note, failed to redistribute restricted flow");
-                    ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, format("Loop side flow = {:.8R} (kg/s)", ThisLoopSideFlow));
-                    ShowContinueError(state, format("Flow Remaining = {:.8R} (kg/s)", FlowRemaining));
-                    ShowContinueError(state, format("Parallel Branch requests  = {:.8R} (kg/s)", TotParallelBranchFlowReq));
-                }
+            // 1b) check if flow all apportioned
+            if (FlowRemaining > DataBranchAirLoopPlant::MassFlowTolerance) {
+                // Call fatal diagnostic error. !The math should work out!
+                ShowSevereError(state, "ResolveParallelFlows: Dev note, failed to redistribute restricted flow");
+                ShowContinueErrorTimeStamp(state, "");
+                ShowContinueError(state, format("Loop side flow = {:.8R} (kg/s)", ThisLoopSideFlow));
+                ShowContinueError(state, format("Flow Remaining = {:.8R} (kg/s)", FlowRemaining));
+                ShowContinueError(state, format("Parallel Branch requests  = {:.8R} (kg/s)", TotParallelBranchFlowReq));
+            }
 
-                // 2)  ! Reset the flow on the Mixer outlet branch
-                MixerBranchOut = this->Mixer.BranchNumOut;
-                FirstNodeOnBranchOut = this->Branch(MixerBranchOut).NodeNumIn;
-                state.dataLoopNodes->Node(FirstNodeOnBranchOut).MassFlowRate = TotParallelBranchFlowReq;
-                this->PushBranchFlowCharacteristics(
-                    state, MixerBranchOut, state.dataLoopNodes->Node(FirstNodeOnBranchOut).MassFlowRate, FirstHVACIteration);
+            // 2)  ! Reset the flow on the Mixer outlet branch
+            MixerBranchOut = this->Mixer.BranchNumOut;
+            FirstNodeOnBranchOut = this->Branch(MixerBranchOut).NodeNumIn;
+            state.dataLoopNodes->Node(FirstNodeOnBranchOut).MassFlowRate = TotParallelBranchFlowReq;
+            this->PushBranchFlowCharacteristics(
+                state, MixerBranchOut, state.dataLoopNodes->Node(FirstNodeOnBranchOut).MassFlowRate, FirstHVACIteration);
 
-            } // Total flow requested >= or < Total parallel request
+            // Total flow requested >= or < Total parallel request
 
         } // Splitter/Mixer exists
     }

@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -108,6 +108,9 @@ CONFIGURATIONS = {
     'win64': {
         'os': OS.Windows, 'bitness': Bitness.X64, 'asset_pattern': 'Windows-x86_64.zip', 'os_version': '2022'
     },
+    'win-arm64': {
+        'os': OS.Windows, 'bitness': Bitness.ARM64, 'asset_pattern': 'Windows-arm64.zip', 'os_version': '2022'
+    },
 }
 # fmt: on
 
@@ -141,10 +144,8 @@ class TestRunner:
         self.last_version = last_version
         self.tag_last_version = last_tag
 
-    def find_and_extract_package(self, artifact_folder: Path) -> str:
+    def find_and_extract_package(self, artifact_folder: Path) -> Path:
         extract_path = Path.cwd() / "ep_package"
-        saved_working_directory = Path.cwd()
-        os.chdir(artifact_folder)
         package_file_name = str(list(artifact_folder.rglob("*"))[0])
         if self.os == OS.Linux:
             # tar -xzf ep.tar.gz -C ep_package
@@ -164,16 +165,41 @@ class TestRunner:
         try:
             print("Extracting asset...")
             dev_null = open(os.devnull, "w")
-            check_call(extract_command, stdout=dev_null, stderr=STDOUT)
+            check_call(extract_command, stdout=dev_null, stderr=STDOUT, cwd=artifact_folder)
             print(" ...Extraction Complete")
         except CalledProcessError as e:
             raise Exception(f"Extraction failed with this error: {e}\nCommand: {extract_command}")
         # should result in a single new directory inside the extract path, like: /extract/path/EnergyPlus-V1-abc-Linux
-        all_sub_folders = [f.path for f in os.scandir(extract_path) if f.is_dir()]
-        if len(all_sub_folders) > 1:
+        all_sub_folders = [p for p in extract_path.iterdir() if p.is_dir()]
+        if not all_sub_folders:
+            raise Exception("Extracted EnergyPlus package has no directories, problem.")
+        elif len(all_sub_folders) > 1:
             raise Exception("Extracted EnergyPlus package has more than one directory, problem.")
-        os.chdir(saved_working_directory)
         return all_sub_folders[0]
+
+    def ensure_python_lib_is_there(self, install_path: Path, verbose: bool = False) -> None:
+        print("* Ensuring Python library is present in the installation...", end="")
+        if self.os == OS.Windows:
+            pattern = "python3*.dll"
+        elif self.os == OS.Linux:
+            pattern = "libpython3*.so*"
+        else:  # Mac
+            pattern = "libpython3*.dylib"
+        found = list(install_path.glob(pattern))
+        # We should have found only one
+        if len(found) != 1:
+            raise Exception(f"Could not find the Python library with pattern {pattern} in {install_path}")
+        # Ensure this is a valid library and not a symlink
+        python_lib_path = found[0]
+        if not python_lib_path.is_file():
+            raise Exception(f"Found Python library '{python_lib_path}' is not file")
+
+        if python_lib_path.is_symlink():
+            raise Exception(f"Found Python library '{python_lib_path}' is not a real file but a symlink")
+
+        if verbose:
+            print(f" [{python_lib_path}]", end="")
+        print(" [DONE]!")
 
     def run_all_tests(self, install_path_path: Path, verbose: bool) -> int:
         saved_path = os.getcwd()
@@ -260,9 +286,11 @@ def main() -> int:
         run_config_key=args.config, this_version=this, last_version=last, last_tag=last_tag, msvc_version=args.msvc
     )
     # Extract the package using the runner utility
-    extracted_package_dir = runner.find_and_extract_package(raw_artifact_path)
+    extracted_package_dir = runner.find_and_extract_package(artifact_folder=raw_artifact_path)
+    # Ensure the python library is there
+    runner.ensure_python_lib_is_there(install_path=extracted_package_dir, verbose=args.verbose)
     # Run all tests and return an exit code
-    return runner.run_all_tests(Path(extracted_package_dir), args.verbose)
+    return runner.run_all_tests(install_path_path=extracted_package_dir, verbose=args.verbose)
 
 
 if __name__ == "__main__":

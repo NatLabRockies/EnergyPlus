@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -123,6 +123,8 @@ namespace EIRPlantLoopHeatPumps {
         ControlType sysControlType = ControlType::Invalid;
         DataPlant::FlowMode flowMode = DataPlant::FlowMode::Invalid;
 
+        bool SetpointSetToLoopErrDone = false; // True if the warning about setpoint is missing at the outlet node has been issued
+
         // sizing data
         Real64 heatSizingRatio = 1.0;
         HeatSizingType heatSizingMethod = HeatSizingType::Invalid;
@@ -196,6 +198,8 @@ namespace EIRPlantLoopHeatPumps {
         PlantLocation heatRecoveryPlantLoc;
         InOutNodePair heatRecoveryNodes;
         bool heatRecoveryHeatPump = false; // HP that transfers heat between plants and should not increase plant size
+
+        int setPointNodeNum = 0;
 
         // counters and indexes
         int condMassFlowRateTriggerIndex = 0;
@@ -382,7 +386,7 @@ namespace EIRPlantLoopHeatPumps {
 
         // New additions for GAHP only
         Constant::eFuel fuelType = Constant::eFuel::Invalid; // Fuel type assignment
-        std::string endUseSubcat = "";
+        std::string endUseSubcat;
         DataPlant::FlowMode flowMode = DataPlant::FlowMode::Invalid;
         Real64 desSupplyTemp = 60.0;
         Real64 desTempLift = 11.1;
@@ -536,7 +540,11 @@ namespace EIRPlantLoopHeatPumps {
         void resetReportingVariables() override;
         Real64 calcCrankcaseHeaterPower(EnergyPlusData &state) const;
         void setUpEMS(EnergyPlusData &state) override;
-        static PlantComponent *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType hp_type, const std::string &hp_name);
+        static PlantComponent *factory(EnergyPlusData &state,
+                                       DataPlant::PlantEquipmentType &hp_type,
+                                       const std::string &hp_name,
+                                       int const inletNodeNum = 0,
+                                       int const outletNodeNum = 0);
         static void processInputForEIRPLHP(EnergyPlusData &state);
         void sizeLoadSide(EnergyPlusData &state);
     }; // HeatPumpAirToWater

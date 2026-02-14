@@ -1,6 +1,6 @@
 \section{Whole-Facility Electric Service}\label{section-whole-facility-electric-service}
 
-Whenever an EnergyPlus model includes anything that consumes electricity the program will do some basic modeling of what can be thought of as the main panel where utility grid connects to the building and HVAC loads.  The following output variables and meters are created and filled to report on the overall, whole-facility power flows at the main panel: 
+Whenever an EnergyPlus model includes anything that consumes electricity the program will do some basic modeling of what can be thought of as the main panel where utility grid connects to the building and HVAC loads.  The following output variables and meters are created and filled to report on the overall, whole-facility power flows at the main panel:
 
 \begin{tabular}{c|c|c}
   ${P_{purch}}$ &    Facility Total Purchased Electric Power & (W) \tabularnewline
@@ -16,7 +16,7 @@ Whenever an EnergyPlus model includes anything that consumes electricity the pro
   ${Q_{prod}}$ &   Facility Total Produced Electric Energy & (J)
 \end{tabular}
 
-The models for electric power service use the meter reporting system inside EnergyPlus to obtain data from all the other models in EnergyPlus for the electric power demand (and maybe power production).  The ElectricPowerServiceManager uses a query routine called "GetInstantMeterValue" which returns the sum for all the metered equipment for the specified meter.  Values for $P_{bldg,dmd}$ and $P_{HVAC,dmd}$ are both filled from the "Electricity:Facility" meter.  $P_{bldg,dmd}$ is filled by passing an argument that triggers to return the "Building" electric load, which is at the zone timestep, while $P_{HVAC,dmd}$ is filled by passing an argument that returns the "HVAC" electric load, which is at the system timestep.  The modeling is based on average power levels for the duration of the timestep. The return values are converted from energy in Joules to power in Watts by dividing by the number of seconds in the zone timestep for building loads and by the system timestep for the HVAC loads.  Then the total facility power demand is the sum of the building loads and the HVAC loads. 
+The models for electric power service use the meter reporting system inside EnergyPlus to obtain data from all the other models in EnergyPlus for the electric power demand (and maybe power production).  The ElectricPowerServiceManager uses a query routine called "GetInstantMeterValue" which returns the sum for all the metered equipment for the specified meter.  Values for $P_{bldg,dmd}$ and $P_{HVAC,dmd}$ are both filled from the "Electricity:Facility" meter.  $P_{bldg,dmd}$ is filled by passing an argument that triggers to return the "Building" electric load, which is at the zone timestep, while $P_{HVAC,dmd}$ is filled by passing an argument that returns the "HVAC" electric load, which is at the system timestep.  The modeling is based on average power levels for the duration of the timestep. The return values are converted from energy in Joules to power in Watts by dividing by the number of seconds in the zone timestep for building loads and by the system timestep for the HVAC loads.  Then the total facility power demand is the sum of the building loads and the HVAC loads.
 
 \begin{equation}
   P_{dmd} = P_{bldg,dmd} + P_{HVAC,dmd}
@@ -48,10 +48,10 @@ Only the positive portion of the net purchased power is the purchased power.
   {P_{purch}} = { max ( {P_{net,purch}}, 0.0 ) }
 \end{equation}
 
-The surplus electric power is exported out to the grid and is only positive. 
+The surplus electric power is exported out to the grid and is only positive.
 
 \begin{equation}
   {P_{surp}} =  { max ( ({P_{prod}} - {P_{dmd}}) , 0.0 ) }
 \end{equation}
 
-The energy versions of the power variables are calculated by multiplying the power level by the number of seconds in the system timestep. 
+The energy versions of the power variables are calculated by multiplying the power level by the number of seconds in the system timestep.

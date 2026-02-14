@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -149,7 +149,8 @@ struct DataGlobal : BaseGlobalStruct
     bool AnyEnergyManagementSystemInModel = false; // true if there is any EMS or Erl in model.  otherwise false
     bool AnySurfPropOverridesInModel = false;      // true if there is any EMS or Erl overriding the surface properties for any surface.
     bool AnyConstrOverridesInModel = false;        // true if there is any EMS or Erl overriding the constructions for any surface.
-    bool AndShadingControlInModel = false;         // true if there is any window shading control for any fenestration surface
+    bool AnyShadingControlInModel = false;         // true if there is any window shading control for any fenestration surface
+    bool AnyInsideShelf = false;                   // true if these is any inside daylighting shelf
     bool AnyLocalEnvironmentsInModel = false;      // true if there is any local environmental data objected defined in model, otherwise false
     bool AnyPlantInModel = false;                  // true if there are any plant or condenser loops in model, otherwise false
     bool AnyIdealCondEntSetPointInModel = false;   // true if there is any ideal condenser entering set point manager in model.

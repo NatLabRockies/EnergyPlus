@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -5226,7 +5226,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                     goto EquipList_exit; // already found previously
                 }
                 for (ELLoop = 1; ELLoop <= state.dataGlobal->NumOfZones; ++ELLoop) { // NumOfZoneEquipLists
-                    if (state.dataZoneEquip->ZoneEquipList(ELLoop).Name == "") {
+                    if (state.dataZoneEquip->ZoneEquipList(ELLoop).Name.empty()) {
                         continue; // dimensioned by NumOfZones.  Only valid ones have names.
                     }
                     for (ListLoop = 1; ListLoop <= state.dataZoneEquip->ZoneEquipList(ELLoop).NumOfEquipTypes; ++ListLoop) {
@@ -5392,7 +5392,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                 if (ctrlZoneNum > 0) {
                     int inletNodeADUNum = 0;
                     DataZoneEquipment::ZoneEquipType sysType_Num = DataZoneEquipment::ZoneEquipType::Invalid;
-                    std::string sysName = "";
+                    std::string sysName;
                     for (int inletNode = 1; inletNode <= state.dataZoneEquip->ZoneEquipConfig(ctrlZoneNum).NumInletNodes; inletNode++) {
                         if (state.dataZoneEquip->ZoneEquipConfig(ctrlZoneNum).InletNodeAirLoopNum(inletNode) !=
                             state.dataHVACVarRefFlow->VRFTU(TUIndex).airLoopNum) {
@@ -8860,12 +8860,11 @@ void VRFTerminalUnitEquipment::ControlVRFToLoad(EnergyPlusData &state,
                 if (setPointControlled) {
                     Real64 outletNodeT = state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum).Temp;
                     return (outletNodeT - state.dataHVACVarRefFlow->VRFTU(VRFTUNum).coilTempSetPoint);
-                } else {
-                    if (std::abs(QZnReq) < 100.0) {
-                        QZnReqTemp = sign(100.0, QZnReq);
-                    }
-                    return (ActualOutput - QZnReq) / QZnReqTemp;
                 }
+                if (std::abs(QZnReq) < 100.0) {
+                    QZnReqTemp = sign(100.0, QZnReq);
+                }
+                return (ActualOutput - QZnReq) / QZnReqTemp;
             };
             General::SolveRoot(state, ErrorTol, MaxIte, SolFla, PartLoadRatio, f, 0.0, 1.0);
             if (SpeedNum == 1) {
@@ -10176,11 +10175,9 @@ void LimitCoilCapacity(int const NumTUInList,           // Number of terminal un
         if ((Temp(TempTUIndex) * (NumTUInList - TempTUIndex + 1)) < RemainingCapacity) {
             RemainingCapacity -= Temp(TempTUIndex);
             continue;
-        } else {
-            // if it does exceed, limit is found
-            MaxLimit = RemainingCapacity / (NumTUInList - TempTUIndex + 1);
-            break;
-        }
+        } // if it does exceed, limit is found
+        MaxLimit = RemainingCapacity / (NumTUInList - TempTUIndex + 1);
+        break;
     }
 }
 
@@ -10203,9 +10200,8 @@ int GetVRFTUOutAirNode(EnergyPlusData &state, int const VRFTUNum)
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
         return state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 int GetVRFTUZoneInletAirNode(EnergyPlusData &state, int const VRFTUNum)
@@ -10227,9 +10223,8 @@ int GetVRFTUZoneInletAirNode(EnergyPlusData &state, int const VRFTUNum)
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
         return state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 int GetVRFTUOutAirNodeFromName(EnergyPlusData &state, std::string const &VRFTUName, bool &errorsFound)
@@ -10295,9 +10290,8 @@ int GetVRFTUMixedAirNode(EnergyPlusData &state, int const VRFTUNum)
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
         return state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 int GetVRFTUReturnAirNode(EnergyPlusData &state, int const VRFTUNum)
@@ -10319,9 +10313,8 @@ int GetVRFTUReturnAirNode(EnergyPlusData &state, int const VRFTUNum)
 
     if (VRFTUNum > 0 && VRFTUNum <= state.dataHVACVarRefFlow->NumVRFTU) {
         return state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOAMixerRetNodeNum;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 int getEqIndex(EnergyPlusData &state, std::string_view VRFTUName)
@@ -10662,7 +10655,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
     Real64 CoolingPLR;                // condenser cooling PLR
     Real64 HeatingPLR;                // condenser heating PLR
     Real64 CyclingRatio;              // cycling ratio of condenser's compressors
-    int Stage;                        // used for crankcase heater power calculation
     Real64 UpperStageCompressorRatio; // used for crankcase heater power calculation
     Real64 RhoAir;                    // Density of air [kg/m3]
     Real64 PartLoadFraction;          // Part load fraction from PLFFPLR curve
@@ -11240,64 +11232,63 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                 this->VRFOU_TeTc(
                     state, HXOpMode::EvapMode, Q_c_OU, SH_OU, m_air, OutdoorDryBulb, OutdoorHumRat, OutdoorPressure, Tfs, this->EvaporatingTemp);
                 break;
-            } else {
-                // CompEvaporatingCAPSpdMin < (Q_c_OU * C_cap_operation) <= CompEvaporatingCAPSpdMaxCurrentTsuc + CompEvaporatingPWRSpdMaxCurrentTsuc
-                // Required heating load is greater than or equal to the min heating capacity
+            } // CompEvaporatingCAPSpdMin < (Q_c_OU * C_cap_operation) <= CompEvaporatingCAPSpdMaxCurrentTsuc + CompEvaporatingPWRSpdMaxCurrentTsuc
+            // Required heating load is greater than or equal to the min heating capacity
 
-                // Iteration_Ncomp: Perform iterations to calculate Ncomp (Label20)
-                Counter = 1;
-                bool converged_20;
-                do {
-                    Ncomp_new = Ncomp;
-                    Q_c_OU = max(0.0, Q_h_TU_PL - Ncomp);
+            // Iteration_Ncomp: Perform iterations to calculate Ncomp (Label20)
+            Counter = 1;
+            bool converged_20;
+            do {
+                Ncomp_new = Ncomp;
+                Q_c_OU = max(0.0, Q_h_TU_PL - Ncomp);
 
-                    // *VRF OU Te calculations
-                    m_air = this->OUAirFlowRate * RhoAir;
-                    SH_OU = this->SH;
-                    this->VRFOU_TeTc(
-                        state, HXOpMode::EvapMode, Q_c_OU, SH_OU, m_air, OutdoorDryBulb, OutdoorHumRat, OutdoorPressure, Tfs, this->EvaporatingTemp);
-                    this->SH = SH_OU;
+                // *VRF OU Te calculations
+                m_air = this->OUAirFlowRate * RhoAir;
+                SH_OU = this->SH;
+                this->VRFOU_TeTc(
+                    state, HXOpMode::EvapMode, Q_c_OU, SH_OU, m_air, OutdoorDryBulb, OutdoorHumRat, OutdoorPressure, Tfs, this->EvaporatingTemp);
+                this->SH = SH_OU;
 
-                    // *VRF OU Compressor Simulation at heating mode: Specify the compressor speed and power consumption
-                    this->VRFOU_CalcCompH(state,
-                                          TU_HeatingLoad,
-                                          this->EvaporatingTemp,
-                                          Tdischarge,
-                                          h_IU_cond_out_ave,
-                                          this->IUCondensingTemp,
-                                          CapMinTe,
-                                          Tfs,
-                                          Pipe_Q_h,
-                                          Q_c_OU,
-                                          CompSpdActual,
-                                          Ncomp_new,
-                                          CyclingRatio);
+                // *VRF OU Compressor Simulation at heating mode: Specify the compressor speed and power consumption
+                this->VRFOU_CalcCompH(state,
+                                      TU_HeatingLoad,
+                                      this->EvaporatingTemp,
+                                      Tdischarge,
+                                      h_IU_cond_out_ave,
+                                      this->IUCondensingTemp,
+                                      CapMinTe,
+                                      Tfs,
+                                      Pipe_Q_h,
+                                      Q_c_OU,
+                                      CompSpdActual,
+                                      Ncomp_new,
+                                      CyclingRatio);
 
-                    converged_20 = (std::abs(Ncomp_new - Ncomp) <= (Tolerance * Ncomp)) || (Counter >= 30);
-                    Counter = Counter + 1;
-                    if (!converged_20) {
-                        Ncomp = Ncomp_new;
-                    }
-                } while (!converged_20);
-
-                // Update h_comp_out in iteration Label23
-                P_comp_in = this->refrig->getSatPressure(state, this->EvaporatingTemp, RoutineName);
-                RefTSat = this->refrig->getSatTemperature(state, max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
-                h_comp_in_new = this->refrig->getSupHeatEnthalpy(
-                    state, max(RefTSat, this->SH + this->EvaporatingTemp), max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
-                h_comp_out_new = Ncomp_new / m_ref_IU_cond + h_comp_in_new;
-
-                converged_23 = !((std::abs(h_comp_out - h_comp_out_new) > Tolerance * h_comp_out) && (h_IU_cond_in < h_IU_cond_in_up));
-                if (!converged_23) {
-                    h_IU_cond_in = h_IU_cond_in + 0.1 * (h_IU_cond_in_up - h_IU_cond_in_low);
-                } else {
-                    if (h_IU_cond_in > h_IU_cond_in_up) {
-                        h_IU_cond_in = 0.5 * (h_IU_cond_in_up + h_IU_cond_in_low);
-                    }
+                converged_20 = (std::abs(Ncomp_new - Ncomp) <= (Tolerance * Ncomp)) || (Counter >= 30);
+                Counter = Counter + 1;
+                if (!converged_20) {
                     Ncomp = Ncomp_new;
-                    break;
                 }
+            } while (!converged_20);
+
+            // Update h_comp_out in iteration Label23
+            P_comp_in = this->refrig->getSatPressure(state, this->EvaporatingTemp, RoutineName);
+            RefTSat = this->refrig->getSatTemperature(state, max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
+            h_comp_in_new = this->refrig->getSupHeatEnthalpy(
+                state, max(RefTSat, this->SH + this->EvaporatingTemp), max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
+            h_comp_out_new = Ncomp_new / m_ref_IU_cond + h_comp_in_new;
+
+            converged_23 = !((std::abs(h_comp_out - h_comp_out_new) > Tolerance * h_comp_out) && (h_IU_cond_in < h_IU_cond_in_up));
+            if (!converged_23) {
+                h_IU_cond_in = h_IU_cond_in + 0.1 * (h_IU_cond_in_up - h_IU_cond_in_low);
+            } else {
+                if (h_IU_cond_in > h_IU_cond_in_up) {
+                    h_IU_cond_in = 0.5 * (h_IU_cond_in_up + h_IU_cond_in_low);
+                }
+                Ncomp = Ncomp_new;
+                break;
             }
+
         } while (!converged_23);
 
         // Key outputs of this subroutine
@@ -11847,7 +11838,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
         this->CrankCaseHeaterPower = this->CCHeaterPower * (1.0 - VRFRTF);
         if (this->NumCompressors > 1) {
             UpperStageCompressorRatio = (1.0 - this->CompressorSizeRatio) / (this->NumCompressors - 1);
-            for (Stage = 1; Stage <= this->NumCompressors - 2; ++Stage) {
+            for (int Stage = 1; Stage <= this->NumCompressors - 2; ++Stage) {
                 if (this->VRFCondPLR < (this->CompressorSizeRatio + Stage * UpperStageCompressorRatio)) {
                     this->CrankCaseHeaterPower += this->CCHeaterPower;
                 }
@@ -12205,12 +12196,11 @@ void VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl(EnergyPlusData &state,
             if (setPointControlled) {
                 Real64 outletNodeT = state.dataLoopNodes->Node(state.dataHVACVarRefFlow->VRFTU(VRFTUNum).VRFTUOutletNodeNum).Temp;
                 return (outletNodeT - state.dataHVACVarRefFlow->VRFTU(VRFTUNum).coilTempSetPoint);
-            } else {
-                if (std::abs(QZnReq) < 100.0) {
-                    QZnReqTemp = sign(100.0, QZnReq);
-                }
-                return (ActualOutput - QZnReq) / QZnReqTemp;
             }
+            if (std::abs(QZnReq) < 100.0) {
+                QZnReqTemp = sign(100.0, QZnReq);
+            }
+            return (ActualOutput - QZnReq) / QZnReqTemp;
         };
         SolveRoot(state, ErrorTol, MaxIte, SolFla, PartLoadRatio, f, 0.0, 1.0);
         if (SolFla == -1) {
@@ -13417,11 +13407,12 @@ void VRFCondenserEquipment::VRFOU_CompSpd(
                 CompSpdUB = CounterCompSpdTemp;
                 Real64 deltaCAP = CompEvaporatingCAPSpd(CompSpdUB) - CompEvaporatingCAPSpd(CompSpdLB);
                 Real64 deltaPWR = CompEvaporatingPWRSpd(CompSpdUB) - CompEvaporatingPWRSpd(CompSpdLB);
-                Real64 r = ((Q_cond_req - CompEvaporatingPWRSpd(CompSpdLB)) * C_cap_operation - CompEvaporatingCAPSpd(CompSpdLB)) /
-                           (deltaCAP + deltaPWR * C_cap_operation);
-                if (r < 1.0) {
-                    CompSpdActual = this->CompressorSpeed(CompSpdLB) + (this->CompressorSpeed(CompSpdUB) - this->CompressorSpeed(CompSpdLB)) * r;
-                    Q_evap_req = Q_cond_req - deltaPWR * r - CompEvaporatingPWRSpd(CompSpdLB);
+                Real64 interpRatio = ((Q_cond_req - CompEvaporatingPWRSpd(CompSpdLB)) * C_cap_operation - CompEvaporatingCAPSpd(CompSpdLB)) /
+                                     (deltaCAP + deltaPWR * C_cap_operation);
+                if (interpRatio < 1.0) {
+                    CompSpdActual =
+                        this->CompressorSpeed(CompSpdLB) + (this->CompressorSpeed(CompSpdUB) - this->CompressorSpeed(CompSpdLB)) * interpRatio;
+                    Q_evap_req = Q_cond_req - deltaPWR * interpRatio - CompEvaporatingPWRSpd(CompSpdLB);
                     break;
                 }
             }
@@ -13665,236 +13656,277 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                                                                (CompSpdActual - this->CompressorSpeed(CompSpdLB));
                 break; // EXIT DoName1
 
-            } else {
-                // Compressor runs at the min speed
-                // Low Load Modification Algorithm for cooling (IU side modification)
+            } // Compressor runs at the min speed
+            // Low Load Modification Algorithm for cooling (IU side modification)
 
-                // Initialization of NumIteCcap iterations (Label13)
+            // Initialization of NumIteCcap iterations (Label13)
+            Pipe_Q0 = Pipe_Q;
+            C_cap_operation0 = C_cap_operation;
+            T_discharge_new = T_discharge;
+            NumIteCcap = 1;
+
+            // Update the C_cap_operation
+            bool converged_13;
+            do {
+                Q_evap_req = TU_load + Pipe_Q0; // Pipe_Q0 is updated during the iteration
+                Pipe_h_IU_in = this->refrig->getSatEnthalpy(state, T_discharge_new - this->SC, 0.0, RoutineName);
+                CompSpdActual = this->CompressorSpeed(1);
+                Real64 CondHeat = Q_evap_req * C_cap_operation0 / this->RatedEvapCapacity; // 150130 To be confirmed
+                int CAPFT = this->OUCoolingCAPFT(CounterCompSpdTemp);
+
+                P_discharge = this->refrig->getSatPressure(state, T_discharge, RoutineName);
+                MinRefriPe = this->refrig->getSatPressure(state, -15, RoutineName);
+                MinOutdoorUnitPe = max(P_discharge - this->CompMaxDeltaP, MinRefriPe);
+                MinOutdoorUnitTe = this->refrig->getSatTemperature(state, max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), RoutineName);
+                // Te can't be smaller than user input lower bound
+                MinOutdoorUnitTe = max(this->IUEvapTempLow, MinOutdoorUnitTe);
+
+                auto f = [&state, T_discharge_new, CondHeat, CAPFT](Real64 const T_suc) {
+                    return CompResidual_FluidTCtrl(state, T_discharge_new, CondHeat, CAPFT, T_suc);
+                };
+
+                Real64 f_xmin = f(MinOutdoorUnitTe);
+                Real64 f_xmax = f(T_suction);
+                if (f_xmin < 0 && f_xmax < 0) {
+                    SmallLoadTe = MinOutdoorUnitTe;
+                } else if (f_xmin > 0 && f_xmax > 0) {
+                    if (f_xmin > f_xmax) {
+                        SmallLoadTe = T_suction;
+                    } else {
+                        SmallLoadTe = MinOutdoorUnitTe;
+                    }
+                } else {
+                    General::SolveRoot(state, 1.0e-3, MaxIter, SolFla, SmallLoadTe, f, MinOutdoorUnitTe, T_suction); // SmallLoadTe is the updated Te'
+                    if (SolFla == -1) {
+                        // show error not converging
+                        if (LowLoadTeIterError == 0) {
+                            ShowWarningMessage(state, format("{}: low load Te adjustment failed for {}", RoutineName, this->Name));
+                            ShowContinueErrorTimeStamp(state, "");
+                            ShowContinueError(state, format("  Iteration limit [{}] exceeded in calculating OU evaporating temperature", MaxIter));
+                        }
+                        ShowRecurringWarningErrorAtEnd(state,
+                                                       "Low load calculation Te solution iteration limit exceeded error continues.",
+                                                       this->LowLoadTeIterError,
+                                                       SmallLoadTe,
+                                                       SmallLoadTe);
+                    } else if (SolFla == -2) {
+                        if (f_xmax < 0) {
+                            // demand < capacity at both endpoints of the Te range, assuming f(x) is roughly monotonic then this is the low load
+                            // case TeTol is added to prevent the final updated Te to go out of bounds
+                            SmallLoadTe = MinOutdoorUnitTe;
+                            this->LowLoadTeError2Neg++;
+                            if (LowLoadTeError2Neg < 5) {
+                                ShowWarningMessage(state,
+                                                   format("{}: no Te solution was found for {}, as load < capacity for the whole range of Te",
+                                                          RoutineName,
+                                                          this->Name));
+                                ShowContinueErrorTimeStamp(state, "");
+                            }
+                            ShowRecurringWarningErrorAtEnd(
+                                state,
+                                "Low load calculation Te solution not found as load is smaller than min-speed capacity for the whole range",
+                                this->LowLoadTeError2NegIndex,
+                                SmallLoadTe,
+                                SmallLoadTe);
+                        } else {
+                            // demand > capacity at both endpoints of the Te range, take the end point x where f(x) is closer to zero
+                            if (f_xmin > f_xmax) { // f(T_suction > 0, not equal as SolFla would not have been -2
+                                SmallLoadTe = T_suction;
+                                this->LowLoadTeError2PosTsuc++;
+                                if (LowLoadTeError2PosTsuc < 5) {
+                                    ShowWarningMessage(state,
+                                                       format("{}: no Te solution was found for {}, as load > capacity for the full range of Te",
+                                                              RoutineName,
+                                                              this->Name));
+                                    ShowContinueErrorTimeStamp(state, "");
+                                }
+                                ShowRecurringWarningErrorAtEnd(
+                                    state,
+                                    "Low load calculation Te solution not found as load is larger than min-speed capacity for "
+                                    "the whole range\nTake T_suction as the updated Te",
+                                    this->LowLoadTeError2PosTsucIndex,
+                                    SmallLoadTe,
+                                    SmallLoadTe);
+                            } else {
+                                SmallLoadTe = MinOutdoorUnitTe;
+                                this->LowLoadTeError2PosOUTe++;
+                                if (LowLoadTeError2PosOUTe < 5) {
+                                    ShowWarningMessage(state,
+                                                       format("{}: no Te solution was found for {}, as load > capacity for the full range of Te",
+                                                              RoutineName,
+                                                              this->Name));
+                                    ShowContinueErrorTimeStamp(state, "");
+                                }
+                                ShowRecurringWarningErrorAtEnd(
+                                    state,
+                                    "Low load calculation Te solution not found as load is larger than min-speed capacity for "
+                                    "the whole range\nTake MinOutdoorUnitTe as the updated Te",
+                                    this->LowLoadTeError2PosOUTeIndex,
+                                    SmallLoadTe,
+                                    SmallLoadTe);
+                            }
+                        }
+                    }
+                }
+
+                // Get an updated Te corresponding to the updated Te'
+                // VRFOU_TeModification( VRFCond, this->EvaporatingTemp, SmallLoadTe, Pipe_h_IU_in, OutdoorDryBulb, Pipe_Te_assumed,
+                // Pipe_Pe_assumed, Pipe_m_ref, Pipe_SH_merged );
+                {
+                    // Initialization of Iteration_Te (Label11)
+                    // i.e., find a new Te (Pipe_Te_assumed) that can generate a new T_suction equaling to SmallLoadTe.
+                    // This requires the re-calculation of piping loss.
+                    NumIteTe = 1;
+                    MaxNumIteTe = (this->EvaporatingTemp - SmallLoadTe) / 0.1 + 1; // upper bound and lower bound of Te iterations
+                    Pipe_Te_assumed = this->EvaporatingTemp - 0.1;
+                    this->adjustedTe = true;
+
+                    bool converged_11_2;
+                    do {
+                        Pipe_m_ref = 0; // Total Ref Flow Rate( kg/s )
+
+                        // Re-calculate Piping loss due to the Te and SH updates
+                        Pipe_h_IU_out = 0;
+                        Pipe_h_IU_out_i = 0;
+                        Pipe_m_ref_i = 0;
+                        Pipe_SH_merged = 0;
+                        Pipe_Pe_assumed = this->refrig->getSatPressure(state, Pipe_Te_assumed, RoutineName);
+
+                        // Re-calculate total refrigerant flow rate, with updated SH
+                        for (int NumTU = 1; NumTU <= NumTUInList; NumTU++) {
+                            if (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU) > 0) {
+                                TUIndex = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).ZoneTUPtr(NumTU);
+                                CoolCoilIndex = state.dataHVACVarRefFlow->VRFTU(TUIndex).CoolCoilNum;
+
+                                Tfs = this->EvaporatingTemp + (this->C3Te * pow_2(state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH) +
+                                                               this->C2Te * state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH + this->C1Te);
+
+                                // Modifi_SH is the updated SH for a specific IU
+                                if (this->C3Te == 0) {
+                                    Modifi_SHin = -(this->C1Te - Tfs + Pipe_Te_assumed) / this->C2Te; // 150130 Modifi_SH>Modifi_SHin
+                                } else {
+                                    Modifi_SHin =
+                                        (-this->C2Te + std::pow((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + Pipe_Te_assumed) * this->C3Te), 0.5)) /
+                                        (2 * this->C3Te);
+                                }
+
+                                RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                                Pipe_h_IU_out_i = this->refrig->getSupHeatEnthalpy(
+                                    state, max(RefTSat, Pipe_Te_assumed + Modifi_SHin), max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+
+                                if (Pipe_h_IU_out_i > Pipe_h_IU_in) {
+                                    Real64 min_speed_capacity = this->CoffEvapCap * this->RatedEvapCapacity *
+                                                                CurveValue(state, this->OUCoolingCAPFT(1), T_discharge, T_suction);
+                                    Pipe_m_ref_i = (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU) <= 0.0)
+                                                       ? 0.0
+                                                       // refrigerant flow rate do not get smaller when the compressor needs to cycle.
+                                                       : max(min_speed_capacity,
+                                                             (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU)) /
+                                                                 (Pipe_h_IU_out_i - Pipe_h_IU_in));
+                                    Pipe_m_ref = Pipe_m_ref + Pipe_m_ref_i;
+                                    Pipe_SH_merged = Pipe_SH_merged + Pipe_m_ref_i * Modifi_SHin;
+                                    Pipe_h_IU_out = Pipe_h_IU_out + Pipe_m_ref_i * Pipe_h_IU_out_i;
+                                }
+                            }
+                        }
+                        if (Pipe_m_ref > 0) {
+                            Pipe_h_IU_out = Pipe_h_IU_out / Pipe_m_ref;
+                            Pipe_SH_merged = Pipe_SH_merged / Pipe_m_ref;
+                        } else {
+                            Pipe_SH_merged = this->SH;
+                            RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                            Pipe_h_IU_out = this->refrig->getSupHeatEnthalpy(
+                                state, max(RefTSat, Pipe_Te_assumed + Pipe_SH_merged), max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                        }
+
+                        // Re-calculate piping loss
+                        this->VRFOU_PipeLossC(state,
+                                              Pipe_m_ref,
+                                              max(min(Pipe_Pe_assumed, RefPHigh), RefPLow),
+                                              Pipe_h_IU_out,
+                                              Pipe_SH_merged,
+                                              OutdoorDryBulb,
+                                              Pipe_Q,
+                                              Pipe_DeltP,
+                                              Pipe_h_comp_in);
+
+                        T_suction = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), RoutineName);
+
+                        converged_11_2 = !((std::abs(T_suction - SmallLoadTe) > TeTol) && (Pipe_Te_assumed < this->EvaporatingTemp) &&
+                                           (Pipe_Te_assumed > SmallLoadTe) && (NumIteTe < MaxNumIteTe));
+                        Pipe_Te_assumed = Pipe_Te_assumed - 0.1;
+                        NumIteTe = NumIteTe + 1;
+                    } while (!converged_11_2);
+
+                    if (std::abs(T_suction - SmallLoadTe) > TeTol) {
+                        NumIteTe = 999;
+                        T_suction = SmallLoadTe;
+                        Pipe_SH_merged = 3.0;
+                        Pipe_Te_assumed = SmallLoadTe + 1;
+                    }
+                    // Iteration_Te End
+                }
+
+                // Perform iteration to calculate Pipe_T_comp_in( Te'+SH' )
+                Pipe_T_comp_in = this->refrig->getSupHeatTemp(
+                    state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), Pipe_h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
+
+                Modifi_SH = Pipe_T_comp_in - T_suction;
+                P_suction = Pipe_Pe_assumed - Pipe_DeltP;
+                OUCondHeatRelease = TU_load + Pipe_Q + Ncomp; // Pipe_Q is changed when T_suction is changed -> Tc is also changed
+
+                // *VRF OU Tc calculations
+                this->VRFOU_TeTc(state,
+                                 HXOpMode::CondMode,
+                                 OUCondHeatRelease,
+                                 this->SC,
+                                 this->OUAirFlowRate * RhoAir,
+                                 OutdoorDryBulb,
+                                 OutdoorHumRat,
+                                 OutdoorPressure,
+                                 Tfs,
+                                 T_discharge);
+                T_discharge = min(MaxOutdoorUnitTc, T_discharge);
+
+                // *Calculate capacity modification factor
+                C_cap_operation = this->VRFOU_CapModFactor(state,
+                                                           Pipe_h_comp_in,
+                                                           Pipe_h_IU_in,
+                                                           max(min(P_suction, RefPHigh), RefPLow),
+                                                           T_suction + Modifi_SH,
+                                                           T_suction + 8,
+                                                           T_discharge - 5);
+
+                Cap_Eva0 = (TU_load + Pipe_Q) * C_cap_operation; // New Pipe_Q & C_cap_operation
+                Cap_Eva1 = this->CoffEvapCap * this->RatedEvapCapacity *
+                           CurveValue(state, this->OUCoolingCAPFT(CounterCompSpdTemp), T_discharge, T_suction); // New Tc
+                CapDiff = std::abs(Cap_Eva1 - Cap_Eva0);
+                converged_13 = !((CapDiff > (Tolerance * Cap_Eva0)) && (NumIteCcap < 30));
+                NumIteCcap = NumIteCcap + 1;
                 Pipe_Q0 = Pipe_Q;
                 C_cap_operation0 = C_cap_operation;
                 T_discharge_new = T_discharge;
-                NumIteCcap = 1;
+            } while (!converged_13);
 
-                // Update the C_cap_operation
-                bool converged_13;
-                do {
-                    Q_evap_req = TU_load + Pipe_Q0; // Pipe_Q0 is updated during the iteration
-                    Pipe_h_IU_in = this->refrig->getSatEnthalpy(state, T_discharge_new - this->SC, 0.0, RoutineName);
-                    CompSpdActual = this->CompressorSpeed(1);
-                    Real64 CondHeat = Q_evap_req * C_cap_operation0 / this->RatedEvapCapacity; // 150130 To be confirmed
-                    int CAPFT = this->OUCoolingCAPFT(CounterCompSpdTemp);
+            // when it gets here, either NumIteCcap = 30 or CapDiff > (Tolerance * Cap_Eva0)
+            if (CapDiff > (Tolerance * Cap_Eva0) && (Cap_Eva1 - Cap_Eva0) >= 0.0) {
+                NumIteCcap = 999;
+                CyclingRatio = Cap_Eva0 / Cap_Eva1;
+            } else {
+                CyclingRatio = 1.0;
+            }
 
-                    P_discharge = this->refrig->getSatPressure(state, T_discharge, RoutineName);
-                    MinRefriPe = this->refrig->getSatPressure(state, -15, RoutineName);
-                    MinOutdoorUnitPe = max(P_discharge - this->CompMaxDeltaP, MinRefriPe);
-                    MinOutdoorUnitTe = this->refrig->getSatTemperature(state, max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), RoutineName);
-                    // Te can't be smaller than user input lower bound
-                    MinOutdoorUnitTe = max(this->IUEvapTempLow, MinOutdoorUnitTe);
+            Ncomp = this->RatedCompPower * CurveValue(state, this->OUCoolingPWRFT(CounterCompSpdTemp), T_discharge, T_suction);
+            OUCondHeatRelease = Ncomp + Cap_Eva1;
 
-                    auto f = [&state, T_discharge_new, CondHeat, CAPFT](Real64 const T_suc) {
-                        return CompResidual_FluidTCtrl(state, T_discharge_new, CondHeat, CAPFT, T_suc);
-                    };
+            this->CondensingTemp = T_discharge; // OU Tc' is updated due to OUCondHeatRelease updates, which is caused by IU Te' updates
+                                                // during low load conditions
+            this->EvaporatingTemp = T_suction;
+            this->IUEvaporatingTemp = T_suction;
 
-                    General::SolveRoot(state, 1.0e-3, MaxIter, SolFla, SmallLoadTe, f, MinOutdoorUnitTe,
-                                       T_suction); // SmallLoadTe is the updated Te'
-                    if (SolFla == -1) {
-                        // show error not converging
-                        ShowWarningMessage(state, format("{}: low load Te adjustment failed for {}", RoutineName, this->Name));
-                        ShowContinueErrorTimeStamp(state, "");
-                        ShowContinueError(state, format("  Iteration limit [{}] exceeded in calculating OU evaporating temperature", MaxIter));
-                    } else if (SolFla == -2) {
-                        this->LowLoadTeError++;
-                        if (LowLoadTeError < 5) {
-                            ShowWarningMessage(state,
-                                               format("{}: no Te solution was found for {} f({})={} and f({})={} are the same sign",
-                                                      RoutineName,
-                                                      this->Name,
-                                                      MinOutdoorUnitTe,
-                                                      f(MinOutdoorUnitTe),
-                                                      T_suction,
-                                                      f(T_suction)));
-                            ShowContinueErrorTimeStamp(state, "");
-                        }
-                        ShowRecurringWarningErrorAtEnd(state,
-                                                       "Low load calculation Te solution not found as end points have the same sign",
-                                                       this->LowLoadTeErrorIndex,
-                                                       SolFla,
-                                                       SolFla);
-                        if (f(T_suction) < 0) {
-                            // demand < capacity at both endpoints of the Te range, assuming f(x) is roughly monotonic than this is the low load case
-                            // TeTol is added to prevent the final updated Te to go out of bounds
-                            SmallLoadTe = MinOutdoorUnitTe + TeTol; // MinOutdoorUnitTe; //SmallLoadTe( Te'_new ) is constant during iterations
-                        } else {
-                            // demand > capacity at both endpoints of the Te range, take the end point x where f(x) is closer to zero
-                            if (f(MinOutdoorUnitTe) > f(T_suction)) { // f(T_suction > 0, not equal as SolFla will not be -2
-                                SmallLoadTe = T_suction;
-                            } else {
-                                SmallLoadTe = MinOutdoorUnitTe;
-                            }
-                        }
-                    }
+            break; // EXIT DoName1
 
-                    // Get an updated Te corresponding to the updated Te'
-                    // VRFOU_TeModification( VRFCond, this->EvaporatingTemp, SmallLoadTe, Pipe_h_IU_in, OutdoorDryBulb, Pipe_Te_assumed,
-                    // Pipe_Pe_assumed, Pipe_m_ref, Pipe_SH_merged );
-                    {
-                        // Initialization of Iteration_Te (Label11)
-                        // i.e., find a new Te (Pipe_Te_assumed) that can generate a new T_suction equaling to SmallLoadTe.
-                        // This requires the re-calculate of piping loss.
-                        NumIteTe = 1;
-                        MaxNumIteTe = (this->EvaporatingTemp - SmallLoadTe) / 0.1 + 1; // upper bound and lower bound of Te iterations
-                        Pipe_Te_assumed = this->EvaporatingTemp - 0.1;
-                        this->adjustedTe = true;
-
-                        bool converged_11_2;
-                        do {
-                            Pipe_m_ref = 0; // Total Ref Flow Rate( kg/s )
-
-                            // Re-calculate Piping loss due to the Te and SH updates
-                            Pipe_h_IU_out = 0;
-                            Pipe_h_IU_out_i = 0;
-                            Pipe_m_ref_i = 0;
-                            Pipe_SH_merged = 0;
-                            Pipe_Pe_assumed = this->refrig->getSatPressure(state, Pipe_Te_assumed, RoutineName);
-
-                            // Re-calculate total refrigerant flow rate, with updated SH
-                            for (int NumTU = 1; NumTU <= NumTUInList; NumTU++) {
-                                if (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU) > 0) {
-                                    TUIndex = state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).ZoneTUPtr(NumTU);
-                                    CoolCoilIndex = state.dataHVACVarRefFlow->VRFTU(TUIndex).CoolCoilNum;
-
-                                    Tfs = this->EvaporatingTemp + (this->C3Te * pow_2(state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH) +
-                                                                   this->C2Te * state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH + this->C1Te);
-
-                                    // Modifi_SH is the updated SH for a specific IU
-                                    if (this->C3Te == 0) {
-                                        Modifi_SHin = -(this->C1Te - Tfs + Pipe_Te_assumed) / this->C2Te; // 150130 Modifi_SH>Modifi_SHin
-                                    } else {
-                                        Modifi_SHin = (-this->C2Te +
-                                                       std::pow((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + Pipe_Te_assumed) * this->C3Te), 0.5)) /
-                                                      (2 * this->C3Te);
-                                    }
-
-                                    RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
-                                    Pipe_h_IU_out_i = this->refrig->getSupHeatEnthalpy(state,
-                                                                                       max(RefTSat, Pipe_Te_assumed + Modifi_SHin),
-                                                                                       max(min(Pipe_Pe_assumed, RefPHigh), RefPLow),
-                                                                                       RoutineName);
-
-                                    if (Pipe_h_IU_out_i > Pipe_h_IU_in) {
-                                        Real64 min_speed_capacity = this->CoffEvapCap * this->RatedEvapCapacity *
-                                                                    CurveValue(state, this->OUCoolingCAPFT(1), T_discharge, T_suction);
-                                        Pipe_m_ref_i = (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU) <= 0.0)
-                                                           ? 0.0
-                                                           // refrigerant flow rate do not get smaller when the compressor needs to cycle.
-                                                           : max(min_speed_capacity,
-                                                                 (state.dataHVACVarRefFlow->TerminalUnitList(TUListNum).TotalCoolLoad(NumTU)) /
-                                                                     (Pipe_h_IU_out_i - Pipe_h_IU_in));
-                                        Pipe_m_ref = Pipe_m_ref + Pipe_m_ref_i;
-                                        Pipe_SH_merged = Pipe_SH_merged + Pipe_m_ref_i * Modifi_SHin;
-                                        Pipe_h_IU_out = Pipe_h_IU_out + Pipe_m_ref_i * Pipe_h_IU_out_i;
-                                    }
-                                }
-                            }
-                            if (Pipe_m_ref > 0) {
-                                Pipe_h_IU_out = Pipe_h_IU_out / Pipe_m_ref;
-                                Pipe_SH_merged = Pipe_SH_merged / Pipe_m_ref;
-                            } else {
-                                Pipe_SH_merged = this->SH;
-                                RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
-                                Pipe_h_IU_out = this->refrig->getSupHeatEnthalpy(
-                                    state, max(RefTSat, Pipe_Te_assumed + Pipe_SH_merged), max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
-                            }
-
-                            // Re-calculate piping loss
-                            this->VRFOU_PipeLossC(state,
-                                                  Pipe_m_ref,
-                                                  max(min(Pipe_Pe_assumed, RefPHigh), RefPLow),
-                                                  Pipe_h_IU_out,
-                                                  Pipe_SH_merged,
-                                                  OutdoorDryBulb,
-                                                  Pipe_Q,
-                                                  Pipe_DeltP,
-                                                  Pipe_h_comp_in);
-
-                            T_suction =
-                                this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), RoutineName);
-
-                            converged_11_2 = !((std::abs(T_suction - SmallLoadTe) > TeTol) && (Pipe_Te_assumed < this->EvaporatingTemp) &&
-                                               (Pipe_Te_assumed > SmallLoadTe) && (NumIteTe < MaxNumIteTe));
-                            Pipe_Te_assumed = Pipe_Te_assumed - 0.1;
-                            NumIteTe = NumIteTe + 1;
-                        } while (!converged_11_2);
-
-                        if (std::abs(T_suction - SmallLoadTe) > TeTol) {
-                            NumIteTe = 999;
-                            T_suction = SmallLoadTe;
-                            Pipe_SH_merged = 3.0;
-                            Pipe_Te_assumed = SmallLoadTe + 1;
-                        }
-                        // Iteration_Te End
-                    }
-
-                    // Perform iteration to calculate Pipe_T_comp_in( Te'+SH' )
-                    Pipe_T_comp_in = this->refrig->getSupHeatTemp(
-                        state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), Pipe_h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
-
-                    Modifi_SH = Pipe_T_comp_in - T_suction;
-                    P_suction = Pipe_Pe_assumed - Pipe_DeltP;
-                    OUCondHeatRelease = TU_load + Pipe_Q + Ncomp; // Pipe_Q is changed when T_suction is changed -> Tc is also changed
-
-                    // *VRF OU Tc calculations
-                    this->VRFOU_TeTc(state,
-                                     HXOpMode::CondMode,
-                                     OUCondHeatRelease,
-                                     this->SC,
-                                     this->OUAirFlowRate * RhoAir,
-                                     OutdoorDryBulb,
-                                     OutdoorHumRat,
-                                     OutdoorPressure,
-                                     Tfs,
-                                     T_discharge);
-                    T_discharge = min(MaxOutdoorUnitTc, T_discharge);
-
-                    // *Calculate capacity modification factor
-                    C_cap_operation = this->VRFOU_CapModFactor(state,
-                                                               Pipe_h_comp_in,
-                                                               Pipe_h_IU_in,
-                                                               max(min(P_suction, RefPHigh), RefPLow),
-                                                               T_suction + Modifi_SH,
-                                                               T_suction + 8,
-                                                               T_discharge - 5);
-
-                    Cap_Eva0 = (TU_load + Pipe_Q) * C_cap_operation; // New Pipe_Q & C_cap_operation
-                    Cap_Eva1 = this->CoffEvapCap * this->RatedEvapCapacity *
-                               CurveValue(state, this->OUCoolingCAPFT(CounterCompSpdTemp), T_discharge, T_suction); // New Tc
-                    CapDiff = std::abs(Cap_Eva1 - Cap_Eva0);
-                    converged_13 = !((CapDiff > (Tolerance * Cap_Eva0)) && (NumIteCcap < 30));
-                    NumIteCcap = NumIteCcap + 1;
-                    Pipe_Q0 = Pipe_Q;
-                    C_cap_operation0 = C_cap_operation;
-                    T_discharge_new = T_discharge;
-                } while (!converged_13);
-
-                // when it gets here, either NumIteCcap = 30 or CapDiff > (Tolerance * Cap_Eva0)
-                if (CapDiff > (Tolerance * Cap_Eva0) && (Cap_Eva1 - Cap_Eva0) >= 0.0) {
-                    NumIteCcap = 999;
-                    CyclingRatio = Cap_Eva0 / Cap_Eva1;
-                } else {
-                    CyclingRatio = 1.0;
-                }
-
-                Ncomp = this->RatedCompPower * CurveValue(state, this->OUCoolingPWRFT(CounterCompSpdTemp), T_discharge, T_suction);
-                OUCondHeatRelease = Ncomp + Cap_Eva1;
-
-                this->CondensingTemp = T_discharge; // OU Tc' is updated due to OUCondHeatRelease updates, which is caused by IU Te' updates
-                                                    // during low load conditions
-                this->EvaporatingTemp = T_suction;
-                this->IUEvaporatingTemp = T_suction;
-
-                break; // EXIT DoName1
-
-            } // End: if( CounterCompSpdTemp <= 1 ) Low load modification
+            // End: if( CounterCompSpdTemp <= 1 ) Low load modification
 
         } // End: if( Q_evap_req <= CompEvaporatingCAPSpd( CounterCompSpdTemp ) )
 
@@ -14018,80 +14050,79 @@ void VRFCondenserEquipment::VRFOU_CalcCompH(
 
                 break; // EXIT DoName2
 
-            } else {
-                // Compressor runs at the min speed
-                // Low Load Modifications
+            } // Compressor runs at the min speed
+            // Low Load Modifications
 
-                NumIteCcap = 1;
-                bool converged_19;
-                // triggered in VariableRefrigerantFlow_FluidTCtrl_HR_5Zone.idf
-                do {
-                    Q_evap_req = max(0.0, TU_load + Pipe_Q - Ncomp);
+            NumIteCcap = 1;
+            bool converged_19;
+            // triggered in VariableRefrigerantFlow_FluidTCtrl_HR_5Zone.idf
+            do {
+                Q_evap_req = max(0.0, TU_load + Pipe_Q - Ncomp);
 
-                    // Update Te'( SmallLoadTe ) to meet the required evaporator capacity
-                    CompSpdActual = this->CompressorSpeed(1);
-                    Real64 CondHeat = Q_evap_req * C_cap_operation / this->RatedEvapCapacity;
-                    int CAPFT = this->OUCoolingCAPFT(CounterCompSpdTemp);
+                // Update Te'( SmallLoadTe ) to meet the required evaporator capacity
+                CompSpdActual = this->CompressorSpeed(1);
+                Real64 CondHeat = Q_evap_req * C_cap_operation / this->RatedEvapCapacity;
+                int CAPFT = this->OUCoolingCAPFT(CounterCompSpdTemp);
 
-                    auto f = [&state, T_discharge, CondHeat, CAPFT](Real64 const T_suc) {
-                        return CompResidual_FluidTCtrl(state, T_discharge, CondHeat, CAPFT, T_suc);
-                    };
-                    General::SolveRoot(state, 1.0e-3, MaxIter, SolFla, SmallLoadTe, f, MinOutdoorUnitTe, T_suction);
-                    if (SolFla < 0) {
-                        SmallLoadTe = MinOutdoorUnitTe;
-                    }
-
-                    T_suction = SmallLoadTe;
-
-                    // Update SH and Pe to calculate Modification Factor, which is used to update rps to for N_comp calculations
-                    if (this->C3Te == 0) {
-                        Modifi_SH = -(this->C1Te - Tfs + T_suction) / this->C2Te;
-                    } else {
-                        if ((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + T_suction) * this->C3Te) < 0.0) {
-                            Modifi_SH = this->C2Te / (-2 * (this->C1Te - Tfs + T_suction));
-                        } else {
-                            Modifi_SH = (-this->C2Te + std::pow((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + T_suction) * this->C3Te), 0.5)) /
-                                        (2 * this->C3Te);
-                        }
-                    }
-
-                    Modifi_Pe = this->refrig->getSatPressure(state, T_suction, RoutineName);
-
-                    // Calculate capacity modification factor
-                    RefTSat = this->refrig->getSatTemperature(state, max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
-                    Pipe_h_comp_in = this->refrig->getSupHeatEnthalpy(
-                        state, max(RefTSat, T_suction + Modifi_SH), max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
-                    C_cap_operation = this->VRFOU_CapModFactor(state,
-                                                               Pipe_h_comp_in,
-                                                               Pipe_h_out_ave,
-                                                               max(min(Modifi_Pe, RefPHigh), RefPLow),
-                                                               T_suction + Modifi_SH,
-                                                               T_suction + 8,
-                                                               IUMaxCondTemp - 5);
-
-                    Cap_Eva0 = Q_evap_req * C_cap_operation;
-                    Cap_Eva1 = this->CoffEvapCap * this->RatedEvapCapacity *
-                               CurveValue(state, this->OUCoolingCAPFT(CounterCompSpdTemp), T_discharge, T_suction);
-                    CapDiff = std::abs(Cap_Eva1 - Cap_Eva0);
-                    converged_19 = (CapDiff <= (Tolerance * Cap_Eva0)) || (NumIteCcap >= 30);
-                    NumIteCcap = NumIteCcap + 1;
-                } while (!converged_19);
-                if (CapDiff > (Tolerance * Cap_Eva0) && (Cap_Eva1 - Cap_Eva0) >= 0.0) {
-                    NumIteCcap = 999;
-                    CyclingRatio = Cap_Eva0 / Cap_Eva1;
-                } else {
-                    CyclingRatio = 1.0;
+                auto f = [&state, T_discharge, CondHeat, CAPFT](Real64 const T_suc) {
+                    return CompResidual_FluidTCtrl(state, T_discharge, CondHeat, CAPFT, T_suc);
+                };
+                General::SolveRoot(state, 1.0e-3, MaxIter, SolFla, SmallLoadTe, f, MinOutdoorUnitTe, T_suction);
+                if (SolFla < 0) {
+                    SmallLoadTe = MinOutdoorUnitTe;
                 }
 
-                Ncomp = this->RatedCompPower * CurveValue(state, this->OUCoolingPWRFT(CounterCompSpdTemp), T_discharge, T_suction) * CyclingRatio;
-                // Cap_Eva1 is the updated compressor min speed capacity
-                OUEvapHeatExtract = Cap_Eva1;
-                this->EvaporatingTemp = T_suction;
-                this->CondensingTemp = T_discharge;
-                this->IUCondensingTemp = T_discharge;
-                break; // EXIT DoName2
+                T_suction = SmallLoadTe;
 
-            } // End: if( CounterCompSpdTemp <= 1 ) Low load modification
+                // Update SH and Pe to calculate Modification Factor, which is used to update rps to for N_comp calculations
+                if (this->C3Te == 0) {
+                    Modifi_SH = -(this->C1Te - Tfs + T_suction) / this->C2Te;
+                } else {
+                    if ((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + T_suction) * this->C3Te) < 0.0) {
+                        Modifi_SH = this->C2Te / (-2 * (this->C1Te - Tfs + T_suction));
+                    } else {
+                        Modifi_SH =
+                            (-this->C2Te + std::pow((pow_2(this->C2Te) - 4 * (this->C1Te - Tfs + T_suction) * this->C3Te), 0.5)) / (2 * this->C3Te);
+                    }
+                }
+
+                Modifi_Pe = this->refrig->getSatPressure(state, T_suction, RoutineName);
+
+                // Calculate capacity modification factor
+                RefTSat = this->refrig->getSatTemperature(state, max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
+                Pipe_h_comp_in =
+                    this->refrig->getSupHeatEnthalpy(state, max(RefTSat, T_suction + Modifi_SH), max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
+                C_cap_operation = this->VRFOU_CapModFactor(state,
+                                                           Pipe_h_comp_in,
+                                                           Pipe_h_out_ave,
+                                                           max(min(Modifi_Pe, RefPHigh), RefPLow),
+                                                           T_suction + Modifi_SH,
+                                                           T_suction + 8,
+                                                           IUMaxCondTemp - 5);
+
+                Cap_Eva0 = Q_evap_req * C_cap_operation;
+                Cap_Eva1 =
+                    this->CoffEvapCap * this->RatedEvapCapacity * CurveValue(state, this->OUCoolingCAPFT(CounterCompSpdTemp), T_discharge, T_suction);
+                CapDiff = std::abs(Cap_Eva1 - Cap_Eva0);
+                converged_19 = (CapDiff <= (Tolerance * Cap_Eva0)) || (NumIteCcap >= 30);
+                NumIteCcap = NumIteCcap + 1;
+            } while (!converged_19);
+            if (CapDiff > (Tolerance * Cap_Eva0) && (Cap_Eva1 - Cap_Eva0) >= 0.0) {
+                NumIteCcap = 999;
+                CyclingRatio = Cap_Eva0 / Cap_Eva1;
+            } else {
+                CyclingRatio = 1.0;
+            }
+
+            Ncomp = this->RatedCompPower * CurveValue(state, this->OUCoolingPWRFT(CounterCompSpdTemp), T_discharge, T_suction) * CyclingRatio;
+            // Cap_Eva1 is the updated compressor min speed capacity
+            OUEvapHeatExtract = Cap_Eva1;
+            this->EvaporatingTemp = T_suction;
+            this->CondensingTemp = T_discharge;
+            this->IUCondensingTemp = T_discharge;
+            break; // EXIT DoName2
+
+            // End: if( CounterCompSpdTemp <= 1 ) Low load modification
 
         } // End: if( Q_evap_req <= CompEvaporatingCAPSpd( CounterCompSpdTemp ) )
 
@@ -14905,9 +14936,8 @@ void VRFTerminalUnitEquipment::CalcVRFSuppHeatingCoil(EnergyPlusData &state,
                                                             PartLoadFrac);
                     if (std::abs(SuppHeatCoilLoad) == 0.0) {
                         return (QActual - SuppHeatCoilLoad) / 100.0;
-                    } else {
-                        return (QActual - SuppHeatCoilLoad) / SuppHeatCoilLoad;
                     }
+                    return (QActual - SuppHeatCoilLoad) / SuppHeatCoilLoad;
                 };
                 General::SolveRoot(state, Acc, MaxIte, SolFla, PartLoadFrac, f, 0.0, 1.0);
                 this->SuppHeatPartLoadRatio = PartLoadFrac;
@@ -14961,10 +14991,10 @@ Real64 VRFTerminalUnitEquipment::HotWaterHeatingCoilResidual(EnergyPlusData &sta
     Real64 Residuum; // Residual to be minimized to zero
 
     // local variables declaration:
-    int VRFTUNum = int(Par[1]);       // index to current terminal unit simulated
-    bool FirstHVACIteration = Par[2]; // 0 flag if it first HVAC iteration, or else 1
-    Real64 SuppHeatCoilLoad = Par[3]; // supplemental heating coil load to be met [W]
-    Real64 QActual = 0.0;             // actual heating load delivered [W]
+    int VRFTUNum = int(Par[1]);              // index to current terminal unit simulated
+    bool FirstHVACIteration = Par[2] != 0.0; // 0 flag if it first HVAC iteration, or else 1
+    Real64 SuppHeatCoilLoad = Par[3];        // supplemental heating coil load to be met [W]
+    Real64 QActual = 0.0;                    // actual heating load delivered [W]
 
     // Real64 mdot = min(state.dataLoopNodes->Node(VRFTU(VRFTUNum).SuppHeatCoilFluidOutletNode).MassFlowRateMaxAvail,
     //                  VRFTU(VRFTUNum).SuppHeatCoilFluidMaxFlow * PartLoadFrac);

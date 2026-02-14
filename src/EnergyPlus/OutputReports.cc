@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -96,7 +96,6 @@ void ReportSurfaces(EnergyPlusData &state)
     bool SurfVert = false;
     bool SurfDet = false;
     bool DXFDone = false;
-    bool VRMLDone = false;
     std::string Option1;
     std::string Option2;
     bool DoReport;
@@ -162,6 +161,7 @@ void ReportSurfaces(EnergyPlusData &state)
 
     General::ScanForReports(state, "Surfaces", DoReport, "VRML", Option1, Option2);
     if (DoReport) {
+        bool VRMLDone = false;
         if (!VRMLDone) {
             VRMLOut(state, Option1, Option2);
             VRMLDone = true;

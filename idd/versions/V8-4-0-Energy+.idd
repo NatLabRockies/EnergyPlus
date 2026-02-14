@@ -666,10 +666,10 @@ ZoneAirContaminantBalance,
 
 ZoneAirMassFlowConservation,
        \memo Enforces the zone air mass flow balance by adjusting zone mixing object and/or
-       \memo infiltration object mass flow rates. 
+       \memo infiltration object mass flow rates.
        \memo If either mixing or infiltration is active, then the zone air mass flow
        \memo balance calculation will attempt to enforce conservation of mass for each zone.
-       \note If mixing is "No" and infiltration is "None", then the zone air mass flow 
+       \note If mixing is "No" and infiltration is "None", then the zone air mass flow
        \note calculation defaults to assume self-balanced simple flow mixing and infiltration objects.
        \unique-object
        \min-fields 3
@@ -20458,7 +20458,7 @@ OtherEquipment,
        \default 0
 
 ElectricEquipment:ITE:AirCooled,
-   \memo This object describes air-cooled electric information technology equipment (ITE) which has 
+   \memo This object describes air-cooled electric information technology equipment (ITE) which has
    \memo variable power consumption as a function of loading and temperature.
        \min-fields 27
   A1 , \field Name
@@ -20508,8 +20508,8 @@ ElectricEquipment:ITE:AirCooled,
        \object-list BiVariateCurves
        \object-list BiVariateTables
        \note The name of a two-variable curve or table lookup object which modifies the CPU power
-       \note input as a function of CPU loading (x) and air inlet node temperature (y). 
-       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and 
+       \note input as a function of CPU loading (x) and air inlet node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
        \note Design Entering Air Temperature).
   N4 , \field Design Fan Power Input Fraction
        \note The fraction of the total power input at design conditions which is for the cooling fan(s)
@@ -20529,8 +20529,8 @@ ElectricEquipment:ITE:AirCooled,
        \object-list BiVariateCurves
        \object-list BiVariateTables
        \note The name of a two-variable curve or table lookup object which modifies the cooling
-       \note air flow rate as a function of CPU loading (x) and air inlet node temperature (y). 
-       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and 
+       \note air flow rate as a function of CPU loading (x) and air inlet node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
        \note Design Entering Air Temperature).
   A8 , \field Fan Power Input Function of Flow Curve Name
        \required-field
@@ -20538,8 +20538,8 @@ ElectricEquipment:ITE:AirCooled,
        \object-list UniVariateCurves
        \object-list UniVariateTables
        \note The name of a single-variable curve or table lookup object which modifies the cooling
-       \note fan power as a function of flow fraction (x). 
-       \note This curve (table) should equal 1.0 at a flow fraction of 1.0. 
+       \note fan power as a function of flow fraction (x).
+       \note This curve (table) should equal 1.0 at a flow fraction of 1.0.
   N6,  \field Design Entering Air Temperature
        \note The entering air temperature at design conditions.
        \type real
@@ -20560,11 +20560,11 @@ ElectricEquipment:ITE:AirCooled,
   A10, \field Air Inlet Connection Type
        \note Specifies the type of connection between the zone and the ITE air inlet node.
        \note AdjustedSupply = ITE inlet temperature will be the current Supply Air Node temperature
-       \note adjusted by the current recirculation fraction. 
+       \note adjusted by the current recirculation fraction.
        \note All heat output is added to the zone air heat balance as a convective gain.
-       \note ZoneAirNode = ITE air inlet condition is  the average zone condition. 
-       \note All heat output is added to the zone air heat balance as a convective gain. 
-       \note RoomAirModel = ITE air inlet and outlet are connected to room air model nodes. 
+       \note ZoneAirNode = ITE air inlet condition is  the average zone condition.
+       \note All heat output is added to the zone air heat balance as a convective gain.
+       \note RoomAirModel = ITE air inlet and outlet are connected to room air model nodes.
        \type choice
        \key AdjustedSupply
        \key ZoneAirNode
@@ -20579,12 +20579,12 @@ ElectricEquipment:ITE:AirCooled,
        \type object-list
        \object-list RoomAirNodes
   A13, \field Supply Air Node Name
-       \note Name of the supply air inlet node serving this ITE. Required if the 
-       \note Air Node Connection Type = AdjustedSupply. Also required if reporting of 
+       \note Name of the supply air inlet node serving this ITE. Required if the
+       \note Air Node Connection Type = AdjustedSupply. Also required if reporting of
        \note Supply Heat Index is desired.
        \type node
   N7,  \field Design Recirculation Fraction
-       \note The recirculation fraction for this equipment at design conditions. This field is used only 
+       \note The recirculation fraction for this equipment at design conditions. This field is used only
        \note if the Air Node Connection Type = AdjustedSupply. The default is 0.0 (no recirculation).
        \type real
        \minimum 0.0
@@ -20595,10 +20595,10 @@ ElectricEquipment:ITE:AirCooled,
        \object-list BiVariateCurves
        \object-list BiVariateTables
        \note The name of a two-variable curve or table lookup object which modifies the recirculation
-       \note fractionas a function of CPU loading (x) and supply air node temperature (y). 
-       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and 
-       \note Design Entering Air Temperature).This field is used only if the 
-       \note Air Node Connection Type = AdjustedSupply. If this curve is left blank, then the curve 
+       \note fractionas a function of CPU loading (x) and supply air node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
+       \note Design Entering Air Temperature).This field is used only if the
+       \note Air Node Connection Type = AdjustedSupply. If this curve is left blank, then the curve
        \note is assumed to always equal 1.0.
   N8 , \field Design Electric Power Supply Efficiency
        \note The efficiency of the power supply system serving this ITE
@@ -20611,11 +20611,11 @@ ElectricEquipment:ITE:AirCooled,
        \object-list UniVariateCurves
        \object-list UniVariateTables
        \note The name of a single-variable curve or table lookup object which modifies the electric
-       \note power supply efficiency as a function of part-load ratio (x). 
+       \note power supply efficiency as a function of part-load ratio (x).
        \note This curve (table) should equal 1.0 at full load (PLR = 1.0).
        \note If this curve is left blank, then the curve is assumed to always equal 1.0.
   N9 , \field Fraction of Electric Power Supply Losses to Zone
-       \note Fraction of the electric power supply losses which are a heat gain to the zone 
+       \note Fraction of the electric power supply losses which are a heat gain to the zone
        \note If this field is <1.0, the remainder of the losses are assumed to be lost to the outdoors.
        \type real
        \minimum 0.0
@@ -24108,7 +24108,7 @@ AirflowNetwork:Distribution:Linkage,
       \note conduction loss is ignored.
 
 AirflowNetwork:OccupantVentilationControl,
-      \memo This object is used to provide advanced thermal comfort control of window opening and closing 
+      \memo This object is used to provide advanced thermal comfort control of window opening and closing
       \memo for both exterior and interior windows.
   A1, \field Name
       \required-field
@@ -24131,7 +24131,7 @@ AirflowNetwork:OccupantVentilationControl,
       \object-list QuadraticCurves
       \object-list UniVariateTables
       \note Enter a curve name that represents thermal comfort temperature as a
-      \note function of outdoor dry-bulb temperature. Up to two curves are allowed if the 
+      \note function of outdoor dry-bulb temperature. Up to two curves are allowed if the
       \note performance cannot be represented by a single curve.
       \note The following two fields are used if two curves are required.
   N3, \field Thermal Comfort Temperature Boundary Point
@@ -24147,7 +24147,7 @@ AirflowNetwork:OccupantVentilationControl,
       \object-list QuadraticCurves
       \object-list UniVariateTables
       \note Enter a curve name that represents thermal comfort temperature as a
-      \note function of outdoor dry-bulb temperature. Up to two curves are allowed if the 
+      \note function of outdoor dry-bulb temperature. Up to two curves are allowed if the
       \note performance cannot be represented by a single curve.
       \note If a single performance curve is used, leave this field blank.
   N4, \field Maximum Threshold for Persons Dissatisfied PPD
@@ -24173,7 +24173,7 @@ AirflowNetwork:OccupantVentilationControl,
 
 AirflowNetwork:IntraZone:Node,
       \min-fields 2
-      \memo This object represents a node in a zone in the combination of RoomAir and 
+      \memo This object represents a node in a zone in the combination of RoomAir and
       \memo AirflowNetwork model.
  A1 , \field Name
       \required-field
@@ -24184,7 +24184,7 @@ AirflowNetwork:IntraZone:Node,
       \required-field
       \type alpha
       \object-list RoomAirflowNetworkNodes
-      \note Enter the name of a RoomAir:Node object defined in a RoomAirSettings:AirflowNetwork 
+      \note Enter the name of a RoomAir:Node object defined in a RoomAirSettings:AirflowNetwork
       \note object.
  A3 , \field Zone Name
       \required-field
@@ -24200,7 +24200,7 @@ AirflowNetwork:IntraZone:Node,
 
 AirflowNetwork:IntraZone:Linkage,
       \min-fields 4
-      \memo This object defines the connection between two nodes and a component used 
+      \memo This object defines the connection between two nodes and a component used
       \memo in the combination of RoomAir and AirflowNetwork model.
  A1 , \field Name
       \required-field
@@ -24223,7 +24223,7 @@ AirflowNetwork:IntraZone:Linkage,
       \type object-list
       \object-list AirflowNetworkComponentNames
       \note Enter the name of an AirflowNetwork component. A component is one of the
-      \note following AirflowNetwork:Multizone:Component objects: 
+      \note following AirflowNetwork:Multizone:Component objects:
       \note AirflowNetwork:MultiZone:Surface:Crack,
       \note AirflowNetwork:MultiZone:Surface:EffectiveLeakageArea,
       \note If the next field is specified, this field can be either blank or ignored.
@@ -31211,7 +31211,7 @@ Sizing:Zone,
       \key No
       \default No
   A9, \field Dedicated Outdoor Air System Control Strategy
-      \note 1)supply neutral ventilation air; 2)supply neutral dehumidified and reheated 
+      \note 1)supply neutral ventilation air; 2)supply neutral dehumidified and reheated
       \note ventilation air; 3)supply cold ventilation air
       \type choice
       \key NeutralSupplyAir
@@ -31717,14 +31717,14 @@ Sizing:Plant,
       \units deltaC
       \minimum> 0.0
   A3, \field Sizing Option
-      \note if Coincident is chosen, then sizing is based on HVAC Sizing Simulations and 
+      \note if Coincident is chosen, then sizing is based on HVAC Sizing Simulations and
       \note the input field called Do HVAC Sizing Simulation for Sizing Periods in SimulationControl must be set to Yes
       \type choice
       \key Coincident
       \key NonCoincident
       \default NonCoincident
   N3, \field Zone Timesteps in Averaging Window
-      \note this is used in the coincident sizing algorithm to apply a running average to peak flow rates 
+      \note this is used in the coincident sizing algorithm to apply a running average to peak flow rates
       \note that occur during HVAC Sizing Simulations
       \type integer
       \minimum 1
@@ -32463,7 +32463,7 @@ ZoneHVAC:FourPipeFanCoil,
         \min-fields 24
    A1 , \field Name
         \required-field
-        \reference DOAToZonalUnit 
+        \reference DOAToZonalUnit
    A2 , \field Availability Schedule Name
         \note Availability schedule name for this system. Schedule value > 0 means the system is available.
         \note If this field is blank, the system is always available.
@@ -33014,7 +33014,7 @@ ZoneHVAC:WaterToAirHeatPump,
    A1,  \field Name
         \required-field
         \type alpha
-        \reference DOAToZonalUnit 
+        \reference DOAToZonalUnit
    A2,  \field Availability Schedule Name
         \note Availability schedule name for this system. Schedule value > 0 means the system is available.
         \note If this field is blank, the system is always available.
@@ -34042,8 +34042,8 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
         \key Fan:OnOff
         \key Fan:ConstantVolume
         \key Fan:VariableVolume
-        \note Supply Air Fan Object Type must be 
-        \note Fan:OnOff or Fan:ConstantVolume 
+        \note Supply Air Fan Object Type must be
+        \note Fan:OnOff or Fan:ConstantVolume
         \note if AirConditioner:VariableRefrigerantFlow
         \note is used to model VRF outdoor unit
         \note Supply Air Fan Object Type must be Fan:VariableVolume if
@@ -34067,11 +34067,11 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
         \key Coil:Cooling:DX:VariableRefrigerantFlow
         \key Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl
         \note Cooling Coil Type must be Coil:Cooling:DX:VariableRefrigerantFlow
-        \note if AirConditioner:VariableRefrigerantFlow is used 
+        \note if AirConditioner:VariableRefrigerantFlow is used
         \note to model VRF outdoor unit
-        \note Cooling Coil Type must be 
+        \note Cooling Coil Type must be
         \note Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl
-        \note if AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl 
+        \note if AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl
         \note is used to model VRF outdoor unit
         \note This field may be left blank if heating-only mode is used
   A12,  \field Cooling Coil Object Name
@@ -34085,11 +34085,11 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
         \key Coil:Heating:DX:VariableRefrigerantFlow
         \key Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl
         \note Heating Coil Type must be Coil:Heating:DX:VariableRefrigerantFlow
-        \note if AirConditioner:VariableRefrigerantFlow is used 
+        \note if AirConditioner:VariableRefrigerantFlow is used
         \note to model VRF outdoor unit
-        \note Heating Coil Type must be 
+        \note Heating Coil Type must be
         \note Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl
-        \note if AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl 
+        \note if AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl
         \note is used to model VRF outdoor unit
         \note This field may be left blank if cooling-only mode is used
   A14,  \field Heating Coil Object Name
@@ -39274,8 +39274,8 @@ AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction,
        \object-list ZoneMixers
 
 AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
-       \memo Central air system terminal unit, single duct, constant volume, 
-       \memo with heating and/or cooling.  
+       \memo Central air system terminal unit, single duct, constant volume,
+       \memo with heating and/or cooling.
        \memo Operates as two-pipe unit if heating or cooling water is omitted.
        \memo Heating and/or cooling can be scheduled off for dedicated ventilation.
   A1 , \field Name
@@ -39372,14 +39372,14 @@ AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
        \default 0.00005
   A11, \field Beam Cooling Capacity Temperature Difference Modification Factor Curve Name
        \note Adjusts beam cooling capacity when the temperature difference between entering water and zone air
-       \note is different than at the rating point.  Single independent variable is the ratio of the current 
+       \note is different than at the rating point.  Single independent variable is the ratio of the current
        \note temperature difference divided by the rating point temperature difference.
        \note This field is required when beam is connected to a chilled water plant.
        \type object-list
        \object-list UniVariateCurves
        \object-list UniVariateTables
   A12, \field Beam Cooling Capacity Air Flow Modification Factor Curve Name
-       \note Adjusts beam cooling capacity when the primary air supply flow rate is different 
+       \note Adjusts beam cooling capacity when the primary air supply flow rate is different
        \note than at the rating point. The single independent variable is the current normalized
        \note air flow rate divided by the normalized air flow rate at the rating point.
        \note This field is required when beam is connected to a chilled water plant.
@@ -39387,7 +39387,7 @@ AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
        \object-list UniVariateCurves
        \object-list UniVariateTables
   A13, \field Beam Cooling Capacity Chilled Water Flow Modification Factor Curve Name
-       \note Adjusts beam cooling capacity when the normalized chilled water flow rate is different 
+       \note Adjusts beam cooling capacity when the normalized chilled water flow rate is different
        \note than at the rating point. The single independent variable is the current normalized
        \note chilled water flow rate divided by the normalized chilled water flow rate at the rating point.
        \note This field is required when beam is connected to a chilled water plant.
@@ -39414,14 +39414,14 @@ AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
        \default 0.00005
   A14, \field Beam Heating Capacity Temperature Difference Modification Factor Curve Name
        \note Adjusts beam heating capacity when the temperature difference between entering water and zone air
-       \note is different than at the rating point.  Single independent variable is the ratio of the current 
+       \note is different than at the rating point.  Single independent variable is the ratio of the current
        \note temperature difference divided by the rating point temperature difference.
        \note This field is required when beam is connected to a hot water plant.
        \type object-list
        \object-list UniVariateCurves
        \object-list UniVariateTables
   A15, \field Beam Heating Capacity Air Flow Modification Factor Curve Name
-       \note Adjusts beam heating capacity when the primary air supply flow rate is different 
+       \note Adjusts beam heating capacity when the primary air supply flow rate is different
        \note than at the rating point. The single independent variable is the current normalized
        \note air flow rate divided by the normalized air flow rate at the rating point.
        \note This field is required when beam is connected to a hot water plant.
@@ -39429,7 +39429,7 @@ AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,
        \object-list UniVariateCurves
        \object-list UniVariateTables
   A16; \field Beam Heating Capacity Hot Water Flow Modification Factor Curve Name
-       \note Adjusts beam heating capacity when the normalized hot water flow rate is different 
+       \note Adjusts beam heating capacity when the normalized hot water flow rate is different
        \note than at the rating point. The single independent variable is the current normalized
        \note hot water flow rate divided by the normalized hot water flow rate at the rating point.
        \note This field is required when beam is connected to a hot water plant.
@@ -39549,12 +39549,12 @@ AirTerminal:SingleDuct:ConstantVolume:CooledBeam,
        \default 0.0145
 
 AirTerminal:SingleDuct:InletSideMixer,
-       \memo The inlet side mixer air terminal unit provides a means of supplying central system air 
-       \memo to the air inlet of a zone AC unit such as a four pipe fan coil. Normally the central air 
+       \memo The inlet side mixer air terminal unit provides a means of supplying central system air
+       \memo to the air inlet of a zone AC unit such as a four pipe fan coil. Normally the central air
        \memo would be ventilation air from a dedicated outdoor air system (DOAS).
    A1, \field Name
        \required-field
-   A2, \field ZoneHVAC Terminal Unit Object Type   
+   A2, \field ZoneHVAC Terminal Unit Object Type
        \required-field
        \type choice
        \key ZoneHVAC:FourPipeFanCoil
@@ -39574,8 +39574,8 @@ AirTerminal:SingleDuct:InletSideMixer,
        \type node
 
 AirTerminal:SingleDuct:SupplySideMixer,
-       \memo The supply side mixer air terminal unit provides a means of supplying central system air 
-       \memo to the air outlet of a zone AC unit such as a four pipe fan coil. Normally the central air 
+       \memo The supply side mixer air terminal unit provides a means of supplying central system air
+       \memo to the air outlet of a zone AC unit such as a four pipe fan coil. Normally the central air
        \memo would be ventilation air from a dedicated outdoor air system (DOAS).
    A1, \field Name
        \required-field
@@ -40567,10 +40567,10 @@ ZoneHVAC:EquipmentConnections,
        \note The optional basis node(s) used to calculate the base return air flow
        \note rate for this zone. The return air flow rate is the sum of the flow rates
        \note at the basis node(s) multiplied by the Zone Return Air Flow Rate Fraction Schedule.
-       \note If this  field is blank, then the base return air flow rate is the total supply  
+       \note If this  field is blank, then the base return air flow rate is the total supply
        \note inlet flow rate to the zone less the total exhaust node flow rate from the zone.
        \type node
-       
+
 
 \group Fans
 !*****************AIR LOOP COMPONENTS*********************
@@ -41506,14 +41506,14 @@ Coil:Cooling:DX:SingleSpeed,
        \key Yes
        \key No
        \default No
-       \note when this input field is specified as Yes then the program calculates the net cooling 
-       \note capacity and total electric power input of DX cooling coils per ANSI/ASHRAE 127.   
+       \note when this input field is specified as Yes then the program calculates the net cooling
+       \note capacity and total electric power input of DX cooling coils per ANSI/ASHRAE 127.
   A18; \field Zone Name for Condenser Placement
        \type object-list
        \object-list ZoneNames
-       \note This input field is name of a conditioned or unconditioned zone where the secondary 
-       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional 
-       \note input field specified only when user desires to reject the condenser heat into a  
+       \note This input field is name of a conditioned or unconditioned zone where the secondary
+       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional
+       \note input field specified only when user desires to reject the condenser heat into a
        \note zone. The heat rejected is modelled as internal sensible heat gain of the zone.
 
 Coil:Cooling:DX:TwoSpeed,
@@ -41780,9 +41780,9 @@ Coil:Cooling:DX:TwoSpeed,
   A21; \field Zone Name for Condenser Placement
        \type object-list
        \object-list ZoneNames
-       \note This input field is name of a conditioned or unconditioned zone where the secondary 
-       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional 
-       \note input field specified only when user desires to reject the condenser heat into a  
+       \note This input field is name of a conditioned or unconditioned zone where the secondary
+       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional
+       \note input field specified only when user desires to reject the condenser heat into a
        \note zone. The heat rejected is modelled as internal sensible heat gain of the zone.
 
 Coil:Cooling:DX:MultiSpeed,
@@ -42501,10 +42501,10 @@ Coil:Cooling:DX:MultiSpeed,
   A37; \field Zone Name for Condenser Placement
        \type object-list
        \object-list ZoneNames
-       \note This input field is name of a conditioned or unconditioned zone where the secondary 
-       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional 
-       \note input field specified only when user desires to reject the condenser heat into a  
-       \note zone. The heat rejected is modelled as internal sensible heat gain of the zone.   
+       \note This input field is name of a conditioned or unconditioned zone where the secondary
+       \note coil (condenser) of DX system or a heat pump is to be placed.  This is an optional
+       \note input field specified only when user desires to reject the condenser heat into a
+       \note zone. The heat rejected is modelled as internal sensible heat gain of the zone.
 
 Coil:Cooling:DX:VariableSpeed,
         \memo Direct expansion (DX) cooling coil and condensing unit (includes electric compressor
@@ -43596,7 +43596,7 @@ Coil:Heating:DX:VariableRefrigerantFlow,
 Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl,
        \memo This is a key object in the new physics based VRF model applicable for Fluid
        \memo Temperature Control. It describes the the indoor unit coil of the system at cooling mode.
-       \memo Used with ZoneHVAC:TerminalUnit:VariableRefrigerantFlow. 
+       \memo Used with ZoneHVAC:TerminalUnit:VariableRefrigerantFlow.
        \memo Outdoor unit is modeled separately, see AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl.
        \min-fields 6
   A1,  \field Name
@@ -43647,7 +43647,7 @@ Coil:Cooling:DX:VariableRefrigerantFlow:FluidTemperatureControl,
 Coil:Heating:DX:VariableRefrigerantFlow:FluidTemperatureControl,
        \memo This is a key object in the new physics based VRF model applicable for Fluid
        \memo Temperature Control. It describes the the indoor unit coil of the system at heating mode.
-       \memo Used with ZoneHVAC:TerminalUnit:VariableRefrigerantFlow. 
+       \memo Used with ZoneHVAC:TerminalUnit:VariableRefrigerantFlow.
        \memo Outdoor unit is modeled separately, see AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl.
        \min-fields 5
   A1,  \field Name
@@ -44315,38 +44315,38 @@ Coil:Heating:DX:SingleSpeed,
        \note an OutdoorAir:Node or OutdoorAir:NodeList object.
   A14, \field Zone Name for Evaporator Placement
        \note This input field is name of a conditioned or unconditioned zone where the secondary
-       \note coil (evaporator) of a heat pump is to be placed.  This is an optional input field 
-       \note specified only when user desires to extract heat from the zone.  The heat extracted 
-       \note is modelled as internal gain of the zone. If the primary DX system is a heat pump, 
-       \note then the zone name should be the same as the zone name specified for placing the 
+       \note coil (evaporator) of a heat pump is to be placed.  This is an optional input field
+       \note specified only when user desires to extract heat from the zone.  The heat extracted
+       \note is modelled as internal gain of the zone. If the primary DX system is a heat pump,
+       \note then the zone name should be the same as the zone name specified for placing the
        \note secondary cooling DX coil.
   N13, \field Secondary Coil Air Flow Rate
        \type real
        \units m3/s
        \minimum> 0.0
        \autosizable
-       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump 
-       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the 
-       \note heat pump is working in cooling mode.  
+       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump
+       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the
+       \note heat pump is working in cooling mode.
   N14, \field Secondary Coil Fan Flow Scaling Factor
        \type real
        \units m3/s
        \minimum> 0.0
        \default 1.25
-       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.  
-       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air 
-       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil 
-       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set 
+       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.
+       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air
+       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil
+       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set
        \note to 1.0.
   N15, \field Nominal Sensible Heat Ratio of Secondary Coil
        \type real
        \units m3/s
        \minimum> 0.0
        \maximum 1.0
-       \note This input value is the nominal sensible heat ratio used to split the heat extracted by 
-       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.  
-       \note This is an optional input field.  If this input field is left blank, then pure sensible 
-       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0. 
+       \note This input value is the nominal sensible heat ratio used to split the heat extracted by
+       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.
+       \note This is an optional input field.  If this input field is left blank, then pure sensible
+       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0.
   A15, \field Sensible Heat Ratio Modifier Function of Temperature Curve Name
        \type object-list
        \object-list BiquadraticCurves
@@ -44354,10 +44354,10 @@ Coil:Heating:DX:SingleSpeed,
        \note curve = a + b*wb + c*wb**2 + d*db + e*db**2 + f*wb*db
        \note wb = entering wet-bulb temperature seen by the secondary DX coil (C)
        \note db = entering dry-bulb temperature seen by the primary DX coil (C)
-       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
-       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering 
-       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left 
+       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
+       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering
+       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left
        \note blank, then the nominal sensible heat ratio specified in the field above will be used.
   A16; \field Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
        \type object-list
@@ -44366,8 +44366,8 @@ Coil:Heating:DX:SingleSpeed,
        \note quadratic curve = a + b*ff + c*ff**2
        \note cubic curve = a + b*ff + c*ff**2 + d*ff**3
        \note ff = secondary air flow fraction of the full load flow
-       \note This input field is name of sensible heat ratio modifier curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
+       \note This input field is name of sensible heat ratio modifier curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
        \note on the secondary coil air flow fraction. This is an optional input field.  If this input
        \note field is left blank, then the nominal sensible heat ratio specified will be used.
 
@@ -44868,38 +44868,38 @@ Coil:Heating:DX:MultiSpeed,
        \note db = entering coil dry-bulb temperature (C)
   A34, \field Zone Name for Evaporator Placement
        \note This input field is name of a conditioned or unconditioned zone where the secondary
-       \note coil (evaporator) of a heat pump is to be placed.  This is an optional input field 
-       \note specified only when user desires to extract heat from the zone.  The heat extracted 
-       \note is modeled as internal heat gain of the zone. If the primary DX system is a heat pump, 
-       \note then the zone name should be the same as the zone name specified for placing the 
+       \note coil (evaporator) of a heat pump is to be placed.  This is an optional input field
+       \note specified only when user desires to extract heat from the zone.  The heat extracted
+       \note is modeled as internal heat gain of the zone. If the primary DX system is a heat pump,
+       \note then the zone name should be the same as the zone name specified for placing the
        \note secondary cooling DX coil.
   N30, \field Speed 1 Secondary Coil Air Flow Rate
        \type real
        \units m3/s
        \minimum> 0.0
        \autosizable
-       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump 
-       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the 
-       \note heat pump is working in cooling mode.  
+       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump
+       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the
+       \note heat pump is working in cooling mode.
   N31, \field Speed 1 Secondary Coil Fan Flow Scaling Factor
        \type real
        \units m3/s
        \minimum> 0.0
        \default 1.25
-       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.  
-       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air 
-       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil 
-       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set 
+       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.
+       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air
+       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil
+       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set
        \note to 1.0.
   N32, \field Speed 1 Nominal Sensible Heat Ratio of Secondary Coil
        \type real
        \units m3/s
        \minimum> 0.0
        \maximum 1.0
-       \note This input value is the nominal sensible heat ratio used to split the heat extracted by 
-       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.  
-       \note This is an optional input field.  If this input field is left blank, then pure sensible 
-       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0. 
+       \note This input value is the nominal sensible heat ratio used to split the heat extracted by
+       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.
+       \note This is an optional input field.  If this input field is left blank, then pure sensible
+       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0.
   A35, \field Speed 1 Sensible Heat Ratio Modifier Function of Temperature Curve Name
        \type object-list
        \object-list BiquadraticCurves
@@ -44907,10 +44907,10 @@ Coil:Heating:DX:MultiSpeed,
        \note curve = a + b*wb + c*wb**2 + d*db + e*db**2 + f*wb*db
        \note wb = entering wet-bulb temperature seen by the secondary DX coil (C)
        \note db = entering dry-bulb temperature seen by the primary DX coil (C)
-       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
-       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering 
-       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left 
+       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
+       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering
+       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left
        \note blank, then the nominal sensible heat ratio specified in the field above will be used.
   A36, \field Speed 1 Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
        \type object-list
@@ -44919,8 +44919,8 @@ Coil:Heating:DX:MultiSpeed,
        \note quadratic curve = a + b*ff + c*ff**2
        \note cubic curve = a + b*ff + c*ff**2 + d*ff**3
        \note ff = secondary air flow fraction of the full load flow
-       \note This input field is name of sensible heat ratio modifier curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
+       \note This input field is name of sensible heat ratio modifier curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
        \note on the secondary coil air flow fraction. This is an optional input field.  If this input
        \note field is left blank, then the nominal sensible heat ratio specified will be used.
   N33, \field Speed 2 Secondary Coil Air Flow Rate
@@ -44928,28 +44928,28 @@ Coil:Heating:DX:MultiSpeed,
        \units m3/s
        \minimum> 0.0
        \autosizable
-       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump 
-       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the 
-       \note heat pump is working in cooling mode.  
+       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump
+       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the
+       \note heat pump is working in cooling mode.
   N34, \field Speed 2 Secondary Coil Fan Flow Scaling Factor
        \type real
        \units m3/s
        \minimum> 0.0
        \default 1.25
-       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.  
-       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air 
-       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil 
-       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set 
+       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.
+       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air
+       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil
+       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set
        \note to 1.0.
   N35, \field Speed 2 Nominal Sensible Heat Ratio of Secondary Coil
        \type real
        \units m3/s
        \minimum> 0.0
        \maximum 1.0
-       \note This input value is the nominal sensible heat ratio used to split the heat extracted by 
-       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.  
-       \note This is an optional input field.  If this input field is left blank, then pure sensible 
-       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0. 
+       \note This input value is the nominal sensible heat ratio used to split the heat extracted by
+       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.
+       \note This is an optional input field.  If this input field is left blank, then pure sensible
+       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0.
   A37, \field Speed 2 Sensible Heat Ratio Modifier Function of Temperature Curve Name
        \type object-list
        \object-list BiquadraticCurves
@@ -44957,10 +44957,10 @@ Coil:Heating:DX:MultiSpeed,
        \note curve = a + b*wb + c*wb**2 + d*db + e*db**2 + f*wb*db
        \note wb = entering wet-bulb temperature seen by the secondary DX coil (C)
        \note db = entering dry-bulb temperature seen by the primary DX coil (C)
-       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
-       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering 
-       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left 
+       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
+       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering
+       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left
        \note blank, then the nominal sensible heat ratio specified in the field above will be used.
   A38, \field Speed 2 Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
        \type object-list
@@ -44969,8 +44969,8 @@ Coil:Heating:DX:MultiSpeed,
        \note quadratic curve = a + b*ff + c*ff**2
        \note cubic curve = a + b*ff + c*ff**2 + d*ff**3
        \note ff = secondary air flow fraction of the full load flow
-       \note This input field is name of sensible heat ratio modifier curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
+       \note This input field is name of sensible heat ratio modifier curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
        \note on the secondary coil air flow fraction. This is an optional input field.  If this input
        \note field is left blank, then the nominal sensible heat ratio specified will be used.
   N36, \field Speed 3 Secondary Coil Air Flow Rate
@@ -44978,28 +44978,28 @@ Coil:Heating:DX:MultiSpeed,
        \units m3/s
        \minimum> 0.0
        \autosizable
-       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump 
-       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the 
+       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump
+       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the
        \note heat pump is working in cooling mode.
   N37, \field Speed 3 Secondary Coil Fan Flow Scaling Factor
        \type real
        \units m3/s
        \minimum> 0.0
        \default 1.25
-       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.  
-       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air 
-       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil 
-       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set 
+       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.
+       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air
+       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil
+       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set
        \note to 1.0.
   N38, \field Speed 3 Nominal Sensible Heat Ratio of Secondary Coil
        \type real
        \units m3/s
        \minimum> 0.0
        \maximum 1.0
-       \note This input value is the nominal sensible heat ratio used to split the heat extracted by 
-       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.  
-       \note This is an optional input field.  If this input field is left blank, then pure sensible 
-       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0. 
+       \note This input value is the nominal sensible heat ratio used to split the heat extracted by
+       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.
+       \note This is an optional input field.  If this input field is left blank, then pure sensible
+       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0.
   A39, \field Speed 3 Sensible Heat Ratio Modifier Function of Temperature Curve Name
        \type object-list
        \object-list BiquadraticCurves
@@ -45007,10 +45007,10 @@ Coil:Heating:DX:MultiSpeed,
        \note curve = a + b*wb + c*wb**2 + d*db + e*db**2 + f*wb*db
        \note wb = entering wet-bulb temperature seen by the secondary DX coil (C)
        \note db = entering dry-bulb temperature seen by the primary DX coil (C)
-       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
-       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering 
-       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left 
+       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
+       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering
+       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left
        \note blank, then the nominal sensible heat ratio specified in the field above will be used.
   A40, \field Speed 3 Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
        \type object-list
@@ -45019,8 +45019,8 @@ Coil:Heating:DX:MultiSpeed,
        \note quadratic curve = a + b*ff + c*ff**2
        \note cubic curve = a + b*ff + c*ff**2 + d*ff**3
        \note ff = secondary air flow fraction of the full load flow
-       \note This input field is name of sensible heat ratio modifier curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
+       \note This input field is name of sensible heat ratio modifier curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
        \note on the secondary coil air flow fraction. This is an optional input field.  If this input
        \note field is left blank, then the nominal sensible heat ratio specified will be used.
   N39, \field Speed 4 Secondary Coil Air Flow Rate
@@ -45028,28 +45028,28 @@ Coil:Heating:DX:MultiSpeed,
        \units m3/s
        \minimum> 0.0
        \autosizable
-       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump 
-       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the 
-       \note heat pump is working in cooling mode.  
+       \note This input value is the secondary coil (evaporator) air flow rate when the heat pump
+       \note is working in heating mode or the secondary DX coil (condenser) air flow rate when the
+       \note heat pump is working in cooling mode.
   N40, \field Speed 4 Secondary Coil Fan Flow Scaling Factor
        \type real
        \units m3/s
        \minimum> 0.0
        \default 1.25
-       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.  
-       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air 
-       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil 
-       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set 
+       \note This input field is scaling factor for autosizing the secondary DX coil fan flow rate.
+       \note The secondary air flow rate is determined by multiplying the primary DX coil rated air
+       \note flow rate by the fan flow scaling factor. Default value is 1.25. If the secondary coil
+       \note fan flow rate is not autosized, then the secondary coil fan flow scaling factor is set
        \note to 1.0.
   N41, \field Speed 4 Nominal Sensible Heat Ratio of Secondary Coil
        \type real
        \units m3/s
        \minimum> 0.0
        \maximum 1.0
-       \note This input value is the nominal sensible heat ratio used to split the heat extracted by 
-       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.  
-       \note This is an optional input field.  If this input field is left blank, then pure sensible 
-       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0. 
+       \note This input value is the nominal sensible heat ratio used to split the heat extracted by
+       \note a secondary DX coil (evaporator) of a heat pump into sensible and latent components.
+       \note This is an optional input field.  If this input field is left blank, then pure sensible
+       \note internal heat gain is assumed, i.e., sensible heat ratio of 1.0.
   A41, \field Speed 4 Sensible Heat Ratio Modifier Function of Temperature Curve Name
        \type object-list
        \object-list BiquadraticCurves
@@ -45057,10 +45057,10 @@ Coil:Heating:DX:MultiSpeed,
        \note curve = a + b*wb + c*wb**2 + d*db + e*db**2 + f*wb*db
        \note wb = entering wet-bulb temperature seen by the secondary DX coil (C)
        \note db = entering dry-bulb temperature seen by the primary DX coil (C)
-       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
-       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering 
-       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left 
+       \note This input field is name of sensible heat ratio modifier biquadratic curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
+       \note on the secondary zone air node wet-bulb temperature and the heating DX coil entering
+       \note air dry-bulb temperature.  This is an optional input field.  If this input field is left
        \note blank, then the nominal sensible heat ratio specified in the field above will be used.
   A42; \field Speed 4 Sensible Heat Ratio Modifier Function of Flow Fraction Curve Name
        \type object-list
@@ -45069,8 +45069,8 @@ Coil:Heating:DX:MultiSpeed,
        \note quadratic curve = a + b*ff + c*ff**2
        \note cubic curve = a + b*ff + c*ff**2 + d*ff**3
        \note ff = secondary air flow fraction of the full load flow
-       \note This input field is name of sensible heat ratio modifier curve.  The value 
-       \note of this curve modifies the nominal sensible heat ratio for current time step depending 
+       \note This input field is name of sensible heat ratio modifier curve.  The value
+       \note of this curve modifies the nominal sensible heat ratio for current time step depending
        \note on the secondary coil air flow fraction. This is an optional input field.  If this input
        \note field is left blank, then the nominal sensible heat ratio specified will be used.
 
@@ -48375,7 +48375,7 @@ Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \default WetBulbTemperature
        \note Determines temperature type for heating capacity curves and
        \note heating COP curves. This input determines whether
-       \note the inlet air dry-bulb or wet-bulb temperature is used to evaluate these curves. 
+       \note the inlet air dry-bulb or wet-bulb temperature is used to evaluate these curves.
   A10, \field Part Load Fraction Correlation Curve Name
        \type object-list
        \object-list QuadraticCubicCurves
@@ -50306,7 +50306,7 @@ Coil:Cooling:DX:SingleSpeed:ThermalStorage,
 EvaporativeCooler:Direct:CelDekPad,
        \memo Direct evaporative cooler with rigid media evaporative pad and recirculating water
        \memo pump. This model has no controls other than its availability schedule.
-       \min-fields 7   
+       \min-fields 7
   A1 , \field Name
        \type alpha
        \reference EvapCoolerNames
@@ -50347,7 +50347,7 @@ EvaporativeCooler:Indirect:CelDekPad,
        \memo Indirect evaporative cooler with rigid media evaporative pad, recirculating water
        \memo pump, and secondary air fan. This model has no controls other than its availability
        \memo schedule.
-       \min-fields 14 
+       \min-fields 14
   A1 , \field Name
        \required-field
        \type alpha
@@ -50359,7 +50359,7 @@ EvaporativeCooler:Indirect:CelDekPad,
        \object-list ScheduleNames
   N1 , \field Direct Pad Area
        \required-field
-       \type real   
+       \type real
        \units m2
        \minimum 0.0
        \autosizable
@@ -50413,9 +50413,9 @@ EvaporativeCooler:Indirect:CelDekPad,
 EvaporativeCooler:Indirect:WetCoil,
        \memo Indirect evaporative cooler with wetted coil, recirculating water pump, and secondary
        \memo air fan. This model has no controls other than its availability schedule.
-       \min-fields 13 
+       \min-fields 13
   A1 , \field Name
-       \required-field   
+       \required-field
        \type alpha
        \reference EvapCoolerNames
   A2 , \field Availability Schedule Name
@@ -50424,35 +50424,35 @@ EvaporativeCooler:Indirect:WetCoil,
        \type object-list
        \object-list ScheduleNames
   N1 , \field Coil Maximum Efficiency
-       \required-field   
+       \required-field
        \type real
        \minimum 0.0
        \maximum 1.0
   N2 , \field Coil Flow Ratio
        \type real
   N3 , \field Recirculating Water Pump Power Consumption
-       \required-field   
+       \required-field
        \units W
        \ip-units W
   N4 , \field Secondary Air Fan Flow Rate
-       \required-field  
+       \required-field
        \units m3/s
        \minimum 0.0
   N5 , \field Secondary Air Fan Total Efficiency
-       \required-field  
+       \required-field
        \type real
        \minimum> 0.0
        \maximum 1.0
   N6 , \field Secondary Air Fan Delta Pressure
-       \required-field  
+       \required-field
        \units Pa
        \minimum 0.0
        \ip-units inH2O
   A3 , \field Primary Air Inlet Node Name
-       \required-field  
+       \required-field
        \type node
   A4 , \field Primary Air Outlet Node Name
-       \required-field  
+       \required-field
        \type node
   A5 , \field Control Type
        \note This field is not currently used and can be left blank
@@ -50468,7 +50468,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \memo Indirect evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or wetted coil), recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
-       \min-fields 21    
+       \min-fields 21
   A1 , \field Name
        \type alpha
        \reference EvapCoolerNames
@@ -50481,7 +50481,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \required-field
        \type real
        \note wet operation effectiveness with respect to wetbulb depression
-       \note this is the nominal design wetbulb effectiveness at design air flow rates and water rate 
+       \note this is the nominal design wetbulb effectiveness at design air flow rates and water rate
        \minimum 0.0
        \maximum 2.0
   A3 , \field Wetbulb Effectiveness Flow Ratio Modifier Curve Name
@@ -50505,7 +50505,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note this curve modifies the drybulb effectiveness in the previous field (eff_db_design)
        \note by multiplying the value by the result of this curve, eff_db = eff_db_design * f(HXFlowRatio)
        \note x = HXFlowRatio = sum of the primary and secondary flow rates divided by the sum of the design flow
-       \note rates. If this input field is left blank, constant cooler drybulb effectiveness is assumed.   
+       \note rates. If this input field is left blank, constant cooler drybulb effectiveness is assumed.
        \type object-list
        \object-list AllCurves
        \note Any curve or table with one independent variable can be used:
@@ -50522,16 +50522,16 @@ EvaporativeCooler:Indirect:ResearchSpecial,
   N4 , \field Water Pump Power Sizing Factor
        \type real
        \units W/(m3/s)
-       \default 90.0   
-       \note This field is used when the previous field is set to autosize. The pump power is scaled with Secondary Air 
-       \note Design Air Flow Rate. This value was backed out from inputs in energy plus example files. Average Pump Power 
+       \default 90.0
+       \note This field is used when the previous field is set to autosize. The pump power is scaled with Secondary Air
+       \note Design Air Flow Rate. This value was backed out from inputs in energy plus example files. Average Pump Power
        \note sizing factor was estimated from pump power and secondary air design flow rates inputs from energyplus example
-       \note files is about 90.0 [W/(m3/s)] (=90.0 ~ Pump Power / Secondary Air Design Flow Rate). The factor ranges from 
-       \note 55.0 to 150.0 [W/(m3/s)] were noted. 
+       \note files is about 90.0 [W/(m3/s)] (=90.0 ~ Pump Power / Secondary Air Design Flow Rate). The factor ranges from
+       \note 55.0 to 150.0 [W/(m3/s)] were noted.
   A5 , \field Water Pump Power Modifier Curve Name
        \note this curve modifies the pump power in the previous field by multiplying the design power by the result of this curve.
-       \note x = ff = flow fraction on the secondary side, secondary air flow rate during operation divided by Secondary Air 
-       \note Design Air Flow Rate. If this input field is left blank, pump power is assumed to be proportional to part load ratio. 
+       \note x = ff = flow fraction on the secondary side, secondary air flow rate during operation divided by Secondary Air
+       \note Design Air Flow Rate. If this input field is left blank, pump power is assumed to be proportional to part load ratio.
        \type object-list
        \object-list AllCurves
        \note Any curve or table with one independent variable can be used:
@@ -50547,25 +50547,25 @@ EvaporativeCooler:Indirect:ResearchSpecial,
   N6 , \field Secondary Air Flow Scaling Factor
        \type real
        \units dimensionless
-       \default 1.0     
+       \default 1.0
        \note This field is used when the previous field is set to autoize.  The Primary Design Air Flow Rate is scaled using this factor
-       \note to calculate the secondary design air flow rate.  
+       \note to calculate the secondary design air flow rate.
   N7 , \field Secondary Air Fan Design Power
        \type real
        \units W
-       \note This is the fan design power at Secondary Design Air Flow Rate. This is the nominal design power at full speed. 
+       \note This is the fan design power at Secondary Design Air Flow Rate. This is the nominal design power at full speed.
        \autosizable
   N8 , \field Secondary Air Fan Sizing Specific Power
        \type real
        \units W/(m3/s)
-       \default 250.0     
+       \default 250.0
        \note This field is used when the previous field is set to autosize. The fan power is scaled with Secondary Air Design Flow Rate.
        \note The default value is estimated from 125 Pa fan total pressure and fan total efficiency of 50.0% (250.0 = 125/0.5).
   A6 , \field Secondary Air Fan Power Modifier Curve Name
        \note this curve modifies the design fan power in the previous field by multiplying the value by the result
-       \note of this curve.  It should have a value of 1.0 at a x = 1.0. 
-       \note x = ff = flow fraction on the secondary side, secondary air flow rate during operation divided by Secondary Air Design Air 
-       \note Flow Rate. If this input field is left blank, the secondary fan power is assumed to be proportional to part load ratio. 
+       \note of this curve.  It should have a value of 1.0 at a x = 1.0.
+       \note x = ff = flow fraction on the secondary side, secondary air flow rate during operation divided by Secondary Air Design Air
+       \note Flow Rate. If this input field is left blank, the secondary fan power is assumed to be proportional to part load ratio.
        \type object-list
        \object-list AllCurves
        \note Any curve or table with one independent variable can be used:
@@ -50574,12 +50574,12 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note Curve:RectangularHyperbola2, Curve:ExponentialDecay, Curve:DoubleExponentialDecay,
        \note Table:OneIndependentVariable
   A7 , \field Primary Air Inlet Node Name
-       \required-field 
+       \required-field
        \type node
   A8 , \field Primary Air Outlet Node Name
-       \required-field 
+       \required-field
        \type node
-  N9 , \field Primary Air Design Flow Rate  
+  N9 , \field Primary Air Design Flow Rate
        \type real
        \units m3/s
        \minimum> 0.0
@@ -50588,13 +50588,13 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \type real
        \minimum 0.0
   A9 , \field Secondary Air Inlet Node Name
-       \required-field 
+       \required-field
        \type node
   A10, \field Secondary Air Outlet Node Name
-       \required-field 
+       \required-field
        \type node
   A11, \field Sensor Node Name
-       \required-field 
+       \required-field
        \type node
   A12, \field Relief Air Inlet Node Name
        \type node
@@ -50604,9 +50604,9 @@ EvaporativeCooler:Indirect:ResearchSpecial,
   N11, \field Drift Loss Fraction
        \type real
        \minimum 0.0
-       \note Rate of drift loss as a fraction of evaporated water flow rate. 
-       \note If this input field is left blank, then zero drift loss is assumed. 
-       \default 0.0   
+       \note Rate of drift loss as a fraction of evaporated water flow rate.
+       \note If this input field is left blank, then zero drift loss is assumed.
+       \default 0.0
   N12, \field Blowdown Concentration Ratio
        \type real
        \minimum 2.0
@@ -50617,36 +50617,36 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note A typical value is 3.  If left blank then there is no blowdown.
   N13, \field Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature
        \type real
-       \note This input field value defines the secondary air inlet node drybulb temperature 
-       \note limits in degreeCelsius. When the secondary side entering air dry bulb temperature 
-       \note drops below this limit, then the evaporative cooler operation mode changes to dry 
-       \note heat exchanger. Users specify their own limits. If this field is left blank, then 
-       \note there is no drybulb temperature lower limit for evaporative cooler operation. If 
-       \note operating range control is desired then this input field and the next two input 
-       \note fields should be specified or all the three should be left blank or left out. If 
+       \note This input field value defines the secondary air inlet node drybulb temperature
+       \note limits in degreeCelsius. When the secondary side entering air dry bulb temperature
+       \note drops below this limit, then the evaporative cooler operation mode changes to dry
+       \note heat exchanger. Users specify their own limits. If this field is left blank, then
+       \note there is no drybulb temperature lower limit for evaporative cooler operation. If
+       \note operating range control is desired then this input field and the next two input
+       \note fields should be specified or all the three should be left blank or left out. If
        \note no minimum drybulb temperature limit is desired while there are maximum drybulb
-       \note and wetbulb temperature limits then specify very low minimum temperature limit 
+       \note and wetbulb temperature limits then specify very low minimum temperature limit
        \note value (e.g. -99.0C).
   N14, \field Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature
        \type real
-       \note This input field value defines the secondary air inlet node wetbulb temperature 
+       \note This input field value defines the secondary air inlet node wetbulb temperature
        \note limits in degree Celsius. When the secondary side entering air wet bulb temperature
        \note exceeds this limit, then the evaporative cooler urns off and does not attempt to do
-       \note any cooling. If this field is left blank, then there is no wetbulb temperature 
+       \note any cooling. If this field is left blank, then there is no wetbulb temperature
        \note upper limit for evaporative cooler wet operation mode. If this input field is left
        \note blank then, the previous and the next input fields should also be left blank. If no
-       \note maximum wetbulb temperature limits is desired while there are minimum drybulb and 
-       \note maximum drybulb upper temperature limits then specify very high maximum wetbulb 
+       \note maximum wetbulb temperature limits is desired while there are minimum drybulb and
+       \note maximum drybulb upper temperature limits then specify very high maximum wetbulb
        \note temperature limit value (e.g. 99.0 C).
   N15; \field Dry Operation Maximum Limit Outdoor Drybulb Temperature
        \type real
-       \note This input field value defines the secondary air inlet node drybulb temperature 
+       \note This input field value defines the secondary air inlet node drybulb temperature
        \note limits in degree Celsius. When the secondary side entering air drybulb temperature
        \note exceeds this limit, then the evaporative cooler will not run in dry operation mode
        \note or may be turned off depending on its wetbulb temperature. If this field is left
        \note blank, then there is no drybulb temperature maximum limit for evaporative cooler
        \note operation. If this input field is left blank then, the previous and the next input
-       \note fields should also be left blank. If no maximum drybulb temperature limit is 
+       \note fields should also be left blank. If no maximum drybulb temperature limit is
        \note desired while there are minimum drybulb and maximum wetbulb upper temperature
        \note limits then specify very high maximum drybulb temperature limit value (e.g. 99.0 C).
 
@@ -50655,7 +50655,7 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \memo Direct evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or similar media), and recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
-       \min-fields 11    
+       \min-fields 11
   A1 , \field Name
        \type alpha
        \reference EvapCoolerNames
@@ -50670,19 +50670,19 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \minimum 0.0
        \maximum 1.0
   A3 , \field Effectiveness Flow Ratio Modifier Curve Name
-       \note this curve modifies the design effectiveness in the previous field 
-       \note by multiplying the value by the result of this curve.  The effectiveness flow modifier curve 
-       \note is a function of flow fraction. Flow fraction is the ratio of current primary air flow rate to 
-       \note the primary air design flow rate. If this input field is left blank then, the effectiveness 
-       \note is assumed to be constant.   
+       \note this curve modifies the design effectiveness in the previous field
+       \note by multiplying the value by the result of this curve.  The effectiveness flow modifier curve
+       \note is a function of flow fraction. Flow fraction is the ratio of current primary air flow rate to
+       \note the primary air design flow rate. If this input field is left blank then, the effectiveness
+       \note is assumed to be constant.
        \type object-list
        \object-list AllCurves
        \note Any curve or table with one independent variable can be used:
        \note Curve:Linear, Curve:Quadratic, Curve:Cubic, Curve:Quartic, Curve:Exponent,
        \note Curve:ExponentialSkewNormal, Curve:Sigmoid, Curve:RectuangularHyperbola1,
        \note Curve:RectangularHyperbola2, Curve:ExponentialDecay, Curve:DoubleExponentialDecay,
-       \note Table:OneIndependentVariable   
-  N2 , \field Primary Air Design Flow Rate  
+       \note Table:OneIndependentVariable
+  N2 , \field Primary Air Design Flow Rate
        \type real
        \units m3/s
        \minimum> 0.0
@@ -50697,11 +50697,11 @@ EvaporativeCooler:Direct:ResearchSpecial,
   N4 , \field Water Pump Power Sizing Factor
        \type real
        \units W/(m3/s)
-       \default 90.0   
-       \note This field is used when the previous field is set to autosize. The pump power is scaled with Secondary Air 
-       \note Design Air Flow Rate. This value was backed out from inputs in energy plus example files. Average Pump Power 
+       \default 90.0
+       \note This field is used when the previous field is set to autosize. The pump power is scaled with Secondary Air
+       \note Design Air Flow Rate. This value was backed out from inputs in energy plus example files. Average Pump Power
        \note sizing factor was estimated from pump power and primary air design flow rates inputs from energyplus example
-       \note files is about 90.0 [W/(m3/s)] (=90.0 ~ Pump Power / Primary Air Design Flow Rate). The factor ranges from 
+       \note files is about 90.0 [W/(m3/s)] (=90.0 ~ Pump Power / Primary Air Design Flow Rate). The factor ranges from
        \note 55.0 to 150.0 [W/(m3/s)].
   A4 , \field Water Pump Power Modifier Curve Name
        \note this curve modifies the pump power in the previous field by multiplying the design power by the result of this curve.
@@ -50715,13 +50715,13 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \note Curve:RectangularHyperbola2, Curve:ExponentialDecay, Curve:DoubleExponentialDecay,
        \note Table:OneIndependentVariable
   A5 , \field Air Inlet Node Name
-       \required-field 
+       \required-field
        \type node
   A6 , \field Air Outlet Node Name
-       \required-field 
+       \required-field
        \type node
   A7 , \field Sensor Node Name
-       \required-field 
+       \required-field
        \type node
   A8 , \field Water Supply Storage Tank Name
        \type object-list
@@ -50741,24 +50741,24 @@ EvaporativeCooler:Direct:ResearchSpecial,
   N7 , \field Evaporative Operation Minimum Drybulb Temperature
        \type real
        \minimum -99.0
-       \note This numeric field defines the evaporative cooler air inlet node drybulb temperature minimum  
-       \note limit in degrees Celsius. The evaporative cooler will be turned off when the evaporator cooler 
-       \note air inlet node dry-bulb temperature falls below this limit. The typical minimum value is 16degC. Users 
+       \note This numeric field defines the evaporative cooler air inlet node drybulb temperature minimum
+       \note limit in degrees Celsius. The evaporative cooler will be turned off when the evaporator cooler
+       \note air inlet node dry-bulb temperature falls below this limit. The typical minimum value is 16degC. Users
        \note are allowed to specify their own limits. If this field is left blank, then there is no drybulb lower
        \note temperature limit for evaporative cooler operation.
   N8 , \field Evaporative Operation Maximum Limit Wetbulb Temperature
        \type real
        \note when outdoor wetbulb temperature rises above this limit the cooler shuts down.
-       \note This numeric field defines the evaporative cooler air inlet node wet-bulb temperature maximum 
-       \note limit in degrees Celsius. The evaporative cooler will be turned off when the evaporative cooler 
-       \note air inlet node wet-bulb temperature exceeds this limit. The typical maximum value is 24degC. Users 
-       \note are allowed to specify their own limits. If this field is left blank, then there is no upper 
+       \note This numeric field defines the evaporative cooler air inlet node wet-bulb temperature maximum
+       \note limit in degrees Celsius. The evaporative cooler will be turned off when the evaporative cooler
+       \note air inlet node wet-bulb temperature exceeds this limit. The typical maximum value is 24degC. Users
+       \note are allowed to specify their own limits. If this field is left blank, then there is no upper
        \note wetbulb temperature limit for evaporative cooler operation.
   N9 ; \field Evaporative Operation Maximum Limit Drybulb Temperature
        \type real
-       \note This numeric field defines the evaporative cooler air inlet node dry-bulb temperature maximum 
-       \note limit in degrees Celsius. The evaporative cooler will be turned off when its air inlet node 
-       \note drybulb temperature exceeds this limit. The typical maximum value is 26degC. Users 
+       \note This numeric field defines the evaporative cooler air inlet node dry-bulb temperature maximum
+       \note limit in degrees Celsius. The evaporative cooler will be turned off when its air inlet node
+       \note drybulb temperature exceeds this limit. The typical maximum value is 26degC. Users
        \note are allowed to specify their own limits. If this field is left blank, then there is no upper
        \note temperature limit for evaporative cooler operation.
 
@@ -50830,14 +50830,14 @@ Humidifier:Steam:Gas,
       \minimum 0.0
       \ip-units W
       \autosizable
-      \note if auto-sized, the rated gas use rate is calculated from the rated 
+      \note if auto-sized, the rated gas use rate is calculated from the rated
       \note capacity and enthalpy rise of water from 20.0C to 100.0C steam and user
-      \note input thermal efficiency value specified in the next input field. If this 
-      \note input field is hard-sized and Inlet Water Temperature Option input field is 
-      \note selected as FixedInletWaterTemperature, then the thermal efficiency input       
-      \note field will not be used or else if the Inlet Water Temperature Option input 
-      \note field is selected as VariableInletWaterTemperature, then the thermal efficiency 
-      \note input value is overridden by a value calculated from the capacity, rated gas use 
+      \note input thermal efficiency value specified in the next input field. If this
+      \note input field is hard-sized and Inlet Water Temperature Option input field is
+      \note selected as FixedInletWaterTemperature, then the thermal efficiency input
+      \note field will not be used or else if the Inlet Water Temperature Option input
+      \note field is selected as VariableInletWaterTemperature, then the thermal efficiency
+      \note input value is overridden by a value calculated from the capacity, rated gas use
       \note rate and design condition.
   N3, \field Thermal Efficiency
       \type real
@@ -50846,11 +50846,11 @@ Humidifier:Steam:Gas,
       \maximum 1.0
       \default 0.80
       \note Based on the higher heating value of fuel.
-      \note If "Rated Gas Use Rate" in the field above is not auto-sized and the Inlet Water 
-      \note Temperature Option input field is specified as FixedInletWaterTemperature, then the 
-      \note thermal efficiency specified will not be used in the calculation, or else if the 
-      \note Inlet Water Temperature Option input field is selected as VariableInletWaterTemperature, 
-      \note then the thermal efficiency value is overridden by a value calculated from the capacity, 
+      \note If "Rated Gas Use Rate" in the field above is not auto-sized and the Inlet Water
+      \note Temperature Option input field is specified as FixedInletWaterTemperature, then the
+      \note thermal efficiency specified will not be used in the calculation, or else if the
+      \note Inlet Water Temperature Option input field is selected as VariableInletWaterTemperature,
+      \note then the thermal efficiency value is overridden by a value calculated from the capacity,
       \note rated gas use rate and design condition.
   A3, \field Thermal Efficiency Modifier Curve Name
       \type object-list
@@ -50860,14 +50860,14 @@ Humidifier:Steam:Gas,
       \note Quadratic = C1 + C2*PLR + C3*PLR^2
       \note Cubic = C1 + C2*PLR + C3*PLR^2 + C4*PLR^3
       \note This is thermal efficiency modifier curve name of gas fired steam humidifier.
-      \note This curve is normalized, i.e., curve output value at rated condition is 1.0. 
+      \note This curve is normalized, i.e., curve output value at rated condition is 1.0.
   N4, \field Rated Fan Power
       \type real
       \units W
       \minimum 0.0
       \ip-units W
-      \note The nominal full capacity electric power input to the blower fan in Watts. If no 
-      \note blower fan is required to inject the dry steam to the supply air stream, then 
+      \note The nominal full capacity electric power input to the blower fan in Watts. If no
+      \note blower fan is required to inject the dry steam to the supply air stream, then
       \note this input field is set to zero.
   N5, \field Auxiliary Electric Power
       \type real
@@ -50876,7 +50876,7 @@ Humidifier:Steam:Gas,
       \ip-units W
       \default 0.0
       \note The auxiliary electric power input in watts. This amount of power will be consumed
-      \note whenever the unit is available (as defined by the availability schedule). This 
+      \note whenever the unit is available (as defined by the availability schedule). This
       \note electric power is used for control purpose only.
   A4, \field Air Inlet Node Name
       \type node
@@ -50886,13 +50886,13 @@ Humidifier:Steam:Gas,
       \type object-list
       \object-list WaterStorageTankNames
   A7; \field Inlet Water Temperature Option
-      \note The inlet water temperature can be fixed at 20C as it is done for electric steam 
-      \note humidifier or it can be allowed to vary with temperature of the water source.  
-      \note Currently allowed water sources are main water or water storage tank in water use objects.  
-      \note if FixedInletWaterTemperature is specified, then a fixed 20C water temperature will be 
+      \note The inlet water temperature can be fixed at 20C as it is done for electric steam
+      \note humidifier or it can be allowed to vary with temperature of the water source.
+      \note Currently allowed water sources are main water or water storage tank in water use objects.
+      \note if FixedInletWaterTemperature is specified, then a fixed 20C water temperature will be
       \note used, or else if VariableInletWaterTemperature is specified, then inlet water will vary
-      \note depending the source water temperature. If this input field is left blank, then fixed 
-      \note inlet water temperature of 20C will be assumed.  
+      \note depending the source water temperature. If this input field is left blank, then fixed
+      \note inlet water temperature of 20C will be assumed.
       \type choice
       \key FixedInletWaterTemperature
       \key VariableInletWaterTemperature
@@ -53959,8 +53959,8 @@ AirConditioner:VariableRefrigerantFlow,
        \note from cooling only mode to heat recovery mode
 
 AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
-       \memo This is a key object in the new physics based VRF model applicable for Fluid 
-       \memo Temperature Control 
+       \memo This is a key object in the new physics based VRF model applicable for Fluid
+       \memo Temperature Control
        \memo It describes the Variable Refrigerant Flow system excluding the performance of indoor units
        \memo Indoor units are modeled separately, see ZoneHVAC:TerminalUnit:VariableRefrigerantFlow
        \min-fields 9
@@ -53991,8 +53991,8 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \default 40000
        \note Enter the total evaporative capacity in watts at rated conditions
        \note This is the capacity corresponding to the max compressor speed at rated conditions
-       \note The actual evaporative capacity is obtained by multiplying the  
-       \note rated capacity with the modification factor calculated by Evaporative 
+       \note The actual evaporative capacity is obtained by multiplying the
+       \note rated capacity with the modification factor calculated by Evaporative
        \note Capacity Multiplier Function of Temperature Curve
   N2 , \field Rated Compressor Power Per Unit of Rated Evaporative Capacity
        \type real
@@ -54001,8 +54001,8 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \default 0.35
        \note Enter the rated compressor power per Watt of rated evaporative capacity [W/W]
        \note Rated compressor power corresponds to the max compressor speed at rated conditions
-       \note The actual compressor power is obtained by multiplying the  
-       \note rated power with the modification factor calculated by Compressor 
+       \note The actual compressor power is obtained by multiplying the
+       \note rated power with the modification factor calculated by Compressor
        \note Power Multiplier Function of Temperature Curve
   N3 , \field Minimum Outdoor Air Temperature in Cooling Mode
        \type real
@@ -54042,42 +54042,42 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \key VariableTemp
        \default VariableTemp
   N9 , \field Reference Evaporating Temperature for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
+       \note This field is used if Refrigerant Temperature Control Algorithm
        \note is ConstantTemp
        \note Evaporating temperature is the refrigerant temperature, not air temperature
        \type real
        \units C
        \default 6.0
   N10, \field Reference Condensing Temperature for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
+       \note This field is used if Refrigerant Temperature Control Algorithm
        \note is ConstantTemp
        \note Condensing temperature is the refrigerant temperature, not air temperature
        \type real
        \units C
        \default 44.0
   N11, \field Variable Evaporating Temperature Minimum for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
-       \note is VariableTemp 
+       \note This field is used if Refrigerant Temperature Control Algorithm
+       \note is VariableTemp
        \note Evaporating temperature is the refrigerant temperature, not air temperature
        \type real
        \units C
        \default 4.0
   N12, \field Variable Evaporating Temperature Maximum for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
-       \note is VariableTemp 
+       \note This field is used if Refrigerant Temperature Control Algorithm
+       \note is VariableTemp
        \note Evaporating temperature is the refrigerant temperature, not air temperature
        \type real
        \units C
        \default 13.0
   N13, \field Variable Condensing Temperature Minimum for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
+       \note This field is used if Refrigerant Temperature Control Algorithm
        \note is VariableTemp
        \note Condensing temperature is the refrigerant temperature, not air temperature
        \type real
        \units C
        \default 42.0
   N14, \field Variable Condensing Temperature Maximum for Indoor Unit
-       \note This field is used if Refrigerant Temperature Control Algorithm 
+       \note This field is used if Refrigerant Temperature Control Algorithm
        \note is VariableTemp
        \note Condensing temperature is the refrigerant temperature, not air temperature
        \type real
@@ -54125,8 +54125,8 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \default 36.0
   N20, \field Height Difference Between Outdoor Unit and Indoor Units
        \note Difference between outdoor unit height and indoor unit height
-       \note Positive means outdoor unit is higher than indoor unit 
-       \note Negative means outdoor unit is lower than indoor unit 
+       \note Positive means outdoor unit is higher than indoor unit
+       \note Negative means outdoor unit is lower than indoor unit
        \type real
        \units m
        \default 5.0
@@ -54169,8 +54169,8 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \key ReverseCycle
        \key Resistive
        \default Resistive
-       \note Select a defrost strategy. 
-       \note Reverse cycle reverses the operating mode from heating to 
+       \note Select a defrost strategy.
+       \note Reverse cycle reverses the operating mode from heating to
        \note cooling to melt frost formation on the condenser coil
        \note The resistive strategy uses a resistive heater
        \note to melt the frost.
@@ -54220,11 +54220,11 @@ AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl,
        \default 2
        \minimum 2
        \maximum 9
-       \note First index represents minimal capacity operation 
-       \note Last index represents full capacity operation 
-  N32, \field Compressor Speed at Loading Index 1 
+       \note First index represents minimal capacity operation
+       \note Last index represents full capacity operation
+  N32, \field Compressor Speed at Loading Index 1
        \type real
-       \note Minimum compressor speed 
+       \note Minimum compressor speed
        \units rev/min
        \minimum> 0
   A11, \field Loading Index 1 Evaporative Capacity Multiplier Function of Temperature Curve Name
@@ -60427,10 +60427,10 @@ Chiller:Electric:ReformulatedEIR,
        \note CWS = supply (leaving) chilled water temperature(C)
        \note LCT = leaving condenser fluid temperature(C)
   A4 , \field Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Type
-       \note Two curve types are available: 
+       \note Two curve types are available:
        \note Type LeavingCondenserWaterTemperature: based on the leaving condenser water temperature.
        \note Type Lift: based on the normalized lift, which is the temperature difference between the
-       \note leaving condenser water temperature and the leaving evaporator water temperature. 
+       \note leaving condenser water temperature and the leaving evaporator water temperature.
        \required-field
        \type choice
        \key LeavingCondenserWaterTemperature
@@ -60445,15 +60445,15 @@ Chiller:Electric:ReformulatedEIR,
        \object-list BiVariateTables
        \object-list ChillerPartLoadWithLiftCurves
        \object-list MultiVariateTables
-       \note The form of this curve is based on the input for 
+       \note The form of this curve is based on the input for
        \note Electric Input to Cooling Output RatioFunction of Part Load Ratio Curve Type
        \note Type=LeavingCondenserWaterTemperature: Calculated based on LCT and PLR
-       \note Curve object type should be Curve:Bicubic or Table:TwoIndependentVariables 
+       \note Curve object type should be Curve:Bicubic or Table:TwoIndependentVariables
        \note Bicubic curve = a + b*LCT + c*LCT**2 + d*PLR + e*PLR**2 + f*LCT*PLR + g*0 + h*PLR**3
        \note + i*0 + j*0
        \note PLR = part load ratio (cooling load/steady state capacity)
        \note LCT = leaving condenser fluid temperature(C)
-       \note Type=Lift: Calculated based on dT*, Tdev* and PLR 
+       \note Type=Lift: Calculated based on dT*, Tdev* and PLR
        \note Curve object type should be Curve:ChillerPartLoadWithLiftCurves or Table:MultiVariableLookup
        \note ChillerPartLoadWithLiftCurves curve = a + b*(dT*) + c*(dT*)**2 + d*PLR + e*PLR**2 + f*(dT*)*PLR + g*(dT*)**3
        \note + h*PLR**3 + i*(dT*)**2*PLR + j*(dT*)*PLR**2 + k*(dT*)**2*PLR**2 + l*(Tdev*)*PLR**3
@@ -66289,7 +66289,7 @@ WaterHeater:Sizing,
 WaterHeater:HeatPump:PumpedCondenser,
        \min-fields 32
        \memo This object models an air-source heat pump for water heating where the water is pumped out of the tank,
-       \memo through a heating coil and returned to the tank. 
+       \memo through a heating coil and returned to the tank.
        \memo For wrapped condenser HPWHs, see WaterHeater:HeatPump:WrappedCondenser.
        \memo WaterHeater:HeatPump:PumpedCondenser is a compound object that references other component objects -
        \memo Coil:WaterHeating:AirToWaterHeatPump:*, Fan:OnOff, WaterHeater:Mixed or WaterHeater:Stratified
@@ -66548,7 +66548,7 @@ WaterHeater:HeatPump:PumpedCondenser,
 WaterHeater:HeatPump:WrappedCondenser,
        \min-fields 31
        \memo This object models an air-source heat pump for water heating where the heating coil is wrapped around
-       \memo the tank, which is typical of residential HPWHs. 
+       \memo the tank, which is typical of residential HPWHs.
        \memo For pumped condenser HPWHs, see WaterHeater:HeatPump:PumpedCondenser.
        \memo WaterHeater:HeatPump:WrappedCondenser is a compound object that references other component objects -
        \memo Coil:WaterHeating:AirToWaterHeatPump:Pumped, Fan:OnOff, WaterHeater:Mixed
@@ -66653,7 +66653,7 @@ WaterHeater:HeatPump:WrappedCondenser,
        \required-field
        \type object-list
        \object-list WaterHeaterStratifiedNames
-       \note Needs to match the name used in the corresponding Water Heater object. 
+       \note Needs to match the name used in the corresponding Water Heater object.
        \note Must be a WaterHeater:Stratified tank.
   A14, \field Tank Use Side Inlet Node Name
        \type node
@@ -72020,21 +72020,21 @@ SetpointManager:SingleZone:OneStageHeating,
 SetpointManager:ReturnTemperature:ChilledWater,
      \memo This setpoint manager is used to place a temperature setpoint on a plant supply
      \memo  outlet node based on a target return water setpoint. The setpoint manager attempts
-     \memo  to achieve the desired return water temperature by adjusting the supply temperature 
+     \memo  to achieve the desired return water temperature by adjusting the supply temperature
      \memo  setpoint based on the plant conditions at each system time step.
      \min-fields 7
   A1,  \field Name
        \required-field
   A2,  \field Plant Loop Supply Outlet Node
-       \note This is the name of the supply outlet node for the plant being controlled by this 
+       \note This is the name of the supply outlet node for the plant being controlled by this
        \note setpoint manager.  Typically this is where the setpoint will be actuated for
        \note supply equipment to control to, but not necessarily.  This setpoint manager will
        \note mine that information from the internal plant data structures.
        \type node
        \required-field
   A3,  \field Plant Loop Supply Inlet Node
-       \note This is the name of the supply inlet node for the plant being controlled with this 
-       \note setpoint manager. The temperature on this node is controlled by actuating the 
+       \note This is the name of the supply inlet node for the plant being controlled with this
+       \note setpoint manager. The temperature on this node is controlled by actuating the
        \note supply setpoint.
        \type node
        \required-field
@@ -72052,7 +72052,7 @@ SetpointManager:ReturnTemperature:ChilledWater,
        \default 10
        \required-field
   A4,  \field Return Temperature Setpoint Input Type
-       \note This defines whether the chilled water return temperature target is constant, 
+       \note This defines whether the chilled water return temperature target is constant,
        \note scheduled, or specified on the supply inlet node by a separate setpoint manager.
        \type choice
        \key Constant
@@ -72060,16 +72060,16 @@ SetpointManager:ReturnTemperature:ChilledWater,
        \key ReturnTemperatureSetpoint
        \required-field
   N3,  \field Return Temperature Setpoint Constant Value
-       \note This is the desired return temperature target, which is met by adjusting the  
-       \note supply temperature setpoint. This constant value is only used if 
+       \note This is the desired return temperature target, which is met by adjusting the
+       \note supply temperature setpoint. This constant value is only used if
        \note the Design Chilled Water Return Temperature Input Type is Constant
        \type real
        \units C
        \default 13
   A5;  \field Return Temperature Setpoint Schedule Name
-       \note This is the desired return temperature target, which is met by adjusting the  
+       \note This is the desired return temperature target, which is met by adjusting the
        \note supply temperature setpoint. This is a schedule name to allow the return temperature
-       \note target value to be scheduled.  This field is only used if 
+       \note target value to be scheduled.  This field is only used if
        \note the Design Chilled Water Return Temperature Input Type is Scheduled
        \type object-list
        \object-list ScheduleNames
@@ -72077,21 +72077,21 @@ SetpointManager:ReturnTemperature:ChilledWater,
 SetpointManager:ReturnTemperature:HotWater,
      \memo This setpoint manager is used to place a temperature setpoint on a plant supply
      \memo  outlet node based on a target return water setpoint. The setpoint manager attempts
-     \memo  to achieve the desired return water temperature by adjusting the supply temperature 
+     \memo  to achieve the desired return water temperature by adjusting the supply temperature
      \memo  setpoint based on the plant conditions at each system time step.
      \min-fields 7
   A1,  \field Name
        \required-field
   A2,  \field Plant Loop Supply Outlet Node
-       \note This is the name of the supply outlet node for the plant being controlled by this 
+       \note This is the name of the supply outlet node for the plant being controlled by this
        \note setpoint manager.  Typically this is where the setpoint will be actuated for
        \note supply equipment to control to, but not necessarily.  This setpoint manager will
        \note mine that information from the internal plant data structures.
        \type node
        \required-field
   A3,  \field Plant Loop Supply Inlet Node
-       \note This is the name of the supply inlet node for the plant being controlled with this 
-       \note setpoint manager. The temperature on this node is controlled by actuating the 
+       \note This is the name of the supply inlet node for the plant being controlled with this
+       \note setpoint manager. The temperature on this node is controlled by actuating the
        \note supply setpoint.
        \type node
        \required-field
@@ -72109,7 +72109,7 @@ SetpointManager:ReturnTemperature:HotWater,
        \default 82
        \required-field
   A4,  \field Return Temperature Setpoint Input Type
-       \note This defines whether the hot water return temperature target is constant, 
+       \note This defines whether the hot water return temperature target is constant,
        \note scheduled, or specified on the supply inlet node by a separate setpoint manager.
        \type choice
        \key Constant
@@ -72117,16 +72117,16 @@ SetpointManager:ReturnTemperature:HotWater,
        \key ReturnTemperatureSetpoint
        \required-field
   N3,  \field Return Temperature Setpoint Constant Value
-       \note This is the desired return temperature target, which is met by adjusting the  
-       \note supply temperature setpoint. This constant value is only used if 
+       \note This is the desired return temperature target, which is met by adjusting the
+       \note supply temperature setpoint. This constant value is only used if
        \note the Design Hot Water Return Temperature Input Type is Constant
        \type real
        \units C
        \default 71
   A5;  \field Return Temperature Setpoint Schedule Name
-       \note This is the desired return temperature target, which is met by adjusting the  
+       \note This is the desired return temperature target, which is met by adjusting the
        \note supply temperature setpoint. This is a schedule name to allow the return temperature
-       \note target value to be scheduled.  This field is only used if 
+       \note target value to be scheduled.  This field is only used if
        \note the Design Hot Water Return Temperature Input Type is Scheduled
        \type object-list
        \object-list ScheduleNames
@@ -78517,7 +78517,7 @@ FaultModel:HumidistatOffset,
        \type object-list
        \object-list ZoneControlHumidistatNames
    A3, \field Humidistat Offset Type
-       \note Two types are available: 
+       \note Two types are available:
        \note Type ThermostatOffsetIndependent
        \note Type ThermostatOffsetDependent
        \type choice
@@ -78568,13 +78568,13 @@ FaultModel:Fouling:AirFilter,
        \type object-list
        \object-list ScheduleNames
    A5, \field Pressure Fraction Schedule Name
-       \note Enter the name of a schedule 
-       \note describing the variations of the fan pressure rise 
+       \note Enter the name of a schedule
+       \note describing the variations of the fan pressure rise
        \note in terms of multipliers to the fan design pressure rise
        \type object-list
        \object-list ScheduleNames
    A6; \field Fan Curve Name
-       \note The curve describes the relationship between 
+       \note The curve describes the relationship between
        \note the fan pressure rise and air flow rate
        \required-field
        \type object-list
@@ -95716,34 +95716,34 @@ Output:Table:Monthly,
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
        \note See instructions under AggregationType01
- 
+
 Output:Table:Annual,
-       \memo Provides a generic method of setting up tables of annual results with one row per object. 
-       \memo The report has multiple columns that are each defined using a repeated group of fields 
-       \memo for any number of columns. A single Output:Table:Annual produces a single table in the 
-       \memo output. 
+       \memo Provides a generic method of setting up tables of annual results with one row per object.
+       \memo The report has multiple columns that are each defined using a repeated group of fields
+       \memo for any number of columns. A single Output:Table:Annual produces a single table in the
+       \memo output.
        \extensible:3
    A1, \field Name
        \required-field
        \type alpha
    A2, \field Filter
        \type alpha
-       \note An optional text string that is compared to the names of the objects referenced by the 
-       \note variables and if they match are included in the table. A footnote will appear that indicates 
-       \note that the objects shown may not be all the objects that of that type that occur in the file. 
+       \note An optional text string that is compared to the names of the objects referenced by the
+       \note variables and if they match are included in the table. A footnote will appear that indicates
+       \note that the objects shown may not be all the objects that of that type that occur in the file.
    A3, \field Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note Optional schedule name. If left blank, aggregation is performed for all hours simulated. If 
+       \note Optional schedule name. If left blank, aggregation is performed for all hours simulated. If
        \note a schedule is specified, aggregation is performed for non-zero hours in the schedule.
 ! The next two fields are repeated for each column
    A4, \field Variable or Meter or EMS Variable or Field 1 Name
        \begin-extensible
        \type external-list
        \external-list autoRDDvariableMeter
-       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter 
-       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown 
-       \note using the aggregation method specified. 
+       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter
+       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown
+       \note using the aggregation method specified.
    A5, \field Aggregation Type for Variable or Meter 1
        \type choice
        \key SumOrAverage
@@ -95756,9 +95756,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95791,14 +95791,14 @@ Output:Table:Annual,
        \note HoursNonNegative - The HoursNonNegative option adds up the elapsed time during the month
        \note   that this variable has non-negative value. Hours with a positive value and
        \note   hours with a zero value are all included.
-       \note HourInTenBinsMinToMax - Creates 10 columns for the specified variable and shows the number 
-       \note   of hours in each of 10 bins based on the minimum and maximum value. The bin sizes will 
-       \note   be rounded up to the next most signficant digit value. 
-       \note HourInTenBinsZeroToMax - Creates 11 columns for the specified variable and shows the number 
-       \note   of hours in each of 10 bins from zero to the maximum value and a bin for hours below zero. 
+       \note HourInTenBinsMinToMax - Creates 10 columns for the specified variable and shows the number
+       \note   of hours in each of 10 bins based on the minimum and maximum value. The bin sizes will
+       \note   be rounded up to the next most signficant digit value.
+       \note HourInTenBinsZeroToMax - Creates 11 columns for the specified variable and shows the number
+       \note   of hours in each of 10 bins from zero to the maximum value and a bin for hours below zero.
        \note   The bin sizes will be rounded up to the next most significant digit value.
-       \note HourInTenBinsMinToZero - Creates 11 columns for the specified variable and shows the number 
-       \note   of hours in each of 10 bins from zero to the minimum value and a bin for hours above zero. 
+       \note HourInTenBinsMinToZero - Creates 11 columns for the specified variable and shows the number
+       \note   of hours in each of 10 bins from zero to the minimum value and a bin for hours above zero.
        \note   The bin sizes will be rounded up to the next most significant digit value.
        \note SumOrAverageDuringHoursShown - Provides the sum or average of the named variable when
        \note   during the hours that the previous variable displayed with any of the Aggregation Types
@@ -95838,9 +95838,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95865,9 +95865,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95892,9 +95892,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95919,9 +95919,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95946,9 +95946,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -95973,9 +95973,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96000,9 +96000,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96027,9 +96027,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96054,9 +96054,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96081,9 +96081,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96108,9 +96108,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96135,9 +96135,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96162,9 +96162,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown
@@ -96189,9 +96189,9 @@ Output:Table:Annual,
        \key HoursNonPositive
        \key HoursNegative
        \key HoursNonNegative
-       \key HourInTenBinsMinToMax 
-       \key HourInTenBinsZeroToMax 
-       \key HourInTenBinsMinToZero 
+       \key HourInTenBinsMinToMax
+       \key HourInTenBinsZeroToMax
+       \key HourInTenBinsMinToZero
        \key SumOrAverageDuringHoursShown
        \key MaximumDuringHoursShown
        \key MinimumDuringHoursShown

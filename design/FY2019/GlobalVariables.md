@@ -3,11 +3,11 @@ NFP: Refactor Global Variables
 
 **Brian Ball, Edwin Lee, Matt Mitchell, Kyle Bene NREL**
 
- - 1 Aug 2019 
+ - 1 Aug 2019
 
 ## Justification for New Feature ##
 
-As EnergyPlus approaches a convergence with next-generation Spawn tools, some aspects of EnergyPlus are expected to be retained and refactored to avoid re-developing those for the new simulation ecosystem. The global variable state in EnergyPlus is a problem to current researchers and developers, and will be a major factor in that new ecosystem. This new feature will more easily allow starting/resetting/saving the state of EnergyPlus. 
+As EnergyPlus approaches a convergence with next-generation Spawn tools, some aspects of EnergyPlus are expected to be retained and refactored to avoid re-developing those for the new simulation ecosystem. The global variable state in EnergyPlus is a problem to current researchers and developers, and will be a major factor in that new ecosystem. This new feature will more easily allow starting/resetting/saving the state of EnergyPlus.
 
 ## Overview ##
 

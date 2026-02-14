@@ -16,7 +16,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with DistrictHeating and Pressure drop components and a pump pressure curve.
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Plant Load Profile Example,  !- Name

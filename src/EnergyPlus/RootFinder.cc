@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1784,35 +1784,36 @@ Real64 BrentMethod(RootFinderDataType &RootFinderData) // Data used by root find
             BrentMethod = C;
             return BrentMethod;
             // Should never happen if CheckRootFinderConvergence() is invoked prior to this subroutine
-        } else if (FA == 0.0) {
+        }
+        if (FA == 0.0) {
             BrentMethod = A;
             return BrentMethod;
-        } else {
-            R = FB / FC;
-            S = FB / FA;
-            T = FA / FC;
-
-            P = S * (T * (R - T) * (C - B) - (1.0 - R) * (B - A));
-            Q = (T - 1.0) * (R - 1.0) * (S - 1.0);
-
-            // Only accept correction if it is small enough (75% of previous increment)
-            if (std::abs(P) <= 0.75 * std::abs(Q * RootFinderData.Increment.X)) {
-                RootFinderData.CurrentMethodType = RootFinderMethod::Brent;
-                XCandidate = B + P / Q;
-
-                // Check that new candidate is within range and brackets
-                if (!CheckRootFinderCandidate(RootFinderData, XCandidate)) {
-                    // Recovery method
-                    XCandidate = FalsePositionMethod(RootFinderData);
-                }
-            } else {
-                // Recover from bad correction with bisection
-                // Bisection produced the best numerical performance in testing compared to
-                // - Secant
-                // - False position (very slow recovery)
-                XCandidate = BisectionMethod(RootFinderData);
-            }
         }
+        R = FB / FC;
+        S = FB / FA;
+        T = FA / FC;
+
+        P = S * (T * (R - T) * (C - B) - (1.0 - R) * (B - A));
+        Q = (T - 1.0) * (R - 1.0) * (S - 1.0);
+
+        // Only accept correction if it is small enough (75% of previous increment)
+        if (std::abs(P) <= 0.75 * std::abs(Q * RootFinderData.Increment.X)) {
+            RootFinderData.CurrentMethodType = RootFinderMethod::Brent;
+            XCandidate = B + P / Q;
+
+            // Check that new candidate is within range and brackets
+            if (!CheckRootFinderCandidate(RootFinderData, XCandidate)) {
+                // Recovery method
+                XCandidate = FalsePositionMethod(RootFinderData);
+            }
+        } else {
+            // Recover from bad correction with bisection
+            // Bisection produced the best numerical performance in testing compared to
+            // - Secant
+            // - False position (very slow recovery)
+            XCandidate = BisectionMethod(RootFinderData);
+        }
+
     } else {
         // Not enough history to try Brent's method yet: use Secant's method
         XCandidate = SecantMethod(RootFinderData);

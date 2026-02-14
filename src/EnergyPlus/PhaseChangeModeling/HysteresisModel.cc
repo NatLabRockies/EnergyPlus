@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,9 +67,8 @@ namespace Material {
         Real64 eta2 = (this->totalLatentHeat / 2) * exp(-2 * std::abs(T - Tc) / tau2);
         if (T <= Tc) {
             return (this->specificHeatSolid * T) + eta1;
-        } else {
-            return (this->specificHeatSolid * Tc) + this->totalLatentHeat + this->specificHeatLiquid * (T - Tc) - eta2;
         }
+        return (this->specificHeatSolid * Tc) + this->totalLatentHeat + this->specificHeatLiquid * (T - Tc) - eta2;
     }
 
     Real64 MaterialPhaseChange::getCurrentSpecificHeat(
@@ -264,36 +263,36 @@ namespace Material {
                            (tau1 * std::abs(T - criticalTemperature));
             Real64 Cp1 = this->specificHeatSolid;
             return (Cp1 + DEta1);
-        } else if (T == criticalTemperature) {
-            return (EnthalpyNew - EnthalpyOld) / (temperatureCurrent - temperaturePrev);
-        } else {
-            Real64 DEta2 = (this->totalLatentHeat * (T - criticalTemperature) * exp(-2 * std::abs(T - criticalTemperature) / tau2)) /
-                           (tau2 * std::abs(T - criticalTemperature));
-            Real64 Cp2 = this->specificHeatLiquid;
-            return Cp2 + DEta2;
         }
+        if (T == criticalTemperature) {
+            return (EnthalpyNew - EnthalpyOld) / (temperatureCurrent - temperaturePrev);
+        }
+        Real64 DEta2 = (this->totalLatentHeat * (T - criticalTemperature) * exp(-2 * std::abs(T - criticalTemperature) / tau2)) /
+                       (tau2 * std::abs(T - criticalTemperature));
+        Real64 Cp2 = this->specificHeatLiquid;
+        return Cp2 + DEta2;
     }
 
     Real64 MaterialPhaseChange::getConductivity(Real64 T) const
     {
         if (T < this->peakTempMelting) {
             return this->fullySolidThermalConductivity;
-        } else if (T > this->peakTempFreezing) {
-            return this->fullyLiquidThermalConductivity;
-        } else {
-            return (this->fullySolidThermalConductivity + this->fullyLiquidThermalConductivity) / 2.0;
         }
+        if (T > this->peakTempFreezing) {
+            return this->fullyLiquidThermalConductivity;
+        }
+        return (this->fullySolidThermalConductivity + this->fullyLiquidThermalConductivity) / 2.0;
     }
 
     Real64 MaterialPhaseChange::getDensity(Real64 T) const
     {
         if (T < this->peakTempMelting) {
             return this->fullySolidDensity;
-        } else if (T > this->peakTempFreezing) {
-            return this->fullyLiquidDensity;
-        } else {
-            return (this->fullySolidDensity + this->fullyLiquidDensity) / 2.0;
         }
+        if (T > this->peakTempFreezing) {
+            return this->fullyLiquidDensity;
+        }
+        return (this->fullySolidDensity + this->fullyLiquidDensity) / 2.0;
     }
 
     void GetHysteresisData(EnergyPlusData &state, bool &ErrorsFound)

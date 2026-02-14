@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1459,6 +1459,49 @@ TEST_F(EnergyPlusFixture, ScheduleFileDSTtoggleOptionTest)
     EXPECT_DOUBLE_EQ(sch4->getHrTsVal(*state, s_glob->HourOfDay, s_glob->TimeStep), 1.0);
 }
 
+TEST_F(EnergyPlusFixture, ScheduleFileUnknownExtensionTest)
+{
+
+    fs::path scheduleFile1 = configured_source_directory() / "tst/EnergyPlus/unit/Resources/schedule_file1.csv";
+    fs::path scheduleFile2 = configured_source_directory() / "tst/EnergyPlus/unit/Resources/schedule_file1.zzz";
+
+    std::string const idf_objects = delimited_string({"Schedule:File,",
+                                                      "  Test1,                   !- Name",
+                                                      "  ,                        !- Schedule Type Limits Name",
+                                                      "  " + scheduleFile1.string() + ",              !- File Name",
+                                                      "  2,                       !- Column Number",
+                                                      "  1,                       !- Rows to Skip at Top",
+                                                      "  8760,                    !- Number of Hours of Data",
+                                                      "  Comma,                   !- Column Separator",
+                                                      "  No,                      !- Interpolate to Timestep",
+                                                      "  60,                      !- Minutes per item",
+                                                      "  Yes;                     !- Adjust Schedule for Daylight Savings",
+                                                      " ",
+                                                      "Schedule:File,",
+                                                      "  Test2,                   !- Name",
+                                                      "  ,                        !- Schedule Type Limits Name",
+                                                      "  " + scheduleFile2.string() + ",              !- File Name",
+                                                      "  2,                       !- Column Number",
+                                                      "  1,                       !- Rows to Skip at Top",
+                                                      "  8760,                    !- Number of Hours of Data",
+                                                      "  Comma,                   !- Column Separator",
+                                                      "  No,                      !- Interpolate to Timestep",
+                                                      "  60,                      !- Minutes per item",
+                                                      "  Yes;                     !- Adjust Schedule for Daylight Savings",
+                                                      " "});
+
+    // This will process the provided idf chunk within the test fixture (must pass this step in order to proceed)
+    ASSERT_TRUE(process_idf(idf_objects));
+    auto &s_glob = state->dataGlobal;
+
+    s_glob->TimeStepsInHour = 4;    // must initialize this to get schedules initialized
+    s_glob->MinutesInTimeStep = 15; // must initialize this to get schedules initialized
+    s_glob->TimeStepZone = 0.25;
+    s_glob->TimeStepZoneSec = s_glob->TimeStepZone * Constant::rSecsInHour;
+    state->dataEnvrn->CurrentYearIsLeapYear = false;
+    ASSERT_NO_THROW(state->init_state(*state)); // read schedules
+}
+
 TEST_F(EnergyPlusFixture, ScheduleFile_Blanks)
 {
     // On the third line (second data record after header), there is a blank in the second column
@@ -2091,4 +2134,45 @@ TEST_F(EnergyPlusFixture, ScheduleCompact_MissingDayTypes)
     state->dataEnvrn->DayOfWeek = 1;
     ASSERT_NO_THROW(sch->getHrTsVal(*state, 7, 4));
     EXPECT_NEAR(0.0, sch->getHrTsVal(*state, 7, 4), 0.000001);
+}
+
+TEST_F(EnergyPlusFixture, ScheduleCompact_MissingValues)
+{
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Fraction,                !- Name",
+        "  0,                       !- Lower Limit Value",
+        "  1,                       !- Upper Limit Value",
+        "  Continuous,              !- Numeric Type",
+        "  Percent;                 !- Unit Type",
+
+        "Schedule:Compact,",
+        "  OccSched,                !- Name",
+        "  Fraction,                !- Schedule Type Limits Name",
+        "  ,                        !- Field 1",
+        "  ,                        !- Field 2",
+        "  ;                        !- Field 3",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    auto &s_glob = state->dataGlobal;
+
+    s_glob->TimeStepsInHour = 4;    // must initialize this to get schedules initialized
+    s_glob->MinutesInTimeStep = 15; // must initialize this to get schedules initialized
+    s_glob->TimeStepZone = 0.25;
+    s_glob->TimeStepZoneSec = s_glob->TimeStepZone * Constant::rSecsInHour;
+    state->dataEnvrn->CurrentYearIsLeapYear = false;
+
+    EXPECT_THROW(state->init_state(*state), EnergyPlus::FatalError); // read schedules
+
+    const std::string expected_error = delimited_string({"   ** Severe  ** ProcessScheduleInput: Schedule:Compact = OCCSCHED",
+                                                         "   **   ~~~   ** Expecting \"Through:\" date, instead found entry=",
+                                                         "   ** Severe  ** ProcessScheduleInput: Schedule:Compact = OCCSCHED",
+                                                         "   **   ~~~   ** has missing days in its schedule pointers",
+                                                         "   **  Fatal  ** ProcessScheduleInput: Preceding Errors cause termination.",
+                                                         "   ...Summary of Errors that led to program termination:",
+                                                         "   ..... Reference severe error count=2",
+                                                         "   ..... Last severe error=ProcessScheduleInput: Schedule:Compact = OCCSCHED"});
+
+    compare_err_stream(expected_error);
 }

@@ -386,7 +386,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               ! If your original object starts with A, insert the rules here
 
               ! If your original object starts with C, insert the rules here
-              
+
              CASE('CONSTRUCTION:AIRBOUNDARY')
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                  nodiff=.false.
@@ -420,7 +420,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  CurArgs = CurArgs - 13
                  ! Write the now truncated equationfit coil object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,CurArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for total capacity
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -433,7 +433,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  END DO
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quintlinear curve for sensible capacity
                  ObjectName='Curve:QuintLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -446,7 +446,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  END DO
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,17,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for power consumption
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -460,7 +460,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
                  Written = .true.
-                 
+
              CASE('COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT')
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                  nodiff=.false.
@@ -471,7 +471,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  CurArgs = CurArgs - 8
                  ! Write the now truncated equationfit coil object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,CurArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for capacity
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -484,7 +484,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  END DO
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
-                                  
+
                  ! Build new quadlinear curve for power consumption
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -498,11 +498,11 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
                  Written = .true.
-                 
+
              CASE('CONSTRUCTION:INTERNALSOURCE')
                  ! Do not write the old object
                  Written=.true.
-                 
+
                 CALL GetNewObjectDefInIDD('ConstructionProperty:InternalHeatSource',NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1) = TRIM(InArgs(1)) // ' Heat Source'
                 OutArgs(2) = InArgs(1)
@@ -511,14 +511,14 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                     OutArgs(7) = '0.0'
                 END IF
                 CALL WriteOutIDFLines(DifLfn,'ConstructionProperty:InternalHeatSource',NwNumArgs,OutArgs,NwFldNames,NwFldUnits)
-                
+
                 CALL GetNewObjectDefInIDD('Construction',NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 ! Construction object has five fewer fields than the incoming Construction:InternalSource object
                 NwNumArgs = CurArgs - 5
                 OutArgs(1) = InArgs(1)
                 OutArgs(2:NwNumArgs) = InArgs(7:CurArgs)
                 CALL WriteOutIDFLines(DifLfn,'Construction',NwNumArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
               ! If your original object starts with D, insert the rules here
 
               ! If your original object starts with E, insert the rules here
@@ -539,7 +539,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  CurArgs = CurArgs - 8
                  ! Write the now truncated equationfit heat pump object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,CurArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for capacity
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -552,7 +552,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  END DO
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for power consumption
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -566,7 +566,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,14,OutArgs,NwFldNames,NwFldUnits)
                  Written = .true.
-                 
+
              CASE('HEATPUMP:WATERTOWATER:EQUATIONFIT:HEATING')
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                  nodiff=.false.
@@ -578,7 +578,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  CurArgs = CurArgs - 8
                  ! Write the now truncated equationfit heat pump object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,CurArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for capacity
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -592,7 +592,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  CurArgs = 14
                  ! Write the new curve object
                  CALL WriteOutIDFLines(DifLfn,ObjectName,CurArgs,OutArgs,NwFldNames,NwFldUnits)
-                 
+
                  ! Build new quadlinear curve for power consumption
                  ObjectName='Curve:QuadLinear'
                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
@@ -644,7 +644,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                  IF (OutArgs(1) == "NO" .OR. OutArgs(1) == "No" .OR. OutArgs(1) == "no") THEN
                      OutArgs(1) = "None"
                  END IF
-				 
+
               CASE('ZONEHVAC:LOWTEMPERATURERADIANT:VARIABLEFLOW')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1)=InArgs(1)

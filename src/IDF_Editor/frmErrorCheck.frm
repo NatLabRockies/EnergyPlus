@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmErrorCheck 
+Begin VB.Form frmErrorCheck
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Validity Check"
    ClientHeight    =   4275
@@ -13,7 +13,7 @@ Begin VB.Form frmErrorCheck
    ScaleWidth      =   11175
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
-   Begin VB.CheckBox chkIgnoreMacro 
+   Begin VB.CheckBox chkIgnoreMacro
       Caption         =   "Ignore Macros"
       Height          =   375
       Left            =   4800
@@ -22,7 +22,7 @@ Begin VB.Form frmErrorCheck
       Top             =   3840
       Width           =   2055
    End
-   Begin VB.CommandButton cmdClose 
+   Begin VB.CommandButton cmdClose
       Cancel          =   -1  'True
       Caption         =   "Close"
       Default         =   -1  'True
@@ -32,7 +32,7 @@ Begin VB.Form frmErrorCheck
       Top             =   3840
       Width           =   1455
    End
-   Begin VB.CommandButton cmdGoto 
+   Begin VB.CommandButton cmdGoto
       Caption         =   "Go to"
       Height          =   375
       Left            =   7440
@@ -40,7 +40,7 @@ Begin VB.Form frmErrorCheck
       Top             =   3840
       Width           =   1455
    End
-   Begin VB.CheckBox chkValidCheckOnSave 
+   Begin VB.CheckBox chkValidCheckOnSave
       Caption         =   "Perform Validity Check When Saving File"
       Height          =   375
       Left            =   120
@@ -48,21 +48,21 @@ Begin VB.Form frmErrorCheck
       Top             =   3840
       Width           =   3495
    End
-   Begin VB.ListBox lstMsgs 
+   Begin VB.ListBox lstMsgs
       Height          =   3570
       Left            =   120
       TabIndex        =   4
       Top             =   120
       Width           =   10935
    End
-   Begin VB.Frame Frame1 
+   Begin VB.Frame Frame1
       Caption         =   "Check for Valid"
       Height          =   1455
       Left            =   11640
       TabIndex        =   0
       Top             =   1800
       Width           =   2055
-      Begin VB.CheckBox Check3 
+      Begin VB.CheckBox Check3
          Caption         =   "Numeric Ranges"
          Height          =   375
          Left            =   240
@@ -70,7 +70,7 @@ Begin VB.Form frmErrorCheck
          Top             =   960
          Width           =   1575
       End
-      Begin VB.CheckBox Check2 
+      Begin VB.CheckBox Check2
          Caption         =   "References"
          Height          =   375
          Left            =   240
@@ -78,7 +78,7 @@ Begin VB.Form frmErrorCheck
          Top             =   600
          Width           =   1575
       End
-      Begin VB.CheckBox Check1 
+      Begin VB.CheckBox Check1
          Caption         =   "Choices"
          Height          =   375
          Left            =   240

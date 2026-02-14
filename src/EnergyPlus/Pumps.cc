@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1804,8 +1804,8 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
     // Get RPM value for reporting as output
     // RPM is calculated using pump affinity laws for rotation speed
     if (thisPumpPlant.UsePressureForPumpCalcs && thisPump.HasVFD) {
-        RotSpeed_Min = thisPump.VFD.minRPMSched ? thisPump.VFD.minRPMSched->getCurrentVal() : 0.0;
-        RotSpeed_Max = thisPump.VFD.maxRPMSched ? thisPump.VFD.maxRPMSched->getCurrentVal() : 0.0;
+        RotSpeed_Min = (thisPump.VFD.minRPMSched != nullptr) ? thisPump.VFD.minRPMSched->getCurrentVal() : 0.0;
+        RotSpeed_Max = (thisPump.VFD.maxRPMSched != nullptr) ? thisPump.VFD.maxRPMSched->getCurrentVal() : 0.0;
         if (thisPump.PumpMassFlowRateMaxRPM < DataBranchAirLoopPlant::MassFlowTolerance ||
             thisPump.PumpMassFlowRateMinRPM < DataBranchAirLoopPlant::MassFlowTolerance) {
             thisPump.VFD.PumpActualRPM = 0.0;

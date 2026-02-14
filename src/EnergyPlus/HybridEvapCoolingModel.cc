@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -192,9 +192,8 @@ namespace HybridEvapCoolingModel {
     {
         if (curve_pointer >= 0) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     Real64 CMode::CalculateCurveVal(EnergyPlusData &state, Real64 Tosa, Real64 Wosa, Real64 Tra, Real64 Wra, Real64 Msa, Real64 OSAF, int curveType)
     {
@@ -709,9 +708,8 @@ namespace HybridEvapCoolingModel {
         }
         if (OATempConstraintmet && OAHRConstraintmet && OARHConstraintmet) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     bool Model::MeetsSupplyAirTOC([[maybe_unused]] EnergyPlusData &state, Real64 Tsupplyair)
@@ -956,7 +954,7 @@ namespace HybridEvapCoolingModel {
 
         // if the map of the solution space looks valid then populate the class member oStandBy (CSetting) with the settings data (what OSAF it runs
         // at, and how much power it uses etc.
-        if (Mode0.sol.MassFlowRatio.size() > 0) {
+        if (!Mode0.sol.MassFlowRatio.empty()) {
             Real64 MsaRatio = Mode0.sol.MassFlowRatio[0];
             Real64 OSAF = Mode0.sol.OutdoorAirFraction[0];
 
@@ -1693,11 +1691,10 @@ namespace HybridEvapCoolingModel {
 
         // Using/Aliasing
 
-        if (CurrentOperatingSettings.size() > 0) {
+        if (!CurrentOperatingSettings.empty()) {
             return CurrentOperatingSettings[0].Mode;
-        } else {
-            return -1;
         }
+        return -1;
     }
     Real64 Model::CurrentPrimaryRuntimeFraction()
     {
@@ -1717,11 +1714,10 @@ namespace HybridEvapCoolingModel {
         // na
 
         // Using/Aliasing
-        if (CurrentOperatingSettings.size() > 0) {
+        if (!CurrentOperatingSettings.empty()) {
             return CurrentOperatingSettings[0].Runtime_Fraction;
-        } else {
-            return -1;
         }
+        return -1;
     }
     void Model::DetermineCoolingVentilationOrHumidificationNeeds(CStepInputs &StepIns)
     {

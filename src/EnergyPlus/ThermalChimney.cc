@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -115,11 +115,9 @@ namespace ThermalChimney {
         // This driver manages the calls to all of
         // the other drivers and simulation algorithms.
 
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        bool ErrorsFound(false);
-
         // Obtains and Allocates heat balance related parameters from input file
         if (state.dataThermalChimneys->ThermalChimneyGetInputFlag) {
+            bool ErrorsFound(false);
             GetThermalChimney(state, ErrorsFound);
             state.dataThermalChimneys->ThermalChimneyGetInputFlag = false;
         }
@@ -158,7 +156,6 @@ namespace ThermalChimney {
         int TCZoneNum1; // Thermal chimney zone counter
         int IOStat;
         int Loop;
-        int Loop1;
         auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
 
         // Following used for reporting
@@ -624,6 +621,7 @@ namespace ThermalChimney {
 
         // Check to make sure there is only one thermal chimney statement per zone
         if (state.dataThermalChimneys->TotThermalChimney > 1) {
+            int Loop1;
             for (Loop = 1; Loop <= state.dataThermalChimneys->TotThermalChimney; ++Loop) {
 
                 if (state.dataThermalChimneys->TotThermalChimney >= (Loop + 1)) {
@@ -1069,7 +1067,6 @@ namespace ThermalChimney {
         Real64 tempb;
         Real64 TCvalue;
         Real64 TCcoefficient;
-        int pivot;
         Real64 ThermalChimSum;
         int ThermChimLoop1;
         int ThermChimLoop2;
@@ -1078,7 +1075,7 @@ namespace ThermalChimney {
         for (ThermChimLoop1 = 1; ThermChimLoop1 <= NTC; ++ThermChimLoop1) {
 
             TCvalue = std::abs(EquaCoef(ThermChimLoop1, ThermChimLoop1));
-            pivot = ThermChimLoop1;
+            int pivot = ThermChimLoop1;
             for (ThermChimLoop2 = ThermChimLoop1 + 1; ThermChimLoop2 <= NTC; ++ThermChimLoop2) {
                 if (std::abs(EquaCoef(ThermChimLoop1, ThermChimLoop2)) > TCvalue) {
                     TCvalue = std::abs(EquaCoef(ThermChimLoop1, ThermChimLoop2));

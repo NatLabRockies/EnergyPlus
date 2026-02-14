@@ -924,10 +924,6 @@ The name of the HVAC system node from which the unit draws its secondary or reci
 
 The name of the HVAC system node to which the unit sends its outlet air. This should be one of the inlet air nodes of the zone which is being served.
 
-\paragraph{Field: Reheat Coil Air Inlet Node Name}\label{field-reheat-coil-air-inlet-node-name}
-
-The name of the HVAC system node which is the inlet node of the unit's heating coil. This is also the outlet node of the unit's fan.
-
 \paragraph{Field: Zone Mixer Name}\label{field-zone-mixer-name}
 
 The name of a zone mixer component (object: \hyperref[airloophvaczonemixer]{AirLoopHVAC:ZoneMixer}) which composes part of the unit. Note that some of the input for the mixer will duplicate input fields of the powered induction unit. One of the zone mixer inlet nodes should be the same as the supply air inlet node of the PIU; the other inlet node of the zone mixer should be the same as the secondary air inlet node of the PIU. The outlet node of the zone mixer should be the same as the inlet node of the PIU fan.
@@ -1186,10 +1182,6 @@ The name of the HVAC system node from which the unit draws its secondary or reci
 
 The name of the HVAC system node to which the unit sends its outlet air. This should be one of the inlet air nodes of the zone which is being served.
 
-\paragraph{Field: Reheat Coil Air Inlet Node Name}\label{field-reheat-coil-air-inlet-node-name-1}
-
-The name of the HVAC system node which is the inlet node of the unit's heating coil. This is also the outlet node of the unit's zone mixer.
-
 \paragraph{Field: Zone Mixer Name}\label{field-zone-mixer-name-1}
 
 The name of an zone mixer component (object: \hyperref[airloophvaczonemixer]{AirLoopHVAC:ZoneMixer}) which composes part of the unit. Note that some of the input for the mixer will duplicate input fields of the powered induction unit. One of the zone mixer inlet nodes should be the same as the supply air inlet node of the PIU; the other inlet node of the zone mixer should be the same as the air outlet node of the fan. The outlet node of the zone mixer should be the same as the inlet node of the heating coil.
@@ -1260,6 +1252,14 @@ This field is used to indicate the design discharge air temperature during the s
 \paragraph{Field: High Limit Heating Discharge Air Temperature}\label{field-heat-limit-DAT-parallelPIU}
 
 This field is used to indicate the high limit on discharge air temperature at the end of stage three heating for \textbf{Modulated} heat control.  The default is 37.7 deg. C (100 deg. F).
+
+\paragraph{Field: Backdraft Damper Leakage Curve Name}\label{field-backdraft_damper_leakage_fraction_curve_name}
+
+This field is used to indicate how the backdraft damper leakage fraction changes with different primary air flow fractions. The leakage fraction is defined as the ratio of leakage mass flow rate to primary air mass flow rate at a constant supply static pressure setpoint. This curve should describe the leakage fraction as a function of primary air flow fraction (ratio of primary flow fraction to maximum nominal primary air flow rate). For a static pressure setpoint of 62 Pa (0.25 in w.c) a resonable low leakage assumption could be around 3\%, a medium leakage value could be around 5\%, and relatively high leakage could be up to 12\%.
+
+\paragraph{Field: Backdraft Damper Leakage Zone Name}\label{field-backdraft_damper_leakage_zone_name}
+
+This field is used to indicate what zone will be impacted by the air leaking from the backdraft damper of the terminal. The zone should be different than the one served by the terminal.
 
 An IDF example:
 

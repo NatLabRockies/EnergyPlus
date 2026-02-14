@@ -102,7 +102,7 @@ Incorporating all of these equations into the original differential equation:
 
 \begin{equation}
   \begin{array}{rl}
-    mC_p\frac{dT}{dt} =& q_{heater} + q_{oncyc} + q_{offcyc} + UA_{oncyc} \PB{T_{amb} - T} + UA_{offcyc} \PB{T_{amb} - T} \\ 
+    mC_p\frac{dT}{dt} =& q_{heater} + q_{oncyc} + q_{offcyc} + UA_{oncyc} \PB{T_{amb} - T} + UA_{offcyc} \PB{T_{amb} - T} \\
                       &+ \varepsilon_{use}\dot{m}_{use}C_p \PB{T_{use} - T} + \varepsilon_{source}\dot{m}_{source}C_p \PB{T_{source} - T}
   \end{array}
 \end{equation}
@@ -261,12 +261,12 @@ Each type of WaterHeater:HeatPump:* object is compatible with certain Coil:Water
 
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Compatibility of Water Heater Objects \label{table:compatibility-of-water-heater-objects}} \tabularnewline
-\toprule 
+\toprule
 WaterHeater:HeatPump:* & WaterHeater:* \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 WaterHeater:HeatPump:* & WaterHeater:* \tabularnewline
 \midrule
 \endhead
@@ -558,7 +558,7 @@ The net heat transfer rate \emph{q\(_{net}\)} is the sum of gains and losses due
 
 \begin{equation}
   \begin{array}{ll}
-    q_{net,n} &= q_{heater,n} + q_{oncycpara,n} + q_{offcycpara,n} + q_{oncycloss,n} + q_{offcycloss,n} \\ 
+    q_{net,n} &= q_{heater,n} + q_{oncycpara,n} + q_{offcycpara,n} + q_{oncycloss,n} + q_{offcycloss,n} \\
               &+ q_{cond,n} + q_{use,n} + q_{source,n} + q_{flow,n}
   \end{array}
 \end{equation}
@@ -768,9 +768,9 @@ To solve the differential equations the nodal heat balance equations are modifie
   \frac{d{T_n}}{dt} = a T_n + b
 \end{equation}
 
-Where $a$ is a constant and $b$ can be a function of either time or the temperature of adjacent nodes. If $b$ is assumed to be constant, the solution of the differential equation is readily solved. Since $b$ is not generally constant a reasonable approximation can be made by assuming $b$ is equal to its average value over the sub timestep. 
+Where $a$ is a constant and $b$ can be a function of either time or the temperature of adjacent nodes. If $b$ is assumed to be constant, the solution of the differential equation is readily solved. Since $b$ is not generally constant a reasonable approximation can be made by assuming $b$ is equal to its average value over the sub timestep.
 
-Solving the differential equation yields the following solution for the temperature of a node at the end of a sub timestep. 
+Solving the differential equation yields the following solution for the temperature of a node at the end of a sub timestep.
 
 \begin{equation}
   T_{final} = \left( T_{initial} + \frac{b}{a} \right) e ^ {a \Delta t} - \frac{b}{a}
@@ -843,13 +843,13 @@ The volume a water heater can be sized in the following ways depending on the de
 {\scriptsize
 \begin{longtable}[c]{>{\raggedright}p{0.8in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}}
 \caption{Residential HUD-FHA Minimum \label{table:residential-hud-fha-minimum}} \tabularnewline
-\toprule 
+\toprule
 \multicolumn{13}{p{5in}}{\raggedright Residential HUD-FHA Minimum DHW Storage and Burner Capacity (ASHRAE 1999)} \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Residential HUD-FHA Minimum} \tabularnewline
-\toprule 
+\toprule
 \multicolumn{13}{p{5in}}{\raggedright Residential HUD-FHA Minimum DHW Storage and Burner Capacity (ASHRAE 1999)} \tabularnewline
 \midrule
 \endhead

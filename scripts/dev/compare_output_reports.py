@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -62,26 +62,23 @@ HTML, SQL, and JSON outputs.
 5ZoneCAV_MaxTemp_JSON_Outputs.idf has all the required
 objects (Output:SQLite, Output:JSON) with 'AllSummary' enabled.
 
-cf: https://github.com/NREL/EnergyPlus/issues/9419
+cf: https://github.com/NatLabRockies/EnergyPlus/issues/9419
 """
 
 __author__ = "Julien Marrec, EffiBEM"
 __email__ = "julien@effibem.com"
 
+import argparse
 import json
 import re
 import sqlite3
-import argparse
 from pathlib import Path
-
 
 REPO_ROOT = Path(__file__).parent.parent.parent
 
 
 def MakeAnchorName(s):
-    validChars = (
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_:."
-    )
+    validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_:."
     for c in s:
         if c not in validChars:
             s = s.replace(c, "")
@@ -102,10 +99,7 @@ def parse_json(out_dir: Path):
 
             # Filter out the empty tables, as they do not show up in the SQL
             if table["Rows"] is None:
-                print(
-                    "Filtering empty JSON table "
-                    f"'{report_name} - {table_name}'"
-                )
+                print("Filtering empty JSON table " f"'{report_name} - {table_name}'")
                 empty_report_to_tables_list.append((report_name, table_name))
             else:
                 all_json_report_names.append(report_name)
@@ -204,16 +198,12 @@ def parse_html(out_dir):
             # print(f"Override for {report_name}")
             report_name = manual_html_mapping_dict[report_name]
 
-        html_report_to_tables_list_without_spaces.append(
-            (report_name, table_name)
-        )
+        html_report_to_tables_list_without_spaces.append((report_name, table_name))
 
     return set(html_report_to_tables_list_without_spaces)
 
 
-def compare_sets(
-    lhs: set, lhs_name: str, rhs: set, rhs_name: str, type_str: str
-) -> bool:
+def compare_sets(lhs: set, lhs_name: str, rhs: set, rhs_name: str, type_str: str) -> bool:
 
     success = True
 
@@ -234,9 +224,7 @@ def compare_sets(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare Output Reports.")
-    parser.add_argument(
-        "out_dir", type=Path, help="Output directory where to find the reports"
-    )
+    parser.add_argument("out_dir", type=Path, help="Output directory where to find the reports")
     args = parser.parse_args()
 
     out_dir = args.out_dir.resolve()
@@ -277,9 +265,7 @@ if __name__ == "__main__":
         json_report_to_tables_nospaces_set = set(
             [
                 (x[0].replace(" ", ""), x[1].replace(" ", ""))
-                for x in json_report_to_tables_set.union(
-                    json_empty_report_to_tables_set
-                )
+                for x in json_report_to_tables_set.union(json_empty_report_to_tables_set)
             ]
         )
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -123,16 +123,15 @@ private:
     {
         if (value < 1.0 && value > -1.0) {
             return true;
-        } else {
-            return static_cast<int>(std::log10(std::abs(value))) < places;
         }
+        return static_cast<int>(std::log10(std::abs(value))) < places;
     }
 
     static std::string &zero_pad_exponent(std::string &str)
     {
         // if necessary, pad the exponent with a 0 to match the old formatting from Objexx
         if (str.size() > 3) {
-            if (!std::isdigit(str[str.size() - 3])) {
+            if (std::isdigit(str[str.size() - 3]) == 0) {
                 // wants a 0 inserted
                 str.insert(str.size() - 2, "0");
             }
@@ -150,19 +149,19 @@ private:
         //    [[fill]align]
         switch (specs_.align) {
         case align_t::left:
-            if (specs_.fill.size()) {
+            if (specs_.fill.size() != 0u) {
                 buffer.append(specs_.fill);
             }
             buffer.push_back('<');
             break;
         case align_t::right:
-            if (specs_.fill.size()) {
+            if (specs_.fill.size() != 0u) {
                 buffer.append(specs_.fill);
             }
             buffer.push_back('>');
             break;
         case align_t::center:
-            if (specs_.fill.size()) {
+            if (specs_.fill.size() != 0u) {
                 buffer.append(specs_.fill);
             }
             buffer.push_back('^');
@@ -251,16 +250,13 @@ public:
             if (std::signbit(value)) {
                 if (value == -0.0) {
                     return value;
-                } else {
-                    return std::nextafter(value, std::numeric_limits<decltype(value)>::lowest());
                 }
-            } else {
-                if (value == 0.0) {
-                    return value;
-                } else {
-                    return std::nextafter(value, std::numeric_limits<decltype(value)>::max());
-                }
+                return std::nextafter(value, std::numeric_limits<decltype(value)>::lowest());
             }
+            if (value == 0.0) {
+                return value;
+            }
+            return std::nextafter(value, std::numeric_limits<decltype(value)>::max());
         };
 
         double val = doubleWrapper;
@@ -296,23 +292,19 @@ public:
                         buffer.push_back('.');
                         std::string_view fmt_buffer(buffer.data(), buffer.size());
                         return fmt::format_to(ctx.out(), fmt_buffer, val);
-                    } else {
-                        return fmt::format_to(ctx.out(), spec_builder(), val);
                     }
-                } else {
-                    if (val == 0.0 || val == -0.0) {
-                        return fmt::format_to(ctx.out(), spec_builder(), 0.0);
-                    } else {
-                        // nudge up to next rounded val
-                        return fmt::format_to(ctx.out(), spec_builder(), next_float(next_float(next_float(val))));
-                    }
+                    return fmt::format_to(ctx.out(), spec_builder(), val);
                 }
-            } else {
-                specs_.type = 'E';
-                auto str = fmt::format(spec_builder(), next_float(val));
-                return fmt::format_to(ctx.out(), "{}", zero_pad_exponent(str));
+                if (val == 0.0 || val == -0.0) {
+                    return fmt::format_to(ctx.out(), spec_builder(), 0.0);
+                } // nudge up to next rounded val
+                return fmt::format_to(ctx.out(), spec_builder(), next_float(next_float(next_float(val))));
             }
-        } else if (specs_.type == 'T') { // matches TrimSigDigits behavior
+            specs_.type = 'E';
+            auto str = fmt::format(spec_builder(), next_float(val));
+            return fmt::format_to(ctx.out(), "{}", zero_pad_exponent(str));
+        }
+        if (specs_.type == 'T') { // matches TrimSigDigits behavior
             const auto fixed_output = should_be_fixed_output(val);
 
             if (fixed_output) {
@@ -321,22 +313,21 @@ public:
                 const auto truncated = std::trunc(adjusted) / magnitude;
                 specs_.type = 'F';
                 return fmt::format_to(ctx.out(), spec_builder(), truncated);
-            } else {
-                specs_.type = 'E';
-                specs_.precision += 2;
-
-                // write the `E` formatted float to a std::string
-                auto str = fmt::format(spec_builder(), val);
-                str = zero_pad_exponent(str);
-
-                // Erase last 2 numbers to truncate the value
-                const auto E_itr = std::find(begin(str), end(str), 'E');
-                if (E_itr != str.end()) {
-                    str.erase(std::prev(E_itr, 2), E_itr);
-                }
-
-                return fmt::format_to(ctx.out(), "{}", str);
             }
+            specs_.type = 'E';
+            specs_.precision += 2;
+
+            // write the `E` formatted float to a std::string
+            auto str = fmt::format(spec_builder(), val);
+            str = zero_pad_exponent(str);
+
+            // Erase last 2 numbers to truncate the value
+            const auto E_itr = std::find(begin(str), end(str), 'E');
+            if (E_itr != str.end()) {
+                str.erase(std::prev(E_itr, 2), E_itr);
+            }
+
+            return fmt::format_to(ctx.out(), "{}", str);
         }
         return fmt::format_to(ctx.out(), spec_builder(), val);
     }
@@ -390,9 +381,8 @@ inline constexpr FormatSyntax check_syntax(const std::string_view format_str)
 {
     if (is_fortran_syntax(format_str)) {
         return FormatSyntax::Fortran;
-    } else {
-        return FormatSyntax::FMT;
     }
+    return FormatSyntax::FMT;
 }
 
 class InputFile
@@ -460,9 +450,8 @@ public:
             *is >> result;
             // Use operator bool, see ReadResult::good() docstring
             return ReadResult<T>{result, is->eof(), bool(is)};
-        } else {
-            return ReadResult<T>{T{}, true, false};
         }
+        return ReadResult<T>{T{}, true, false};
     }
 
     std::string readFile();
@@ -771,14 +760,12 @@ template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFil
     auto *outputStream = [&]() -> std::ostream * {
         if (outputFile.os) {
             return outputFile.os.get();
-        } else {
-            if (outputFile.defaultToStdOut) {
-                return &std::cout;
-            } else {
-                assert(outputFile.os);
-                return nullptr;
-            }
         }
+        if (outputFile.defaultToStdOut) {
+            return &std::cout;
+        }
+        assert(outputFile.os);
+        return nullptr;
     }();
     if constexpr (formatSyntax == FormatSyntax::Fortran) {
         print_fortran_syntax(*outputStream, format_str, args...);

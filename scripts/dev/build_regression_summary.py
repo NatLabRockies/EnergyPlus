@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -55,9 +55,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from os import path
-from sys import argv, exit
-
 from pathlib import Path
+from sys import argv, exit
 
 workspace = argv[1]
 matrix_os = argv[2]
@@ -82,11 +81,11 @@ fixed_up_contents = f"""
 
 {md_contents}
 
- - [View Results](https://github.com/NREL/EnergyPlus/actions/runs/{github_run_id})
+ - [View Results](https://github.com/NatLabRockies/EnergyPlus/actions/runs/{github_run_id})
  - [Download Regressions]({artifact_url})
 """
 
-with open(summary_output_js_file, 'w') as js:
+with open(summary_output_js_file, "w") as js:
     js_contents = f"""
 module.exports = ({{github, context}}) => {{
     github.rest.issues.createComment({{

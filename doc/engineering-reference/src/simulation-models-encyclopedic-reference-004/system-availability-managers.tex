@@ -60,7 +60,7 @@ If the program is in warmup, the start time stop time are reset to the current t
 Otherwise:
 
 \begin{enumerate}
-\item  If current time (in time steps since the start of the run period) is greater than the start time and less than the stop time, \emph{AvailStatus = CycleOn} (or \emph{CycleOnZoneFansOnly} if the control type is \emph{Cycle On Any -- Zone Fans only}) for CyclingRunTimeControlType = \emph{CyclingRunTimeControlType = FixedRunTime}, or \emph{CyclingRunTimeControlType = ThermostatWithMinimumRunTime} but for \emph{CyclingRunTimeControlType = Thermostat} the availability status is determined based on the zone air and the thermostat setpoint temperature difference and the tolerance limits.  
+\item  If current time (in time steps since the start of the run period) is greater than the start time and less than the stop time, \emph{AvailStatus = CycleOn} (or \emph{CycleOnZoneFansOnly} if the control type is \emph{Cycle On Any -- Zone Fans only}) for CyclingRunTimeControlType = \emph{CyclingRunTimeControlType = FixedRunTime}, or \emph{CyclingRunTimeControlType = ThermostatWithMinimumRunTime} but for \emph{CyclingRunTimeControlType = Thermostat} the availability status is determined based on the zone air and the thermostat setpoint temperature difference and the tolerance limits.
 
 \item  If the current time equals the stop time and the CyclingRunTimeControlType = \emph{CyclingRunTimeControlType = FixedRunTime}, or \emph{CyclingRunTimeControlType = ThermostatWithMinimumRunTime}, \emph{AvailStatus = NoAction} ~and the fan schedule will determine if the system is on. For \emph{CyclingRunTimeControlType = Thermostat} the availability status is determined based on the zone air and the thermostat setpoint temperature difference and the tolerance limits, and the fan schedule will determine if the system is on.
 
@@ -298,15 +298,15 @@ If the actual zone air humidity ratio is above the humidity ratio setpoint and t
 
 \subsubsection{Operative Temperature Control with 80 Percent Acceptability Limits}\label{operative-temperature-control-with-80-acceptability-limits}
 
- This control mode checks whether the zone air operative temperature is between the lower and upper adaptive comfort 80\% acceptability limits or not. If the zone air operative temperature is between the lower and upper limits, then natural ventilation is allowed, else natural ventilation is not allowed. 
+ This control mode checks whether the zone air operative temperature is between the lower and upper adaptive comfort 80\% acceptability limits or not. If the zone air operative temperature is between the lower and upper limits, then natural ventilation is allowed, else natural ventilation is not allowed.
 
 \subsubsection{Operative Temperature Control with 90 Percent Acceptability Limits}\label{operative-temperature-control-with-90-acceptability-limits}
 
- This control mode checks whether the zone air operative temperature is between the lower and upper adaptive comfort 90\% acceptability limits or not. If the zone air operative temperature is between the lower and upper limits, then natural ventilation is allowed, else natural ventilation is not allowed. 
+ This control mode checks whether the zone air operative temperature is between the lower and upper adaptive comfort 90\% acceptability limits or not. If the zone air operative temperature is between the lower and upper limits, then natural ventilation is allowed, else natural ventilation is not allowed.
 
-\subsubsection{CO2 Control}\label{co2-control} 
+\subsubsection{CO2 Control}\label{co2-control}
 
- This control mode checks whether the zone air CO2 concentration level is above the CO2 setpoint or not. If the zone air CO2 concentration level is above the setpoint, the control checks availability of HVAC system. If available, The available status will be ForceOn. If not available, natural ventilation will be allowed. 
+ This control mode checks whether the zone air CO2 concentration level is above the CO2 setpoint or not. If the zone air CO2 concentration level is above the setpoint, the control checks availability of HVAC system. If available, The available status will be ForceOn. If not available, natural ventilation will be allowed.
 
 \subsubsection{Outdoor Ventilation Air Control}\label{outdoor-ventilation-air-control}
 

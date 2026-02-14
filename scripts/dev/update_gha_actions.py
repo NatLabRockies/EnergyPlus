@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -117,11 +117,11 @@ def get_replacements(uses: Set[str], latests: dict[str, Version]) -> dict[str, s
     for use in uses:
         action, version = use.split("@")
         assert action in latests, f"{action} not found in latests: {latests}"
-        replacement_v = None
+        replacement_v: str = ""
         if "." in version:
-            replacement_v = latests[action]
+            replacement_v = str(latests[action])
         else:
-            replacement_v = latests[action].major
+            replacement_v = str(latests[action].major)
         replacement = f"{action}@v{replacement_v}"
         if replacement == use:
             print(f"No updates found for {use}")

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -478,9 +478,7 @@ namespace WindowComplexManager {
         // PURPOSE OF THIS SUBROUTINE:
         // Check if there are new states available for complex fenestration and performs proper initialization
 
-        int NumOfStates; // number of states for current surface
         bool StateFound; // variable to indicate if state has been found
-        int i;           // Local counter
         int CurrentCFSState;
 
         StateFound = false;
@@ -491,8 +489,8 @@ namespace WindowComplexManager {
 
             // If construction number changed then take new state
             // First search for existing states. Maybe state is already added in previous timestep
-            NumOfStates = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates;
-            for (i = 1; i <= NumOfStates; ++i) {
+            int NumOfStates = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates; // number of states for current surface
+            for (int i = 1; i <= NumOfStates; ++i) {
                 if (state.dataSurface->Surface(iSurf).Construction == state.dataSurface->SurfaceWindow(iSurf).ComplexFen.State(i).Konst) {
                     StateFound = true;
                     CurrentCFSState = i;
@@ -542,13 +540,7 @@ namespace WindowComplexManager {
 
         // PURPOSE OF THIS SUBROUTINE:
         // Performs the shading-dependent initialization of the Complex Fenestration data;
-        // On first call, calls the one-time initializition
-
-        // LOGICAL,SAVE    ::  Once  =.TRUE.  !Flag for insuring things happen once
-        int NumStates; // Number of states for a given complex fen
-        int ISurf;     // Index for sorting thru Surface array
-        int IState;    // Index identifying the window state for a particular window
-        int IWind;     // Index identifying a window in the WindowList
+        // On first call, calls the one-time initialization
 
         if (state.dataWindowComplexManager->NumComplexWind == 0) {
             return;
@@ -562,10 +554,14 @@ namespace WindowComplexManager {
 
         // Initialize the geometric quantities
 
-        for (IWind = 1; IWind <= state.dataWindowComplexManager->NumComplexWind; ++IWind) {
-            ISurf = state.dataWindowComplexManager->WindowList(IWind).SurfNo;
-            NumStates = state.dataBSDFWindow->ComplexWind(ISurf).NumStates;
-            for (IState = 1; IState <= NumStates; ++IState) {
+        for (int IWind = 1; IWind <= state.dataWindowComplexManager->NumComplexWind; ++IWind) {
+            // Index for sorting through Surface array
+            const int ISurf = state.dataWindowComplexManager->WindowList(IWind).SurfNo;
+
+            // Number of states for a given complex fen
+            const int NumStates = state.dataBSDFWindow->ComplexWind(ISurf).NumStates;
+
+            for (int IState = 1; IState <= NumStates; ++IState) {
                 CFSShadeAndBeamInitialization(state, ISurf, IState);
             } // State loop
         } // window loop
@@ -747,24 +743,19 @@ namespace WindowComplexManager {
         using namespace Vectors;
 
         int IConst; // State construction number
-        int I;      // general purpose index--Back surface
         int J;      // general purpose index--ray
         int JRay;   // ray index number
         Real64 Theta;
         Real64 Phi;
-        int JSurf;               // gen purpose surface no
-        int BaseSurf;            // base surface no
         int M;                   // general purpose index--ray
         int L;                   // general purpose index--layer
         int KBkSurf;             // general purpose index--back surface
         Real64 Sum1;             // general purpose sum
         Real64 Sum2;             // general purpose sum
         int IBm;                 // index of beam ray in incoming basis
-        int BkIncRay;            // index of sun dir in back incidence basis
         bool RegWindFnd;         // flag for regular exterior back surf window
         Array1D_int RegWinIndex; // bk surf nos of reg windows
         int NRegWin(0);          // no reg windows found as back surfaces
-        int KRegWin(0);          // index of reg window as back surface
         Real64 Refl;             // temporary reflectance
         Array1D<Real64> Absorb;  // temporary layer absorptance
 
@@ -783,7 +774,7 @@ namespace WindowComplexManager {
             State.WinDirSpecTrans(Hour, TS) = 0.0;
             State.WinBmFtAbs(Hour, TS, {1, State.NLayers}) = 0.0;
         } else {
-            for (I = 1; I <= Window.NBkSurf; ++I) { // Back surface loop
+            for (int I = 1; I <= Window.NBkSurf; ++I) { // Back surface loop
                 Sum1 = 0.0;
                 for (J = 1; J <= Geom.NSurfInt(I); ++J) { // Ray loop
                     Sum1 +=
@@ -852,8 +843,8 @@ namespace WindowComplexManager {
         NRegWin = 0.0;
         RegWinIndex.allocate(Window.NBkSurf);
         for (KBkSurf = 1; KBkSurf <= Window.NBkSurf; ++KBkSurf) {
-            BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf; // ShadowComb is organized by base surface
-            JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf);
+            int BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf; // ShadowComb is organized by base surface
+            int JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf);
             if (state.dataSurface->SurfWinWindowModelType(JSurf) == WindowModel::BSDF) {
                 continue;
             }
@@ -873,14 +864,14 @@ namespace WindowComplexManager {
         if (RegWindFnd) {
             Absorb.allocate(State.NLayers);
             SunDir = state.dataBSDFWindow->SUNCOSTS(TS, Hour);
-            BkIncRay = FindInBasis(state,
-                                   SunDir,
-                                   RayIdentificationType::Back_Incident,
-                                   ISurf,
-                                   IState,
-                                   state.dataBSDFWindow->ComplexWind(ISurf).Geom(IState).Trn,
-                                   Theta,
-                                   Phi);
+            int BkIncRay = FindInBasis(state,
+                                       SunDir,
+                                       RayIdentificationType::Back_Incident,
+                                       ISurf,
+                                       IState,
+                                       state.dataBSDFWindow->ComplexWind(ISurf).Geom(IState).Trn,
+                                       Theta,
+                                       Phi); // index of sun dir in back incidence basis
             if (BkIncRay > 0) {
                 // Here calculate the back incidence properties for the solar ray
                 // this does not say whether or not the ray can pass through the
@@ -900,7 +891,7 @@ namespace WindowComplexManager {
                     Absorb(L) = 0.0;
                 }
             }
-            for (KRegWin = 1; KRegWin <= NRegWin; ++KRegWin) {
+            for (int KRegWin = 1; KRegWin <= NRegWin; ++KRegWin) { // index of reg window as back surface
                 KBkSurf = RegWinIndex(KRegWin);
                 State.BkSurf(KBkSurf).WinDHBkRefl(Hour, TS) = Refl;
                 for (L = 1; L <= State.NLayers; ++L) {
@@ -993,12 +984,7 @@ namespace WindowComplexManager {
         // PURPOSE OF THIS SUBROUTINE:
         // Set up a basis from the matrix information pointed to in Construction by ICons
 
-        int I(0);               // general purpose index
-        int J(0);               // general purpose index
         int NThetas(0);         // Current number of theta values
-        int NumElem(0);         // Number of elements in current basis
-        int ElemNo(0);          // Current basis element number
-        int MaxNPhis;           // Max no of NPhis for any theta
         Real64 Theta(0.0);      // Current theta value
         Real64 Phi(0.0);        // Current phi value
         Real64 DTheta(0.0);     // Increment for theta value (Window6 type input)
@@ -1028,6 +1014,9 @@ namespace WindowComplexManager {
         Basis.SolAng.allocate(state.dataConstruction->Construct(IConst).BSDFInput.NBasis);
         if (state.dataConstruction->Construct(IConst).BSDFInput.BasisType == DataBSDFWindow::Basis::WINDOW) {
             //   WINDOW6 Basis
+            int I(0);       // general purpose index
+            int NumElem(0); // Number of elements in current basis
+            int ElemNo(0);  // Current basis element number
             Basis.BasisType = DataBSDFWindow::Basis::WINDOW;
             if (state.dataConstruction->Construct(IConst).BSDFInput.BasisSymmetryType == DataBSDFWindow::BasisSymmetry::None) {
                 // No basis symmetry
@@ -1044,7 +1033,7 @@ namespace WindowComplexManager {
                     }
                     NumElem += NPhis(I);
                 }
-                MaxNPhis = maxval(NPhis({1, NThetas}));
+                int MaxNPhis = maxval(NPhis({1, NThetas}));     // Max no of NPhis for any theta
                 Basis.Phis.allocate(NThetas + 1, MaxNPhis + 1); // N+1st Phi point (not basis element) at 2Pi
                 Basis.BasisIndex.allocate(MaxNPhis, NThetas + 1);
                 Basis.Phis = 0.0;                                                            // Initialize so undefined elements will contain zero
@@ -1088,7 +1077,7 @@ namespace WindowComplexManager {
                     }
                     DTheta = UpperTheta - LowerTheta;
                     Basis.Phis(I, NPhis(I) + 1) = 2.0 * Constant::Pi; // Non-basis-element Phi point for table searching in Phi
-                    for (J = 1; J <= NPhis(I); ++J) {
+                    for (int J = 1; J <= NPhis(I); ++J) {
                         ++ElemNo;
                         Basis.BasisIndex(J, I) = ElemNo;
                         Phi = (J - 1) * DPhi;
@@ -1676,19 +1665,17 @@ namespace WindowComplexManager {
 
         using namespace Vectors;
 
-        int IConst;   // Pointer to construction for this fenestration
-        int I(0);     // general purpose index
-        int J(0);     // general purpose index
-        int JJ(0);    // general purpose index--ray
-        int L(0);     // general purpose index--layer
-        int M(0);     // general purpose index--ray
-        int KBkSurf;  // back surface index
-        int JSurf;    // surface number (used for back surface)
-        int BaseSurf; // base surface number (used for finding back surface)
-        Real64 Sum1;  // general purpose temporary sum
-        Real64 Sum2;  // general purpose temporary sum
-        Real64 Sum3;  // general purpose temporary sum
-        Real64 Hold;  // temp variable
+        int IConst;  // Pointer to construction for this fenestration
+        int I(0);    // general purpose index
+        int J(0);    // general purpose index
+        int JJ(0);   // general purpose index--ray
+        int L(0);    // general purpose index--layer
+        int M(0);    // general purpose index--ray
+        int KBkSurf; // back surface index
+        Real64 Sum1; // general purpose temporary sum
+        Real64 Sum2; // general purpose temporary sum
+        Real64 Sum3; // general purpose temporary sum
+        Real64 Hold; // temp variable
 
         IConst = state.dataSurface->SurfaceWindow(ISurf).ComplexFen.State(IState).Konst;
 
@@ -1920,9 +1907,12 @@ namespace WindowComplexManager {
         if (!allocated(State.BkSurf)) {
             State.BkSurf.allocate(Window.NBkSurf);
         }
-        for (KBkSurf = 1; KBkSurf <= Window.NBkSurf; ++KBkSurf) {  // back surface loop
-            BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf; // ShadowComb is organized by base surface
-            JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf);
+        for (KBkSurf = 1; KBkSurf <= Window.NBkSurf; ++KBkSurf) { // back surface loop
+            // base surface number (used for finding back surface)
+            int BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf; // ShadowComb is organized by base surface
+
+            // surface number (used for back surface)
+            int JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf);
             if (state.dataSurface->SurfWinWindowModelType(JSurf) != WindowModel::BSDF) {
                 continue;
             }
@@ -2281,11 +2271,8 @@ namespace WindowComplexManager {
         // INTEGER, INTENT(IN)      ::  IWind  !window index in window list
 
         int ITheta;   // Table index of Theta
-        int IPhi;     // Table index of Phi, given ITheta
         int IThDn;    // Theta lower table index
         int IThUp;    // Theta upper table index
-        int IPhDn;    // Phi lower table index
-        int IPhUp;    // Phi upper table index
         Real64 Gamma; // Gamma (tilt) angle of window
         Real64 Alpha; // Alpha (azimuth) angle of window
         Real64 DotProd;
@@ -2312,6 +2299,9 @@ namespace WindowComplexManager {
         }
         if (Basis.BasisSymmetryType == DataBSDFWindow::BasisSymmetry::None) {
             // Search the basis thetas
+            int IPhi;  // Table index of Phi, given ITheta
+            int IPhDn; // Phi lower table index
+            int IPhUp; // Phi upper table index
             if (Theta <= 0.0) {
                 // Special case, Theta = 0.; this is always the first basis element
                 RayIndex = 1;
@@ -2350,7 +2340,8 @@ namespace WindowComplexManager {
             }
             RayIndex = Basis.BasisIndex(IPhi, ITheta);
             return RayIndex;
-        } else if (Basis.BasisSymmetryType == DataBSDFWindow::BasisSymmetry::Axisymmetric) {
+        }
+        if (Basis.BasisSymmetryType == DataBSDFWindow::BasisSymmetry::Axisymmetric) {
             // Search the basis thetas
             if (Theta <= 0.0) {
                 // Special case, Theta = 0.; this is always the first basis element
@@ -2707,27 +2698,25 @@ namespace WindowComplexManager {
         int TotLay; // Total number of layers in a construction
         //   (sum of solid layers and gap layers)
         int Lay;                  // Layer number
-        int LayPtr;               // Material number for a layer
         int IGlass;               // glass layer number (1,2,3,...)
         int IGap;                 // Gap layer number (1,2,...)
-        int TotGlassLay;          // Total number of glass layers in a construction
         int k;                    // Layer counter
         int SurfNumAdj;           // An interzone surface's number in the adjacent zone
         WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
         int IMix;
 
-        Real64 IncidentSolar;       // Solar incident on outside of window (W)
+        // Real64 IncidentSolar;       // Solar incident on outside of window (W)
         Real64 ConvHeatFlowNatural; // Convective heat flow from gap between glass and interior shade or blind (W)
         Real64 ShadeArea;           // shade/blind area (m2)
         Real64 sconsh;              // shade/blind conductance (W/m2-K)
-        Real64 CondHeatGainShade;   // Conduction through shade/blind, outside to inside (W)
+        // Real64 CondHeatGainShade;   // Conduction through shade/blind, outside to inside (W)
 
         Real64 ShGlReflFacIR; // Factor for long-wave inter-reflection between shade/blind and adjacent glass
                               //        Real64 RhoGlIR1; // Long-wave reflectance of glass surface facing shade/blind; 1=exterior shade/blind,
         Real64 RhoGlIR2;
         //  2=interior shade/blind
         Real64 RhoShIR1; // Long-wave reflectance of shade/blind surface facing glass; 1=interior shade/blind,
-        Real64 RhoShIR2;
+        // Real64 RhoShIR2;
         //  2=exterior shade/blind
         Real64 EpsShIR1; // Long-wave emissivity of shade/blind surface facing glass; 1=interior shade/blind,
         Real64 EpsShIR2;
@@ -2739,7 +2728,7 @@ namespace WindowComplexManager {
         Real64 ConvHeatGainFrZoneSideOfShade; // Convective heat gain to zone from side of interior shade facing zone (W)
         Real64 ConvHeatGainFrZoneSideOfGlass; // Convective heat gain to zone from side of glass facing zone when
         //  no interior shade/blind is present (W)
-        Real64 CondHeatGainGlass;     // Conduction through inner glass layer, outside to inside (W)
+        // Real64 CondHeatGainGlass;     // Conduction through inner glass layer, outside to inside (W)
         Real64 TotAirflowGap;         // Total volumetric airflow through window gap (m3/s)
         Real64 TAirflowGapOutlet;     // Temperature of air leaving airflow gap between glass panes (K)
         Real64 TAirflowGapOutletC;    // Temperature of air leaving airflow gap between glass panes (C)
@@ -2781,7 +2770,6 @@ namespace WindowComplexManager {
             ShadeFlag = state.dataSurface->SurfWinShadingFlag(SurfNum);
         }
 
-        TotGlassLay = state.dataConstruction->Construct(ConstrNum).TotGlassLayers;
         ngllayer = state.dataConstruction->Construct(ConstrNum).TotGlassLayers;
         nglface = 2 * ngllayer;
         nglfacep = nglface;
@@ -2918,7 +2906,7 @@ namespace WindowComplexManager {
         IGlass = 0;
         IGap = 0;
         for (Lay = 1; Lay <= TotLay; ++Lay) {
-            LayPtr = state.dataConstruction->Construct(ConstrNum).LayerPoint(Lay);
+            int LayPtr = state.dataConstruction->Construct(ConstrNum).LayerPoint(Lay); // Material number for a layer
             auto const *mat = s_mat->materials(LayPtr);
 
             if ((mat->group == Material::Group::Glass) || (mat->group == Material::Group::GlassSimple)) {
@@ -2972,7 +2960,7 @@ namespace WindowComplexManager {
 
                 PillarSpacing(IGap) = matGap->pillarSpacing;
                 PillarRadius(IGap) = matGap->pillarRadius;
-                SupportPlr(IGap) = matGap->pillarSpacing != 0.0 && matGap->pillarRadius != 0.0;
+                SupportPlr(IGap) = static_cast<int>(matGap->pillarSpacing != 0.0 && matGap->pillarRadius != 0.0);
 
                 nmix(IGap + 1) = matGap->numGases;
                 for (IMix = 1; IMix <= nmix(IGap + 1); ++IMix) {
@@ -3103,7 +3091,7 @@ namespace WindowComplexManager {
             heightt = 1.0;
             width = 1.0;
             tilt = 90.0;
-            // Just to make initial quess different from absolute zero
+            // Just to make initial guess different from absolute zero
             theta = 273.15;
         }
 
@@ -3235,7 +3223,9 @@ namespace WindowComplexManager {
             }
             ShowContinueError(state, format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
             ShowFatalError(state, "halting because of error in tarcog");
-        } else if (CalcCondition == DataBSDFWindow::Condition::Winter) {
+        }
+
+        if (CalcCondition == DataBSDFWindow::Condition::Winter) {
             state.dataHeatBal->NominalU(ConstrNum) = ufactor;
         } else if (CalcCondition == DataBSDFWindow::Condition::Summer) {
             // tempInt = SurfaceWindow(SurfNum)%ComplexFen%CurrentState
@@ -3275,7 +3265,7 @@ namespace WindowComplexManager {
             SurfOutsideTemp = theta(1) - Constant::Kelvin;
             SurfOutsideEmiss = emis(1);
 
-            IncidentSolar = state.dataSurface->Surface(SurfNum).Area * state.dataHeatBal->SurfQRadSWOutIncident(SurfNum);
+            // IncidentSolar = state.dataSurface->Surface(SurfNum).Area * state.dataHeatBal->SurfQRadSWOutIncident(SurfNum);
             if (ANY_INTERIOR_SHADE_BLIND(ShadeFlag)) {
                 // Interior shade or blind
                 ConvHeatFlowNatural = -qv(nlayer) * height * width;
@@ -3292,12 +3282,12 @@ namespace WindowComplexManager {
                 ShadeArea = state.dataSurface->Surface(SurfNum).Area + state.dataSurface->SurfWinDividerArea(SurfNum);
                 sconsh = scon(ngllayer + 1) / thick(ngllayer + 1);
                 nglfacep = nglface + 2;
-                CondHeatGainShade = ShadeArea * sconsh * (theta(nglfacep - 1) - theta(nglfacep));
+                // CondHeatGainShade = ShadeArea * sconsh * (theta(nglfacep - 1) - theta(nglfacep));
                 EpsShIR1 = emis(nglface + 1);
                 EpsShIR2 = emis(nglface + 2);
                 TauShIR = tir(nglface + 1);
                 RhoShIR1 = max(0.0, 1.0 - TauShIR - EpsShIR1);
-                RhoShIR2 = max(0.0, 1.0 - TauShIR - EpsShIR2);
+                // RhoShIR2 = max(0.0, 1.0 - TauShIR - EpsShIR2);
                 RhoGlIR2 = 1.0 - emis(2 * ngllayer);
                 ShGlReflFacIR = 1.0 - RhoGlIR2 * RhoShIR1;
                 NetIRHeatGainShade =
@@ -3314,8 +3304,8 @@ namespace WindowComplexManager {
                 state.dataSurface->SurfWinGainIRShadeToZoneRep(SurfNum) = NetIRHeatGainShade;
             } else {
                 // Interior shade or blind not present; innermost layer is glass
-                CondHeatGainGlass =
-                    state.dataSurface->Surface(SurfNum).Area * scon(nlayer) / thick(nlayer) * (theta(2 * nlayer - 1) - theta(2 * nlayer));
+                // CondHeatGainGlass =
+                //     state.dataSurface->Surface(SurfNum).Area * scon(nlayer) / thick(nlayer) * (theta(2 * nlayer - 1) - theta(2 * nlayer));
                 NetIRHeatGainGlass = state.dataSurface->Surface(SurfNum).Area * emis(2 * nlayer) *
                                      (state.dataWindowComplexManager->sigma * pow_4(theta(2 * nlayer)) - rmir);
                 ConvHeatGainFrZoneSideOfGlass = state.dataSurface->Surface(SurfNum).Area * hcin * (theta(2 * nlayer) - tind);
@@ -3515,21 +3505,19 @@ namespace WindowComplexManager {
         // Return value
         int SearchAscTable;
 
-        int Ih;    // Intex for upper end of interval
-        int Il;    // Index for lower end of interval
-        int Im;    // Index for midpoint of interval
         Real64 Yh; // Table value for upper end of interval
         Real64 Yl; // Table value for lower end of interval
         Real64 Ym; // Table value for midpoint of interval
 
         Yh = ytab(n);
         Yl = ytab(1);
-        Ih = n;
-        Il = 1;
+        int Ih = n; // Index for upper end of interval
+        int Il = 1; // Index for lower end of interval
         if (y < Yl) {
             SearchAscTable = 1;
             return SearchAscTable;
-        } else if (y > Yh) {
+        }
+        if (y > Yh) {
             SearchAscTable = n;
             return SearchAscTable;
         }
@@ -3537,7 +3525,8 @@ namespace WindowComplexManager {
             if (Ih - Il <= 1) {
                 break;
             }
-            Im = (Ih + Il) / 2;
+            // Midpoint index
+            int Im = (Ih + Il) / 2;
             Ym = ytab(Im);
             if (y <= Ym) {
                 Yh = Ym;

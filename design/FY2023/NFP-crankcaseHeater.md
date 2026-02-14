@@ -108,7 +108,7 @@ details.
 
 ## Testing/Validation/Data Source(s)
 
-The feature will be tested and demonstrated with a test file derived from 
+The feature will be tested and demonstrated with a test file derived from
 MultiSpeedHP_StagedThermostat.idf
 
 ## IDD Object changes
@@ -135,7 +135,7 @@ The added optional field is:
 
     Ai, \field Crankcase Heater Capacity Function of Outdoor Temperature Curve Name
         \note A Curve:* or Table:Lookup object encoding the relationship between
-        \note the crankcase heater capacity and the outdoor air temperature. When this field is 
+        \note the crankcase heater capacity and the outdoor air temperature. When this field is
         \note missing or empty, constant crankcase heater capacity will be assumed.
 
 For the following idd objects with the "Crankcase Heater Power per Compressor"
@@ -154,7 +154,7 @@ N/A
 ## Proposed Report Variables:
 
 N/A
- 
+
 ## References
 
 [1]	J. McHugh, M. Energy, A. German, and F. Energy, "Heat Pump Controls: Decarbonizing Buildings While Avoiding Electric Resistance Heating and Higher Net Peak Demand," presented at the 2022 Summer Study on Energy Efficiency in Buildings, California, California, 2022.

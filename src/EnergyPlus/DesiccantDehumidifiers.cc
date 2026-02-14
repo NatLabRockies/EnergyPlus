@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -427,12 +427,6 @@ namespace DesiccantDehumidifiers {
             // Set up component set for regen fan
             BranchNodeConnections::SetUpCompSets(state, desicDehum.DehumType, desicDehum.Name, Alphas(10), Alphas(11), Alphas(6), "UNDEFINED");
 
-            if ((!Util::SameString(Alphas(12), "Default")) && (Util::SameString(Alphas(12), "UserCurves"))) {
-                ShowWarningError(state, format("{}{}: Invalid{} = {}", RoutineName, CurrentModuleObject, cAlphaFields(12), Alphas(12)));
-                ShowContinueError(state, "resetting to Default");
-                desicDehum.PerformanceModel_Num = PerformanceModel::Default;
-            }
-
             if (Util::SameString(Alphas(12), "UserCurves")) {
                 desicDehum.PerformanceModel_Num = PerformanceModel::UserCurves;
                 desicDehum.ProcDryBulbCurvefTW = Curve::GetCurveIndex(state, Alphas(13));
@@ -501,15 +495,11 @@ namespace DesiccantDehumidifiers {
             } else {
                 // If DEFAULT performance model, set operating limits curves.  Unit is off outside this range
                 desicDehum.PerformanceModel_Num = PerformanceModel::Default;
-                // this is wrong to initialize all dehumidifiers, it should be just this specific dehumidifier
-                // this was likely tested with only 1 desiccant dehumidifier so this was never discovered
-                // or maybe if there were more than 1 these data would not be used when Alphas(12) == "UserCurves" ???
-                for (auto &e : state.dataDesiccantDehumidifiers->DesicDehum) {
-                    e.MinProcAirInTemp = 1.67;       //  35 F
-                    e.MaxProcAirInTemp = 48.89;      // 120 F
-                    e.MinProcAirInHumRat = 0.002857; //  20 gr/lb
-                    e.MaxProcAirInHumRat = 0.02857;  // 200 gr/lb
-                }
+                desicDehum.MinProcAirInTemp = 1.67;       //  35 F
+                desicDehum.MaxProcAirInTemp = 48.89;      // 120 F
+                desicDehum.MinProcAirInHumRat = 0.002857; //  20 gr/lb
+                desicDehum.MaxProcAirInHumRat = 0.02857;  // 200 gr/lb
+
                 //  If DEFAULT performance model, warn if curve names and nominal regen temp have values
                 if ((!lAlphaBlanks(13)) || (!lAlphaBlanks(14)) || (!lAlphaBlanks(15)) || (!lAlphaBlanks(16)) || (!lAlphaBlanks(17)) ||
                     (!lAlphaBlanks(18)) || (!lAlphaBlanks(19)) || (!lAlphaBlanks(20))) {
@@ -1241,10 +1231,9 @@ namespace DesiccantDehumidifiers {
                                 desicDehum.Name);
         }
 
-        for (int DesicDehumIndex = 1; DesicDehumIndex <= state.dataDesiccantDehumidifiers->NumGenericDesicDehums; ++DesicDehumIndex) {
-            // this is wrong, should be a loop from (state.dataDesiccantDehumidifiers->NumSolidDesicDehums + 1) to
-            // (state.dataDesiccantDehumidifiers->NumDesicDehums = NumSolidDesicDehums + NumGenericDesicDehums)
-            // DesicDehumNum = DesicDehumIndex + state.dataDesiccantDehumidifiers->NumSolidDesicDehums;
+        for (int DesicDehumIndex = state.dataDesiccantDehumidifiers->NumSolidDesicDehums + 1;
+             DesicDehumIndex <= state.dataDesiccantDehumidifiers->NumDesicDehums;
+             ++DesicDehumIndex) {
             auto &desicDehum = state.dataDesiccantDehumidifiers->DesicDehum(DesicDehumIndex);
             // Setup Report variables for the Desiccant Dehumidifiers
             SetupOutputVariable(state,
@@ -2702,9 +2691,8 @@ namespace DesiccantDehumidifiers {
                                                                 RegenCoilActual);
                         if (RegenCoilHeatLoad != 0.0) {
                             return (RegenCoilActual - RegenCoilHeatLoad) / RegenCoilHeatLoad;
-                        } else { // Autodesk:Return ELSE added to assure return value is set
-                            return 0.0;
-                        }
+                        } // Autodesk:Return ELSE added to assure return value is set
+                        return 0.0;
                     };
                     General::SolveRoot(state, ErrTolerance, SolveMaxIter, SolFlag, HotWaterMdot, f, MinWaterFlow, MaxHotWaterFlow);
                     if (SolFlag == -1) {
@@ -2814,11 +2802,10 @@ namespace DesiccantDehumidifiers {
         int WhichDesicDehum = Util::FindItemInList(DesicDehumName, state.dataDesiccantDehumidifiers->DesicDehum);
         if (WhichDesicDehum != 0) {
             return state.dataDesiccantDehumidifiers->DesicDehum(WhichDesicDehum).ProcAirInNode;
-        } else {
-            ShowSevereError(state, format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
+        ErrorsFound = true;
+        return 0;
     }
 
     int GetProcAirOutletNodeNum(EnergyPlusData &state, std::string const &DesicDehumName, bool &ErrorsFound)
@@ -2840,11 +2827,10 @@ namespace DesiccantDehumidifiers {
         int WhichDesicDehum = Util::FindItemInList(DesicDehumName, state.dataDesiccantDehumidifiers->DesicDehum);
         if (WhichDesicDehum != 0) {
             return state.dataDesiccantDehumidifiers->DesicDehum(WhichDesicDehum).ProcAirOutNode;
-        } else {
-            ShowSevereError(state, format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
-            ErrorsFound = true;
-            return 0;
         }
+        ShowSevereError(state, format("GetProcAirInletNodeNum: Could not find Desciccant Dehumidifier = \"{}\"", DesicDehumName));
+        ErrorsFound = true;
+        return 0;
     }
 
     //        End of Reporting subroutines for the SimAir Module

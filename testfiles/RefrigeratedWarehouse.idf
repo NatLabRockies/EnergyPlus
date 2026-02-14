@@ -4,7 +4,7 @@
 !          and ZoneRefrigerationDoorMixing objects
 !
 ! Basic File Description:
-! Building Name Benchmark Large Refridgerated Warehouse
+! Building Name Benchmark Large Refrigerated Warehouse
 ! Total Floor Area (m2) 26693 m2  (287334 ft2)
 ! Building Shape Rectangle
 ! Aspect Ratio 2.2
@@ -193,7 +193,7 @@
 !
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,25.2;
+  Version,26.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 

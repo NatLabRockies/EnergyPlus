@@ -95,7 +95,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,25.2;
+  Version,26.1;
 
   Building,
     Building,                !- Name
@@ -2026,7 +2026,6 @@
     SPACE1-1 Zone Equip Inlet,  !- Supply Air Inlet Node Name
     SPACE1-1 PIU Secondary From Zone,  !- Secondary Air Inlet Node Name
     SPACE1-1 Supply Inlet,   !- Outlet Node Name
-    SPACE1-1 PIU Fan Outlet, !- Reheat Coil Air Inlet Node Name
     SPACE1-1 PIU Mixer,      !- Zone Mixer Name
     SPACE1-1 PIU Fan,        !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -2160,7 +2159,6 @@
     SPACE2-1 Zone Equip Inlet,  !- Supply Air Inlet Node Name
     SPACE2-1 PIU Secondary From Zone,  !- Secondary Air Inlet Node Name
     SPACE2-1 Supply Inlet,   !- Outlet Node Name
-    SPACE2-1 PIU Fan Outlet, !- Reheat Coil Air Inlet Node Name
     SPACE2-1 PIU Mixer,      !- Zone Mixer Name
     SPACE2-1 PIU Fan,        !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -2294,7 +2292,6 @@
     SPACE3-1 Zone Equip Inlet,  !- Supply Air Inlet Node Name
     SPACE3-1 PIU Secondary From Zone,  !- Secondary Air Inlet Node Name
     SPACE3-1 Supply Inlet,   !- Outlet Node Name
-    SPACE3-1 PIU Fan Outlet, !- Reheat Coil Air Inlet Node Name
     SPACE3-1 PIU Mixer,      !- Zone Mixer Name
     SPACE3-1 PIU Fan,        !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type
@@ -2428,7 +2425,6 @@
     SPACE4-1 Zone Equip Inlet,  !- Supply Air Inlet Node Name
     SPACE4-1 PIU Secondary From Zone,  !- Secondary Air Inlet Node Name
     SPACE4-1 Supply Inlet,   !- Outlet Node Name
-    SPACE4-1 PIU Fan Outlet, !- Reheat Coil Air Inlet Node Name
     SPACE4-1 PIU Mixer,      !- Zone Mixer Name
     SPACE4-1 PIU Fan,        !- Fan Name
     Coil:Heating:Water,      !- Reheat Coil Object Type

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -307,7 +307,7 @@ bool EnergyPlusFixture::has_mtr_output(bool reset_stream)
 
 bool EnergyPlusFixture::has_err_output(bool reset_stream)
 {
-    bool const has_output = this->err_stream->str().size() > 0;
+    bool const has_output = !this->err_stream->str().empty();
     if (reset_stream) {
         this->err_stream->str(std::string());
     }
@@ -316,7 +316,7 @@ bool EnergyPlusFixture::has_err_output(bool reset_stream)
 
 bool EnergyPlusFixture::has_cout_output(bool reset_stream)
 {
-    bool const has_output = this->m_cout_buffer->str().size() > 0;
+    bool const has_output = !this->m_cout_buffer->str().empty();
     if (reset_stream) {
         this->m_cout_buffer->str(std::string());
     }
@@ -325,7 +325,7 @@ bool EnergyPlusFixture::has_cout_output(bool reset_stream)
 
 bool EnergyPlusFixture::has_cerr_output(bool reset_stream)
 {
-    bool const has_output = this->m_cerr_buffer->str().size() > 0;
+    bool const has_output = !this->m_cerr_buffer->str().empty();
     if (reset_stream) {
         this->m_cerr_buffer->str(std::string());
     }

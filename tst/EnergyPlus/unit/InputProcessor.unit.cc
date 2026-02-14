@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2057,7 +2057,7 @@ TEST_F(InputProcessorFixture, next_token)
 TEST_F(InputProcessorFixture, getObjectItem_json1)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Output:SQLite,SimpleAndTabular;",
     });
 
@@ -2109,7 +2109,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
 TEST_F(InputProcessorFixture, getObjectItem_json2)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2185,7 +2185,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json2)
 TEST_F(InputProcessorFixture, getObjectItem_json3)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  BuildingSurface:Detailed,",
         "    Zn001:Wall001,           !- Name",
         "    Wall,                    !- Surface Type",
@@ -2379,7 +2379,7 @@ TEST_F(InputProcessorFixture, getObjectItem_parsing_numbers_as_alpha_fields2)
 TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2491,7 +2491,7 @@ TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2581,7 +2581,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Sizing:System,",
         "  West Zone Air System,    !- AirLoop Name",
         "  Sensible,                !- Type of Load to Size On",
@@ -2679,7 +2679,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_autosize)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2765,7 +2765,7 @@ TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_a
 TEST_F(InputProcessorFixture, getObjectItem_truncated_autosize_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -4066,7 +4066,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_biquadratic2)
     EXPECT_EQ(1, IOStatus);
 }
 
-// https://github.com/NREL/EnergyPlus/issues/6720
+// https://github.com/NatLabRockies/EnergyPlus/issues/6720
 TEST_F(InputProcessorFixture, FalseDuplicates)
 {
     std::string const idf(delimited_string({
@@ -4230,8 +4230,7 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_basic)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated
@@ -4334,8 +4333,7 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated

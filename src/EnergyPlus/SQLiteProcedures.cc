@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -1578,7 +1578,7 @@ void SQLite::createSQLiteTimeIndexRecord(OutputProcessor::ReportFreq const repor
         switch (reportFreq) {
         case OutputProcessor::ReportFreq::EachCall:
         case OutputProcessor::ReportFreq::TimeStep: {
-            if (month == -1 || dayOfMonth == -1 || hour == -1 || endMinute == -1.0 || startMinute == -1.0 || dst == -1 || dayType == "") {
+            if (month == -1 || dayOfMonth == -1 || hour == -1 || endMinute == -1.0 || startMinute == -1.0 || dst == -1 || dayType.empty()) {
                 sqliteWriteMessage("Empty month, dayOfMonth, hour, endMinute, startMinute, dst, or dayType passed to CreateSQLiteTimeIndexRecord");
                 break;
             }
@@ -1610,7 +1610,7 @@ void SQLite::createSQLiteTimeIndexRecord(OutputProcessor::ReportFreq const repor
             break;
         }
         case OutputProcessor::ReportFreq::Hour: {
-            if (month == -1 || dayOfMonth == -1 || hour == -1 || dst == -1 || dayType == "") {
+            if (month == -1 || dayOfMonth == -1 || hour == -1 || dst == -1 || dayType.empty()) {
                 sqliteWriteMessage("Empty month, dayOfMonth, hour, dst, or dayType passed to CreateSQLiteTimeIndexRecord");
                 break;
             }
@@ -1635,7 +1635,7 @@ void SQLite::createSQLiteTimeIndexRecord(OutputProcessor::ReportFreq const repor
             break;
         }
         case OutputProcessor::ReportFreq::Day: {
-            if (month == -1 || dayOfMonth == -1 || dst == -1 || dayType == "") {
+            if (month == -1 || dayOfMonth == -1 || dst == -1 || dayType.empty()) {
                 sqliteWriteMessage("Empty month, dayOfMonth, dst, or dayType passed to CreateSQLiteTimeIndexRecord");
                 break;
             }
@@ -2329,13 +2329,13 @@ bool SQLite::NominalPeople::insertIntoSQLite(sqlite3_stmt *insertStmt)
     sqliteBindText(insertStmt, 2, name);
     sqliteBindForeignKey(insertStmt, 3, zonePtr);
     sqliteBindDouble(insertStmt, 4, numberOfPeople);
-    sqliteBindForeignKey(insertStmt, 5, numberOfPeopleSched ? numberOfPeopleSched->Num : -1);
-    sqliteBindForeignKey(insertStmt, 6, activityLevelSched ? activityLevelSched->Num : -1);
+    sqliteBindForeignKey(insertStmt, 5, (numberOfPeopleSched != nullptr) ? numberOfPeopleSched->Num : -1);
+    sqliteBindForeignKey(insertStmt, 6, (activityLevelSched != nullptr) ? activityLevelSched->Num : -1);
     sqliteBindDouble(insertStmt, 7, fractionRadiant);
     sqliteBindDouble(insertStmt, 8, fractionConvected);
-    sqliteBindForeignKey(insertStmt, 9, workEffSched ? workEffSched->Num : -1);
-    sqliteBindForeignKey(insertStmt, 10, clothingSched ? clothingSched->Num : -1);
-    sqliteBindForeignKey(insertStmt, 11, airVelocitySched ? airVelocitySched->Num : -1);
+    sqliteBindForeignKey(insertStmt, 9, (workEffSched != nullptr) ? workEffSched->Num : -1);
+    sqliteBindForeignKey(insertStmt, 10, (clothingSched != nullptr) ? clothingSched->Num : -1);
+    sqliteBindForeignKey(insertStmt, 11, (airVelocitySched != nullptr) ? airVelocitySched->Num : -1);
     sqliteBindLogical(insertStmt, 12, fanger);
     sqliteBindLogical(insertStmt, 13, pierce);
     sqliteBindLogical(insertStmt, 14, ksu);
@@ -2656,7 +2656,7 @@ SQLiteProcedures::SQLiteProcedures(std::shared_ptr<std::ostream> const &errorStr
         if (ok) {
             // sqlite3_open_v2 could return SQLITE_BUSY at this point. If so, do not proceed to sqlite3_exec.
             rc = sqlite3_open_v2(dbName_utf8.c_str(), &m_connection, SQLITE_OPEN_READWRITE, nullptr);
-            if (rc) {
+            if (rc != 0) {
                 *m_errorStream << "SQLite3 message, can't get exclusive lock to open database: " << sqlite3_errmsg(m_connection) << std::endl;
                 ok = false;
             }
@@ -2666,11 +2666,11 @@ SQLiteProcedures::SQLiteProcedures(std::shared_ptr<std::ostream> const &errorStr
             char *zErrMsg = nullptr;
             // Set journal_mode OFF to avoid creating the file dbName + "-journal" (when dbName is a regular file)
             rc = sqlite3_exec(m_connection, "PRAGMA journal_mode = OFF;", nullptr, 0, &zErrMsg);
-            if (!rc) {
+            if (rc == 0) {
                 rc = sqlite3_exec(m_connection, "CREATE TABLE Test(x INTEGER PRIMARY KEY)", nullptr, 0, &zErrMsg);
             }
             sqlite3_close(m_connection);
-            if (rc) {
+            if (rc != 0) {
                 *m_errorStream << "SQLite3 message, can't get exclusive lock to edit database: " << zErrMsg << std::endl;
                 ok = false;
             } else {
@@ -2695,7 +2695,7 @@ SQLiteProcedures::SQLiteProcedures(std::shared_ptr<std::ostream> const &errorStr
             // Now open the output db for the duration of the simulation
             rc = sqlite3_open_v2(dbName_utf8.c_str(), &m_connection, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
             m_db = std::shared_ptr<sqlite3>(m_connection, sqlite3_close);
-            if (rc) {
+            if (rc != 0) {
                 *m_errorStream << "SQLite3 message, can't open new database: " << sqlite3_errmsg(m_connection) << std::endl;
                 ok = false;
             }

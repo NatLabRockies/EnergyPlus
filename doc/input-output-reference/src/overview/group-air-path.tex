@@ -248,7 +248,7 @@ AirLoopHVAC:ExhaustSystem,
 
 \subsubsection{Outputs}
 
-The following output will be added the to the new exhaust system: 
+The following output will be added the to the new exhaust system:
 
 \begin{itemize}
 
@@ -408,7 +408,7 @@ AirLoopHVAC:ZoneMixer,
 
 \subsection{AirLoopHVAC:DedicatedOutdoorAirSystem}\label{airloophvacdedicatedoutdoorairsystem}
 
-The AirLoopHVAC:DedicatedOutdoorAirSystem is a central dedicated outdoor air system (DOAS) and delivers outdoor air to multiple \hyperref[airloophvac]{AirLoopHVAC} systems. The amount of delivered outdoor air is based on a sum of outdoor air flow rates from outdoor air stream nodes defined in the \hyperref[outdoorairmixer]{OutdoorAir:Mixer}. These OutdoorAir:Mixer objects are a component of served multiple AirLoopHVAC systems. The central DOAS system also pretreats outdoor air before outdoor air distribution into multiple AirLoopHVAC, with given precool and preheat air conditions.
+The AirLoopHVAC:DedicatedOutdoorAirSystem is a central dedicated outdoor air system (DOAS) and delivers outdoor air to multiple \hyperref[airloophvac]{AirLoopHVAC} systems. The amount of delivered outdoor air is based on a sum of outdoor air flow rates from outdoor air stream nodes defined in the \hyperref[outdoorairmixer]{OutdoorAir:Mixer}. These OutdoorAir:Mixer objects are a component of the multiple AirLoopHVAC systems connected to the central DOAS. The central DOAS system also pretreats outdoor air before outdoor air distribution into multiple AirLoopHVAC, with given precool and preheat air conditions. The DOAS system may have a draw thorugh or blow through fan (i.e., before or after the non-fan components) and could include an exhaust fan as the last object in the DOAS system's AirLoopHVAC:OutdoorAirSystem equipment list object (ref. AirLoopHVAC:OutdoorAirSystem:EquipmentList). The exhaust fan inlet node name will be the same node name as the DOAS system's AirLoopHVAC:Mixer's outlet node name.
 
 After the object name, the object has four fields to provide the name of AirLoopHVAC:OutdoorAirSystem, system availability, and names of AirLoopHVAC:Mixer and AirLoopHVAC:Splitter. The AirLoopHVAC:OutdoorAirSystem lists a controller to perform controls, and coils and fans to pretreat outdoor air before delivery to served AirLoopHVAC. The Availability Schedule determines times when a system is operational or shutdown. The AirLoopHVAC:Mixer and AirLoopHVAC:Splitter provide connection into distribution and relief nodes, respectively.
 
@@ -477,7 +477,7 @@ AirLoopHVAC:DedicatedOutdoorAirSystem,
 
 \subsection{AirLoopHVAC:Mixer}\label{airloophvacmixer}
 
-The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object. 
+The AirLoopHVAC:Mixer takes the air from multiple inlets and mixes the streams together to be sent out of a single outlet node. This is a simple process of summing flows and averaging the air properties. This component must be referenced in an \hyperref[airloophvacdedicatedoutdoorairsystem]{AirLoopHVAC:DedicatedOutdoorAirSystem} object. The multiple inlet nodes are relief nodes of \hyperref[outdoorairmixer]{OutdoorAir:Mixer}, which is a component of AirLoopHVAC, served by the AirLoopHVAC:DedicatedOutdoorAirSystem object. The single outlet node is connected into either outdoor or a heat exchanger. The heat exchanger must be listed as a component in AirLoopHVAC:OutdoorAirSystem, referenced in the AirLoopHVAC:DedicatedOutdoorAirSystem object.
 
 \subsubsection{Inputs}\label{inputs-5-002}
 

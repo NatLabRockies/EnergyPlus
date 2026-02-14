@@ -1,8 +1,8 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
+# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
 # of Illinois, The Regents of the University of California, through Lawrence
 # Berkeley National Laboratory (subject to receipt of any required approvals
 # from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
+# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
 # rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
@@ -124,12 +124,12 @@ class CondFDSurfaceManager(EnergyPlusPlugin):
     def get_handles(self, state):
 
         # get air temperature handles
-        self.zone_air_temp_handle = self.api.exchange.get_variable_handle(state,
-                                                                          "Zone Mean Air Temperature",
-                                                                          "Zone One")
-        self.outdoor_air_temp_handle = self.api.exchange.get_variable_handle(state,
-                                                                             "Site Outdoor Air Drybulb Temperature",
-                                                                             "Environment")
+        self.zone_air_temp_handle = self.api.exchange.get_variable_handle(
+            state, "Zone Mean Air Temperature", "Zone One"
+        )
+        self.outdoor_air_temp_handle = self.api.exchange.get_variable_handle(
+            state, "Site Outdoor Air Drybulb Temperature", "Environment"
+        )
         # get surface handles
         for surface in self.surfaces:
             for material in surface.material_layers:
@@ -138,24 +138,21 @@ class CondFDSurfaceManager(EnergyPlusPlugin):
                 material.set_num_nodes(num_nodes)
 
                 # set the conductivity handle in each material layer
-                k_handle = self.api.exchange.get_actuator_handle(state,
-                                                                 "CondFD Surface Material Layer",
-                                                                 "Thermal Conductivity",
-                                                                 f"{surface.name}:{material.name}")
+                k_handle = self.api.exchange.get_actuator_handle(
+                    state, "CondFD Surface Material Layer", "Thermal Conductivity", f"{surface.name}:{material.name}"
+                )
                 material.set_k_handle(k_handle)
 
                 # set the specific heat handle in each material layer
-                cp_handle = self.api.exchange.get_actuator_handle(state,
-                                                                  "CondFD Surface Material Layer",
-                                                                  "Specific Heat",
-                                                                  f"{surface.name}:{material.name}")
+                cp_handle = self.api.exchange.get_actuator_handle(
+                    state, "CondFD Surface Material Layer", "Specific Heat", f"{surface.name}:{material.name}"
+                )
                 material.set_cp_handle(cp_handle)
 
                 # set the heat flux handle for each material layer
-                flux_handle = self.api.exchange.get_actuator_handle(state,
-                                                                    "CondFD Surface Material Layer",
-                                                                    "Heat Flux",
-                                                                    f"{surface.name}:{material.name}")
+                flux_handle = self.api.exchange.get_actuator_handle(
+                    state, "CondFD Surface Material Layer", "Heat Flux", f"{surface.name}:{material.name}"
+                )
                 material.set_flux_handle(flux_handle)
 
         self.need_to_get_handles = False

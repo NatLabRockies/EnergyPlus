@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -101,7 +101,6 @@ namespace HybridModel {
             int NumAlphas = 0;        // Number of Alphas for each GetobjectItem call
             int NumNumbers = 0;       // Number of Numbers for each GetobjectItem call
             int IOStatus = 0;
-            int ZonePtr = 0;
             for (int HybridModelNum = 1; HybridModelNum <= state.dataHybridModel->NumOfHybridModelZones; ++HybridModelNum) {
 
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
@@ -117,7 +116,7 @@ namespace HybridModel {
                                                                          cAlphaFieldNames,
                                                                          cNumericFieldNames);
 
-                ZonePtr = Util::FindItemInList(cAlphaArgs(2), state.dataHeatBal->Zone); // "Zone" is a 1D array, cAlphaArgs(2) is the zone name
+                int ZonePtr = Util::FindItemInList(cAlphaArgs(2), state.dataHeatBal->Zone); // "Zone" is a 1D array, cAlphaArgs(2) is the zone name
                 if (ZonePtr > 0) {
                     auto &hmZone = state.dataHybridModel->hybridModelZones(ZonePtr);
                     hmZone.Name = cAlphaArgs(1);                                                        // Zone HybridModel name

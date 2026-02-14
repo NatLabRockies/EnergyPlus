@@ -1064,7 +1064,7 @@ A related output is \hyperref[daylighting-lighting-power-multiplier-1]{Daylighti
 \item
   Zone,Average,Lights Electricity Rate {[}W{]}
 \item
-  Zone,Sum,Lights Radiant Heat Gain {[}J{]}
+  Zone,Sum,Lights Radiant Heating Energy {[}J{]}
 \item
   Zone,Average,Lights Radiant Heating Rate {[}W{]}
 \item
@@ -2445,11 +2445,11 @@ IndoorLivingWall objects have output variables for individual objects. The follo
 
 \paragraph{Indoor Living Wall Plant Surface Temperature {[}C{]}}\label{indoor-living-wall-plant-surface-temperature-c}
 
-This output is the plant surface temperature in C. Plant surface temperature is determined using surface heat balance of indoor living walls. 
+This output is the plant surface temperature in C. Plant surface temperature is determined using surface heat balance of indoor living walls.
 
 \paragraph{Indoor Living Wall Sensible Heat Gain Rate {[}W{]}}\label{indoor-living-wall-sensible-heat-gain-rate-w}
 
-This output is the sensible heat gain rate from indoor living walls in W and determined by surface heat balance. Positive sign represents heat gain of spaces; negative sign represents heat loss of spaces. 
+This output is the sensible heat gain rate from indoor living walls in W and determined by surface heat balance. Positive sign represents heat gain of spaces; negative sign represents heat loss of spaces.
 
 \paragraph{Indoor Living Wall Latent Heat Gain Rate {[}W{]}}\label{indoor-living-wall-latent-heat-gain-rate-w}
 
@@ -2465,7 +2465,7 @@ This output is energy rate per unit area required for plant evapotranspiration (
 
 \paragraph{Indoor Living Wall LED Operational PPFD {[}\si{\umolperAreaperSecond}{]}}\label{indoor-living-wall-led-operational-ppfd}
 
-This output is operational photosynthetic photon flux density (PPFD) of LED light in \si{\umolperAreaperSecond}. The operational PPFD of LED light is determined based on lighting method. If lighting method is Daylight, the operational LED PPFD is zero. If lighting method is LED, the operational LED PPFD is nominal LED PPFD. If lighting method is LED-Daylight, the operational LED PPFD is calculated based on targeted PPFD and daylighting level with the consideration of nominal LED PPFD. 
+This output is operational photosynthetic photon flux density (PPFD) of LED light in \si{\umolperAreaperSecond}. The operational PPFD of LED light is determined based on lighting method. If lighting method is Daylight, the operational LED PPFD is zero. If lighting method is LED, the operational LED PPFD is nominal LED PPFD. If lighting method is LED-Daylight, the operational LED PPFD is calculated based on targeted PPFD and daylighting level with the consideration of nominal LED PPFD.
 
 \paragraph{Indoor Living Wall PPFD {[}\si{\umolperAreaperSecond}{]}}\label{indoor-living-wall-ppfd}
 
@@ -2477,16 +2477,16 @@ This output is the vapor pressure deficit in Pa. The output represents the diffe
 
 \paragraph{Indoor Living Wall LED Sensible Heat Gain Rate {[}W{]}}\label{indoor-living-wall-led-sensible-heat-gain-rate-w}
 
-This output is the LED sensible heat gain rate for indoor living walls in W. The output determines convective heat gain from LED lights when LED lights are on. 
+This output is the LED sensible heat gain rate for indoor living walls in W. The output determines convective heat gain from LED lights when LED lights are on.
 
 \paragraph{Indoor Living Wall LED Operational Power {[}W{]}}\label{indoor-living-wall-led-operational-power-w}
 
-This output is LED operational power for indoor living walls in W. The LED operational power is determined by LED nominal power in proportion to the ratio of LED operational PPFD to LED nominal PPFD. 
+This output is LED operational power for indoor living walls in W. The LED operational power is determined by LED nominal power in proportion to the ratio of LED operational PPFD to LED nominal PPFD.
 
 \paragraph{Indoor Living Wall LED Electricity Energy {[}J{]}}\label{indoor-living-wall-led-electricity-energy-j}
 
-This output is LED electricity energy for indoor living walls in J. The LED electricity energy is calculated by LED operational power multiplied by time period. 
-  
+This output is LED electricity energy for indoor living walls in J. The LED electricity energy is calculated by LED operational power multiplied by time period.
+
 \subsection{ElectricEquipment:ITE:AirCooled}\label{electricequipmentiteaircooled}
 
 This object describes air-cooled electric information technology equipment (ITE) which has variable power consumption as a function of loading and temperature.

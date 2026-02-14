@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2952,73 +2952,15 @@ namespace HeatingCoils {
         return state.dataHeatingCoils->HeatingCoil(coilNum).AirOutletNodeNum;
     }
 
-  #ifdef OLD_API
+#ifdef OLD_API
     int GetCoilReclaimSourceIndex(EnergyPlusData &state,
                                   std::string_view const coilType, // must match coil types in this module
                                   std::string const &coilName, // must match coil names for the coil type
                                   bool &ErrorsFound            // set to true if problem
     )
     {
-<<<<<<< HEAD
         int coilNum = GetCoilIndex(state, coilType, coilName, ErrorsFound);
         return (coilNum == 0) ? 0 : state.dataHeatingCoils->HeatingCoil(coilNum).ReclaimHeatSourceNum;
-=======
-
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Richard Raustad
-        //       DATE WRITTEN   June 2007
-
-        // PURPOSE OF THIS FUNCTION:
-        // This function looks up the given coil and returns the heating coil index number if it is a desuperheating coil.
-        // If incorrect coil type or name is given, ErrorsFound is returned as true and index number is returned
-        // as zero.
-
-        // FUNCTION LOCAL VARIABLE DECLARATIONS:
-        bool GetCoilErrFlag;
-        int NumCoil;
-        int CoilNum(0);
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
-        int CoilFound = 0;
-
-        // note should eventually get rid of this string comparison
-        if (Util::SameString(CoilType, "COIL:COOLING:DX:SINGLESPEED") || Util::SameString(CoilType, "COIL:COOLING:DX:TWOSPEED") ||
-            Util::SameString(CoilType, "COIL:COOLING:DX:TWOSTAGEWITHHUMIDITYCONTROLMODE")) {
-            bool SuppressWarning = true;
-            DXCoils::GetDXCoilIndex(state, CoilName, CoilNum, GetCoilErrFlag, CoilType, SuppressWarning);
-            for (NumCoil = 1; NumCoil <= state.dataHeatingCoils->NumHeatingCoils; ++NumCoil) {
-                if (state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingSource != HeatObjTypes::COIL_DX_COOLING &&
-                    state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingSource != HeatObjTypes::COIL_DX_MULTISPEED &&
-                    state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingSource != HeatObjTypes::COIL_DX_MULTIMODE &&
-                    state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingCoilName != CoilName) {
-                    continue;
-                }
-                CoilFound = CoilNum;
-                break;
-            }
-        } else if (Util::SameString(CoilType, "COIL:COOLING:DX:VARIABLESPEED")) {
-            CoilNum = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, CoilType, CoilName, GetCoilErrFlag);
-            for (NumCoil = 1; NumCoil <= state.dataHeatingCoils->NumHeatingCoils; ++NumCoil) {
-                if (state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingSource != HeatObjTypes::COIL_DX_VARIABLE_COOLING &&
-                    state.dataHeatingCoils->HeatingCoil(NumCoil).ReclaimHeatingCoilName != CoilName) {
-                    continue;
-                }
-                CoilFound = CoilNum;
-                break;
-            }
-        }
-
-        if (CoilNum == 0) {
-            ErrorsFound = true;
-        }
-
-        return CoilFound;
->>>>>>> origin/develop
     }
 #endif // OLD_API
   

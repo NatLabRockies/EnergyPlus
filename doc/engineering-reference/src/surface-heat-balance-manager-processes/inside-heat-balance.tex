@@ -213,13 +213,13 @@ The adaptive convection algorithm implemented in EnergyPlus for the inside face 
 \begin{longtable}[c]{p{0.25in}p{1.25in}p{0.25in}p{1.5in}p{2.5in}}
 
 \caption{Inside Convection Categories and Assignments \label{table:table-13.-inside-convection-categories}} \tabularnewline
-\toprule 
+\toprule
 \# & Zone Air Flow Regime & IB-M's \# & Surface orientation and heat flow direction & Keywords for Applicable Model Equation Sources \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Inside Convection Categories and Assignments} \tabularnewline
-\toprule 
+\toprule
 \# & Zone Air Flow Regime & IB-M's \# & Surface orientation and heat flow direction & Keywords for Applicable Model Equation Sources \tabularnewline
 \midrule
 \endhead
@@ -521,11 +521,11 @@ Beausoleil-Morrison (2000) used blending techniques to combine correlations orig
 \thickmuskip=0mu
 \nulldelimiterspace=0pt
 \scriptspace=0pt
-h = \left( 
+h = \left(
 \left\{
 \left[1.5\left(\frac{\left|\Delta T\right|}{H}\right)^{1/4}\right]^6 +
 \left[1.23\left|\Delta T\right|^2\right]^{1/6}
-\right\}^{1/2} + 
+\right\}^{1/2} +
 \left\{
 \left[\frac{T_{surf}-T_{SAT}}{\left|\Delta T\right|}\right]
 \left[-0.199+0.190\cdot ACH^{0.8}\right]
@@ -953,7 +953,7 @@ Convection coefficient applied to each wall separately and actually used in the 
 
 \subsubsection{ASTM C1340 Algorithm}\label{ASTM-C1340-algorithm}
 
-The algorithm is based on ASTM C1340 Standard. This algorithm specifies to simulate heat flows in attic zone. The correlations account for the effects of surface-to-air temperature difference, heat flow direction, surface length along the heat flow direction, surface tilt angle, air speed past surface, and surface orientation. The correlations are in the form of a Nusselt number, Nu, as a function of a Rayleigh number, Ra, Grashof number, Gr, or a Reynolds number, Re. 
+The algorithm is based on ASTM C1340 Standard. This algorithm specifies to simulate heat flows in attic zone. The correlations account for the effects of surface-to-air temperature difference, heat flow direction, surface length along the heat flow direction, surface tilt angle, air speed past surface, and surface orientation. The correlations are in the form of a Nusselt number, Nu, as a function of a Rayleigh number, Ra, Grashof number, Gr, or a Reynolds number, Re.
 
 \begin{equation}
 Nu = hL/k
@@ -971,7 +971,7 @@ Pr = \nu / \alpha
 Re = VL/ \nu
 \end{equation}
 
-\noindent 
+\noindent
 \emph{h} = convection heat transfer coefficient \\
 \emph{L} = characteristic length of surface \\
 \emph{k} = thermal conductivity of air \\
@@ -992,16 +992,16 @@ The correlations used in the model are as below. (reference: Table 1 of ASTM C13
    \begin{enumerate}
      \item Horizontal surface, heat flow up \\
      $Nu_n = 0.54 \: Ra^{1/4} \enspace for \enspace Ra < 8 * 10^6$ \\
-     $Nu_n = 0.15 \: Ra^{1/3} \enspace for \enspace Ra > 8 * 10^6$ 
+     $Nu_n = 0.15 \: Ra^{1/3} \enspace for \enspace Ra > 8 * 10^6$
      \item Horizontal surface, heat flow down \\
      $Nu_n = 0.58 \: Ra^{0.2}$
      \item Vertical surface \\
      $Nu_n = 0.59 \: Ra^{1/4} \enspace for \enspace Ra < 1 * 10^9$ \\
-     $Nu_n = 0.10 \: Ra^{1/3} \enspace for \enspace Ra > 1 * 10^9$ 
+     $Nu_n = 0.10 \: Ra^{1/3} \enspace for \enspace Ra > 1 * 10^9$
      \item Nearly horizontal surface (tilt angle less than $2^o$), heat flow down \\
-     $Nu_n = 0.58 \: Ra^{0.2}$ 
+     $Nu_n = 0.58 \: Ra^{0.2}$
      \item Tilted surfaces (greater than $2^o$ tilt), heat flow down \\
-     $Nu_n = 0.56 \: (Ra \, sin (\Phi))^{1/4} \qquad  \Phi = tilt \: angle$ 
+     $Nu_n = 0.56 \: (Ra \, sin (\Phi))^{1/4} \qquad  \Phi = tilt \: angle$
      \item Tilted surfaces, heat flow up \\
      $Nu_n = 0.56 \: (Ra \, sin (\Phi))^{1/4} \enspace for \enspace Ra/Pr < Gr_c$ \\
      $Nu_n = 0.14 \: (Ra^{1/3}- (Gr_c\,Pr)^{1/3}) \\

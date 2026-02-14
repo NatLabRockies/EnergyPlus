@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -2630,83 +2630,85 @@ namespace StandardRatings {
                 if ((int)(ratioArray(i)) == 100.0) {
                     speedsForA.push_back(i);
                     continue;
-                } else if ((int)(ratioArray(i)) == 75.0) {
+                }
+                if ((int)(ratioArray(i)) == 75.0) {
                     speedsForB.push_back(i);
                     bFound = true;
                     smallerThanSpeedB = 0;
                     largerThanSpeedB = 0;
                     continue;
-                } else if ((int)(ratioArray(i)) == 50.0) {
+                }
+                if ((int)(ratioArray(i)) == 50.0) {
                     speedsForC.push_back(i);
                     cFound = true;
                     smallerThanSpeedC = 0;
                     largerThanSpeedC = 0;
                     continue;
-                } else if ((int)(ratioArray(i)) == 25.0) {
+                }
+                if ((int)(ratioArray(i)) == 25.0) {
                     speedsForD.push_back(i);
                     dFound = true;
                     smallerThanSpeedD = 0;
                     largerThanSpeedD = 0;
                     continue;
-                } else {
-                    if (((int)(ratioArray(i)) > 0.0 && (int)(ratioArray(i)) < 25.0) && !dFound) {
-                        if (smallerThanSpeedD == 0) {
+                }
+                if (((int)(ratioArray(i)) > 0.0 && (int)(ratioArray(i)) < 25.0) && !dFound) {
+                    if (smallerThanSpeedD == 0) {
+                        smallerThanSpeedD = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedD) - _25PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
                             smallerThanSpeedD = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedD) - _25PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
-                                smallerThanSpeedD = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !dFound) {
-                        if (largerThanSpeedD == 0) {
+                }
+                if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !dFound) {
+                    if (largerThanSpeedD == 0) {
+                        largerThanSpeedD = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedD) - _25PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
                             largerThanSpeedD = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedD) - _25PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _25PercentCoolCap)) {
-                                largerThanSpeedD = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !cFound) {
-                        if (smallerThanSpeedC == 0) {
+                }
+                if (((int)(ratioArray(i)) > 25.0 && (int)(ratioArray(i)) < 50.0) && !cFound) {
+                    if (smallerThanSpeedC == 0) {
+                        smallerThanSpeedC = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedC) - _50PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
                             smallerThanSpeedC = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedC) - _50PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
-                                smallerThanSpeedC = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !cFound) {
-                        if (largerThanSpeedC == 0) {
+                }
+                if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !cFound) {
+                    if (largerThanSpeedC == 0) {
+                        largerThanSpeedC = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedC) - _50PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
                             largerThanSpeedC = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedC) - _50PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _50PercentCoolCap)) {
-                                largerThanSpeedC = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !bFound) {
-                        if (smallerThanSpeedB == 0) {
+                }
+                if (((int)(ratioArray(i)) > 50.0 && (int)(ratioArray(i)) < 75.0) && !bFound) {
+                    if (smallerThanSpeedB == 0) {
+                        smallerThanSpeedB = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(smallerThanSpeedB) - _75PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
                             smallerThanSpeedB = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(smallerThanSpeedB) - _75PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
-                                smallerThanSpeedB = i;
-                            }
                         }
                     }
-                    if (((int)(ratioArray(i)) > 75.0 && (int)(ratioArray(i)) < 100.0) && !bFound) {
-                        if (largerThanSpeedB == 0) {
+                }
+                if (((int)(ratioArray(i)) > 75.0 && (int)(ratioArray(i)) < 100.0) && !bFound) {
+                    if (largerThanSpeedB == 0) {
+                        largerThanSpeedB = i;
+                    } else {
+                        if (std::abs(RatedTotalCapacity(largerThanSpeedB) - _75PercentCoolCap) >
+                            std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
                             largerThanSpeedB = i;
-                        } else {
-                            if (std::abs(RatedTotalCapacity(largerThanSpeedB) - _75PercentCoolCap) >
-                                std::abs(RatedTotalCapacity(i) - _75PercentCoolCap)) {
-                                largerThanSpeedB = i;
-                            }
                         }
                     }
                 }

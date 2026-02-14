@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -806,7 +806,6 @@ int AssignReverseConstructionNumber(EnergyPlusData &state,
     // METHODOLOGY EMPLOYED:
     // Create reverse layers.  Look in current constructions to see if match.  If no match, create a new one.
 
-    auto &s_mat = state.dataMaterial;
     // Return value
     int NewConstrNum; // Reverse Construction Number
 
@@ -861,6 +860,7 @@ int AssignReverseConstructionNumber(EnergyPlusData &state,
         // replace others...
         state.dataConstruction->Construct(state.dataHeatBal->TotConstructs).Name = "iz-" + state.dataConstruction->Construct(ConstrNum).Name;
         state.dataConstruction->Construct(state.dataHeatBal->TotConstructs).TotLayers = state.dataConstruction->Construct(ConstrNum).TotLayers;
+        auto &s_mat = state.dataMaterial;
         for (nLayer = 1; nLayer <= Construction::MaxLayersInConstruct; ++nLayer) {
             state.dataConstruction->Construct(state.dataHeatBal->TotConstructs).LayerPoint(nLayer) = state.dataConstruction->LayerPoint(nLayer);
             if (state.dataConstruction->LayerPoint(nLayer) != 0) {

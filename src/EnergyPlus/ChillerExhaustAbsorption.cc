@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -152,24 +152,25 @@ void ExhaustAbsorberSpecs::simulate(
         if (compInletNodeNum == this->ChillReturnNodeNum) { // Operate as chiller
             brIdentity = DataPlant::BrLoopType::Chiller;    // chiller
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
-            brIdentity = DataPlant::BrLoopType::Heater;           // heater
-            break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
-            brIdentity = DataPlant::BrLoopType::Condenser;        // condenser
-            break;
-        } else {
-            brIdentity = DataPlant::BrLoopType::NoMatch;
         }
+        if (compInletNodeNum == this->HeatReturnNodeNum) { // Operate as heater
+            brIdentity = DataPlant::BrLoopType::Heater;    // heater
+            break;
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+            brIdentity = DataPlant::BrLoopType::Condenser; // condenser
+            break;
+        }
+        brIdentity = DataPlant::BrLoopType::NoMatch;
     }
 
     if (brIdentity == DataPlant::BrLoopType::Chiller) {
-        this->InCoolingMode = RunFlag != 0;
+        this->InCoolingMode = RunFlag != false;
         this->initialize(state);
         this->calcChiller(state, CurLoad);
         this->updateCoolRecords(state, CurLoad, RunFlag);
     } else if (brIdentity == DataPlant::BrLoopType::Heater) {
-        this->InHeatingMode = RunFlag != 0;
+        this->InHeatingMode = RunFlag != false;
         this->initialize(state);
         this->calcHeater(state, CurLoad, RunFlag);
         this->updateHeatRecords(state, CurLoad, RunFlag);
@@ -220,22 +221,23 @@ void ExhaustAbsorberSpecs::getDesignCapacities(
             OptLoad = this->NomCoolingCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->HeatReturnNodeNum) {              // Operate as heater
+        }
+        if (compInletNodeNum == this->HeatReturnNodeNum) {                     // Operate as heater
             Real64 Sim_HeatCap = this->NomCoolingCap * this->NomHeatCoolRatio; // W - nominal heating capacity
             MinLoad = Sim_HeatCap * this->MinPartLoadRat;
             MaxLoad = Sim_HeatCap * this->MaxPartLoadRat;
             OptLoad = Sim_HeatCap * this->OptPartLoadRat;
             matchfound = true;
             break;
-        } else if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
+        }
+        if (compInletNodeNum == this->CondReturnNodeNum) { // called from condenser loop
             MinLoad = 0.0;
             MaxLoad = 0.0;
             OptLoad = 0.0;
             matchfound = true;
             break;
-        } else {
-            matchfound = false;
         }
+        matchfound = false;
     }
 
     if (!matchfound) {

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -117,8 +117,8 @@ std::string IdfParser::encode(json const &root, json const &schema)
         for (auto obj_in = obj.value().begin(); obj_in != obj.value().end(); ++obj_in) {
             encoded += obj.key();
             size_t skipped_fields = 0;
-            for (size_t i = 0; i < legacy_idd_field.size(); i++) {
-                std::string const &entry = legacy_idd_field[i].get<std::string>();
+            for (const auto &i : legacy_idd_field) {
+                std::string const &entry = i.get<std::string>();
                 if (obj_in.value().find(entry) == obj_in.value().end()) {
                     if (entry == "name") {
                         encoded += std::string{end_of_field} + obj_in.key();
@@ -149,11 +149,10 @@ std::string IdfParser::encode(json const &root, json const &schema)
             }
 
             auto &extensions = obj_in.value()[extension_key];
-            for (size_t extension_i = 0; extension_i < extensions.size(); extension_i++) {
-                auto const &cur_extension_obj = extensions[extension_i];
+            for (const auto &cur_extension_obj : extensions) {
                 auto const &extensible = schema["properties"][obj.key()]["legacy_idd"]["extensibles"];
-                for (size_t i = 0; i < extensible.size(); i++) {
-                    std::string const &tmp = extensible[i].get<std::string>();
+                for (const auto &i : extensible) {
+                    std::string const &tmp = i.get<std::string>();
                     if (cur_extension_obj.find(tmp) == cur_extension_obj.end()) {
                         skipped_fields++;
                         continue;
@@ -230,17 +229,21 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
         token = look_ahead(idf, index);
         if (token == Token::END) {
             break;
-        } else if (token == Token::NONE) {
+        }
+        if (token == Token::NONE) {
             success = false;
             return root;
-        } else if (token == Token::SEMICOLON) {
+        }
+        if (token == Token::SEMICOLON) {
             next_token(idf, index);
             continue;
-        } else if (token == Token::COMMA) {
+        }
+        if (token == Token::COMMA) {
             errors_.emplace_back(fmt::format("Line: {} Index: {} - Extraneous comma found.", cur_line_num, index_into_cur_line));
             success = false;
             return root;
-        } else if (token == Token::EXCLAMATION) {
+        }
+        if (token == Token::EXCLAMATION) {
             eat_comment(idf, index);
         } else {
             ++idfObjectCount;
@@ -321,9 +324,9 @@ json IdfParser::parse_object(
     std::string patternProperty;
     int dot_star_present = schema_patternProperties.count(".*");
     int no_whitespace_present = schema_patternProperties.count(R"(^.*\S.*$)");
-    if (dot_star_present) {
+    if (dot_star_present != 0) {
         patternProperty = ".*";
-    } else if (no_whitespace_present) {
+    } else if (no_whitespace_present != 0) {
         patternProperty = R"(^.*\S.*$)";
     } else {
         throw std::runtime_error(R"(The patternProperties value is not a valid choice (".*", "^.*\S.*$"))");
@@ -355,9 +358,11 @@ json IdfParser::parse_object(
         if (token == Token::NONE) {
             success = false;
             return root;
-        } else if (token == Token::END) {
+        }
+        if (token == Token::END) {
             return root;
-        } else if (token == Token::COMMA || token == Token::SEMICOLON) {
+        }
+        if (token == Token::COMMA || token == Token::SEMICOLON) {
             if (!was_value_parsed) {
                 int ext_size = 0;
                 if (legacy_idd_index < legacy_idd_fields_array.size()) {
@@ -370,7 +375,7 @@ json IdfParser::parse_object(
                     extensible_index++;
                     //                    extensible[ field_name ] = "";
                 }
-                if (ext_size && extensible_index % ext_size == 0) {
+                if ((ext_size != 0) && extensible_index % ext_size == 0) {
                     array_of_extensions.push_back(extensible);
                     extensible.clear();
                 }
@@ -423,7 +428,7 @@ json IdfParser::parse_object(
             extensible[field_name] = std::move(val);
             was_value_parsed = true;
             extensible_index++;
-            if (extensible_index && extensible_index % size == 0) {
+            if ((extensible_index != 0u) && extensible_index % size == 0) {
                 array_of_extensions.push_back(extensible);
                 extensible.clear();
             }
@@ -498,7 +503,8 @@ json IdfParser::parse_number(std::string_view idf, size_t &index)
         auto result = fast_float::from_chars(str.data() + plus_sign, str.data() + str.size(), val); // (AUTO_OK)
         if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
             return rtrim(str);
-        } else if (result.ptr != str_end) {
+        }
+        if (result.ptr != str_end) {
             auto const initial_ptr = result.ptr; // (AUTO_OK)
             while (result.ptr != str_end) {
                 if (*result.ptr != ' ') {
@@ -522,24 +528,24 @@ json IdfParser::parse_number(std::string_view idf, size_t &index)
         auto result = FromChars::from_chars(str.data(), str.data() + str.size(), val); // (AUTO_OK)
         if (result.ec == std::errc::result_out_of_range || result.ec == std::errc::invalid_argument) {
             return convert_double(str);
-        } else if (result.ptr != str_end) {
+        }
+        if (result.ptr != str_end) {
             if (*result.ptr == '.' || *result.ptr == 'e' || *result.ptr == 'E') {
                 return convert_double(str);
-            } else {
-                auto const initial_ptr = result.ptr; // (AUTO_OK)
-                while (result.ptr != str_end) {
-                    if (*result.ptr != ' ') {
-                        break;
-                    }
-                    ++result.ptr;
-                }
-                if (result.ptr == str_end) {
-                    index -= (str_end - initial_ptr);
-                    this->index_into_cur_line -= (str_end - initial_ptr);
-                    return val;
-                }
-                return rtrim(str);
             }
+            auto const initial_ptr = result.ptr; // (AUTO_OK)
+            while (result.ptr != str_end) {
+                if (*result.ptr != ' ') {
+                    break;
+                }
+                ++result.ptr;
+            }
+            if (result.ptr == str_end) {
+                index -= (str_end - initial_ptr);
+                this->index_into_cur_line -= (str_end - initial_ptr);
+                return val;
+            }
+            return rtrim(str);
         }
         return val;
     };
@@ -585,7 +591,8 @@ json IdfParser::parse_integer(std::string_view idf, size_t &index)
     if (result.ec == std::errc::result_out_of_range || result.ec == std::errc::invalid_argument) {
         // Failure, return the string
         return rtrim(string_value);
-    } else if (result.ptr != string_end) {
+    }
+    if (result.ptr != string_end) {
         // Didn't use the entire string, try again via double conversion + rounding
         size_t plus_sign = 0;
         if (string_value.front() == '+') {
@@ -642,9 +649,8 @@ json IdfParser::parse_value(std::string_view idf, size_t &index, bool &success, 
             // in the future this might not hold true for the array indexes.
             if (default_it != field_loc.end()) {
                 return field_loc.at("anyOf")[1]["enum"][1];
-            } else {
-                return field_loc.at("anyOf")[1]["enum"][0];
             }
+            return field_loc.at("anyOf")[1]["enum"][0];
         }
         return parsed_string;
     }
@@ -682,9 +688,8 @@ std::string IdfParser::parse_string(std::string_view idf, size_t &index)
         if (c == ',' || c == ';' || c == '!') {
             decrement_both_index(index, index_into_cur_line);
             break;
-        } else {
-            str += c;
         }
+        str += c;
     }
 
     return rtrim(str);
@@ -806,7 +811,8 @@ std::string IdfParser::rtrim(std::string_view str)
     size_t const index = str.find_last_not_of(whitespace);
     if (index == std::string::npos) {
         return std::string{};
-    } else if (index + 1 < str.length()) {
+    }
+    if (index + 1 < str.length()) {
         return std::string{str.substr(0, index + 1)};
     }
     return std::string{str};

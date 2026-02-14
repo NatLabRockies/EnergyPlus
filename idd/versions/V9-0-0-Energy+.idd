@@ -8633,9 +8633,9 @@ WindowThermalModel:Params,
        \units Pa
        \minimum> 0
        \default 101325
-       
+
 WindowsCalculationEngine,
-       \memo Describes which window model will be used in calculations. Built in windows model will use algorithms that are part of EnergyPlus, 
+       \memo Describes which window model will be used in calculations. Built in windows model will use algorithms that are part of EnergyPlus,
        \memo while ExternalWindowsModel will use Windows-CalcEngine library to perform optical and thermal performances of windows and doors.
   A1;  \field Windows engine
        \type choice
@@ -12028,8 +12028,8 @@ WindowShadingControl,
        \minimum 1
        \default 1
        \note If multiple WindowShadingControl objects are used than the order that they deploy the window shades
-       \note can be set with this field. The first WindowShadingControl should be 1 and subsequent 
-       \note WindowShadingControl should 2 or 3 or higher. This is usually used when the Multiple Surface Control Type 
+       \note can be set with this field. The first WindowShadingControl should be 1 and subsequent
+       \note WindowShadingControl should 2 or 3 or higher. This is usually used when the Multiple Surface Control Type
        \note field is set to Group and groups of windows are being controlled in a certain order.
   A3 , \field Shading Type
        \required-field
@@ -12042,7 +12042,7 @@ WindowShadingControl,
        \key BetweenGlassShade
        \key BetweenGlassBlind
        \key SwitchableGlazing
-  A4 , \field Construction with Shading Name 
+  A4 , \field Construction with Shading Name
        \type object-list
        \object-list ConstructionNames
        \note Required if Shading Type = SwitchableGlazing
@@ -12165,59 +12165,59 @@ WindowShadingControl,
        \key Group
        \default Sequential
        \note When Sequential is used the list of fenestration surfaces are controlled individually in the order specified
-       \note When Group is used the entire list is controlled simultaneously and if glare control is needed the entire 
+       \note When Group is used the entire list is controlled simultaneously and if glare control is needed the entire
        \note group of window shades are deployed together a the same time
   A14, \field Fenestration Surface 1 Name
        \required-field
        \begin-extensible
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A15, \field Fenestration Surface 2 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A16, \field Fenestration Surface 3 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A17, \field Fenestration Surface 4 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A18, \field Fenestration Surface 5 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A19, \field Fenestration Surface 6 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A20, \field Fenestration Surface 7 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A21, \field Fenestration Surface 8 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A22, \field Fenestration Surface 9 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
   A23; \field Fenestration Surface 10 Name
        \type object-list
        \object-list GlazedExtSubSurfNames
-       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order. 
+       \note When Multiple Surface Control Type is set to Sequential the shades will be deployed for the referenced surface objects in order.
        \note When that field is set to Group the entire list is controlled simultaneously.
 
 WindowProperty:FrameAndDivider,
@@ -106918,4 +106918,3 @@ Output:PreprocessorMessage,
         \retaincase
    A12; \field Message Line 10
         \retaincase
-
