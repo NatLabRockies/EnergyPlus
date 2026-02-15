@@ -204,6 +204,7 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Water Cooling Coil";
     state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
     PlantUtilities::SetPlantLocationLinks(*state, state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc);
+    state->dataWaterCoils->WaterCoil(CoilNum).coilType = HVAC::CoilType::CoolingWater;
     state->dataWaterCoils->WaterCoil(CoilNum).coilPlantType = DataPlant::PlantEquipmentType::CoilWaterCooling;
     state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
     state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;

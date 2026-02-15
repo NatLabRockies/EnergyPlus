@@ -674,6 +674,8 @@ namespace WindowAC {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 windAC.Name);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
             SetupOutputVariable(state,
                                 "Zone Window Air Conditioner Fan Availability Status",
                                 Constant::Units::None,
@@ -681,6 +683,7 @@ namespace WindowAC {
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
                                 windAC.Name);
+#pragma GCC diagnostic pop
             if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
                 SetupEMSActuator(state,
                                  "Window Air Conditioner",
